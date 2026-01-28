@@ -1,0 +1,13 @@
+import type { Permission } from '@/modules/permissions/domain/models/Permission';
+import type { PermissionRepository } from '@/modules/permissions/domain/repositories/PermissionRepository';
+
+export class GetPermissionsUseCase {
+  private permissionRepository: PermissionRepository;
+  constructor(permissionRepository: PermissionRepository) {
+    this.permissionRepository = permissionRepository;
+  }
+
+  async execute(): Promise<Permission[]> {
+    return this.permissionRepository.findAll();
+  }
+}

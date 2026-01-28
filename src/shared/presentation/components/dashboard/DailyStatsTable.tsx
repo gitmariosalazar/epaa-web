@@ -1,0 +1,121 @@
+import { useState } from 'react';
+import { Search } from 'lucide-react';
+import type { DailyStatsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
+import {
+  Table,
+  type Column
+} from '@/shared/presentation/components/Table/Table';
+
+interface DailyStatsProps {
+  data: DailyStatsReport[];
+  loading: boolean;
+}
+
+export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  if (loading)
+    return <div className="text-gray-500">Loading daily stats...</div>;
+  if (!data.length)
+    return <div className="text-gray-500">No daily data available.</div>;
+
+  const filteredData = data.filter(
+    (row) =>
+      row.date.includes(searchTerm) ||
+      row.uniqueSectors.toString().includes(searchTerm)
+  );
+
+  const columns: Column<DailyStatsReport>[] = [
+    {
+      header: 'Date',
+      accessor: (row) => (
+        <span className="font-medium">
+          {new Date(row.date).toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          })}
+        </span>
+      )
+    },
+    {
+      header: 'Readings',
+      accessor: 'readingsCount'
+    },
+    {
+      header: 'Avg Value',
+      accessor: (row) => `$${Number(row.averageReadingValue).toFixed(2)}`
+    },
+    {
+      header: 'Consumption (Avg)',
+      accessor: (row) => `${Number(row.averageConsumption).toFixed(2)} m³`
+    },
+    {
+      header: 'Sectors',
+      accessor: 'uniqueSectors'
+    }
+  ];
+
+  return (
+    <div
+      className="content-card"
+      style={{
+        height: '100%', // Fill parent height
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
+      <div
+        className="card-header"
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexShrink: 0 // Prevent header shrinking
+        }}
+      >
+        <h3>Daily Performance</h3>
+        <div style={{ position: 'relative', maxWidth: '200px' }}>
+          <Search
+            size={16}
+            style={{
+              position: 'absolute',
+              left: '8px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#9ca3af'
+            }}
+          />
+          <input
+            type="text"
+            placeholder="Search date..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              padding: '6px 8px 6px 30px',
+              border: '1px solid var(--border-color)',
+              borderRadius: '4px',
+              fontSize: '0.875rem',
+              outline: 'none',
+              width: '100%',
+              backgroundColor: 'var(--surface)',
+              color: 'var(--text-main)'
+            }}
+          />
+        </div>
+      </div>
+      <Table
+        data={filteredData}
+        columns={columns}
+        pagination={true}
+        pageSize={15}
+        containerStyle={{
+          flex: 1, // Grow to fill remaining space
+          maxHeight: 'none', // Override sticky limitation if needed or keep standard
+          overflowY: 'auto',
+          borderRadius: '0 0 0.75rem 0.75rem' // Match card radius
+        }}
+      />
+    </div>
+  );
+};

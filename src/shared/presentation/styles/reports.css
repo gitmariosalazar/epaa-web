@@ -1,0 +1,378 @@
+/* Reports Module Styles */
+.reports-container {
+  padding: 0;
+  font-family: var(--font-sans);
+  color: var(--text-main);
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.reports-header {
+  margin-bottom: 1rem;
+}
+
+.reports-header h1 {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.reports-header p {
+  color: var(--text-secondary);
+  margin-top: 4px;
+  font-size: 0.875rem;
+}
+
+/* Tabs Navigation */
+.reports-tabs {
+  display: flex;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+.tab-button {
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  color: var(--text-main);
+  border-bottom-color: var(--border-color);
+}
+
+.tab-button.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* Report Content Area */
+.report-content {
+  background: var(--surface);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+/* Filters Section */
+/* Toolbar Layout */
+.reports-toolbar {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-sm);
+  align-items: flex-end;
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5rem;
+  flex: 1; /* Allow sharing space */
+  min-width: 450px; /* Force wrap on smaller desktop/tablet */
+}
+
+.toolbar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Specific group sizing */
+.toolbar-group.main {
+  flex: 1; /* Takes remaining space */
+}
+
+.toolbar-group.actions {
+  flex: 0 0 auto; /* Fits content */
+}
+
+.toolbar-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.toolbar-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+}
+
+/* Desktop: Inputs expand, buttons fixed */
+.toolbar-controls .toolbar-input {
+  flex: 1;
+}
+
+.toolbar-controls .toolbar-select {
+  width: 140px; /* Fixed reasonable width */
+  flex: 0 0 auto;
+}
+
+.toolbar-controls button {
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.toolbar-input {
+  height: 42px; /* Fixed height for alignment */
+  padding: 0 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background: var(--background);
+  color: var(--text-main);
+  font-size: 0.875rem;
+  flex: 1;
+  width: 100%; /* Full width within container */
+  max-width: 400px; /* Prevent excessive width on large screens */
+  transition: all 0.2s;
+}
+
+/* Specific input constraints */
+.input-cadastral {
+  max-width: 250px; /* Max 15 chars approx visual width */
+}
+
+.input-search {
+  max-width: 100%; /* Search is longer */
+}
+
+.toolbar-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+.toolbar-select {
+  height: 42px;
+  padding: 0 2rem 0 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background: var(--background);
+  color: var(--text-main);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.btn-search {
+  height: 42px;
+  padding: 0 1.5rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-search:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.btn-search:disabled {
+  background: var(--secondary);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.btn-icon-text {
+  height: 42px;
+  padding: 0 1rem;
+  background: var(--surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-icon-text:hover {
+  background: var(--surface-hover);
+  color: var(--text-main);
+  border-color: var(--text-secondary);
+}
+
+.input-icon-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.input-icon-wrapper svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.input-icon-wrapper input {
+  padding-left: 36px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  /* Wrap sooner on medium screens if side-by-side is too cramped */
+  .toolbar-row {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .reports-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* Force row layout even on mobile (as requested: "never put buttons below") */
+  .toolbar-row {
+    flex-direction: row; /* Keep horizontal */
+    align-items: flex-end; /* Align bottom */
+    gap: 0.75rem; /* Reduce gap slightly on mobile */
+    flex-wrap: nowrap; /* Try not to wrap */
+  }
+
+  /* Allow the input to shrink to fit the buttons */
+  .toolbar-input {
+    min-width: 0; /* Allow shrinking below content size if needed */
+  }
+
+  .toolbar-group {
+    width: auto; /* Let it shrink/grow */
+  }
+
+  .toolbar-group.main {
+    flex: 1; /* Main input takes available space */
+    min-width: 0; /* Allow massive shrinking */
+  }
+
+  .toolbar-group.actions {
+    flex: 0 0 auto; /* Buttons keep their size */
+  }
+
+  /* Keep controls in a row (side-by-side) even on mobile */
+  .toolbar-controls {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+
+  /* Select and Button share space */
+  .toolbar-select {
+    width: auto !important; /* Reset 100% width override */
+    flex: 1; /* Expand to fill available space */
+  }
+
+  /* Hide text on mobile for compact icon-only buttons */
+  .btn-text {
+    display: none;
+  }
+
+  /* Export buttons share space equally */
+  .btn-icon-text {
+    width: auto;
+    flex: 0 0 auto; /* Do not expand, keep icon size */
+    justify-content: center;
+    padding: 0 1rem; /* Square-ish padding */
+  }
+
+  /* Search button adapts */
+  .btn-search {
+    width: auto;
+    padding: 0 1rem;
+    flex: 0 0 auto;
+  }
+}
+
+/* Table Styles (Reuse or Override) */
+.report-table-wrapper {
+  overflow-x: auto;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.report-table th {
+  background-color: var(--surface-hover);
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+}
+
+.report-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--surface-hover);
+  color: var(--text-main);
+}
+
+.report-table tr:hover {
+  background-color: var(--surface-hover);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-normal {
+  background-color: var(--success);
+  color: white;
+  opacity: 0.9;
+}
+.status-novelty {
+  background-color: var(--error);
+  color: white;
+  opacity: 0.9;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+}

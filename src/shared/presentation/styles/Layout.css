@@ -1,0 +1,42 @@
+.dashboard-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; /* Prevent body scroll */
+  background-color: var(--background);
+}
+
+.dashboard-content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Prevent flex overflow */
+  height: 100%;
+  overflow: hidden;
+  margin-left: 0; /* No margin needed with flex */
+  transition: none; /* Flex handles width */
+}
+
+.dashboard-main {
+  flex: 1;
+  padding: var(--spacing-xl);
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  overflow-y: auto; /* Scroll content */
+}
+
+@media (max-width: 768px) {
+  .dashboard-content-wrapper {
+    margin-left: 0 !important; /* Override inline styles if any */
+    padding-left: 80px; /* Space for collapsed sidebar */
+  }
+
+  .dashboard-layout--collapsed .dashboard-content-wrapper {
+    padding-left: 80px;
+  }
+
+  .dashboard-main {
+    padding: var(--spacing-sm);
+  }
+}

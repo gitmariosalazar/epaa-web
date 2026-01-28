@@ -1,0 +1,31 @@
+.card {
+  background-color: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.card__header {
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.card__title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-main);
+}
+
+.card__body {
+  padding: var(--spacing-md);
+  flex: 1;
+}
+
+.card__footer {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--surface-hover);
+  border-top: 1px solid var(--border-color);
+}

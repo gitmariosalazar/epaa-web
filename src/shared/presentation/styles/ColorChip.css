@@ -1,0 +1,136 @@
+.color-chip {
+  --chip-color: var(--primary); /* Default fallback */
+  --chip-bg: var(--chip-color);
+  --chip-text: #fff;
+  --chip-border: transparent;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 6px; /* Slightly more squared for modern look, or keep rounded */
+  border-radius: 9999px; /* Pill shape is standard for chips */
+
+  font-family: inherit;
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+
+  background-color: var(--chip-bg);
+  color: var(--chip-text);
+  border: 1px solid var(--chip-border);
+
+  cursor: default;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  opacity: 1;
+}
+
+/* Interactive state */
+.color-chip--interactive {
+  cursor: pointer;
+}
+
+.color-chip--interactive:hover {
+  filter: brightness(0.95);
+  transform: translateY(-1px);
+}
+
+.color-chip--interactive:active {
+  transform: translateY(0);
+  filter: brightness(0.9);
+}
+
+/* --- Sizes --- */
+.color-chip--xs {
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  height: 20px;
+}
+
+.color-chip--sm {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  height: 24px;
+}
+
+.color-chip--md {
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  height: 32px;
+}
+
+.color-chip--lg {
+  padding: 8px 16px;
+  font-size: 1rem;
+  height: 40px;
+}
+
+/* --- Variants --- */
+
+/* Solid / Filled (Default) */
+.color-chip--solid,
+.color-chip--filled {
+  /* Inherits base vars */
+  --chip-bg: var(--chip-color);
+  --chip-text: #ffffff;
+  /* Ensure text contrast relative to the color? 
+     For now assuming white text on solid colors matches design system.
+     If color is light, might need dark text.
+  */
+}
+
+/* Outline */
+.color-chip--outline {
+  --chip-bg: transparent;
+  --chip-text: var(--chip-color);
+  --chip-border: var(--chip-color);
+}
+.color-chip--outline.color-chip--interactive:hover {
+  background-color: color-mix(in srgb, var(--chip-color), transparent 90%);
+}
+
+/* Soft */
+.color-chip--soft {
+  /* 
+     Using color-mix to create a 15% opacity version of the color on white background effectively.
+     Or just use opacity on bg.
+  */
+  --chip-bg: color-mix(in srgb, var(--chip-color), transparent 85%);
+  --chip-text: var(--chip-color);
+  --chip-text: color-mix(
+    in srgb,
+    var(--chip-color),
+    black 10%
+  ); /* Make text slightly darker for readability if needed */
+}
+.color-chip--soft.color-chip--interactive:hover {
+  --chip-bg: color-mix(in srgb, var(--chip-color), transparent 75%);
+}
+
+/* Ghost */
+.color-chip--ghost {
+  --chip-bg: transparent;
+  --chip-text: var(--chip-color);
+}
+.color-chip--ghost.color-chip--interactive:hover {
+  --chip-bg: color-mix(in srgb, var(--chip-color), transparent 90%);
+}
+
+/* Dot (Optional - a small dot before text) */
+.color-chip__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--chip-color);
+  margin-right: 4px;
+}
+
+/* Icons */
+.color-chip svg {
+  width: 1.2em;
+  height: 1.2em;
+  display: block;
+}
