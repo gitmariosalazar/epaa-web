@@ -1,4 +1,5 @@
 import type {
+  AdvancedReportReadings,
   ConnectionLastReadingsReport,
   DailyReadingsReport,
   DailyStatsReport,
@@ -21,4 +22,5 @@ export interface IReportDashboardRepository {
   getDailyStatsReport(month: string): Promise<DailyStatsReport[]>;
   getSectorStatsReport(month: string): Promise<SectorStatsReport[]>;
   getNoveltyStatsReport(month: string): Promise<NoveltyStatsReport[]>;
+  getAdvancedReportReadings(month: string): Promise<AdvancedReportReadings[]>;
 }

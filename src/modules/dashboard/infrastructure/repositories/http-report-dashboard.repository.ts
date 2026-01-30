@@ -1,6 +1,7 @@
 import { api } from '@/shared/infrastructure/http/api';
 import type { IReportDashboardRepository } from '@/modules/dashboard/domain/repositories/report-dashboard.repository';
 import type {
+  AdvancedReportReadings,
   ConnectionLastReadingsReport,
   DailyReadingsReport,
   DailyStatsReport,
@@ -78,6 +79,15 @@ export class HttpReportDashboardRepository implements IReportDashboardRepository
   async getNoveltyStatsReport(month: string): Promise<NoveltyStatsReport[]> {
     const response = await api.get<any>(
       `/Readings-Report-Dashboard/report/stats/novelty/${month}`
+    );
+    return response.data.data;
+  }
+
+  async getAdvancedReportReadings(
+    month: string
+  ): Promise<AdvancedReportReadings[]> {
+    const response = await api.get<any>(
+      `/Readings-Report-Dashboard/report/advanced-monthly/${month}`
     );
     return response.data.data;
   }

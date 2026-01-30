@@ -4,11 +4,12 @@ import { YearlyReport } from '@/shared/presentation/components/reports/YearlyRep
 import { ConnectionReport } from '@/shared/presentation/components/reports/ConnectionReport';
 import '@/shared/presentation/styles/reports.css';
 import { Calendar, FileText, Activity } from 'lucide-react';
+import { AdvancedReadingsReport } from '@/shared/presentation/components/reports/AdvancedReadingsReport';
 
 export const ReportsPage = () => {
-  const [activeTab, setActiveTab] = useState<'daily' | 'yearly' | 'connection'>(
-    'daily'
-  );
+  const [activeTab, setActiveTab] = useState<
+    'daily' | 'yearly' | 'connection' | 'advanced'
+  >('daily');
 
   return (
     <div className="reports-container">
@@ -60,12 +61,27 @@ export const ReportsPage = () => {
           />
           Connection History
         </button>
+        <button
+          className={`tab-button ${activeTab === 'advanced' ? 'active' : ''}`}
+          onClick={() => setActiveTab('advanced')}
+        >
+          <FileText
+            size={16}
+            style={{
+              display: 'inline',
+              marginRight: '8px',
+              verticalAlign: 'middle'
+            }}
+          />
+          Advanced Readings
+        </button>
       </div>
 
       <div className="report-content-area">
         {activeTab === 'daily' && <DailyReport />}
         {activeTab === 'yearly' && <YearlyReport />}
         {activeTab === 'connection' && <ConnectionReport />}
+        {activeTab === 'advanced' && <AdvancedReadingsReport />}
       </div>
     </div>
   );

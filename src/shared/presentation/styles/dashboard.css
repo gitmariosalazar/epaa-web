@@ -197,6 +197,11 @@
   width: 100%;
 }
 
+.dashboard-advanced-readings-row {
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
 /* Generic Card/Table Container */
 .content-card {
   background: var(--surface);

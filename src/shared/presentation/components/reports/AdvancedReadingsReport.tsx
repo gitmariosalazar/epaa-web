@@ -1,41 +1,38 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { Calendar, Search } from 'lucide-react';
-import type { DailyReadingsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
-import { ExportService } from '@/shared/infrastructure/services/ExportService';
-import { GetDailyReadingsReportUseCase } from '@/modules/dashboard/application/usecases/get-daily-readings-report.usecase';
+import { GetAdvancedReportReadingsUseCase } from '@/modules/dashboard/application/usecases/get-advanced-report-readings.usecase';
+import type { AdvancedReportReadings } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructure/repositories/http-report-dashboard.repository';
+import { ExportService } from '@/shared/infrastructure/services/ExportService';
+import { Calendar, Search } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { ColorChip } from '../chip/ColorChip';
 import { EmptyState } from '../common/EmptyState';
 
-export const DailyReport = () => {
+export const AdvancedReadingsReport = () => {
   const pickerRef = useRef<HTMLInputElement>(null);
-  const [date, setDate] = useState<string>(
-    //new Date().toISOString().slice(0, 10)
-    '2025-01-27'
-  );
-  const [data, setData] = useState<DailyReadingsReport[]>([]);
+  const [month, setMonth] = useState<string>('2025-12');
+
+  const [data, setData] = useState<AdvancedReportReadings[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [resultSearchTerm, setResultSearchTerm] = useState('');
 
   const repository = useMemo(() => new HttpReportDashboardRepository(), []);
   const exportService = useMemo(() => new ExportService(), []);
-
   const useCase = useMemo(
-    () => new GetDailyReadingsReportUseCase(repository),
+    () => new GetAdvancedReportReadingsUseCase(repository),
     [repository]
   );
 
   const handleSearch = async () => {
-    if (!date) return;
+    if (!month) return;
     setLoading(true);
     try {
-      const result = await useCase.execute(date);
+      const result = await useCase.execute(month);
       setData(result);
       setHasSearched(true);
     } catch (error) {
-      console.error('Error fetching daily report', error);
+      console.error('Error fetching advanced readings report', error);
     } finally {
       setLoading(false);
     }
@@ -43,7 +40,14 @@ export const DailyReport = () => {
 
   useEffect(() => {
     handleSearch();
-  }, []);
+  }, [month]);
+
+  const filteredData = useMemo(() => {
+    if (!resultSearchTerm) return data;
+    return data.filter((item) =>
+      item.sector.toString().includes(resultSearchTerm)
+    );
+  }, [data, resultSearchTerm]);
 
   return (
     <div>
@@ -61,9 +65,9 @@ export const DailyReport = () => {
                 <Calendar className="text-gray-400" size={20} color="#9ca3af" />
                 <input
                   ref={pickerRef}
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  type="month"
+                  value={month}
+                  onChange={(e) => setMonth(e.target.value)}
                   className="month-picker"
                 />
               </div>
@@ -100,7 +104,7 @@ export const DailyReport = () => {
                 <input
                   type="text"
                   className="toolbar-input input-search"
-                  placeholder="Search client, key, or reading..."
+                  placeholder="Search sector..."
                   maxLength={60}
                   value={resultSearchTerm}
                   onChange={(e) => setResultSearchTerm(e.target.value)}
@@ -116,40 +120,24 @@ export const DailyReport = () => {
                 <button
                   className="btn-icon-text"
                   onClick={() => {
-                    const filtered = data.filter(
-                      (row) =>
-                        (row.clientName || '')
-                          .toLowerCase()
-                          .includes(resultSearchTerm.toLowerCase()) ||
-                        (row.cadastralKey || '')
-                          .toLowerCase()
-                          .includes(resultSearchTerm.toLowerCase()) ||
-                        row.readingValue.toString().includes(resultSearchTerm)
-                    );
-                    const rows = filtered.map((d) => [
-                      new Date(d.readingTime).toLocaleString(),
-                      d.cadastralKey,
-                      d.blockNumber || '',
-                      d.clientName,
-                      d.readingValue.toString(),
-                      d.measureType || '',
-                      d.status || '',
-                      `${d.observation || '-'}`
+                    const rows = filteredData.map((d) => [
+                      d.sector.toString(),
+                      d.totalConnections.toString(),
+                      d.readingsCompleted.toString(),
+                      d.missingReadings.toString(),
+                      d.progressPercentage.toString()
                     ]);
                     exportService.exportToPdf({
                       rows,
                       columns: [
-                        'Date/Time',
-                        'Key',
-                        'Block',
-                        'Client',
-                        'Value',
-                        'Type',
-                        'Status',
-                        'Obs'
+                        'Sector',
+                        'Total Connections',
+                        'Readings Completed',
+                        'Missing Readings',
+                        'Progress Percentage'
                       ],
-                      fileName: 'daily_report',
-                      title: 'Daily Readings Report'
+                      fileName: 'advanced_readings_report',
+                      title: 'Advanced Readings Report'
                     });
                   }}
                 >
@@ -159,17 +147,10 @@ export const DailyReport = () => {
                 <button
                   className="btn-icon-text"
                   onClick={() => {
-                    const filtered = data.filter(
-                      (row) =>
-                        (row.clientName || '')
-                          .toLowerCase()
-                          .includes(resultSearchTerm.toLowerCase()) ||
-                        (row.cadastralKey || '')
-                          .toLowerCase()
-                          .includes(resultSearchTerm.toLowerCase()) ||
-                        row.readingValue.toString().includes(resultSearchTerm)
+                    exportService.exportToExcel(
+                      filteredData,
+                      'advanced_readings_report'
                     );
-                    exportService.exportToExcel(filtered, 'daily_report');
                   }}
                 >
                   {ColoredIcons.Excel}
@@ -185,58 +166,47 @@ export const DailyReport = () => {
         <table className="table">
           <thead>
             <tr>
-              <th>Time</th>
-              <th>Cadastral Key</th>
-              <th>Client</th>
-              <th>Reading</th>
-              <th>Consumption</th>
-              <th>Novelty</th>
+              <th>Sector</th>
+              <th>Total Connections</th>
+              <th>Readings Completed</th>
+              <th>Missing Readings</th>
+              <th>Progress Percentage</th>
             </tr>
           </thead>
           <tbody>
-            {data.length > 0 ? (
-              data
-                .filter(
-                  (row) =>
-                    (row.clientName || '')
-                      .toLowerCase()
-                      .includes(resultSearchTerm.toLowerCase()) ||
-                    (row.cadastralKey || '')
-                      .toLowerCase()
-                      .includes(resultSearchTerm.toLowerCase()) ||
-                    row.readingValue.toString().includes(resultSearchTerm)
-                )
-                .map((row) => (
-                  <tr key={row.readingId}>
-                    <td>{row.readingTime}</td>
-                    <td style={{ fontFamily: 'monospace' }}>
-                      {row.cadastralKey}
-                    </td>
-                    <td>{row.clientName}</td>
-                    <td>{row.readingValue}</td>
-                    <td>{row.consumption} m³</td>
-                    <td>
-                      <ColorChip
-                        color={
-                          row.novelty === 'NORMAL' ||
-                          row.novelty === 'LECTURA NORMAL'
-                            ? 'var(--success)'
-                            : 'var(--warning)'
-                        }
-                        label={row.novelty}
-                        size="sm"
-                        variant="soft"
-                      />
-                    </td>
-                  </tr>
-                ))
+            {filteredData.length > 0 ? (
+              filteredData.map((row) => (
+                <tr key={row.sector}>
+                  <td>{row.sector}</td>
+                  <td style={{ fontFamily: 'monospace' }}>
+                    {row.totalConnections}
+                  </td>
+                  <td>{row.readingsCompleted}</td>
+                  <td>{row.missingReadings}</td>
+                  <td>
+                    <ColorChip
+                      color={
+                        row.progressPercentage >= 95
+                          ? 'var(--success)'
+                          : row.progressPercentage < 95 &&
+                              row.progressPercentage > 50
+                            ? 'var(--warning)'
+                            : 'var(--error)'
+                      }
+                      label={`${row.progressPercentage}%`}
+                      size="sm"
+                      variant="soft"
+                    />
+                  </td>
+                </tr>
+              ))
             ) : (
               <tr>
                 <td colSpan={6} className="empty-state">
                   {hasSearched ? (
                     <EmptyState
-                      message="No readings found"
-                      description={`No readings found for ${date}`}
+                      message="No readings for this month"
+                      description={`No readings found for ${month}`}
                     />
                   ) : (
                     <EmptyState

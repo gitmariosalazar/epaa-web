@@ -12,11 +12,14 @@ import type {
   GlobalStatsReport,
   DailyStatsReport,
   SectorStatsReport,
-  NoveltyStatsReport
+  NoveltyStatsReport,
+  AdvancedReportReadings
 } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { Calendar } from 'lucide-react';
 
 import '@/shared/presentation/styles/dashboard.css';
+import { GetAdvancedReportReadingsUseCase } from '@/modules/dashboard/application/usecases/get-advanced-report-readings.usecase';
+import { AdvancedReadingsTable } from '@/shared/presentation/components/dashboard/AdvancedReadingsTable';
 
 export const DashboardHome = () => {
   const [currentMonth, setCurrentMonth] = useState<string>(
@@ -31,6 +34,9 @@ export const DashboardHome = () => {
   const [dailyStats, setDailyStats] = useState<DailyStatsReport[]>([]);
   const [sectorStats, setSectorStats] = useState<SectorStatsReport[]>([]);
   const [noveltyStats, setNoveltyStats] = useState<NoveltyStatsReport[]>([]);
+  const [advancedReportReadings, setAdvancedReportReadings] = useState<
+    AdvancedReportReadings[]
+  >([]);
 
   // Dependency Injection (Manually for now)
   const repository = useMemo(() => new HttpReportDashboardRepository(), []);
@@ -51,21 +57,28 @@ export const DashboardHome = () => {
     [repository]
   );
 
+  const getAdvancedReportReadingsUseCase = useMemo(
+    () => new GetAdvancedReportReadingsUseCase(repository),
+    [repository]
+  );
+
   const fetchData = async (month: string) => {
     setLoading(true);
     try {
       // Parallel fetching
-      const [global, daily, sector, novelty] = await Promise.all([
+      const [global, daily, sector, novelty, advanced] = await Promise.all([
         getGlobalStatsUseCase.execute(month),
         getDailyStatsUseCase.execute(month),
         getSectorStatsUseCase.execute(month),
-        getNoveltyStatsUseCase.execute(month)
+        getNoveltyStatsUseCase.execute(month),
+        getAdvancedReportReadingsUseCase.execute(month)
       ]);
 
       setGlobalStats(global);
       setDailyStats(daily);
       setSectorStats(sector);
       setNoveltyStats(novelty);
+      setAdvancedReportReadings(advanced);
     } catch (error) {
       console.error('Failed to fetch dashboard data', error);
       // Handle error (notification/toast)
@@ -128,6 +141,14 @@ export const DashboardHome = () => {
       {noveltyStats.length > 0 && (
         <div className="dashboard-novelties-row">
           <NoveltyStats data={noveltyStats} loading={loading} />
+        </div>
+      )}
+      {advancedReportReadings.length > 0 && (
+        <div className="dashboard-advanced-readings-row">
+          <AdvancedReadingsTable
+            data={advancedReportReadings}
+            loading={loading}
+          />
         </div>
       )}
     </div>

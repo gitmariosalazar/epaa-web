@@ -42,6 +42,19 @@ export const ConnectionReport = () => {
     handleSearch();
   }, []);
 
+  const filteredData = useMemo(() => {
+    if (!resultSearchTerm) return data;
+    const lowerTerm = resultSearchTerm.toLowerCase();
+    return data.filter(
+      (row) =>
+        (row.clientName || '').toLowerCase().includes(lowerTerm) ||
+        (row.meterNumber || '').toLowerCase().includes(lowerTerm) ||
+        new Date(row.readingDate)
+          .toLocaleDateString()
+          .includes(resultSearchTerm)
+    );
+  }, [data, resultSearchTerm]);
+
   return (
     <div>
       <div className="reports-toolbar">
@@ -120,29 +133,17 @@ export const ConnectionReport = () => {
                 <button
                   className="btn-icon-text"
                   onClick={() => {
-                    const filtered = data.filter(
-                      (row) =>
-                        (row.clientName || '')
-                          .toLowerCase()
-                          .includes(resultSearchTerm.toLowerCase()) ||
-                        (row.meterNumber || '')
-                          .toLowerCase()
-                          .includes(resultSearchTerm.toLowerCase()) ||
-                        new Date(row.readingDate)
-                          .toLocaleDateString()
-                          .includes(resultSearchTerm)
-                    );
-                    const rows = filtered.map((d) => [
+                    const rows = filteredData.map((d) => [
                       new Date(d.readingDate).toLocaleDateString(),
-                      d.readingValue,
+                      d.readingValue.toString(),
                       `${d.consumption} m³`,
                       d.clientName,
                       d.meterNumber,
                       d.novelty
                     ]);
-                    exportService.exportToPdf(
+                    exportService.exportToPdf({
                       rows,
-                      [
+                      columns: [
                         'Date',
                         'Reading',
                         'Consumption',
@@ -150,9 +151,19 @@ export const ConnectionReport = () => {
                         'Meter',
                         'Status'
                       ],
-                      'connection_history',
-                      'Connection Reading History'
-                    );
+                      fileName: 'connection_history',
+                      title: 'Connection Reading History',
+                      clientInfo:
+                        filteredData.length > 0
+                          ? {
+                              'Client Name': filteredData[0].clientName || '',
+                              'Cadastral Key':
+                                filteredData[0].cadastralKey || '',
+                              'Meter Number': filteredData[0].meterNumber || '',
+                              Address: filteredData[0].address || ''
+                            }
+                          : undefined
+                    });
                   }}
                 >
                   {ColoredIcons.Pdf}
@@ -161,19 +172,10 @@ export const ConnectionReport = () => {
                 <button
                   className="btn-icon-text"
                   onClick={() => {
-                    const filtered = data.filter(
-                      (row) =>
-                        (row.clientName || '')
-                          .toLowerCase()
-                          .includes(resultSearchTerm.toLowerCase()) ||
-                        (row.meterNumber || '')
-                          .toLowerCase()
-                          .includes(resultSearchTerm.toLowerCase()) ||
-                        new Date(row.readingDate)
-                          .toLocaleDateString()
-                          .includes(resultSearchTerm)
+                    exportService.exportToExcel(
+                      filteredData,
+                      'connection_history'
                     );
-                    exportService.exportToExcel(filtered, 'connection_history');
                   }}
                 >
                   {ColoredIcons.Excel}
@@ -198,45 +200,32 @@ export const ConnectionReport = () => {
             </tr>
           </thead>
           <tbody>
-            {data.length > 0 ? (
-              data
-                .filter(
-                  (row) =>
-                    (row.clientName || '')
-                      .toLowerCase()
-                      .includes(resultSearchTerm.toLowerCase()) ||
-                    (row.meterNumber || '')
-                      .toLowerCase()
-                      .includes(resultSearchTerm.toLowerCase()) ||
-                    new Date(row.readingDate)
-                      .toLocaleDateString()
-                      .includes(resultSearchTerm)
-                )
-                .map((row) => (
-                  <tr key={row.readingId}>
-                    <td>{new Date(row.readingDate).toLocaleDateString()}</td>
-                    <td className="font-medium">{row.readingValue}</td>
-                    <td>{row.consumption} m³</td>
-                    <td>
-                      <div>{row.clientName}</div>
-                      <small style={{ color: '#9ca3af' }}>{row.address}</small>
-                    </td>
-                    <td>{row.meterNumber}</td>
-                    <td>
-                      <ColorChip
-                        color={
-                          row.novelty === 'NORMAL' ||
-                          row.novelty === 'LECTURA NORMAL'
-                            ? 'var(--success)'
-                            : 'var(--warning)'
-                        }
-                        label={row.novelty}
-                        size="sm"
-                        variant="soft"
-                      />
-                    </td>
-                  </tr>
-                ))
+            {filteredData.length > 0 ? (
+              filteredData.map((row) => (
+                <tr key={row.readingId}>
+                  <td>{new Date(row.readingDate).toLocaleDateString()}</td>
+                  <td className="font-medium">{row.readingValue}</td>
+                  <td>{row.consumption} m³</td>
+                  <td>
+                    <div>{row.clientName}</div>
+                    <small style={{ color: '#9ca3af' }}>{row.address}</small>
+                  </td>
+                  <td>{row.meterNumber}</td>
+                  <td>
+                    <ColorChip
+                      color={
+                        row.novelty === 'NORMAL' ||
+                        row.novelty === 'LECTURA NORMAL'
+                          ? 'var(--success)'
+                          : 'var(--warning)'
+                      }
+                      label={row.novelty}
+                      size="sm"
+                      variant="soft"
+                    />
+                  </td>
+                </tr>
+              ))
             ) : (
               <tr>
                 <td colSpan={6} className="empty-state">

@@ -43,16 +43,16 @@ export const YearlyReport = () => {
 
     const rows = data.monthlySummaries.map((m) => [
       m.month,
-      m.totalReadings,
+      m.totalReadings.toString(),
       `${Number(m.totalConsumption).toFixed(2)} m³`
     ]);
 
-    exportService.exportToPdf(
+    exportService.exportToPdf({
       rows,
-      ['Month', 'Readings Count', 'Total Consumption'],
-      `yearly_report_${year}`,
-      `Yearly Report - ${year}`
-    );
+      columns: ['Month', 'Readings Count', 'Total Consumption'],
+      fileName: `yearly_report_${year}`,
+      title: `Yearly Report - ${year}`
+    });
   };
 
   const handleExportExcel = () => {
