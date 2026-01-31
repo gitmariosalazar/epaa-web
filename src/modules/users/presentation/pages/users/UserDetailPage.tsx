@@ -21,7 +21,6 @@ import {
   Loader
 } from 'lucide-react';
 import '../profile/Profile.css'; // Reusing profile styles
-import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { GetProfileUseCase } from '@/modules/users/application/usecases/GetProfileUseCase';
 import { MdAdd, MdDeleteForever, MdLockOpen } from 'react-icons/md';

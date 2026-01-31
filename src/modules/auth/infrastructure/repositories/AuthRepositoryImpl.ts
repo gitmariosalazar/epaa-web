@@ -1,21 +1,35 @@
-import type { AuthSession, LoginCredentials } from '@/modules/auth/domain/models/Auth';
+import type {
+  AuthSession,
+  LoginCredentials
+} from '@/modules/auth/domain/models/Auth';
 import type { AuthRepository } from '@/modules/auth/domain/repositories/AuthRepository';
-import { api } from '@/shared/infrastructure/http/api';
+import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
+import type { HttpClientInterface } from '@/shared/infrastructure/api/interfaces/HttpClientInterface';
+import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 
 export class AuthRepositoryImpl implements AuthRepository {
+  private readonly client: HttpClientInterface;
+
+  constructor(client: HttpClientInterface = apiClient) {
+    this.client = client;
+  }
+
   async signIn(credentials: LoginCredentials): Promise<AuthSession> {
-    const response = await api.post('/auth/signin', credentials);
-    // Adjust based on actual API response structure (ApiResponse wrapper)
-    // Assuming backend returns { data: AuthResponse, ... }
+    const response = await this.client.post<ApiResponse<AuthSession>>(
+      '/auth/signin',
+      credentials
+    );
     return response.data.data;
   }
 
   async signOut(): Promise<void> {
-    await api.post('/auth/signout');
+    await this.client.post('/auth/signout');
   }
 
   async refreshToken(): Promise<AuthSession> {
-    const response = await api.post('/auth/refresh-token');
+    const response = await this.client.post<ApiResponse<AuthSession>>(
+      '/auth/refresh-token'
+    );
     return response.data.data;
   }
 }

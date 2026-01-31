@@ -16,17 +16,13 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setTheme] = useState<Theme>('light');
-
-  useEffect(() => {
-    // Check local storage or system preference
+  const [theme, setTheme] = useState<Theme>(() => {
     const storedTheme = localStorage.getItem('theme') as Theme;
-    if (storedTheme) {
-      setTheme(storedTheme);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
-    }
-  }, []);
+    if (storedTheme) return storedTheme;
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches)
+      return 'dark';
+    return 'light';
+  });
 
   useEffect(() => {
     // Apply theme to document element

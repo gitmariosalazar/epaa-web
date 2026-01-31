@@ -3,61 +3,82 @@ import type { UpdateUserRequest } from '@/modules/users/domain/models/UpdateUser
 import type { ChangePasswordRequest } from '@/modules/users/domain/models/ChangePasswordRequest';
 import type { CreateUserEmployeeRequest } from '@/modules/users/domain/models/CreateUserRequest';
 import type { UserRepository } from '@/modules/users/domain/repositories/UserRepository';
-import { api } from '@/shared/infrastructure/http/api';
+import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
+import type { HttpClientInterface } from '@/shared/infrastructure/api/interfaces/HttpClientInterface';
+import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 
 export class UserRepositoryImpl implements UserRepository {
+  private readonly client: HttpClientInterface;
+
+  constructor(client: HttpClientInterface = apiClient) {
+    this.client = client;
+  }
+
   async findAll(limit: number, offset: number): Promise<User[]> {
-    const response = await api.get('/users-gateway/find-all', {
-      params: { limit, offset }
-    });
+    const response = await this.client.get<ApiResponse<User[]>>(
+      '/users-gateway/find-all',
+      {
+        params: { limit, offset }
+      }
+    );
     return response.data.data;
   }
 
   async findById(userId: string): Promise<User> {
-    const response = await api.get(`/users-gateway/find-by-id/${userId}`);
+    const response = await this.client.get<ApiResponse<User>>(
+      `/users-gateway/find-by-id/${userId}`
+    );
     return response.data.data;
   }
 
   async findByUsernameOrEmail(username: string, email: string): Promise<User> {
-    const response = await api.get('/users-gateway/find-by-username-or-email', {
-      params: { username, email }
-    });
+    const response = await this.client.get<ApiResponse<User>>(
+      '/users-gateway/find-by-username-or-email',
+      {
+        params: { username, email }
+      }
+    );
     return response.data.data;
   }
 
   async getDetail(usernameOrEmail: string): Promise<User> {
-    const response = await api.get(
+    const response = await this.client.get<ApiResponse<User>>(
       `/users-gateway/get-profile/${usernameOrEmail}`
     );
     return response.data.data;
   }
 
   async getProfile(usernameOrEmail: string): Promise<User> {
-    const response = await api.get(
+    const response = await this.client.get<ApiResponse<User>>(
       `/users-gateway/get-profile/${usernameOrEmail}`
     );
     return response.data.data;
   }
 
   async existsByUsername(username: string): Promise<boolean> {
-    const response = await api.get(
+    const response = await this.client.get<ApiResponse<boolean>>(
       `/users-gateway/exists-by-username/${username}`
     );
-    return response.data.data?.exists || false;
+    return response.data.data;
   }
 
   async existsByEmail(email: string): Promise<boolean> {
-    const response = await api.get(`/users-gateway/exists-by-email/${email}`);
-    return response.data.data?.exists || false;
+    const response = await this.client.get<ApiResponse<boolean>>(
+      `/users-gateway/exists-by-email/${email}`
+    );
+    return response.data.data;
   }
 
   async createUser(user: CreateUserEmployeeRequest): Promise<User> {
-    const response = await api.post('/users-gateway/create-user', user);
+    const response = await this.client.post<ApiResponse<User>>(
+      '/users-gateway/create-user',
+      user
+    );
     return response.data.data;
   }
 
   async updateUser(userId: string, updates: UpdateUserRequest): Promise<User> {
-    const response = await api.put(
+    const response = await this.client.put<ApiResponse<User>>(
       `/users-gateway/update-user/${userId}`,
       updates
     );
@@ -68,19 +89,28 @@ export class UserRepositoryImpl implements UserRepository {
     userId: string,
     data: ChangePasswordRequest
   ): Promise<void> {
-    await api.put(`/users-gateway/update-password/${userId}`, data);
+    await this.client.put<ApiResponse<User>>(
+      `/users-gateway/update-password/${userId}`,
+      data
+    );
   }
 
   async deleteUser(userId: string): Promise<void> {
-    await api.delete(`/users-gateway/soft-delete/${userId}`);
+    await this.client.delete<ApiResponse<void>>(
+      `/users-gateway/soft-delete/${userId}`
+    );
   }
 
   async restoreUser(userId: string): Promise<User> {
-    const response = await api.put(`/users-gateway/restore/${userId}`);
+    const response = await this.client.put<ApiResponse<User>>(
+      `/users-gateway/restore/${userId}`
+    );
     return response.data.data;
   }
 
   async resetFailedAttempts(userId: string): Promise<void> {
-    await api.put(`/users-gateway/reset-failed-attempts/${userId}`);
+    await this.client.put<ApiResponse<void>>(
+      `/users-gateway/reset-failed-attempts/${userId}`
+    );
   }
 }

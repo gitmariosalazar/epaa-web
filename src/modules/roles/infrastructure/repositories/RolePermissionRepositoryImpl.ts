@@ -1,6 +1,8 @@
 import type { Permission } from '@/modules/permissions/domain/models/Permission';
 import type { RolePermissionRepository } from '@/modules/roles/domain/repositories/RolePermissionRepository';
-import { api } from '@/shared/infrastructure/http/api';
+import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
+import type { HttpClientInterface } from '@/shared/infrastructure/api/interfaces/HttpClientInterface';
+import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 
 interface RolPermissionResponse {
   id: number;
@@ -10,18 +12,24 @@ interface RolPermissionResponse {
 }
 
 export class RolePermissionRepositoryImpl implements RolePermissionRepository {
+  private readonly client: HttpClientInterface;
+
+  constructor(client: HttpClientInterface = apiClient) {
+    this.client = client;
+  }
+
   async createRolPermission(
     rolId: number,
     permissionId: number
   ): Promise<void> {
-    await api.post('/rol-permission/create-rol-permission', {
+    await this.client.post('/rol-permission/create-rol-permission', {
       rolId,
       permissionId
     });
   }
 
   async deleteRolPermission(rolPermissionId: number): Promise<void> {
-    await api.delete(
+    await this.client.delete(
       `/rol-permission/delete-rol-permission/${rolPermissionId}`
     );
   }
@@ -39,7 +47,9 @@ export class RolePermissionRepositoryImpl implements RolePermissionRepository {
     // We will fetch all (maybe with high limit) and filter. Ideally backend should support filtering.
 
     // For now, fetching reasonable amount and filtering.
-    const response = await api.get('/rol-permission/get-all-rol-permissions');
+    const response = await this.client.get<
+      ApiResponse<RolPermissionResponse[]>
+    >('/rol-permission/get-all-rol-permissions');
     const all: RolPermissionResponse[] = response.data.data;
 
     // Filter by role ID
@@ -66,7 +76,9 @@ export class RolePermissionRepositoryImpl implements RolePermissionRepository {
     rolId: number,
     permissionId: number
   ): Promise<number | null> {
-    const response = await api.get('/rol-permission/get-all-rol-permissions');
+    const response = await this.client.get<
+      ApiResponse<RolPermissionResponse[]>
+    >('/rol-permission/get-all-rol-permissions');
     const all: RolPermissionResponse[] = response.data.data;
     const match = all.find(
       (rp) =>

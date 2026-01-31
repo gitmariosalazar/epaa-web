@@ -12,7 +12,7 @@ import type {
 import { SessionExpirationDialog } from '@/shared/presentation/components/Auth/SessionExpirationDialog';
 import { LoginUseCase } from '@/modules/auth/application/usecases/LoginUseCase';
 import { AuthRepositoryImpl } from '@/modules/auth/infrastructure/repositories/AuthRepositoryImpl';
-import { registerSessionExpiredCallback } from '../../infrastructure/http/api';
+import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 
 interface AuthContextType {
   user: AuthSession['user'] | null;
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
 
     // Register session expired callback
-    registerSessionExpiredCallback(() => {
+    apiClient.setUnauthorizedHandler(async () => {
       setIsSessionExpired(true);
     });
   }, []);
