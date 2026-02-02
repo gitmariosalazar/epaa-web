@@ -23,8 +23,8 @@ import { AdvancedReadingsTable } from '@/shared/presentation/components/dashboar
 
 export const DashboardHome = () => {
   const [currentMonth, setCurrentMonth] = useState<string>(
-    //new Date().toISOString().slice(0, 7)
-    '2025-12'
+    new Date().toISOString().slice(0, 7)
+    //'2025-12'
   ); // YYYY-MM
   const [loading, setLoading] = useState(false);
 
@@ -62,8 +62,8 @@ export const DashboardHome = () => {
     [repository]
   );
 
-  const fetchData = async (month: string) => {
-    setLoading(true);
+  const fetchData = async (month: string, isBackground = false) => {
+    if (!isBackground) setLoading(true);
     try {
       // Parallel fetching
       const [global, daily, sector, novelty, advanced] = await Promise.all([
@@ -83,7 +83,7 @@ export const DashboardHome = () => {
       console.error('Failed to fetch dashboard data', error);
       // Handle error (notification/toast)
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 
@@ -93,6 +93,14 @@ export const DashboardHome = () => {
       fetchData(currentMonth);
     }, 500);
     return () => clearTimeout(timer);
+  }, [currentMonth]);
+
+  // Real-time updates (Polling)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchData(currentMonth, true);
+    }, 5000);
+    return () => clearInterval(interval);
   }, [currentMonth]);
 
   const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {

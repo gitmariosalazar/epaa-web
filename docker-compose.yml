@@ -1,0 +1,20 @@
+services:
+  web:
+    build:
+      context: .
+      target: development
+    container_name: epaa-web-dev
+    ports:
+      - '5173:5173'
+    environment:
+      - NODE_ENV=development
+      - VITE_WATCH_POLLING=true # Helps with file watching in some environments
+    volumes:
+      - .:/app # Sync code into container
+      - /app/node_modules # Prevent host node_modules from overwriting container's
+    networks:
+      - epaa-network
+
+networks:
+  epaa-network:
+    driver: bridge

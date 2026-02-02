@@ -8,7 +8,7 @@ import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { EmptyState } from '../common/EmptyState';
 
 export const YearlyReport = () => {
-  const [year, setYear] = useState<number>(new Date().getFullYear() - 1);
+  const [year, setYear] = useState<number>(new Date().getFullYear());
   const [data, setData] = useState<YearlyReadingsReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);

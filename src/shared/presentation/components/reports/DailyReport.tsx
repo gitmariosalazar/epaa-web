@@ -11,8 +11,8 @@ import { EmptyState } from '../common/EmptyState';
 export const DailyReport = () => {
   const pickerRef = useRef<HTMLInputElement>(null);
   const [date, setDate] = useState<string>(
-    //new Date().toISOString().slice(0, 10)
-    '2025-01-27'
+    new Date().toISOString().slice(0, 10)
+    //'2025-01-27'
   );
   const [data, setData] = useState<DailyReadingsReport[]>([]);
   const [loading, setLoading] = useState(false);

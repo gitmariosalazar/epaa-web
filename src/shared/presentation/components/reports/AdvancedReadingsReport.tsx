@@ -10,7 +10,9 @@ import { EmptyState } from '../common/EmptyState';
 
 export const AdvancedReadingsReport = () => {
   const pickerRef = useRef<HTMLInputElement>(null);
-  const [month, setMonth] = useState<string>('2025-12');
+  const [month, setMonth] = useState<string>(
+    new Date().toISOString().slice(0, 7)
+  );
 
   const [data, setData] = useState<AdvancedReportReadings[]>([]);
   const [loading, setLoading] = useState(false);

@@ -1,0 +1,17 @@
+services:
+  web:
+    build:
+      context: .
+      target: production
+    container_name: epaa-web-prod
+    restart: always # Auto-restart if crashes
+    ports:
+      - '80:80'
+    environment:
+      - NODE_ENV=production
+    networks:
+      - epaa-network
+
+networks:
+  epaa-network:
+    driver: bridge

@@ -11,8 +11,14 @@ import { useTheme } from '@/shared/presentation/context/ThemeContext';
 import { Moon, Sun, Globe, User } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
-  const { login } = useAuth();
+  const { login, token, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (!isAuthLoading && token) {
+      navigate('/', { replace: true });
+    }
+  }, [token, isAuthLoading, navigate]);
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
 
