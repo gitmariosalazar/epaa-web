@@ -1,0 +1,111 @@
+.horizontal-novelty-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.list-section {
+  flex: 1;
+}
+
+.custom-legend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.novelty-item {
+  padding: 12px;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left-width: 4px;
+  border-left-style: solid;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.novelty-item.active {
+  background-color: var(--bg-hover);
+  transform: translateX(5px);
+}
+
+.novelty-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.novelty-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.novelty-meta {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.novelty-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.chart-center-overlay {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.total-card {
+  background-color: var(--bg-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+  pointer-events: auto; /* Allow interaction if needed, though mostly visual */
+  min-width: 120px;
+}
+
+.total-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.total-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.chart-section {
+  height: 300px;
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .horizontal-novelty-layout {
+    flex-direction: row;
+    align-items: center;
+  }
+  .chart-section {
+    flex: 0 0 40%;
+    border-right: 1px solid var(--border-color);
+    padding-right: 2rem;
+    margin-right: 2rem;
+    height: 300px;
+  }
+}

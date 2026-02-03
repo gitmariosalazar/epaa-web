@@ -10,21 +10,13 @@ import {
 import { Loader2 } from 'lucide-react';
 import type { NoveltyStatsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { NOVELTY_COLORS } from '../../utils/colors/novelties.colors';
+import './NoveltyStats.css';
 
 interface NoveltyStatsProps {
   data: NoveltyStatsReport[];
   loading: boolean;
 }
-
-const NOVELTY_COLORS: Record<string, string> = {
-  NORMAL: '#10b981', // Green
-  'LECTURA NORMAL': '#10b981',
-  'FALTA LECTURA': '#f59e0b', // Amber
-  DAÑADO: '#ef4444', // Red
-  NUEVO: '#3b82f6', // Blue
-  SUSPENDIDO: '#6b7280', // Gray
-  DEFAULT: '#8b5cf6' // Purple
-};
 
 const renderActiveShape = (props: any) => {
   const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } =
@@ -56,6 +48,20 @@ const renderActiveShape = (props: any) => {
   );
 };
 
+const getNoveltyColor = (noveltyName: string): string => {
+  if (!noveltyName) return NOVELTY_COLORS.DEFAULT;
+
+  // Normalize string: uppercase and replace spaces with underscores
+  // e.g., "Consumo Bajo" -> "CONSUMO_BAJO"
+  const normalizedKey = noveltyName.toUpperCase().replace(/\s+/g, '_');
+
+  return (
+    NOVELTY_COLORS[normalizedKey] ||
+    NOVELTY_COLORS[noveltyName] || // Fallback to exact match just in case
+    NOVELTY_COLORS.DEFAULT
+  );
+};
+
 export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
   data,
   loading
@@ -73,14 +79,12 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
   const chartData = useMemo(() => {
     return data.map((item) => {
       const noveltyName = item.novelty || 'Unknown';
-      const colorKey = noveltyName ? noveltyName.toUpperCase() : 'DEFAULT';
+      const color = getNoveltyColor(noveltyName);
+
       return {
         name: noveltyName,
         value: item.count,
-        color:
-          NOVELTY_COLORS[colorKey] ||
-          NOVELTY_COLORS[noveltyName] ||
-          NOVELTY_COLORS.DEFAULT,
+        color: color,
         average: Number(item.averageConsumption).toFixed(1)
       };
     });
@@ -111,12 +115,14 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
     );
   }
 
+  const activeItem = activeIndex >= 0 ? chartData[activeIndex] : null;
+
   return (
     <div
       className="content-card"
       style={{
         transition: 'border-color 0.3s ease',
-        borderColor: activeIndex >= 0 ? chartData[activeIndex].color : undefined
+        borderColor: activeItem ? activeItem.color : undefined
       }}
     >
       <div className="card-header">
@@ -126,10 +132,7 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
       <div className="novelty-content-wrapper" style={{ padding: '1.5rem' }}>
         <div className="horizontal-novelty-layout">
           {/* Chart Section */}
-          <div
-            className="chart-section"
-            style={{ height: 300, position: 'relative' }}
-          >
+          <div className="chart-section">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -180,14 +183,10 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
                   <div className="chart-center-overlay">
                     <div className="total-card">
                       <span className="total-label">
-                        {activeIndex !== -1
-                          ? chartData[activeIndex].name
-                          : 'Total'}
+                        {activeItem ? activeItem.name : 'Total'}
                       </span>
                       <span className="total-value">
-                        {activeIndex !== -1
-                          ? chartData[activeIndex].value
-                          : total}
+                        {activeItem ? activeItem.value : total}
                       </span>
                     </div>
                   </div>
@@ -196,7 +195,7 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
             </ResponsiveContainer>
           </div>
 
-          {/* List/Legend Section - RESTORED */}
+          {/* List/Legend Section */}
           <div className="list-section">
             <div className="custom-legend-grid">
               {chartData.map((item, index) => (
@@ -206,11 +205,9 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
                   onMouseEnter={() => setActiveIndex(index)}
                   onMouseLeave={() => setActiveIndex(-1)}
                   style={{
-                    borderLeft: `4px solid ${item.color}`,
+                    borderLeftColor: item.color,
                     opacity:
-                      activeIndex !== -1 && activeIndex !== index ? 0.4 : 1,
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer'
+                      activeIndex !== -1 && activeIndex !== index ? 0.4 : 1
                   }}
                 >
                   <div className="novelty-info">
@@ -232,81 +229,6 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
           </div>
         </div>
       </div>
-      <style>{`
-        .horizontal-novelty-layout {
-          display: flex;
-          flex-direction: column;
-          gap: 2rem;
-        }
-        .list-section {
-            flex: 1;
-        }
-        .custom-legend-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
-        }
-        .novelty-item {
-            padding: 12px;
-            background-color: var(--bg-secondary);
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .novelty-item.active {
-            background-color: var(--bg-hover);
-            transform: translateX(5px);
-        }
-
-        .chart-center-overlay {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .total-card {
-           background-color: var(--bg-secondary);
-           padding: 0.5rem 1rem;
-           border-radius: 8px;
-           display: flex;
-           flex-direction: column;
-           align-items: center;
-           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-           border: 1px solid var(--border-color);
-           pointer-events: auto; /* Allow interaction if needed, though mostly visual */
-           min-width: 120px;
-        }
-        .total-label {
-          font-size: 0.75rem;
-          color: var(--text-secondary);
-          text-align: center;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          max-width: 100%;
-        }
-        .total-value {
-          font-size: 1.25rem;
-          font-weight: 700;
-          color: var(--text-primary);
-        }
-
-        @media (min-width: 1024px) {
-          .horizontal-novelty-layout {
-            flex-direction: row;
-            align-items: center;
-          }
-          .chart-section {
-            flex: 0 0 40%;
-            border-right: 1px solid var(--border-color);
-            padding-right: 2rem;
-            margin-right: 2rem;
-          }
-        }
-      `}</style>
     </div>
   );
 };
