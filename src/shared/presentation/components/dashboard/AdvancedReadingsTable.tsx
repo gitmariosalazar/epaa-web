@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { Table, type Column } from '../Table/Table';
 import { ColorChip } from '../chip/ColorChip';
+import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
 
 interface AdvancedReadingsTableProps {
   data: AdvancedReportReadings[];
@@ -56,13 +57,7 @@ export const AdvancedReadingsTable = ({
       header: 'Progress Percentage',
       accessor: (row) => (
         <ColorChip
-          color={
-            row.progressPercentage >= 95
-              ? 'var(--success)'
-              : row.progressPercentage < 95 && row.progressPercentage > 50
-                ? 'var(--warning)'
-                : 'var(--error)'
-          }
+          color={getTrafficLightColor(row.progressPercentage)}
           size="sm"
           label={`${row.progressPercentage}%`}
           variant="soft"

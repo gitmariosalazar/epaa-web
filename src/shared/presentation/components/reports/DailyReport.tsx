@@ -7,6 +7,7 @@ import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructur
 import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { ColorChip } from '../chip/ColorChip';
 import { EmptyState } from '../common/EmptyState';
+import { getNoveltyColor } from '../../utils/colors/novelties.colors';
 
 export const DailyReport = () => {
   const pickerRef = useRef<HTMLInputElement>(null);
@@ -188,7 +189,10 @@ export const DailyReport = () => {
               <th>Time</th>
               <th>Cadastral Key</th>
               <th>Client</th>
-              <th>Reading</th>
+              <th>Average Consumption</th>
+              <th>Preview Reading</th>
+              <th>Current Reading</th>
+              <th>Reading Value</th>
               <th>Consumption</th>
               <th>Novelty</th>
             </tr>
@@ -206,30 +210,31 @@ export const DailyReport = () => {
                       .includes(resultSearchTerm.toLowerCase()) ||
                     row.readingValue.toString().includes(resultSearchTerm)
                 )
-                .map((row) => (
-                  <tr key={row.readingId}>
-                    <td>{row.readingTime}</td>
-                    <td style={{ fontFamily: 'monospace' }}>
-                      {row.cadastralKey}
-                    </td>
-                    <td>{row.clientName}</td>
-                    <td>{row.readingValue}</td>
-                    <td>{row.consumption} m³</td>
-                    <td>
-                      <ColorChip
-                        color={
-                          row.novelty === 'NORMAL' ||
-                          row.novelty === 'LECTURA NORMAL'
-                            ? 'var(--success)'
-                            : 'var(--warning)'
-                        }
-                        label={row.novelty}
-                        size="sm"
-                        variant="soft"
-                      />
-                    </td>
-                  </tr>
-                ))
+                .map((row) => {
+                  const color = getNoveltyColor(row.novelty);
+                  return (
+                    <tr key={row.readingId}>
+                      <td>{row.readingTime}</td>
+                      <td style={{ fontFamily: 'monospace' }}>
+                        {row.cadastralKey}
+                      </td>
+                      <td>{row.clientName}</td>
+                      <td>{row.averageConsumption} m³</td>
+                      <td>{row.previewReading}</td>
+                      <td>{row.currentReading}</td>
+                      <td>$ {row.readingValue}</td>
+                      <td>{row.consumption} m³</td>
+                      <td>
+                        <ColorChip
+                          color={color}
+                          label={row.novelty}
+                          size="sm"
+                          variant="soft"
+                        />
+                      </td>
+                    </tr>
+                  );
+                })
             ) : (
               <tr>
                 <td colSpan={6} className="empty-state">

@@ -9,7 +9,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { MdCable } from 'react-icons/md';
-
+import { TbListNumbers } from 'react-icons/tb';
 interface GlobalStatsProps {
   stats: GlobalStatsReport | null;
   loading: boolean;
@@ -63,10 +63,17 @@ export const GlobalStats: React.FC<GlobalStatsProps> = ({ stats, loading }) => {
       color: 'icon-red'
     },
     {
-      title: 'Connections',
+      title: 'Connections Completed',
       value: stats.uniqueConnections,
       icon: <MdCable size={20} />,
       desc: 'Unique meters/connections',
+      color: 'icon-green'
+    },
+    {
+      title: 'Total Connections',
+      value: stats.totalConnections,
+      icon: <TbListNumbers size={20} />,
+      desc: 'Total connections',
       color: 'icon-purple'
     }
   ];

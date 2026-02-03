@@ -10,7 +10,7 @@ import {
 import { Loader2 } from 'lucide-react';
 import type { NoveltyStatsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { NOVELTY_COLORS } from '../../utils/colors/novelties.colors';
+import { getNoveltyColor } from '../../utils/colors/novelties.colors';
 import './NoveltyStats.css';
 
 interface NoveltyStatsProps {
@@ -45,20 +45,6 @@ const renderActiveShape = (props: any) => {
         cornerRadius={4}
       />
     </g>
-  );
-};
-
-const getNoveltyColor = (noveltyName: string): string => {
-  if (!noveltyName) return NOVELTY_COLORS.DEFAULT;
-
-  // Normalize string: uppercase and replace spaces with underscores
-  // e.g., "Consumo Bajo" -> "CONSUMO_BAJO"
-  const normalizedKey = noveltyName.toUpperCase().replace(/\s+/g, '_');
-
-  return (
-    NOVELTY_COLORS[normalizedKey] ||
-    NOVELTY_COLORS[noveltyName] || // Fallback to exact match just in case
-    NOVELTY_COLORS.DEFAULT
   );
 };
 

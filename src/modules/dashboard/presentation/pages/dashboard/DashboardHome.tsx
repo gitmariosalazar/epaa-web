@@ -24,7 +24,7 @@ import { AdvancedReadingsTable } from '@/shared/presentation/components/dashboar
 export const DashboardHome = () => {
   const [currentMonth, setCurrentMonth] = useState<string>(
     new Date().toISOString().slice(0, 7)
-    //'2025-12'
+    // '2025-12'
   ); // YYYY-MM
   const [loading, setLoading] = useState(false);
 
