@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { SectorStatsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import {
   Table,
@@ -12,12 +13,17 @@ interface SectorStatsProps {
 }
 
 export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
 
   if (loading)
-    return <div className="text-gray-500">Loading sector stats...</div>;
+    return (
+      <div className="text-gray-500">{t('dashboard.sectorStats.loading')}</div>
+    );
   if (!data.length)
-    return <div className="text-gray-500">No sector data available.</div>;
+    return (
+      <div className="text-gray-500">{t('dashboard.sectorStats.empty')}</div>
+    );
 
   const filteredData = data.filter((row) =>
     row.sector.toString().toLowerCase().includes(searchTerm.toLowerCase())
@@ -25,23 +31,25 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
 
   const columns: Column<SectorStatsReport>[] = [
     {
-      header: 'Sector',
+      header: t('dashboard.sectorStats.columns.sector'),
       accessor: (row) => (
-        <span className="font-medium text-blue">Sector {row.sector}</span>
+        <span className="font-medium text-blue">
+          {t('dashboard.sectorStats.columns.sector')} {row.sector}
+        </span>
       )
     },
     {
-      header: 'Count',
+      header: t('dashboard.sectorStats.columns.count'),
       accessor: 'readingsCount',
       className: 'text-right'
     },
     {
-      header: 'Avg Consumption',
+      header: t('dashboard.sectorStats.columns.avgConsumption'),
       accessor: (row) => `${Number(row.averageConsumption).toFixed(2)} m³`,
       className: 'text-right'
     },
     {
-      header: 'Active Days',
+      header: t('dashboard.sectorStats.columns.activeDays'),
       accessor: 'activeDays',
       className: 'text-right'
     }
@@ -65,7 +73,7 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
           flexShrink: 0
         }}
       >
-        <h3>Sector Analysis</h3>
+        <h3>{t('dashboard.sectorStats.title')}</h3>
         <div style={{ position: 'relative', maxWidth: '150px' }}>
           <Search
             size={14}
@@ -79,7 +87,7 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
           />
           <input
             type="text"
-            placeholder="Search..."
+            placeholder={t('dashboard.sectorStats.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{

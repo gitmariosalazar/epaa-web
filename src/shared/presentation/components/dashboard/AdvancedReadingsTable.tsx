@@ -1,8 +1,9 @@
 import type { AdvancedReportReadings } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { Search } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ProgressBar } from '@/shared/presentation/components/ProgressBar/ProgressBar';
 import { Table, type Column } from '../Table/Table';
-import { ColorChip } from '../chip/ColorChip';
 import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
 
 interface AdvancedReadingsTableProps {
@@ -14,11 +15,21 @@ export const AdvancedReadingsTable = ({
   data,
   loading
 }: AdvancedReadingsTableProps) => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
+
   if (loading)
-    return <div className="text-gray-500">Loading advanced readings...</div>;
+    return (
+      <div className="text-gray-500">
+        {t('dashboard.advancedReadings.loading')}
+      </div>
+    );
   if (!data.length)
-    return <div className="text-gray-500">No advanced readings available.</div>;
+    return (
+      <div className="text-gray-500">
+        {t('dashboard.advancedReadings.empty')}
+      </div>
+    );
 
   const filteredData = data.filter((item) =>
     item.sector.toString().includes(searchTerm)
@@ -26,13 +37,13 @@ export const AdvancedReadingsTable = ({
 
   const columns: Column<AdvancedReportReadings>[] = [
     {
-      header: 'Sector',
+      header: t('dashboard.advancedReadings.columns.sector'),
       accessor: (row) => (
         <span className="font-medium text-blue">{row.sector}</span>
       )
     },
     {
-      header: 'Total Connections',
+      header: t('dashboard.advancedReadings.columns.totalConnections'),
       accessor: (row) => (
         <span className="font-medium text-gray-900">
           {row.totalConnections}
@@ -40,7 +51,7 @@ export const AdvancedReadingsTable = ({
       )
     },
     {
-      header: 'Readings Completed',
+      header: t('dashboard.advancedReadings.columns.readingsCompleted'),
       accessor: (row) => (
         <span className="font-medium text-gray-900">
           {row.readingsCompleted}
@@ -48,21 +59,21 @@ export const AdvancedReadingsTable = ({
       )
     },
     {
-      header: 'Missing Readings',
+      header: t('dashboard.advancedReadings.columns.missingReadings'),
       accessor: (row) => (
         <span className="font-medium text-gray-900">{row.missingReadings}</span>
       )
     },
     {
-      header: 'Progress Percentage',
+      header: t('dashboard.advancedReadings.columns.progress'),
       accessor: (row) => (
-        <ColorChip
+        <ProgressBar
+          value={row.progressPercentage}
           color={getTrafficLightColor(row.progressPercentage)}
-          size="sm"
-          label={`${row.progressPercentage}%`}
-          variant="soft"
+          height="8px"
         />
-      )
+      ),
+      className: 'w-48' // Give it some width
     }
   ];
 
@@ -84,7 +95,7 @@ export const AdvancedReadingsTable = ({
           flexShrink: 0 // Prevent header shrinking
         }}
       >
-        <h3>Daily Performance</h3>
+        <h3>{t('dashboard.advancedReadings.title')}</h3>
         <div style={{ position: 'relative', maxWidth: '200px' }}>
           <Search
             size={16}
@@ -98,7 +109,7 @@ export const AdvancedReadingsTable = ({
           />
           <input
             type="text"
-            placeholder="Search date..."
+            placeholder={t('dashboard.advancedReadings.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{

@@ -1,0 +1,43 @@
+/* DashboardHome specific styles */
+
+.section-divider {
+  margin: 2rem 0 1rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.tabs-container {
+  margin-bottom: 1.5rem;
+  display: flex;
+  width: 100%;
+  background-color: var(--bg-card); /* Fallback or variable */
+  padding: 0.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.tab-button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  background-color: transparent;
+  color: var(--text-secondary, #6b7280);
+  box-shadow: none;
+}
+
+.tab-button.active {
+  background-color: var(--primary-color, #3b82f6);
+  color: #fff;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}

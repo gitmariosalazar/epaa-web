@@ -5,7 +5,7 @@
 export const getTrafficLightColor = (value: number): string => {
   const v = Math.max(0, Math.min(100, value));
 
-  // 10 puntos clave (cada ~11.1%)
+  // Puntos clave extendidos para mayor diferenciación
   const stops = [
     { pos: 0, color: '#991b1b' }, // rojo muy oscuro     (crítico extremo)
     { pos: 10, color: '#b91c1c' }, // rojo oscuro
@@ -15,9 +15,9 @@ export const getTrafficLightColor = (value: number): string => {
     { pos: 50, color: '#eab308' }, // amarillo equilibrado
     { pos: 60, color: '#a3e635' }, // amarillo-verde
     { pos: 70, color: '#84cc16' }, // verde lima
-    { pos: 80, color: '#22c55e' }, // verde medio
-    { pos: 90, color: '#10b981' }, // verde esmeralda
-    { pos: 100, color: '#065f46' } // verde muy profundo (óptimo)
+    { pos: 80, color: '#06b6d4' }, // cyan (muy bueno)
+    { pos: 90, color: '#3b82f6' }, // azul (excelente)
+    { pos: 100, color: '#22c55e' } // verde (máximo/óptimo)
   ];
 
   // Encontramos el segmento actual

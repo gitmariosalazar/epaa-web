@@ -55,7 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const navSections: NavSection[] = [
     {
-      title: 'General',
+      title: t('sidebar.general'),
       items: [
         {
           icon: <LayoutDashboard size={20} />,
@@ -64,17 +64,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         },
         {
           icon: <FileText size={20} />,
-          label: 'Reports',
+          label: t('sidebar.reports'),
           to: '/reports'
         }
       ]
     },
     {
-      title: 'Administration',
+      title: t('sidebar.administration'),
       items: [
         {
           icon: <Lock size={20} />,
-          label: 'Security',
+          label: t('sidebar.security'),
           subItems: [
             {
               icon: <Users size={18} />,
@@ -101,11 +101,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       ]
     },
     {
-      title: 'User',
+      title: t('sidebar.user'),
       items: [
         {
           icon: <User size={20} />,
-          label: 'Profile',
+          label: t('sidebar.profile'),
           to: '/profile'
         }
       ]
@@ -195,8 +195,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {navSections.map((section, index) => (
           <div key={index} className="sidebar__section">
             {!isCollapsed &&
-              section.title !== 'General' &&
-              section.title !== 'User' && (
+              section.title !== t('sidebar.general') &&
+              section.title !== t('sidebar.user') && (
                 <div className="sidebar__section-title">{section.title}</div>
               )}
             {/* Optional: Add a separator for collapsed state or just rely on spacing */}

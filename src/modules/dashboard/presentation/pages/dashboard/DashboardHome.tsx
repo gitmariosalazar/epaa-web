@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { GlobalStats } from '@/shared/presentation/components/dashboard/GlobalStats';
 import { DailyStatsTable } from '@/shared/presentation/components/dashboard/DailyStatsTable';
 import { SectorStatsTable } from '@/shared/presentation/components/dashboard/SectorStatsTable';
@@ -18,11 +19,14 @@ import type {
 import { Calendar } from 'lucide-react';
 
 import '@/shared/presentation/styles/dashboard.css';
+import './DashboardHome.css';
 import { GetAdvancedReportReadingsUseCase } from '@/modules/dashboard/application/usecases/get-advanced-report-readings.usecase';
 import { AdvancedReadingsTable } from '@/shared/presentation/components/dashboard/AdvancedReadingsTable';
+import { SectorProgressStats } from '@/shared/presentation/components/dashboard/SectorProgressStats';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 export const DashboardHome = () => {
+  const { t } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState<string>(
     dateService.getCurrentMonthString()
   ); // YYYY-MM
@@ -37,6 +41,8 @@ export const DashboardHome = () => {
   const [advancedReportReadings, setAdvancedReportReadings] = useState<
     AdvancedReportReadings[]
   >([]);
+  // Default tab is table
+  const [activeTab, setActiveTab] = useState<'visual' | 'table'>('table');
 
   // Dependency Injection (Manually for now)
   const repository = useMemo(() => new HttpReportDashboardRepository(), []);
@@ -152,12 +158,44 @@ export const DashboardHome = () => {
         </div>
       )}
       {advancedReportReadings.length > 0 && (
-        <div className="dashboard-advanced-readings-row">
-          <AdvancedReadingsTable
-            data={advancedReportReadings}
-            loading={loading}
-          />
-        </div>
+        <>
+          <div className="section-divider">
+            <h2 className="section-title">
+              {t('dashboard.tabs.detailedReports')}
+            </h2>
+          </div>
+
+          <div className="tabs-container">
+            <button
+              className={`tab-button ${activeTab === 'visual' ? 'active' : ''}`}
+              onClick={() => setActiveTab('visual')}
+            >
+              {t('dashboard.tabs.visual')}
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'table' ? 'active' : ''}`}
+              onClick={() => setActiveTab('table')}
+            >
+              {t('dashboard.tabs.detailed')}
+            </button>
+          </div>
+
+          {activeTab === 'visual' ? (
+            <div className="dashboard-novelties-row">
+              <SectorProgressStats
+                data={advancedReportReadings}
+                loading={loading}
+              />
+            </div>
+          ) : (
+            <div className="dashboard-advanced-readings-row">
+              <AdvancedReadingsTable
+                data={advancedReportReadings}
+                loading={loading}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -5,10 +5,10 @@ import { ExportService } from '@/shared/infrastructure/services/ExportService';
 import { Calendar, Search } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColoredIcons } from '../../utils/icons/CustomIcons';
-import { ColorChip } from '../chip/ColorChip';
 import { EmptyState } from '../common/EmptyState';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
+import { ProgressBar } from '../ProgressBar/ProgressBar';
 
 export const AdvancedReadingsReport = () => {
   const pickerRef = useRef<HTMLInputElement>(null);
@@ -188,11 +188,10 @@ export const AdvancedReadingsReport = () => {
                   <td>{row.readingsCompleted}</td>
                   <td>{row.missingReadings}</td>
                   <td>
-                    <ColorChip
+                    <ProgressBar
+                      value={row.progressPercentage}
                       color={getTrafficLightColor(row.progressPercentage)}
-                      label={`${row.progressPercentage}%`}
-                      size="sm"
-                      variant="soft"
+                      height="8px"
                     />
                   </td>
                 </tr>
