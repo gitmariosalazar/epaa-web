@@ -79,6 +79,11 @@ i18n
             english: 'English',
             spanish: 'Spanish'
           },
+          common: {
+            pagination: {
+              page: 'Page {{current}} of {{total}}'
+            }
+          },
           pages: {
             roles: {
               title: 'Roles',
@@ -204,6 +209,11 @@ i18n
               passwordPlaceholder: 'Ingrese su contraseña',
               signIn: 'Iniciar Sesión',
               error: 'Usuario o contraseña inválidos'
+            }
+          },
+          common: {
+            pagination: {
+              page: 'Página {{current}} de {{total}}'
             }
           }
         }

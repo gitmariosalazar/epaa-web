@@ -6,6 +6,7 @@ import { ExportService } from '@/shared/infrastructure/services/ExportService';
 import { Search, Droplets, FileText, Calendar } from 'lucide-react';
 import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { EmptyState } from '../common/EmptyState';
+import { Table, type Column } from '../Table/Table';
 
 export const YearlyReport = () => {
   const [year, setYear] = useState<number>(new Date().getFullYear());
@@ -67,6 +68,26 @@ export const YearlyReport = () => {
 
     exportService.exportToExcel(excelData, `yearly_report_${year}`);
   };
+
+  /* Define columns for the shared Table component */
+  const columns = useMemo<Column<any>[]>(
+    () => [
+      {
+        header: 'Month',
+        accessor: 'month',
+        className: 'font-medium'
+      },
+      {
+        header: 'Readings Count',
+        accessor: 'totalReadings'
+      },
+      {
+        header: 'Total Consumption',
+        accessor: (row) => `${Number(row.totalConsumption).toFixed(2)} m³`
+      }
+    ],
+    []
+  );
 
   return (
     <div>
@@ -173,37 +194,18 @@ export const YearlyReport = () => {
               </div>
             </div>
           </div>
-          <div className="table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Month</th>
-                  <th>Readings Count</th>
-                  <th>Total Consumption</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.monthlySummaries.length > 0 ? (
-                  data.monthlySummaries.map((month, idx) => (
-                    <tr key={idx}>
-                      <td className="font-medium">{month.month}</td>
-                      <td>{month.totalReadings}</td>
-                      <td>{Number(month.totalConsumption).toFixed(2)} m³</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={3} className="empty-state">
-                      <EmptyState
-                        message="No data found"
-                        description={`No data found for ${year}`}
-                      />
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+
+          <Table
+            data={data.monthlySummaries}
+            columns={columns}
+            pagination={false}
+            emptyState={
+              <EmptyState
+                message="No data found"
+                description={`No data found for ${year}`}
+              />
+            }
+          />
         </div>
       ) : (
         <div className="empty-state">

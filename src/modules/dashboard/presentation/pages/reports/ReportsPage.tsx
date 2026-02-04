@@ -5,6 +5,7 @@ import { ConnectionReport } from '@/shared/presentation/components/reports/Conne
 import '@/shared/presentation/styles/reports.css';
 import { Calendar, FileText, Activity } from 'lucide-react';
 import { AdvancedReadingsReport } from '@/shared/presentation/components/reports/AdvancedReadingsReport';
+import { Tabs } from '@/shared/presentation/components/common/Tabs';
 
 export const ReportsPage = () => {
   const [activeTab, setActiveTab] = useState<
@@ -18,64 +19,36 @@ export const ReportsPage = () => {
         <p>Generate detailed reports on system readings and anomalies.</p>
       </div>
 
-      <div className="reports-tabs">
-        <button
-          className={`tab-button ${activeTab === 'daily' ? 'active' : ''}`}
-          onClick={() => setActiveTab('daily')}
-        >
-          <Calendar
-            size={16}
-            style={{
-              display: 'inline',
-              marginRight: '8px',
-              verticalAlign: 'middle'
-            }}
-          />
-          Daily Report
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'yearly' ? 'active' : ''}`}
-          onClick={() => setActiveTab('yearly')}
-        >
-          <Activity
-            size={16}
-            style={{
-              display: 'inline',
-              marginRight: '8px',
-              verticalAlign: 'middle'
-            }}
-          />
-          Yearly Summary
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'connection' ? 'active' : ''}`}
-          onClick={() => setActiveTab('connection')}
-        >
-          <FileText
-            size={16}
-            style={{
-              display: 'inline',
-              marginRight: '8px',
-              verticalAlign: 'middle'
-            }}
-          />
-          Connection History
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'advanced' ? 'active' : ''}`}
-          onClick={() => setActiveTab('advanced')}
-        >
-          <FileText
-            size={16}
-            style={{
-              display: 'inline',
-              marginRight: '8px',
-              verticalAlign: 'middle'
-            }}
-          />
-          Advanced Readings
-        </button>
-      </div>
+      <Tabs
+        tabs={[
+          {
+            id: 'daily',
+            label: 'Daily Report',
+            icon: <Calendar size={16} />
+          },
+          {
+            id: 'yearly',
+            label: 'Yearly Summary',
+            icon: <Activity size={16} />
+          },
+          {
+            id: 'connection',
+            label: 'Connection History',
+            icon: <FileText size={16} />
+          },
+          {
+            id: 'advanced',
+            label: 'Advanced Readings',
+            icon: <FileText size={16} />
+          }
+        ]}
+        activeTab={activeTab}
+        onTabChange={(id) =>
+          setActiveTab(id as 'daily' | 'yearly' | 'connection' | 'advanced')
+        }
+        variant="underline"
+        className="reports-tabs"
+      />
 
       <div className="report-content-area">
         {activeTab === 'daily' && <DailyReport />}

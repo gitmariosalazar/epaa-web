@@ -9,6 +9,7 @@ import { EmptyState } from '../common/EmptyState';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
 import { ProgressBar } from '../ProgressBar/ProgressBar';
+import { Table, type Column } from '../Table/Table';
 
 export const AdvancedReadingsReport = () => {
   const pickerRef = useRef<HTMLInputElement>(null);
@@ -52,6 +53,41 @@ export const AdvancedReadingsReport = () => {
       item.sector.toString().includes(resultSearchTerm)
     );
   }, [data, resultSearchTerm]);
+
+  /* Pagination logic handled by Table component */
+
+  const columns = useMemo<Column<AdvancedReportReadings>[]>(
+    () => [
+      {
+        header: 'Sector',
+        accessor: 'sector'
+      },
+      {
+        header: 'Total Connections',
+        accessor: 'totalConnections',
+        style: { fontFamily: 'monospace' }
+      },
+      {
+        header: 'Readings Completed',
+        accessor: 'readingsCompleted'
+      },
+      {
+        header: 'Missing Readings',
+        accessor: 'missingReadings'
+      },
+      {
+        header: 'Progress Percentage',
+        accessor: (row) => (
+          <ProgressBar
+            value={row.progressPercentage}
+            color={getTrafficLightColor(row.progressPercentage)}
+            height="8px"
+          />
+        )
+      }
+    ],
+    []
+  );
 
   return (
     <div>
@@ -166,56 +202,25 @@ export const AdvancedReadingsReport = () => {
         )}
       </div>
 
-      <div className="table-container">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Sector</th>
-              <th>Total Connections</th>
-              <th>Readings Completed</th>
-              <th>Missing Readings</th>
-              <th>Progress Percentage</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredData.length > 0 ? (
-              filteredData.map((row) => (
-                <tr key={row.sector}>
-                  <td>{row.sector}</td>
-                  <td style={{ fontFamily: 'monospace' }}>
-                    {row.totalConnections}
-                  </td>
-                  <td>{row.readingsCompleted}</td>
-                  <td>{row.missingReadings}</td>
-                  <td>
-                    <ProgressBar
-                      value={row.progressPercentage}
-                      color={getTrafficLightColor(row.progressPercentage)}
-                      height="8px"
-                    />
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={6} className="empty-state">
-                  {hasSearched ? (
-                    <EmptyState
-                      message="No readings for this month"
-                      description={`No readings found for ${month}`}
-                    />
-                  ) : (
-                    <EmptyState
-                      message="Select a date to view readings"
-                      description="Select a date to view readings"
-                    />
-                  )}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <Table
+        data={filteredData}
+        columns={columns}
+        pagination={true}
+        pageSize={10}
+        emptyState={
+          hasSearched ? (
+            <EmptyState
+              message="No readings for this month"
+              description={`No readings found for ${month}`}
+            />
+          ) : (
+            <EmptyState
+              message="Select a date to view readings"
+              description="Select a date to view readings"
+            />
+          )
+        }
+      />
     </div>
   );
 };

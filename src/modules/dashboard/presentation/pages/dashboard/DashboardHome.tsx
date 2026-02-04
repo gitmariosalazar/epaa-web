@@ -24,6 +24,7 @@ import { GetAdvancedReportReadingsUseCase } from '@/modules/dashboard/applicatio
 import { AdvancedReadingsTable } from '@/shared/presentation/components/dashboard/AdvancedReadingsTable';
 import { SectorProgressStats } from '@/shared/presentation/components/dashboard/SectorProgressStats';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import { Tabs } from '@/shared/presentation/components/common/Tabs';
 
 export const DashboardHome = () => {
   const { t } = useTranslation();
@@ -165,20 +166,15 @@ export const DashboardHome = () => {
             </h2>
           </div>
 
-          <div className="tabs-container">
-            <button
-              className={`tab-button ${activeTab === 'visual' ? 'active' : ''}`}
-              onClick={() => setActiveTab('visual')}
-            >
-              {t('dashboard.tabs.visual')}
-            </button>
-            <button
-              className={`tab-button ${activeTab === 'table' ? 'active' : ''}`}
-              onClick={() => setActiveTab('table')}
-            >
-              {t('dashboard.tabs.detailed')}
-            </button>
-          </div>
+          <Tabs
+            tabs={[
+              { id: 'visual', label: t('dashboard.tabs.visual') },
+              { id: 'table', label: t('dashboard.tabs.detailed') }
+            ]}
+            activeTab={activeTab}
+            onTabChange={(id) => setActiveTab(id as 'visual' | 'table')}
+            variant="pill"
+          />
 
           {activeTab === 'visual' ? (
             <div className="dashboard-novelties-row">

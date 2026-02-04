@@ -52,3 +52,8 @@
   font-feature-settings: 'tnum';
   font-variant-numeric: tabular-nums;
 }
+
+/* Dark mode override */
+.dark .progress-bar-container {
+  background-color: rgba(255, 255, 255, 0.15);
+}

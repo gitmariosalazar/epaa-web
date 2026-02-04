@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Calendar, Search } from 'lucide-react';
+import { Table, type Column } from '../Table/Table';
 import type { DailyReadingsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { ExportService } from '@/shared/infrastructure/services/ExportService';
 import { GetDailyReadingsReportUseCase } from '@/modules/dashboard/application/usecases/get-daily-readings-report.usecase';
@@ -43,6 +44,70 @@ export const DailyReport = () => {
   useEffect(() => {
     handleSearch();
   }, []);
+
+  const filteredData = useMemo(() => {
+    if (!resultSearchTerm) return data;
+    const lowerTerm = resultSearchTerm.toLowerCase();
+    return data.filter(
+      (row) =>
+        (row.clientName || '').toLowerCase().includes(lowerTerm) ||
+        (row.cadastralKey || '').toLowerCase().includes(lowerTerm) ||
+        row.readingValue.toString().includes(resultSearchTerm)
+    );
+  }, [data, resultSearchTerm]);
+
+  const columns = useMemo<Column<DailyReadingsReport>[]>(
+    () => [
+      {
+        header: 'Time',
+        accessor: 'readingTime'
+      },
+      {
+        header: 'Cadastral Key',
+        accessor: 'cadastralKey',
+        style: { fontFamily: 'monospace' }
+      },
+      {
+        header: 'Client',
+        accessor: 'clientName'
+      },
+      {
+        header: 'Average Consumption',
+        accessor: (row) => `${row.averageConsumption} m³`
+      },
+      {
+        header: 'Preview Reading',
+        accessor: 'previewReading'
+      },
+      {
+        header: 'Current Reading',
+        accessor: 'currentReading'
+      },
+      {
+        header: 'Reading Value',
+        accessor: (row) => `$ ${row.readingValue}`
+      },
+      {
+        header: 'Consumption',
+        accessor: (row) => `${row.consumption} m³`
+      },
+      {
+        header: 'Novelty',
+        accessor: (row) => {
+          const color = getNoveltyColor(row.novelty);
+          return (
+            <ColorChip
+              color={color}
+              label={row.novelty}
+              size="sm"
+              variant="soft"
+            />
+          );
+        }
+      }
+    ],
+    []
+  );
 
   return (
     <div>
@@ -180,79 +245,25 @@ export const DailyReport = () => {
         )}
       </div>
 
-      <div className="table-container">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Cadastral Key</th>
-              <th>Client</th>
-              <th>Average Consumption</th>
-              <th>Preview Reading</th>
-              <th>Current Reading</th>
-              <th>Reading Value</th>
-              <th>Consumption</th>
-              <th>Novelty</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.length > 0 ? (
-              data
-                .filter(
-                  (row) =>
-                    (row.clientName || '')
-                      .toLowerCase()
-                      .includes(resultSearchTerm.toLowerCase()) ||
-                    (row.cadastralKey || '')
-                      .toLowerCase()
-                      .includes(resultSearchTerm.toLowerCase()) ||
-                    row.readingValue.toString().includes(resultSearchTerm)
-                )
-                .map((row) => {
-                  const color = getNoveltyColor(row.novelty);
-                  return (
-                    <tr key={row.readingId}>
-                      <td>{row.readingTime}</td>
-                      <td style={{ fontFamily: 'monospace' }}>
-                        {row.cadastralKey}
-                      </td>
-                      <td>{row.clientName}</td>
-                      <td>{row.averageConsumption} m³</td>
-                      <td>{row.previewReading}</td>
-                      <td>{row.currentReading}</td>
-                      <td>$ {row.readingValue}</td>
-                      <td>{row.consumption} m³</td>
-                      <td>
-                        <ColorChip
-                          color={color}
-                          label={row.novelty}
-                          size="sm"
-                          variant="soft"
-                        />
-                      </td>
-                    </tr>
-                  );
-                })
-            ) : (
-              <tr>
-                <td colSpan={6} className="empty-state">
-                  {hasSearched ? (
-                    <EmptyState
-                      message="No readings found"
-                      description={`No readings found for ${date}`}
-                    />
-                  ) : (
-                    <EmptyState
-                      message="Select a date to view readings"
-                      description="Select a date to view readings"
-                    />
-                  )}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <Table
+        data={filteredData}
+        columns={columns}
+        pagination={true}
+        pageSize={10}
+        emptyState={
+          hasSearched ? (
+            <EmptyState
+              message="No readings found"
+              description={`No readings found for ${date}`}
+            />
+          ) : (
+            <EmptyState
+              message="Select a date to view readings"
+              description="Select a date to view readings"
+            />
+          )
+        }
+      />
     </div>
   );
 };
