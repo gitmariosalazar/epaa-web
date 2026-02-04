@@ -198,7 +198,8 @@ export const YearlyReport = () => {
           <Table
             data={data.monthlySummaries}
             columns={columns}
-            pagination={false}
+            pagination={true}
+            pageSize={15}
             emptyState={
               <EmptyState
                 message="No data found"

@@ -11,7 +11,7 @@ import { Table, type Column } from '../Table/Table';
 
 export const ConnectionReport = () => {
   const [cadastralKey, setCadastralKey] = useState<string>('1-1');
-  const [limit, setLimit] = useState<number>(10);
+  const [limit, setLimit] = useState<number>(15);
   const [data, setData] = useState<ConnectionLastReadingsReport[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -134,7 +134,10 @@ export const ConnectionReport = () => {
               >
                 <option value={5}>Last 5</option>
                 <option value={10}>Last 10</option>
+                <option value={15}>Last 15</option>
                 <option value={20}>Last 20</option>
+                <option value={25}>Last 25</option>
+                <option value={30}>Last 30</option>
               </select>
               <button
                 className="btn-search"
@@ -239,7 +242,7 @@ export const ConnectionReport = () => {
         data={filteredData}
         columns={columns}
         pagination={true}
-        pageSize={10}
+        pageSize={15}
         emptyState={
           hasSearched ? (
             <EmptyState

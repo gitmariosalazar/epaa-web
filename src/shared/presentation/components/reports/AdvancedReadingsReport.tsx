@@ -206,7 +206,7 @@ export const AdvancedReadingsReport = () => {
         data={filteredData}
         columns={columns}
         pagination={true}
-        pageSize={10}
+        pageSize={15}
         emptyState={
           hasSearched ? (
             <EmptyState
