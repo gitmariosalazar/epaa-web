@@ -8,13 +8,11 @@ import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { ColorChip } from '../chip/ColorChip';
 import { EmptyState } from '../common/EmptyState';
 import { getNoveltyColor } from '../../utils/colors/novelties.colors';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 export const DailyReport = () => {
   const pickerRef = useRef<HTMLInputElement>(null);
-  const [date, setDate] = useState<string>(
-    new Date().toISOString().slice(0, 10)
-    //'2025-01-27'
-  );
+  const [date, setDate] = useState<string>(dateService.getCurrentDateString());
   const [data, setData] = useState<DailyReadingsReport[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);

@@ -7,11 +7,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { ColorChip } from '../chip/ColorChip';
 import { EmptyState } from '../common/EmptyState';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
 
 export const AdvancedReadingsReport = () => {
   const pickerRef = useRef<HTMLInputElement>(null);
   const [month, setMonth] = useState<string>(
-    new Date().toISOString().slice(0, 7)
+    dateService.getCurrentMonthString()
   );
 
   const [data, setData] = useState<AdvancedReportReadings[]>([]);
@@ -187,14 +189,7 @@ export const AdvancedReadingsReport = () => {
                   <td>{row.missingReadings}</td>
                   <td>
                     <ColorChip
-                      color={
-                        row.progressPercentage >= 95
-                          ? 'var(--success)'
-                          : row.progressPercentage < 95 &&
-                              row.progressPercentage > 50
-                            ? 'var(--warning)'
-                            : 'var(--error)'
-                      }
+                      color={getTrafficLightColor(row.progressPercentage)}
                       label={`${row.progressPercentage}%`}
                       size="sm"
                       variant="soft"

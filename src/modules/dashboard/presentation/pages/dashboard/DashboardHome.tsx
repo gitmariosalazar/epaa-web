@@ -20,11 +20,11 @@ import { Calendar } from 'lucide-react';
 import '@/shared/presentation/styles/dashboard.css';
 import { GetAdvancedReportReadingsUseCase } from '@/modules/dashboard/application/usecases/get-advanced-report-readings.usecase';
 import { AdvancedReadingsTable } from '@/shared/presentation/components/dashboard/AdvancedReadingsTable';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 export const DashboardHome = () => {
   const [currentMonth, setCurrentMonth] = useState<string>(
-    new Date().toISOString().slice(0, 7)
-    // '2025-12'
+    dateService.getCurrentMonthString()
   ); // YYYY-MM
   const [loading, setLoading] = useState(false);
 

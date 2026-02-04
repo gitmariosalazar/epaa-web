@@ -20,6 +20,7 @@ import {
   Edit2,
   Lock
 } from 'lucide-react';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 export const ProfilePage = () => {
   const { user: authUser, updateUserSession } = useAuth();
@@ -178,7 +179,7 @@ export const ProfilePage = () => {
             <label>Member Since</label>
             <div className="profile-page__info-value">
               <Calendar size={16} />{' '}
-              {new Date(profile.registeredAt).toLocaleDateString()}
+              {dateService.formatToLocaleString(profile.registeredAt)}
             </div>
           </div>
         </div>
@@ -202,7 +203,7 @@ export const ProfilePage = () => {
             <div className="profile-page__info-value">
               <Calendar size={16} />
               {profile.lastLogin
-                ? new Date(profile.lastLogin).toLocaleString()
+                ? dateService.formatToLocaleString(profile.lastLogin)
                 : 'Last login not available'}
             </div>
           </div>

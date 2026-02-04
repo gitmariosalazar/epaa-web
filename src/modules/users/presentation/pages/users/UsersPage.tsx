@@ -32,6 +32,7 @@ import { GetUserDetailUseCase } from '@/modules/users/application/usecases/GetUs
 import { UserDetailModal } from '@/shared/presentation/components/Users/UserDetailModal';
 import '@/shared/presentation/styles/Users.css';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 export const UsersPage: React.FC = () => {
   const navigate = useNavigate();
@@ -218,7 +219,7 @@ export const UsersPage: React.FC = () => {
       firstName: user.firstName || '',
       lastName: user.lastName || '',
       dateOfBirth: user.dateOfBirth
-        ? new Date(user.dateOfBirth).toISOString().split('T')[0]
+        ? dateService.toISODateString(user.dateOfBirth)
         : '',
       sexId: user.sexId ? user.sexId.toString() : '',
       idCard: user.idCard || '',
@@ -228,11 +229,9 @@ export const UsersPage: React.FC = () => {
       employeeStatusId: user.employeeStatusId
         ? user.employeeStatusId.toString()
         : '',
-      hireDate: user.hireDate
-        ? new Date(user.hireDate).toISOString().split('T')[0]
-        : '',
+      hireDate: user.hireDate ? dateService.toISODateString(user.hireDate) : '',
       terminationDate: user.terminationDate
-        ? new Date(user.terminationDate).toISOString().split('T')[0]
+        ? dateService.toISODateString(user.terminationDate)
         : '',
       baseSalary: user.baseSalary ? user.baseSalary.toString() : '',
       supervisorId: user.supervisorId || '',

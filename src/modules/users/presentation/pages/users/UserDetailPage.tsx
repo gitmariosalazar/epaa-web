@@ -26,6 +26,7 @@ import { GetProfileUseCase } from '@/modules/users/application/usecases/GetProfi
 import { MdAdd, MdDeleteForever, MdLockOpen } from 'react-icons/md';
 import { CheckBox } from '@/shared/presentation/components/Input/CheckBox';
 import '@/shared/presentation/styles/UserDetailPage.css';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 // Mock component for roles table (will be implemented fully later)
 const UserRolesTable = ({ user }: { user: User }) => {
@@ -567,7 +568,7 @@ export const UserDetailPage = () => {
             <label>Registered At</label>
             <div className="profile-page__info-value">
               <Calendar size={16} />{' '}
-              {new Date(user.registeredAt).toLocaleDateString()}
+              {dateService.formatToLocaleString(user.registeredAt)}
             </div>
           </div>
         </div>
@@ -591,7 +592,7 @@ export const UserDetailPage = () => {
             <div className="profile-page__info-value">
               <Calendar size={16} />
               {user.lastLogin
-                ? new Date(user.lastLogin).toLocaleString()
+                ? dateService.formatToLocaleString(user.lastLogin)
                 : 'Last login not available'}
             </div>
           </div>
