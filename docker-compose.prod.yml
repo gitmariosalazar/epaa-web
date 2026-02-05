@@ -24,7 +24,9 @@ services:
       retries: 3
     read_only: true # buena práctica de seguridad
     tmpfs:
-      - /tmp/nginx
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
 
 networks:
   epaa-network:
