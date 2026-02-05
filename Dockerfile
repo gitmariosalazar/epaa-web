@@ -25,6 +25,9 @@ CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 FROM base AS builder
 ENV NODE_ENV=production
 
+ARG VITE_API_URL
+ARG VITE_HTTP_CLIENT
+
 # Copia el resto del código
 COPY . .
 

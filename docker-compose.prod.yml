@@ -3,6 +3,9 @@ services:
     build:
       context: .
       target: production
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+        - VITE_HTTP_CLIENT=${VITE_HTTP_CLIENT}
     container_name: epaa-web-prod
     restart: unless-stopped # mejor que always en algunos casos
     ports:
@@ -10,7 +13,7 @@ services:
     networks:
       - epaa-network
     healthcheck:
-      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost/health']
+      test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1/health']
       interval: 30s
       timeout: 10s
       retries: 3
