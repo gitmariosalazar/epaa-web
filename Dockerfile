@@ -1,59 +1,52 @@
 # ==========================================
-# Stage 1: Base - Install dependencies
+# Stage 1: Base
 # ==========================================
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 WORKDIR /app
 
-# Enable corepack for modern package management if needed (optional)
-# RUN corepack enable
-
-# Copy package files first to leverage Docker cache
+# Copia solo lo necesario para dependencias
 COPY package*.json ./
 
-# Install all dependencies (including devDependencies)
-# We need devDependencies for the build step and for development
-RUN npm ci
+# Usa npm ci (ya lo tienes, perfecto)
+RUN npm ci --omit=dev  # ← cambio opcional: solo prod deps aquí si quieres ahorrar tiempo/caché
+                       # Pero como luego copias todo, está bien dejar npm ci completo
 
 # ==========================================
-# Stage 2: Development - Run dev server
+# Stage 2: Development (sin cambios, está bien)
 # ==========================================
 FROM base AS development
 ENV NODE_ENV=development
-
-# Expose Vite default port
 EXPOSE 5173
-
-# CMD will be overridden by docker-compose, but good default
-CMD ["npm", "run", "dev", "--", "--host"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
 # ==========================================
-# Stage 3: Builder - Build the production bundle
+# Stage 3: Builder
 # ==========================================
 FROM base AS builder
 ENV NODE_ENV=production
 
-# Copy source code
+# Copia el resto del código
 COPY . .
 
-# Run the build script defined in package.json
-RUN npm run build -- --mode production
+# Build (agrega --mode production si no lo tienes en vite.config)
+RUN npm run build
+
+# Opcional: limpia caché de npm para achicar capa
+RUN rm -rf ~/.npm
 
 # ==========================================
-# Stage 4: Production - Serve with Nginx
+# Stage 4: Production
 # ==========================================
 FROM nginx:alpine AS production
 
-# Remove default nginx static assets
+# Limpieza (ya lo tienes)
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy built assets from builder stage
+# Copia build (Vite usa /dist por defecto)
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy custom nginx config
+# Copia config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80
 EXPOSE 80
-
-# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]

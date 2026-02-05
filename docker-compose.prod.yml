@@ -4,13 +4,27 @@ services:
       context: .
       target: production
     container_name: epaa-web-prod
-    restart: always # Auto-restart if crashes
+    restart: unless-stopped # mejor que always en algunos casos
     ports:
-      - '80:80'
-    environment:
-      - NODE_ENV=production
+      - '80:80' # o "8080:80" si 80 está ocupado
     networks:
       - epaa-network
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost'
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    read_only: true # buena práctica de seguridad
+    tmpfs:
+      - /tmp/nginx
 
 networks:
   epaa-network:
