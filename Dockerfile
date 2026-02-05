@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Usa npm ci (ya lo tienes, perfecto)
-RUN npm ci --omit=dev  # ← cambio opcional: solo prod deps aquí si quieres ahorrar tiempo/caché
+RUN npm ci
                        # Pero como luego copias todo, está bien dejar npm ci completo
 
 # ==========================================
