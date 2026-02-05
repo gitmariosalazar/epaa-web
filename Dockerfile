@@ -29,7 +29,7 @@ ENV NODE_ENV=production
 COPY . .
 
 # Build (agrega --mode production si no lo tienes en vite.config)
-RUN npm run build
+RUN npm run build:prod
 
 # Opcional: limpia caché de npm para achicar capa
 RUN rm -rf ~/.npm
