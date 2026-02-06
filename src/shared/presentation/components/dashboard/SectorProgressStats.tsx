@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import type { AdvancedReportReadings } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import './SectorProgressStats.css';
-import { Loader2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Loader2,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown
+} from 'lucide-react';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
+import { useTableSort } from '@/shared/presentation/hooks/useTableSort';
 
 interface SectorProgressStatsProps {
   data: AdvancedReportReadings[];
@@ -19,20 +26,15 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
 
-  if (loading) {
-    return (
-      <div className="p-4 text-center">
-        {t('dashboard.sectorProgress.loading')}
-      </div>
+  const validData = useMemo(() => {
+    return data.filter(
+      (item) =>
+        item.sector > 0 &&
+        item.sector.toString().toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }
+  }, [data, searchTerm]);
 
-  // Filter based on search term (sector number)
-  const validData = data.filter(
-    (item) =>
-      item.sector > 0 &&
-      item.sector.toString().toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const { sortedData, requestSort, sortConfig } = useTableSort(validData);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,8 +45,16 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
     setCurrentPage(1);
   }, [searchTerm]);
 
-  const totalPages = Math.ceil(validData.length / ITEMS_PER_PAGE);
-  const currentData = validData.slice(
+  if (loading) {
+    return (
+      <div className="p-4 text-center">
+        {t('dashboard.sectorProgress.loading')}
+      </div>
+    );
+  }
+
+  const totalPages = Math.ceil(sortedData.length / ITEMS_PER_PAGE);
+  const currentData = sortedData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -57,46 +67,115 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (!value) return;
+
+    // Format: "key-direction"
+    const [key, direction] = value.split('-');
+    requestSort(key, direction as 'asc' | 'desc');
+  };
+
   return (
     <div className="content-card progress-stats-container">
       <div
-        className="card-header flex justify-between items-center"
+        className="card-header"
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem'
         }}
       >
         <h3>{t('dashboard.sectorProgress.title')}</h3>
-        <div style={{ position: 'relative', width: '250px' }}>
-          <Search
-            size={16}
-            style={{
-              position: 'absolute',
-              left: '10px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: '#9ca3af'
-            }}
-          />
-          <input
-            type="text"
-            placeholder={t('dashboard.sectorProgress.searchPlaceholder')}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              padding: '8px 10px 8px 34px',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px',
-              fontSize: '0.9rem',
-              outline: 'none',
-              width: '100%',
-              backgroundColor: 'var(--surface)',
-              color: 'var(--text-main)',
-              transition: 'all 0.2s',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-            }}
-          />
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          {/* Sort Control */}
+          <div style={{ position: 'relative' }}>
+            <ArrowUpDown
+              size={16}
+              style={{
+                position: 'absolute',
+                left: '10px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#9ca3af',
+                pointerEvents: 'none'
+              }}
+            />
+            <select
+              onChange={handleSortChange}
+              value={
+                sortConfig ? `${sortConfig.key}-${sortConfig.direction}` : ''
+              }
+              style={{
+                padding: '8px 10px 8px 34px',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px',
+                fontSize: '0.9rem',
+                outline: 'none',
+                backgroundColor: 'var(--surface)',
+                color: 'var(--text-main)',
+                cursor: 'pointer',
+                appearance: 'none',
+                minWidth: '160px'
+              }}
+            >
+              <option value="" disabled>
+                Sort by...
+              </option>
+              <option value="sector-asc">
+                {t('dashboard.sectorProgress.sort.sectorAsc', 'Sector (Asc)')}
+              </option>
+              <option value="sector-desc">
+                {t('dashboard.sectorProgress.sort.sectorDesc', 'Sector (Desc)')}
+              </option>
+              <option value="progressPercentage-desc">
+                {t(
+                  'dashboard.sectorProgress.sort.progressDesc',
+                  'Progress (High to Low)'
+                )}
+              </option>
+              <option value="progressPercentage-asc">
+                {t(
+                  'dashboard.sectorProgress.sort.progressAsc',
+                  'Progress (Low to High)'
+                )}
+              </option>
+            </select>
+          </div>
+
+          {/* Search Control */}
+          <div style={{ position: 'relative', width: '200px' }}>
+            <Search
+              size={16}
+              style={{
+                position: 'absolute',
+                left: '10px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#9ca3af'
+              }}
+            />
+            <input
+              type="text"
+              placeholder={t('dashboard.sectorProgress.searchPlaceholder')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                padding: '8px 10px 8px 34px',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px',
+                fontSize: '0.9rem',
+                outline: 'none',
+                width: '100%',
+                backgroundColor: 'var(--surface)',
+                color: 'var(--text-main)',
+                transition: 'all 0.2s',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+              }}
+            />
+          </div>
         </div>
       </div>
 

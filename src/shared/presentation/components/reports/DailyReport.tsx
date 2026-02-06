@@ -12,6 +12,22 @@ import { getNoveltyColor } from '../../utils/colors/novelties.colors';
 
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { ReportPreviewModal } from './ReportPreviewModal';
+import type { ExportColumn } from './ReportPreviewModal';
+
+const AVAILABLE_COLUMNS: ExportColumn[] = [
+  { id: 'time', label: 'Date/Time', isDefault: true },
+  { id: 'key', label: 'Cadastral Key', isDefault: true },
+  { id: 'block', label: 'Block', isDefault: true },
+  { id: 'client', label: 'Client', isDefault: true },
+  { id: 'average', label: 'Average Consumption', isDefault: false },
+  { id: 'preview', label: 'Preview Reading', isDefault: false },
+  { id: 'current', label: 'Current Reading', isDefault: false },
+  { id: 'value', label: 'Reading Value', isDefault: true },
+  { id: 'consumption', label: 'Consumption', isDefault: true },
+  { id: 'type', label: 'Measure Type', isDefault: true },
+  { id: 'status', label: 'Status', isDefault: true },
+  { id: 'obs', label: 'Observation', isDefault: true }
+];
 
 export const DailyReport = () => {
   const pickerRef = useRef<HTMLInputElement>(null);
@@ -227,57 +243,76 @@ export const DailyReport = () => {
         onClose={() => setShowPdfPreview(false)}
         dataCount={filteredData.length}
         reportTitle="Daily Readings Report"
-        pdfGenerator={(orientation) => {
-          const rows = filteredData.map((d) => [
-            d.readingTime ? new Date(d.readingTime).toLocaleString() : '-',
-            d.cadastralKey,
-            d.blockNumber || '',
-            d.clientName,
-            d.readingValue.toString(),
-            d.measureType || '',
-            d.status || '',
-            `${d.observation || '-'}`
-          ]);
+        availableColumns={AVAILABLE_COLUMNS}
+        pdfGenerator={(options) => {
+          const { orientation, selectedColumnIds } = options;
+
+          // Filter columns based on selection
+          const selectedCols = AVAILABLE_COLUMNS.filter((col) =>
+            selectedColumnIds.includes(col.id)
+          );
+          const colLabels = selectedCols.map((c) => c.label);
+
+          const rows = filteredData.map((d) => {
+            const rowData: any = {};
+            rowData['time'] = d.readingTime
+              ? new Date(d.readingTime).toLocaleString()
+              : '-';
+            rowData['key'] = d.cadastralKey;
+            rowData['block'] = d.blockNumber || '';
+            rowData['client'] = d.clientName;
+            rowData['average'] = `${d.averageConsumption} m³`;
+            rowData['preview'] = d.previewReading;
+            rowData['current'] = d.currentReading;
+            rowData['value'] = d.readingValue.toString();
+            rowData['consumption'] = `${d.consumption} m³`;
+            rowData['type'] = d.measureType || '';
+            rowData['status'] = d.status || '';
+            rowData['obs'] = `${d.observation || '-'}`;
+
+            // Map to array in correct order
+            return selectedCols.map((col) => rowData[col.id]);
+          });
+
           return exportService.generatePdfBlobUrl({
             rows,
-            columns: [
-              'Date/Time',
-              'Key',
-              'Block',
-              'Client',
-              'Value',
-              'Type',
-              'Status',
-              'Obs'
-            ],
+            columns: colLabels,
             fileName: 'daily_report',
             title: 'Daily Readings Report',
             orientation
           });
         }}
-        onDownload={(orientation) => {
-          const rows = filteredData.map((d) => [
-            d.readingTime ? new Date(d.readingTime).toLocaleString() : '-',
-            d.cadastralKey,
-            d.blockNumber || '',
-            d.clientName,
-            d.readingValue.toString(),
-            d.measureType || '',
-            d.status || '',
-            `${d.observation || '-'}`
-          ]);
+        onDownload={(options) => {
+          const { orientation, selectedColumnIds } = options;
+
+          const selectedCols = AVAILABLE_COLUMNS.filter((col) =>
+            selectedColumnIds.includes(col.id)
+          );
+          const colLabels = selectedCols.map((c) => c.label);
+
+          const rows = filteredData.map((d) => {
+            const rowData: any = {};
+            rowData['time'] = d.readingTime
+              ? new Date(d.readingTime).toLocaleString()
+              : '-';
+            rowData['key'] = d.cadastralKey;
+            rowData['block'] = d.blockNumber || '';
+            rowData['client'] = d.clientName;
+            rowData['average'] = `${d.averageConsumption} m³`;
+            rowData['preview'] = d.previewReading;
+            rowData['current'] = d.currentReading;
+            rowData['value'] = d.readingValue.toString();
+            rowData['consumption'] = `${d.consumption} m³`;
+            rowData['type'] = d.measureType || '';
+            rowData['status'] = d.status || '';
+            rowData['obs'] = `${d.observation || '-'}`;
+
+            return selectedCols.map((col) => rowData[col.id]);
+          });
+
           exportService.exportToPdf({
             rows,
-            columns: [
-              'Date/Time',
-              'Key',
-              'Block',
-              'Client',
-              'Value',
-              'Type',
-              'Status',
-              'Obs'
-            ],
+            columns: colLabels,
             fileName: 'daily_report',
             title: 'Daily Readings Report',
             orientation

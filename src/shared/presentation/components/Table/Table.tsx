@@ -1,6 +1,12 @@
 import React from 'react';
 import '@/shared/presentation/styles/Table.css';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export interface Column<T> {
@@ -8,6 +14,8 @@ export interface Column<T> {
   accessor: keyof T | ((item: T) => React.ReactNode);
   className?: string;
   style?: React.CSSProperties;
+  sortable?: boolean;
+  sortKey?: keyof T;
 }
 
 interface TableProps<T> {
@@ -19,6 +27,8 @@ interface TableProps<T> {
   pagination?: boolean;
   pageSize?: number;
   emptyState?: React.ReactNode;
+  sortConfig?: { key: keyof T | string; direction: 'asc' | 'desc' } | null;
+  onSort?: (key: keyof T | string, direction: 'asc' | 'desc') => void;
 }
 
 export const Table = <T extends { [key: string]: any }>({
@@ -29,7 +39,9 @@ export const Table = <T extends { [key: string]: any }>({
   containerStyle = {},
   pagination = false,
   pageSize = 15,
-  emptyState
+  emptyState,
+  sortConfig,
+  onSort
 }: TableProps<T>) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -44,6 +56,20 @@ export const Table = <T extends { [key: string]: any }>({
     // If we wanted strict "search resets to 1", we'd need a separate prop or callback.
     // For now, "persistence unless undefined" is the requested behavior.
   }, [data, pageSize]);
+
+  const handleSort = (key: keyof T | string) => {
+    if (!onSort) return;
+
+    let direction: 'asc' | 'desc' = 'asc';
+    if (
+      sortConfig &&
+      sortConfig.key === key &&
+      sortConfig.direction === 'asc'
+    ) {
+      direction = 'desc';
+    }
+    onSort(key, direction);
+  };
 
   if (isLoading) {
     return (
@@ -72,11 +98,52 @@ export const Table = <T extends { [key: string]: any }>({
         <table className="table">
           <thead>
             <tr>
-              {columns.map((col, index) => (
-                <th key={index} className={col.className} style={col.style}>
-                  {col.header}
-                </th>
-              ))}
+              {columns.map((col, index) => {
+                const isSortable = col.sortable;
+                const sortKey =
+                  col.sortKey ||
+                  (typeof col.accessor === 'string' ? col.accessor : undefined);
+                const isSorted = sortConfig?.key === sortKey;
+
+                return (
+                  <th
+                    key={index}
+                    className={col.className}
+                    style={{
+                      ...col.style,
+                      cursor: isSortable ? 'pointer' : 'default',
+                      userSelect: 'none'
+                    }}
+                    onClick={() => isSortable && sortKey && handleSort(sortKey)}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      {col.header}
+                      {isSortable && (
+                        <span style={{ display: 'inline-flex' }}>
+                          {isSorted ? (
+                            sortConfig?.direction === 'asc' ? (
+                              <ArrowUp size={14} />
+                            ) : (
+                              <ArrowDown size={14} />
+                            )
+                          ) : (
+                            <ArrowUpDown
+                              size={14}
+                              className="text-gray-400 opacity-50"
+                            />
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>

@@ -95,13 +95,67 @@ export const Header: React.FC = () => {
             <div
               className="header__user-menu-trigger"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '6px 16px 6px 6px', // Extra padding on right for balance
+                borderRadius: '9999px', // Pill shape
+                border: '1px solid var(--border-color)', // Border as requested
+                backgroundColor: 'var(--surface)', // Background
+                cursor: 'pointer',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.02)' // Subtle shadow
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'var(--primary)';
+                e.currentTarget.style.boxShadow =
+                  '0 4px 12px rgba(var(--primary-rgb), 0.15)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border-color)';
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
-              <span className="header__username">{displayName}</span>
               <Avatar name={displayName} size="md" />
-              <ChevronDown
-                size={16}
-                className={`header__chevron ${isMenuOpen ? 'header__chevron--open' : ''}`}
-              />
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  lineHeight: 1.2
+                }}
+              >
+                <span
+                  className="header__username"
+                  style={{ fontWeight: 600, fontSize: '0.875rem' }}
+                >
+                  {displayName}
+                </span>
+                <span
+                  style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}
+                >
+                  {user?.firstName ? 'Admin' : 'User'}
+                </span>
+              </div>
+              <div
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--background)',
+                  marginLeft: '4px'
+                }}
+              >
+                <ChevronDown
+                  size={14}
+                  className={`header__chevron ${isMenuOpen ? 'header__chevron--open' : ''}`}
+                />
+              </div>
             </div>
 
             {isMenuOpen && (

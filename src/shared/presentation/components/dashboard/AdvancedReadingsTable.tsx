@@ -1,10 +1,11 @@
 import type { AdvancedReportReadings } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { Search } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProgressBar } from '@/shared/presentation/components/ProgressBar/ProgressBar';
 import { Table, type Column } from '../Table/Table';
 import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
+import { useTableSort } from '@/shared/presentation/hooks/useTableSort';
 
 interface AdvancedReadingsTableProps {
   data: AdvancedReportReadings[];
@@ -17,6 +18,12 @@ export const AdvancedReadingsTable = ({
 }: AdvancedReadingsTableProps) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredData = useMemo(() => {
+    return data.filter((item) => item.sector.toString().includes(searchTerm));
+  }, [data, searchTerm]);
+
+  const { sortedData, sortConfig, requestSort } = useTableSort(filteredData);
 
   if (loading)
     return (
@@ -31,16 +38,14 @@ export const AdvancedReadingsTable = ({
       </div>
     );
 
-  const filteredData = data.filter((item) =>
-    item.sector.toString().includes(searchTerm)
-  );
-
   const columns: Column<AdvancedReportReadings>[] = [
     {
       header: t('dashboard.advancedReadings.columns.sector'),
       accessor: (row) => (
         <span className="font-medium text-blue">{row.sector}</span>
-      )
+      ),
+      sortable: true,
+      sortKey: 'sector'
     },
     {
       header: t('dashboard.advancedReadings.columns.totalConnections'),
@@ -48,7 +53,9 @@ export const AdvancedReadingsTable = ({
         <span className="font-medium text-gray-900">
           {row.totalConnections}
         </span>
-      )
+      ),
+      sortable: true,
+      sortKey: 'totalConnections'
     },
     {
       header: t('dashboard.advancedReadings.columns.readingsCompleted'),
@@ -56,13 +63,17 @@ export const AdvancedReadingsTable = ({
         <span className="font-medium text-gray-900">
           {row.readingsCompleted}
         </span>
-      )
+      ),
+      sortable: true,
+      sortKey: 'readingsCompleted'
     },
     {
       header: t('dashboard.advancedReadings.columns.missingReadings'),
       accessor: (row) => (
         <span className="font-medium text-gray-900">{row.missingReadings}</span>
-      )
+      ),
+      sortable: true,
+      sortKey: 'missingReadings'
     },
     {
       header: t('dashboard.advancedReadings.columns.progress'),
@@ -73,7 +84,9 @@ export const AdvancedReadingsTable = ({
           height="8px"
         />
       ),
-      className: 'w-48' // Give it some width
+      className: 'w-48', // Give it some width
+      sortable: true,
+      sortKey: 'progressPercentage'
     }
   ];
 
@@ -126,10 +139,12 @@ export const AdvancedReadingsTable = ({
         </div>
       </div>
       <Table
-        data={filteredData}
+        data={sortedData}
         columns={columns}
         pagination={true}
         pageSize={15}
+        sortConfig={sortConfig}
+        onSort={requestSort}
         containerStyle={{
           flex: 1, // Grow to fill remaining space
           maxHeight: 'none', // Override sticky limitation if needed or keep standard

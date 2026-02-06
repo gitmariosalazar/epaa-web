@@ -296,3 +296,61 @@
 .preview-loading .text-accent {
   color: var(--accent);
 }
+
+/* Column Selection Styles */
+.control-section {
+  margin-bottom: 2rem;
+}
+
+.columns-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.column-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent; /* Prevent jump on hover */
+}
+
+.column-option:hover {
+  background-color: var(--bg-hover);
+}
+
+.column-option.selected {
+  background-color: var(--surface-hover);
+}
+
+.checkbox-custom {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--surface);
+  transition: all 0.2s;
+  color: white; /* Check icon color */
+}
+
+.column-option:hover .checkbox-custom {
+  border-color: var(--text-muted);
+}
+
+.column-option.selected .checkbox-custom {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.column-label {
+  font-size: 0.9rem;
+  color: var(--text-main);
+  user-select: none;
+}

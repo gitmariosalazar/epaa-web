@@ -2,13 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { X, Check, Download, Loader2 } from 'lucide-react';
 import './ReportPreviewModal.css';
 
+export interface ExportColumn {
+  id: string;
+  label: string;
+  isDefault?: boolean;
+}
+
+interface ReportPreviewModalOptions {
+  orientation: 'portrait' | 'landscape';
+  selectedColumnIds: string[];
+}
+
 interface ReportPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onDownload: (orientation: 'portrait' | 'landscape') => void;
+  onDownload: (options: ReportPreviewModalOptions) => void;
   dataCount: number;
   reportTitle: string;
-  pdfGenerator?: (orientation: 'portrait' | 'landscape') => string;
+  pdfGenerator?: (options: ReportPreviewModalOptions) => string;
+  availableColumns: ExportColumn[];
 }
 
 export const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
@@ -17,26 +29,57 @@ export const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
   onDownload,
   dataCount,
   reportTitle,
-  pdfGenerator
+  pdfGenerator,
+  availableColumns
 }) => {
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>(
     'portrait'
   );
+  const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
 
+  // Initialize selected columns
   useEffect(() => {
-    if (isOpen && pdfGenerator) {
+    if (isOpen && availableColumns.length > 0) {
+      // If no selection yet (first open), select defaults or all
+      if (selectedColumnIds.length === 0) {
+        const defaults = availableColumns
+          .filter((c) => c.isDefault !== false)
+          .map((c) => c.id);
+        setSelectedColumnIds(defaults);
+      }
+    }
+  }, [isOpen, availableColumns]);
+
+  useEffect(() => {
+    if (isOpen && pdfGenerator && selectedColumnIds.length > 0) {
       setLoadingPreview(true);
       // Small timeout to allow UI to render before heavy PDF generation
       const timer = setTimeout(() => {
-        const url = pdfGenerator(orientation);
+        const url = pdfGenerator({ orientation, selectedColumnIds });
         setPreviewUrl(url);
         setLoadingPreview(false);
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, orientation, pdfGenerator]);
+  }, [isOpen, orientation, pdfGenerator, selectedColumnIds]);
+
+  const toggleColumn = (id: string) => {
+    setSelectedColumnIds((prev) => {
+      if (prev.includes(id)) {
+        // Don't allow unchecking the last column
+        if (prev.length <= 1) return prev;
+        return prev.filter((colId) => colId !== id);
+      } else {
+        // maintain order based on availableColumns
+        const newSelection = [...prev, id];
+        return availableColumns
+          .filter((c) => newSelection.includes(c.id))
+          .map((c) => c.id);
+      }
+    });
+  };
 
   if (!isOpen) return null;
 
@@ -57,8 +100,8 @@ export const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
               <strong>{dataCount}</strong> rows.
             </p>
 
-            <div className="orientation-selection">
-              <h4 className="section-title">Select Orientation</h4>
+            <div className="control-section">
+              <h4 className="section-title">Orientation</h4>
               <div className="orientation-options vertical">
                 <div
                   className={`orientation-card ${
@@ -94,11 +137,28 @@ export const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
                   </div>
                 </div>
               </div>
-              <p className="orientation-hint">
-                {orientation === 'landscape'
-                  ? 'Best for many columns.'
-                  : 'Best for standard docs.'}
-              </p>
+            </div>
+
+            <div className="control-section">
+              <h4 className="section-title">Columns</h4>
+              <div className="columns-list">
+                {availableColumns.map((col) => (
+                  <div
+                    key={col.id}
+                    className={`column-option ${
+                      selectedColumnIds.includes(col.id) ? 'selected' : ''
+                    }`}
+                    onClick={() => toggleColumn(col.id)}
+                  >
+                    <div className="checkbox-custom">
+                      {selectedColumnIds.includes(col.id) && (
+                        <Check size={12} />
+                      )}
+                    </div>
+                    <span className="column-label">{col.label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -126,7 +186,7 @@ export const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
           </button>
           <button
             className="btn-primary"
-            onClick={() => onDownload(orientation)}
+            onClick={() => onDownload({ orientation, selectedColumnIds })}
           >
             <Download size={18} style={{ marginRight: '8px' }} />
             Download PDF

@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 import type { DailyStatsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
+import { useTableSort } from '@/shared/presentation/hooks/useTableSort';
 
 interface DailyStatsProps {
   data: DailyStatsReport[];
@@ -14,16 +15,20 @@ interface DailyStatsProps {
 export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
   const [searchTerm, setSearchTerm] = useState('');
 
+  const filteredData = useMemo(() => {
+    return data.filter(
+      (row) =>
+        row.date.includes(searchTerm) ||
+        row.uniqueSectors.toString().includes(searchTerm)
+    );
+  }, [data, searchTerm]);
+
+  const { sortedData, sortConfig, requestSort } = useTableSort(filteredData);
+
   if (loading)
     return <div className="text-gray-500">Loading daily stats...</div>;
   if (!data.length)
     return <div className="text-gray-500">No daily data available.</div>;
-
-  const filteredData = data.filter(
-    (row) =>
-      row.date.includes(searchTerm) ||
-      row.uniqueSectors.toString().includes(searchTerm)
-  );
 
   const columns: Column<DailyStatsReport>[] = [
     {
@@ -36,23 +41,33 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
             year: 'numeric'
           })}
         </span>
-      )
+      ),
+      sortable: true,
+      sortKey: 'date'
     },
     {
       header: 'Readings',
-      accessor: 'readingsCount'
+      accessor: 'readingsCount',
+      sortable: true,
+      sortKey: 'readingsCount'
     },
     {
       header: 'Avg Value',
-      accessor: (row) => `$${Number(row.averageReadingValue).toFixed(2)}`
+      accessor: (row) => `$${Number(row.averageReadingValue).toFixed(2)}`,
+      sortable: true,
+      sortKey: 'averageReadingValue'
     },
     {
       header: 'Consumption (Avg)',
-      accessor: (row) => `${Number(row.averageConsumption).toFixed(2)} m³`
+      accessor: (row) => `${Number(row.averageConsumption).toFixed(2)} m³`,
+      sortable: true,
+      sortKey: 'averageConsumption'
     },
     {
       header: 'Sectors',
-      accessor: 'uniqueSectors'
+      accessor: 'uniqueSectors',
+      sortable: true,
+      sortKey: 'uniqueSectors'
     }
   ];
 
@@ -105,10 +120,12 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
         </div>
       </div>
       <Table
-        data={filteredData}
+        data={sortedData}
         columns={columns}
         pagination={true}
         pageSize={15}
+        sortConfig={sortConfig}
+        onSort={requestSort}
         containerStyle={{
           flex: 1, // Grow to fill remaining space
           maxHeight: 'none', // Override sticky limitation if needed or keep standard
