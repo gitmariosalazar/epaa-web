@@ -209,11 +209,8 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
                         <div
                           className="progress-percentage"
                           style={{
-                            background: `linear-gradient(135deg, ${progressColor} 0%, ${progressColor} 100%)`,
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
-                            color: progressColor // Fallback
+                            color: progressColor,
+                            textShadow: `0 0 10px ${progressColor}40`
                           }}
                         >
                           {percentage}%

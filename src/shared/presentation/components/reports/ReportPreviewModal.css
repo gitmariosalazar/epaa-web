@@ -1,0 +1,298 @@
+/* Large Modal for Preview */
+.modal-content.large {
+  max-width: 900px;
+  height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-body-preview-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  height: 100%;
+}
+
+.sidebar-controls {
+  width: 300px;
+  padding: 1.5rem;
+  border-right: 1px solid var(--border-color);
+  background-color: var(--surface);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-container {
+  flex: 1;
+  background-color: #525659; /* Standard PDF viewer background color */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.pdf-preview-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.preview-loading,
+.preview-placeholder {
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.orientation-options.vertical {
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: none;
+}
+
+/* Maintain existing styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: var(--surface);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideIn 0.3s ease-out;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.modal-header {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--surface);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background-color: var(--surface-hover);
+  color: var(--text-main);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-description {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.modal-description strong {
+  color: var(--text-main);
+}
+
+.section-title {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.orientation-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.orientation-card {
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  background-color: var(--background); /* Was bg-card, changed to background */
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.orientation-card:hover {
+  border-color: var(--accent); /* Was primary-color-light */
+  background-color: var(--surface-hover);
+}
+
+.orientation-card.selected {
+  border-color: var(--accent);
+  background-color: var(--surface-hover); /* Safe for both modes */
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); /* Using blue accent RGBA manually for now as var is hex */
+}
+
+/* Fallback selected style removed/merged */
+
+.preview-icon {
+  width: 40px;
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  position: relative;
+  border-radius: 4px;
+}
+
+.preview-icon.portrait {
+  height: 56px;
+}
+
+.preview-icon.landscape {
+  height: 28px;
+  width: 56px;
+  margin: 14px 0;
+}
+
+.preview-lines {
+  position: absolute;
+  top: 8px;
+  left: 6px;
+  right: 6px;
+  height: 4px;
+  background-color: var(--text-muted);
+  border-radius: 2px;
+  box-shadow:
+    0 8px 0 var(--text-muted),
+    0 16px 0 var(--text-muted);
+}
+
+.preview-icon.landscape .preview-lines {
+  box-shadow: 0 8px 0 var(--text-muted);
+}
+
+.option-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.check-icon {
+  color: var(--accent);
+}
+
+.orientation-hint {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-align: center;
+  min-height: 1.25em;
+}
+
+.modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  background-color: var(--background); /* Was bg-subtle */
+  z-index: 10;
+}
+
+.btn-secondary {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  color: var(--text-main);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-hover);
+}
+
+.btn-primary {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  border: none;
+  background: #2980b9; /* Professional Blue */
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 6px -1px rgba(41, 128, 185, 0.3);
+}
+
+.btn-primary:hover {
+  background: #21618c;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px -1px rgba(41, 128, 185, 0.4);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.preview-loading .text-accent {
+  color: var(--accent);
+}

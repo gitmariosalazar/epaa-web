@@ -34,10 +34,16 @@ export const Table = <T extends { [key: string]: any }>({
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = React.useState(1);
 
-  // Reset page when data changes (filter applied)
+  // Adjust page when data changes (e.g. new search or data refresh)
   React.useEffect(() => {
-    setCurrentPage(1);
-  }, [data]);
+    const totalPages = Math.ceil(data.length / pageSize);
+    // Only reset if current page is out of bounds
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+    // If we wanted strict "search resets to 1", we'd need a separate prop or callback.
+    // For now, "persistence unless undefined" is the requested behavior.
+  }, [data, pageSize]);
 
   if (isLoading) {
     return (

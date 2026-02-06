@@ -4,9 +4,11 @@ export interface ReportOptions {
   columns: string[];
   rows: string[][];
   clientInfo?: Record<string, string>;
+  orientation?: 'portrait' | 'landscape';
 }
 
 export interface IExportService {
   exportToPdf(options: ReportOptions): void;
   exportToExcel<T>(data: T[], fileName: string): void;
+  generatePdfBlobUrl(options: ReportOptions): string;
 }

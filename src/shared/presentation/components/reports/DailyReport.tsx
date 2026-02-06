@@ -9,7 +9,9 @@ import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { ColorChip } from '../chip/ColorChip';
 import { EmptyState } from '../common/EmptyState';
 import { getNoveltyColor } from '../../utils/colors/novelties.colors';
+
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import { ReportPreviewModal } from './ReportPreviewModal';
 
 export const DailyReport = () => {
   const pickerRef = useRef<HTMLInputElement>(null);
@@ -17,7 +19,9 @@ export const DailyReport = () => {
   const [data, setData] = useState<DailyReadingsReport[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+
   const [resultSearchTerm, setResultSearchTerm] = useState('');
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
 
   const repository = useMemo(() => new HttpReportDashboardRepository(), []);
   const exportService = useMemo(() => new ExportService(), []);
@@ -179,43 +183,7 @@ export const DailyReport = () => {
               <div className="toolbar-controls">
                 <button
                   className="btn-icon-text"
-                  onClick={() => {
-                    const filtered = data.filter(
-                      (row) =>
-                        (row.clientName || '')
-                          .toLowerCase()
-                          .includes(resultSearchTerm.toLowerCase()) ||
-                        (row.cadastralKey || '')
-                          .toLowerCase()
-                          .includes(resultSearchTerm.toLowerCase()) ||
-                        row.readingValue.toString().includes(resultSearchTerm)
-                    );
-                    const rows = filtered.map((d) => [
-                      new Date(d.readingTime).toLocaleString(),
-                      d.cadastralKey,
-                      d.blockNumber || '',
-                      d.clientName,
-                      d.readingValue.toString(),
-                      d.measureType || '',
-                      d.status || '',
-                      `${d.observation || '-'}`
-                    ]);
-                    exportService.exportToPdf({
-                      rows,
-                      columns: [
-                        'Date/Time',
-                        'Key',
-                        'Block',
-                        'Client',
-                        'Value',
-                        'Type',
-                        'Status',
-                        'Obs'
-                      ],
-                      fileName: 'daily_report',
-                      title: 'Daily Readings Report'
-                    });
-                  }}
+                  onClick={() => setShowPdfPreview(true)}
                 >
                   {ColoredIcons.Pdf}
                   <span className="btn-text">PDF</span>
@@ -223,17 +191,7 @@ export const DailyReport = () => {
                 <button
                   className="btn-icon-text"
                   onClick={() => {
-                    const filtered = data.filter(
-                      (row) =>
-                        (row.clientName || '')
-                          .toLowerCase()
-                          .includes(resultSearchTerm.toLowerCase()) ||
-                        (row.cadastralKey || '')
-                          .toLowerCase()
-                          .includes(resultSearchTerm.toLowerCase()) ||
-                        row.readingValue.toString().includes(resultSearchTerm)
-                    );
-                    exportService.exportToExcel(filtered, 'daily_report');
+                    exportService.exportToExcel(filteredData, 'daily_report');
                   }}
                 >
                   {ColoredIcons.Excel}
@@ -263,6 +221,69 @@ export const DailyReport = () => {
             />
           )
         }
+      />
+      <ReportPreviewModal
+        isOpen={showPdfPreview}
+        onClose={() => setShowPdfPreview(false)}
+        dataCount={filteredData.length}
+        reportTitle="Daily Readings Report"
+        pdfGenerator={(orientation) => {
+          const rows = filteredData.map((d) => [
+            d.readingTime ? new Date(d.readingTime).toLocaleString() : '-',
+            d.cadastralKey,
+            d.blockNumber || '',
+            d.clientName,
+            d.readingValue.toString(),
+            d.measureType || '',
+            d.status || '',
+            `${d.observation || '-'}`
+          ]);
+          return exportService.generatePdfBlobUrl({
+            rows,
+            columns: [
+              'Date/Time',
+              'Key',
+              'Block',
+              'Client',
+              'Value',
+              'Type',
+              'Status',
+              'Obs'
+            ],
+            fileName: 'daily_report',
+            title: 'Daily Readings Report',
+            orientation
+          });
+        }}
+        onDownload={(orientation) => {
+          const rows = filteredData.map((d) => [
+            d.readingTime ? new Date(d.readingTime).toLocaleString() : '-',
+            d.cadastralKey,
+            d.blockNumber || '',
+            d.clientName,
+            d.readingValue.toString(),
+            d.measureType || '',
+            d.status || '',
+            `${d.observation || '-'}`
+          ]);
+          exportService.exportToPdf({
+            rows,
+            columns: [
+              'Date/Time',
+              'Key',
+              'Block',
+              'Client',
+              'Value',
+              'Type',
+              'Status',
+              'Obs'
+            ],
+            fileName: 'daily_report',
+            title: 'Daily Readings Report',
+            orientation
+          });
+          setShowPdfPreview(false);
+        }}
       />
     </div>
   );
