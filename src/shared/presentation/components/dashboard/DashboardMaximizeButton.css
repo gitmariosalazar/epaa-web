@@ -1,0 +1,57 @@
+/* DashboardMaximizeButton.css */
+
+.dashboard-maximize-btn {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
+  z-index: 50;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Visual Styles */
+  background-color: var(--surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  transition: all 0.2s ease;
+}
+
+.dashboard-maximize-btn:hover {
+  background-color: var(--primary);
+  color: #ffffff;
+  transform: scale(1.1);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+.dashboard-maximize-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.dashboard-maximize-btn.hidden {
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Dark Mode Overrides */
+.dark .dashboard-maximize-btn {
+  background-color: #0f172a;
+  border-color: #1e293b;
+  color: #94a3b8;
+}
+
+.dark .dashboard-maximize-btn:hover {
+  background-color: #334155;
+  color: #f8fafc;
+  border-color: #64748b;
+}

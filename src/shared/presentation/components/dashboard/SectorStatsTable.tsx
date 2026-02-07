@@ -1,12 +1,11 @@
-import { useState, useMemo } from 'react';
-import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Search } from 'lucide-react';
 import type { SectorStatsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
-import { useTableSort } from '@/shared/presentation/hooks/useTableSort';
+import { useSectorStatsTable } from '@/shared/presentation/hooks/dashboard/useSectorStatsTable';
 
 interface SectorStatsProps {
   data: SectorStatsReport[];
@@ -15,15 +14,14 @@ interface SectorStatsProps {
 
 export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
   const { t } = useTranslation();
-  const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredData = useMemo(() => {
-    return data.filter((row) =>
-      row.sector.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [data, searchTerm]);
-
-  const { sortedData, sortConfig, requestSort } = useTableSort(filteredData);
+  const {
+    searchTerm,
+    sortedData,
+    sortConfig,
+    requestSort,
+    handleSearchChange
+  } = useSectorStatsTable({ data });
 
   if (loading)
     return (
@@ -106,7 +104,7 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
             type="text"
             placeholder={t('dashboard.sectorStats.searchPlaceholder')}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
             style={{
               padding: '4px 8px 4px 26px',
               border: '1px solid var(--border-color)',

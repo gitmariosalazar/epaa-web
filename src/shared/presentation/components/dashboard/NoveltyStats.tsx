@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import {
   PieChart,
   Pie,
@@ -10,8 +10,8 @@ import {
 import { Loader2 } from 'lucide-react';
 import type { NoveltyStatsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { getNoveltyColor } from '../../utils/colors/novelties.colors';
 import './NoveltyStats.css';
+import { useNoveltyStats } from '@/shared/presentation/hooks/dashboard/useNoveltyStats';
 
 interface NoveltyStatsProps {
   data: NoveltyStatsReport[];
@@ -52,34 +52,15 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
   data,
   loading
 }) => {
-  const [activeIndex, setActiveIndex] = useState<number>(-1);
-
-  const onPieEnter = (_: any, index: number) => {
-    setActiveIndex(index);
-  };
-
-  const onPieLeave = () => {
-    setActiveIndex(-1);
-  };
-
-  const chartData = useMemo(() => {
-    return data.map((item) => {
-      const noveltyName = item.novelty || 'Unknown';
-      const color = getNoveltyColor(noveltyName);
-
-      return {
-        name: noveltyName,
-        value: item.count,
-        color: color,
-        average: Number(item.averageConsumption).toFixed(1)
-      };
-    });
-  }, [data]);
-
-  const total = useMemo(
-    () => chartData.reduce((acc, cur) => acc + cur.value, 0),
-    [chartData]
-  );
+  const {
+    activeIndex,
+    setActiveIndex,
+    onPieEnter,
+    onPieLeave,
+    chartData,
+    total,
+    activeItem
+  } = useNoveltyStats({ data });
 
   if (loading) {
     return (
@@ -100,8 +81,6 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
       />
     );
   }
-
-  const activeItem = activeIndex >= 0 ? chartData[activeIndex] : null;
 
   return (
     <div

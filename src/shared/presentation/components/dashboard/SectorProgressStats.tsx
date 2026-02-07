@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import type { AdvancedReportReadings } from '@/modules/dashboard/domain/models/report-dashboard.model';
@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
-import { useTableSort } from '@/shared/presentation/hooks/useTableSort';
+import { useSectorProgressStats } from '@/shared/presentation/hooks/dashboard/useSectorProgressStats';
 
 interface SectorProgressStatsProps {
   data: AdvancedReportReadings[];
@@ -24,26 +24,18 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
   loading
 }) => {
   const { t } = useTranslation();
-  const [searchTerm, setSearchTerm] = useState('');
 
-  const validData = useMemo(() => {
-    return data.filter(
-      (item) =>
-        item.sector > 0 &&
-        item.sector.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [data, searchTerm]);
-
-  const { sortedData, requestSort, sortConfig } = useTableSort(validData);
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
-
-  // Reset page when search changes
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
+  const {
+    searchTerm,
+    currentPage,
+    totalPages,
+    currentData,
+    sortConfig,
+    handleSearchChange,
+    handleSortChange,
+    goToNextPage,
+    goToPrevPage
+  } = useSectorProgressStats({ data });
 
   if (loading) {
     return (
@@ -52,29 +44,6 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
       </div>
     );
   }
-
-  const totalPages = Math.ceil(sortedData.length / ITEMS_PER_PAGE);
-  const currentData = sortedData.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
-  const handlePrevPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1));
-  };
-
-  const handleNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-  };
-
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    if (!value) return;
-
-    // Format: "key-direction"
-    const [key, direction] = value.split('-');
-    requestSort(key, direction as 'asc' | 'desc');
-  };
 
   return (
     <div className="content-card progress-stats-container">
@@ -122,7 +91,7 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
               type="text"
               placeholder={t('dashboard.sectorProgress.searchPlaceholder')}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
               className="sector-search-input"
             />
           </div>
@@ -130,7 +99,7 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
       </div>
 
       <div className="sector-progress-grid-wrapper">
-        {validData.length === 0 ? (
+        {currentData.length === 0 ? (
           <EmptyState
             message={t('dashboard.sectorProgress.emptyTitle')}
             description={t('dashboard.sectorProgress.emptyDescription')}
@@ -280,7 +249,7 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
             {totalPages > 1 && (
               <div className="sector-pagination">
                 <button
-                  onClick={handlePrevPage}
+                  onClick={goToPrevPage}
                   disabled={currentPage === 1}
                   className="pagination-btn"
                 >
@@ -293,7 +262,7 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
                   }) || `Page ${currentPage} of ${totalPages}`}
                 </span>
                 <button
-                  onClick={handleNextPage}
+                  onClick={goToNextPage}
                   disabled={currentPage === totalPages}
                   className="pagination-btn"
                 >

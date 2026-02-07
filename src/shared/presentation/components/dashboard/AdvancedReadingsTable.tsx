@@ -1,11 +1,10 @@
 import type { AdvancedReportReadings } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { Search } from 'lucide-react';
-import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProgressBar } from '@/shared/presentation/components/ProgressBar/ProgressBar';
 import { Table, type Column } from '../Table/Table';
 import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
-import { useTableSort } from '@/shared/presentation/hooks/useTableSort';
+import { useAdvancedReadingsTable } from '@/shared/presentation/hooks/dashboard/useAdvancedReadingsTable';
 
 interface AdvancedReadingsTableProps {
   data: AdvancedReportReadings[];
@@ -17,13 +16,14 @@ export const AdvancedReadingsTable = ({
   loading
 }: AdvancedReadingsTableProps) => {
   const { t } = useTranslation();
-  const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredData = useMemo(() => {
-    return data.filter((item) => item.sector.toString().includes(searchTerm));
-  }, [data, searchTerm]);
-
-  const { sortedData, sortConfig, requestSort } = useTableSort(filteredData);
+  const {
+    searchTerm,
+    sortedData,
+    sortConfig,
+    requestSort,
+    handleSearchChange
+  } = useAdvancedReadingsTable({ data });
 
   if (loading)
     return (
@@ -128,7 +128,7 @@ export const AdvancedReadingsTable = ({
             type="text"
             placeholder={t('dashboard.advancedReadings.searchPlaceholder')}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
             style={{
               padding: '6px 8px 6px 30px',
               border: '1px solid var(--border-color)',

@@ -1,11 +1,10 @@
-import { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 import type { DailyStatsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
-import { useTableSort } from '@/shared/presentation/hooks/useTableSort';
+import { useDailyStatsTable } from '@/shared/presentation/hooks/dashboard/useDailyStatsTable';
 
 interface DailyStatsProps {
   data: DailyStatsReport[];
@@ -13,17 +12,13 @@ interface DailyStatsProps {
 }
 
 export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredData = useMemo(() => {
-    return data.filter(
-      (row) =>
-        row.date.includes(searchTerm) ||
-        row.uniqueSectors.toString().includes(searchTerm)
-    );
-  }, [data, searchTerm]);
-
-  const { sortedData, sortConfig, requestSort } = useTableSort(filteredData);
+  const {
+    searchTerm,
+    sortedData,
+    sortConfig,
+    requestSort,
+    handleSearchChange
+  } = useDailyStatsTable({ data });
 
   if (loading)
     return (
@@ -113,7 +108,7 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
             type="text"
             placeholder="Search date..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
             style={{
               padding: '6px 8px 6px 30px',
               border: '1px solid var(--border-color)',

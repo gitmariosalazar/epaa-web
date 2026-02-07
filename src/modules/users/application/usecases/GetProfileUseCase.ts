@@ -12,9 +12,7 @@ export class GetProfileUseCase {
     if (!usernameOrEmail) {
       throw new Error('Username or email is required');
     }
-    console.log(usernameOrEmail);
     const user = await this.userRepository.getProfile(usernameOrEmail);
-    console.log(user);
     return user;
   }
 }
