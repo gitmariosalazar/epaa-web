@@ -27,13 +27,13 @@ export const AdvancedReadingsTable = ({
 
   if (loading)
     return (
-      <div className="text-gray-500">
+      <div style={{ color: 'var(--text-secondary)' }}>
         {t('dashboard.advancedReadings.loading')}
       </div>
     );
   if (!data.length)
     return (
-      <div className="text-gray-500">
+      <div style={{ color: 'var(--text-secondary)' }}>
         {t('dashboard.advancedReadings.empty')}
       </div>
     );
@@ -42,7 +42,9 @@ export const AdvancedReadingsTable = ({
     {
       header: t('dashboard.advancedReadings.columns.sector'),
       accessor: (row) => (
-        <span className="font-medium text-blue">{row.sector}</span>
+        <span className="font-medium" style={{ color: 'var(--primary)' }}>
+          {row.sector}
+        </span>
       ),
       sortable: true,
       sortKey: 'sector'
@@ -50,7 +52,7 @@ export const AdvancedReadingsTable = ({
     {
       header: t('dashboard.advancedReadings.columns.totalConnections'),
       accessor: (row) => (
-        <span className="font-medium text-gray-900">
+        <span className="font-medium" style={{ color: 'var(--text-main)' }}>
           {row.totalConnections}
         </span>
       ),
@@ -60,7 +62,7 @@ export const AdvancedReadingsTable = ({
     {
       header: t('dashboard.advancedReadings.columns.readingsCompleted'),
       accessor: (row) => (
-        <span className="font-medium text-gray-900">
+        <span className="font-medium" style={{ color: 'var(--text-main)' }}>
           {row.readingsCompleted}
         </span>
       ),
@@ -70,7 +72,9 @@ export const AdvancedReadingsTable = ({
     {
       header: t('dashboard.advancedReadings.columns.missingReadings'),
       accessor: (row) => (
-        <span className="font-medium text-gray-900">{row.missingReadings}</span>
+        <span className="font-medium" style={{ color: 'var(--text-main)' }}>
+          {row.missingReadings}
+        </span>
       ),
       sortable: true,
       sortKey: 'missingReadings'
@@ -117,7 +121,7 @@ export const AdvancedReadingsTable = ({
               left: '8px',
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#9ca3af'
+              color: 'var(--text-secondary)'
             }}
           />
           <input

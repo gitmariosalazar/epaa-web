@@ -1,0 +1,221 @@
+/* DashboardFocusOverlay.css */
+
+/* Focus Overlay Backdrop */
+.dashboard-focus-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  background-color: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fullscreen Content Container */
+.dashboard-fullscreen-overlay {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: var(--surface); /* Critical for theme */
+  color: var(--text-main);
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Content Area */
+.dashboard-overlay-content-wrapper {
+  flex: 1;
+  overflow: auto;
+  padding: 4.5rem 2rem 2rem; /* Increased to clear floating controls */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--surface);
+}
+
+.dashboard-overlay-inner-content {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  color: var(--text-main);
+}
+
+/* Fullscreen Overrides for Sector Progress Stats (Generic) */
+.dashboard-fullscreen-overlay .sector-progress-grid-wrapper {
+  flex: 1;
+  padding: 0.5rem 0 0 0; /* Minimal top padding to align with header flow */
+}
+
+/* 
+ * ==========================================
+ * Global Stats Fullscreen Overrides 
+ * ==========================================
+ * These styles are specific to the GlobalStats component when rendered inside the overlay.
+ */
+
+.dashboard-fullscreen-overlay .stats-grid {
+  height: 100%;
+  display: flex !important; /* Override grid layout */
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 1rem 0; /* Minimal vertical padding, centering handles rest */
+  box-sizing: border-box;
+  max-width: 1600px;
+  margin: 0 auto;
+  overflow-y: auto; /* Allow scrolling if content overflows vertically on small screens */
+}
+
+.dashboard-fullscreen-overlay .stat-card {
+  width: 100%;
+  max-width: 450px; /* Increased width to prevent text wrapping */
+  min-height: 160px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.5rem;
+  background-color: var(--surface);
+  border: 1px solid var(--border-color); /* Ensure border visibility */
+  border-radius: 12px;
+}
+
+/* Typography Scaling */
+.dashboard-fullscreen-overlay .stat-content h3 {
+  font-size: clamp(
+    1.5rem,
+    4vw,
+    2.25rem
+  ) !important; /* Responsive font scaling */
+  margin: 0;
+  white-space: nowrap; /* Prevent value wrapping */
+}
+
+.dashboard-fullscreen-overlay .stat-content .stat-title {
+  font-size: clamp(0.9rem, 2vw, 1.1rem) !important;
+}
+
+.dashboard-fullscreen-overlay .stat-icon-wrapper {
+  padding: 1.25rem !important;
+  transform: scale(1.3);
+}
+
+.dashboard-fullscreen-overlay .stat-content .stat-desc {
+  font-size: 0.9rem !important;
+  opacity: 0.8;
+}
+
+/* Responsive Breakpoints for Overlay */
+@media (max-width: 768px) {
+  .dashboard-fullscreen-overlay .stats-grid {
+    padding-top: 5rem; /* Reduce top padding on mobile */
+    gap: 1rem;
+    align-items: flex-start; /* Align closer to top on mobile scroll */
+  }
+
+  .dashboard-fullscreen-overlay .stat-card {
+    padding: 1rem;
+    min-height: auto;
+    max-width: 100%; /* Full width on mobile */
+  }
+
+  .dashboard-fullscreen-overlay .stat-icon-wrapper {
+    transform: scale(1); /* Reset scale */
+    padding: 0.75rem !important;
+  }
+}
+
+/* =========================================
+ * Presentation Mode Animations (PowerPoint Style)
+ * ========================================= */
+
+/* 1. Slide Up & Fade */
+@keyframes pptSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+.anim-ppt-slide-up {
+  animation: pptSlideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* 2. Slide Left (Enter from Right) */
+@keyframes pptSlideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.anim-ppt-slide-left {
+  animation: pptSlideLeft 0.7s cubic-bezier(0.21, 1.02, 0.7, 1) forwards;
+}
+
+/* 3. Zoom Out Fade (Scale Down from big) */
+@keyframes pptZoomOut {
+  from {
+    opacity: 0;
+    transform: scale(1.1);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+.anim-ppt-zoom-out {
+  animation: pptZoomOut 0.9s ease-out forwards;
+}
+
+/* 4. Blur Reveal */
+@keyframes pptBlurReveal {
+  from {
+    opacity: 0;
+    filter: blur(12px);
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+.anim-ppt-blur {
+  animation: pptBlurReveal 1s ease forwards;
+}
+
+/* 5. Flip In (Subtle 3D) */
+@keyframes pptFlipIn {
+  from {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(10deg) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1000px) rotateX(0) translateY(0);
+  }
+}
+.anim-ppt-flip {
+  animation: pptFlipIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}

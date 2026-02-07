@@ -1,0 +1,142 @@
+/* DashboardFloatingNavigation.css */
+
+/* Floating Controls Container */
+.dashboard-floating-controls {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  padding: 4px;
+  border-radius: 9999px; /* Pill shape */
+  box-shadow: var(--shadow-md);
+  opacity: 0.95;
+  transition: opacity 0.2s;
+  /* Prevent text selection */
+  user-select: none;
+}
+
+.dashboard-floating-controls:hover {
+  opacity: 1;
+}
+
+/* Base Button Style */
+.dashboard-float-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dashboard-float-btn:hover {
+  background-color: var(--surface-hover);
+  color: var(--text-main);
+}
+
+/* Main Action Button (Exit) */
+.dashboard-float-btn-main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-hover);
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.dashboard-float-btn-main:hover {
+  background-color: var(--border-color);
+  border-color: var(--text-secondary);
+}
+
+/* Date Picker Group */
+.dashboard-float-date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-main);
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: 1px solid transparent;
+  position: relative;
+}
+
+.dashboard-float-date:hover {
+  background-color: var(--surface-hover);
+  border-color: var(--border-color);
+}
+
+.date-label {
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+/* Hidden input trigger */
+.month-picker-hidden {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Separator */
+.vertical-divider {
+  width: 1px;
+  height: 20px;
+  background-color: var(--border-color);
+  margin: 0 0.25rem;
+}
+
+/* Utility */
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .dashboard-floating-controls {
+    width: 90%;
+    justify-content: space-between;
+    padding: 0.5rem;
+    top: 1rem;
+  }
+
+  .dashboard-float-date {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .dashboard-float-btn-main span {
+    display: none; /* Hide 'Exit' text on very small screens */
+  }
+
+  .dashboard-float-btn-main {
+    padding: 6px;
+    width: 32px;
+    justify-content: center;
+  }
+}

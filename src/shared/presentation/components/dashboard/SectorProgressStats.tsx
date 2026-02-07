@@ -78,48 +78,18 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
 
   return (
     <div className="content-card progress-stats-container">
-      <div
-        className="card-header"
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '1rem'
-        }}
-      >
+      <div className="card-header sector-header-controls">
         <h3>{t('dashboard.sectorProgress.title')}</h3>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div className="sector-actions">
           {/* Sort Control */}
-          <div style={{ position: 'relative' }}>
-            <ArrowUpDown
-              size={16}
-              style={{
-                position: 'absolute',
-                left: '10px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#9ca3af',
-                pointerEvents: 'none'
-              }}
-            />
+          <div className="sector-sort-wrapper">
+            <ArrowUpDown size={16} className="sector-sort-icon" />
             <select
               onChange={handleSortChange}
               value={
                 sortConfig ? `${sortConfig.key}-${sortConfig.direction}` : ''
               }
-              style={{
-                padding: '8px 10px 8px 34px',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px',
-                fontSize: '0.9rem',
-                outline: 'none',
-                backgroundColor: 'var(--surface)',
-                color: 'var(--text-main)',
-                cursor: 'pointer',
-                appearance: 'none',
-                minWidth: '160px'
-              }}
+              className="sector-select"
             >
               <option value="" disabled>
                 Sort by...
@@ -146,34 +116,14 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
           </div>
 
           {/* Search Control */}
-          <div style={{ position: 'relative', width: '200px' }}>
-            <Search
-              size={16}
-              style={{
-                position: 'absolute',
-                left: '10px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#9ca3af'
-              }}
-            />
+          <div className="sector-search-wrapper">
+            <Search size={16} className="sector-search-icon" />
             <input
               type="text"
               placeholder={t('dashboard.sectorProgress.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                padding: '8px 10px 8px 34px',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px',
-                fontSize: '0.9rem',
-                outline: 'none',
-                width: '100%',
-                backgroundColor: 'var(--surface)',
-                color: 'var(--text-main)',
-                transition: 'all 0.2s',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-              }}
+              className="sector-search-input"
             />
           </div>
         </div>
@@ -262,8 +212,8 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
                             data={chartData}
                             cx="50%"
                             cy="50%"
-                            innerRadius={55}
-                            outerRadius={70}
+                            innerRadius="70%"
+                            outerRadius="90%"
                             startAngle={90}
                             endAngle={-270}
                             dataKey="value"
@@ -328,40 +278,15 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  marginTop: '1.5rem',
-                  paddingTop: '1rem',
-                  borderTop: '1px solid var(--border-color)'
-                }}
-              >
+              <div className="sector-pagination">
                 <button
                   onClick={handlePrevPage}
                   disabled={currentPage === 1}
-                  className="btn-icon"
-                  style={{
-                    padding: '0.5rem',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--surface)',
-                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                    opacity: currentPage === 1 ? 0.5 : 1,
-                    color: 'var(--text-main)'
-                  }}
+                  className="pagination-btn"
                 >
                   <ChevronLeft size={20} />
                 </button>
-                <span
-                  style={{
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    color: 'var(--text-secondary)'
-                  }}
-                >
+                <span className="pagination-info">
                   {t('common.pagination.page', {
                     current: currentPage,
                     total: totalPages
@@ -370,17 +295,7 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
                 <button
                   onClick={handleNextPage}
                   disabled={currentPage === totalPages}
-                  className="btn-icon"
-                  style={{
-                    padding: '0.5rem',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--surface)',
-                    cursor:
-                      currentPage === totalPages ? 'not-allowed' : 'pointer',
-                    opacity: currentPage === totalPages ? 0.5 : 1,
-                    color: 'var(--text-main)'
-                  }}
+                  className="pagination-btn"
                 >
                   <ChevronRight size={20} />
                 </button>

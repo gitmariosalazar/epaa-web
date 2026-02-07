@@ -83,7 +83,7 @@
 .sector-name {
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-main);
   margin-bottom: 0.5rem;
 }
 
@@ -103,9 +103,143 @@
 
 .stat-value {
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
 .stat-label {
   font-size: 0.75rem;
+}
+
+/* Extracted Styles */
+.sector-header-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.sector-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.sector-sort-wrapper,
+.sector-search-wrapper {
+  position: relative;
+}
+
+.sector-search-wrapper {
+  width: 200px;
+}
+
+.sector-sort-icon,
+.sector-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.sector-select {
+  padding: 8px 10px 8px 34px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  background-color: var(--surface);
+  color: var(--text-main);
+  cursor: pointer;
+  appearance: none;
+  min-width: 160px;
+}
+
+.sector-search-input {
+  padding: 8px 10px 8px 34px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  width: 100%;
+  background-color: var(--surface);
+  color: var(--text-main);
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.sector-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.pagination-btn {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.pagination-btn:not(:disabled) {
+  cursor: pointer;
+}
+
+.pagination-info {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* Fullscreen Overrides */
+/* Fullscreen Overrides */
+.dashboard-fullscreen-overlay .progress-stats-container {
+  height: 100%;
+  border: none;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-fullscreen-overlay .sector-progress-grid-wrapper {
+  flex: 1;
+  padding: 0.5rem 0 0 0; /* Minimal top padding to align with header flow */
+}
+
+.dashboard-fullscreen-overlay .sector-progress-grid {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.dashboard-fullscreen-overlay .progress-chart-container {
+  width: 200px;
+  height: 200px;
+}
+
+.dashboard-fullscreen-overlay .progress-percentage {
+  font-size: 2.5rem;
+}
+
+.dashboard-fullscreen-overlay .sector-name {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-fullscreen-overlay .stat-value {
+  font-size: 1rem;
 }

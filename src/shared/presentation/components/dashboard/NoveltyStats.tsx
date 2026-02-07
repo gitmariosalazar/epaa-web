@@ -127,8 +127,8 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
                   data={chartData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={80}
-                  outerRadius={100}
+                  innerRadius="70%"
+                  outerRadius="90%"
                   paddingAngle={5}
                   dataKey="value"
                   onMouseEnter={onPieEnter}
@@ -151,12 +151,12 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
                     name
                   ]}
                   contentStyle={{
-                    backgroundColor: 'var(--bg-card)',
+                    backgroundColor: 'var(--surface)',
                     borderColor: 'var(--border-color)',
-                    color: 'var(--text-primary)',
+                    color: 'var(--text-main)',
                     borderRadius: '8px'
                   }}
-                  itemStyle={{ color: 'var(--text-primary)' }}
+                  itemStyle={{ color: 'var(--text-main)' }}
                 />
                 {/* Center Content Overlay */}
                 <foreignObject

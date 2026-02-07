@@ -25,6 +25,12 @@ import { AdvancedReadingsTable } from '@/shared/presentation/components/dashboar
 import { SectorProgressStats } from '@/shared/presentation/components/dashboard/SectorProgressStats';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { Tabs } from '@/shared/presentation/components/common/Tabs';
+import { DashboardFocusProvider } from '@/shared/presentation/components/dashboard/DashboardFocusContext';
+import {
+  DashboardWidgetWrapper,
+  DashboardFocusOverlay
+} from '@/shared/presentation/components/dashboard/DashboardWidgetWrapper';
+import { DashboardMaximizeButton } from '@/shared/presentation/components/dashboard/DashboardMaximizeButton';
 
 export const DashboardHome = () => {
   const { t } = useTranslation();
@@ -117,83 +123,131 @@ export const DashboardHome = () => {
   const pickerRef = React.useRef<HTMLInputElement>(null);
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <div className="dashboard-title">
-          <h1>Analytical Dashboard</h1>
-          <p>Overview of system readings and performance</p>
+    <DashboardFocusProvider>
+      <div className="dashboard-container">
+        <DashboardFocusOverlay
+          currentMonth={currentMonth}
+          onMonthChange={handleMonthChange}
+        />
+        <div className="dashboard-header">
+          <div className="dashboard-title">
+            <h1>Analytical Dashboard</h1>
+            <p>Overview of system readings and performance</p>
+          </div>
+
+          <div
+            className="dashboard-controls"
+            onClick={() => pickerRef.current?.showPicker()}
+            title="Change Period"
+          >
+            <Calendar className="text-gray-400" size={20} color="#9ca3af" />
+            <input
+              ref={pickerRef}
+              type="month"
+              value={currentMonth}
+              onChange={handleMonthChange}
+              className="month-picker"
+            />
+          </div>
         </div>
 
-        <div
-          className="dashboard-controls"
-          onClick={() => pickerRef.current?.showPicker()}
-          title="Change Period"
-        >
-          <Calendar className="text-gray-400" size={20} color="#9ca3af" />
-          <input
-            ref={pickerRef}
-            type="month"
-            value={currentMonth}
-            onChange={handleMonthChange}
-            className="month-picker"
-          />
-        </div>
+        {globalStats && (
+          <DashboardWidgetWrapper
+            id="global-stats"
+            title={t('dashboard.globalStats.title', 'System Overview')}
+          >
+            <GlobalStats stats={globalStats} loading={loading} />
+          </DashboardWidgetWrapper>
+        )}
+
+        {dailyStats.length > 0 && (
+          <div className="dashboard-stats-grid">
+            <div className="stats-col">
+              <DashboardWidgetWrapper
+                id="daily-stats"
+                title="Daily Activity Logic"
+                className="h-full"
+              >
+                <DailyStatsTable data={dailyStats} loading={loading} />
+              </DashboardWidgetWrapper>
+            </div>
+            <div className="stats-col">
+              <DashboardWidgetWrapper
+                id="sector-stats"
+                title={t('dashboard.sectorStats.title')}
+                className="h-full"
+              >
+                <SectorStatsTable data={sectorStats} loading={loading} />
+              </DashboardWidgetWrapper>
+            </div>
+          </div>
+        )}
+
+        {noveltyStats.length > 0 && (
+          <div className="dashboard-novelties-row">
+            <DashboardWidgetWrapper
+              id="novelty-stats"
+              title="Novelty Distribution"
+              className="h-full"
+            >
+              <NoveltyStats data={noveltyStats} loading={loading} />
+            </DashboardWidgetWrapper>
+          </div>
+        )}
+        {advancedReportReadings.length > 0 && (
+          <>
+            <div className="section-divider">
+              <h2 className="section-title">
+                {t('dashboard.tabs.detailedReports')}
+              </h2>
+            </div>
+
+            <Tabs
+              tabs={[
+                { id: 'visual', label: t('dashboard.tabs.visual') },
+                { id: 'table', label: t('dashboard.tabs.detailed') }
+              ]}
+              activeTab={activeTab}
+              onTabChange={(id) => setActiveTab(id as 'visual' | 'table')}
+              variant="pill"
+            />
+
+            <div
+              className="dashboard-novelties-row"
+              style={{ display: activeTab === 'visual' ? undefined : 'none' }}
+            >
+              <DashboardWidgetWrapper
+                id="sector-progress"
+                title={t('dashboard.sectorProgress.title')}
+                className="h-full"
+              >
+                <SectorProgressStats
+                  data={advancedReportReadings}
+                  loading={loading}
+                />
+              </DashboardWidgetWrapper>
+            </div>
+
+            <div
+              className="dashboard-advanced-readings-row"
+              style={{ display: activeTab === 'table' ? undefined : 'none' }}
+            >
+              <DashboardWidgetWrapper
+                id="advanced-readings"
+                title={t('dashboard.advancedReadings.title')}
+                className="h-full"
+              >
+                <AdvancedReadingsTable
+                  data={advancedReportReadings}
+                  loading={loading}
+                />
+              </DashboardWidgetWrapper>
+            </div>
+          </>
+        )}
+        <DashboardMaximizeButton />
       </div>
-
-      {globalStats && <GlobalStats stats={globalStats} loading={loading} />}
-
-      {dailyStats.length > 0 && (
-        <div className="dashboard-stats-grid">
-          <div className="stats-col">
-            <DailyStatsTable data={dailyStats} loading={loading} />
-          </div>
-          <div className="stats-col">
-            <SectorStatsTable data={sectorStats} loading={loading} />
-          </div>
-        </div>
-      )}
-
-      {noveltyStats.length > 0 && (
-        <div className="dashboard-novelties-row">
-          <NoveltyStats data={noveltyStats} loading={loading} />
-        </div>
-      )}
-      {advancedReportReadings.length > 0 && (
-        <>
-          <div className="section-divider">
-            <h2 className="section-title">
-              {t('dashboard.tabs.detailedReports')}
-            </h2>
-          </div>
-
-          <Tabs
-            tabs={[
-              { id: 'visual', label: t('dashboard.tabs.visual') },
-              { id: 'table', label: t('dashboard.tabs.detailed') }
-            ]}
-            activeTab={activeTab}
-            onTabChange={(id) => setActiveTab(id as 'visual' | 'table')}
-            variant="pill"
-          />
-
-          {activeTab === 'visual' ? (
-            <div className="dashboard-novelties-row">
-              <SectorProgressStats
-                data={advancedReportReadings}
-                loading={loading}
-              />
-            </div>
-          ) : (
-            <div className="dashboard-advanced-readings-row">
-              <AdvancedReadingsTable
-                data={advancedReportReadings}
-                loading={loading}
-              />
-            </div>
-          )}
-        </>
-      )}
-    </div>
+    </DashboardFocusProvider>
   );
 };
 

@@ -27,18 +27,22 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
 
   if (loading)
     return (
-      <div className="text-gray-500">{t('dashboard.sectorStats.loading')}</div>
+      <div style={{ color: 'var(--text-secondary)' }}>
+        {t('dashboard.sectorStats.loading')}
+      </div>
     );
   if (!data.length)
     return (
-      <div className="text-gray-500">{t('dashboard.sectorStats.empty')}</div>
+      <div style={{ color: 'var(--text-secondary)' }}>
+        {t('dashboard.sectorStats.empty')}
+      </div>
     );
 
   const columns: Column<SectorStatsReport>[] = [
     {
       header: t('dashboard.sectorStats.columns.sector'),
       accessor: (row) => (
-        <span className="font-medium text-blue">
+        <span className="font-medium" style={{ color: 'var(--primary)' }}>
           {t('dashboard.sectorStats.columns.sector')} {row.sector}
         </span>
       ),
@@ -95,7 +99,7 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
               left: '8px',
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#9ca3af'
+              color: 'var(--text-secondary)'
             }}
           />
           <input

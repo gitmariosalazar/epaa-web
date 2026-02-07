@@ -26,9 +26,17 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
   const { sortedData, sortConfig, requestSort } = useTableSort(filteredData);
 
   if (loading)
-    return <div className="text-gray-500">Loading daily stats...</div>;
+    return (
+      <div style={{ color: 'var(--text-secondary)' }}>
+        Loading daily stats...
+      </div>
+    );
   if (!data.length)
-    return <div className="text-gray-500">No daily data available.</div>;
+    return (
+      <div style={{ color: 'var(--text-secondary)' }}>
+        No daily data available.
+      </div>
+    );
 
   const columns: Column<DailyStatsReport>[] = [
     {
@@ -98,7 +106,7 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
               left: '8px',
               top: '50%',
               transform: 'translateY(-50%)',
-              color: '#9ca3af'
+              color: 'var(--text-secondary)'
             }}
           />
           <input
