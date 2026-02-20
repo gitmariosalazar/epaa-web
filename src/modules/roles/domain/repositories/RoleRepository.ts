@@ -5,4 +5,5 @@ export interface RoleRepository {
   findById(rolId: number): Promise<Role>;
   createRole(role: Omit<Role, 'id' | 'active'>): Promise<Role>;
   updateRole(rolId: number, role: Partial<Role>): Promise<Role>;
+  deleteRole(rolId: number): Promise<void>;
 }

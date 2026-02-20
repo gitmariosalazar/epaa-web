@@ -11,8 +11,10 @@ import {
   ChevronRight,
   CheckCircle,
   User,
+  Building2,
   ChevronDown,
-  Lock
+  Lock,
+  Plug
 } from 'lucide-react';
 import { useAuth } from '@/shared/presentation/context/AuthContext';
 import { useTranslation } from 'react-i18next';
@@ -101,12 +103,44 @@ export const Sidebar: React.FC<SidebarProps> = ({
       ]
     },
     {
-      title: t('sidebar.user'),
+      title: t('sidebar.customers'),
       items: [
         {
           icon: <User size={20} />,
-          label: t('sidebar.profile'),
-          to: '/profile'
+          label: t('sidebar.customers'),
+          subItems: [
+            {
+              icon: <User size={18} />,
+              label: t('sidebar.naturalPersons'),
+              to: '/customers/natural-persons'
+            },
+            {
+              icon: <Building2 size={18} />,
+              label: t('sidebar.companies'),
+              to: '/customers/companies'
+            },
+            {
+              icon: <Users size={18} />,
+              label: t('sidebar.generalCustomers'),
+              to: '/customers/general'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      title: 'Connections',
+      items: [
+        {
+          icon: <Plug size={20} />,
+          label: 'Connections',
+          subItems: [
+            {
+              icon: <Plug size={18} />,
+              label: 'List',
+              to: '/connections'
+            }
+          ]
         }
       ]
     }
@@ -208,6 +242,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       <div className="sidebar__footer">
+        <NavLink
+          to="/profile"
+          className={({ isActive }) =>
+            `sidebar__link ${isActive ? 'sidebar__link--active' : ''}`
+          }
+          title={isCollapsed ? t('sidebar.profile') : ''}
+        >
+          <span className="sidebar__icon">
+            <User size={20} />
+          </span>
+          {!isCollapsed && (
+            <span className="sidebar__label">{t('sidebar.profile')}</span>
+          )}
+        </NavLink>
         <button
           className="sidebar__link sidebar__link--logout"
           onClick={logout}

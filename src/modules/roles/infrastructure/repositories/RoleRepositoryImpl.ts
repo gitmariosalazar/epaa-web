@@ -43,4 +43,8 @@ export class RoleRepositoryImpl implements RoleRepository {
     );
     return response.data.data;
   }
+
+  async deleteRole(rolId: number): Promise<void> {
+    await this.client.delete<ApiResponse<void>>(`/roles/delete-rol/${rolId}`);
+  }
 }

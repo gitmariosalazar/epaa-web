@@ -1,8 +1,8 @@
 import React from 'react';
 import type { User } from '@/modules/users/domain/models/User';
-import { Modal } from '../Modal/Modal';
-import { Button } from '../Button/Button';
-import { Avatar } from '../Avatar/Avatar';
+import { Modal } from '@/shared/presentation/components/Modal/Modal';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { CheckCircle, XCircle, Shield, Key } from 'lucide-react';
 import './UserDetailModal.css';
 

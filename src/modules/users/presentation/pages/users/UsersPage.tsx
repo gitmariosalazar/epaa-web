@@ -1,17 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { User } from '@/modules/users/domain/models/User';
-import { CreateUserEmployeeRequest } from '@/modules/users/domain/models/CreateUserRequest';
-import { UpdateUserRequest } from '@/modules/users/domain/models/UpdateUserRequest';
-import { GetUsersUseCase } from '@/modules/users/application/usecases/GetUsersUseCase';
-import { CreateUserUseCase } from '@/modules/users/application/usecases/CreateUserUseCase';
-import { UpdateUserUseCase } from '@/modules/users/application/usecases/UpdateUserUseCase';
-import { DeleteUserUseCase } from '@/modules/users/application/usecases/DeleteUserUseCase';
-import { UserRepositoryImpl } from '@/modules/users/infrastructure/repositories/UserRepositoryImpl';
 import { Table } from '@/shared/presentation/components/Table/Table';
 import type { Column } from '@/shared/presentation/components/Table/Table';
 import { Input } from '@/shared/presentation/components/Input/Input';
-import { PasswordInput } from '@/shared/presentation/components/Input/PasswordInput';
 import { Card } from '@/shared/presentation/components/Card/Card';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
@@ -28,325 +19,58 @@ import {
   Eye,
   Settings
 } from 'lucide-react';
-import { GetUserDetailUseCase } from '@/modules/users/application/usecases/GetUserDetailUseCase';
-import { UserDetailModal } from '@/shared/presentation/components/Users/UserDetailModal';
+import { UserDetailModal } from '../../components/UserDetailModal/UserDetailModal';
 import '@/shared/presentation/styles/Users.css';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
-import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import { useUsersViewModel } from '../../hooks/useUsersViewModel';
+import { UserFormWizard } from '../../components/UserFormWizard/UserFormWizard';
+import type { User } from '@/modules/users/domain/models/User';
+import { UsersProvider } from '../../context/UsersContext';
 
-export const UsersPage: React.FC = () => {
+const UsersLayout: React.FC = () => {
   const navigate = useNavigate();
-  // State
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [limit] = useState(10);
-  const [searchTerm, setSearchTerm] = useState('');
 
-  // Modals State
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isViewOpen, setIsViewOpen] = useState(false);
-  const [viewUser, setViewUser] = useState<User | null>(null);
-  const [isViewLoading, setIsViewLoading] = useState(false);
+  const {
+    // Data
+    filteredUsers,
+    isLoading,
+    page,
+    setPage,
+    hasMore,
+    searchTerm,
+    setSearchTerm,
 
-  // Wizard State
-  const [currentStep, setCurrentStep] = useState(0);
-  const steps = [
-    'Account Details',
-    'Personal Info',
-    'Employment',
-    'Contact & Other'
-  ];
+    // Modals
+    isCreateOpen,
+    setIsCreateOpen,
+    isEditOpen,
+    setIsEditOpen,
+    isDeleteOpen,
+    setIsDeleteOpen,
+    selectedUser,
+    setSelectedUser,
+    isViewOpen,
+    setIsViewOpen,
+    viewUser,
+    isViewLoading,
 
-  // Form State
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: '',
-    dateOfBirth: '',
-    sexId: '',
-    idCard: '',
-    citizenId: '',
-    positionId: '',
-    contractTypeId: '',
-    employeeStatusId: '',
-    hireDate: '',
-    terminationDate: '',
-    baseSalary: '',
-    supervisorId: '',
-    assignedZones: '',
-    driverLicense: '',
-    hasCompanyVehicle: '',
-    internalPhone: '',
-    internalEmail: '',
-    photoUrl: '',
-    createdBy: ''
-  });
+    // Wizard
+    currentStep,
+    setCurrentStep,
+    steps,
 
-  // Dependencies
-  const userRepository = new UserRepositoryImpl();
-  const getUsersUseCase = new GetUsersUseCase(userRepository);
-  const createUserUseCase = new CreateUserUseCase(userRepository);
-  const updateUserUseCase = new UpdateUserUseCase(userRepository);
-  const deleteUserUseCase = new DeleteUserUseCase(userRepository);
-  const getUserDetailUseCase = new GetUserDetailUseCase(userRepository);
+    // Form
+    formData,
+    handleInputChange,
+    resetForm,
 
-  // Load Data
-  const loadUsers = async () => {
-    setIsLoading(true);
-    try {
-      const offset = (page - 1) * limit;
-      const data = await getUsersUseCase.execute(limit, offset);
-      setUsers(data);
-      setHasMore(data.length === limit);
-    } catch (error) {
-      console.error('Failed to load users', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadUsers();
-  }, [page]);
-
-  // Handlers
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const resetForm = () => {
-    setFormData({
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      firstName: '',
-      lastName: '',
-      dateOfBirth: '',
-      sexId: '',
-      idCard: '',
-      citizenId: '',
-      positionId: '',
-      contractTypeId: '',
-      employeeStatusId: '',
-      hireDate: '',
-      terminationDate: '',
-      baseSalary: '',
-      supervisorId: '',
-      assignedZones: '',
-      driverLicense: '',
-      hasCompanyVehicle: '',
-      internalPhone: '',
-      internalEmail: '',
-      photoUrl: '',
-      createdBy: ''
-    });
-    setSelectedUser(null);
-    setCurrentStep(0);
-  };
-
-  const handleCreate = async () => {
-    try {
-      if (formData.password !== formData.confirmPassword) {
-        alert("Passwords don't match"); // Replace with toast later
-        return;
-      }
-
-      // Create strictly typed request object
-      const newUserRequest = new CreateUserEmployeeRequest({
-        userId: crypto.randomUUID(),
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        dateOfBirth: formData.dateOfBirth
-          ? new Date(formData.dateOfBirth)
-          : undefined,
-        sexId: formData.sexId ? Number(formData.sexId) : undefined,
-        idCard: formData.idCard,
-        citizenId: formData.citizenId,
-        positionId: Number(formData.positionId),
-        contractTypeId: Number(formData.contractTypeId),
-        employeeStatusId: formData.employeeStatusId
-          ? Number(formData.employeeStatusId)
-          : undefined,
-        hireDate: new Date(formData.hireDate),
-        terminationDate: formData.terminationDate
-          ? new Date(formData.terminationDate)
-          : undefined,
-        baseSalary: formData.baseSalary
-          ? Number(formData.baseSalary)
-          : undefined,
-        supervisorId: formData.supervisorId,
-        assignedZones: formData.assignedZones
-          ? formData.assignedZones.split(',').map(Number)
-          : undefined,
-        driverLicense: formData.driverLicense,
-        hasCompanyVehicle: formData.hasCompanyVehicle === 'true',
-        internalPhone: formData.internalPhone,
-        internalEmail: formData.internalEmail,
-        photoUrl: formData.photoUrl,
-        metadata: undefined,
-        createdBy: formData.createdBy
-      });
-
-      await createUserUseCase.execute(newUserRequest);
-      setIsCreateOpen(false);
-      resetForm();
-      loadUsers();
-    } catch (error) {
-      console.error('Create failed', error);
-      alert('Failed to create user');
-    }
-  };
-
-  const openEdit = (user: User) => {
-    setSelectedUser(user);
-    setFormData({
-      username: user.username,
-      email: user.email,
-      password: '',
-      confirmPassword: '',
-      firstName: user.firstName || '',
-      lastName: user.lastName || '',
-      dateOfBirth: user.dateOfBirth
-        ? dateService.toISODateString(user.dateOfBirth)
-        : '',
-      sexId: user.sexId ? user.sexId.toString() : '',
-      idCard: user.idCard || '',
-      citizenId: user.citizenId || '',
-      positionId: user.positionId ? user.positionId.toString() : '',
-      contractTypeId: user.contractTypeId ? user.contractTypeId.toString() : '',
-      employeeStatusId: user.employeeStatusId
-        ? user.employeeStatusId.toString()
-        : '',
-      hireDate: user.hireDate ? dateService.toISODateString(user.hireDate) : '',
-      terminationDate: user.terminationDate
-        ? dateService.toISODateString(user.terminationDate)
-        : '',
-      baseSalary: user.baseSalary ? user.baseSalary.toString() : '',
-      supervisorId: user.supervisorId || '',
-      assignedZones: user.assignedZones ? user.assignedZones.toString() : '',
-      driverLicense: user.driverLicense || '',
-      hasCompanyVehicle: user.hasCompanyVehicle
-        ? user.hasCompanyVehicle.toString()
-        : '',
-      internalPhone: user.internalPhone || '',
-      internalEmail: user.internalEmail || '',
-      photoUrl: user.photoUrl || '',
-      createdBy: user.createdBy || ''
-    });
-    setIsEditOpen(true);
-  };
-
-  const handleUpdate = async () => {
-    try {
-      if (formData.password !== formData.confirmPassword) {
-        alert("Passwords don't match"); // Replace with toast later
-        return;
-      }
-
-      const updateRequest = new UpdateUserRequest({
-        username: formData.username,
-        email: formData.email,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        dateOfBirth: formData.dateOfBirth
-          ? new Date(formData.dateOfBirth)
-          : undefined,
-        sexId: formData.sexId ? Number(formData.sexId) : undefined,
-        idCard: formData.idCard,
-        citizenId: formData.citizenId,
-        positionId: formData.positionId
-          ? Number(formData.positionId)
-          : undefined,
-        contractTypeId: formData.contractTypeId
-          ? Number(formData.contractTypeId)
-          : undefined,
-        employeeStatusId: formData.employeeStatusId
-          ? Number(formData.employeeStatusId)
-          : undefined,
-        terminationDate: formData.terminationDate
-          ? new Date(formData.terminationDate)
-          : undefined,
-        baseSalary: formData.baseSalary
-          ? Number(formData.baseSalary)
-          : undefined,
-        supervisorId: formData.supervisorId,
-        assignedZones: formData.assignedZones
-          ? formData.assignedZones.split(',').map(Number)
-          : undefined,
-        driverLicense: formData.driverLicense,
-        hasCompanyVehicle: formData.hasCompanyVehicle === 'true',
-        internalPhone: formData.internalPhone,
-        internalEmail: formData.internalEmail,
-        photoUrl: formData.photoUrl,
-        metadata: undefined
-      });
-
-      await updateUserUseCase.execute(
-        selectedUser?.userId || '',
-        updateRequest
-      );
-      setIsEditOpen(false);
-      resetForm();
-      loadUsers();
-    } catch (error) {
-      console.error('Update failed', error);
-      alert('Failed to update user');
-    }
-  };
-
-  const handleView = async (user: User) => {
-    setIsViewOpen(true);
-    setIsViewLoading(true);
-    setViewUser(null);
-    try {
-      const fullUser = await getUserDetailUseCase.execute(
-        user.username,
-        user.email
-      );
-      setViewUser(fullUser);
-    } catch (error) {
-      console.error('Failed to fetch user details', error);
-      alert('Failed to load user details');
-      setIsViewOpen(false);
-    } finally {
-      setIsViewLoading(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!selectedUser) return;
-    try {
-      await deleteUserUseCase.execute(selectedUser.userId);
-      setIsDeleteOpen(false);
-      resetForm();
-      loadUsers();
-    } catch (error) {
-      console.error('Delete failed', error);
-      alert('Failed to delete user');
-    }
-  };
-
-  const filteredUsers = users.filter(
-    (user) =>
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.firstName &&
-        user.firstName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (user.lastName &&
-        user.lastName.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+    // Actions
+    handleCreate,
+    handleUpdate,
+    handleView,
+    handleDelete,
+    openEdit
+  } = useUsersViewModel();
 
   // Columns Configuration
   const columns: Column<User>[] = [
@@ -493,490 +217,198 @@ export const UsersPage: React.FC = () => {
     }
   ];
 
-  // Wizard Rendering
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0: // Account Details
-        return (
-          <div style={{ display: 'grid', gap: '16px' }}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '16px'
-              }}
-            >
-              <Input
-                label="Username"
-                name="username"
-                value={formData.username}
-                onChange={handleInputChange}
-                placeholder="jdoe"
-              />
-              <Input
-                label="Email"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="john@example.com"
-              />
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '16px'
-              }}
-            >
-              <Input
-                label="First Name"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleInputChange}
-                placeholder="John"
-              />
-              <Input
-                label="Last Name"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleInputChange}
-                placeholder="Doe"
-              />
-            </div>
-
-            {/* Password only for Create or explicit change */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '16px'
-              }}
-            >
-              <PasswordInput
-                label="Password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                placeholder={
-                  isEditOpen ? 'Leave blank to keep current' : '••••••••'
-                }
-                showStrength={true}
-              />
-              <PasswordInput
-                label="Confirm Password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                placeholder="••••••••"
-                showStrength={false}
-                valueToMatch={formData.password}
-              />
-            </div>
-          </div>
-        );
-
-      case 1: // Personal Info
-        return (
-          <div style={{ display: 'grid', gap: '16px' }}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
-                gap: '16px'
-              }}
-            >
-              <Input
-                label="Date of Birth"
-                type="date"
-                name="dateOfBirth"
-                value={formData.dateOfBirth}
-                onChange={handleInputChange}
-              />
-              <Input
-                label="Sex ID"
-                type="number"
-                name="sexId"
-                value={formData.sexId}
-                onChange={handleInputChange}
-                placeholder="1"
-              />
-              <Input
-                label="ID Card"
-                name="idCard"
-                value={formData.idCard}
-                onChange={handleInputChange}
-                placeholder="1234567890"
-              />
-            </div>
-            <Input
-              label="Citizen ID"
-              name="citizenId"
-              value={formData.citizenId}
-              onChange={handleInputChange}
-              placeholder="Optional citizen reference"
-            />
-          </div>
-        );
-
-      case 2: // Employment Details
-        return (
-          <div style={{ display: 'grid', gap: '16px' }}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
-                gap: '16px'
-              }}
-            >
-              <Input
-                label="Position ID"
-                type="number"
-                name="positionId"
-                value={formData.positionId}
-                onChange={handleInputChange}
-              />
-              <Input
-                label="Contract Type ID"
-                type="number"
-                name="contractTypeId"
-                value={formData.contractTypeId}
-                onChange={handleInputChange}
-              />
-              <Input
-                label="Status ID"
-                type="number"
-                name="employeeStatusId"
-                value={formData.employeeStatusId}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '16px'
-              }}
-            >
-              <Input
-                label="Hire Date"
-                type="date"
-                name="hireDate"
-                value={formData.hireDate}
-                onChange={handleInputChange}
-              />
-              <Input
-                label="Termination Date"
-                type="date"
-                name="terminationDate"
-                value={formData.terminationDate}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '16px'
-              }}
-            >
-              <Input
-                label="Base Salary"
-                type="number"
-                name="baseSalary"
-                value={formData.baseSalary}
-                onChange={handleInputChange}
-              />
-              <Input
-                label="Supervisor ID"
-                name="supervisorId"
-                value={formData.supervisorId}
-                onChange={handleInputChange}
-              />
-            </div>
-            <Input
-              label="Assigned Zones"
-              name="assignedZones"
-              value={formData.assignedZones}
-              onChange={handleInputChange}
-              placeholder="1, 2, 3"
-            />
-          </div>
-        );
-
-      case 3: // Contact & Other
-        return (
-          <div style={{ display: 'grid', gap: '16px' }}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '16px'
-              }}
-            >
-              <Input
-                label="Internal Phone"
-                name="internalPhone"
-                value={formData.internalPhone}
-                onChange={handleInputChange}
-              />
-              <Input
-                label="Internal Email"
-                type="email"
-                name="internalEmail"
-                value={formData.internalEmail}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '16px'
-              }}
-            >
-              <Input
-                label="Driver License"
-                name="driverLicense"
-                value={formData.driverLicense}
-                onChange={handleInputChange}
-              />
-              <div
-                style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
-              >
-                <label
-                  style={{
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    color: 'var(--text-primary)'
-                  }}
-                >
-                  Has Company Vehicle
-                </label>
-                <select
-                  name="hasCompanyVehicle"
-                  value={formData.hasCompanyVehicle}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      hasCompanyVehicle: e.target.value
-                    })
-                  }
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-color)',
-                    backgroundColor: 'var(--surface)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.9rem'
-                  }}
-                >
-                  <option value="false">No</option>
-                  <option value="true">Yes</option>
-                </select>
-              </div>
-            </div>
-            <Input
-              label="Photo URL"
-              name="photoUrl"
-              value={formData.photoUrl}
-              onChange={handleInputChange}
-            />
-            {isCreateOpen && (
-              <Input
-                label="Created By"
-                name="createdBy"
-                value={formData.createdBy}
-                onChange={handleInputChange}
-              />
-            )}
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const renderWizardFooter = (onCancel: () => void, onSubmit: () => void) => {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          width: '100%'
-        }}
-      >
-        <Button
-          variant="subtle"
-          onClick={
-            currentStep === 0
-              ? onCancel
-              : () => setCurrentStep((prev) => prev - 1)
-          }
-        >
-          {currentStep === 0 ? 'Cancel' : 'Back'}
-        </Button>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <span
-            style={{
-              fontSize: '0.85rem',
-              color: 'var(--text-secondary)',
-              marginRight: '8px'
-            }}
-          >
-            Step {currentStep + 1} of {steps.length}
-          </span>
-          <Button
-            onClick={
-              currentStep === steps.length - 1
-                ? onSubmit
-                : () => setCurrentStep((prev) => prev + 1)
-            }
-          >
-            {currentStep === steps.length - 1
-              ? isEditOpen
-                ? 'Save Changes'
-                : 'Create User'
-              : 'Next'}
-          </Button>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="users-page">
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-lg)'
-        }}
-      >
-        <div className="users-header">
-          <h1>Users Management</h1>
-          <p>Manage user access and details</p>
-        </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <Button
-            variant="outline"
-            onClick={loadUsers}
-            title="Refresh List"
-            circle
-          >
-            <RefreshCw size={18} />
-          </Button>
-          <Button
-            variant="outline"
-            leftIcon={<Plus size={18} />}
-            onClick={() => setIsCreateOpen(true)}
-          >
-            Add User
-          </Button>
-        </div>
-      </div>
-      <Card>
-        {/* Simple Search Placeholder - To be fully implemented with backend support */}
-        <div
-          style={{
-            padding: 'var(--spacing-md)',
-            borderBottom: '1px solid var(--border-color)'
+      <div className="users-page__header">
+        <h1>Users Management</h1>
+        <Button
+          onClick={() => {
+            resetForm();
+            setIsCreateOpen(true);
           }}
+          leftIcon={<Plus size={20} />}
         >
-          <div style={{ position: 'relative', maxWidth: '300px' }}>
-            <Search
-              size={18}
-              style={{
-                position: 'absolute',
-                left: '10px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-secondary)'
-              }}
-            />
-            <input
-              type="text"
+          New User
+        </Button>
+      </div>
+
+      <Card className="users-page__content">
+        <div className="users-page__toolbar">
+          <div className="users-page__search">
+            <Search size={20} color="var(--text-secondary)" />
+            <Input
               placeholder="Search users..."
-              style={{
-                width: '100%',
-                padding: '8px 10px 8px 36px',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-color)',
-                backgroundColor: 'var(--surface)', // Changed from background to surface for better contrast
-                color: 'var(--text-main)', // Fix for dark mode text color
-                outline: 'none'
-              }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              className="users-page__search-input"
             />
           </div>
+          <Button
+            variant="outline"
+            onClick={() => window.location.reload()}
+            leftIcon={<RefreshCw size={18} />}
+          >
+            Refresh
+          </Button>
         </div>
 
         <Table data={filteredUsers} columns={columns} isLoading={isLoading} />
 
         <Pagination
           currentPage={page}
-          onPageChange={setPage}
           hasMore={hasMore}
-          isLoading={isLoading}
+          onPageChange={setPage}
         />
       </Card>
 
-      <UserDetailModal
-        isOpen={isViewOpen}
-        onClose={() => setIsViewOpen(false)}
-        user={viewUser}
-        isLoading={isViewLoading}
-      />
-
-      {/* CREATE MODAL */}
-
+      {/* Create Modal */}
       <Modal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        title={`Create New User - ${steps[currentStep]}`}
-        footer={renderWizardFooter(() => setIsCreateOpen(false), handleCreate)}
+        title="Create New User"
+        size="lg"
+        footer={
+          <div className="users-modal__footer--between">
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (currentStep > 0) setCurrentStep(currentStep - 1);
+                else setIsCreateOpen(false);
+              }}
+            >
+              Back
+            </Button>
+            <Button
+              onClick={() => {
+                if (currentStep < steps.length - 1)
+                  setCurrentStep(currentStep + 1);
+                else handleCreate();
+              }}
+            >
+              {currentStep === steps.length - 1 ? 'Create User' : 'Next'}
+            </Button>
+          </div>
+        }
       >
-        {renderStepContent()}
+        <div className="users-modal__body">
+          <div className="users-wizard__stepper">
+            {steps.map((step, idx) => (
+              <div
+                key={step}
+                className={`users-wizard__step-indicator ${
+                  idx === currentStep
+                    ? 'users-wizard__step-indicator--active'
+                    : ''
+                }`}
+              >
+                {step}
+              </div>
+            ))}
+          </div>
+          <UserFormWizard
+            currentStep={currentStep}
+            formData={formData}
+            onChange={handleInputChange}
+            isEditMode={false}
+            isCreateMode={true}
+          />
+        </div>
       </Modal>
-      {/* EDIT MODAL */}
+
+      {/* Edit Modal */}
       <Modal
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
-        title={`Edit User - ${steps[currentStep]}`}
-        footer={renderWizardFooter(() => setIsEditOpen(false), handleUpdate)}
+        title="Edit User"
+        size="lg"
+        footer={
+          <div className="users-modal__footer--end">
+            <Button variant="outline" onClick={() => setIsEditOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdate}>Save Changes</Button>
+          </div>
+        }
       >
-        {renderStepContent()}
+        <div className="users-modal__scroll-container">
+          <UserFormWizard
+            currentStep={0}
+            formData={formData}
+            onChange={handleInputChange}
+            isEditMode={true}
+            isCreateMode={false}
+          />
+          <div className="users-modal__divider"></div>
+          <UserFormWizard
+            currentStep={1}
+            formData={formData}
+            onChange={handleInputChange}
+            isEditMode={true}
+            isCreateMode={false}
+          />
+          <div className="users-modal__divider"></div>
+          <UserFormWizard
+            currentStep={2}
+            formData={formData}
+            onChange={handleInputChange}
+            isEditMode={true}
+            isCreateMode={false}
+          />
+          <div className="users-modal__divider"></div>
+          <UserFormWizard
+            currentStep={3}
+            formData={formData}
+            onChange={handleInputChange}
+            isEditMode={true}
+            isCreateMode={false}
+          />
+        </div>
       </Modal>
-      {/* DELETE MODAL */}
+
+      {/* Delete Modal */}
       <Modal
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
         title="Confirm Deletion"
         size="sm"
         footer={
-          <>
-            <Button variant="subtle" onClick={() => setIsDeleteOpen(false)}>
+          <div
+            style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}
+          >
+            <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
               Cancel
             </Button>
-            <Button variant="danger" onClick={handleDelete}>
+            <Button
+              style={{ backgroundColor: 'var(--error)', color: 'white' }}
+              onClick={handleDelete}
+            >
               Delete
             </Button>
-          </>
+          </div>
         }
       >
-        <p style={{ color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+        <p>
           Are you sure you want to delete user{' '}
-          <strong style={{ color: 'var(--text-main)' }}>
-            {selectedUser?.username}
-          </strong>
-          ?
-          <br />
-          This action will restrict their access immediately.
+          <strong>{selectedUser?.username}</strong>? This action cannot be
+          undone.
         </p>
       </Modal>
+
+      {/* View Details Modal */}
+      <UserDetailModal
+        isOpen={isViewOpen}
+        onClose={() => setIsViewOpen(false)}
+        user={viewUser}
+        isLoading={isViewLoading}
+      />
     </div>
+  );
+};
+
+export const UsersPage: React.FC = () => {
+  return (
+    <UsersProvider>
+      <UsersLayout />
+    </UsersProvider>
   );
 };

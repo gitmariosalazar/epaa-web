@@ -1,9 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import type { Role } from '@/modules/roles/domain/models/Role';
-import { GetRolesUseCase } from '@/modules/roles/application/usecases/GetRolesUseCase';
-import { CreateRoleUseCase } from '@/modules/roles/application/usecases/CreateRoleUseCase';
-import { UpdateRoleUseCase } from '@/modules/roles/application/usecases/UpdateRoleUseCase';
-import { RoleRepositoryImpl } from '@/modules/roles/infrastructure/repositories/RoleRepositoryImpl';
 import { RolePermissionModal } from '@/shared/presentation/components/Roles/RolePermissionModal';
 import { Table } from '@/shared/presentation/components/Table/Table';
 import type { Column } from '@/shared/presentation/components/Table/Table';
@@ -14,80 +10,27 @@ import { Card } from '@/shared/presentation/components/Card/Card';
 import { Edit2, Plus, Search } from 'lucide-react';
 import '@/shared/presentation/styles/Roles.css';
 import { MdAdd, MdClose, MdLockOpen } from 'react-icons/md';
+import { useRolesViewModel } from '../../hooks/useRolesViewModel';
 
 export const RolesPage: React.FC = () => {
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isPermissionOpen, setIsPermissionOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-  const [formData, setFormData] = useState<Partial<Role>>({
-    name: '',
-    description: '',
-    isActive: true
-  });
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // Dependencies
-  const repo = new RoleRepositoryImpl();
-  const getRoles = new GetRolesUseCase(repo);
-  const createRole = new CreateRoleUseCase(repo);
-  const updateRole = new UpdateRoleUseCase(repo);
-
-  const loadRoles = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getRoles.execute(100, 0);
-      setRoles(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadRoles();
-  }, []);
-
-  const handleSave = async () => {
-    try {
-      if (selectedRole) {
-        // Update
-        await updateRole.execute(selectedRole.rolId, formData);
-      } else {
-        // Create
-        await createRole.execute({
-          name: formData.name!,
-          description: formData.description || '',
-          isActive: formData.isActive ?? true,
-          rolId: 0
-        });
-      }
-      setIsCreateOpen(false);
-      setFormData({ name: '', description: '', isActive: true });
-      setSelectedRole(null);
-      loadRoles();
-    } catch (error) {
-      console.error('Failed to save role', error);
-      alert('Failed to save role');
-    }
-  };
-
-  const openEdit = (role: Role) => {
-    setSelectedRole(role);
-    setFormData({
-      name: role.name,
-      description: role.description,
-      isActive: role.isActive
-    });
-    setIsCreateOpen(true);
-  };
-
-  const openPermissions = (role: Role) => {
-    setSelectedRole(role);
-    setIsPermissionOpen(true);
-  };
+  const {
+    loading,
+    searchTerm,
+    isCreateOpen,
+    isPermissionOpen,
+    selectedRole,
+    formData,
+    filteredRoles,
+    setSearchTerm,
+    setIsCreateOpen,
+    setIsPermissionOpen,
+    setFormData,
+    handleSave,
+    handleDelete,
+    openEdit,
+    openPermissions,
+    resetForm
+  } = useRolesViewModel();
 
   const columns: Column<Role>[] = [
     { header: 'ID', accessor: 'rolId' },
@@ -122,7 +65,7 @@ export const RolesPage: React.FC = () => {
             size="sm"
             variant="ghost"
             title="Add Permission"
-            onClick={() => openPermissions(role)} // Reusing openPermissions for now as entry point
+            onClick={() => openPermissions(role)}
             circle
             style={{ color: 'var(--success)' }}
           >
@@ -154,11 +97,7 @@ export const RolesPage: React.FC = () => {
             size="sm"
             variant="ghost"
             title="Remove Role"
-            onClick={() => {
-              if (confirm('Are you sure you want to delete this role?')) {
-                alert('Delete logic here');
-              }
-            }}
+            onClick={() => handleDelete(role)}
             circle
             style={{ color: 'var(--error)' }}
           >
@@ -185,8 +124,7 @@ export const RolesPage: React.FC = () => {
         <Button
           leftIcon={<Plus size={18} />}
           onClick={() => {
-            setSelectedRole(null);
-            setFormData({ name: '', description: '', isActive: true });
+            resetForm();
             setIsCreateOpen(true);
           }}
         >
@@ -229,15 +167,7 @@ export const RolesPage: React.FC = () => {
             />
           </div>
         </div>
-        <Table
-          data={roles.filter(
-            (r) =>
-              r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              r.description.toLowerCase().includes(searchTerm.toLowerCase())
-          )}
-          columns={columns}
-          isLoading={isLoading}
-        />
+        <Table data={filteredRoles} columns={columns} isLoading={loading} />
       </Card>
 
       <Modal

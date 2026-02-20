@@ -21,7 +21,11 @@ i18n
             roles: 'Roles',
             permissions: 'Permissions',
             settings: 'Settings',
-            signOut: 'Sign Out'
+            signOut: 'Sign Out',
+            customers: 'Customers',
+            naturalPersons: 'Natural Persons',
+            companies: 'Companies',
+            generalCustomers: 'General Customers'
           },
           dashboard: {
             title: 'Dashboard',
@@ -126,7 +130,11 @@ i18n
             roles: 'Roles',
             permissions: 'Permisos',
             settings: 'Configuración',
-            signOut: 'Cerrar Sesión'
+            signOut: 'Cerrar Sesión',
+            customers: 'Clientes',
+            naturalPersons: 'Personas Naturales',
+            companies: 'Empresas',
+            generalCustomers: 'Clientes Generales'
           },
           dashboard: {
             title: 'Panel Principal',
