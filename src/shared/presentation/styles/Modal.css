@@ -19,6 +19,7 @@
   border-radius: 1.5rem;
   width: 90%;
   max-width: 480px;
+  max-height: 90vh; /* Prevent modal from being taller than the screen */
   box-shadow: var(
     --shadow-xl,
     0 20px 25px -5px rgba(0, 0, 0, 0.1),
@@ -33,16 +34,21 @@
 
 /* Size Variants */
 .modal--sm {
-  max-width: 400px;
+  max-width: 400px !important;
 }
 .modal--md {
-  max-width: 500px;
+  max-width: 650px !important;
 }
 .modal--lg {
-  max-width: 800px;
+  max-width: 800px !important;
 }
 .modal--xl {
-  max-width: 1100px;
+  max-width: 1000px !important;
+  width: 95% !important;
+}
+.modal--xxl {
+  max-width: 1200px !important;
+  width: 98% !important;
 }
 
 .modal-header {
@@ -88,10 +94,10 @@
 }
 
 .modal-footer {
-  margin-top: 2rem;
+  margin-top: 0.1rem;
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .modal-form {

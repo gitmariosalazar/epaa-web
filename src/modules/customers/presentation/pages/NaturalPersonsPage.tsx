@@ -25,23 +25,24 @@ export const NaturalPersonsPage: React.FC = () => {
         <div style={{ display: 'flex', gap: '8px' }}>
           <Button
             size="sm"
-            variant="ghost"
+            variant="action"
             circle
             onClick={() => customerVM.openEdit(row)}
+            title="Edit"
           >
-            <Edit2 size={16} />
+            <Edit2 size={14} color="var(--text-secondary)" />
           </Button>
           <Button
             size="sm"
-            variant="ghost"
+            variant="action"
             circle
             onClick={() => {
               customerVM.setSelectedCustomer(row);
               customerVM.setIsDeleteOpen(true);
             }}
-            style={{ color: 'var(--error)' }}
+            title="Delete"
           >
-            <Trash2 size={16} />
+            <Trash2 size={14} color="var(--error)" />
           </Button>
         </div>
       )
@@ -62,14 +63,27 @@ export const NaturalPersonsPage: React.FC = () => {
 
       <Card className="users-page__content">
         <div className="users-page__toolbar">
-          <div className="users-page__search">
-            <Search size={20} color="var(--text-secondary)" />
-            <Input
-              placeholder="Search customers..."
-              value={customerVM.searchTerm}
-              onChange={(e) => customerVM.setSearchTerm(e.target.value)}
-              className="users-page__search-input"
-            />
+          <div className="users-page__search-container">
+            <select
+              className="users-page__search-select"
+              value={customerVM.searchType}
+              onChange={(e) => customerVM.setSearchType(e.target.value)}
+            >
+              <option value="all">All Fields</option>
+              <option value="name">Name</option>
+              <option value="id">Identity ID</option>
+              <option value="email">Email</option>
+              <option value="phone">Phone</option>
+            </select>
+            <div className="users-page__search">
+              <Search size={20} color="var(--text-secondary)" />
+              <Input
+                placeholder="Search customers..."
+                value={customerVM.searchTerm}
+                onChange={(e) => customerVM.setSearchTerm(e.target.value)}
+                className="users-page__search-input"
+              />
+            </div>
           </div>
           <Button
             variant="outline"
@@ -96,7 +110,7 @@ export const NaturalPersonsPage: React.FC = () => {
         isOpen={customerVM.isFormOpen}
         onClose={() => customerVM.setIsFormOpen(false)}
         title={customerVM.selectedCustomer ? 'Edit Client' : 'New Client'}
-        size="lg"
+        size="xxl"
         footer={
           <div className="users-modal__footer--end">
             <Button

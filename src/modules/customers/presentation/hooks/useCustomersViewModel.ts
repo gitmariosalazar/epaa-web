@@ -17,6 +17,7 @@ export const useCustomersViewModel = () => {
   const [limit] = useState(10);
   const [hasMore, setHasMore] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchType, setSearchType] = useState('all');
 
   // Modals
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -136,16 +137,34 @@ export const useCustomersViewModel = () => {
   };
 
   // Filter
-  const filteredCustomers = customers.filter(
-    (customer) =>
-      (customer.firstName?.toLowerCase() || '').includes(
-        searchTerm.toLowerCase()
-      ) ||
-      (customer.lastName?.toLowerCase() || '').includes(
-        searchTerm.toLowerCase()
-      ) ||
-      (customer.customerId || '').includes(searchTerm)
-  );
+  const filteredCustomers = customers.filter((customer) => {
+    const term = searchTerm.toLowerCase();
+    if (!term) return true;
+
+    const name = `${customer.firstName} ${customer.lastName}`.toLowerCase();
+    const id = customer.customerId || '';
+    const email = customer.emails?.[0]?.toLowerCase() || '';
+    const phone = customer.phoneNumbers?.[0] || '';
+
+    switch (searchType) {
+      case 'name':
+        return name.includes(term);
+      case 'id':
+        return id.includes(term);
+      case 'email':
+        return email.includes(term);
+      case 'phone':
+        return phone.includes(term);
+      case 'all':
+      default:
+        return (
+          name.includes(term) ||
+          id.includes(term) ||
+          email.includes(term) ||
+          phone.includes(term)
+        );
+    }
+  });
 
   return {
     customers,
@@ -156,6 +175,8 @@ export const useCustomersViewModel = () => {
     hasMore,
     searchTerm,
     setSearchTerm,
+    searchType,
+    setSearchType,
     isFormOpen,
     setIsFormOpen,
     isDeleteOpen,

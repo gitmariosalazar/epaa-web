@@ -3,7 +3,7 @@ import { Table } from '@/shared/presentation/components/Table/Table';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Card } from '@/shared/presentation/components/Card/Card';
-import { Edit2, Plus, Search, Trash } from 'lucide-react';
+import { Edit2, EyeIcon, Plus, Search, Trash } from 'lucide-react';
 import { CreateConnectionWizard } from '../components/CreateConnectionWizard';
 import type { Connection } from '../../domain/models/Connection';
 import type { Column } from '@/shared/presentation/components/Table/Table';
@@ -80,6 +80,18 @@ export const ConnectionsPage = () => {
             style={{ color: 'var(--error)' }}
           >
             <Trash size={16} />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => {
+              alert('View Connection');
+            }}
+            title="View Connection"
+            circle
+            style={{ color: 'var(--success)' }}
+          >
+            <EyeIcon size={16} />
           </Button>
         </div>
       )

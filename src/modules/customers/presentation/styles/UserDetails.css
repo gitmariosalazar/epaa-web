@@ -1,0 +1,116 @@
+/* UserDetails.css */
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px 16px 16px 16px;
+  font-family: var(--font-sans, system-ui, sans-serif);
+}
+
+.user-details__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.user-details__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--warning, #f59e0b);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+.user-details__avatar--company {
+  background-color: var(--primary, #3b82f6);
+}
+
+.user-details__status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  font-size: 14px;
+}
+.user-details__status--active {
+  color: var(--success, #10b981);
+}
+.user-details__status--inactive {
+  color: var(--text-muted, #9ca3af);
+}
+
+.user-details__section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-details__section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-details__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  row-gap: 16px;
+  column-gap: 24px;
+}
+
+.user-details__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-details__label {
+  font-size: 12px;
+  color: var(--text-muted, #9ca3af);
+  font-weight: 400;
+}
+
+.user-details__value {
+  font-size: 15px;
+  color: var(--text-main);
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.user-details__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  background-color: color-mix(in srgb, var(--primary), transparent 90%);
+  color: var(--primary);
+  width: fit-content;
+}
+
+@media (max-width: 768px) {
+  .user-details__grid {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
+
+  .user-details__field[style*='column'] {
+    grid-column: 1 / -1 !important;
+  }
+}

@@ -7,6 +7,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     | 'secondary'
     | 'outline'
     | 'ghost'
+    | 'action'
     | 'danger'
     | 'subtle'
     | 'success'
@@ -17,6 +18,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   circle?: boolean;
+  iconOnly?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -29,11 +31,12 @@ export const Button: React.FC<ButtonProps> = ({
   className = '',
   disabled,
   circle = false,
+  iconOnly = false,
   ...props
 }) => {
   return (
     <button
-      className={`btn btn--${variant} btn--${size} ${className} ${circle ? `btn--circle btn--circle--${size}` : ''}`}
+      className={`btn btn--${variant} btn--${size} ${className} ${iconOnly ? 'btn--icon-only' : ''} ${circle ? 'btn--circle' : ''}`}
       disabled={disabled || isLoading}
       {...props}
     >
@@ -41,7 +44,7 @@ export const Button: React.FC<ButtonProps> = ({
       {!isLoading && leftIcon && (
         <span className="btn__icon-left">{leftIcon}</span>
       )}
-      {children}
+      {!iconOnly && children}
       {!isLoading && rightIcon && (
         <span className="btn__icon-right">{rightIcon}</span>
       )}

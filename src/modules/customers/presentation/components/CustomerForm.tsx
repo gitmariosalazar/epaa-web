@@ -1,6 +1,7 @@
 import React from 'react';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import type { Customer } from '../../domain/models/Customer';
+import '../styles/CustomerForm.css';
 
 interface CustomerFormProps {
   formData: Omit<Customer, 'customerId'> & { customerId: string };
@@ -8,24 +9,25 @@ interface CustomerFormProps {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
   isEditMode: boolean;
+  isViewOnly?: boolean;
 }
 
 export const CustomerForm: React.FC<CustomerFormProps> = ({
   formData,
   onChange,
-  isEditMode
+  isEditMode,
+  isViewOnly = false
 }) => {
   return (
-    <div style={{ display: 'grid', gap: '16px' }}>
-      <div
-        style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}
-      >
+    <div className="customer-form__container">
+      <div className="customer-form__row-2">
         <Input
           label="First Name"
           name="firstName"
           value={formData.firstName}
           onChange={onChange}
           required
+          disabled={isViewOnly}
         />
         <Input
           label="Last Name"
@@ -33,19 +35,18 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
           value={formData.lastName}
           onChange={onChange}
           required
+          disabled={isViewOnly}
         />
       </div>
 
-      <div
-        style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}
-      >
+      <div className="customer-form__row-2">
         <Input
           label="Identity ID (Cedula)"
           name="customerId"
           value={formData.customerId}
           onChange={onChange}
           required
-          disabled={isEditMode}
+          disabled={isEditMode || isViewOnly}
         />
         <Input
           label="Date of Birth"
@@ -53,39 +54,22 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
           name="dateOfBirth"
           value={formData.dateOfBirth || ''}
           onChange={onChange}
+          disabled={isViewOnly}
         />
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr',
-          gap: '16px'
-        }}
-      >
+      <div className="customer-form__row-2">
         <Input
           label="Email"
           type="email"
           name="emails"
           value={formData.emails[0] || ''}
           onChange={(e) => {
-            // Simple handling for single email for now
-            const newEmails = [e.target.value];
-            // We need to propagate this change correctly.
-            // Since onChange expects an event, we might need a custom handler or modify the ViewModel.
-            // For now, let's assume the ViewModel handles array updates via a specific method or we pass a synthetic event.
-            // A better way is to handle this in constraints of the current onChange signature:
-            // The ViewModel `handleInputChange` might not handle arrays deeply.
-            // Let's rely on `setFormData` exposed from VM or just use a custom handler here if we could.
-            // Given the VM structure, we might need to patch it.
-            // Let's use the `name` as a path or specialized handler.
-            // PROPOSAL: Update VM to handle `emails` array or just send a custom event.
-            // Simplification: We will bind to a temporary local state or assume VM handles specific field names.
-            // Let's assume the VM's handleInputChange is simple. We will hack it slightly by sending the array as value.
             onChange({
-              target: { name: 'emails', value: newEmails }
+              target: { name: 'emails', value: [e.target.value] }
             } as any);
           }}
+          disabled={isViewOnly}
         />
         <Input
           label="Phone"
@@ -96,52 +80,49 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
               target: { name: 'phoneNumbers', value: [e.target.value] }
             } as any);
           }}
+          disabled={isViewOnly}
         />
-        <div className="input-group">
-          <label>Sex</label>
-          <select
-            name="sexId"
-            value={formData.sexId}
-            onChange={onChange}
-            className="input-field"
-          >
-            <option value={1}>Male</option>
-            <option value={2}>Female</option>
-          </select>
-        </div>
       </div>
 
-      <div
-        style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}
-      >
+      <div className="customer-form__row-2">
         <Input
           label="Address"
           name="address"
           value={formData.address || ''}
           onChange={onChange}
+          disabled={isViewOnly}
         />
         <Input
           label="Parish ID"
           name="parishId"
           value={formData.parishId}
           onChange={onChange}
+          disabled={isViewOnly}
         />
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr',
-          gap: '16px'
-        }}
-      >
-        <div className="input-group">
-          <label>Civil Status</label>
+      <div className="customer-form__row-2">
+        <div className="customer-form__group">
+          <label className="customer-form__label">Sex</label>
+          <select
+            name="sexId"
+            value={formData.sexId}
+            onChange={onChange}
+            className="customer-form__control"
+            disabled={isViewOnly}
+          >
+            <option value={1}>Male</option>
+            <option value={2}>Female</option>
+          </select>
+        </div>
+        <div className="customer-form__group">
+          <label className="customer-form__label">Civil Status</label>
           <select
             name="civilStatus"
             value={formData.civilStatus}
             onChange={onChange}
-            className="input-field"
+            className="customer-form__control"
+            disabled={isViewOnly}
           >
             <option value={1}>Single</option>
             <option value={2}>Married</option>
@@ -150,23 +131,29 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
             <option value={5}>Free Union</option>
           </select>
         </div>
-        <div className="input-group">
-          <label>Profession ID</label>
+      </div>
+
+      <div className="customer-form__row-2">
+        <div className="customer-form__group">
+          <label className="customer-form__label">Profession ID</label>
           <input
             type="number"
             name="professionId"
             value={formData.professionId}
             onChange={onChange}
-            className="input-field"
+            className="customer-form__control"
+            disabled={isViewOnly}
           />
         </div>
-        <div className="input-group">
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="customer-form__checkbox-wrapper">
+          <label className="customer-form__checkbox-label">
             <input
               type="checkbox"
               name="deceased"
               checked={formData.deceased}
               onChange={onChange}
+              className="customer-form__checkbox"
+              disabled={isViewOnly}
             />
             Deceased
           </label>

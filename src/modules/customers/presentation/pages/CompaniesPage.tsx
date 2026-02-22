@@ -31,23 +31,24 @@ export const CompaniesPage: React.FC = () => {
         <div style={{ display: 'flex', gap: '8px' }}>
           <Button
             size="sm"
-            variant="ghost"
+            variant="action"
             circle
             onClick={() => companyVM.openEdit(row)}
+            title="Edit"
           >
-            <Edit2 size={16} />
+            <Edit2 size={14} color="var(--text-secondary)" />
           </Button>
           <Button
             size="sm"
-            variant="ghost"
+            variant="action"
             circle
             onClick={() => {
               companyVM.setSelectedCompany(row);
               companyVM.setIsDeleteOpen(true);
             }}
-            style={{ color: 'var(--error)' }}
+            title="Delete"
           >
-            <Trash2 size={16} />
+            <Trash2 size={14} color="var(--error)" />
           </Button>
         </div>
       )
@@ -102,14 +103,14 @@ export const CompaniesPage: React.FC = () => {
         isOpen={companyVM.isFormOpen}
         onClose={() => companyVM.setIsFormOpen(false)}
         title={companyVM.selectedCompany ? 'Edit Company' : 'New Company'}
-        size="lg"
+        size="xl"
         footer={
-          <div className="users-modal__footer--end">
+          <>
             <Button
               variant="outline"
               onClick={() => companyVM.setIsFormOpen(false)}
             >
-              Cancel
+              Cancel11
             </Button>
             <Button
               onClick={
@@ -120,7 +121,7 @@ export const CompaniesPage: React.FC = () => {
             >
               Save
             </Button>
-          </div>
+          </>
         }
       >
         <CompanyForm

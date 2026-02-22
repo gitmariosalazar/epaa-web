@@ -18,6 +18,7 @@ export const useCompaniesViewModel = () => {
   const [limit] = useState(10);
   const [hasMore, setHasMore] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchType, setSearchType] = useState('all');
 
   // Modals
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -125,16 +126,36 @@ export const useCompaniesViewModel = () => {
   };
 
   // Filter
-  const filteredCompanies = companies.filter(
-    (company) =>
-      (company.companyName?.toLowerCase() || '').includes(
-        searchTerm.toLowerCase()
-      ) ||
-      (company.socialReason?.toLowerCase() || '').includes(
-        searchTerm.toLowerCase()
-      ) ||
-      (company.companyRuc || '').includes(searchTerm)
-  );
+  const filteredCompanies = companies.filter((company) => {
+    const term = searchTerm.toLowerCase();
+    if (!term) return true;
+
+    const name = company.companyName?.toLowerCase() || '';
+    const socialReason = company.socialReason?.toLowerCase() || '';
+    const ruc = company.companyRuc || '';
+    const email = company.companyEmails?.[0]?.correo?.toLowerCase() || '';
+    const phone = company.companyPhones?.[0]?.numero || '';
+
+    switch (searchType) {
+      case 'name':
+        return name.includes(term) || socialReason.includes(term);
+      case 'id':
+        return ruc.includes(term);
+      case 'email':
+        return email.includes(term);
+      case 'phone':
+        return phone.includes(term);
+      case 'all':
+      default:
+        return (
+          name.includes(term) ||
+          socialReason.includes(term) ||
+          ruc.includes(term) ||
+          email.includes(term) ||
+          phone.includes(term)
+        );
+    }
+  });
 
   return {
     companies,
@@ -145,6 +166,8 @@ export const useCompaniesViewModel = () => {
     hasMore,
     searchTerm,
     setSearchTerm,
+    searchType,
+    setSearchType,
     isFormOpen,
     setIsFormOpen,
     isDeleteOpen,

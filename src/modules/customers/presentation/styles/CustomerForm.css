@@ -1,0 +1,85 @@
+.customer-form__container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.customer-form__row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.customer-form__row-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+/* Custom styling for native inputs/selects to match the generic Input component styling and sizing */
+.customer-form__group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.customer-form__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.customer-form__control {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--secondary);
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+  color: var(--text-main);
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.customer-form__control:hover {
+  border-color: var(--text-muted);
+}
+
+.customer-form__control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent), transparent 85%);
+}
+
+.customer-form__checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-top: 1.25rem; /* To align with inputs that have top labels */
+}
+
+.customer-form__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.customer-form__checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .customer-form__row-2,
+  .customer-form__row-3 {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
