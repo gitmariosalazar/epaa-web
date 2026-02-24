@@ -30,6 +30,8 @@ import { ReportsPage } from '@/modules/dashboard/presentation/pages/reports/Repo
 import './index.css';
 import { RolesProvider } from '@/modules/roles/presentation/context/RolesContext';
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ReadingsProvider } from '@/modules/readings/presentation/context/ReadingsContext';
+import { CreateReadingPage } from '@/modules/readings/presentation/pages/CreateReadingPage';
 
 const ProtectedRoute = () => {
   const { token, isLoading } = useAuth();
@@ -89,6 +91,17 @@ function App() {
                 <Route path="/permissions" element={<PermissionsPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route
+                  path="/readings/*"
+                  element={
+                    <ReadingsProvider>
+                      <Routes>
+                        <Route path="add" element={<CreateReadingPage />} />
+                        {/* Other reading routes can be added here */}
+                      </Routes>
+                    </ReadingsProvider>
+                  }
+                />
                 {/* Add other protected routes here */}
               </Route>
             </Route>
