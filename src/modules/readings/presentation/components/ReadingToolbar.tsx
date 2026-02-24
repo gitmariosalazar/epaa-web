@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaSave, FaTimes, FaBriefcase, FaSearch } from 'react-icons/fa';
+import { FaSave, FaTimes, FaSearch } from 'react-icons/fa';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import type { ReadingInfo } from '../../domain/models/ReadingInfoResponse';
