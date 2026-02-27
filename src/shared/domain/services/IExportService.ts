@@ -2,7 +2,7 @@ export interface ReportOptions {
   fileName: string;
   title: string;
   columns: string[];
-  rows: string[][];
+  rows: any[][];
   clientInfo?: Record<string, string>;
   orientation?: 'portrait' | 'landscape';
 }

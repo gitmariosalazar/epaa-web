@@ -365,7 +365,7 @@ export const EntryDataPage: React.FC = () => {
     const rows = currentFilteredData.map((d) => mapRowData(d, selectedCols));
 
     return exportService.generatePdfBlobUrl({
-      rows,
+      rows: rows,
       columns: colLabels,
       fileName: `reporte_${activeTab}`,
       title: currentReportTitle,
@@ -382,7 +382,7 @@ export const EntryDataPage: React.FC = () => {
     const rows = currentFilteredData.map((d) => mapRowData(d, selectedCols));
 
     exportService.exportToPdf({
-      rows,
+      rows: rows,
       columns: colLabels,
       fileName: `reporte_${activeTab}`,
       title: currentReportTitle,
