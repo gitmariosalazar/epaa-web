@@ -16,6 +16,21 @@ export interface Column<T> {
   style?: React.CSSProperties;
   sortable?: boolean;
   sortKey?: keyof T;
+  isNumeric?: boolean;
+}
+
+export interface SummaryRow {
+  label: string;
+  value: string | number;
+  highlight?: boolean;
+  percentage?: string;
+}
+
+interface TotalRow {
+  label: string;
+  value: string | number;
+  highlight?: boolean;
+  percentage?: string;
 }
 
 interface TableProps<T> {
@@ -29,6 +44,10 @@ interface TableProps<T> {
   emptyState?: React.ReactNode;
   sortConfig?: { key: keyof T | string; direction: 'asc' | 'desc' } | null;
   onSort?: (key: keyof T | string, direction: 'asc' | 'desc') => void;
+  summaryRows?: SummaryRow[];
+  totalRows?: TotalRow[];
+  width?: '100' | '70' | '50' | 'auto';
+  fullHeight?: boolean;
 }
 
 export const Table = <T extends { [key: string]: any }>({
@@ -41,21 +60,28 @@ export const Table = <T extends { [key: string]: any }>({
   pageSize = 15,
   emptyState,
   sortConfig,
-  onSort
+  onSort,
+  summaryRows = [],
+  totalRows = [],
+  width = '100',
+  fullHeight = false
 }: TableProps<T>) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [currentLimit, setCurrentLimit] = React.useState(pageSize);
+
+  React.useEffect(() => {
+    setCurrentLimit(pageSize);
+  }, [pageSize]);
 
   // Adjust page when data changes (e.g. new search or data refresh)
   React.useEffect(() => {
-    const totalPages = Math.ceil(data.length / pageSize);
+    const totalPages = Math.ceil(data.length / currentLimit);
     // Only reset if current page is out of bounds
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(1);
     }
-    // If we wanted strict "search resets to 1", we'd need a separate prop or callback.
-    // For now, "persistence unless undefined" is the requested behavior.
-  }, [data, pageSize]);
+  }, [data, currentLimit, currentPage]);
 
   const handleSort = (key: keyof T | string) => {
     if (!onSort) return;
@@ -81,9 +107,9 @@ export const Table = <T extends { [key: string]: any }>({
     );
   }
 
-  const totalPages = Math.ceil(data.length / pageSize);
+  const totalPages = Math.ceil(data.length / currentLimit);
   const paginatedData = pagination
-    ? data.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+    ? data.slice((currentPage - 1) * currentLimit, currentPage * currentLimit)
     : data;
 
   const handlePrev = () => setCurrentPage((p) => Math.max(1, p - 1));
@@ -91,10 +117,12 @@ export const Table = <T extends { [key: string]: any }>({
 
   return (
     <div
-      className={`table-container ${containerClassName}`}
-      style={{ ...containerStyle, display: 'flex', flexDirection: 'column' }}
+      className={`table-container table--w-${width} ${
+        fullHeight ? 'table--full-height' : ''
+      } ${containerClassName}`}
+      style={containerStyle}
     >
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div className="table-body-wrapper">
         <table className="table">
           <thead>
             <tr>
@@ -154,7 +182,10 @@ export const Table = <T extends { [key: string]: any }>({
                     <td
                       key={colIndex}
                       className={col.className}
-                      style={col.style}
+                      style={{
+                        ...col.style,
+                        textAlign: col.isNumeric ? 'right' : 'inherit'
+                      }}
                     >
                       {typeof col.accessor === 'function'
                         ? col.accessor(item)
@@ -176,68 +207,181 @@ export const Table = <T extends { [key: string]: any }>({
         </table>
       </div>
 
-      {pagination && totalPages > 1 && (
+      {totalRows.length > 0 && (
+        <div className="table-totals-horizontal">
+          {totalRows.map((row, idx) => (
+            <div
+              key={idx}
+              className={`table-total-item ${
+                row.highlight ? 'table-total-item--highlight' : ''
+              }`}
+            >
+              <div className="table-total-label">
+                {row.label}
+                {row.percentage && (
+                  <span className="table-total-percentage">
+                    ({row.percentage})
+                  </span>
+                )}
+              </div>
+              <div className="table-total-value">
+                {typeof row.value === 'number'
+                  ? new Intl.NumberFormat('en-US', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    }).format(row.value)
+                  : row.value}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {summaryRows.length > 0 && (
+        <div className="table-summary-block">
+          <div className="table-summary-content">
+            {summaryRows.map((row, idx) => (
+              <div
+                key={idx}
+                className={`table-summary-row ${
+                  row.highlight ? 'table-summary-row--highlight' : ''
+                }`}
+              >
+                <div className="table-summary-label">
+                  <span>{row.label}</span>
+                  {row.percentage && (
+                    <span className="table-summary-percentage">
+                      {row.percentage}
+                    </span>
+                  )}
+                </div>
+                <div className="table-summary-value">
+                  {typeof row.value === 'number'
+                    ? new Intl.NumberFormat('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      }).format(row.value)
+                    : row.value}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {pagination && (
         <div
           style={{
             display: 'flex',
-            justifyContent: 'center',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            gap: '1rem',
             padding: '1rem',
             borderTop: '1px solid var(--border-color)',
-            background: 'var(--surface)'
+            background: 'var(--surface)',
+            flexWrap: 'wrap',
+            gap: '1rem'
           }}
         >
-          <button
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-            className="btn-icon"
+          <div
             style={{
-              padding: '0.5rem',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)',
-              background: 'var(--surface)',
-              cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-              opacity: currentPage === 1 ? 0.5 : 1,
-              color: 'var(--text-main)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              gap: '1.5rem',
+              flexWrap: 'wrap'
             }}
           >
-            <ChevronLeft size={20} />
-          </button>
-          <span
-            style={{
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              color: 'var(--text-secondary)'
-            }}
-          >
-            {t('common.pagination.page', {
-              current: currentPage,
-              total: totalPages
-            }) || `Page ${currentPage} of ${totalPages}`}
-          </span>
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className="btn-icon"
-            style={{
-              padding: '0.5rem',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)',
-              background: 'var(--surface)',
-              cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-              opacity: currentPage === totalPages ? 0.5 : 1,
-              color: 'var(--text-main)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <ChevronRight size={20} />
-          </button>
+            <span
+              style={{
+                fontSize: '0.875rem',
+                color: 'var(--text-secondary)',
+                fontWeight: 500
+              }}
+            >
+              {t('common.table.totalRecords', {
+                count: data.length,
+                defaultValue: `Total Registros: ${data.length}`
+              })}
+            </span>
+
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              <span
+                style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}
+              >
+                {t('common.table.rowsPerPage', {
+                  defaultValue: 'Rows per page:'
+                })}
+              </span>
+              <select
+                value={currentLimit}
+                onChange={(e) => {
+                  setCurrentLimit(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="table-rows-select"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={15}>15</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+          </div>
+
+          {totalPages > 1 && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                justifyContent: 'center'
+              }}
+            >
+              <button
+                onClick={handlePrev}
+                disabled={currentPage === 1}
+                className="pagination-btn"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0.35rem'
+                }}
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <span
+                style={{
+                  fontSize: '0.8125rem',
+                  fontWeight: 600,
+                  color: 'var(--text-main)',
+                  minWidth: '90px',
+                  textAlign: 'center'
+                }}
+              >
+                {t('common.pagination.page', {
+                  current: currentPage,
+                  total: totalPages
+                }) || `Pág. ${currentPage} / ${totalPages}`}
+              </span>
+              <button
+                onClick={handleNext}
+                disabled={currentPage === totalPages}
+                className="pagination-btn"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0.35rem'
+                }}
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

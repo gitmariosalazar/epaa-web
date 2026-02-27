@@ -20,71 +20,77 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
     setIsExpanded((prev) => !prev);
   };
 
-  if (item.subItems) {
-    const hasActiveChild = item.subItems.some(
-      (child) => child.to === location.pathname
-    );
-
-    return (
-      <div className="sidebar__item-wrapper">
-        <div
-          className={`sidebar__link sidebar__parent-item ${
-            hasActiveChild ? 'sidebar__link--active-parent' : ''
-          }`}
-          onClick={toggleSubMenu}
-          title={isCollapsed ? item.label : ''}
-        >
-          <span className="sidebar__icon">{item.icon}</span>
-          {!isCollapsed && (
-            <>
-              <span className="sidebar__label">{item.label}</span>
-              <span className="sidebar__chevron">
-                {isExpanded ? (
-                  <ChevronDown size={16} />
-                ) : (
-                  <ChevronRight size={16} />
-                )}
-              </span>
-            </>
-          )}
-        </div>
-
-        <div
-          className={`sidebar__sub-menu ${
-            isExpanded && !isCollapsed ? 'sidebar__sub-menu--open' : ''
-          }`}
-        >
-          {item.subItems.map((subItem) => (
-            <NavLink
-              key={subItem.to}
-              to={subItem.to!}
-              end
-              className={({ isActive }) =>
-                `sidebar__link sidebar__sub-link ${
-                  isActive ? 'sidebar__link--active' : ''
-                }`
-              }
-            >
-              <span className="sidebar__icon">{subItem.icon}</span>
-              <span className="sidebar__label">{subItem.label}</span>
-            </NavLink>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <NavLink
-      to={item.to!}
-      end
-      className={({ isActive }) =>
-        `sidebar__link ${isActive ? 'sidebar__link--active' : ''}`
-      }
-      title={isCollapsed ? item.label : ''}
-    >
-      <span className="sidebar__icon">{item.icon}</span>
-      {!isCollapsed && <span className="sidebar__label">{item.label}</span>}
-    </NavLink>
+    <div className="sidebar__item-wrapper">
+      {item.subItems ? (
+        <>
+          <div
+            className={`sidebar__link sidebar__parent-item ${
+              item.subItems.some((child) => child.to === location.pathname)
+                ? 'sidebar__link--active-parent'
+                : ''
+            }`}
+            onClick={toggleSubMenu}
+          >
+            <span className="sidebar__icon">{item.icon}</span>
+            {!isCollapsed && (
+              <>
+                <span className="sidebar__label">{item.label}</span>
+                <span className="sidebar__chevron">
+                  {isExpanded ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </span>
+              </>
+            )}
+          </div>
+
+          <div
+            className={`sidebar__sub-menu ${
+              isExpanded && !isCollapsed ? 'sidebar__sub-menu--open' : ''
+            }`}
+          >
+            {isCollapsed && (
+              <div className="sidebar__flyout-header">{item.label}</div>
+            )}
+            {item.subItems.map((subItem) => (
+              <NavLink
+                key={subItem.to}
+                to={subItem.to!}
+                end
+                className={({ isActive }) =>
+                  `sidebar__link sidebar__sub-link ${
+                    isActive ? 'sidebar__link--active' : ''
+                  }`
+                }
+              >
+                <span className="sidebar__icon">{subItem.icon}</span>
+                <span className="sidebar__label">{subItem.label}</span>
+              </NavLink>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <NavLink
+            to={item.to!}
+            end
+            className={({ isActive }) =>
+              `sidebar__link ${isActive ? 'sidebar__link--active' : ''}`
+            }
+          >
+            <span className="sidebar__icon">{item.icon}</span>
+            {!isCollapsed && (
+              <span className="sidebar__label">{item.label}</span>
+            )}
+          </NavLink>
+          {isCollapsed && (
+            <div className="sidebar__floating-label">{item.label}</div>
+          )}
+        </>
+      )}
+    </div>
   );
 };

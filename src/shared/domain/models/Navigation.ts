@@ -10,4 +10,5 @@ export interface NavItem {
 export interface NavSection {
   title: string;
   items: NavItem[];
+  hideTitle?: boolean;
 }

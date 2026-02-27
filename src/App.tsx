@@ -32,6 +32,10 @@ import { RolesProvider } from '@/modules/roles/presentation/context/RolesContext
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { ReadingsProvider } from '@/modules/readings/presentation/context/ReadingsContext';
 import { CreateReadingPage } from '@/modules/readings/presentation/pages/CreateReadingPage';
+import { PaymentsProvider } from '@/modules/accounting/presentation/context/PaymentsContext';
+import { PaymentsPage } from '@/modules/accounting/presentation/pages/PaymentsPage';
+import { EntryDataProvider } from '@/modules/accounting/presentation/context/EntryDataContext';
+import { EntryDataPage } from '@/modules/accounting/presentation/pages/EntryDataPage';
 
 const ProtectedRoute = () => {
   const { token, isLoading } = useAuth();
@@ -91,6 +95,22 @@ function App() {
                 <Route path="/permissions" element={<PermissionsPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route
+                  path="/accounting"
+                  element={
+                    <PaymentsProvider>
+                      <PaymentsPage />
+                    </PaymentsProvider>
+                  }
+                />
+                <Route
+                  path="/accounting/entry-data"
+                  element={
+                    <EntryDataProvider>
+                      <EntryDataPage />
+                    </EntryDataProvider>
+                  }
+                />
                 <Route
                   path="/readings/*"
                   element={

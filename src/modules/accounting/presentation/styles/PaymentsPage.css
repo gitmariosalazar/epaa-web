@@ -1,0 +1,103 @@
+/* src/modules/accounting/presentation/styles/PaymentsPage.css */
+
+.payments-page {
+  padding: clamp(0.5rem, 2vw, 1rem);
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.5rem, 2vw, 1rem);
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  animation: fade-in 0.3s ease-out;
+  color: var(--text-main);
+  box-sizing: border-box;
+}
+
+@media (min-width: 1024px) {
+  .payments-page {
+    padding: 1rem;
+  }
+}
+
+.payments-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.payments-title {
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-main);
+}
+
+.payments-subtitle {
+  font-size: clamp(0.75rem, 3vw, 0.875rem);
+  color: var(--text-secondary);
+  font-weight: 500;
+  max-width: 48rem;
+  line-height: 1.4;
+}
+
+.payments-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 260px;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+  background: linear-gradient(
+    135deg,
+    var(--surface) 0%,
+    var(--background) 100%
+  );
+  animation: fade-in 0.25s ease-out;
+}
+
+.payments-error-container {
+  padding: 1.5rem;
+  background-color: rgba(239, 68, 68, 0.1); /* light red */
+  color: #ef4444; /* tailwind red-500 */
+  border-radius: 0.75rem;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.payments-error-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: #ef4444;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.payments-error-text {
+  font-weight: 500;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

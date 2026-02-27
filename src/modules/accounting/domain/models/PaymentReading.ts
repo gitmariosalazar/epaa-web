@@ -1,0 +1,31 @@
+export interface PaymentReading {
+  incomeCode: string;
+  cardId: string;
+  name: string;
+  lastName: string;
+  cadastralKey: string;
+  address: string;
+  rate: number;
+  month: string;
+  year: number;
+  currentReading: number;
+  previousReading: number;
+  readingValue: number;
+  paymentUser: string;
+  titleCode: string;
+  consumption: number;
+  readingStatus: string;
+  paymentDate: string;
+  trashRate: number;
+  epaaValue: number;
+  thirdPartyValue: number;
+  surcharge: number;
+  total: number;
+  dueDate: string;
+  incomeStatus: string;
+  incomeDate: string;
+  value: number;
+  orderValue: number;
+  paymentMethod?: string;
+  comments: string;
+}

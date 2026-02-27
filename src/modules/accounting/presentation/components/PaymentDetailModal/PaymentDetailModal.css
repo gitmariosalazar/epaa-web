@@ -1,0 +1,112 @@
+.payment-detail-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.payment-detail__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--surface-hover);
+}
+
+.payment-detail__info-main h2 {
+  margin: 0;
+  color: var(--text-main);
+  font-size: 1.5rem;
+}
+
+.payment-detail__status {
+  margin-top: var(--spacing-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.payment-detail__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.payment-detail__section h3 {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--surface-hover);
+  padding-bottom: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+.payment-detail__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+.payment-detail__item label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.payment-detail__item span {
+  font-size: 0.95rem;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.payment-detail__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.payment-detail__tag {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background-color: var(--surface-hover);
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  font-weight: 500;
+}
+
+.payment-detail__tag--info {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--accent);
+}
+
+.payment-detail__tag--highlight {
+  background-color: rgba(245, 158, 11, 0.1); /* warning color */
+  color: var(--warning);
+}
+
+.payment-detail__tag--money {
+  background-color: rgba(16, 185, 129, 0.1); /* success color */
+  color: var(--success);
+}
+
+.payment-detail__tag--total {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+  border: 1px solid var(--border-color);
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .payment-detail__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-detail__header {
+    flex-direction: column;
+    text-align: center;
+  }
+}

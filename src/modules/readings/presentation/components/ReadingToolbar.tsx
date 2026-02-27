@@ -53,7 +53,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
       <div className="cr-actions">
         <Button
           className="cr-action-btn"
-          variant="success"
+          color="success"
           onClick={handleSave}
           disabled={!readingInfo?.hasCurrentReading || isSubmitting}
           leftIcon={<FaSave />}
@@ -62,7 +62,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
         </Button>
         <Button
           className="cr-action-btn"
-          variant="danger"
+          color="error"
           onClick={handleCancel}
           disabled={!readingInfo}
           leftIcon={<FaTimes />}
@@ -82,7 +82,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
 
         <Button
           className="cr-action-btn"
-          variant="warning"
+          color="warning"
           onClick={handleCancel}
           disabled={!readingInfo}
           leftIcon={<GrClear />}

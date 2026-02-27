@@ -8,7 +8,9 @@ import {
   CheckCircle,
   User,
   Building2,
-  Lock
+  Lock,
+  Receipt,
+  BarChart3
 } from 'lucide-react';
 import { MdAssignmentAdd, MdOutlineCable } from 'react-icons/md';
 import { TiThList } from 'react-icons/ti';
@@ -21,6 +23,7 @@ export const useNavigation = (): NavSection[] => {
   const navSections: NavSection[] = [
     {
       title: t('sidebar.general'),
+      hideTitle: true,
       items: [
         {
           icon: <LayoutDashboard size={20} />,
@@ -36,6 +39,7 @@ export const useNavigation = (): NavSection[] => {
     },
     {
       title: t('sidebar.administration'),
+      hideTitle: true,
       items: [
         {
           icon: <Lock size={20} />,
@@ -67,6 +71,7 @@ export const useNavigation = (): NavSection[] => {
     },
     {
       title: t('sidebar.customers'),
+      hideTitle: true,
       items: [
         {
           icon: <User size={20} />,
@@ -92,15 +97,16 @@ export const useNavigation = (): NavSection[] => {
       ]
     },
     {
-      title: 'Connections', // TODO: Add translation key 'sidebar.connections'
+      title: 'Connections',
+      hideTitle: true,
       items: [
         {
           icon: <MdOutlineCable size={20} />,
-          label: 'Connections', // TODO: Add translation key 'sidebar.connections'
+          label: 'Connections',
           subItems: [
             {
               icon: <TiThList size={18} />,
-              label: 'List', // TODO: Add translation key 'sidebar.list'
+              label: 'List',
               to: '/connections'
             }
           ]
@@ -108,25 +114,48 @@ export const useNavigation = (): NavSection[] => {
       ]
     },
     {
-      title: 'Readings', // TODO: Add translation key 'sidebar.readings'
+      title: 'Accounting',
+      hideTitle: true,
+      items: [
+        {
+          icon: <Receipt size={20} />,
+          label: 'Contabilidad',
+          subItems: [
+            {
+              icon: <Receipt size={18} />,
+              label: 'Pagos',
+              to: '/accounting'
+            },
+            {
+              icon: <BarChart3 size={18} />,
+              label: 'Reportes de Ingreso',
+              to: '/accounting/entry-data'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      title: 'Readings',
+      hideTitle: true,
       items: [
         {
           icon: <TbClock24 size={20} />,
-          label: 'Readings', // TODO: Add translation key 'sidebar.readings'
+          label: 'Readings',
           subItems: [
             {
               icon: <MdAssignmentAdd size={18} />,
-              label: 'Add Reading', // TODO: Add translation key 'sidebar.addReading'
+              label: 'Add Reading',
               to: '/readings/add'
             },
             {
               icon: <TiThList size={18} />,
-              label: 'Foto Lecturas', // TODO: Add translation key 'sidebar.list'
+              label: 'Foto Lecturas',
               to: '/readings/photo'
             },
             {
               icon: <TiThList size={18} />,
-              label: 'List', // TODO: Add translation key 'sidebar.list'
+              label: 'List',
               to: '/readings'
             }
           ]
