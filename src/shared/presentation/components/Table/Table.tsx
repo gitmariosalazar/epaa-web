@@ -5,9 +5,12 @@ import {
   ChevronRight,
   ArrowUp,
   ArrowDown,
-  ArrowUpDown
+  ArrowUpDown,
+  FileText
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '../Button/Button';
+import { ColoredIcons } from '../../utils/icons/CustomIcons';
 
 export interface Column<T> {
   header: string;
@@ -48,6 +51,7 @@ interface TableProps<T> {
   totalRows?: TotalRow[];
   width?: '100' | '70' | '50' | 'auto';
   fullHeight?: boolean;
+  onExportPdf?: () => void;
 }
 
 export const Table = <T extends { [key: string]: any }>({
@@ -64,7 +68,8 @@ export const Table = <T extends { [key: string]: any }>({
   summaryRows = [],
   totalRows = [],
   width = '100',
-  fullHeight = false
+  fullHeight = false,
+  onExportPdf
 }: TableProps<T>) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -208,32 +213,91 @@ export const Table = <T extends { [key: string]: any }>({
       </div>
 
       {totalRows.length > 0 && (
-        <div className="table-totals-horizontal">
-          {totalRows.map((row, idx) => (
+        <div
+          className="table-totals-horizontal"
+          style={{ paddingRight: onExportPdf ? '1rem' : undefined }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '1.5rem',
+              flex: 1
+            }}
+          >
+            {totalRows.map((row, idx) => (
+              <div
+                key={idx}
+                className={`table-total-item ${
+                  row.highlight ? 'table-total-item--highlight' : ''
+                }`}
+              >
+                <div className="table-total-label">
+                  {row.label}
+                  {row.percentage && (
+                    <span className="table-total-percentage">
+                      ({row.percentage})
+                    </span>
+                  )}
+                </div>
+                <div className="table-total-value">
+                  {typeof row.value === 'number'
+                    ? new Intl.NumberFormat('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      }).format(row.value)
+                    : row.value}
+                </div>
+              </div>
+            ))}
+          </div>
+          {onExportPdf && (
             <div
-              key={idx}
-              className={`table-total-item ${
-                row.highlight ? 'table-total-item--highlight' : ''
-              }`}
+              style={{
+                marginLeft: 'auto',
+                display: 'flex',
+                alignItems: 'center'
+              }}
             >
-              <div className="table-total-label">
-                {row.label}
-                {row.percentage && (
-                  <span className="table-total-percentage">
-                    ({row.percentage})
-                  </span>
-                )}
-              </div>
-              <div className="table-total-value">
-                {typeof row.value === 'number'
-                  ? new Intl.NumberFormat('en-US', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    }).format(row.value)
-                  : row.value}
-              </div>
+              <Button
+                onClick={onExportPdf}
+                variant="outline"
+                color="slate"
+                iconOnly
+                circle
+                disabled={data.length === 0}
+                title={t('common.exportPdf', 'Exportar PDF')}
+                leftIcon={ColoredIcons.Pdf}
+              />
             </div>
-          ))}
+          )}
+        </div>
+      )}
+
+      {totalRows.length === 0 && onExportPdf && (
+        <div
+          className="table-totals-horizontal"
+          style={{ paddingRight: '1rem', alignItems: 'center' }}
+        >
+          <div style={{ flex: 1 }} />
+          <div
+            style={{
+              marginLeft: 'auto',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            <Button
+              onClick={onExportPdf}
+              variant="ghost"
+              color="slate"
+              iconOnly
+              circle
+              disabled={data.length === 0}
+              title={t('common.exportPdf', 'Exportar PDF')}
+              leftIcon={ColoredIcons.Pdf}
+            />
+          </div>
         </div>
       )}
 

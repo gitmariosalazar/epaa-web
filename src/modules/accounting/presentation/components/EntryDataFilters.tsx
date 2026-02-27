@@ -158,7 +158,8 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
       {/* ── RIGHT: search + conditional dropdowns ── */}
       <div className="entry-filter-right">
         {/* Search — always visible */}
-        <div className="entry-filter-group entry-filter-group--search">
+        {/*
+          <div className="entry-filter-group entry-filter-group--search">
           <label className="entry-filter-label">
             {t('entryData.filters.search', 'Buscar')}
           </label>
@@ -176,6 +177,7 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
             />
           </div>
         </div>
+          */}
 
         {/* Collector — grouped | collector | fullBreakdown */}
         {show.collector && (

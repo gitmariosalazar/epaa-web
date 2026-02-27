@@ -16,6 +16,11 @@ import {
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
 
+// ── Imports for PDF Export exactly like dashboard ────────────────────────────
+import { ExportService } from '@/shared/infrastructure/services/ExportService';
+import { ReportPreviewModal } from '@/shared/presentation/components/reports/ReportPreviewModal';
+import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
+
 // ── Static tab definitions ────────────────────────────────────────────────────
 const ENTRY_TABS: TabItem<EntryDataTab>[] = [
   {
@@ -36,6 +41,49 @@ const ENTRY_TABS: TabItem<EntryDataTab>[] = [
   }
 ];
 
+// ── Export columns Definitions ────────────────────────────────────────────────
+const fmt = (n: any) => `$${Number(n || 0).toFixed(2)}`;
+
+const GROUPED_AND_BREAKDOWN_COLUMNS: ExportColumn[] = [
+  { id: 'date', label: 'Fecha', isDefault: true },
+  { id: 'collector', label: 'Cobrador', isDefault: true },
+  { id: 'titleCode', label: 'Código T.', isDefault: true },
+  { id: 'paymentMethod', label: 'Mét. Pago', isDefault: true },
+  { id: 'status', label: 'Estado', isDefault: true },
+  { id: 'titleValue', label: 'V. EPAA', isDefault: true },
+  { id: 'thirdPartyValue', label: 'V. Terc.', isDefault: true },
+  { id: 'surchargeValue', label: 'Recargo', isDefault: true },
+  { id: 'trashRateValue', label: 'TB D.I.', isDefault: true },
+  { id: 'detailValue', label: 'TB Valor', isDefault: true },
+  { id: 'incomeCount', label: 'Ingresos', isDefault: true },
+  { id: 'grandTotal', label: 'Total', isDefault: true }
+];
+
+const COLLECTOR_COLUMNS: ExportColumn[] = [
+  { id: 'date', label: 'Fecha', isDefault: true },
+  { id: 'collector', label: 'Cobrador', isDefault: true },
+  { id: 'paymentCount', label: 'Ingresos', isDefault: true },
+  { id: 'titleValue', label: 'V. EPAA', isDefault: true },
+  { id: 'thirdPartyValue', label: 'V. Terc.', isDefault: true },
+  { id: 'surchargeValue', label: 'Recargo', isDefault: true },
+  { id: 'trashRateValue', label: 'TB D.I.', isDefault: true },
+  { id: 'detailValue', label: 'TB Valor', isDefault: true },
+  { id: 'totalCollected', label: 'Total', isDefault: true }
+];
+
+const PAYMENT_METHOD_COLUMNS: ExportColumn[] = [
+  { id: 'date', label: 'Fecha', isDefault: true },
+  { id: 'paymentMethod', label: 'Mét. Pago', isDefault: true },
+  { id: 'status', label: 'Estado', isDefault: true },
+  { id: 'incomeCount', label: 'Ingresos', isDefault: true },
+  { id: 'titleValue', label: 'V. EPAA', isDefault: true },
+  { id: 'thirdPartyValue', label: 'V. Terc.', isDefault: true },
+  { id: 'surchargeValue', label: 'Recargo', isDefault: true },
+  { id: 'trashRateValue', label: 'TB D.I.', isDefault: true },
+  { id: 'detailValue', label: 'TB Valor', isDefault: true },
+  { id: 'grandTotal', label: 'Total', isDefault: true }
+];
+
 // ── Sort helper (SRP) ─────────────────────────────────────────────────────────
 function applySortConfig<T>(
   data: T[],
@@ -54,6 +102,8 @@ function applySortConfig<T>(
 // ── Page ──────────────────────────────────────────────────────────────────────
 export const EntryDataPage: React.FC = () => {
   const { t } = useTranslation();
+
+  const exportService = useMemo(() => new ExportService(), []);
 
   const translatedTabs: TabItem<EntryDataTab>[] = [
     {
@@ -107,6 +157,9 @@ export const EntryDataPage: React.FC = () => {
     key: string;
     direction: 'asc' | 'desc';
   } | null>(null);
+
+  // ── PDF Export state ─────────────────────────────────────────────────────────
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
 
   // Reset all local filters when the tab changes
   useEffect(() => {
@@ -168,7 +221,6 @@ export const EntryDataPage: React.FC = () => {
   );
 
   // ── Generic filter + sort helper ─────────────────────────────────────────────
-  // Only the filters relevant to the active tab are applied (matching SHOW map in filters component).
   const applyLocalFilters = <T extends Record<string, any>>(
     data: T[],
     textFields: (keyof T)[]
@@ -195,8 +247,6 @@ export const EntryDataPage: React.FC = () => {
     return applySortConfig(result, sortConfig);
   };
 
-  // Every dependency that may change for each tab is listed explicitly so
-  // React can memoize only the affected dataset.
   const filteredGrouped = useMemo(
     () =>
       applyLocalFilters(dailyGrouped, [
@@ -219,7 +269,6 @@ export const EntryDataPage: React.FC = () => {
 
   const filteredCollector = useMemo(
     () => applyLocalFilters(collectorSummary, ['date', 'collector']),
-    // collector tab: only collector matters  (titleCode/paymentMethod/status won't be set)
     [collectorSummary, searchQuery, selectedCollector, sortConfig]
   );
 
@@ -259,7 +308,90 @@ export const EntryDataPage: React.FC = () => {
     ]
   );
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── PDF Generation Logic ─────────────────────────────────────────────────────
+  const currentFilteredData = useMemo(() => {
+    if (activeTab === 'grouped') return filteredGrouped;
+    if (activeTab === 'collector') return filteredCollector;
+    if (activeTab === 'paymentMethod') return filteredPaymentMethod;
+    return filteredFullBreakdown;
+  }, [
+    activeTab,
+    filteredGrouped,
+    filteredCollector,
+    filteredPaymentMethod,
+    filteredFullBreakdown
+  ]);
+
+  const currentAvailableColumns = useMemo(() => {
+    if (activeTab === 'grouped') return GROUPED_AND_BREAKDOWN_COLUMNS;
+    if (activeTab === 'collector') return COLLECTOR_COLUMNS;
+    if (activeTab === 'paymentMethod') return PAYMENT_METHOD_COLUMNS;
+    return GROUPED_AND_BREAKDOWN_COLUMNS;
+  }, [activeTab]);
+
+  const currentReportTitle = useMemo(() => {
+    if (activeTab === 'grouped') return 'Reporte Diario Agrupado';
+    if (activeTab === 'collector') return 'Resumen por Cobrador';
+    if (activeTab === 'paymentMethod') return 'Reporte por Método de Pago';
+    return 'Desglose Completo';
+  }, [activeTab]);
+
+  const mapRowData = (item: any, selectedCols: ExportColumn[]) => {
+    const rowData: Record<string, string> = {};
+
+    rowData['date'] = item.date || '-';
+    rowData['collector'] = item.collector || '-';
+    rowData['titleCode'] = item.titleCode || '-';
+    rowData['paymentMethod'] = item.paymentMethod || '-';
+    rowData['status'] = item.status || '-';
+    rowData['incomeCount'] = String(item.incomeCount ?? item.paymentCount ?? 0);
+    rowData['titleValue'] = fmt(item.titleValue);
+    rowData['thirdPartyValue'] = fmt(item.thirdPartyValue);
+    rowData['surchargeValue'] = fmt(item.surchargeValue);
+    rowData['trashRateValue'] = fmt(item.trashRateValue);
+    rowData['detailValue'] = fmt(item.detailValue);
+    rowData['grandTotal'] = fmt(item.grandTotal);
+    rowData['totalCollected'] = fmt(item.totalCollected);
+
+    return selectedCols.map((col) => rowData[col.id]);
+  };
+
+  const handlePdfGenerator = ({ orientation, selectedColumnIds }: any) => {
+    const selectedCols = currentAvailableColumns.filter((col) =>
+      selectedColumnIds.includes(col.id)
+    );
+    const colLabels = selectedCols.map((c) => c.label);
+
+    const rows = currentFilteredData.map((d) => mapRowData(d, selectedCols));
+
+    return exportService.generatePdfBlobUrl({
+      rows,
+      columns: colLabels,
+      fileName: `reporte_${activeTab}`,
+      title: currentReportTitle,
+      orientation
+    });
+  };
+
+  const handleDownloadPdf = ({ orientation, selectedColumnIds }: any) => {
+    const selectedCols = currentAvailableColumns.filter((col) =>
+      selectedColumnIds.includes(col.id)
+    );
+    const colLabels = selectedCols.map((c) => c.label);
+
+    const rows = currentFilteredData.map((d) => mapRowData(d, selectedCols));
+
+    exportService.exportToPdf({
+      rows,
+      columns: colLabels,
+      fileName: `reporte_${activeTab}`,
+      title: currentReportTitle,
+      orientation
+    });
+    setShowPdfPreview(false);
+  };
+
+  // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <div className="entry-data-page">
       <Tabs
@@ -311,6 +443,7 @@ export const EntryDataPage: React.FC = () => {
           isLoading={false}
           onSort={handleSort}
           sortConfig={sortConfig}
+          onExportPdf={() => setShowPdfPreview(true)}
         />
       ) : activeTab === 'collector' ? (
         <DailyCollectorSummaryTable
@@ -318,6 +451,7 @@ export const EntryDataPage: React.FC = () => {
           isLoading={false}
           onSort={handleSort}
           sortConfig={sortConfig}
+          onExportPdf={() => setShowPdfPreview(true)}
         />
       ) : activeTab === 'paymentMethod' ? (
         <DailyPaymentMethodReportTable
@@ -325,6 +459,7 @@ export const EntryDataPage: React.FC = () => {
           isLoading={false}
           onSort={handleSort}
           sortConfig={sortConfig}
+          onExportPdf={() => setShowPdfPreview(true)}
         />
       ) : (
         <FullBreakdownReportTable
@@ -332,8 +467,19 @@ export const EntryDataPage: React.FC = () => {
           isLoading={false}
           onSort={handleSort}
           sortConfig={sortConfig}
+          onExportPdf={() => setShowPdfPreview(true)}
         />
       )}
+
+      <ReportPreviewModal
+        isOpen={showPdfPreview}
+        onClose={() => setShowPdfPreview(false)}
+        dataCount={currentFilteredData.length}
+        reportTitle={currentReportTitle}
+        availableColumns={currentAvailableColumns}
+        pdfGenerator={handlePdfGenerator}
+        onDownload={handleDownloadPdf}
+      />
     </div>
   );
 };

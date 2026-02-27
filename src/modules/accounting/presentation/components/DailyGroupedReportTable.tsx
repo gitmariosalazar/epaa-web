@@ -12,13 +12,14 @@ interface DailyGroupedReportTableProps {
   isLoading: boolean;
   onSort?: (key: string, direction: 'asc' | 'desc') => void;
   sortConfig?: { key: string; direction: 'asc' | 'desc' } | null;
+  onExportPdf?: () => void;
 }
 
 const fmt = (n: number) => `$${Number(n).toFixed(2)}`;
 
 export const DailyGroupedReportTable: React.FC<
   DailyGroupedReportTableProps
-> = ({ data, isLoading, onSort, sortConfig }) => {
+> = ({ data, isLoading, onSort, sortConfig, onExportPdf }) => {
   const { t } = useTranslation();
 
   const columns: Column<DailyGroupedReport>[] = [
@@ -140,6 +141,7 @@ export const DailyGroupedReportTable: React.FC<
         totalRows={totalRows}
         width="100"
         fullHeight
+        onExportPdf={onExportPdf}
         emptyState={
           <div className="payments-table-empty">
             <p>{t('common.noData', 'No se encontraron registros')}</p>
