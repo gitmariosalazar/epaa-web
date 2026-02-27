@@ -5,8 +5,7 @@ import {
   ChevronRight,
   ArrowUp,
   ArrowDown,
-  ArrowUpDown,
-  FileText
+  ArrowUpDown
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../Button/Button';
