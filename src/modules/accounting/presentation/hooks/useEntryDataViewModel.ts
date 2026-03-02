@@ -94,6 +94,11 @@ export const useEntryDataViewModel = () => {
         isDefault: true
       },
       {
+        id: 'discountTrashRateValue',
+        label: t('Desc. TR D.I.'),
+        isDefault: true
+      },
+      {
         id: 'detailValue',
         label: t('accounting.columns.trashRateVal'),
         isDefault: true
@@ -151,6 +156,11 @@ export const useEntryDataViewModel = () => {
         isDefault: true
       },
       {
+        id: 'discountTrashRateValue',
+        label: t('Desc. TR D.I.'),
+        isDefault: true
+      },
+      {
         id: 'totalCollected',
         label: t('accounting.columns.total'),
         isDefault: true
@@ -196,6 +206,11 @@ export const useEntryDataViewModel = () => {
       {
         id: 'detailValue',
         label: t('accounting.columns.trashRateVal'),
+        isDefault: true
+      },
+      {
+        id: 'discountTrashRateValue',
+        label: t('Desc. TR D.I.'),
         isDefault: true
       },
       {
@@ -259,6 +274,18 @@ export const useEntryDataViewModel = () => {
       fetchPaymentMethodReport(startDate, endDate);
     else fetchFullBreakdown(startDate, endDate);
   };
+
+  // Auto-fetch when switching to a tab that has no data yet (so preview report shows correct count)
+  useEffect(() => {
+    const hasData =
+      (activeTab === 'grouped' && dailyGrouped.length > 0) ||
+      (activeTab === 'collector' && collectorSummary.length > 0) ||
+      (activeTab === 'paymentMethod' && paymentMethodReport.length > 0) ||
+      (activeTab === 'fullBreakdown' && fullBreakdown.length > 0);
+    if (!hasData && !isLoading) {
+      handleFetch();
+    }
+  }, [activeTab]);
 
   const handleSort = (key: string, direction: 'asc' | 'desc') =>
     setSortConfig({ key, direction });
@@ -425,14 +452,25 @@ export const useEntryDataViewModel = () => {
     rowData['titleCode'] = item.titleCode || '-';
     rowData['paymentMethod'] = item.paymentMethod || '-';
     rowData['status'] = item.status || '-';
-    rowData['incomeCount'] = String(item.incomeCount ?? item.paymentCount ?? 0);
+    // Cada tipo de reporte usa distinto nombre: incomeCount (fullBreakdown), paymentCount (collector), recordCount (grouped, paymentMethod)
+    const incomesCount = String(
+      item.incomeCount ?? item.paymentCount ?? item.recordCount ?? 0
+    );
+    rowData['incomeCount'] = incomesCount;
+    rowData['paymentCount'] = incomesCount; // Resumen por Cobrador usa id 'paymentCount' para Ingresos
     rowData['titleValue'] = fmt(item.titleValue);
     rowData['thirdPartyValue'] = fmt(item.thirdPartyValue);
     rowData['surchargeValue'] = fmt(item.surchargeValue);
     rowData['trashRateValue'] = fmt(item.trashRateValue);
+    rowData['discountTrashRateValue'] = fmt(item.discountTrashRateValue);
     rowData['detailValue'] = fmt(item.detailValue);
-    rowData['grandTotal'] = fmt(item.grandTotal);
-    rowData['totalCollected'] = fmt(item.totalCollected);
+    // Cada tipo de reporte: grandTotal (fullBreakdown), totalCollected (collector), totalValue (grouped), total (paymentMethod)
+    rowData['grandTotal'] = fmt(
+      item.grandTotal ?? item.totalCollected ?? item.totalValue ?? item.total
+    );
+    rowData['totalCollected'] = fmt(
+      item.totalCollected ?? item.grandTotal ?? item.totalValue ?? item.total
+    );
 
     return selectedCols.map((col) => rowData[col.id]);
   };
