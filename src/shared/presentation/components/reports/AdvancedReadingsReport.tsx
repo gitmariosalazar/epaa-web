@@ -2,7 +2,7 @@ import { GetAdvancedReportReadingsUseCase } from '@/modules/dashboard/applicatio
 import type { AdvancedReportReadings } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructure/repositories/http-report-dashboard.repository';
 import { ExportService } from '@/shared/infrastructure/services/ExportService';
-import { Calendar, Search } from 'lucide-react';
+import { Calendar, List, Search } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { EmptyState } from '../common/EmptyState';
@@ -10,6 +10,8 @@ import { dateService } from '@/shared/infrastructure/services/EcuadorDateService
 import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
 import { ProgressBar } from '../ProgressBar/ProgressBar';
 import { Table, type Column } from '../Table/Table';
+import { Button } from '../Button/Button';
+import { SectorReadingsModal } from '../dashboard/SectorReadingsModal';
 
 export const AdvancedReadingsReport = () => {
   const pickerRef = useRef<HTMLInputElement>(null);
@@ -28,6 +30,18 @@ export const AdvancedReadingsReport = () => {
     () => new GetAdvancedReportReadingsUseCase(repository),
     [repository]
   );
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSector, setSelectedSector] = useState<number | null>(null);
+  const [selectedType, setSelectedType] = useState<
+    'completed' | 'missing' | null
+  >(null);
+
+  const openModal = (sector: number, type: 'completed' | 'missing') => {
+    setSelectedSector(sector);
+    setSelectedType(type);
+    setIsModalOpen(true);
+  };
 
   const handleSearch = async () => {
     if (!month) return;
@@ -69,11 +83,51 @@ export const AdvancedReadingsReport = () => {
       },
       {
         header: 'Readings Completed',
-        accessor: 'readingsCompleted'
+        accessor: (row) => (
+          <div
+            className="flex items-center gap-2"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <span className="font-bold text-rose-600 dark:text-rose-400">
+              {row.readingsCompleted}
+            </span>
+            {row.readingsCompleted > 0 && (
+              <Button
+                variant="outline"
+                size="xs"
+                color="slate"
+                iconOnly
+                leftIcon={<List size={14} />}
+                onClick={() => openModal(row.sector, 'completed')}
+                title="Ver Completadas"
+              />
+            )}
+          </div>
+        )
       },
       {
         header: 'Missing Readings',
-        accessor: 'missingReadings'
+        accessor: (row) => (
+          <div
+            className="flex items-center gap-2"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <span className="font-bold text-rose-600 dark:text-rose-400">
+              {row.missingReadings}
+            </span>
+            {row.missingReadings > 0 && (
+              <Button
+                variant="outline"
+                size="xs"
+                color="slate"
+                iconOnly
+                leftIcon={<List size={14} />}
+                onClick={() => openModal(row.sector, 'missing')}
+                title="Ver Faltantes"
+              />
+            )}
+          </div>
+        )
       },
       {
         header: 'Progress Percentage',
@@ -220,6 +274,13 @@ export const AdvancedReadingsReport = () => {
             />
           )
         }
+      />
+      <SectorReadingsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        sector={selectedSector}
+        month={month}
+        type={selectedType}
       />
     </div>
   );

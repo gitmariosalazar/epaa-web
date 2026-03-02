@@ -152,6 +152,7 @@ export const DashboardHome = () => {
                   <AdvancedReadingsTable
                     data={advancedReportReadings}
                     loading={loading}
+                    currentMonth={currentMonth}
                   />
                 </DashboardWidgetWrapper>
               </div>

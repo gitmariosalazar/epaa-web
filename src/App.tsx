@@ -24,7 +24,9 @@ import { UserDetailPage } from '@/modules/users/presentation/pages/users/UserDet
 import { RolesPage } from '@/modules/roles/presentation/pages/roles/RolesPage';
 import { ConnectionsPage } from '@/modules/connections/presentation/pages/ConnectionsPage';
 import { PermissionsPage } from '@/modules/permissions/presentation/pages/permissions/PermissionsPage';
+import { PermissionsProvider } from '@/modules/permissions/presentation/context/PermissionsContext';
 import { ProfilePage } from '@/modules/users/presentation/pages/profile/ProfilePage';
+import { UsersProvider } from '@/modules/users/presentation/context/UsersContext';
 import { SettingsPage } from '@/shared/presentation/pages/settings/SettingsPage';
 import { ReportsPage } from '@/modules/dashboard/presentation/pages/reports/ReportsPage';
 import './index.css';
@@ -36,6 +38,8 @@ import { PaymentsProvider } from '@/modules/accounting/presentation/context/Paym
 import { PaymentsPage } from '@/modules/accounting/presentation/pages/PaymentsPage';
 import { EntryDataProvider } from '@/modules/accounting/presentation/context/EntryDataContext';
 import { EntryDataPage } from '@/modules/accounting/presentation/pages/EntryDataPage';
+import { ReadingsListPage } from '@/modules/readings/presentation/pages/ReadingsListPage';
+import { ReadingImagesPage } from '@/modules/readings/presentation/pages/ReadingImagesPage';
 
 const ProtectedRoute = () => {
   const { token, isLoading } = useAuth();
@@ -62,8 +66,17 @@ function App() {
               <Route element={<DashboardLayout />}>
                 <Route path="/" element={<DashboardHome />} />
                 <Route path="/reports" element={<ReportsPage />} />
-                <Route path="/users" element={<UsersPage />} />
-                <Route path="/users/:username" element={<UserDetailPage />} />
+                <Route
+                  path="/users/*"
+                  element={
+                    <UsersProvider>
+                      <Routes>
+                        <Route index element={<UsersPage />} />
+                        <Route path=":username" element={<UserDetailPage />} />
+                      </Routes>
+                    </UsersProvider>
+                  }
+                />
                 <Route path="/customers" element={<CustomersLayout />}>
                   <Route
                     index
@@ -92,8 +105,22 @@ function App() {
                     </RolesProvider>
                   }
                 />
-                <Route path="/permissions" element={<PermissionsPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
+                <Route
+                  path="/permissions"
+                  element={
+                    <PermissionsProvider>
+                      <PermissionsPage />
+                    </PermissionsProvider>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <UsersProvider>
+                      <ProfilePage />
+                    </UsersProvider>
+                  }
+                />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route
                   path="/accounting"
@@ -117,6 +144,8 @@ function App() {
                     <ReadingsProvider>
                       <Routes>
                         <Route path="add" element={<CreateReadingPage />} />
+                        <Route path="list" element={<ReadingsListPage />} />
+                        <Route path="images" element={<ReadingImagesPage />} />
                         {/* Other reading routes can be added here */}
                       </Routes>
                     </ReadingsProvider>

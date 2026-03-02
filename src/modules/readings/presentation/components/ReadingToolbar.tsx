@@ -1,9 +1,10 @@
 import React from 'react';
 import { FaSave, FaTimes, FaSearch } from 'react-icons/fa';
-import { Input } from '@/shared/presentation/components/Input/Input';
+import { InputCadastralKey } from '@/shared/presentation/components/Input/InputCadastralKey';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import type { ReadingInfo } from '../../domain/models/ReadingInfoResponse';
 import { GrClear } from 'react-icons/gr';
+import { FaSchoolLock } from 'react-icons/fa6';
 
 interface ReadingToolbarProps {
   cadastralKeyInput: string;
@@ -30,20 +31,22 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
     <div className="cr-toolbar">
       {/* Search Area */}
       <div className="cr-search-area">
-        <Input
-          className="cr-search-input"
+        <InputCadastralKey
+          className="entry-filter-input"
           placeholder="Ingrese la clave catastral (Ej: 12-364)"
           value={cadastralKeyInput}
-          onChange={(e) => setCadastralKeyInput(e.target.value)}
+          onChange={(val) => setCadastralKeyInput(val)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleSearch();
           }}
+          leftIcon={<FaSchoolLock />}
         />
         <Button
           className="cr-search-btn"
           onClick={handleSearch}
           disabled={isLoadingInfo}
           leftIcon={<FaSearch />}
+          size="sm"
         >
           {isLoadingInfo ? 'Buscando...' : 'Buscar'}
         </Button>
@@ -57,6 +60,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
           onClick={handleSave}
           disabled={!readingInfo?.hasCurrentReading || isSubmitting}
           leftIcon={<FaSave />}
+          size="sm"
         >
           {isSubmitting ? 'Guardando...' : 'Guardar'}
         </Button>
@@ -66,6 +70,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
           onClick={handleCancel}
           disabled={!readingInfo}
           leftIcon={<FaTimes />}
+          size="sm"
         >
           Cancelar
         </Button>
@@ -86,6 +91,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
           onClick={handleCancel}
           disabled={!readingInfo}
           leftIcon={<GrClear />}
+          size="sm"
         >
           Limpiar
         </Button>

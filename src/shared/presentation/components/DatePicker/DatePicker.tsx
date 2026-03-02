@@ -5,25 +5,31 @@ import {
   Calendar as CalendarIcon
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/shared/presentation/components/Button/Button';
 import './DatePicker.css';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 interface DatePickerProps {
-  value: string; // Format: YYYY-MM-DD
+  value: string; // Format: YYYY-MM-DD or YYYY-MM based on view
   onChange: (date: string) => void;
   disabled?: boolean;
+  view?: 'date' | 'month';
 }
 
 export const DatePicker: React.FC<DatePickerProps> = ({
   value,
   onChange,
-  disabled = false
+  disabled = false,
+  view = 'date'
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Parse initial date or default to today
-  const initialDate = value ? new Date(value + 'T00:00:00') : new Date();
+  // Parse initial date or default to today in Ecuador time
+  const initialDate = value
+    ? new Date(value + 'T00:00:00')
+    : dateService.getCurrentDate();
 
   const [currentMonth, setCurrentMonth] = useState(initialDate);
   const [selectedDate, setSelectedDate] = useState<Date | null>(
@@ -70,14 +76,22 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   const nextMonth = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1)
+      new Date(
+        currentMonth.getFullYear() + (view === 'month' ? 1 : 0),
+        currentMonth.getMonth() + (view === 'month' ? 0 : 1),
+        1
+      )
     );
   };
 
   const prevMonth = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1)
+      new Date(
+        currentMonth.getFullYear() - (view === 'month' ? 1 : 0),
+        currentMonth.getMonth() - (view === 'month' ? 0 : 1),
+        1
+      )
     );
   };
 
@@ -107,7 +121,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   };
 
   const getFormattedDateDisplay = () => {
-    if (!selectedDate) return 'Select Date';
+    if (!selectedDate)
+      return view === 'month' ? 'Seleccionar Mes' : 'Select Date';
+    if (view === 'month') {
+      return `${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+    }
     return selectedDate.toLocaleDateString(undefined, {
       year: 'numeric',
       month: '2-digit',
@@ -155,10 +173,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         selectedDate?.getMonth() === month &&
         selectedDate?.getFullYear() === year;
 
+      const ecuadorToday = dateService.getCurrentDate();
       const isToday =
-        new Date().getDate() === i &&
-        new Date().getMonth() === month &&
-        new Date().getFullYear() === year;
+        ecuadorToday.getDate() === i &&
+        ecuadorToday.getMonth() === month &&
+        ecuadorToday.getFullYear() === year;
 
       days.push(
         <button
@@ -172,6 +191,39 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     }
 
     return days;
+  };
+
+  const renderMonthGrid = () => {
+    const year = currentMonth.getFullYear();
+
+    return monthNames.map((mName, idx) => {
+      const isSelected =
+        selectedDate?.getMonth() === idx &&
+        selectedDate?.getFullYear() === year;
+
+      return (
+        <button
+          key={idx}
+          type="button"
+          className={`datepicker-month-cell ${isSelected ? 'datepicker-month-cell--selected' : ''}`}
+          onClick={() => {
+            const newDate = new Date(year, idx, 1);
+            setSelectedDate(newDate);
+            const m = String(idx + 1).padStart(2, '0');
+            onChange(`${year}-${m}`);
+            setIsOpen(false);
+          }}
+        >
+          {mName}
+        </button>
+      );
+    });
+  };
+
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange('');
+    setIsOpen(false);
   };
 
   return (
@@ -197,7 +249,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
               <ChevronLeft size={16} />
             </button>
             <span className="datepicker-month-title">
-              {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+              {view === 'month'
+                ? currentMonth.getFullYear()
+                : `${monthNames[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`}
             </span>
             <button
               className="datepicker-nav-btn"
@@ -208,17 +262,63 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             </button>
           </div>
 
-          <div className="datepicker-weekdays">
-            <span>{t('common.days.su', 'Su')}</span>
-            <span>{t('common.days.mo', 'Mo')}</span>
-            <span>{t('common.days.tu', 'Tu')}</span>
-            <span>{t('common.days.we', 'We')}</span>
-            <span>{t('common.days.th', 'Th')}</span>
-            <span>{t('common.days.fr', 'Fr')}</span>
-            <span>{t('common.days.sa', 'Sa')}</span>
+          {view === 'date' ? (
+            <>
+              <div className="datepicker-weekdays">
+                <span>{t('common.days.su', 'Su')}</span>
+                <span>{t('common.days.mo', 'Mo')}</span>
+                <span>{t('common.days.tu', 'Tu')}</span>
+                <span>{t('common.days.we', 'We')}</span>
+                <span>{t('common.days.th', 'Th')}</span>
+                <span>{t('common.days.fr', 'Fr')}</span>
+                <span>{t('common.days.sa', 'Sa')}</span>
+              </div>
+              <div className="datepicker-grid">{renderCalendarDays()}</div>
+            </>
+          ) : (
+            <div className="datepicker-months-grid">{renderMonthGrid()}</div>
+          )}
+          <div className="datepicker-footer">
+            <Button variant="ghost" size="sm" onClick={handleClear}>
+              {t('common.datePicker.clear')}
+            </Button>
+            <div className="datepicker-footer-actions">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOpen(false);
+                }}
+              >
+                {t('common.datePicker.cancel')}
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (selectedDate) {
+                    const valueToEmit =
+                      view === 'month'
+                        ? `${selectedDate.getFullYear()}-${String(
+                            selectedDate.getMonth() + 1
+                          ).padStart(2, '0')}`
+                        : `${selectedDate.getFullYear()}-${String(
+                            selectedDate.getMonth() + 1
+                          ).padStart(2, '0')}-${String(
+                            selectedDate.getDate()
+                          ).padStart(2, '0')}`;
+                    onChange(valueToEmit);
+                    setIsOpen(false);
+                  }
+                }}
+                disabled={!selectedDate}
+              >
+                {t('common.datePicker.selectDate')}
+              </Button>
+            </div>
           </div>
-
-          <div className="datepicker-grid">{renderCalendarDays()}</div>
         </div>
       )}
     </div>

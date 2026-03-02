@@ -61,8 +61,8 @@ export const useDashboardController = () => {
   const fetchData = async (month: string, isBackground = false) => {
     if (!isBackground) setLoading(true);
     try {
-      // Parallel fetching
-      const [global, daily, sector, novelty, advanced] = await Promise.all([
+      // Parallel fetching but tolerant to individual failures (SRP)
+      const results = await Promise.allSettled([
         getGlobalStatsUseCase.execute(month),
         getDailyStatsUseCase.execute(month),
         getSectorStatsUseCase.execute(month),
@@ -70,13 +70,33 @@ export const useDashboardController = () => {
         getAdvancedReportReadingsUseCase.execute(month)
       ]);
 
-      setGlobalStats(global);
-      setDailyStats(daily);
-      setSectorStats(sector);
-      setNoveltyStats(novelty);
-      setAdvancedReportReadings(advanced);
+      setGlobalStats(
+        results[0].status === 'fulfilled' ? results[0].value || null : null
+      );
+      setDailyStats(
+        results[1].status === 'fulfilled' ? results[1].value || [] : []
+      );
+      setSectorStats(
+        results[2].status === 'fulfilled' ? results[2].value || [] : []
+      );
+      setNoveltyStats(
+        results[3].status === 'fulfilled' ? results[3].value || [] : []
+      );
+      setAdvancedReportReadings(
+        results[4].status === 'fulfilled' ? results[4].value || [] : []
+      );
+
+      // Log specific errors for debugging while keeping the UI alive
+      results.forEach((res, index) => {
+        if (res.status === 'rejected') {
+          console.error(
+            `Dashboard fetch failed for index ${index}:`,
+            res.reason
+          );
+        }
+      });
     } catch (error) {
-      console.error('Failed to fetch dashboard data', error);
+      console.error('Failed to execute dashboard data fetching process', error);
       // Handle error (notification/toast)
     } finally {
       if (!isBackground) setLoading(false);

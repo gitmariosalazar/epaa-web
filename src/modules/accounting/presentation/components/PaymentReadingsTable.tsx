@@ -31,7 +31,7 @@ export const PaymentReadingsTable: React.FC<PaymentReadingsTableProps> = ({
 
   const columns: Column<PaymentReading>[] = [
     {
-      header: t('accounting.readings.titleCode', 'Código'),
+      header: t('accounting.columns.titleCode'),
       accessor: 'titleCode',
       sortable: true
     },
@@ -59,59 +59,59 @@ export const PaymentReadingsTable: React.FC<PaymentReadingsTableProps> = ({
       )
     },
     {
-      header: t('accounting.readings.cadastralKey', 'C.K.'),
+      header: t('accounting.columns.cadastralKey'),
       accessor: 'cadastralKey',
       sortable: true
     },
     {
-      header: t('accounting.readings.surcharge', 'V. Recargo'),
+      header: t('accounting.columns.surcharge'),
       accessor: (item) => `$${Number(item.surcharge).toFixed(2)}`,
       sortKey: 'surcharge',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('accounting.readings.epaaValue', 'V. EPAA'),
+      header: t('accounting.columns.epaaValue'),
       accessor: (item) => `$${Number(item.epaaValue).toFixed(2)}`,
       sortKey: 'epaaValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('accounting.readings.thirdPartyValue', 'V. Terceros'),
+      header: t('accounting.columns.thirdPartyValue'),
       accessor: (item) => `$${Number(item.thirdPartyValue).toFixed(2)}`,
       sortKey: 'thirdPartyValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('accounting.readings.trashRate', 'TB D.I.'),
+      header: t('accounting.columns.trashRateDt'),
       accessor: (item) => `$${Number(item.trashRate).toFixed(2)}`,
       sortKey: 'trashRate',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('accounting.readings.value', 'TB Valor'),
+      header: t('accounting.columns.trashRateVal'),
       accessor: (item) => `$${Number(item.value).toFixed(2)}`,
       sortKey: 'value',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('accounting.readings.total', 'Total'),
+      header: t('accounting.columns.total'),
       accessor: (item) => `$${Number(item.total).toFixed(2)}`,
       sortKey: 'total',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('accounting.readings.paymentUser', 'Usuario'),
+      header: t('accounting.columns.user'),
       accessor: 'paymentUser',
       sortable: true
     },
     {
-      header: t('accounting.readings.paymentMethod', 'Mét. Pago'),
+      header: t('accounting.columns.paymentMethod'),
       accessor: 'paymentMethod',
       sortable: true
     },
@@ -171,28 +171,27 @@ export const PaymentReadingsTable: React.FC<PaymentReadingsTableProps> = ({
 
   const totalRows = [
     {
-      label: t('accounting.readings.epaaTotal', 'Total EPAA'),
+      label: 'TOTAL ' + t('accounting.columns.epaaValue'),
       value: epaaTotal
     },
     {
-      label: t('accounting.readings.surchargeTotal', 'Total Recargos'),
+      label: 'TOTAL ' + t('accounting.columns.surcharge'),
       value: surchargeTotal
     },
-
     {
-      label: t('accounting.readings.trashRateTotalA', 'Total TB D.I.'),
+      label: 'TOTAL ' + t('accounting.columns.trashRateDt'),
       value: trashRateTotalA
     },
     {
-      label: t('accounting.readings.trashRateTotalB', 'Total TB Valor'),
+      label: 'TOTAL ' + t('accounting.columns.trashRateVal'),
       value: trashRateTotalB
     },
     {
-      label: t('accounting.readings.thirdPartyTotal', 'Total Terceros'),
+      label: 'TOTAL ' + t('accounting.columns.thirdPartyValue'),
       value: thirdPartyTotal
     },
     {
-      label: t('accounting.readings.grandTotal', 'Total Recaudado'),
+      label: 'TOTAL',
       value: totalAmount,
       highlight: true
     }

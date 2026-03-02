@@ -1,0 +1,89 @@
+.error-boundary-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100vw;
+  background-color: var(--bg-main);
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.error-boundary-content {
+  background-color: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: 40px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  animation: slideUp 0.3s ease-out;
+}
+
+.error-boundary-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background-color: rgba(239, 68, 68, 0.1); /* Red with 10% opacity */
+  color: #ef4444; /* Tailwind red-500 */
+  margin-bottom: 24px;
+}
+
+.error-boundary-title {
+  color: var(--text-main);
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+}
+
+.error-boundary-message {
+  color: var(--text-secondary);
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0 0 32px 0;
+}
+
+.error-boundary-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.error-boundary-details {
+  margin-bottom: 32px;
+  text-align: left;
+  background-color: var(--bg-body, #111827);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+
+.error-boundary-details-title {
+  color: var(--text-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.error-boundary-code {
+  color: #ef4444; /* Red color for actual error string to clearly see it */
+  font-family: monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

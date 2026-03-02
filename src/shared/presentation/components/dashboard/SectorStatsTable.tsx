@@ -70,6 +70,36 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
     }
   ];
 
+  const totalReadings = sortedData.reduce(
+    (total, row) => total + Number(row.readingsCount || 0),
+    0
+  );
+
+  const totalAverageConsumption = sortedData.reduce(
+    (total, row) => total + Number(row.averageConsumption || 0),
+    0
+  );
+
+  const totalActiveDays = sortedData.reduce(
+    (total, row) => total + Number(row.activeDays || 0),
+    0
+  );
+
+  const totalRows = [
+    {
+      label: t('dashboard.sectorStats.totals.readings'),
+      value: totalReadings
+    },
+    {
+      label: t('dashboard.sectorStats.totals.averageConsumption'),
+      value: `${totalAverageConsumption.toFixed(2)} m³`
+    },
+    {
+      label: t('dashboard.sectorStats.totals.activeDays'),
+      value: totalActiveDays
+    }
+  ];
+
   return (
     <div
       className="content-card"
@@ -125,6 +155,7 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
         pageSize={15}
         sortConfig={sortConfig}
         onSort={requestSort}
+        totalRows={totalRows}
         containerStyle={{
           flex: 1,
           maxHeight: 'none',

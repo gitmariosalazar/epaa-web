@@ -17,7 +17,7 @@
   display: flex;
   align-items: center;
   cursor: pointer;
-  height: 28px; /* Force small height */
+  height: 36px; /* Aumentado a petición para mejor apariencia */
   text-align: left;
 }
 
@@ -58,7 +58,9 @@
   top: calc(100% + 0.25rem);
   left: 0;
   z-index: 50;
-  width: 260px;
+  min-width: 280px;
+  width: max-content;
+  max-width: 90vw;
   background-color: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: 0.5rem;
@@ -156,5 +158,70 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.datepicker-months-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.datepicker-month-cell {
+  padding: 0.75rem 0.25rem;
+  text-align: center;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.1s;
+  color: var(--text-main);
+  background: transparent;
+  border: none;
+}
+
+.datepicker-month-cell:hover {
+  background-color: var(--surface-hover);
+}
+
+.datepicker-month-cell--selected {
+  background-color: var(--accent) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.datepicker-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.datepicker-footer-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+@media (max-width: 480px) {
+  .datepicker-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .datepicker-footer-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .datepicker-footer button {
+    width: 100%;
+    justify-content: center;
   }
 }

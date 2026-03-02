@@ -1,6 +1,6 @@
 /* --- Base Professional Button Styles --- */
 .btn-pro {
-  --btn-bg: #0f172a;
+  --btn-bg: var(--accent); /* Professional Blue instead of Slate 900 */
   --btn-color: #ffffff;
   --btn-border: transparent;
   --btn-hover-bg: color-mix(in srgb, var(--btn-bg), black 8%);
@@ -72,7 +72,7 @@
   font-size: 0.8125rem;
 }
 .btn-pro--md {
-  --btn-h: 38px;
+  --btn-h: 36px;
   height: var(--btn-h);
   padding: 0 16px;
   font-size: 0.875rem;
@@ -146,7 +146,9 @@
 
 /* --- Theme Colors (The mappings) --- */
 .btn-pro--primary {
-  --btn-bg: var(--primary);
+  --btn-bg: var(
+    --accent
+  ); /* Redirect primary buttons to use professional accent blue, avoiding Slate 900 */
   --btn-color: var(--text-inverse);
 }
 .btn-pro--secondary {
@@ -189,13 +191,28 @@
   background-color: color-mix(in srgb, var(--btn-bg), transparent 85%);
 }
 .dark .btn-pro--subtle:hover {
-  background-color: color-mix(in srgb, var(--btn-bg), transparent 75%);
+  background-color: color-mix(in srgb, var(--btn-bg), transparent 70%);
 }
 
 .dark .btn-pro--ghost:hover,
 .dark .btn-pro--outline:hover,
 .dark .btn-pro--dashed:hover {
-  background-color: color-mix(in srgb, var(--btn-bg), transparent 85%);
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.08
+  ); /* Generic professional translucent highlight */
+}
+
+/* Base button primary dark mode override */
+.dark .btn-pro {
+  --btn-bg: rgba(255, 255, 255, 0.1);
+  --btn-hover-bg: rgba(255, 255, 255, 0.15);
+  --btn-active-bg: rgba(255, 255, 255, 0.2);
+  --btn-border: rgba(255, 255, 255, 0.1);
+  --btn-ring: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
 }
 
 /* Palette - these stay fixed but we can lighten them for dark mode if needed */
@@ -339,21 +356,38 @@
   --btn-bg: #e2e8f0;
 }
 
+.dark .btn-pro--action {
+  --btn-bg: rgba(255, 255, 255, 0.05);
+  --btn-hover-bg: rgba(255, 255, 255, 0.1);
+  --btn-active-bg: rgba(255, 255, 255, 0.15);
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
 /* Backward Compatibility with .btn */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 6px 16px;
-  height: 38px;
+  height: 36px;
   font-size: 0.875rem;
   font-weight: 600;
   border-radius: var(--radius-md);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   border: 1px solid transparent;
-  background-color: #0f172a;
+  background-color: var(--accent);
   color: white;
+}
+
+.dark .btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+.dark .btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
 }
 .btn--sm {
   height: 32px;
@@ -377,4 +411,13 @@
   background-color: #f1f5f9;
   color: #1e293b;
   border-color: #e2e8f0;
+}
+
+.dark .btn--action {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.dark .btn--action:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }

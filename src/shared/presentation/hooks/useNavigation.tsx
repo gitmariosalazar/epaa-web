@@ -97,12 +97,12 @@ export const useNavigation = (): NavSection[] => {
       ]
     },
     {
-      title: 'Connections',
+      title: 'Conexiones',
       hideTitle: true,
       items: [
         {
           icon: <MdOutlineCable size={20} />,
-          label: 'Connections',
+          label: 'Conexiones',
           subItems: [
             {
               icon: <TiThList size={18} />,
@@ -114,7 +114,7 @@ export const useNavigation = (): NavSection[] => {
       ]
     },
     {
-      title: 'Accounting',
+      title: 'Contabilidad',
       hideTitle: true,
       items: [
         {
@@ -136,27 +136,27 @@ export const useNavigation = (): NavSection[] => {
       ]
     },
     {
-      title: 'Readings',
+      title: 'Lecturas',
       hideTitle: true,
       items: [
         {
           icon: <TbClock24 size={20} />,
-          label: 'Readings',
+          label: 'Lecturas',
           subItems: [
             {
               icon: <MdAssignmentAdd size={18} />,
-              label: 'Add Reading',
+              label: 'Agregar Lectura',
               to: '/readings/add'
             },
             {
               icon: <TiThList size={18} />,
               label: 'Foto Lecturas',
-              to: '/readings/photo'
+              to: '/readings/images'
             },
             {
               icon: <TiThList size={18} />,
-              label: 'List',
-              to: '/readings'
+              label: 'Lecturas',
+              to: '/readings/list'
             }
           ]
         }

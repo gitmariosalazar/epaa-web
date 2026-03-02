@@ -24,64 +24,71 @@ export const DailyPaymentMethodReportTable: React.FC<
 
   const columns: Column<DailyPaymentMethodReport>[] = [
     {
-      header: t('entryData.method.date', 'Fecha'),
+      header: t('accounting.columns.date'),
       accessor: 'date',
       sortable: true
     },
     {
-      header: t('entryData.method.paymentMethod', 'Método de Pago'),
+      header: t('accounting.columns.paymentMethod'),
       accessor: 'paymentMethod',
       sortable: true
     },
     {
-      header: t('entryData.method.status', 'Estado'),
+      header: t('accounting.columns.status'),
       accessor: 'status',
       sortable: true
     },
     {
-      header: t('entryData.method.titleValue', 'V. EPAA'),
+      header: t('accounting.columns.epaaValue'),
       accessor: (item) => fmt(item.titleValue),
       sortKey: 'titleValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.method.thirdPartyValue', 'V. Terc.'),
+      header: t('accounting.columns.thirdPartyValue'),
       accessor: (item) => fmt(item.thirdPartyValue),
       sortKey: 'thirdPartyValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.method.surchargeValue', 'Recargo'),
+      header: t('accounting.columns.surcharge'),
       accessor: (item) => fmt(item.surchargeValue),
       sortKey: 'surchargeValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.method.trashRateValue', 'TB D.I.'),
+      header: t('accounting.columns.trashRateDt'),
       accessor: (item) => fmt(item.trashRateValue),
       sortKey: 'trashRateValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.method.detailValue', 'TB Valor'),
+      header: t('accounting.columns.trashRateVal'),
       accessor: (item) => fmt(item.detailValue),
       sortKey: 'detailValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.method.recordCount', 'Registros'),
+      header: t('Desc. TR D.I.'),
+      accessor: (item) => fmt(item.discountTrashRateValue),
+      sortKey: 'discountTrashRateValue',
+      sortable: true,
+      isNumeric: true
+    },
+    {
+      header: t('accounting.columns.records'),
       accessor: (item) => String(item.recordCount),
       sortKey: 'recordCount',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.method.total', 'Total'),
+      header: t('accounting.columns.total'),
       accessor: (item) => fmt(item.total),
       sortKey: 'total',
       sortable: true,
@@ -91,27 +98,31 @@ export const DailyPaymentMethodReportTable: React.FC<
 
   const totalRows = [
     {
-      label: t('entryData.method.totalEpaa', 'Total EPAA'),
+      label: 'TOTAL ' + t('accounting.columns.epaaValue'),
       value: data.reduce((s, r) => s + Number(r.titleValue), 0)
     },
     {
-      label: t('entryData.method.totalThirdParty', 'Total Terceros'),
+      label: 'TOTAL ' + t('accounting.columns.thirdPartyValue'),
       value: data.reduce((s, r) => s + Number(r.thirdPartyValue), 0)
     },
     {
-      label: t('entryData.method.totalSurcharge', 'Total Recargo'),
+      label: 'TOTAL ' + t('accounting.columns.surcharge'),
       value: data.reduce((s, r) => s + Number(r.surchargeValue), 0)
     },
     {
-      label: t('entryData.method.totalTrash', 'Total TB D.I.'),
+      label: 'TOTAL ' + t('accounting.columns.trashRateDt'),
       value: data.reduce((s, r) => s + Number(r.trashRateValue), 0)
     },
     {
-      label: t('entryData.method.totalDetail', 'Total TB Valor'),
+      label: 'TOTAL ' + t('accounting.columns.trashRateVal'),
       value: data.reduce((s, r) => s + Number(r.detailValue), 0)
     },
     {
-      label: t('entryData.method.grandTotal', 'Total General'),
+      label: 'TOTAL ' + t('Desc. TR D.I.'),
+      value: data.reduce((s, r) => s + Number(r.discountTrashRateValue), 0)
+    },
+    {
+      label: 'TOTAL',
       value: data.reduce((s, r) => s + Number(r.total), 0),
       highlight: true
     }

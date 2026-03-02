@@ -9,18 +9,21 @@ import {
   FaHome
 } from 'react-icons/fa';
 import { Input } from '@/shared/presentation/components/Input/Input';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import { useTranslation } from 'react-i18next';
 
 interface PropTypes {
   info: ReadingInfo | null;
 }
 
 export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="cr-accordion">
       <div className="cr-accordion-header" onClick={() => setIsOpen(!isOpen)}>
-        <span>Ver Información Adicional</span>
+        <span>{t('readings.additionalInfo.viewMore')}</span>
         {isOpen ? <FaChevronUp /> : <FaChevronDown />}
       </div>
 
@@ -28,7 +31,7 @@ export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
         <div className="cr-accordion-body">
           <div className="cr-form-section">
             <Input
-              label="Cédula de Ciudadanía"
+              label={t('readings.additionalInfo.cardId')}
               leftIcon={<FaIdCard color="var(--text-muted)" />}
               type="text"
               value={info?.cardId || ''}
@@ -36,7 +39,7 @@ export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
               disabled
             />
             <Input
-              label="Número de Medidor"
+              label={t('readings.additionalInfo.meterNumber')}
               leftIcon={<FaHome color="var(--text-muted)" />}
               type="text"
               value={info?.meterNumber || ''}
@@ -47,7 +50,7 @@ export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
 
           <div style={{ marginTop: '15px' }}>
             <Input
-              label="Propietario de la Conexión"
+              label={t('readings.additionalInfo.owner')}
               leftIcon={<FaUser color="var(--text-muted)" />}
               type="text"
               value={info?.clientName || ''}
@@ -58,7 +61,7 @@ export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
 
           <div style={{ marginTop: '15px' }}>
             <Input
-              label="Dirección de la Conexión"
+              label={t('readings.additionalInfo.address')}
               leftIcon={<FaMapMarkerAlt color="var(--text-muted)" />}
               type="text"
               value={info?.address || ''}
@@ -68,24 +71,28 @@ export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
           </div>
 
           <div className="cr-period-box">
-            <h4>Periodo de Lectura</h4>
+            <h4>{t('readings.additionalInfo.period')}</h4>
             <div className="cr-period-dates">
               <div className="cr-date-badge cr-date-start">
                 <div className="cr-date-value">
                   {info?.startDatePeriod
-                    ? new Date(info.startDatePeriod).toLocaleDateString()
+                    ? dateService.formatToLocaleString(info.startDatePeriod)
                     : '---'}
                 </div>
-                <div className="cr-date-label">Inicio</div>
+                <div className="cr-date-label">
+                  {t('readings.additionalInfo.start')}
+                </div>
               </div>
               <div className="cr-period-line"></div>
               <div className="cr-date-badge cr-date-end">
                 <div className="cr-date-value">
                   {info?.endDatePeriod
-                    ? new Date(info.endDatePeriod).toLocaleDateString()
+                    ? dateService.formatToLocaleString(info.endDatePeriod)
                     : '---'}
                 </div>
-                <div className="cr-date-label">Fin</div>
+                <div className="cr-date-label">
+                  {t('readings.additionalInfo.end')}
+                </div>
               </div>
             </div>
           </div>

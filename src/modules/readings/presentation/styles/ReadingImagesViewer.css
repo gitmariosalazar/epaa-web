@@ -1,0 +1,205 @@
+/* src/modules/readings/presentation/styles/ReadingImagesViewer.css */
+
+.reading-images-viewer-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.reading-images-viewer {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 0;
+  min-height: 250px; /* Reduced min-height */
+  width: 100%;
+  user-select: none;
+  background-color: var(--surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.reading-images-viewer__btn-prev {
+  position: absolute;
+  left: 1rem;
+  z-index: 10;
+  background: rgba(var(--surface-rgb), 0.8) !important;
+  backdrop-filter: blur(4px);
+  border-color: var(--border-color) !important;
+  box-shadow: var(--shadow-md) !important;
+  color: var(--text-main) !important;
+  transition: all 0.3s ease !important;
+}
+
+.reading-images-viewer__btn-next {
+  position: absolute;
+  right: 1rem;
+  z-index: 10;
+  background: rgba(var(--surface-rgb), 0.8) !important;
+  backdrop-filter: blur(4px);
+  border-color: var(--border-color) !important;
+  box-shadow: var(--shadow-md) !important;
+  color: var(--text-main) !important;
+  transition: all 0.3s ease !important;
+}
+
+.reading-images-viewer__btn-prev:hover,
+.reading-images-viewer__btn-next:hover {
+  transform: scale(1.1);
+  background: var(--surface) !important;
+}
+
+.reading-images-viewer__image-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  animation: fadeSlideUp 0.4s ease-out forwards;
+}
+
+.reading-images-viewer__image {
+  max-height: 40vh; /* Further reduced from 55vh to make the image even smaller */
+  max-width: 50%; /* Further reduced from 65% */
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s ease-in-out;
+}
+
+.reading-images-viewer__badge {
+  position: absolute;
+  bottom: 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+  box-shadow: var(--shadow-sm);
+  z-index: 10;
+}
+
+/* Base modal specific adjustments if needed for the viewer */
+@media (max-width: 768px) {
+  .reading-images-viewer__image {
+    max-width: 85%; /* Reduced from 95% */
+    max-height: 40vh; /* Reduced from 50vh */
+  }
+}
+
+/* Image Zoom Feature */
+.reading-images-viewer__image-container--zoomed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.reading-images-viewer__image--zoomed {
+  max-width: 95vw;
+  max-height: 95vh;
+  cursor: zoom-out;
+  border-radius: 4px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.reading-images-viewer__image--clickable {
+  cursor: zoom-in;
+}
+
+/* Data Context Panel */
+.reading-images-context {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  background-color: var(--surface-hover);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.reading-images-context__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.75rem;
+}
+
+.reading-images-context__header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.reading-images-context__icon {
+  color: var(--accent);
+}
+
+.reading-images-context__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.reading-images-context__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.reading-images-context__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
+.reading-images-context__value {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  width: fit-content;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Highlight variations for context values */
+.highlight-blue {
+  color: var(--accent);
+  background-color: color-mix(in srgb, var(--accent), transparent 90%);
+  border-color: color-mix(in srgb, var(--accent), transparent 75%);
+}
+
+.highlight-green {
+  color: var(--success);
+  background-color: color-mix(in srgb, var(--success), transparent 90%);
+  border-color: color-mix(in srgb, var(--success), transparent 75%);
+}
+
+.highlight-orange {
+  color: var(--warning);
+  background-color: color-mix(in srgb, var(--warning), transparent 90%);
+  border-color: color-mix(in srgb, var(--warning), transparent 75%);
+}

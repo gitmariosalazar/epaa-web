@@ -4,6 +4,8 @@ import type { ReadingInfo } from '../../domain/models/ReadingInfoResponse';
 import { calculateConsumptionVisuals } from '../utils/consumptionVisuals';
 import { Card } from '@/shared/presentation/components/Card/Card';
 import { FaPlug, FaTint, FaHistory } from 'react-icons/fa';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import { useTranslation } from 'react-i18next';
 
 interface PropTypes {
   info: ReadingInfo | null;
@@ -14,6 +16,8 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
   info,
   currentReadingInput
 }) => {
+  const { t } = useTranslation();
+
   const currentVal =
     currentReadingInput !== undefined && currentReadingInput !== ''
       ? Number(currentReadingInput)
@@ -43,20 +47,22 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
     <div className="cr-summary-cards">
       <Card className="cr-card cr-card-connection">
         <div className="cr-card-header">
-          <span>Conexión ID</span>
+          <span>{t('readings.summaryCards.connectionId')}</span>
           <FaPlug className="cr-icon-green" size={20} />
         </div>
         <div className="cr-card-body">
           <div className="cr-card-value">{info?.cadastralKey || '---'}</div>
         </div>
         <div className="cr-card-footer">
-          <div className="cr-description">Clave Catastral de la Acometida</div>
+          <div className="cr-description">
+            {t('readings.summaryCards.cadastralDesc')}
+          </div>
         </div>
       </Card>
 
       <Card className="cr-card cr-card-average">
         <div className="cr-card-header">
-          <span>Consumo Prom.</span>
+          <span>{t('readings.summaryCards.avgConsumption')}</span>
           <FaTint className="cr-icon-blue" size={20} />
         </div>
         <div className="cr-card-body">
@@ -67,13 +73,13 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
           </div>
         </div>
         <div className="cr-description">
-          Promedio de los últimos 10 periodos
+          {t('readings.summaryCards.avgDesc')}
         </div>
       </Card>
 
       <Card className="cr-card cr-card-previous">
         <div className="cr-card-header">
-          <span>Consumo Anterior</span>
+          <span>{t('readings.summaryCards.prevConsumption')}</span>
           <FaHistory className="cr-icon-gray" size={20} />
         </div>
         <div className="cr-card-body">
@@ -83,9 +89,9 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
               : '0.00 m³'}
           </div>
           <div className="cr-date">
-            Fecha:{' '}
+            {t('readings.summaryCards.date')}{' '}
             {info?.previousReadingDate
-              ? new Date(info.previousReadingDate).toLocaleDateString()
+              ? dateService.formatToLocaleString(info.previousReadingDate)
               : '---'}
           </div>
         </div>
@@ -93,7 +99,7 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
 
       <Card className="cr-card cr-card-current">
         <div className="cr-card-header">
-          <span>Consumo Actual</span>
+          <span>{t('readings.summaryCards.currentConsumption')}</span>
           <visuals.Icon className={visuals.iconClass} size={20} />
         </div>
         <div className="cr-card-body">
@@ -105,7 +111,8 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
               : '0.00 m³'}
           </div>
           <div className={`cr-date ${visuals.textClass}`}>
-            Fecha: {new Date().toLocaleDateString()}
+            Fecha:{' '}
+            {dateService.formatToLocaleString(dateService.getCurrentDate())}
           </div>
         </div>
       </Card>

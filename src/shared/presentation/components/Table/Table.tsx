@@ -106,7 +106,7 @@ export const Table = <T extends { [key: string]: any }>({
       <div className="table-loader">
         <div className="spinner"></div>{' '}
         {/* You can replace this with a proper Spinner component if available */}
-        Loading...
+        {t('common.table.loading')}
       </div>
     );
   }
@@ -202,7 +202,9 @@ export const Table = <T extends { [key: string]: any }>({
               <tr>
                 <td colSpan={columns.length} className="empty-state-cell">
                   {emptyState || (
-                    <div className="default-empty-state">No data found</div>
+                    <div className="default-empty-state">
+                      {t('common.table.noData')}
+                    </div>
                   )}
                 </td>
               </tr>
@@ -264,6 +266,7 @@ export const Table = <T extends { [key: string]: any }>({
                 color="slate"
                 iconOnly
                 circle
+                size="sm"
                 disabled={data.length === 0}
                 title={t('common.exportPdf', 'Exportar PDF')}
                 leftIcon={ColoredIcons.Pdf}
@@ -292,6 +295,7 @@ export const Table = <T extends { [key: string]: any }>({
               color="slate"
               iconOnly
               circle
+              size="sm"
               disabled={data.length === 0}
               title={t('common.exportPdf', 'Exportar PDF')}
               leftIcon={ColoredIcons.Pdf}

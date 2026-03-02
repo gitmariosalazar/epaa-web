@@ -1,10 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import type { Permission } from '@/modules/permissions/domain/models/Permission';
-import { GetPermissionsUseCase } from '@/modules/permissions/application/usecases/GetPermissionsUseCase';
-import { CreatePermissionUseCase } from '@/modules/permissions/application/usecases/CreatePermissionUseCase';
-import { UpdatePermissionUseCase } from '@/modules/permissions/application/usecases/UpdatePermissionUseCase';
-import { DeletePermissionUseCase } from '@/modules/permissions/application/usecases/DeletePermissionUseCase';
-import { PermissionRepositoryImpl } from '@/modules/permissions/infrastructure/repositories/PermissionRepositoryImpl';
 import { Table } from '@/shared/presentation/components/Table/Table';
 import type { Column } from '@/shared/presentation/components/Table/Table';
 import { Button } from '@/shared/presentation/components/Button/Button';
@@ -14,91 +9,24 @@ import { Card } from '@/shared/presentation/components/Card/Card';
 import { Edit2, Plus, Trash2, Search, Check, X } from 'lucide-react';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import '@/shared/presentation/styles/Permission.css';
+import { usePermissionsViewModel } from '../../hooks/usePermissionsViewModel';
 
 export const PermissionsPage: React.FC = () => {
-  const [permissions, setPermissions] = useState<Permission[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [selectedPerm, setSelectedPerm] = useState<Permission | null>(null);
-  const [formData, setFormData] = useState<Partial<Permission>>({
-    permissionName: '',
-    permissionDescription: '',
-    categoryId: '',
-    isActive: true
-  });
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // Dependencies
-  const repo = new PermissionRepositoryImpl();
-  const getPermissions = new GetPermissionsUseCase(repo);
-  const createPermission = new CreatePermissionUseCase(repo);
-  const updatePermission = new UpdatePermissionUseCase(repo);
-  const deletePermission = new DeletePermissionUseCase(repo);
-
-  const loadPermissions = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getPermissions.execute();
-      setPermissions(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadPermissions();
-  }, []);
-
-  const handleSave = async () => {
-    try {
-      if (selectedPerm) {
-        await updatePermission.execute(selectedPerm.permissionId, formData);
-      } else {
-        await createPermission.execute({
-          permissionName: formData.permissionName!,
-          permissionDescription: formData.permissionDescription || '',
-          categoryId: formData.categoryId || 'General',
-          isActive: true
-        });
-      }
-      setIsCreateOpen(false);
-      setFormData({
-        permissionName: '',
-        permissionDescription: '',
-        categoryId: '',
-        isActive: true
-      });
-      setSelectedPerm(null);
-      loadPermissions();
-    } catch (error) {
-      console.error('Failed to save permission', error);
-      alert('Failed to save permission');
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this permission?')) return;
-    try {
-      await deletePermission.execute(id);
-      loadPermissions();
-    } catch (error) {
-      console.error('Failed to delete', error);
-      alert('Failed to delete permission');
-    }
-  };
-
-  const openEdit = (perm: Permission) => {
-    setSelectedPerm(perm);
-    setFormData({
-      permissionName: perm.permissionName,
-      permissionDescription: perm.permissionDescription,
-      categoryId: perm.categoryId,
-      isActive: perm.isActive
-    });
-    setIsCreateOpen(true);
-  };
+  const {
+    permissions,
+    isLoading,
+    isCreateOpen,
+    selectedPerm,
+    formData,
+    searchTerm,
+    setSearchTerm,
+    setFormData,
+    handleSave,
+    handleDelete,
+    openEdit,
+    openCreate,
+    closeCreate
+  } = usePermissionsViewModel();
 
   const columns: Column<Permission>[] = [
     { header: 'ID', accessor: 'permissionId' },
@@ -164,19 +92,7 @@ export const PermissionsPage: React.FC = () => {
           <h1>Permissions</h1>
           <p>Manage permission access and details</p>
         </div>
-        <Button
-          leftIcon={<Plus size={18} />}
-          onClick={() => {
-            setSelectedPerm(null);
-            setFormData({
-              permissionName: '',
-              permissionDescription: '',
-              categoryId: '',
-              isActive: true
-            });
-            setIsCreateOpen(true);
-          }}
-        >
+        <Button leftIcon={<Plus size={18} />} onClick={openCreate}>
           Create Permission
         </Button>
       </div>
@@ -216,31 +132,16 @@ export const PermissionsPage: React.FC = () => {
             />
           </div>
         </div>
-        <Table
-          data={permissions.filter(
-            (p) =>
-              (p.permissionName?.toLowerCase() || '').includes(
-                searchTerm.toLowerCase()
-              ) ||
-              (p.permissionDescription?.toLowerCase() || '').includes(
-                searchTerm.toLowerCase()
-              ) ||
-              (p.categoryId?.toLowerCase() || '').includes(
-                searchTerm.toLowerCase()
-              )
-          )}
-          columns={columns}
-          isLoading={isLoading}
-        />
+        <Table data={permissions} columns={columns} isLoading={isLoading} />
       </Card>
 
       <Modal
         isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
+        onClose={closeCreate}
         title={selectedPerm ? 'Edit Permission' : 'Create Permission'}
         footer={
           <>
-            <Button variant="subtle" onClick={() => setIsCreateOpen(false)}>
+            <Button variant="subtle" onClick={closeCreate}>
               Cancel
             </Button>
             <Button onClick={handleSave}>Save</Button>

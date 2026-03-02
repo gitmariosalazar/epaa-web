@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Search,
   User,
@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import type { Customer } from '@/modules/customers/domain/models/Customer';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { useClientSelectionForm } from '../../hooks/useClientSelectionForm';
 
 interface ClientSelectionStepProps {
   foundClient: Customer | null;
@@ -20,173 +21,29 @@ interface ClientSelectionStepProps {
   nextStep: () => void;
 }
 
-export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
-  foundClient,
-  searchClient,
-  createClient,
-  createCompany,
-  loading,
-  nextStep
-}) => {
-  const [activeTab, setActiveTab] = useState<'search' | 'create'>('search');
-  const [entityType, setEntityType] = useState<'person' | 'company'>('person');
-
-  const [identification, setIdentification] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
-
-  // Form States
-  const [personForm, setPersonForm] = useState({
-    firstName: '',
-    lastName: '',
-    customerId: '', // Identification
-    email: '',
-    phone: '',
-    address: '',
-    identificationType: 'CEDULA',
-    status: true
-  });
-
-  const [companyForm, setCompanyForm] = useState({
-    companyName: '',
-    socialReason: '',
-    companyRuc: '',
-    companyAddress: '',
-    companyParishId: '1', // Default or select
-    companyCountry: 'Ecuador',
-    companyEmails: [''],
-    companyPhones: [''],
-    identificationType: 'RUC'
-  });
-
-  const handleSearch = async () => {
-    if (!identification) return;
-    setError(null);
-    const client = await searchClient(identification);
-    if (!client) {
-      setError(
-        'Client not found. Please check the identification or create a new client.'
-      );
-    }
-  };
-
-  const handleIdBlur = async () => {
-    if (!personForm.customerId) return;
-    try {
-      const client = await searchClient(personForm.customerId);
-      if (client) {
-        setPersonForm((prev) => ({
-          ...prev,
-          firstName: client.firstName || '',
-          lastName: client.lastName || '',
-          email: client.emails?.[0] || '',
-          phone: client.phoneNumbers?.[0] || '',
-          address: client.address || ''
-        }));
-        setSuccessMsg('Client found! Details loaded automatically.');
-        setError(null);
-      }
-    } catch (e) {
-      // ignore error on blur
-    }
-  };
-
-  const handleRucBlur = async () => {
-    if (!companyForm.companyRuc) return;
-    try {
-      // Assuming searchClient can find companies by RUC (mapped to customerId or similar)
-      // If simpler, we use the same searchClient.
-      // Note: If backend considers RUC as ID, this works.
-      const client = await searchClient(companyForm.companyRuc);
-
-      // Logic: If the backend returns a generic 'Customer' object even for companies (unlikely if strictly typed),
-      // we map what we can.
-      // However, if searchClient returns a Person-like object, mapping to Company fields might be tricky
-      // unless we know for sure it's a company.
-      // For now, let's assume if it finds something by RUC, we try to use it.
-      // If the API returns 'companyName' inside the generic object, great.
-      // If not, we might only be able to fill ID.
-
-      // HACK: Casting to any to check for company fields if they exist in the response but not in Customer interface
-      const rawData = client as any;
-
-      if (client) {
-        setCompanyForm((prev) => ({
-          ...prev,
-          companyName: rawData.companyName || client.firstName || '', // Fallback
-          socialReason: rawData.socialReason || client.lastName || '',
-          companyAddress: rawData.companyAddress || client.address || '',
-          companyEmails: [
-            rawData.companyEmails?.[0]?.correo || client.emails?.[0] || ''
-          ],
-          companyPhones: [
-            rawData.companyPhones?.[0]?.numero || client.phoneNumbers?.[0] || ''
-          ]
-        }));
-        setSuccessMsg('Company found! Details loaded automatically.');
-        setError(null);
-      }
-    } catch (e) {
-      // ignore
-    }
-  };
-
-  const handleCreatePerson = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccessMsg(null);
-
-    // If we found a client during blur (auto-filled), we might be "updating" or just "using" it.
-    // createClient in logic first calls create, then search.
-    // If create fails (duplicate), it enters catch.
-    // We should probably check if foundClient matches the form ID.
-
-    if (foundClient && foundClient.customerId === personForm.customerId) {
-      // Just proceed, essentially "selecting" the found client
-      nextStep();
-      return;
-    }
-
-    const newPerson = {
-      ...personForm,
-      emails: [personForm.email],
-      phoneNumbers: [personForm.phone],
-      parishId: '1' // Default
-    };
-
-    const success = await createClient(newPerson);
-    if (success) {
-      // Success logic handled by parent (sets foundClient)
-      // If we want to move to next step automatically:
-      nextStep();
-    } else {
-      // If it failed, maybe it already exists?
-      // We could try to search one last time if error is "exists"
-      // But for now show error.
-      setError('Failed to create person. User might already exist.');
-    }
-  };
-
-  const handleCreateCompany = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccessMsg(null);
-
-    if (
-      foundClient &&
-      (foundClient as any).companyRuc === companyForm.companyRuc
-    ) {
-      nextStep();
-      return;
-    }
-
-    const success = await createCompany(companyForm);
-    if (success) {
-      nextStep();
-    } else {
-      setError('Failed to create company. It might already exist.');
-    }
-  };
+export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = (
+  props
+) => {
+  const { foundClient, loading, nextStep } = props;
+  const {
+    activeTab,
+    setActiveTab,
+    entityType,
+    setEntityType,
+    identification,
+    setIdentification,
+    error,
+    successMsg,
+    personForm,
+    setPersonForm,
+    companyForm,
+    setCompanyForm,
+    handleSearch,
+    handleIdBlur,
+    handleRucBlur,
+    handleCreatePerson,
+    handleCreateCompany
+  } = useClientSelectionForm(props);
 
   return (
     <div className="step-animation">

@@ -1,11 +1,10 @@
 import React from 'react';
 import { Card } from '@/shared/presentation/components/Card/Card';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { Input } from '@/shared/presentation/components/Input/Input';
 import { Table } from '@/shared/presentation/components/Table/Table';
 import { Pagination } from '@/shared/presentation/components/Pagination/Pagination';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
-import { Search, RefreshCw, Edit2, Trash2, Plus, Eye } from 'lucide-react';
+import { Edit2, Trash2, Plus, Eye } from 'lucide-react';
 import { useGeneralCustomersViewModel } from '../hooks/useGeneralCustomersViewModel';
 import type { Column } from '@/shared/presentation/components/Table/Table';
 import type { GeneralCustomer } from '../../domain/models/GeneralCustomer';
@@ -13,17 +12,36 @@ import { CustomerForm } from '../components/CustomerForm';
 import { CompanyForm } from '../components/CompanyForm';
 import { CustomerDetails } from '../components/CustomerDetails';
 import { CompanyDetails } from '../components/CompanyDetails';
+import { CustomerFilters } from '../components/CustomerFilters';
+import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
+import { useTranslation } from 'react-i18next';
 
 export const GeneralCustomersPage: React.FC = () => {
   const viewModel = useGeneralCustomersViewModel();
+  const { t } = useTranslation();
 
   const columns: Column<GeneralCustomer>[] = [
-    { header: 'ID / RUC', accessor: 'customerId' },
-    { header: 'Name / Reason', accessor: 'customerName' },
-    { header: 'Type', accessor: 'identificationType' },
-    { header: 'Address', accessor: 'customerAddress' },
     {
-      header: 'Email',
+      header: t('customers.columns.nameReason'),
+      accessor: (row) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Avatar
+            name={row.customerName.trim() === '' ? 'S/N' : row.customerName}
+            size="sm"
+          />
+          <div>
+            <div style={{ fontWeight: 300 }}>{row.customerName}</div>
+            <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+              {row.customerId}
+            </div>
+          </div>
+        </div>
+      )
+    },
+    { header: t('customers.columns.type'), accessor: 'identificationType' },
+    { header: t('customers.columns.address'), accessor: 'customerAddress' },
+    {
+      header: t('customers.columns.email'),
       accessor: (row) => {
         const email = row.emails?.[0];
         if (typeof email === 'string') return email;
@@ -31,7 +49,7 @@ export const GeneralCustomersPage: React.FC = () => {
       }
     },
     {
-      header: 'Phone',
+      header: t('customers.columns.phone'),
       accessor: (row) => {
         const phone = row.phoneNumbers?.[0];
         if (typeof phone === 'string') return phone;
@@ -39,7 +57,7 @@ export const GeneralCustomersPage: React.FC = () => {
       }
     },
     {
-      header: 'Actions',
+      header: t('customers.columns.actions'),
       accessor: (row) => (
         <div
           className="users-page__actions"
@@ -50,7 +68,7 @@ export const GeneralCustomersPage: React.FC = () => {
             variant="action"
             circle
             onClick={() => viewModel.handleEdit(row, true)}
-            title="View Details"
+            title={t('customers.actions.viewDetails')}
           >
             <Eye size={14} color="var(--text-secondary)" />
           </Button>
@@ -59,7 +77,7 @@ export const GeneralCustomersPage: React.FC = () => {
             variant="action"
             circle
             onClick={() => viewModel.handleEdit(row, false)}
-            title="Edit"
+            title={t('customers.actions.edit')}
           >
             <Edit2 size={14} color="var(--text-secondary)" />
           </Button>
@@ -68,7 +86,7 @@ export const GeneralCustomersPage: React.FC = () => {
             variant="action"
             circle
             onClick={() => viewModel.promptDelete(row)}
-            title="Delete"
+            title={t('customers.actions.delete')}
           >
             <Trash2 size={14} color="var(--error)" />
           </Button>
@@ -80,7 +98,7 @@ export const GeneralCustomersPage: React.FC = () => {
   return (
     <div className="users-page">
       <div className="users-page__header">
-        <h1>General Customers</h1>
+        <h1>{t('customers.pageTitle')}</h1>
         <div style={{ display: 'flex', gap: '8px' }}>
           <Button
             onClick={() => {
@@ -89,7 +107,7 @@ export const GeneralCustomersPage: React.FC = () => {
             }}
             leftIcon={<Plus size={18} />}
           >
-            New Client
+            {t('customers.newClient')}
           </Button>
           <Button
             variant="secondary"
@@ -99,30 +117,18 @@ export const GeneralCustomersPage: React.FC = () => {
             }}
             leftIcon={<Plus size={18} />}
           >
-            New Company
+            {t('customers.newCompany')}
           </Button>
         </div>
       </div>
 
       <Card className="users-page__content">
-        <div className="users-page__toolbar">
-          <div className="users-page__search">
-            <Search size={20} color="var(--text-secondary)" />
-            <Input
-              placeholder="Search by name, ID or RUC..."
-              value={viewModel.searchTerm}
-              onChange={(e) => viewModel.setSearchTerm(e.target.value)}
-              className="users-page__search-input"
-            />
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => window.location.reload()}
-            leftIcon={<RefreshCw size={18} />}
-          >
-            Refresh
-          </Button>
-        </div>
+        <CustomerFilters
+          searchTerm={viewModel.searchTerm}
+          onSearchTermChange={viewModel.setSearchTerm}
+          onRefresh={() => window.location.reload()}
+          isLoading={viewModel.isLoading}
+        />
 
         <Table
           data={viewModel.filteredGeneralCustomers}
@@ -142,10 +148,10 @@ export const GeneralCustomersPage: React.FC = () => {
         onClose={() => viewModel.setIsCustomerFormOpen(false)}
         title={
           viewModel.isViewOnly
-            ? 'Client Details'
+            ? t('customers.modals.clientDetails')
             : viewModel.selectedCustomer
-              ? 'Edit Client'
-              : 'New Client'
+              ? t('customers.modals.editClient')
+              : t('customers.modals.newClient')
         }
         size={viewModel.isViewOnly ? 'lg' : 'xl'}
         footer={
@@ -154,7 +160,9 @@ export const GeneralCustomersPage: React.FC = () => {
               variant={viewModel.isViewOnly ? 'primary' : 'outline'}
               onClick={() => viewModel.setIsCustomerFormOpen(false)}
             >
-              {viewModel.isViewOnly ? 'Close' : 'Cancel'}
+              {viewModel.isViewOnly
+                ? t('common.close', 'Close')
+                : t('common.cancel', 'Cancel')}
             </Button>
             {!viewModel.isViewOnly && (
               <Button
@@ -164,7 +172,7 @@ export const GeneralCustomersPage: React.FC = () => {
                     : viewModel.handleCreateCustomer
                 }
               >
-                Save
+                {t('common.save', 'Save')}
               </Button>
             )}
           </div>
@@ -188,10 +196,10 @@ export const GeneralCustomersPage: React.FC = () => {
         onClose={() => viewModel.setIsCompanyFormOpen(false)}
         title={
           viewModel.isViewOnly
-            ? 'Company Details'
+            ? t('customers.modals.companyDetails')
             : viewModel.selectedCompany
-              ? 'Edit Company'
-              : 'New Company'
+              ? t('customers.modals.editCompany')
+              : t('customers.modals.newCompany')
         }
         size={viewModel.isViewOnly ? 'lg' : 'xl'}
         footer={
@@ -200,7 +208,9 @@ export const GeneralCustomersPage: React.FC = () => {
               variant={viewModel.isViewOnly ? 'primary' : 'outline'}
               onClick={() => viewModel.setIsCompanyFormOpen(false)}
             >
-              {viewModel.isViewOnly ? 'Close' : 'Cancel'}
+              {viewModel.isViewOnly
+                ? t('common.close', 'Close')
+                : t('common.cancel', 'Cancel')}
             </Button>
             {!viewModel.isViewOnly && (
               <Button
@@ -210,7 +220,7 @@ export const GeneralCustomersPage: React.FC = () => {
                     : viewModel.handleCreateCompany
                 }
               >
-                Save
+                {t('common.save', 'Save')}
               </Button>
             )}
           </div>
@@ -233,7 +243,7 @@ export const GeneralCustomersPage: React.FC = () => {
       <Modal
         isOpen={viewModel.isDeleteOpen}
         onClose={() => viewModel.setIsDeleteOpen(false)}
-        title="Confirm Deletion"
+        title={t('customers.modals.confirmDelete')}
         size="sm"
         footer={
           <div className="users-modal__footer--end">
@@ -241,19 +251,19 @@ export const GeneralCustomersPage: React.FC = () => {
               variant="outline"
               onClick={() => viewModel.setIsDeleteOpen(false)}
             >
-              Cancel
+              {t('common.cancel', 'Cancel')}
             </Button>
             <Button
               className="users-modal__btn-danger"
               onClick={viewModel.handleDelete}
             >
-              Delete
+              {t('customers.actions.delete')}
             </Button>
           </div>
         }
       >
         <p>
-          Are you sure you want to delete{' '}
+          {t('customers.modals.deleteMessage')}{' '}
           <strong>{viewModel.generalCustomerToDelete?.customerName}</strong>?
         </p>
       </Modal>

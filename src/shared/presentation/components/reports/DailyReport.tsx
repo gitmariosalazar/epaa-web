@@ -13,23 +13,78 @@ import { getNoveltyColor } from '../../utils/colors/novelties.colors';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { ReportPreviewModal } from './ReportPreviewModal';
 import type { ExportColumn } from './ReportPreviewModal';
-
-const AVAILABLE_COLUMNS: ExportColumn[] = [
-  { id: 'time', label: 'Date/Time', isDefault: true },
-  { id: 'key', label: 'Cadastral Key', isDefault: true },
-  { id: 'block', label: 'Block', isDefault: true },
-  { id: 'client', label: 'Client', isDefault: true },
-  { id: 'average', label: 'Average Consumption', isDefault: false },
-  { id: 'preview', label: 'Preview Reading', isDefault: false },
-  { id: 'current', label: 'Current Reading', isDefault: false },
-  { id: 'value', label: 'Reading Value', isDefault: true },
-  { id: 'consumption', label: 'Consumption', isDefault: true },
-  { id: 'type', label: 'Measure Type', isDefault: true },
-  { id: 'status', label: 'Status', isDefault: true },
-  { id: 'obs', label: 'Observation', isDefault: true }
-];
+import { Avatar } from '../Avatar/Avatar';
+import { useTranslation } from 'react-i18next';
 
 export const DailyReport = () => {
+  const { t } = useTranslation();
+
+  const AVAILABLE_COLUMNS: ExportColumn[] = useMemo(
+    () => [
+      {
+        id: 'time',
+        label: t('dashboard.reports.daily.columns.dateTime'),
+        isDefault: true
+      },
+      {
+        id: 'key',
+        label: t('dashboard.reports.daily.columns.cadastralKey'),
+        isDefault: true
+      },
+      {
+        id: 'block',
+        label: t('dashboard.reports.daily.columns.block'),
+        isDefault: true
+      },
+      {
+        id: 'client',
+        label: t('dashboard.reports.daily.columns.client'),
+        isDefault: true
+      },
+      {
+        id: 'average',
+        label: t('dashboard.reports.daily.columns.average'),
+        isDefault: false
+      },
+      {
+        id: 'preview',
+        label: t('dashboard.reports.daily.columns.preview'),
+        isDefault: false
+      },
+      {
+        id: 'current',
+        label: t('dashboard.reports.daily.columns.current'),
+        isDefault: false
+      },
+      {
+        id: 'value',
+        label: t('dashboard.reports.daily.columns.value'),
+        isDefault: true
+      },
+      {
+        id: 'consumption',
+        label: t('dashboard.reports.daily.columns.consumption'),
+        isDefault: true
+      },
+      {
+        id: 'type',
+        label: t('dashboard.reports.daily.columns.type'),
+        isDefault: true
+      },
+      {
+        id: 'status',
+        label: t('dashboard.reports.daily.columns.status'),
+        isDefault: true
+      },
+      {
+        id: 'obs',
+        label: t('dashboard.reports.daily.columns.observation'),
+        isDefault: true
+      }
+    ],
+    [t]
+  );
+
   const pickerRef = useRef<HTMLInputElement>(null);
   const [date, setDate] = useState<string>(dateService.getCurrentDateString());
   const [data, setData] = useState<DailyReadingsReport[]>([]);
@@ -79,17 +134,29 @@ export const DailyReport = () => {
   const columns = useMemo<Column<DailyReadingsReport>[]>(
     () => [
       {
-        header: 'Time',
+        header: t('dashboard.reports.daily.columns.time'),
         accessor: 'readingTime'
       },
       {
-        header: 'Cadastral Key',
+        header: t('dashboard.reports.daily.columns.cadastralKey'),
         accessor: 'cadastralKey',
         style: { fontFamily: 'monospace' }
       },
       {
-        header: 'Client',
-        accessor: 'clientName'
+        header: t('dashboard.reports.daily.columns.client'),
+        accessor: (row) => (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Avatar name={row.clientName} size="sm" />
+            <div>
+              <div style={{ fontWeight: 300 }}>{row.clientName}</div>
+              <div
+                style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}
+              >
+                {row.clientId}
+              </div>
+            </div>
+          </div>
+        )
       },
       {
         header: 'Average Consumption',
@@ -256,7 +323,10 @@ export const DailyReport = () => {
           const rows = filteredData.map((d) => {
             const rowData: any = {};
             rowData['time'] = d.readingTime
-              ? new Date(d.readingTime).toLocaleString()
+              ? dateService.formatToLocaleString(d.readingTime, {
+                  dateStyle: 'short',
+                  timeStyle: 'medium'
+                })
               : '-';
             rowData['key'] = d.cadastralKey;
             rowData['block'] = d.blockNumber || '';
@@ -293,7 +363,10 @@ export const DailyReport = () => {
           const rows = filteredData.map((d) => {
             const rowData: any = {};
             rowData['time'] = d.readingTime
-              ? new Date(d.readingTime).toLocaleString()
+              ? dateService.formatToLocaleString(d.readingTime, {
+                  dateStyle: 'short',
+                  timeStyle: 'medium'
+                })
               : '-';
             rowData['key'] = d.cadastralKey;
             rowData['block'] = d.blockNumber || '';

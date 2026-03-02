@@ -1,0 +1,179 @@
+.sector-readings-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.sector-readings-modal-content {
+  background-color: var(--surface);
+  border-radius: 12px;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 95vw;
+  max-width: 1600px;
+  height: 95vh;
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.sector-readings-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--surface);
+}
+
+.sector-readings-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.sector-readings-filters-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+  margin-right: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.sector-readings-filter-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--background);
+  color: var(--text-main);
+  font-size: 0.875rem;
+  min-width: 150px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.sector-readings-search-input {
+  min-width: 250px;
+}
+
+.sector-readings-filter-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--background);
+  color: var(--text-main);
+  font-size: 0.875rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.sector-readings-filter-select:focus {
+  border-color: var(--primary-500);
+}
+
+.sector-readings-filter-input:focus {
+  border-color: var(--primary-500);
+}
+
+.sector-readings-filter-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.sector-readings-filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-main);
+  cursor: pointer;
+  user-select: none;
+}
+
+.sector-readings-filter-checkbox input[type='checkbox'] {
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--primary-500);
+}
+
+.sector-readings-sector-badge {
+  background-color: var(--primary-100, #dbeafe);
+  color: var(--primary-800, #1e40af);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+
+.sector-readings-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.sector-readings-modal-close:hover {
+  color: var(--text-main);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.sector-readings-modal-body {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem;
+  background-color: var(--background);
+  display: flex;
+  flex-direction: column;
+}
+
+.sector-readings-table-wrapper {
+  background-color: var(--surface);
+  border-radius: 8px;
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fix table container inside to fill height */
+.sector-readings-table-wrapper > .table-container {
+  flex: 1;
+}
+
+.sector-readings-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: var(--text-secondary);
+  text-align: center;
+}

@@ -1,6 +1,7 @@
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 import type { HttpClientInterface } from '@/shared/infrastructure/api/interfaces/HttpClientInterface';
 import { environments } from '@/settings/environments/environments';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 export class FetchHttpClient implements HttpClientInterface {
   constructor() {
@@ -68,7 +69,7 @@ export class FetchHttpClient implements HttpClientInterface {
 
       const apiResponse: ApiResponse<T> = {
         status_code: response.status,
-        time: new Date(),
+        time: dateService.getCurrentDate(),
         message: responseData.message || ['Request successful'],
         url: fullUrl,
         data: responseData

@@ -8,8 +8,12 @@ import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { ColorChip } from '../chip/ColorChip';
 import { EmptyState } from '../common/EmptyState';
 import { Table, type Column } from '../Table/Table';
+import { Avatar } from '../Avatar/Avatar';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import { useTranslation } from 'react-i18next';
 
 export const ConnectionReport = () => {
+  const { t } = useTranslation();
   const [cadastralKey, setCadastralKey] = useState<string>('1-1');
   const [limit, setLimit] = useState<number>(15);
   const [data, setData] = useState<ConnectionLastReadingsReport[]>([]);
@@ -50,8 +54,8 @@ export const ConnectionReport = () => {
       (row) =>
         (row.clientName || '').toLowerCase().includes(lowerTerm) ||
         (row.meterNumber || '').toLowerCase().includes(lowerTerm) ||
-        new Date(row.readingDate)
-          .toLocaleDateString()
+        dateService
+          .formatToLocaleString(row.readingDate)
           .includes(resultSearchTerm)
     );
   }, [data, resultSearchTerm]);
@@ -59,33 +63,40 @@ export const ConnectionReport = () => {
   const columns = useMemo<Column<ConnectionLastReadingsReport>[]>(
     () => [
       {
-        header: 'Date',
-        accessor: (row) => new Date(row.readingDate).toLocaleDateString()
+        header: t('dashboard.reports.connection.columns.date'),
+        accessor: (row) => dateService.formatToLocaleString(row.readingDate)
       },
       {
-        header: 'Reading Value',
+        header: t('dashboard.reports.connection.columns.readingValue'),
         accessor: 'readingValue',
         className: 'font-medium'
       },
       {
-        header: 'Consumption',
+        header: t('dashboard.reports.connection.columns.consumption'),
         accessor: (row) => `${row.consumption} m³`
       },
       {
-        header: 'Client',
+        header: t('dashboard.reports.connection.columns.client'),
         accessor: (row) => (
-          <div>
-            <div>{row.clientName}</div>
-            <small style={{ color: '#9ca3af' }}>{row.address}</small>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Avatar name={row.clientName} size="sm" />
+            <div>
+              <div style={{ fontWeight: 300 }}>{row.clientName}</div>
+              <div
+                style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}
+              >
+                {row.clientId}
+              </div>
+            </div>
           </div>
         )
       },
       {
-        header: 'Meter',
+        header: t('dashboard.reports.connection.columns.meter'),
         accessor: 'meterNumber'
       },
       {
-        header: 'Status',
+        header: t('dashboard.reports.connection.columns.status'),
         accessor: (row) => (
           <ColorChip
             color={
@@ -110,13 +121,15 @@ export const ConnectionReport = () => {
         <div className="toolbar-row">
           <div className="toolbar-group main">
             <label className="toolbar-label">
-              Cadastral Key / Connection ID
+              {t('dashboard.reports.connection.filters.searchLabel')}
             </label>
             <div className="toolbar-controls">
               <input
                 type="text"
                 className="toolbar-input input-cadastral"
-                placeholder="e.g. 1-2-3-4"
+                placeholder={t(
+                  'dashboard.reports.connection.filters.searchPlaceholder'
+                )}
                 maxLength={15}
                 value={cadastralKey}
                 onChange={(e) => setCadastralKey(e.target.value)}
@@ -185,7 +198,7 @@ export const ConnectionReport = () => {
                   className="btn-icon-text"
                   onClick={() => {
                     const rows = filteredData.map((d) => [
-                      new Date(d.readingDate).toLocaleDateString(),
+                      dateService.formatToLocaleString(d.readingDate),
                       d.readingValue.toString(),
                       `${d.consumption} m³`,
                       d.clientName,

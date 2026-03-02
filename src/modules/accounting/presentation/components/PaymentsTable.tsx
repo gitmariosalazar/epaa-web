@@ -32,7 +32,7 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
 
   const columns: Column<Payment>[] = [
     {
-      header: t('accounting.payments.titleCode', 'Código T.'),
+      header: t('accounting.columns.titleCode'),
       accessor: 'titleCode',
       sortable: true
     },
@@ -51,59 +51,59 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
       )
     },
     {
-      header: t('accounting.payments.cadastralKey', 'C.K'),
+      header: 'C.C',
       accessor: 'cadastralKey',
       sortable: true
     },
     {
-      header: t('accounting.payments.titleValue', 'V. EPAA'),
+      header: t('accounting.columns.epaaValue'),
       accessor: (item) => `$${Number(item.titleValue).toFixed(2)}`,
       sortKey: 'titleValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('accounting.payments.surcharge', 'V. Rec.'),
+      header: t('accounting.columns.surcharge'),
       accessor: (item) => `$${Number(item.surcharge).toFixed(2)}`,
       sortKey: 'surcharge',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('accounting.payments.thirtyPartyValue', 'V. Terc.'),
+      header: t('accounting.columns.thirdPartyValue'),
       accessor: (item) => `$${Number(item.thirdPartyValue).toFixed(2)}`,
       sortKey: 'thirdPartyValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('accounting.payments.trashRate', 'TB D.I'),
+      header: t('accounting.columns.trashRateDt'),
       accessor: (item) => `$${Number(item.trashRate).toFixed(2)}`,
       sortKey: 'trashRate',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('accounting.payments.value', 'TB Valor'),
+      header: t('accounting.columns.trashRateVal'),
       accessor: (item) => `$${Number(item.value).toFixed(2)}`,
       sortKey: 'value',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('accounting.payments.total', 'Total'),
+      header: t('accounting.columns.total'),
       accessor: (item) => `$${Number(item.total).toFixed(2)}`,
       sortKey: 'total',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('accounting.payments.paymentUser', 'Usuario'),
+      header: 'Usuario',
       accessor: 'paymentUser',
       sortable: true
     },
     {
-      header: t('accounting.payments.paymentMethod', 'Mét. Pago'),
+      header: t('accounting.columns.paymentMethod'),
       accessor: 'paymentMethod',
       sortable: true
     },
@@ -160,31 +160,31 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
 
   const totalRows = [
     {
-      label: t('accounting.payments.totalVal', 'Total EPAA'),
+      label: 'TOTAL ' + t('accounting.columns.epaaValue'),
       value: totalTitleValue
     },
     {
-      label: t('accounting.payments.surcharge', 'TOTAL Recargos'),
+      label: 'TOTAL ' + t('accounting.columns.surcharge'),
       value: totalSurcharge,
       highlight: false
     },
     {
-      label: t('accounting.payments.trashRate', 'Total TB D.I'),
+      label: 'TOTAL ' + t('accounting.columns.trashRateDt'),
       value: totalTrashRate,
       highlight: false
     },
     {
-      label: t('accounting.payments.value', 'TOTAL TB Valor'),
+      label: 'TOTAL ' + t('accounting.columns.trashRateVal'),
       value: totalValue,
       highlight: false
     },
     {
-      label: t('accounting.payments.thirdPartyValue', 'TOTAL Terceros'),
+      label: 'TOTAL ' + t('accounting.columns.thirdPartyValue'),
       value: totalThirdPartyValue,
       highlight: false
     },
     {
-      label: t('accounting.payments.totalRecaudado', 'TOTAL Recaudado'),
+      label: 'TOTAL',
       value: totalAmount,
       highlight: true
     }

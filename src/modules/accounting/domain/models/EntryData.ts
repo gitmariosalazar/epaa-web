@@ -10,6 +10,7 @@ export interface DailyGroupedReport {
   thirdPartyValue: number; // SUM(ValorTerceros)
   surchargeValue: number; // SUM(Recargo)
   trashRateValue: number; // SUM(tasa_basura)
+  discountTrashRateValue: number; // SUM(descuento) descuento de tasa de basura
   totalValue: number; // SUM of all four above
   recordCount: number; // COUNT(Cod_Ingreso)
   detailValue: number; // SUM(v.Valor) from Valor table
@@ -26,6 +27,7 @@ export interface DailyCollectorSummary {
   thirdPartyValue: number; // SUM(ValorTerceros)
   surchargeValue: number; // SUM(Recargo)
   trashRateValue: number; // SUM(tasa_basura)
+  discountTrashRateValue: number; // SUM(descuento) descuento de tasa de basura
   detailValue: number; // SUM(v.Valor) from Valor table
 }
 
@@ -41,6 +43,7 @@ export interface DailyPaymentMethodReport {
   thirdPartyValue: number; // SUM(ValorTerceros)
   surchargeValue: number; // SUM(Recargo)
   trashRateValue: number; // SUM(tasa_basura)
+  discountTrashRateValue: number; // SUM(descuento) descuento de tasa de basura
   detailValue: number; // SUM(v.Valor) from Valor table
 }
 
@@ -55,6 +58,7 @@ export interface FullBreakdownReport {
   thirdPartyValue: number; // SUM(ValorTerceros)
   surchargeValue: number; // SUM(Recargo)
   trashRateValue: number; // SUM(tasa_basura)
+  discountTrashRateValue: number; // SUM(descuento) descuento de tasa de basura
   detailValue: number; // SUM(v.Valor) from Valor table
   grandTotal: number; // SUM of all four main components
   incomeCount: number; // COUNT(DISTINCT Cod_Ingreso)

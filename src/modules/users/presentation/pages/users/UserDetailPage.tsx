@@ -1,13 +1,10 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { UserRepositoryImpl } from '@/modules/users/infrastructure/repositories/UserRepositoryImpl';
 import type { User } from '@/modules/users/domain/models/User';
 import { EditProfileModal } from '@/shared/presentation/components/Modal/EditProfileModal';
 import { ChangePasswordModal } from '@/shared/presentation/components/Modal/ChangePasswordModal';
-import { UpdateUserUseCase } from '@/modules/users/application/usecases/UpdateUserUseCase';
-import { ChangePasswordUseCase } from '@/modules/users/application/usecases/ChangePasswordUseCase';
-import type { UpdateUserRequest } from '@/modules/users/domain/models/UpdateUserRequest';
-import type { ChangePasswordRequest } from '@/modules/users/domain/models/ChangePasswordRequest';
+import { useUsersContext } from '../../context/UsersContext';
+import { useUserDetailViewModel } from '../../hooks/useUserDetailViewModel';
 import {
   User as UserIcon,
   Mail,
@@ -22,7 +19,6 @@ import {
 } from 'lucide-react';
 import '../profile/Profile.css'; // Reusing profile styles
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { GetProfileUseCase } from '@/modules/users/application/usecases/GetProfileUseCase';
 import { MdAdd, MdDeleteForever, MdLockOpen } from 'react-icons/md';
 import { CheckBox } from '@/shared/presentation/components/Input/CheckBox';
 import '@/shared/presentation/styles/UserDetailPage.css';
@@ -36,15 +32,14 @@ const UserRolesTable = ({ user }: { user: User }) => {
   // Local state for roles to handle UI toggles immediately
   const [localRoles, setLocalRoles] = useState<any[]>([]);
 
-  const userRepository = useMemo(() => new UserRepositoryImpl(), []);
+  const { getProfileUseCase } = useUsersContext();
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     if (!user?.username) return;
 
     try {
       setLoading(true);
-      const useCase = new GetProfileUseCase(userRepository);
-      const userData = await useCase.execute(user.username);
+      const userData = await getProfileUseCase.execute(user.username);
       // Initialize local roles with an extra 'active' property for the table demo
       // In a real app, 'active' might come from the backend or be implied by presence in the list
       if (userData?.roles) {
@@ -61,11 +56,11 @@ const UserRolesTable = ({ user }: { user: User }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.username, getProfileUseCase]);
 
   useEffect(() => {
     fetchUser();
-  }, [user.username]);
+  }, [fetchUser]);
 
   const toggleRoleStatus = (roleId: string | number) => {
     setLocalRoles((prev) =>
@@ -408,48 +403,18 @@ const UserRolesTable = ({ user }: { user: User }) => {
 export const UserDetailPage = () => {
   const { username } = useParams();
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
-  const userRepository = useMemo(() => new UserRepositoryImpl(), []);
-
-  const fetchUser = async () => {
-    if (!username) return;
-
-    try {
-      setLoading(true);
-      const useCase = new GetProfileUseCase(userRepository);
-      const userData = await useCase.execute(username);
-      setUser(userData);
-    } catch (err) {
-      console.error('Failed to fetch user', err);
-      setError('Failed to load user data.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, [username]);
-
-  const handleUpdateUser = async (data: UpdateUserRequest) => {
-    if (!user || !username) return;
-    const updateUserUseCase = new UpdateUserUseCase(userRepository);
-    await updateUserUseCase.execute(username, data);
-    await fetchUser();
-  };
-
-  const handleChangePassword = async (data: ChangePasswordRequest) => {
-    if (!user || !username) return;
-    const changePasswordUseCase = new ChangePasswordUseCase(userRepository);
-    await changePasswordUseCase.execute(user.username, data);
-    alert('Password changed successfully');
-    await fetchUser();
-  };
+  const {
+    user,
+    loading,
+    error,
+    isEditModalOpen,
+    isPasswordModalOpen,
+    setIsEditModalOpen,
+    setIsPasswordModalOpen,
+    handleUpdateUser,
+    handleChangePassword
+  } = useUserDetailViewModel(username);
 
   if (loading) {
     return (

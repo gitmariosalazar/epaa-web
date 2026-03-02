@@ -2,6 +2,7 @@ import React from 'react';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import type { CreateCompanyRequest } from '../../domain/repositories/CompanyRepository';
 import '../styles/CustomerForm.css';
+import { useTranslation } from 'react-i18next';
 
 interface CompanyFormProps {
   formData: CreateCompanyRequest;
@@ -21,6 +22,8 @@ export const CompanyForm: React.FC<CompanyFormProps> = ({
   isEditMode,
   isViewOnly = false
 }) => {
+  const { t } = useTranslation();
+
   const handleArrayChange = (
     field: 'companyEmails' | 'companyPhones',
     value: string
@@ -35,7 +38,7 @@ export const CompanyForm: React.FC<CompanyFormProps> = ({
     <div className="customer-form__container">
       <div className="customer-form__row-2">
         <Input
-          label="Company Name"
+          label={t('customers.form.companyName')}
           name="companyName"
           value={formData.companyName}
           onChange={onChange}
@@ -43,7 +46,7 @@ export const CompanyForm: React.FC<CompanyFormProps> = ({
           disabled={isViewOnly}
         />
         <Input
-          label="Social Reason"
+          label={t('customers.form.socialReason')}
           name="socialReason"
           value={formData.socialReason}
           onChange={onChange}
@@ -53,7 +56,7 @@ export const CompanyForm: React.FC<CompanyFormProps> = ({
 
       <div className="customer-form__row-2">
         <Input
-          label="RUC"
+          label={t('customers.form.ruc')}
           name="companyRuc"
           value={formData.companyRuc}
           onChange={onChange}
@@ -61,7 +64,7 @@ export const CompanyForm: React.FC<CompanyFormProps> = ({
           disabled={isEditMode || isViewOnly}
         />
         <Input
-          label="Country"
+          label={t('customers.form.country')}
           name="companyCountry"
           value={formData.companyCountry}
           onChange={onChange}
@@ -71,7 +74,7 @@ export const CompanyForm: React.FC<CompanyFormProps> = ({
 
       <div className="customer-form__row-2">
         <Input
-          label="Email"
+          label={t('customers.form.email')}
           type="email"
           name="companyEmails"
           value={formData.companyEmails[0] || ''}
@@ -79,7 +82,7 @@ export const CompanyForm: React.FC<CompanyFormProps> = ({
           disabled={isViewOnly}
         />
         <Input
-          label="Phone"
+          label={t('customers.form.phone')}
           name="companyPhones"
           value={formData.companyPhones[0] || ''}
           onChange={(e) => handleArrayChange('companyPhones', e.target.value)}
@@ -89,14 +92,14 @@ export const CompanyForm: React.FC<CompanyFormProps> = ({
 
       <div className="customer-form__row-2">
         <Input
-          label="Address"
+          label={t('customers.form.address')}
           name="companyAddress"
           value={formData.companyAddress}
           onChange={onChange}
           disabled={isViewOnly}
         />
         <Input
-          label="Parish ID"
+          label={t('customers.form.parishId')}
           name="companyParishId"
           value={formData.companyParishId}
           onChange={onChange}

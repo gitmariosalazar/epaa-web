@@ -24,59 +24,66 @@ export const DailyCollectorSummaryTable: React.FC<
 
   const columns: Column<DailyCollectorSummary>[] = [
     {
-      header: t('entryData.collector.date', 'Fecha'),
+      header: t('accounting.columns.date'),
       accessor: 'date',
       sortable: true
     },
     {
-      header: t('entryData.collector.collector', 'Cobrador'),
+      header: t('accounting.columns.collector'),
       accessor: 'collector',
       sortable: true
     },
     {
-      header: t('entryData.collector.titleValue', 'V. EPAA'),
+      header: t('accounting.columns.epaaValue'),
       accessor: (item) => fmt(item.titleValue),
       sortKey: 'titleValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.collector.thirdPartyValue', 'V. Terc.'),
+      header: t('accounting.columns.thirdPartyValue'),
       accessor: (item) => fmt(item.thirdPartyValue),
       sortKey: 'thirdPartyValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.collector.surchargeValue', 'Recargo'),
+      header: t('accounting.columns.surcharge'),
       accessor: (item) => fmt(item.surchargeValue),
       sortKey: 'surchargeValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.collector.trashRateValue', 'TB D.I.'),
+      header: t('accounting.columns.trashRateDt'),
       accessor: (item) => fmt(item.trashRateValue),
       sortKey: 'trashRateValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.collector.detailValue', 'TB Valor'),
+      header: t('Desc. TR D.I.'),
+      accessor: (item) => fmt(item.discountTrashRateValue),
+      sortKey: 'discountTrashRateValue',
+      sortable: true,
+      isNumeric: true
+    },
+    {
+      header: t('accounting.columns.trashRateVal'),
       accessor: (item) => fmt(item.detailValue),
       sortKey: 'detailValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.collector.paymentCount', 'Pagos'),
+      header: t('accounting.columns.incomes'),
       accessor: (item) => String(item.paymentCount),
       sortKey: 'paymentCount',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.collector.totalCollected', 'Total Recaudado'),
+      header: t('accounting.columns.total'),
       accessor: (item) => fmt(item.totalCollected),
       sortKey: 'totalCollected',
       sortable: true,
@@ -86,27 +93,31 @@ export const DailyCollectorSummaryTable: React.FC<
 
   const totalRows = [
     {
-      label: t('entryData.collector.totalEpaa', 'Total EPAA'),
+      label: 'TOTAL ' + t('accounting.columns.epaaValue'),
       value: data.reduce((s, r) => s + Number(r.titleValue), 0)
     },
     {
-      label: t('entryData.collector.totalThirdParty', 'Total Terceros'),
+      label: 'TOTAL ' + t('accounting.columns.thirdPartyValue'),
       value: data.reduce((s, r) => s + Number(r.thirdPartyValue), 0)
     },
     {
-      label: t('entryData.collector.totalSurcharge', 'Total Recargo'),
+      label: 'TOTAL ' + t('accounting.columns.surcharge'),
       value: data.reduce((s, r) => s + Number(r.surchargeValue), 0)
     },
     {
-      label: t('entryData.collector.totalTrash', 'Total TB D.I.'),
+      label: 'TOTAL ' + t('accounting.columns.trashRateDt'),
       value: data.reduce((s, r) => s + Number(r.trashRateValue), 0)
     },
     {
-      label: t('entryData.collector.totalDetail', 'Total TB Valor'),
+      label: 'TOTAL ' + t('accounting.columns.trashRateVal'),
       value: data.reduce((s, r) => s + Number(r.detailValue), 0)
     },
     {
-      label: t('entryData.collector.grandTotal', 'Total General'),
+      label: 'TOTAL ' + t('Desc. TR D.I.'),
+      value: data.reduce((s, r) => s + Number(r.discountTrashRateValue), 0)
+    },
+    {
+      label: 'TOTAL',
       value: data.reduce((s, r) => s + Number(r.totalCollected), 0),
       highlight: true
     }

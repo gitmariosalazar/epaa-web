@@ -2,6 +2,7 @@ import React from 'react';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import type { Customer } from '../../domain/models/Customer';
 import '../styles/CustomerForm.css';
+import { useTranslation } from 'react-i18next';
 
 interface CustomerFormProps {
   formData: Omit<Customer, 'customerId'> & { customerId: string };
@@ -18,11 +19,13 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
   isEditMode,
   isViewOnly = false
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="customer-form__container">
       <div className="customer-form__row-2">
         <Input
-          label="First Name"
+          label={t('customers.form.firstName')}
           name="firstName"
           value={formData.firstName}
           onChange={onChange}
@@ -30,7 +33,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
           disabled={isViewOnly}
         />
         <Input
-          label="Last Name"
+          label={t('customers.form.lastName')}
           name="lastName"
           value={formData.lastName}
           onChange={onChange}
@@ -41,7 +44,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
 
       <div className="customer-form__row-2">
         <Input
-          label="Identity ID (Cedula)"
+          label={t('customers.form.identityId')}
           name="customerId"
           value={formData.customerId}
           onChange={onChange}
@@ -49,7 +52,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
           disabled={isEditMode || isViewOnly}
         />
         <Input
-          label="Date of Birth"
+          label={t('customers.form.dob')}
           type="date"
           name="dateOfBirth"
           value={formData.dateOfBirth || ''}
@@ -60,7 +63,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
 
       <div className="customer-form__row-2">
         <Input
-          label="Email"
+          label={t('customers.form.email')}
           type="email"
           name="emails"
           value={formData.emails[0] || ''}
@@ -72,7 +75,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
           disabled={isViewOnly}
         />
         <Input
-          label="Phone"
+          label={t('customers.form.phone')}
           name="phoneNumbers"
           value={formData.phoneNumbers[0] || ''}
           onChange={(e) => {
@@ -86,14 +89,14 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
 
       <div className="customer-form__row-2">
         <Input
-          label="Address"
+          label={t('customers.form.address')}
           name="address"
           value={formData.address || ''}
           onChange={onChange}
           disabled={isViewOnly}
         />
         <Input
-          label="Parish ID"
+          label={t('customers.form.parishId')}
           name="parishId"
           value={formData.parishId}
           onChange={onChange}
@@ -103,7 +106,9 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
 
       <div className="customer-form__row-2">
         <div className="customer-form__group">
-          <label className="customer-form__label">Sex</label>
+          <label className="customer-form__label">
+            {t('customers.form.sex')}
+          </label>
           <select
             name="sexId"
             value={formData.sexId}
@@ -111,12 +116,14 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
             className="customer-form__control"
             disabled={isViewOnly}
           >
-            <option value={1}>Male</option>
-            <option value={2}>Female</option>
+            <option value={1}>{t('customers.form.male')}</option>
+            <option value={2}>{t('customers.form.female')}</option>
           </select>
         </div>
         <div className="customer-form__group">
-          <label className="customer-form__label">Civil Status</label>
+          <label className="customer-form__label">
+            {t('customers.form.civilStatus')}
+          </label>
           <select
             name="civilStatus"
             value={formData.civilStatus}
@@ -124,18 +131,20 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
             className="customer-form__control"
             disabled={isViewOnly}
           >
-            <option value={1}>Single</option>
-            <option value={2}>Married</option>
-            <option value={3}>Divorced</option>
-            <option value={4}>Widowed</option>
-            <option value={5}>Free Union</option>
+            <option value={1}>{t('customers.form.single')}</option>
+            <option value={2}>{t('customers.form.married')}</option>
+            <option value={3}>{t('customers.form.divorced')}</option>
+            <option value={4}>{t('customers.form.widowed')}</option>
+            <option value={5}>{t('customers.form.freeUnion')}</option>
           </select>
         </div>
       </div>
 
       <div className="customer-form__row-2">
         <div className="customer-form__group">
-          <label className="customer-form__label">Profession ID</label>
+          <label className="customer-form__label">
+            {t('customers.form.professionId')}
+          </label>
           <input
             type="number"
             name="professionId"
@@ -155,7 +164,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
               className="customer-form__checkbox"
               disabled={isViewOnly}
             />
-            Deceased
+            {t('customers.form.deceased')}
           </label>
         </div>
       </div>

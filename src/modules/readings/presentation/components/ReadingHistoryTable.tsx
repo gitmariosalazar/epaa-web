@@ -4,6 +4,8 @@ import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import { useTranslation } from 'react-i18next';
 
 interface PropTypes {
   history: ReadingHistory[];
@@ -14,30 +16,35 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
   history,
   isLoading
 }) => {
+  const { t } = useTranslation();
+
   const columns: Column<ReadingHistory>[] = useMemo(
     () => [
       {
-        header: 'Mes/Año',
+        header: t('readings.historyTable.monthYear'),
         accessor: (row) => `${row.readingMonth} / ${row.readingYear}`
       },
       {
-        header: 'Fecha Lect.',
-        accessor: (row) => new Date(row.readingDate).toLocaleDateString()
+        header: t('readings.historyTable.readingDate'),
+        accessor: (row) => dateService.formatToLocaleString(row.readingDate)
       },
       {
-        header: 'Hora Lect.',
-        accessor: (row) => new Date(row.readingDate).toLocaleTimeString()
+        header: t('readings.historyTable.readingTime'),
+        accessor: (row) =>
+          dateService.formatToLocaleString(row.readingDate, {
+            timeStyle: 'medium'
+          })
       },
       {
-        header: 'Lectura Ant.',
+        header: t('readings.historyTable.prevReading'),
         accessor: 'previousReading'
       },
       {
-        header: 'Lectura Act.',
+        header: t('readings.historyTable.currReading'),
         accessor: 'currentReading'
       },
       {
-        header: 'Consumo (m³)',
+        header: t('readings.historyTable.consumption'),
         accessor: (row) => (
           <span
             style={{
@@ -53,17 +60,17 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
         )
       },
       {
-        header: 'Observación',
-        accessor: (row) => row.observation || 'Ninguna'
+        header: t('readings.historyTable.observation'),
+        accessor: (row) => row.observation || t('readings.historyTable.none')
       }
     ],
-    []
+    [t]
   );
 
   return (
     <div className="cr-table-container">
       <h3 style={{ marginBottom: '5px', color: 'var(--text-primary)' }}>
-        Historial de Lecturas Recientes
+        {t('readings.historyTable.title')}
       </h3>
       <Table<ReadingHistory>
         data={history}

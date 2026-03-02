@@ -255,6 +255,7 @@ const ModalFooterActions: React.FC<ModalFooterActionsProps> = ({
       disabled={isSubmitting}
       onClick={onClose}
       leftIcon={<FaTimesCircle />}
+      size="sm"
     >
       Cancelar
     </Button>
@@ -264,6 +265,7 @@ const ModalFooterActions: React.FC<ModalFooterActionsProps> = ({
       disabled={isSubmitting}
       onClick={onConfirm}
       leftIcon={<FaCheckCircle />}
+      size="sm"
     >
       {isSubmitting ? 'Guardando...' : 'Confirmar y Guardar'}
     </Button>

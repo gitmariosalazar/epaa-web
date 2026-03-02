@@ -1,9 +1,11 @@
 import { Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { DailyStatsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { useDailyStatsTable } from '@/shared/presentation/hooks/dashboard/useDailyStatsTable';
 
 interface DailyStatsProps {
@@ -12,6 +14,7 @@ interface DailyStatsProps {
 }
 
 export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
+  const { t } = useTranslation();
   const {
     searchTerm,
     sortedData,
@@ -23,22 +26,22 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
   if (loading)
     return (
       <div style={{ color: 'var(--text-secondary)' }}>
-        Loading daily stats...
+        {t('dashboard.dailyStats.loading')}
       </div>
     );
   if (!data.length)
     return (
       <div style={{ color: 'var(--text-secondary)' }}>
-        No daily data available.
+        {t('dashboard.dailyStats.empty')}
       </div>
     );
 
   const columns: Column<DailyStatsReport>[] = [
     {
-      header: 'Date',
+      header: t('dashboard.dailyStats.columns.date'),
       accessor: (row) => (
         <span className="font-medium">
-          {new Date(row.date).toLocaleDateString('es-ES', {
+          {dateService.formatToLocaleString(row.date, {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
@@ -49,28 +52,66 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
       sortKey: 'date'
     },
     {
-      header: 'Readings',
+      header: t('dashboard.dailyStats.columns.readings'),
       accessor: 'readingsCount',
       sortable: true,
       sortKey: 'readingsCount'
     },
     {
-      header: 'Avg Value',
+      header: t('dashboard.dailyStats.columns.avgValue'),
       accessor: (row) => `$${Number(row.averageReadingValue).toFixed(2)}`,
       sortable: true,
       sortKey: 'averageReadingValue'
     },
     {
-      header: 'Consumption (Avg)',
+      header: t('dashboard.dailyStats.columns.avgConsumption'),
       accessor: (row) => `${Number(row.averageConsumption).toFixed(2)} m³`,
       sortable: true,
       sortKey: 'averageConsumption'
     },
     {
-      header: 'Sectors',
+      header: t('dashboard.dailyStats.columns.sectors'),
       accessor: 'uniqueSectors',
       sortable: true,
       sortKey: 'uniqueSectors'
+    }
+  ];
+
+  const totalReadings = sortedData.reduce(
+    (total, row) => total + Number(row.readingsCount || 0),
+    0
+  );
+
+  // Count distinct values
+  const totalUniqueSectors = new Set(sortedData.map((row) => row.uniqueSectors))
+    .size;
+
+  const totalAverageReadingValue = sortedData.reduce(
+    (total, row) => total + Number(row.averageReadingValue || 0),
+    0
+  );
+
+  const totalAverageConsumption = sortedData.reduce(
+    (total, row) => total + Number(row.averageConsumption || 0),
+    0
+  );
+
+  const totalRows = [
+    {
+      label: t('dashboard.dailyStats.totals.readings'),
+      value: totalReadings
+    },
+    {
+      label: t('dashboard.dailyStats.totals.sectors'),
+      value: totalUniqueSectors
+    },
+    {
+      label: t('dashboard.dailyStats.totals.avgValue'),
+      value: `$${totalAverageReadingValue.toFixed(2)}`
+    },
+    {
+      label: t('dashboard.dailyStats.totals.avgConsumption'),
+      value: `${totalAverageConsumption.toFixed(2)} m³`
     }
   ];
 
@@ -92,7 +133,7 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
           flexShrink: 0 // Prevent header shrinking
         }}
       >
-        <h3>Daily Performance</h3>
+        <h3>{t('dashboard.dailyStats.title')}</h3>
         <div style={{ position: 'relative', maxWidth: '200px' }}>
           <Search
             size={16}
@@ -106,7 +147,7 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
           />
           <input
             type="text"
-            placeholder="Search date..."
+            placeholder={t('dashboard.dailyStats.searchPlaceholder')}
             value={searchTerm}
             onChange={handleSearchChange}
             style={{
@@ -129,6 +170,7 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
         pageSize={15}
         sortConfig={sortConfig}
         onSort={requestSort}
+        totalRows={totalRows}
         containerStyle={{
           flex: 1, // Grow to fill remaining space
           maxHeight: 'none', // Override sticky limitation if needed or keep standard

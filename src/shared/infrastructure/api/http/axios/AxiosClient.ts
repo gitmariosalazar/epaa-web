@@ -3,6 +3,7 @@ import type { HttpClientInterface } from '../../interfaces/HttpClientInterface';
 import type { ApiResponse } from '../../response/ApiResponse';
 import { environments } from '@/settings/environments/environments';
 import { localStorageService } from '@/shared/infrastructure/storage/LocalStorageService';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 export class AxiosHttpClient implements HttpClientInterface {
   private axiosInstance = axios.create();
@@ -81,7 +82,7 @@ export class AxiosHttpClient implements HttpClientInterface {
 
       return {
         status_code: response.status,
-        time: new Date(),
+        time: dateService.getCurrentDate(),
         message: ['Request successful'],
         url: `${environments.API_URL}${url}`,
         data: response.data

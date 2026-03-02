@@ -24,74 +24,81 @@ export const DailyGroupedReportTable: React.FC<
 
   const columns: Column<DailyGroupedReport>[] = [
     {
-      header: t('entryData.grouped.date', 'Fecha'),
+      header: t('accounting.columns.date'),
       accessor: 'date',
       sortable: true
     },
     {
-      header: t('entryData.grouped.collector', 'Cobrador'),
+      header: t('accounting.columns.collector'),
       accessor: 'collector',
       sortable: true
     },
     {
-      header: t('entryData.grouped.titleCode', 'Código T.'),
+      header: t('accounting.columns.titleCode'),
       accessor: 'titleCode',
       sortable: true
     },
     {
-      header: t('entryData.grouped.paymentMethod', 'Mét. Pago'),
+      header: t('accounting.columns.paymentMethod'),
       accessor: 'paymentMethod',
       sortable: true
     },
     {
-      header: t('entryData.grouped.status', 'Estado'),
+      header: t('accounting.columns.status'),
       accessor: 'status',
       sortable: true
     },
     {
-      header: t('entryData.grouped.titleValue', 'V. EPAA'),
+      header: t('accounting.columns.epaaValue'),
       accessor: (item) => fmt(item.titleValue),
       sortKey: 'titleValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.grouped.thirdPartyValue', 'V. Terc.'),
+      header: t('accounting.columns.thirdPartyValue'),
       accessor: (item) => fmt(item.thirdPartyValue),
       sortKey: 'thirdPartyValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.grouped.surchargeValue', 'Recargo'),
+      header: t('accounting.columns.surcharge'),
       accessor: (item) => fmt(item.surchargeValue),
       sortKey: 'surchargeValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.grouped.trashRateValue', 'TB D.I.'),
+      header: t('accounting.columns.trashRateDt'),
       accessor: (item) => fmt(item.trashRateValue),
       sortKey: 'trashRateValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.grouped.detailValue', 'TB Valor'),
+      header: t('Desc. TR D.I.'),
+      accessor: (item) => fmt(item.discountTrashRateValue),
+      sortKey: 'discountTrashRateValue',
+      sortable: true,
+      isNumeric: true
+    },
+    {
+      header: t('accounting.columns.trashRateVal'),
       accessor: (item) => fmt(item.detailValue),
       sortKey: 'detailValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.grouped.totalValue', 'Total'),
+      header: t('accounting.columns.total'),
       accessor: (item) => fmt(item.totalValue),
       sortKey: 'totalValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.grouped.recordCount', 'Registros'),
+      header: t('accounting.columns.records'),
       accessor: (item) => String(item.recordCount),
       sortKey: 'recordCount',
       sortable: true,
@@ -102,27 +109,31 @@ export const DailyGroupedReportTable: React.FC<
   // ── Totals ──────────────────────────────────────────────────────────────────
   const totalRows = [
     {
-      label: t('entryData.grouped.totalTitleValue', 'Total EPAA'),
+      label: 'TOTAL ' + t('accounting.columns.epaaValue'),
       value: data.reduce((s, r) => s + Number(r.titleValue), 0)
     },
     {
-      label: t('entryData.grouped.totalThirdParty', 'Total Terceros'),
+      label: 'TOTAL ' + t('accounting.columns.thirdPartyValue'),
       value: data.reduce((s, r) => s + Number(r.thirdPartyValue), 0)
     },
     {
-      label: t('entryData.grouped.totalSurcharge', 'Total Recargo'),
+      label: 'TOTAL ' + t('accounting.columns.surcharge'),
       value: data.reduce((s, r) => s + Number(r.surchargeValue), 0)
     },
     {
-      label: t('entryData.grouped.totalTrash', 'Total TB D.I.'),
+      label: 'TOTAL ' + t('accounting.columns.trashRateDt'),
       value: data.reduce((s, r) => s + Number(r.trashRateValue), 0)
     },
     {
-      label: t('entryData.grouped.totalDetail', 'Total TB Valor'),
+      label: 'TOTAL ' + t('accounting.columns.trashRateVal'),
       value: data.reduce((s, r) => s + Number(r.detailValue), 0)
     },
     {
-      label: t('entryData.grouped.grandTotal', 'Total General'),
+      label: 'TOTAL ' + t('Desc. TR D.I.'),
+      value: data.reduce((s, r) => s + Number(r.discountTrashRateValue), 0)
+    },
+    {
+      label: 'TOTAL',
       value: data.reduce((s, r) => s + Number(r.totalValue), 0),
       highlight: true
     }

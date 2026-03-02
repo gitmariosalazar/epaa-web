@@ -24,74 +24,81 @@ export const FullBreakdownReportTable: React.FC<
 
   const columns: Column<FullBreakdownReport>[] = [
     {
-      header: t('entryData.breakdown.date', 'Fecha'),
+      header: t('accounting.columns.date'),
       accessor: 'date',
       sortable: true
     },
     {
-      header: t('entryData.breakdown.collector', 'Cobrador'),
+      header: t('accounting.columns.collector'),
       accessor: 'collector',
       sortable: true
     },
     {
-      header: t('entryData.breakdown.titleCode', 'Código T.'),
+      header: t('accounting.columns.titleCode'),
       accessor: 'titleCode',
       sortable: true
     },
     {
-      header: t('entryData.breakdown.paymentMethod', 'Mét. Pago'),
+      header: t('accounting.columns.paymentMethod'),
       accessor: 'paymentMethod',
       sortable: true
     },
     {
-      header: t('entryData.breakdown.status', 'Estado'),
+      header: t('accounting.columns.status'),
       accessor: 'status',
       sortable: true
     },
     {
-      header: t('entryData.breakdown.titleValue', 'V. EPAA'),
+      header: t('accounting.columns.epaaValue'),
       accessor: (item) => fmt(item.titleValue),
       sortKey: 'titleValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.breakdown.thirdPartyValue', 'V. Terc.'),
+      header: t('accounting.columns.thirdPartyValue'),
       accessor: (item) => fmt(item.thirdPartyValue),
       sortKey: 'thirdPartyValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.breakdown.surchargeValue', 'Recargo'),
+      header: t('accounting.columns.surcharge'),
       accessor: (item) => fmt(item.surchargeValue),
       sortKey: 'surchargeValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.breakdown.trashRateValue', 'TB D.I.'),
+      header: t('accounting.columns.trashRateDt'),
       accessor: (item) => fmt(item.trashRateValue),
       sortKey: 'trashRateValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.breakdown.detailValue', 'TB Valor'),
+      header: t('Desc. TR D.I.'),
+      accessor: (item) => fmt(item.discountTrashRateValue),
+      sortKey: 'discountTrashRateValue',
+      sortable: true,
+      isNumeric: true
+    },
+    {
+      header: t('accounting.columns.trashRateVal'),
       accessor: (item) => fmt(item.detailValue),
       sortKey: 'detailValue',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.breakdown.incomeCount', 'Ingresos'),
+      header: t('accounting.columns.incomes'),
       accessor: (item) => String(item.incomeCount),
       sortKey: 'incomeCount',
       sortable: true,
       isNumeric: true
     },
     {
-      header: t('entryData.breakdown.grandTotal', 'Total'),
+      header: t('accounting.columns.total'),
       accessor: (item) => fmt(item.grandTotal),
       sortKey: 'grandTotal',
       sortable: true,
@@ -101,27 +108,31 @@ export const FullBreakdownReportTable: React.FC<
 
   const totalRows = [
     {
-      label: t('entryData.breakdown.totalEpaa', 'Total EPAA'),
+      label: 'TOTAL ' + t('accounting.columns.epaaValue'),
       value: data.reduce((s, r) => s + Number(r.titleValue), 0)
     },
     {
-      label: t('entryData.breakdown.totalThirdParty', 'Total Terceros'),
+      label: 'TOTAL ' + t('accounting.columns.thirdPartyValue'),
       value: data.reduce((s, r) => s + Number(r.thirdPartyValue), 0)
     },
     {
-      label: t('entryData.breakdown.totalSurcharge', 'Total Recargo'),
+      label: 'TOTAL ' + t('accounting.columns.surcharge'),
       value: data.reduce((s, r) => s + Number(r.surchargeValue), 0)
     },
     {
-      label: t('entryData.breakdown.totalTrash', 'Total TB D.I.'),
+      label: 'TOTAL ' + t('accounting.columns.trashRateDt'),
       value: data.reduce((s, r) => s + Number(r.trashRateValue), 0)
     },
     {
-      label: t('entryData.breakdown.totalDetail', 'Total TB Valor'),
+      label: 'TOTAL ' + t('Desc. TR D.I.'),
+      value: data.reduce((s, r) => s + Number(r.discountTrashRateValue), 0)
+    },
+    {
+      label: 'TOTAL ' + t('accounting.columns.trashRateVal'),
       value: data.reduce((s, r) => s + Number(r.detailValue), 0)
     },
     {
-      label: t('entryData.breakdown.grandTotalAll', 'Total General'),
+      label: 'TOTAL',
       value: data.reduce((s, r) => s + Number(r.grandTotal), 0),
       highlight: true
     }

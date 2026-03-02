@@ -14,10 +14,12 @@ export const ReportsPage = () => {
 
   return (
     <div className="reports-container">
-      <div className="reports-header">
+      {/*
+         <div className="reports-header">
         <h1>Reports Center</h1>
         <p>Generate detailed reports on system readings and anomalies.</p>
       </div>
+      */}
 
       <Tabs
         tabs={[

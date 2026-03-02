@@ -7,9 +7,12 @@ import { Search, Droplets, FileText, Calendar } from 'lucide-react';
 import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { EmptyState } from '../common/EmptyState';
 import { Table, type Column } from '../Table/Table';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 export const YearlyReport = () => {
-  const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [year, setYear] = useState<number>(
+    dateService.getCurrentDate().getFullYear()
+  );
   const [data, setData] = useState<YearlyReadingsReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
