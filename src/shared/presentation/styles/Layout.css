@@ -19,11 +19,12 @@
 
 .dashboard-main {
   flex: 1;
-  padding: var(--spacing-xl);
-  max-width: 1600px;
+  padding: var(--spacing-sm);
+  max-width: 98%;
   width: 100%;
-  margin: 0 auto;
+  margin: 0;
   overflow-y: auto; /* Scroll content */
+  margin-inline: auto;
 }
 
 @media (max-width: 768px) {

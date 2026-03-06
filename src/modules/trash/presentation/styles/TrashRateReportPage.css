@@ -1,0 +1,98 @@
+/* src/modules/trash/presentation/styles/TrashRateReportPage.css */
+
+.trash-report-page {
+  padding: clamp(0.5rem, 2vw, 1rem);
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  animation: trash-report-fade-in 0.3s ease-out;
+  color: var(--text-main);
+  box-sizing: border-box;
+}
+
+.trash-rate-report-filters-section {
+  flex-shrink: 0;
+}
+
+/* Content area fills all remaining vertical space */
+.trash-rate-report-content {
+  flex: 1 1 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+@media (min-width: 1024px) {
+  .trash-report-page {
+    padding: 1rem;
+  }
+}
+
+/* ── Loading state ───────────────────────────────────────────────────── */
+.trash-report-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 260px;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+  background: linear-gradient(
+    135deg,
+    var(--surface) 0%,
+    var(--background) 100%
+  );
+  animation: trash-report-fade-in 0.25s ease-out;
+}
+
+/* ── Error state ─────────────────────────────────────────────────────── */
+.trash-report-error {
+  padding: 1.5rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.trash-report-error-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: #ef4444;
+  animation: trash-report-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  flex-shrink: 0;
+}
+
+.trash-report-error-text {
+  font-weight: 500;
+}
+
+/* ── Animations ──────────────────────────────────────────────────────── */
+@keyframes trash-report-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes trash-report-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

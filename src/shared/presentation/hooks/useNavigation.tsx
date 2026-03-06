@@ -10,7 +10,8 @@ import {
   Building2,
   Lock,
   Receipt,
-  BarChart3
+  BarChart3,
+  List
 } from 'lucide-react';
 import { MdAssignmentAdd, MdOutlineCable } from 'react-icons/md';
 import { TiThList } from 'react-icons/ti';
@@ -157,6 +158,23 @@ export const useNavigation = (): NavSection[] => {
               icon: <TiThList size={18} />,
               label: 'Lecturas',
               to: '/readings/list'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      title: 'Trash Rates',
+      hideTitle: true,
+      items: [
+        {
+          icon: <TbClock24 size={20} />,
+          label: 'Trash Rate Audit',
+          subItems: [
+            {
+              icon: <List size={20} />,
+              label: 'Trash rate audit',
+              to: '/trash-rate/trash-report-audit'
             }
           ]
         }

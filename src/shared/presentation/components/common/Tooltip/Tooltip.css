@@ -1,0 +1,154 @@
+/* src/shared/presentation/components/common/Tooltip/Tooltip.css */
+
+.tooltip-container {
+  display: inline-block;
+  position: relative;
+  /* Allow children to be interacted with normally */
+}
+
+.tooltip-box {
+  position: absolute;
+  /* Adapt seamlessly to Light/Dark modes */
+  background-color: var(--surface);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none; /* Let mouse pass through */
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0.2s;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Positioning ── */
+.tooltip-top {
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, -4px);
+  margin-bottom: 8px;
+}
+
+.tooltip-bottom {
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, 4px);
+  margin-top: 8px;
+}
+
+.tooltip-left {
+  right: 100%;
+  top: 50%;
+  transform: translate(-4px, -50%);
+  margin-right: 8px;
+}
+
+.tooltip-right {
+  left: 100%;
+  top: 50%;
+  transform: translate(4px, -50%);
+  margin-left: 8px;
+}
+
+/* ── Active State ── */
+.tooltip-container:hover .tooltip-box,
+.tooltip-container:focus-within .tooltip-box {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tooltip-container:hover .tooltip-top {
+  transform: translate(-50%, 0);
+}
+.tooltip-container:hover .tooltip-bottom {
+  transform: translate(-50%, 0);
+}
+.tooltip-container:hover .tooltip-left {
+  transform: translate(0, -50%);
+}
+.tooltip-container:hover .tooltip-right {
+  transform: translate(0, -50%);
+}
+
+/* ── Arrow Base ── */
+.tooltip-box::after,
+.tooltip-box::before {
+  content: '';
+  position: absolute;
+  border-style: solid;
+}
+
+/* TOP */
+.tooltip-top::after {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px 5px 0 5px;
+  border-color: var(--surface) transparent transparent transparent;
+}
+.tooltip-top::before {
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, 1px);
+  border-width: 6px 6px 0 6px;
+  border-color: var(--border-color) transparent transparent transparent;
+  z-index: -1;
+}
+
+/* BOTTOM */
+.tooltip-bottom::after {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 5px 5px 5px;
+  border-color: transparent transparent var(--surface) transparent;
+}
+.tooltip-bottom::before {
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, -1px);
+  border-width: 0 6px 6px 6px;
+  border-color: transparent transparent var(--border-color) transparent;
+  z-index: -1;
+}
+
+/* LEFT */
+.tooltip-left::after {
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px 0 5px 5px;
+  border-color: transparent transparent transparent var(--surface);
+}
+.tooltip-left::before {
+  left: 100%;
+  top: 50%;
+  transform: translate(1px, -50%);
+  border-width: 6px 0 6px 6px;
+  border-color: transparent transparent transparent var(--border-color);
+  z-index: -1;
+}
+
+/* RIGHT */
+.tooltip-right::after {
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px 5px 5px 0;
+  border-color: transparent var(--surface) transparent transparent;
+}
+.tooltip-right::before {
+  right: 100%;
+  top: 50%;
+  transform: translate(-1px, -50%);
+  border-width: 6px 6px 6px 0;
+  border-color: transparent var(--border-color) transparent transparent;
+  z-index: -1;
+}

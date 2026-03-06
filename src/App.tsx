@@ -40,6 +40,8 @@ import { EntryDataProvider } from '@/modules/accounting/presentation/context/Ent
 import { EntryDataPage } from '@/modules/accounting/presentation/pages/EntryDataPage';
 import { ReadingsListPage } from '@/modules/readings/presentation/pages/ReadingsListPage';
 import { ReadingImagesPage } from '@/modules/readings/presentation/pages/ReadingImagesPage';
+import { TrashRateReportProvider } from './modules/trash/presentation/context/TrashRateReportContext';
+import { TrashRateReportPage } from './modules/trash/presentation/pages/TrashRateReportPage';
 
 const ProtectedRoute = () => {
   const { token, isLoading } = useAuth();
@@ -149,6 +151,20 @@ function App() {
                         {/* Other reading routes can be added here */}
                       </Routes>
                     </ReadingsProvider>
+                  }
+                />
+                <Route
+                  path="/trash-rate/*"
+                  element={
+                    <TrashRateReportProvider>
+                      <Routes>
+                        <Route
+                          path="trash-report-audit"
+                          element={<TrashRateReportPage />}
+                        />
+                        {/* Add more trash-rate sub-routes here */}
+                      </Routes>
+                    </TrashRateReportProvider>
                   }
                 />
                 {/* Add other protected routes here */}

@@ -1,0 +1,692 @@
+/* src/modules/trash/presentation/styles/TrashRateDashboard.css */
+
+/* ── Dashboard root ─────────────────────────────────────────────────── */
+.trash-dashboard {
+  display: grid;
+  /* KPIs = alto natural, Charts = ocupa el resto (sin scroll) */
+  grid-template-rows: auto minmax(0, 1fr);
+  row-gap: 0.5rem;
+  flex: 1 1 auto;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  animation: dashboard-fade-in 0.4s ease-out;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+/* ── KPI rows ────────────────────────────────────────────────────────── */
+.trash-dashboard-kpi-grid {
+  display: grid;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  grid-template-columns: 1fr;
+  grid-auto-rows: minmax(135px, auto);
+}
+
+/* Asegura que las cards estiren en el grid */
+.trash-dashboard-kpi-grid > * {
+  min-width: 0;
+}
+
+/* Desktop grande: 2 filas, sin huecos
+   - Col 1: Cumplimiento (2 filas)
+   - Fila 1 cols 2-21: 4 KPIs (cada uno span 5)
+   - Fila 2 cols 2-21: 5 KPIs (cada uno span 4)
+*/
+@media (min-width: 1200px) {
+  .trash-dashboard-kpi-grid {
+    grid-template-columns: minmax(310px, 1.6fr) repeat(20, minmax(0, 1fr));
+  }
+
+  /* Cumplimiento ocupa 2 filas */
+  .trash-kpi--compliance {
+    grid-column: 1 / span 1;
+    grid-row: span 2;
+    display: flex;
+    min-height: 0;
+  }
+
+  .trash-kpi--compliance > .trash-kpi-card {
+    height: 100%;
+    min-height: 0;
+  }
+
+  /* 4 KPIs de la fila superior (20/4 = 5 slots) */
+  .trash-kpi--top {
+    grid-column: span 4;
+  }
+
+  /* 5 KPIs de la fila inferior (20/5 = 4 slots) */
+  .trash-kpi--bottom {
+    grid-column: span 4;
+  }
+}
+
+/* Tablet / pantallas medianas */
+@media (min-width: 900px) and (max-width: 1199.98px) {
+  .trash-dashboard-kpi-grid {
+    grid-template-columns: repeat(20, minmax(0, 1fr));
+  }
+
+  .trash-kpi--compliance {
+    grid-column: span 20;
+  }
+
+  /* top = 2 per row */
+  .trash-kpi--top {
+    grid-column: span 10;
+  }
+
+  /* bottom = maybe 3 then 2? 20/3 is hard. let's just use flex wrapping or span 10 */
+  .trash-kpi--bottom {
+    grid-column: span 10;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 899.98px) {
+  .trash-dashboard-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trash-kpi--compliance {
+    grid-column: span 2;
+  }
+
+  .trash-kpi--top,
+  .trash-kpi--bottom {
+    grid-column: span 1;
+  }
+}
+
+/* ── Charts grid (fills remaining space) ────────────────────────────── */
+.trash-dashboard-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: 1fr;
+  grid-auto-rows: 1fr;
+  gap: 0.5rem;
+  height: 100%;
+  min-height: 0;
+  align-items: stretch;
+  align-content: stretch;
+}
+
+/* ── Chart card ──────────────────────────────────────────────────────── */
+.trash-chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: clamp(0.65rem, 1.1vw, 0.95rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  /* Forzar que cada tarjeta llene su celda del grid de charts */
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+  position: relative;
+}
+
+.trash-chart-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.trash-chart-card:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+}
+
+.trash-chart-card-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.trash-chart-card-description {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  max-width: 16rem;
+  text-align: right;
+  line-clamp: 2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.trash-chart-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  width: 100%;
+  padding: 0.5rem;
+}
+
+/* ── Vertical Bar chart ────────────────────────────────────────────────── */
+.trash-v-bar-chart {
+  width: 100%;
+  height: 100%;
+  padding-top: 1.5rem; /* Space for values above bars */
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 1rem;
+}
+
+.trash-v-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  min-width: 0;
+}
+
+.trash-v-bar-track {
+  width: 32px;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: visible; /* To allow values to show above */
+  position: relative;
+}
+
+.trash-v-bar-fill {
+  width: 100%;
+  border-radius: 6px;
+  transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 2px;
+  position: relative;
+}
+
+.trash-v-bar-fill--green {
+  background: linear-gradient(180deg, #22c55e, #16a34a);
+}
+.trash-v-bar-fill--red {
+  background: linear-gradient(180deg, #ef4444, #b91c1c);
+}
+.trash-v-bar-fill--amber {
+  background: linear-gradient(180deg, #f59e0b, #b45309);
+}
+.trash-v-bar-fill--blue {
+  background: linear-gradient(180deg, #38bdf8, #1d4ed8);
+}
+
+.trash-v-bar-value {
+  position: absolute;
+  top: -1.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.trash-v-bar-label {
+  margin-top: 0.75rem;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Donut chart ─────────────────────────────────────────────────────── */
+.trash-donut-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+.trash-donut-svg {
+  flex-shrink: 0;
+  width: min(260px, 100%);
+  height: auto;
+  aspect-ratio: 1;
+  max-height: 100%;
+}
+
+.trash-donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.trash-donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+}
+
+.trash-donut-bg {
+  fill: none;
+  stroke: var(--border-color);
+  stroke-width: 8;
+  opacity: 0.5;
+}
+
+.trash-donut-slice {
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+  transform-origin: center;
+}
+
+.trash-donut-slice:hover {
+  transform: scale(1.02);
+  opacity: 1;
+}
+
+.trash-donut-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.trash-donut-legend-label {
+  color: var(--text-secondary);
+}
+.trash-donut-legend-value {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* ── KPI Card ─────────────────────────────────────────────────────────── */
+.trash-kpi-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: clamp(0.85rem, 1.4vw, 1.25rem) clamp(1rem, 1.8vw, 1.5rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  overflow: hidden;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  cursor: default;
+}
+
+.trash-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+}
+
+.trash-kpi-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+.trash-kpi-card--green::before {
+  background: radial-gradient(circle at 0% 0%, #22c55e 40%, transparent 70%);
+}
+.trash-kpi-card--red::before {
+  background: radial-gradient(circle at 0% 0%, #ef4444 40%, transparent 70%);
+}
+.trash-kpi-card--blue::before {
+  background: radial-gradient(circle at 0% 0%, #38bdf8 40%, transparent 70%);
+}
+.trash-kpi-card--amber::before {
+  background: radial-gradient(circle at 0% 0%, #f59e0b 40%, transparent 70%);
+}
+.trash-kpi-card--purple::before {
+  background: radial-gradient(circle at 0% 0%, #a855f7 40%, transparent 70%);
+}
+.trash-kpi-card--teal::before {
+  background: radial-gradient(circle at 0% 0%, #14b8a6 40%, transparent 70%);
+}
+.trash-kpi-card--rose::before {
+  background: radial-gradient(circle at 0% 0%, #f43f5e 40%, transparent 70%);
+}
+
+.trash-kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.trash-kpi-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.trash-kpi-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.trash-kpi-icon--green {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+.trash-kpi-icon--red {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+.trash-kpi-icon--blue {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+}
+.trash-kpi-icon--amber {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+.trash-kpi-icon--purple {
+  background: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
+}
+.trash-kpi-icon--teal {
+  background: rgba(20, 184, 166, 0.12);
+  color: #14b8a6;
+}
+.trash-kpi-icon--rose {
+  background: rgba(244, 63, 94, 0.12);
+  color: #f43f5e;
+}
+
+.trash-kpi-value {
+  font-size: clamp(1.05rem, 2.2vw, 1.5rem);
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.trash-kpi-value--green {
+  color: #22c55e;
+}
+.trash-kpi-value--red {
+  color: #ef4444;
+}
+.trash-kpi-value--amber {
+  color: #f59e0b;
+}
+
+.trash-kpi-description {
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  text-align: center;
+  line-clamp: 2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Compliance special card ────────────────────────────────────────── */
+.trash-kpi-compliance {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  grid-template-areas:
+    'ring info'
+    'desc desc';
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  column-gap: 1rem;
+  row-gap: 0.5rem;
+  padding: clamp(0.75rem, 1.2vw, 1.25rem);
+  height: 100%;
+  min-height: 0;
+}
+
+.trash-kpi-compliance-info {
+  grid-area: info;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.trash-kpi-compliance-desc {
+  grid-area: desc;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  line-height: 1.25;
+  text-align: center;
+  line-clamp: 3;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* En pantallas bajas, compacta espacios */
+@media (max-height: 760px) {
+  .trash-dashboard {
+    row-gap: 0.35rem;
+  }
+
+  .trash-dashboard-kpi-grid {
+    gap: 0.35rem;
+  }
+
+  .trash-dashboard-charts-grid {
+    gap: 0.35rem;
+  }
+}
+
+.trash-kpi-compliance-ring {
+  grid-area: ring;
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.trash-kpi-compliance-ring svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.trash-kpi-compliance-ring-bg {
+  fill: none;
+  stroke: var(--border-color);
+  stroke-width: 6;
+}
+.trash-kpi-compliance-ring-fill {
+  fill: none;
+  stroke: #22c55e;
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s ease;
+}
+.trash-kpi-compliance-ring-fill--warn {
+  stroke: #f59e0b;
+}
+.trash-kpi-compliance-ring-fill--danger {
+  stroke: #ef4444;
+}
+
+.trash-kpi-compliance-pct {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.trash-kpi-compliance-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.trash-kpi-compliance-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.trash-kpi-compliance-subtitle {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────── */
+.trash-dashboard-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem;
+  border: 1px dashed var(--border-color);
+  border-radius: 1rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  flex: 1;
+}
+
+/* ── Area chart styles ───────────────────────────────────────────────── */
+.trash-area-svg {
+  width: 100%;
+  height: 220px;
+}
+
+.trash-area-fill {
+  fill: url(#trashAreaGradient);
+}
+
+.trash-area-line {
+  fill: none;
+  stroke: #22c55e;
+  stroke-width: 1.8;
+}
+
+.trash-area-dot {
+  fill: #22c55e;
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
+
+.trash-area-axis-text {
+  font-size: 0.6rem;
+  fill: var(--text-secondary);
+}
+
+.trash-area-grid-line {
+  stroke: rgba(148, 163, 184, 0.25);
+  stroke-width: 0.4;
+}
+
+.trash-area-gradient-stop-1 {
+  stop-color: rgba(34, 197, 94, 0.35);
+}
+
+.trash-area-gradient-stop-2 {
+  stop-color: rgba(34, 197, 94, 0);
+}
+
+/* ── Animations ──────────────────────────────────────────────────────── */
+@keyframes dashboard-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 900px) {
+  .trash-dashboard-kpi-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .trash-dashboard-kpi-row--top {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .trash-dashboard-kpi-row--bottom {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .trash-dashboard-charts-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1199.98px) {
+  .trash-dashboard-charts-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .trash-dashboard-charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trash-donut-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .trash-dashboard-kpi-row {
+    grid-template-columns: 1fr;
+  }
+}

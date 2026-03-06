@@ -1,0 +1,122 @@
+/* src/modules/trash/presentation/styles/TrashRateReportFilters.css */
+
+/* ── Container ───────────────────────────────────────────────────────── */
+.trash-report-filters {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+/* ── Sections ────────────────────────────────────────────────────────── */
+.trash-report-filter-left {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.trash-report-filter-right {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+}
+
+/* ── Individual group ────────────────────────────────────────────────── */
+.trash-report-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  width: 11rem;
+}
+
+/* ── Label ───────────────────────────────────────────────────────────── */
+.trash-report-filter-label {
+  font-size: 0.675rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── Input wrapper ───────────────────────────────────────────────────── */
+.trash-report-filter-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* ── Inputs & selects ────────────────────────────────────────────────── */
+.trash-report-filter-input,
+.trash-report-filter-input[type='date'],
+.trash-report-filter-input[type='text'],
+.trash-report-filter-select {
+  width: 100%;
+  height: 36px;
+  padding: 0 0.5rem;
+  background-color: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.trash-report-filter-input:focus,
+.trash-report-filter-select:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+.trash-report-filter-select {
+  padding-left: 0.625rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 0.875rem;
+  padding-right: 1.75rem;
+}
+
+/* ── Spinner ─────────────────────────────────────────────────────────── */
+.trash-report-filter-spinner {
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: trash-report-filter-spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes trash-report-filter-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Alignment fix for button height */
+.trash-report-filters .btn-pro {
+  height: 36px;
+}
