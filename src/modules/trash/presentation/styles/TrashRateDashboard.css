@@ -698,3 +698,108 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Revenue Status Table ────────────────────────────────────────── */
+.trash-kpi-revenue-status {
+  grid-column: span 4;
+  height: 100%;
+}
+
+.revenue-status-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.revenue-status-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary-light);
+  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+}
+
+.revenue-status-header {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.4rem;
+}
+
+.revenue-status-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.revenue-status-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.revenue-status-table th {
+  text-align: left;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+}
+
+.revenue-status-table td {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  border-bottom: 1px solid rgba(var(--border-rgb), 0.3);
+}
+
+.revenue-status-table tr:last-child td {
+  border-bottom: none;
+}
+
+.monto-value {
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: right;
+}
+
+.status-badge {
+  display: inline-flex;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-badge--B {
+  background: rgba(244, 63, 94, 0.12);
+  color: #f43f5e;
+}
+
+.status-badge--P {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+.error-text {
+  color: var(--error);
+  font-size: 0.7rem;
+  padding: 0.5rem;
+}
+
+@media (max-width: 1200px) {
+  .trash-kpi-revenue-status {
+    grid-column: span 10;
+  }
+}
+
+@media (max-width: 641px) {
+  .trash-kpi-revenue-status {
+    grid-column: span 1;
+  }
+}

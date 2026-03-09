@@ -7,8 +7,8 @@ import {
   CheckCircle,
   Clock,
   Home,
-  AlertTriangle,
-  TrendingUp
+  TrendingUp,
+  AlertTriangle
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { TrashRateKPI } from '../../domain/models/trash-rate-report.model';
@@ -22,6 +22,11 @@ import {
   type BarItem
 } from '@/shared/presentation/components/Charts/VerticalBarChart';
 import '@/shared/presentation/components/Charts/Charts.css';
+
+interface RevenueStatusItem {
+  Estado: string;
+  Monto: number;
+}
 
 interface TrashRateDashboardKPIProps {
   data: TrashRateKPI[];
@@ -224,12 +229,33 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
         />
         <KpiCard
           className="trash-kpi--top"
-          label="Neto Recaudado"
+          label="Total sin ajustes"
           value={fmtMoney(k.netAmountCollected)}
+          icon={<AlertTriangle size={16} />}
+          color="amber"
+          description="Total sin ajustes/anulaciones"
+        />
+        <KpiCard
+          className="trash-kpi--top"
+          label="Total Recaudado (Pagos)"
+          value={fmtMoney(
+            (() => {
+              try {
+                const statusData: RevenueStatusItem[] = JSON.parse(
+                  k.revenueStatusJsonArray || '[]'
+                );
+                return (
+                  statusData.find((item) => item.Estado === 'P')?.Monto || 0
+                );
+              } catch (e) {
+                return 0;
+              }
+            })()
+          )}
           icon={<CheckCircle size={16} />}
           color="green"
           valueColor="green"
-          description="Efectivo ingresado"
+          description="Pagos liquidados (Estado P)"
         />
         <KpiCard
           className="trash-kpi--top"
@@ -240,25 +266,8 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
           valueColor="red"
           description="Cartera por cobrar"
         />
-        <KpiCard
-          className="trash-kpi--top"
-          label="Brecha Integridad"
-          value={fmtMoney(k.integrityGapAmount)}
-          icon={<AlertTriangle size={16} />}
-          color="rose"
-          valueColor="red"
-          description="Diferencia Sistema vs Tabla"
-        />
 
         {/* Row 2 */}
-        <KpiCard
-          className="trash-kpi--bottom"
-          label="Facturas Emitidas"
-          value={fmtNum(k.totalBillsIssued)}
-          icon={<FileText size={16} />}
-          color="purple"
-          description="Total de comprobantes"
-        />
         <KpiCard
           className="trash-kpi--bottom"
           label="Predios Únicos"
@@ -269,12 +278,87 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
         />
         <KpiCard
           className="trash-kpi--bottom"
+          label="Facturas Emitidas"
+          value={fmtNum(k.totalBillsIssued)}
+          icon={<FileText size={16} />}
+          color="purple"
+          description="Total de comprobantes"
+        />
+        <KpiCard
+          className="trash-kpi--bottom"
+          label="Creditos Emitidos"
+          value={fmtNum(k.creditNotesVolume)}
+          icon={<FileText size={16} />}
+          color="purple"
+          description="Total de creditos emitidos"
+        />
+        <KpiCard
+          className="trash-kpi--bottom"
+          label="Valor Creditos"
+          value={fmtNum(k.creditNotesTotalAmount)}
+          icon={<DollarSign size={16} />}
+          color="purple"
+          description="Valor total de creditos emitidos"
+        />
+        <KpiCard
+          className="trash-kpi--bottom"
           label="Sin Valor Table"
           value={fmtNum(k.integrityAuditMissingValor)}
           icon={<AlertCircle size={16} />}
           color="red"
           description="Omitidos en auditoría"
         />
+
+        <div className="trash-kpi-revenue-status">
+          <div className="revenue-status-card">
+            <div className="revenue-status-header">
+              <span className="revenue-status-title">
+                Distribución por Estado
+              </span>
+            </div>
+            <table className="revenue-status-table">
+              <thead>
+                <tr>
+                  <th>Estado</th>
+                  <th>Monto</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  try {
+                    const statusData: RevenueStatusItem[] = JSON.parse(
+                      k.revenueStatusJsonArray || '[]'
+                    );
+                    return statusData.map((item, idx) => (
+                      <tr key={idx}>
+                        <td>
+                          <span
+                            className={`status-badge status-badge--${item.Estado}`}
+                          >
+                            {item.Estado === 'B'
+                              ? 'Baja'
+                              : item.Estado === 'P'
+                                ? 'Pagado'
+                                : item.Estado}
+                          </span>
+                        </td>
+                        <td className="monto-value">{fmtMoney(item.Monto)}</td>
+                      </tr>
+                    ));
+                  } catch (e) {
+                    return (
+                      <tr>
+                        <td colSpan={2} className="error-text">
+                          Error al cargar datos
+                        </td>
+                      </tr>
+                    );
+                  }
+                })()}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <div className="trash-dashboard-charts-grid">
