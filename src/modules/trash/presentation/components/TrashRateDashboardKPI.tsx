@@ -192,20 +192,25 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
 
   const barItems: BarItem[] = [
     {
-      label: 'Auditado',
-      value: k.valorTableTotal ?? 0,
+      label: 'Total a Recaudar',
+      value: k.grossAmountToCollect ?? 0,
       color: 'blue',
       fmt: fmtMoney
     },
     {
-      label: 'Sistema',
-      value: k.grossAmountToCollect ?? 0,
+      label: 'Notas de Crédito',
+      value: k.creditNotesTotalAmount ?? 0,
       color: 'amber',
       fmt: fmtMoney
     },
     {
-      label: 'Cobrado',
-      value: k.netAmountCollected ?? 0,
+      label: 'Total Recaudado',
+      value:
+        JSON.parse(k.revenueStatusJsonArray ?? '[]').reduce(
+          (acc: number, item: RevenueStatusItem) =>
+            item.Estado === 'P' ? acc + item.Monto : acc,
+          0
+        ) ?? 0,
       color: 'green',
       fmt: fmtMoney
     }
@@ -374,7 +379,7 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
         <VerticalBarChart
           title="Comparativa General"
           items={barItems}
-          description="Comparativa directa del monto total emitido contra las retenciones y la deuda"
+          description="Detalle de la recaudación"
         />
         <DonutChart
           title="Auditoría Integridad"
