@@ -9,7 +9,10 @@ import type {
   MissingValorRow,
   MonthlySummaryRow,
   TopDebtorRow,
-  TrashRateAuditRow
+  TrashRateAuditRow,
+  CollectorPerformanceKPI,
+  TrashRateKPI,
+  DailyCollectorDetail
 } from '../../domain/models/trash-rate-report.model';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 
@@ -83,6 +86,33 @@ export class TrashRateRepositoryImpl implements InterfaceTrashRateReportReposito
   ): Promise<TrashRateAuditRow[]> {
     const response = await this.client.get<ApiResponse<TrashRateAuditRow[]>>(
       '/trash-rate-report/trash-rate-audit-report',
+      { params }
+    );
+    return response.data.data;
+  }
+
+  async getCollectorPerformanceKPI(
+    params: DateRangeParams
+  ): Promise<CollectorPerformanceKPI[]> {
+    const response = await this.client.get<
+      ApiResponse<CollectorPerformanceKPI[]>
+    >('/trash-rate-report/collector-performance-kpi', { params });
+    return response.data.data;
+  }
+
+  async getDailyCollectorDetail(
+    params: DateRangeParams
+  ): Promise<DailyCollectorDetail[]> {
+    const response = await this.client.get<ApiResponse<DailyCollectorDetail[]>>(
+      '/trash-rate-report/daily-collector-detail',
+      { params }
+    );
+    return response.data.data;
+  }
+
+  async getTrashRateKPI(params: DateRangeParams): Promise<TrashRateKPI[]> {
+    const response = await this.client.get<ApiResponse<TrashRateKPI[]>>(
+      '/trash-rate-report/trash-rate-kpi',
       { params }
     );
     return response.data.data;

@@ -7,6 +7,9 @@ import { GetTrashDashboardKpiUseCase } from '../../application/usecases/GetTrash
 import { GetClientTrashDetailRowUseCase } from '../../application/usecases/GetClientTrashDetailRowUse';
 import { createContext, useContext } from 'react';
 import { TrashRateRepositoryImpl } from '../../infrastructure/repositories/TrashRateRepositoryImpl';
+import { GetCollectorPerformanceKPIUseCase } from '../../application/usecases/GetCollectorPerformanceKPIUseCase';
+import { GetDailyCollectorDetailUseCase } from '../../application/usecases/GetDailyCollectorDetailUseCase';
+import { GetTrashRateKPIUseCase } from '../../application/usecases/GetTrashRateKPIUseCase';
 
 interface TrashRateReportContextType {
   getTrashRateAuditReport: GetTrashRateAuditRowUseCase;
@@ -16,6 +19,9 @@ interface TrashRateReportContextType {
   getClientDetailSearch: GetClientTrashDetailRowUseCase;
   getTopDebtorReport: GetTopDebtorRowUseCase;
   getDashboardKPITrashRate: GetTrashDashboardKpiUseCase;
+  getCollectorPerformanceKPI: GetCollectorPerformanceKPIUseCase;
+  getDailyCollectorDetail: GetDailyCollectorDetailUseCase;
+  getTrashRateKPI: GetTrashRateKPIUseCase;
 }
 
 const TrashRateReportContext = createContext<TrashRateReportContextType | null>(
@@ -46,7 +52,14 @@ export const TrashRateReportProvider: React.FC<{
     getTopDebtorReport: new GetTopDebtorRowUseCase(trashRateReportRepository),
     getDashboardKPITrashRate: new GetTrashDashboardKpiUseCase(
       trashRateReportRepository
-    )
+    ),
+    getCollectorPerformanceKPI: new GetCollectorPerformanceKPIUseCase(
+      trashRateReportRepository
+    ),
+    getDailyCollectorDetail: new GetDailyCollectorDetailUseCase(
+      trashRateReportRepository
+    ),
+    getTrashRateKPI: new GetTrashRateKPIUseCase(trashRateReportRepository)
   };
 
   return (

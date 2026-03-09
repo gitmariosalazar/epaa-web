@@ -4,9 +4,6 @@ import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '../../../../shared/presentation/components/DatePicker/DatePicker';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import type { TrashRateTab } from '../hooks/useTrashRateReportViewModel';
-
-export type { TrashRateTab };
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 export interface TrashRateReportFiltersProps {

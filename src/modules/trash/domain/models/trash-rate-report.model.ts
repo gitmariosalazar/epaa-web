@@ -99,3 +99,58 @@ export interface TrashDashboardKpi {
   countNotes: number;
   totalNotesAmount: number;
 }
+
+export interface TrashRateKPI {
+  totalBillsIssued: number;
+  uniqueCadastralKeys: number;
+  sourceTrashRateTotal: number;
+  valorTableTotal: number;
+  integrityGapAmount: number;
+  grossAmountToCollect: number;
+  totalToCollectedMonthly: number;
+  netAmountCollected: number;
+  totalAmountPending: number;
+  collectionCompliancePct: number;
+  paidBillsCount: number;
+  pendingBillsCount: number;
+  integrityAuditMissingValor: number;
+  creditNotesVolume: number;
+  creditNotesTotalAmount: number;
+  paymentRateVolumePct: number;
+  delinquencyRateValuePct: number;
+  creditNotesImpactPct: number;
+  revenueStatusJsonArray: string;
+}
+
+export interface CollectorPerformanceKPI {
+  performanceRank: number;
+  collectorId: string;
+  totalTransactions: number;
+  uniqueCustomersServed: number;
+  sourceTrashRateTotal: number;
+  valorTableTotal: number;
+  integrityGapAmount: number;
+  grossAmount: number;
+  totalDiscountsApplied: number;
+  netCollectionTotal: number;
+  avgTicketSize: number;
+  pctOfTotalRevenue: number;
+  cancelledBillsCount: number;
+  cancelledBillsValue: number;
+}
+
+export interface DailyCollectorDetail {
+  collectorId: string;
+  paymentDate: string;
+  incomeStatus: string;
+  transactionsCount: number;
+  sourceTrashRateDaily: number;
+  valorTableDaily: number;
+  integrityGapDaily: number;
+  grossDailyTotal: number;
+  discountsDailyTotal: number;
+  netDailyCollection: number;
+  avgTicketDaily: number;
+  cancelledCountDaily: number;
+  cancelledValueDaily: number;
+}

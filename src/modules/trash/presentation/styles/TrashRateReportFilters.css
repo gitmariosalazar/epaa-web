@@ -6,13 +6,14 @@
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: flex-end;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
   background-color: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
+  margin-bottom: 1rem;
 }
 
 /* ── Sections ────────────────────────────────────────────────────────── */
@@ -41,7 +42,11 @@
   flex-direction: column;
   gap: 0.3rem;
   flex-shrink: 0;
-  width: 11rem;
+  width: 11.5rem;
+}
+
+.trash-report-filter-group--range {
+  width: 22rem;
 }
 
 /* ── Label ───────────────────────────────────────────────────────────── */
@@ -119,4 +124,20 @@
 /* Alignment fix for button height */
 .trash-report-filters .btn-pro {
   height: 36px;
+}
+
+@media (max-width: 640px) {
+  .trash-report-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .trash-report-filter-left,
+  .trash-report-filter-right {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  .trash-report-filter-group {
+    width: 100%;
+  }
 }

@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import type { CreditNoteRow } from '../../domain/models/trash-rate-report.model';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
+import { ConverDate } from '@/shared/presentation/utils/datetime/ConverDate';
+
 interface CreditNotesTableProps {
   data: CreditNoteRow[];
   isLoading: boolean;
@@ -22,13 +24,15 @@ export const CreditNotesTable: React.FC<CreditNotesTableProps> = ({
   isLoading,
   onSort,
   onExportPdf,
-  sortConfig,
-  error
+  sortConfig
 }) => {
   const { t } = useTranslation();
 
-  const fmt = (n: number | null | undefined) =>
-    n != null ? `$${Number(n).toFixed(2)}` : '-';
+  const formatCurrency = (value: number | null | undefined) =>
+    new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value ?? 0);
 
   const columns: Column<CreditNoteRow>[] = [
     {
@@ -45,37 +49,42 @@ export const CreditNotesTable: React.FC<CreditNotesTableProps> = ({
     },
     {
       header: t('trashRateReport.creditNotes.creditNoteCount', 'N° NC'),
-      accessor: 'creditNoteCount'
+      accessor: 'creditNoteCount',
+      isNumeric: true
     },
     {
       header: t('trashRateReport.creditNotes.totalBalanceInFavor', 'Saldo NC'),
-      accessor: (r) => fmt(r.totalBalanceInFavor)
+      accessor: (r) => formatCurrency(r.totalBalanceInFavor),
+      isNumeric: true
     },
     {
       header: t('trashRateReport.creditNotes.creditCoverage', 'Cobertura'),
-      accessor: 'creditCoverage'
+      accessor: 'creditCoverage',
+      isNumeric: true
     },
     {
       header: t(
         'trashRateReport.creditNotes.pendingTrashDebt',
         'Deuda Pendiente'
       ),
-      accessor: (r) => fmt(r.pendingTrashDebt)
+      accessor: (r) => formatCurrency(r.pendingTrashDebt),
+      isNumeric: true
     },
     {
       header: t(
         'trashRateReport.creditNotes.remainingDebtAfterNc',
         'Deuda Restante'
       ),
-      accessor: (r) => fmt(r.remainingDebtAfterNc)
+      accessor: (r) => formatCurrency(r.remainingDebtAfterNc),
+      isNumeric: true
     },
     {
       header: t('trashRateReport.creditNotes.lastBillIssued', 'Última Factura'),
-      accessor: (r) => r.lastBillIssued ?? '-'
+      accessor: (r) => ConverDate(r.lastBillIssued)
     },
     {
       header: t('trashRateReport.creditNotes.lastPaymentDate', 'Último Pago'),
-      accessor: (r) => r.lastPaymentDate ?? '-'
+      accessor: (r) => ConverDate(r.lastPaymentDate)
     }
   ];
 
@@ -118,7 +127,7 @@ export const CreditNotesTable: React.FC<CreditNotesTableProps> = ({
     }
   ];
 
-  if (error) return null;
+  if (isLoading) return null;
 
   return (
     <div className="trash-rate-audit-table-wrapper">

@@ -42,6 +42,7 @@ import { ReadingsListPage } from '@/modules/readings/presentation/pages/Readings
 import { ReadingImagesPage } from '@/modules/readings/presentation/pages/ReadingImagesPage';
 import { TrashRateReportProvider } from './modules/trash/presentation/context/TrashRateReportContext';
 import { TrashRateReportPage } from './modules/trash/presentation/pages/TrashRateReportPage';
+import { TrashRateKPIPage } from './modules/trash/presentation/pages/TrashRateKPIPage';
 
 const ProtectedRoute = () => {
   const { token, isLoading } = useAuth();
@@ -161,6 +162,10 @@ function App() {
                         <Route
                           path="trash-report-audit"
                           element={<TrashRateReportPage />}
+                        />
+                        <Route
+                          path="trash-rate-kpi"
+                          element={<TrashRateKPIPage />}
                         />
                         {/* Add more trash-rate sub-routes here */}
                       </Routes>

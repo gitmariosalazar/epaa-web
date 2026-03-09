@@ -1,8 +1,8 @@
 /* src/modules/trash/presentation/styles/PaymentsTable.css */
 
 .trash-rate-audit-table-wrapper {
-  background-color: var(--surface);
-  border-radius: 0.75rem;
+  background: var(--surface);
+  border-radius: 0.5rem;
   border: 1px solid var(--border-color);
   overflow: hidden;
   box-shadow:

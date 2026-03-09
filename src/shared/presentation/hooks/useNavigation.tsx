@@ -169,12 +169,17 @@ export const useNavigation = (): NavSection[] => {
       items: [
         {
           icon: <TbClock24 size={20} />,
-          label: 'Trash Rate Audit',
+          label: 'Trash Rate',
           subItems: [
             {
-              icon: <List size={20} />,
+              icon: <List size={18} />,
               label: 'Trash rate audit',
               to: '/trash-rate/trash-report-audit'
+            },
+            {
+              icon: <BarChart3 size={18} />,
+              label: 'Trash rate kpi',
+              to: '/trash-rate/trash-rate-kpi'
             }
           ]
         }

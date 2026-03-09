@@ -1,7 +1,12 @@
 import type { DateRangeParams } from '../../domain/dto/params/DateRangeParams';
 import { useTrashRateReportContext } from '../context/TrashRateReportContext';
 import { useCallback, useState } from 'react';
-import type { TrashRateAuditRow } from '../../domain/models/trash-rate-report.model';
+import type {
+  CollectorPerformanceKPI,
+  DailyCollectorDetail,
+  TrashRateAuditRow,
+  TrashRateKPI
+} from '../../domain/models/trash-rate-report.model';
 import type { MonthlySummaryRow } from '../../domain/models/trash-rate-report.model';
 import type { MissingValorRow } from '../../domain/models/trash-rate-report.model';
 import type { CreditNoteRow } from '../../domain/models/trash-rate-report.model';
@@ -31,6 +36,13 @@ export const useTrashRateReport = () => {
   const [dashboardKPITrashRate, setDashboardKPITrashRate] = useState<
     TrashDashboardKpi[]
   >([]);
+  const [collectorPerformanceKPI, setCollectorPerformanceKPI] = useState<
+    CollectorPerformanceKPI[]
+  >([]);
+  const [dailyCollectorDetail, setDailyCollectorDetail] = useState<
+    DailyCollectorDetail[]
+  >([]);
+  const [trashRateKPI, setTrashRateKPI] = useState<TrashRateKPI[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -120,6 +132,36 @@ export const useTrashRateReport = () => {
     [context.getDashboardKPITrashRate, withLoading]
   );
 
+  const getCollectorPerformanceKPI = useCallback(
+    async (params: DateRangeParams) => {
+      await withLoading(async () => {
+        const result = await context.getCollectorPerformanceKPI.execute(params);
+        setCollectorPerformanceKPI(result);
+      });
+    },
+    [context.getCollectorPerformanceKPI, withLoading]
+  );
+
+  const getDailyCollectorDetail = useCallback(
+    async (params: DateRangeParams) => {
+      await withLoading(async () => {
+        const result = await context.getDailyCollectorDetail.execute(params);
+        setDailyCollectorDetail(result);
+      });
+    },
+    [context.getDailyCollectorDetail, withLoading]
+  );
+
+  const getTrashRateKPI = useCallback(
+    async (params: DateRangeParams) => {
+      await withLoading(async () => {
+        const result = await context.getTrashRateKPI.execute(params);
+        setTrashRateKPI(result);
+      });
+    },
+    [context.getTrashRateKPI, withLoading]
+  );
+
   return {
     //Data
     trashRateAuditReport,
@@ -129,6 +171,9 @@ export const useTrashRateReport = () => {
     clientDetailSearch,
     topDebtorReport,
     dashboardKPITrashRate,
+    collectorPerformanceKPI,
+    dailyCollectorDetail,
+    trashRateKPI,
     //Methods Actions
     getTrashRateAuditReport,
     getMonthlySummaryReport,
@@ -137,6 +182,9 @@ export const useTrashRateReport = () => {
     getClientDetailSearch,
     getTopDebtorReport,
     getDashboardKPITrashRate,
+    getCollectorPerformanceKPI,
+    getDailyCollectorDetail,
+    getTrashRateKPI,
     //State
     loading,
     error,

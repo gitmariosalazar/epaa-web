@@ -1,0 +1,263 @@
+/* src/shared/presentation/components/Charts/Charts.css */
+
+/* ── Base Chart Card ──────────────────────────────── */
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  animation: chart-fade-in 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  position: relative;
+}
+
+.chart-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.chart-card-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.chart-card-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chart-card-description {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.chart-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+/* ── Donut Chart ──────────────────────────────────── */
+.donut-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.donut-svg-container {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+}
+
+.donut-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.donut-slice {
+  cursor: pointer;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+  stroke: var(--surface);
+  stroke-width: 0.5;
+}
+
+.donut-slice:hover {
+  opacity: 0.8 !important;
+  transform: scale(1.02);
+  transform-origin: center;
+}
+
+.donut-bg {
+  fill: none;
+  stroke: var(--surface-hover);
+  stroke-width: 12;
+}
+
+.donut-center-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+
+.donut-center-label {
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.donut-center-value {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.donut-legend {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.donut-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.donut-legend-label {
+  flex: 1;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.donut-legend-value {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* ── Vertical Bar Chart ───────────────────────────── */
+.v-bar-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  width: 100%;
+  height: 180px;
+  padding-top: 2rem;
+  gap: 1rem;
+}
+
+.v-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 60px;
+}
+
+.v-bar-track {
+  width: 100%;
+  background: var(--surface-hover);
+  border-radius: 4px;
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+  height: 140px;
+  overflow: visible;
+}
+
+.v-bar-fill {
+  width: 100%;
+  border-radius: 4px;
+  position: relative;
+  transition: height 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: bar-grow 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.v-bar-value {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.675rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.v-bar-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Animations ───────────────────────────────────── */
+@keyframes chart-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bar-grow {
+  from {
+    height: 0;
+  }
+}
+
+/* ── Color Variations ─────────────────────────────── */
+.v-bar-fill--blue {
+  background: linear-gradient(180deg, #3b82f6, #2563eb);
+}
+.v-bar-fill--green {
+  background: linear-gradient(180deg, #22c55e, #16a34a);
+}
+.v-bar-fill--red {
+  background: linear-gradient(180deg, #ef4444, #dc2626);
+}
+.v-bar-fill--amber {
+  background: linear-gradient(180deg, #f59e0b, #d97706);
+}
+.v-bar-fill--purple {
+  background: linear-gradient(180deg, #8b5cf6, #7c3aed);
+}
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 768px) {
+  .donut-wrapper {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  .donut-legend {
+    width: 100%;
+  }
+}

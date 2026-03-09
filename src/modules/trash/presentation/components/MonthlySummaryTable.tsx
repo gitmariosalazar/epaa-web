@@ -22,13 +22,15 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
   isLoading,
   onSort,
   onExportPdf,
-  sortConfig,
-  error
+  sortConfig
 }) => {
   const { t } = useTranslation();
 
-  const fmt = (n: number | null | undefined) =>
-    n != null ? `$${Number(n).toFixed(2)}` : '-';
+  const formatCurrency = (value: number | null | undefined) =>
+    new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value ?? 0);
 
   const columns: Column<MonthlySummaryRow>[] = [
     {
@@ -44,36 +46,42 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
     },
     {
       header: t('trashRateReport.monthlySummary.billCount', 'Facturas'),
-      accessor: 'billCount'
+      accessor: 'billCount',
+      isNumeric: true
     },
     {
       header: t(
         'trashRateReport.monthlySummary.totalRateIncome',
         'Tasa Ingreso'
       ),
-      accessor: (r) => fmt(r.totalRateIncome)
+      accessor: (r) => formatCurrency(r.totalRateIncome),
+      isNumeric: true
     },
     {
       header: t(
         'trashRateReport.monthlySummary.totalRateValorTable',
         'Tasa Valor'
       ),
-      accessor: (r) => fmt(r.totalRateValorTable)
+      accessor: (r) => formatCurrency(r.totalRateValorTable),
+      isNumeric: true
     },
     {
       header: t('trashRateReport.monthlySummary.totalDiscounts', 'Descuentos'),
-      accessor: (r) => fmt(r.totalDiscounts)
+      accessor: (r) => formatCurrency(r.totalDiscounts),
+      isNumeric: true
     },
     {
       header: t('trashRateReport.monthlySummary.totalTrashNet', 'Neto Basura'),
-      accessor: (r) => fmt(r.totalTrashNet)
+      accessor: (r) => formatCurrency(r.totalTrashNet),
+      isNumeric: true
     },
     {
       header: t(
         'trashRateReport.monthlySummary.missingValorRecords',
         'Sin Valor'
       ),
-      accessor: 'missingValorRecords'
+      accessor: 'missingValorRecords',
+      isNumeric: true
     }
   ];
 
@@ -138,7 +146,7 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
     }
   ];
 
-  if (error) return null;
+  if (isLoading) return null;
 
   return (
     <div className="trash-rate-audit-table-wrapper">

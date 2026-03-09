@@ -5,7 +5,10 @@ import type {
   CreditNoteRow,
   ClientTrashDetailRow,
   TopDebtorRow,
-  TrashDashboardKpi
+  TrashDashboardKpi,
+  CollectorPerformanceKPI,
+  DailyCollectorDetail,
+  TrashRateKPI
 } from '../models/trash-rate-report.model';
 import type { DateRangeParams } from '../dto/params/DateRangeParams';
 
@@ -29,4 +32,14 @@ export interface InterfaceTrashRateReportRepository {
   getDashboardKPITrashRate(
     params: DateRangeParams
   ): Promise<TrashDashboardKpi[]>;
+
+  getCollectorPerformanceKPI(
+    params: DateRangeParams
+  ): Promise<CollectorPerformanceKPI[]>;
+
+  getDailyCollectorDetail(
+    params: DateRangeParams
+  ): Promise<DailyCollectorDetail[]>;
+
+  getTrashRateKPI(params: DateRangeParams): Promise<TrashRateKPI[]>;
 }

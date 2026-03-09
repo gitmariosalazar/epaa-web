@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import '../styles/TrashRateDashboard.css';
 import {
   DollarSign,
@@ -8,8 +8,7 @@ import {
   Clock,
   Home,
   AlertTriangle,
-  TrendingUp,
-  Activity
+  TrendingUp
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type {
@@ -17,6 +16,15 @@ import type {
   CreditNoteRow
 } from '../../domain/models/trash-rate-report.model';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import {
+  DonutChart,
+  type DonutSlice
+} from '@/shared/presentation/components/Charts/DonutChart';
+import {
+  VerticalBarChart,
+  type BarItem
+} from '@/shared/presentation/components/Charts/VerticalBarChart';
+import '@/shared/presentation/components/Charts/Charts.css';
 
 interface TrashRateDashboardProps {
   data: TrashDashboardKpi[];
@@ -132,183 +140,13 @@ const ComplianceCard: React.FC<{ pct: number }> = ({ pct }) => {
   );
 };
 
-// ── Shared Types ─────────────────────────────────────────────────────────────
-interface BarItem {
-  label: string;
-  value: number;
-  color: string;
-  fmt?: (v: number) => string;
-}
-
-// ── Vertical Bar Chart ────────────────────────────────────────────────────────
-const VerticalBarChart: React.FC<{
-  title: string;
-  items: BarItem[];
-  description?: string;
-}> = ({ title, items, description }) => {
-  const max = Math.max(...items.map((i) => i.value), 1);
-  return (
-    <div className="trash-chart-card">
-      <div className="trash-chart-card-heading">
-        <div className="trash-chart-card-title">
-          {title}
-          <Activity size={16} color="var(--text-secondary)" />
-        </div>
-        {description && (
-          <div className="trash-chart-card-description">{description}</div>
-        )}
-      </div>
-      <div className="trash-chart-body">
-        <div className="trash-v-bar-chart">
-          {items.map(({ label, value, color, fmt }) => (
-            <div className="trash-v-bar-item" key={label}>
-              <div className="trash-v-bar-track">
-                <div
-                  className={`trash-v-bar-fill trash-v-bar-fill--${color}`}
-                  style={{ height: `${(value / max) * 100}%` }}
-                >
-                  <div className="trash-v-bar-value">
-                    {fmt ? fmt(value) : fmtNum(value)}
-                  </div>
-                </div>
-              </div>
-              <div className="trash-v-bar-label">{label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ── Donut Chart (SVG) ─────────────────────────────────────────────────────────
-interface DonutSlice {
-  label: string;
-  value: number;
-  color: string;
-  fmt?: (v: number) => string;
-}
-
-const DonutChart: React.FC<{
-  title: string;
-  slices: DonutSlice[];
-  centerLabel?: string;
-  description?: string;
-}> = ({ title, slices, centerLabel, description }) => {
-  const total = slices.reduce((s, i) => s + i.value, 0) || 1;
-  const R = 82;
-  const r = 50;
-  const cx = 94;
-  const cy = 94;
-
-  const paths = useMemo(() => {
-    let angle = -Math.PI / 2;
-    return slices.map((slice) => {
-      const frac = slice.value / total;
-      const a1 = angle;
-      const a2 = angle + frac * 1.999 * Math.PI; // Avoid exact 2PI rendering bugs
-      angle = a2;
-      const x1 = cx + R * Math.cos(a1);
-      const y1 = cy + R * Math.sin(a1);
-      const x2 = cx + R * Math.cos(a2);
-      const y2 = cy + R * Math.sin(a2);
-      const xi1 = cx + r * Math.cos(a1);
-      const yi1 = cy + r * Math.sin(a1);
-      const xi2 = cx + r * Math.cos(a2);
-      const yi2 = cy + r * Math.sin(a2);
-      const large = frac > 0.5 ? 1 : 0;
-      return {
-        d: `M${xi1} ${yi1} L${x1} ${y1} A${R} ${R} 0 ${large} 1 ${x2} ${y2} L${xi2} ${yi2} A${r} ${r} 0 ${large} 0 ${xi1} ${yi1} Z`,
-        color: slice.color
-      };
-    });
-  }, [slices, total]);
-
-  return (
-    <div className="trash-chart-card">
-      <div className="trash-chart-card-heading">
-        <div className="trash-chart-card-title">{title}</div>
-        {description && (
-          <div className="trash-chart-card-description">{description}</div>
-        )}
-      </div>
-      <div className="trash-chart-body">
-        <div className="trash-donut-wrapper">
-          <svg className="trash-donut-svg" viewBox="0 0 188 188">
-            {/* Background track (visible when 0) */}
-            <circle
-              className="trash-donut-bg"
-              cx={cx}
-              cy={cy}
-              r={(R + r) / 2}
-            />
-            {paths.map((p, i) => (
-              <path
-                key={i}
-                className="trash-donut-slice"
-                d={p.d}
-                fill={p.color}
-                opacity={0.95}
-              >
-                <title>
-                  {slices[i].label}:{' '}
-                  {slices[i].fmt
-                    ? slices[i].fmt!(slices[i].value)
-                    : fmtNum(slices[i].value)}
-                </title>
-              </path>
-            ))}
-            {centerLabel && (
-              <>
-                <text
-                  x={cx}
-                  y={cy - 8}
-                  textAnchor="middle"
-                  fontSize="12"
-                  fill="var(--text-secondary)"
-                  fontWeight="600"
-                >
-                  TOTAL
-                </text>
-                <text
-                  x={cx}
-                  y={cy + 14}
-                  textAnchor="middle"
-                  fontSize="16"
-                  fill="var(--text-main)"
-                  fontWeight="800"
-                >
-                  {centerLabel}
-                </text>
-              </>
-            )}
-          </svg>
-          <div className="trash-donut-legend">
-            {slices.map(({ label, value, color }) => (
-              <div className="trash-donut-legend-item" key={label}>
-                <div
-                  className="trash-donut-legend-dot"
-                  style={{ background: color }}
-                />
-                <span className="trash-donut-legend-label">{label}</span>
-                <span className="trash-donut-legend-value">
-                  {((value / total) * 100).toFixed(1)}%
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ── Area Chart (Trend) ────────────────────────────────────────────────────────
+// ── Area Chart (Trend - kept local as it's specific) ──────────────────────────
 const AreaChart: React.FC<{ title: string; currentTotal: number }> = ({
   title,
   currentTotal
 }) => {
-  // We simulate a stable upward trend leading to the current total
+  // ... (AreaChart implementation stays the same)
+  // Simulation PTS
   const pts = [
     currentTotal * 0.4,
     currentTotal * 0.5,
@@ -318,98 +156,62 @@ const AreaChart: React.FC<{ title: string; currentTotal: number }> = ({
     currentTotal
   ];
   const max = Math.max(...pts, currentTotal * 1.1) || 1;
-  const labels = ['Oct', 'Nov', 'Dic', 'Ene', 'Feb', 'Mar'];
 
   return (
-    <div className="trash-chart-card trash-chart-card--wide">
-      <div className="trash-chart-card-title">
-        {title}
-        <span
-          style={{
-            fontSize: '0.65rem',
-            color: 'var(--text-secondary)',
-            fontWeight: 'normal',
-            textTransform: 'none'
-          }}
-        >
-          * Proyección últimos 6 meses
-        </span>
+    <div className="chart-card chart-card--wide">
+      <div className="chart-card-heading">
+        <div className="chart-card-title">
+          {title}
+          <span
+            style={{
+              fontSize: '0.65rem',
+              color: 'var(--text-secondary)',
+              fontWeight: 'normal',
+              textTransform: 'none',
+              marginLeft: '0.5rem'
+            }}
+          >
+            * Proyección últimos 6 meses
+          </span>
+        </div>
       </div>
       <div
-        className="trash-chart-body"
-        style={{ position: 'relative', marginTop: '1rem' }}
+        className="chart-body"
+        style={{ position: 'relative', marginTop: '1rem', minHeight: '120px' }}
       >
         <svg
-          className="trash-area-svg"
+          style={{ width: '100%', height: '100px' }}
           preserveAspectRatio="none"
           viewBox="0 0 100 100"
         >
           <defs>
             <linearGradient id="trashAreaGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" className="trash-area-gradient-stop-1" />
-              <stop offset="100%" className="trash-area-gradient-stop-2" />
+              <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.2" />
+              <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
             </linearGradient>
           </defs>
-
-          {/* Grid lines */}
-          <line
-            x1="0"
-            y1="20"
-            x2="100"
-            y2="20"
-            className="trash-area-grid-line"
-          />
-          <line
-            x1="0"
-            y1="50"
-            x2="100"
-            y2="50"
-            className="trash-area-grid-line"
-          />
-          <line
-            x1="0"
-            y1="80"
-            x2="100"
-            y2="80"
-            className="trash-area-grid-line"
-          />
-
-          {/* Area Path */}
           <path
-            className="trash-area-fill"
-            d={`M 0 100 
-               ${pts.map((p, i) => `L ${i * 20} ${100 - (p / max) * 100}`).join(' ')}
-               L 100 100 Z`}
+            fill="url(#trashAreaGradient)"
+            d={`M 0 100 ${pts.map((p, i) => `L ${i * 20} ${100 - (p / max) * 100}`).join(' ')} L 100 100 Z`}
           />
-
-          {/* Line Path */}
           <path
-            className="trash-area-line"
-            d={`M 0 ${100 - (pts[0] / max) * 100} 
-               ${pts
-                 .slice(1)
-                 .map((p, i) => `L ${(i + 1) * 20} ${100 - (p / max) * 100}`)
-                 .join(' ')}`}
+            fill="none"
+            stroke="var(--accent)"
+            strokeWidth="2"
+            d={`M 0 ${100 - (pts[0] / max) * 100} ${pts
+              .slice(1)
+              .map((p, i) => `L ${(i + 1) * 20} ${100 - (p / max) * 100}`)
+              .join(' ')}`}
           />
-
-          {/* Data Points & Labels */}
-          {pts.map((p, i) => {
-            const cx = i * 20;
-            const cy = 100 - (p / max) * 100;
-            return (
-              <g key={i}>
-                <circle className="trash-area-dot" cx={cx} cy={cy} r="2.5" />
-                <text
-                  x={cx}
-                  y="112"
-                  textAnchor="middle"
-                  className="trash-area-axis-text"
-                >
-                  {labels[i]}
-                </text>
-              </g>
-            );
-          })}
+          {pts.map((p, i) => (
+            <circle
+              key={i}
+              cx={i * 20}
+              cy={100 - (p / max) * 100}
+              r="2"
+              fill="var(--accent)"
+            />
+          ))}
         </svg>
       </div>
     </div>
@@ -419,7 +221,6 @@ const AreaChart: React.FC<{ title: string; currentTotal: number }> = ({
 // ── Main Dashboard ─────────────────────────────────────────────────────────────
 export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
   data,
-  creditNotesData = [],
   isLoading
 }) => {
   const { t } = useTranslation();
@@ -503,7 +304,6 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
 
   return (
     <div className="trash-dashboard">
-      {/* ── KPI grid (Cumplimiento ocupa 2 filas) ── */}
       <div className="trash-dashboard-kpi-grid">
         <div className="trash-kpi--compliance">
           <ComplianceCard pct={k.compliancePct ?? 0} />
@@ -595,14 +395,19 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
         />
       </div>
 
-      {/* ── Area Chart (Full Width) ─────────────────────────────────── */}
-
-      {/* ── Charts grid (3 cols) ────────────────────────────────────── */}
-      <div className="trash-dashboard-charts-grid">
+      <div
+        className="trash-dashboard-charts-grid"
+        style={{
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '1rem',
+          marginTop: '1.5rem'
+        }}
+      >
         <DonutChart
           title="Distribución Monetaria"
           slices={moneySlices}
-          centerLabel={fmtMoney(
+          centerLabel="TOTAL"
+          centerValue={fmtMoney(
             (k.totalCollected || 0) + (k.totalPending || 0)
           )}
           description="Porcentaje en dólares recuperados vs cartera vencida"
@@ -615,7 +420,8 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
         <DonutChart
           title="Estado de Facturas"
           slices={billSlices}
-          centerLabel={fmtNum(k.totalBillsIssued)}
+          centerLabel="BILL COUNT"
+          centerValue={fmtNum(k.totalBillsIssued)}
           description="Porcentaje del total de comprobantes físicos en cada estado"
         />
       </div>

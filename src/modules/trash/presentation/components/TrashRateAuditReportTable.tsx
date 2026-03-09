@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import type { TrashRateAuditRow } from '../../domain/models/trash-rate-report.model';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
+import { ConverDate } from '@/shared/presentation/utils/datetime/ConverDate';
+
 interface TrashRateAuditRowProps {
   data: TrashRateAuditRow[];
   isLoading: boolean;
@@ -22,10 +24,15 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
   isLoading,
   onSort,
   onExportPdf,
-  sortConfig,
-  error
+  sortConfig
 }) => {
   const { t } = useTranslation();
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
 
   const columns: Column<TrashRateAuditRow>[] = [
     {
@@ -42,11 +49,11 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
     },
     {
       header: t('Fecha de Emisión'),
-      accessor: 'issueDate'
+      accessor: (r) => ConverDate(r.issueDate)
     },
     {
       header: t('Fecha de Pago'),
-      accessor: 'paymentDate'
+      accessor: (r) => ConverDate(r.paymentDate)
     },
     {
       header: t('Estado de Pago'),
@@ -54,11 +61,13 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
     },
     {
       header: t('Tarifa en Ingreso'),
-      accessor: 'rateInIncome'
+      accessor: (r) => formatCurrency(r.rateInIncome ?? 0),
+      isNumeric: true
     },
     {
       header: t('Tarifa en Tabla de Valor'),
-      accessor: 'rateInValorTable'
+      accessor: (r) => formatCurrency(r.rateInValorTable ?? 0),
+      isNumeric: true
     },
     {
       header: t('Diagnóstico'),
@@ -66,7 +75,8 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
     },
     {
       header: t('Diferencia'),
-      accessor: 'difference'
+      accessor: (r) => formatCurrency(r.difference ?? 0),
+      isNumeric: true
     }
   ];
 
@@ -108,6 +118,8 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
       highlight: true
     }
   ];
+
+  if (isLoading) return null;
 
   return (
     <div className="trash-rate-audit-table-wrapper">
