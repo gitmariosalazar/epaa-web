@@ -146,10 +146,12 @@ export const CollectorPerformanceKPITable: React.FC<
     (sum, row) => sum + row.totalTransactions,
     0
   );
+  /*
   const totalUniqueCustomers = data.reduce(
     (sum, row) => sum + row.uniqueCustomersServed,
     0
   );
+  */
   const sourceTrashRateTotal = data.reduce(
     (sum, row) => sum + row.sourceTrashRateTotal,
     0
@@ -175,6 +177,7 @@ export const CollectorPerformanceKPITable: React.FC<
     (sum, row) => sum + row.cancelledBillsValue,
     0
   );
+  /*
   const avgTicketSize =
     totalTransactions > 0 ? netCollectionTotal / totalTransactions : 0;
 
@@ -182,6 +185,7 @@ export const CollectorPerformanceKPITable: React.FC<
     (sum, row) => sum + row.pctOfTotalRevenue,
     0
   );
+  */
 
   const totalCancelledCount = data.reduce(
     (sum, row) => sum + row.cancelledBillsCount,

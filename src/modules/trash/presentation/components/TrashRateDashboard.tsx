@@ -139,7 +139,7 @@ const ComplianceCard: React.FC<{ pct: number }> = ({ pct }) => {
     </div>
   );
 };
-
+/*
 // ── Area Chart (Trend - kept local as it's specific) ──────────────────────────
 const AreaChart: React.FC<{ title: string; currentTotal: number }> = ({
   title,
@@ -217,7 +217,7 @@ const AreaChart: React.FC<{ title: string; currentTotal: number }> = ({
     </div>
   );
 };
-
+*/
 // ── Main Dashboard ─────────────────────────────────────────────────────────────
 export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
   data,
