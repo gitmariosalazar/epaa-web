@@ -75,12 +75,19 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
       setTempStart(dateStr);
       setTempEnd('');
     } else {
+      let finalStart = tempStart;
+      let finalEnd = dateStr;
+
       if (dateStr < tempStart) {
-        setTempStart(dateStr);
-        setTempEnd(tempStart);
-      } else {
-        setTempEnd(dateStr);
+        finalStart = dateStr;
+        finalEnd = tempStart;
       }
+
+      setTempStart(finalStart);
+      setTempEnd(finalEnd);
+
+      // Auto-apply selection without closing immediately
+      onChange(finalStart, finalEnd);
     }
   };
 
