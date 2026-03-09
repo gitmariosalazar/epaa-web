@@ -164,21 +164,21 @@ export const useNavigation = (): NavSection[] => {
       ]
     },
     {
-      title: 'Trash Rates',
+      title: 'Recolección de Basura',
       hideTitle: true,
       items: [
         {
           icon: <TbClock24 size={20} />,
-          label: 'Trash Rate',
+          label: 'Recolección de Basura',
           subItems: [
             {
               icon: <List size={18} />,
-              label: 'Trash rate audit',
+              label: 'Auditoría de Recolección',
               to: '/trash-rate/trash-report-audit'
             },
             {
               icon: <BarChart3 size={18} />,
-              label: 'Trash rate kpi',
+              label: 'KPI de Recolección',
               to: '/trash-rate/trash-rate-kpi'
             }
           ]
