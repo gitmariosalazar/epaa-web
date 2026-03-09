@@ -3,10 +3,10 @@ import '../styles/TrashRateReportFilters.css';
 import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
+import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 
 export interface TrashRateKPIFiltersProps {
-  // Date range
+  // Monthly selection (represented internally as startDate/endDate)
   startDate: string;
   onStartDateChange: (val: string) => void;
   endDate: string;
@@ -19,8 +19,7 @@ export interface TrashRateKPIFiltersProps {
 
 /**
  * Filters component for the Trash Rate KPI Dashboard.
- * Designed to be similar to TrashRateReportFilters but using DateRangePicker
- * for a more professional and unified user experience.
+ * Specialized for monthly selection that auto-populates the full range.
  */
 export const TrashRateKPIFilters: React.FC<TrashRateKPIFiltersProps> = ({
   startDate,
@@ -32,26 +31,45 @@ export const TrashRateKPIFilters: React.FC<TrashRateKPIFiltersProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const handleRangeChange = (start: string, end: string) => {
-    onStartDateChange(start);
-    onEndDateChange(end);
+  // Convert "YYYY-MM-DD" to "YYYY-MM" for the picker display
+  const currentMonthValue = startDate ? startDate.substring(0, 7) : '';
+
+  const handleMonthChange = (monthStr: string) => {
+    if (!monthStr) {
+      onStartDateChange('');
+      onEndDateChange('');
+      return;
+    }
+
+    // monthStr is expected to be "YYYY-MM"
+    const [year, month] = monthStr.split('-').map(Number);
+
+    // First day of the month
+    const firstDay = `${year}-${String(month).padStart(2, '0')}-01`;
+
+    // Last day of the month
+    const lastDayObj = new Date(year, month, 0); // month is 1-indexed here relative to 0-indexed Date month
+    const lastDay = `${year}-${String(month).padStart(2, '0')}-${String(lastDayObj.getDate()).padStart(2, '0')}`;
+
+    onStartDateChange(firstDay);
+    onEndDateChange(lastDay);
   };
 
   const canFetch = !isLoading && Boolean(startDate && endDate);
 
   return (
     <div className="trash-report-filters">
-      {/* ── LEFT: date range ── */}
+      {/* ── LEFT: month selection ── */}
       <div className="trash-report-filter-left">
         <div className="trash-report-filter-group trash-report-filter-group--range">
           <label className="trash-report-filter-label">
-            {t('trashRateKPI.filters.dateRange', 'Rango de Fechas')}
+            {t('trashRateKPI.filters.selectMonth', 'Seleccionar Mes')}
           </label>
           <div className="trash-report-filter-input-wrapper">
-            <DateRangePicker
-              startDate={startDate}
-              endDate={endDate}
-              onChange={handleRangeChange}
+            <DatePicker
+              view="month"
+              value={currentMonthValue}
+              onChange={handleMonthChange}
               disabled={isLoading}
             />
           </div>
