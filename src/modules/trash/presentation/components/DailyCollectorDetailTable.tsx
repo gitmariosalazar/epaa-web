@@ -6,6 +6,7 @@ import {
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import { ConverDate } from '@/shared/presentation/utils/datetime/ConverDate';
+import '../styles/PaymentsTable.css';
 
 interface DailyCollectorDetailTableProps {
   data: DailyCollectorDetail[];
@@ -170,7 +171,7 @@ export const DailyCollectorDetailTable: React.FC<
   if (error) return null;
 
   return (
-    <div>
+    <div className="trash-rate-audit-table-wrapper">
       <Table
         data={data}
         columns={columns}

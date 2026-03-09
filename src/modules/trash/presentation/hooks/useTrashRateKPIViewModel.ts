@@ -1,21 +1,17 @@
 import type { TabItem } from '@/shared/presentation/components/Tabs';
 import React, { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  LayoutDashboard,
-  ClipboardList,
-  CalendarRange,
-  FileWarning
-} from 'lucide-react';
+import { LayoutDashboard, ClipboardList, CalendarRange } from 'lucide-react';
 import { DateRangeParams } from '../../domain/dto/params/DateRangeParams';
 import { useTrashRateReport } from './useTrashRateReport';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import { ExportService } from '@/shared/infrastructure/services/ExportService';
+import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
 
 export type TrashRateKPIViewTabs =
   | 'dashboard'
   | 'collectorPerformance'
-  | 'dailyCollectorDetail'
-  | 'trashRate';
+  | 'dailyCollectorDetail';
 
 function applySortConfig<T>(
   data: T[],
@@ -31,8 +27,74 @@ function applySortConfig<T>(
   });
 }
 
+const fmt = (n: any) => `$${Number(n || 0).toFixed(2)}`;
+
 export const useTrashRateKPIViewModel = () => {
   const { t } = useTranslation();
+
+  const COLLECTOR_PERFORMANCE_COLUMNS: ExportColumn[] = useMemo(
+    () => [
+      { id: 'collectorId', label: 'ID del Cobrador', isDefault: true },
+      { id: 'totalTransactions', label: 'N° de Facturas', isDefault: true },
+      {
+        id: 'sourceTrashRateTotal',
+        label: 'TB Datos Ingreso',
+        isDefault: true
+      },
+      { id: 'valorTableTotal', label: 'TB Tabla Valor', isDefault: true },
+      {
+        id: 'integrityGapAmount',
+        label: 'Diferencia (TBDI - TBTV)',
+        isDefault: true
+      },
+      { id: 'grossAmount', label: 'Monto Facturado', isDefault: true },
+      {
+        id: 'totalDiscountsApplied',
+        label: 'DesC. Aplicados',
+        isDefault: true
+      },
+      { id: 'netCollectionTotal', label: 'Recaudación Neta', isDefault: true },
+      {
+        id: 'cancelledBillsValue',
+        label: 'Valor Fact. (A - B)',
+        isDefault: true
+      },
+      { id: 'cancelledBillsCount', label: 'Fact. (A - B)', isDefault: true }
+    ],
+    []
+  );
+
+  const DAILY_COLLECTOR_DETAIL_COLUMNS: ExportColumn[] = useMemo(
+    () => [
+      { id: 'collectorId', label: 'Colector', isDefault: true },
+      { id: 'paymentDate', label: 'Fecha Pago', isDefault: true },
+      { id: 'incomeStatus', label: 'Estado Ingreso', isDefault: true },
+      { id: 'transactionsCount', label: 'N° de Facturas', isDefault: true },
+      {
+        id: 'sourceTrashRateDaily',
+        label: 'TB Datos Ingreso',
+        isDefault: true
+      },
+      { id: 'valorTableDaily', label: 'TB Tabla Valor', isDefault: true },
+      {
+        id: 'integrityGapDaily',
+        label: 'Diferencia (TBDI - TBTV)',
+        isDefault: true
+      },
+      { id: 'grossDailyTotal', label: 'Monto Facturado', isDefault: true },
+      { id: 'discountsDailyTotal', label: 'DesC. Aplicados', isDefault: true },
+      { id: 'netDailyCollection', label: 'Recaudación Neta', isDefault: true },
+      {
+        id: 'cancelledValueDaily',
+        label: 'Valor Fact. (A - B)',
+        isDefault: true
+      },
+      { id: 'cancelledCountDaily', label: 'Fact. (A - B)', isDefault: true }
+    ],
+    []
+  );
+
+  const exportService = useMemo(() => new ExportService(), []);
 
   const TRASH_KPI_TABS: TabItem<TrashRateKPIViewTabs>[] = useMemo(
     () => [
@@ -56,11 +118,6 @@ export const useTrashRateKPIViewModel = () => {
           'Detalle del Recolector Diario'
         ),
         icon: React.createElement(CalendarRange, { size: 16 })
-      },
-      {
-        id: 'trashRate',
-        label: t('trashRateKPI.tabs.trashRate', 'Tasa de Basura'),
-        icon: React.createElement(FileWarning, { size: 16 })
       }
     ],
     [t]
@@ -96,6 +153,12 @@ export const useTrashRateKPIViewModel = () => {
   // Local Filters for Daily Collector Detail
   const [selectedCollector, setSelectedCollector] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
+
+  useEffect(() => {
+    handleFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     setSortConfig(null);
@@ -123,7 +186,6 @@ export const useTrashRateKPIViewModel = () => {
       getCollectorPerformanceKPI(dateParams());
     else if (activeTab === 'dailyCollectorDetail')
       getDailyCollectorDetail(dateParams());
-    else if (activeTab === 'trashRate') getTrashRateKPI(dateParams());
   };
 
   const handleSort = (key: string, direction: 'asc' | 'desc') =>
@@ -158,10 +220,100 @@ export const useTrashRateKPIViewModel = () => {
     return Array.from(new Set(statuses)).sort();
   }, [dailyCollectorDetail]);
 
-  const filteredTrashRateKPI = useMemo(
-    () => applySortConfig(trashRateKPI, sortConfig),
-    [trashRateKPI, sortConfig]
-  );
+  const currentFilteredData = useMemo(() => {
+    if (activeTab === 'collectorPerformance')
+      return filteredCollectorPerformance;
+    if (activeTab === 'dailyCollectorDetail')
+      return filteredDailyCollectorDetail;
+    return [];
+  }, [activeTab, filteredCollectorPerformance, filteredDailyCollectorDetail]);
+
+  const currentAvailableColumns = useMemo(() => {
+    if (activeTab === 'collectorPerformance')
+      return COLLECTOR_PERFORMANCE_COLUMNS;
+    if (activeTab === 'dailyCollectorDetail')
+      return DAILY_COLLECTOR_DETAIL_COLUMNS;
+    return [];
+  }, [
+    activeTab,
+    COLLECTOR_PERFORMANCE_COLUMNS,
+    DAILY_COLLECTOR_DETAIL_COLUMNS
+  ]);
+
+  const currentReportTitle = useMemo(() => {
+    if (activeTab === 'collectorPerformance')
+      return 'Rendimiento del Recolector';
+    if (activeTab === 'dailyCollectorDetail')
+      return 'Detalle de Recolectores Diarios';
+    return '';
+  }, [activeTab]);
+
+  const mapRowData = (item: any, selectedCols: ExportColumn[]) => {
+    const rowData: Record<string, string> = {};
+
+    if (activeTab === 'collectorPerformance') {
+      rowData['collectorId'] = item.collectorId || '-';
+      rowData['totalTransactions'] = String(item.totalTransactions || 0);
+      rowData['sourceTrashRateTotal'] = fmt(item.sourceTrashRateTotal);
+      rowData['valorTableTotal'] = fmt(item.valorTableTotal);
+      rowData['integrityGapAmount'] = fmt(item.integrityGapAmount);
+      rowData['grossAmount'] = fmt(item.grossAmount);
+      rowData['totalDiscountsApplied'] = fmt(item.totalDiscountsApplied);
+      rowData['netCollectionTotal'] = fmt(item.netCollectionTotal);
+      rowData['cancelledBillsValue'] = fmt(item.cancelledBillsValue);
+      rowData['cancelledBillsCount'] = String(item.cancelledBillsCount || 0);
+    } else if (activeTab === 'dailyCollectorDetail') {
+      rowData['collectorId'] = item.collectorId || '-';
+      rowData['paymentDate'] = item.paymentDate
+        ? new Date(item.paymentDate).toLocaleDateString()
+        : '-';
+      rowData['incomeStatus'] = item.incomeStatus || '-';
+      rowData['transactionsCount'] = String(item.transactionsCount || 0);
+      rowData['sourceTrashRateDaily'] = fmt(item.sourceTrashRateDaily);
+      rowData['valorTableDaily'] = fmt(item.valorTableDaily);
+      rowData['integrityGapDaily'] = fmt(item.integrityGapDaily);
+      rowData['grossDailyTotal'] = fmt(item.grossDailyTotal);
+      rowData['discountsDailyTotal'] = fmt(item.discountsDailyTotal);
+      rowData['netDailyCollection'] = fmt(item.netDailyCollection);
+      rowData['cancelledValueDaily'] = fmt(item.cancelledValueDaily);
+      rowData['cancelledCountDaily'] = String(item.cancelledCountDaily || 0);
+    }
+
+    return selectedCols.map((col) => rowData[col.id] || '-');
+  };
+
+  const handlePdfGenerator = ({ orientation, selectedColumnIds }: any) => {
+    const selectedCols = currentAvailableColumns.filter((col) =>
+      selectedColumnIds.includes(col.id)
+    );
+    const colLabels = selectedCols.map((c: any) => c.label);
+    const rows = currentFilteredData.map((d) => mapRowData(d, selectedCols));
+
+    return exportService.generatePdfBlobUrl({
+      rows: rows,
+      columns: colLabels,
+      fileName: `reporte_trash_${activeTab}`,
+      title: currentReportTitle,
+      orientation
+    });
+  };
+
+  const handleDownloadPdf = ({ orientation, selectedColumnIds }: any) => {
+    const selectedCols = currentAvailableColumns.filter((col) =>
+      selectedColumnIds.includes(col.id)
+    );
+    const colLabels = selectedCols.map((c: any) => c.label);
+    const rows = currentFilteredData.map((d) => mapRowData(d, selectedCols));
+
+    exportService.exportToPdf({
+      rows: rows,
+      columns: colLabels,
+      fileName: `reporte_trash_${activeTab}`,
+      title: currentReportTitle,
+      orientation
+    });
+    setShowPdfPreview(false);
+  };
 
   const errorMessage =
     error instanceof Error ? error.message : error ? String(error) : null;
@@ -186,7 +338,7 @@ export const useTrashRateKPIViewModel = () => {
     dashboardKPITrashRate,
     filteredCollectorPerformance,
     filteredDailyCollectorDetail,
-    filteredTrashRateKPI,
+    trashRateKPI,
     handleFetch,
     handleSort,
     sortConfig,
@@ -196,6 +348,13 @@ export const useTrashRateKPIViewModel = () => {
     collectorList,
     selectedStatus,
     setSelectedStatus,
-    statusList
+    statusList,
+    showPdfPreview,
+    setShowPdfPreview,
+    currentFilteredData,
+    currentAvailableColumns,
+    currentReportTitle,
+    handlePdfGenerator,
+    handleDownloadPdf
   };
 };

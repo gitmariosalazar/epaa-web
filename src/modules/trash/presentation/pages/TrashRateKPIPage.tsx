@@ -9,7 +9,7 @@ import { SearchX, AlertCircle } from 'lucide-react';
 import { TrashRateDashboardKPI } from '../components/TrashRateDashboardKPI';
 import { CollectorPerformanceKPITable } from '../components/CollectorPerformanceKPITable';
 import { DailyCollectorDetailTable } from '../components/DailyCollectorDetailTable';
-import { TrashRateKPITable } from '../components/TrashRateKPITable';
+import { ReportPreviewModal } from '@/shared/presentation/components/reports/ReportPreviewModal';
 
 // Filters
 import { TrashRateKPIFilters } from '../components/TrashRateKPIFilters';
@@ -25,19 +25,12 @@ export const TrashRateKPIPage: React.FC = () => {
   const renderFilters = () => {
     switch (vm.activeTab) {
       case 'dashboard':
-      case 'trashRate':
         return (
           <TrashRateKPIFilters
             startDate={vm.startDate}
             onStartDateChange={vm.setStartDate}
             endDate={vm.endDate}
             onEndDateChange={vm.setEndDate}
-            top={vm.top}
-            onTopChange={vm.setTop}
-            limit={vm.limit}
-            onLimitChange={vm.setLimit}
-            offset={vm.offset}
-            onOffsetChange={vm.setOffset}
             onFetch={vm.handleFetch}
             isLoading={vm.isLoading}
           />
@@ -117,7 +110,7 @@ export const TrashRateKPIPage: React.FC = () => {
       case 'dashboard':
         return (
           <TrashRateDashboardKPI
-            data={vm.filteredTrashRateKPI}
+            data={vm.trashRateKPI}
             isLoading={vm.isLoading}
             error={vm.error}
           />
@@ -130,6 +123,7 @@ export const TrashRateKPIPage: React.FC = () => {
             error={null}
             onSort={vm.handleSort}
             sortConfig={vm.sortConfig}
+            onExportPdf={() => vm.setShowPdfPreview(true)}
           />
         );
       case 'dailyCollectorDetail':
@@ -140,16 +134,7 @@ export const TrashRateKPIPage: React.FC = () => {
             error={null}
             onSort={vm.handleSort}
             sortConfig={vm.sortConfig}
-          />
-        );
-      case 'trashRate':
-        return (
-          <TrashRateKPITable
-            data={vm.filteredTrashRateKPI}
-            isLoading={vm.isLoading}
-            error={null}
-            onSort={vm.handleSort}
-            sortConfig={vm.sortConfig}
+            onExportPdf={() => vm.setShowPdfPreview(true)}
           />
         );
       default:
@@ -166,6 +151,15 @@ export const TrashRateKPIPage: React.FC = () => {
       />
       <div className="trash-kpi-filters-container">{renderFilters()}</div>
       <div className="trash-kpi-main-content">{renderContent()}</div>
+      <ReportPreviewModal
+        isOpen={vm.showPdfPreview}
+        onClose={() => vm.setShowPdfPreview(false)}
+        dataCount={vm.currentFilteredData.length}
+        reportTitle={vm.currentReportTitle}
+        availableColumns={vm.currentAvailableColumns}
+        pdfGenerator={vm.handlePdfGenerator}
+        onDownload={vm.handleDownloadPdf}
+      />
     </div>
   );
 };

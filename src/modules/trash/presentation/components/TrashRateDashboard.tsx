@@ -395,14 +395,7 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
         />
       </div>
 
-      <div
-        className="trash-dashboard-charts-grid"
-        style={{
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '1rem',
-          marginTop: '1.5rem'
-        }}
-      >
+      <div className="trash-dashboard-charts-grid">
         <DonutChart
           title="Distribución Monetaria"
           slices={moneySlices}

@@ -5,6 +5,7 @@ import {
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import { useTranslation } from 'react-i18next';
+import '../styles/PaymentsTable.css';
 
 interface TrashRateKPITableProps {
   data: TrashRateKPI[];
@@ -86,7 +87,7 @@ export const TrashRateKPITable: React.FC<TrashRateKPITableProps> = ({
   if (isLoading) return null;
 
   return (
-    <div>
+    <div className="trash-rate-audit-table-wrapper">
       <Table
         data={data}
         columns={columns}

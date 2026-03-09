@@ -5,6 +5,7 @@ import {
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import { useTranslation } from 'react-i18next';
+import '../styles/PaymentsTable.css';
 
 interface CollectorPerformanceKPITableProps {
   data: CollectorPerformanceKPI[];
@@ -214,7 +215,7 @@ export const CollectorPerformanceKPITable: React.FC<
   if (error) return null;
 
   return (
-    <div>
+    <div className="trash-rate-audit-table-wrapper">
       <Table
         data={data}
         columns={columns}
