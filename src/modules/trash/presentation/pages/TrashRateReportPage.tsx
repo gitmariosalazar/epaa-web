@@ -5,21 +5,21 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { useTrashRateReportViewModel } from '../hooks/useTrashRateReportViewModel';
 import { SearchX, AlertCircle } from 'lucide-react';
 // Tables
-import { TrashRateAuditReportTable } from '../components/TrashRateAuditReportTable';
-import { MonthlySummaryTable } from '../components/MonthlySummaryTable';
-import { MissingValorBillsTable } from '../components/MissingValorBillsTable';
-import { CreditNotesTable } from '../components/CreditNotesTable';
-import { TopDebtorsTable } from '../components/TopDebtorsTable';
-import { ClientTrashDetailTable } from '../components/ClientTrashDetailTable';
-import { TrashRateDashboard } from '../components/TrashRateDashboard';
+import { TrashRateAuditReportTable } from '../components/audit/TrashRateAuditReportTable';
+import { MonthlySummaryTable } from '../components/audit/MonthlySummaryTable';
+import { MissingValorBillsTable } from '../components/audit/MissingValorBillsTable';
+import { CreditNotesTable } from '../components/audit/CreditNotesTable';
+import { TopDebtorsTable } from '../components/audit/TopDebtorsTable';
+import { ClientTrashDetailTable } from '../components/audit/ClientTrashDetailTable';
+import { TrashRateDashboard } from '../components/audit/TrashRateDashboard';
 // Filters
-import { TrashRateReportFilters } from '../components/TrashRateReportFilters';
-import { DashboardFilters } from '../components/DashboardFilters';
-import { MonthlySummaryFilters } from '../components/MonthlySummaryFilters';
-import { MissingValorFilters } from '../components/MissingValorFilters';
-import { CreditNotesFilters } from '../components/CreditNotesFilters';
-import { TopDebtorsFilters } from '../components/TopDebtorsFilters';
-import { ClientDetailFilters } from '../components/ClientDetailFilters';
+import { TrashRateReportFilters } from '../components/audit/TrashRateReportFilters';
+import { DashboardFilters } from '../components/audit/DashboardFilters';
+import { MonthlySummaryFilters } from '../components/audit/MonthlySummaryFilters';
+import { MissingValorFilters } from '../components/audit/MissingValorFilters';
+import { CreditNotesFilters } from '../components/audit/CreditNotesFilters';
+import { TopDebtorsFilters } from '../components/audit/TopDebtorsFilters';
+import { ClientDetailFilters } from '../components/audit/ClientDetailFilters';
 // Styles
 import '../styles/TrashRateReportPage.css';
 
@@ -185,6 +185,8 @@ export const TrashRateReportPage: React.FC = () => {
             error={null}
             onSort={vm.handleSort}
             sortConfig={vm.sortConfig}
+            startDate={vm.startDate}
+            endDate={vm.endDate}
           />
         );
       case 'monthlySummary':
@@ -195,6 +197,8 @@ export const TrashRateReportPage: React.FC = () => {
             error={null}
             onSort={vm.handleSort}
             sortConfig={vm.sortConfig}
+            startDate={vm.startDate}
+            endDate={vm.endDate}
           />
         );
       case 'missingValor':
@@ -205,6 +209,8 @@ export const TrashRateReportPage: React.FC = () => {
             error={null}
             onSort={vm.handleSort}
             sortConfig={vm.sortConfig}
+            startDate={vm.startDate}
+            endDate={vm.endDate}
           />
         );
       case 'creditNotes':
@@ -215,6 +221,8 @@ export const TrashRateReportPage: React.FC = () => {
             error={null}
             onSort={vm.handleSort}
             sortConfig={vm.sortConfig}
+            startDate={vm.startDate}
+            endDate={vm.endDate}
           />
         );
       case 'topDebtors':
@@ -225,6 +233,8 @@ export const TrashRateReportPage: React.FC = () => {
             error={null}
             onSort={vm.handleSort}
             sortConfig={vm.sortConfig}
+            startDate={vm.startDate}
+            endDate={vm.endDate}
           />
         );
       case 'clientDetail':
@@ -235,6 +245,8 @@ export const TrashRateReportPage: React.FC = () => {
             error={null}
             onSort={vm.handleSort}
             sortConfig={vm.sortConfig}
+            startDate={vm.startDate}
+            endDate={vm.endDate}
           />
         );
     }

@@ -1,11 +1,11 @@
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import type { TrashRateKPI } from '../../domain/models/trash-rate-report.model';
+import type { TrashRateKPI } from '../../../domain/models/trash-rate-report.model';
 import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import { useTranslation } from 'react-i18next';
-import '../styles/PaymentsTable.css';
+import '../../styles/PaymentsTable.css';
 
 interface TrashRateKPITableProps {
   data: TrashRateKPI[];
@@ -98,6 +98,12 @@ export const TrashRateKPITable: React.FC<TrashRateKPITableProps> = ({
         onExportPdf={onExportPdf}
         sortConfig={sortConfig}
         fullHeight
+        getRowColor={(r) => {
+          if (r.collectionCompliancePct >= 90) return 'success';
+          if (r.collectionCompliancePct < 60) return 'error';
+          if (r.collectionCompliancePct < 85) return 'warning';
+          //return 'neutral';
+        }}
         emptyState={<EmptyState message="Data not found!" />}
       />
     </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/TrashRateDashboard.css';
+import '../../styles/TrashRateDashboard.css';
 import {
   DollarSign,
   AlertCircle,
@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import type {
   TrashDashboardKpi,
   CreditNoteRow
-} from '../../domain/models/trash-rate-report.model';
+} from '../../../domain/models/trash-rate-report.model';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import {
   DonutChart,

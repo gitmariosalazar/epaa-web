@@ -28,6 +28,8 @@ export interface SummaryRow {
   percentage?: string;
 }
 
+export type RowColor = 'success' | 'warning' | 'error' | 'info' | 'neutral';
+
 interface TotalRow {
   label: string;
   value: string | number;
@@ -51,6 +53,8 @@ interface TableProps<T> {
   width?: '100' | '70' | '50' | 'auto';
   fullHeight?: boolean;
   onExportPdf?: () => void;
+  getRowColor?: (item: T) => RowColor | undefined;
+  getRowClassName?: (item: T) => string | undefined;
 }
 
 export const Table = <T extends { [key: string]: any }>({
@@ -68,7 +72,9 @@ export const Table = <T extends { [key: string]: any }>({
   totalRows = [],
   width = '100',
   fullHeight = false,
-  onExportPdf
+  onExportPdf,
+  getRowColor,
+  getRowClassName
 }: TableProps<T>) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -180,24 +186,34 @@ export const Table = <T extends { [key: string]: any }>({
           </thead>
           <tbody>
             {paginatedData.length > 0 ? (
-              paginatedData.map((item, rowIndex) => (
-                <tr key={rowIndex}>
-                  {columns.map((col, colIndex) => (
-                    <td
-                      key={colIndex}
-                      className={col.className}
-                      style={{
-                        ...col.style,
-                        textAlign: col.isNumeric ? 'right' : 'inherit'
-                      }}
-                    >
-                      {typeof col.accessor === 'function'
-                        ? col.accessor(item)
-                        : item[col.accessor]}
-                    </td>
-                  ))}
-                </tr>
-              ))
+              paginatedData.map((item, rowIndex) => {
+                const rowColor = getRowColor ? getRowColor(item) : undefined;
+                const customClassName = getRowClassName
+                  ? getRowClassName(item)
+                  : '';
+                const rowClassName = `table-row ${
+                  rowColor ? `table-row--${rowColor}` : ''
+                } ${customClassName}`.trim();
+
+                return (
+                  <tr key={rowIndex} className={rowClassName}>
+                    {columns.map((col, colIndex) => (
+                      <td
+                        key={colIndex}
+                        className={col.className}
+                        style={{
+                          ...col.style,
+                          textAlign: col.isNumeric ? 'right' : 'inherit'
+                        }}
+                      >
+                        {typeof col.accessor === 'function'
+                          ? col.accessor(item)
+                          : item[col.accessor]}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan={columns.length} className="empty-state-cell">

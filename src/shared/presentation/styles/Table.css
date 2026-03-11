@@ -90,6 +90,57 @@
   background-color: var(--table-row-hover);
 }
 
+/* Semaphore / Information Row Styles - Stronger Colors */
+.table-row--success {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+}
+.table-row--success:hover {
+  background-color: rgba(16, 185, 129, 0.25) !important;
+}
+
+.table-row--error {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+}
+.table-row--error:hover {
+  background-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+.table-row--warning {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+}
+.table-row--warning:hover {
+  background-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+.table-row--info {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+.table-row--info:hover {
+  background-color: rgba(59, 130, 246, 0.25) !important;
+}
+
+/* Specific Dark Mode overrides for even better contrast if needed */
+.dark .table-row--success {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+}
+.dark .table-row--error {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+}
+.dark .table-row--warning {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+}
+.dark .table-row--info {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.table-row--neutral {
+  background-color: var(--table-row-striped) !important;
+}
+
+.table-row--neutral:hover {
+  background-color: var(--table-row-hover) !important;
+}
+
 .table-loader {
   padding: 2rem;
   text-align: center;

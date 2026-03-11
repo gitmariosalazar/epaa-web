@@ -1,12 +1,13 @@
 import React from 'react';
-import '../styles/PaymentsTable.css';
+import '../../styles/PaymentsTable.css';
 import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import { useTranslation } from 'react-i18next';
-import type { MonthlySummaryRow } from '../../domain/models/trash-rate-report.model';
+import type { MonthlySummaryRow } from '../../../domain/models/trash-rate-report.model';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 
 interface MonthlySummaryTableProps {
   data: MonthlySummaryRow[];
@@ -14,15 +15,17 @@ interface MonthlySummaryTableProps {
   onSort?: (key: string, direction: 'asc' | 'desc') => void;
   sortConfig?: { key: string; direction: 'asc' | 'desc' } | null;
   error: Error | null;
-  onExportPdf?: () => void;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
   data,
   isLoading,
   onSort,
-  onExportPdf,
-  sortConfig
+  sortConfig,
+  startDate,
+  endDate
 }) => {
   const { t } = useTranslation();
 
@@ -108,6 +111,40 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
     0
   );
 
+  const { setShowPdfPreview, PdfPreviewModal } =
+    useTablePdfExport<MonthlySummaryRow>({
+      data,
+      availableColumns: columns.map((c) => ({
+        id: typeof c.accessor === 'string' ? c.accessor : (c.header as string),
+        label: c.header as string,
+        isDefault: true
+      })),
+      reportTitle: 'REPORTE DE RESUMEN MENSUAL',
+      reportDescription:
+        'Resumen consolidado de valores y estados de facturación.',
+      labelsHorizontal: {
+        'Rango de Fecha': `${startDate} - ${endDate}`,
+        'Fecha de Exportación':
+          new Date().toLocaleDateString() +
+          ' ' +
+          new Date().toLocaleTimeString()
+      },
+      mapRowData: (item, selectedCols) => {
+        const rowData: Record<string, string> = {
+          'Estado Pago': item.paymentStatusCode || '-',
+          'Orden Valor': String(item.valorOrder || '-'),
+          Facturas: String(item.billCount || 0),
+          'Tasa Ingreso': formatCurrency(item.totalRateIncome),
+          'Tasa Valor': formatCurrency(item.totalRateValorTable),
+          Descuentos: formatCurrency(item.totalDiscounts),
+          'Neto Basura': formatCurrency(item.totalTrashNet),
+          'Sin Valor': String(item.missingValorRecords || 0)
+        };
+
+        return selectedCols.map((col) => rowData[col.label] || '-');
+      }
+    });
+
   const totalRows = [
     {
       label: 'TOTAL FACTURAS',
@@ -157,12 +194,17 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
         pagination
         pageSize={15}
         onSort={onSort}
-        onExportPdf={onExportPdf}
+        onExportPdf={() => setShowPdfPreview(true)}
         sortConfig={sortConfig}
         fullHeight
         emptyState={<EmptyState message="Data not found!" />}
         totalRows={totalRows}
+        getRowColor={(item: MonthlySummaryRow) => {
+          const color = item.paymentStatusCode !== 'P' ? 'error' : undefined;
+          return color;
+        }}
       />
+      {PdfPreviewModal}
     </div>
   );
 };

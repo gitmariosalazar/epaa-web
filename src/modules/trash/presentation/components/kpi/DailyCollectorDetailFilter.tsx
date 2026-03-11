@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
-import '../styles/DailyCollectorDetailFilter.css';
+import '../../styles/DailyCollectorDetailFilter.css';
 
 export interface DailyCollectorDetailFilterProps {
   startDate: string;

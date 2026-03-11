@@ -1,12 +1,12 @@
 .sidebar {
-  width: 260px;
+  width: 280px;
   height: 100%; /* Full height of flex container */
   background-color: var(--surface);
   border-right: 1px solid var(--surface-hover);
   display: flex;
   flex-direction: column;
   position: relative; /* Changed from fixed */
-  z-index: 50;
+  z-index: 500;
   transition: width var(--transition-normal);
   flex-shrink: 0; /* Don't shrink */
   overflow-x: hidden;
@@ -92,7 +92,7 @@
 .sidebar__link {
   display: flex;
   align-items: center;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-sm);
   color: var(--text-secondary);
   border-radius: var(--radius-md);
   font-weight: 500;
@@ -133,7 +133,7 @@
 
 .sidebar__icon {
   display: flex;
-  margin-right: var(--spacing-md);
+  margin-right: var(--spacing-sm);
   min-width: 20px; /* Ensure icon size doesn't shrink */
 }
 

@@ -1,11 +1,11 @@
 import React from 'react';
-import '../styles/TrashRateReportFilters.css';
+import '../../styles/TrashRateReportFilters.css';
 import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { DatePicker } from '../../../../shared/presentation/components/DatePicker/DatePicker';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
 
-export interface MissingValorFiltersProps {
+export interface CreditNotesFiltersProps {
   startDate: string;
   onStartDateChange: (val: string) => void;
   endDate: string;
@@ -13,21 +13,21 @@ export interface MissingValorFiltersProps {
   onFetch: () => void;
   isLoading: boolean;
   // Local dropdowns (populated from loaded data)
-  selectedPaymentStatus: string;
-  onPaymentStatusChange: (val: string) => void;
-  paymentStatusList: string[];
+  selectedCreditCoverage: string;
+  onCreditCoverageChange: (val: string) => void;
+  creditCoverageList: string[];
 }
 
-export const MissingValorFilters: React.FC<MissingValorFiltersProps> = ({
+export const CreditNotesFilters: React.FC<CreditNotesFiltersProps> = ({
   startDate,
   onStartDateChange,
   endDate,
   onEndDateChange,
   onFetch,
   isLoading,
-  selectedPaymentStatus,
-  onPaymentStatusChange,
-  paymentStatusList
+  selectedCreditCoverage,
+  onCreditCoverageChange,
+  creditCoverageList
 }) => {
   const { t } = useTranslation();
   const canFetch = !isLoading && Boolean(startDate && endDate);
@@ -37,18 +37,17 @@ export const MissingValorFilters: React.FC<MissingValorFiltersProps> = ({
       <div className="trash-report-filter-left">
         <div className="trash-report-filter-group">
           <label className="trash-report-filter-label">
-            {t('trashRateReport.filters.startDate', 'Desde')}
+            {t('trashRateReport.filters.dateRange', 'Rango de Fechas')}
           </label>
           <div className="trash-report-filter-input-wrapper">
-            <DatePicker value={startDate} onChange={onStartDateChange} />
-          </div>
-        </div>
-        <div className="trash-report-filter-group">
-          <label className="trash-report-filter-label">
-            {t('trashRateReport.filters.endDate', 'Hasta')}
-          </label>
-          <div className="trash-report-filter-input-wrapper">
-            <DatePicker value={endDate} onChange={onEndDateChange} />
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onChange={(start, end) => {
+                onStartDateChange(start);
+                onEndDateChange(end);
+              }}
+            />
           </div>
         </div>
         <Button onClick={onFetch} disabled={!canFetch} size="sm">
@@ -63,23 +62,23 @@ export const MissingValorFilters: React.FC<MissingValorFiltersProps> = ({
         </Button>
       </div>
       <div className="trash-report-filter-right">
-        {paymentStatusList.length > 0 && (
+        {creditCoverageList.length > 0 && (
           <div className="trash-report-filter-group">
             <label className="trash-report-filter-label">
-              {t('trashRateReport.filters.paymentStatus', 'Estado Pago')}
+              {t('trashRateReport.filters.creditCoverage', 'Cobertura NC')}
             </label>
             <div className="trash-report-filter-input-wrapper">
               <select
                 className="trash-report-filter-select"
-                value={selectedPaymentStatus}
-                onChange={(e) => onPaymentStatusChange(e.target.value)}
+                value={selectedCreditCoverage}
+                onChange={(e) => onCreditCoverageChange(e.target.value)}
               >
                 <option value="">
                   {t('trashRateReport.filters.all', 'Todos')}
                 </option>
-                {paymentStatusList.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
+                {creditCoverageList.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
                   </option>
                 ))}
               </select>

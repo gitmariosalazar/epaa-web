@@ -1,14 +1,17 @@
 import React from 'react';
-import '../styles/PaymentsTable.css';
+import '../../styles/PaymentsTable.css';
 import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import { useTranslation } from 'react-i18next';
-import type { CreditNoteRow } from '../../domain/models/trash-rate-report.model';
+import type { CreditNoteRow } from '../../../domain/models/trash-rate-report.model';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 import { ConverDate } from '@/shared/presentation/utils/datetime/ConverDate';
+import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
+import { maskString } from '@/shared/presentation/utils/maskString';
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 
 interface CreditNotesTableProps {
   data: CreditNoteRow[];
@@ -16,15 +19,17 @@ interface CreditNotesTableProps {
   onSort?: (key: string, direction: 'asc' | 'desc') => void;
   sortConfig?: { key: string; direction: 'asc' | 'desc' } | null;
   error: Error | null;
-  onExportPdf?: () => void;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const CreditNotesTable: React.FC<CreditNotesTableProps> = ({
   data,
   isLoading,
   onSort,
-  onExportPdf,
-  sortConfig
+  sortConfig,
+  startDate,
+  endDate
 }) => {
   const { t } = useTranslation();
 
@@ -40,12 +45,20 @@ export const CreditNotesTable: React.FC<CreditNotesTableProps> = ({
       accessor: 'cadastralKey'
     },
     {
-      header: t('trashRateReport.creditNotes.cardId', 'Cédula'),
-      accessor: 'cardId'
-    },
-    {
       header: t('trashRateReport.creditNotes.customerName', 'Cliente'),
-      accessor: 'customerName'
+      accessor: (item: CreditNoteRow) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Avatar name={item.customerName} size="sm" />
+          <div>
+            <div style={{ fontWeight: 300 }}>
+              {maskString(item.customerName)}
+            </div>
+            <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+              {maskString(item.cardId)}
+            </div>
+          </div>
+        </div>
+      )
     },
     {
       header: t('trashRateReport.creditNotes.creditNoteCount', 'N° NC'),
@@ -104,25 +117,60 @@ export const CreditNotesTable: React.FC<CreditNotesTableProps> = ({
     0
   );
 
+  const { setShowPdfPreview, PdfPreviewModal } =
+    useTablePdfExport<CreditNoteRow>({
+      data,
+      availableColumns: columns.map((c) => ({
+        id: typeof c.accessor === 'string' ? c.accessor : (c.header as string),
+        label: c.header as string,
+        isDefault: true
+      })),
+      reportTitle: 'REPORTE DE NOTAS DE CRÉDITO',
+      reportDescription:
+        'Registro de notas de crédito aplicadas y saldos a favor de clientes.',
+      labelsHorizontal: {
+        'Rango de Fecha': `${startDate} - ${endDate}`,
+        'Fecha de Exportación':
+          new Date().toLocaleDateString() +
+          ' ' +
+          new Date().toLocaleTimeString()
+      },
+      mapRowData: (item, selectedCols) => {
+        const rowData: Record<string, string> = {
+          'Clave Catastral': item.cadastralKey || '-',
+          Cliente: item.customerName || '-',
+          'N° NC': String(item.creditNoteCount || 0),
+          'Saldo NC': formatCurrency(item.totalBalanceInFavor),
+          Cobertura: String(item.creditCoverage || 0),
+          'Deuda Pendiente': formatCurrency(item.pendingTrashDebt),
+          'Deuda Restante': formatCurrency(item.remainingDebtAfterNc),
+          'Última Factura': ConverDate(item.lastBillIssued),
+          'Último Pago': ConverDate(item.lastPaymentDate)
+        };
+
+        return selectedCols.map((col) => rowData[col.label] || '-');
+      }
+    });
+
   const totalRows = [
     {
       label: 'TOTAL SALDO NC',
-      value: totalBalanceInFavor,
+      value: formatCurrency(totalBalanceInFavor),
       highlight: false
     },
     {
       label: 'TOTAL DEUDA PENDIENTE',
-      value: totalPendingTrashDebt,
+      value: formatCurrency(totalPendingTrashDebt),
       highlight: false
     },
     {
       label: 'TOTAL DEUDA RESTANTE',
-      value: totalRemainingDebtAfterNc,
+      value: formatCurrency(totalRemainingDebtAfterNc),
       highlight: false
     },
     {
       label: 'TOTAL',
-      value: totalRemainingDebtAfterNc,
+      value: formatCurrency(totalRemainingDebtAfterNc),
       highlight: true
     }
   ];
@@ -138,12 +186,13 @@ export const CreditNotesTable: React.FC<CreditNotesTableProps> = ({
         pagination
         pageSize={15}
         onSort={onSort}
-        onExportPdf={onExportPdf}
+        onExportPdf={() => setShowPdfPreview(true)}
         sortConfig={sortConfig}
         fullHeight
         emptyState={<EmptyState message="Data not found!" />}
         totalRows={totalRows}
       />
+      {PdfPreviewModal}
     </div>
   );
 };

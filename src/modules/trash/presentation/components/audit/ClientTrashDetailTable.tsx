@@ -1,12 +1,15 @@
 import React from 'react';
-import '../styles/PaymentsTable.css';
+import '../../styles/PaymentsTable.css';
 import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import { useTranslation } from 'react-i18next';
-import type { ClientTrashDetailRow } from '../../domain/models/trash-rate-report.model';
+import type { ClientTrashDetailRow } from '../../../domain/models/trash-rate-report.model';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
+import { maskString } from '@/shared/presentation/utils/maskString';
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 
 interface ClientTrashDetailTableProps {
   data: ClientTrashDetailRow[];
@@ -14,16 +17,18 @@ interface ClientTrashDetailTableProps {
   onSort?: (key: string, direction: 'asc' | 'desc') => void;
   sortConfig?: { key: string; direction: 'asc' | 'desc' } | null;
   error: Error | null;
-  onExportPdf?: () => void;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const ClientTrashDetailTable: React.FC<ClientTrashDetailTableProps> = ({
   data,
   isLoading,
   onSort,
-  onExportPdf,
   sortConfig,
-  error
+  error,
+  startDate,
+  endDate
 }) => {
   const { t } = useTranslation();
 
@@ -40,12 +45,20 @@ export const ClientTrashDetailTable: React.FC<ClientTrashDetailTableProps> = ({
       accessor: 'cadastralKey'
     },
     {
-      header: t('trashRateReport.clientDetail.cardId', 'Cédula'),
-      accessor: 'cardId'
-    },
-    {
       header: t('trashRateReport.clientDetail.customerName', 'Cliente'),
-      accessor: 'customerName'
+      accessor: (item: ClientTrashDetailRow) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Avatar name={item.customerName} size="sm" />
+          <div>
+            <div style={{ fontWeight: 300 }}>
+              {maskString(item.customerName)}
+            </div>
+            <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+              {maskString(item.cardId)}
+            </div>
+          </div>
+        </div>
+      )
     },
     {
       header: t('trashRateReport.clientDetail.issueDate', 'Emisión'),
@@ -105,29 +118,66 @@ export const ClientTrashDetailTable: React.FC<ClientTrashDetailTableProps> = ({
     0
   );
 
+  const { setShowPdfPreview, PdfPreviewModal } =
+    useTablePdfExport<ClientTrashDetailRow>({
+      data,
+      availableColumns: columns.map((c) => ({
+        id: typeof c.accessor === 'string' ? c.accessor : (c.header as string),
+        label: c.header as string,
+        isDefault: true
+      })),
+      reportTitle: 'DETALLE DE COBROS DE BASURA POR CLIENTE',
+      reportDescription:
+        'Desglose por cliente de tasas oficiales, descuentos y valores netos a pagar.',
+      labelsHorizontal: {
+        'Rango de Fecha': `${startDate} - ${endDate}`,
+        'Fecha de Exportación':
+          new Date().toLocaleDateString() +
+          ' ' +
+          new Date().toLocaleTimeString()
+      },
+      mapRowData: (item, selectedCols) => {
+        const rowData: Record<string, string> = {
+          'Cód. Ingreso': String(item.incomeCode || '-'),
+          'Clave Catastral': item.cadastralKey || '-',
+          Cliente: item.customerName || '-',
+          Emisión: item.issueDate || '-',
+          Vencimiento: item.dueDate || '-',
+          'Fecha Pago': item.paymentDate || '-',
+          'Tasa Oficial': fmt(item.officialRate),
+          Descuento: fmt(item.discountApplied),
+          'Neto a Pagar': fmt(item.netRateToPay),
+          'Efec. a Pagar': fmt(item.effectiveTrashToPay),
+          Diagnóstico: item.diagnostic || '-'
+        };
+
+        return selectedCols.map((col) => rowData[col.label] || '-');
+      }
+    });
+
   const totalRows = [
     {
       label: 'TOTAL TB',
-      value: totalOfficialRate
+      value: fmt(totalOfficialRate)
     },
     {
       label: 'TOTAL DESCUENTO',
-      value: totalDiscountApplied,
+      value: fmt(totalDiscountApplied),
       highlight: false
     },
     {
       label: 'TOTAL NETO A PAGAR',
-      value: totalTrashRate,
+      value: fmt(totalTrashRate),
       highlight: false
     },
     {
       label: 'TOTAL EFECTIVO A PAGAR',
-      value: totalValue,
+      value: fmt(totalValue),
       highlight: false
     },
     {
       label: 'TOTAL',
-      value: totalValue,
+      value: fmt(totalValue),
       highlight: true
     }
   ];
@@ -143,12 +193,13 @@ export const ClientTrashDetailTable: React.FC<ClientTrashDetailTableProps> = ({
         pagination
         pageSize={15}
         onSort={onSort}
-        onExportPdf={onExportPdf}
+        onExportPdf={() => setShowPdfPreview(true)}
         sortConfig={sortConfig}
         fullHeight
         emptyState={<EmptyState message="Data not found!" />}
         totalRows={totalRows}
       />
+      {PdfPreviewModal}
     </div>
   );
 };

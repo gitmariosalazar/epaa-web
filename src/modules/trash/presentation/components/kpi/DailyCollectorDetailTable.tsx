@@ -1,12 +1,14 @@
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import type { DailyCollectorDetail } from '../../domain/models/trash-rate-report.model';
+import type { DailyCollectorDetail } from '../../../domain/models/trash-rate-report.model';
 import { useTranslation } from 'react-i18next';
 import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import { ConverDate } from '@/shared/presentation/utils/datetime/ConverDate';
-import '../styles/PaymentsTable.css';
+import '../../styles/PaymentsTable.css';
+
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 
 interface DailyCollectorDetailTableProps {
   data: DailyCollectorDetail[];
@@ -14,12 +16,13 @@ interface DailyCollectorDetailTableProps {
   onSort?: (key: string, direction: 'asc' | 'desc') => void;
   sortConfig?: { key: string; direction: 'asc' | 'desc' } | null;
   error: Error | null;
-  onExportPdf?: () => void;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const DailyCollectorDetailTable: React.FC<
   DailyCollectorDetailTableProps
-> = ({ data, isLoading, onSort, onExportPdf, sortConfig, error }) => {
+> = ({ data, isLoading, onSort, sortConfig, error, startDate, endDate }) => {
   const { t } = useTranslation();
 
   const formatCurrency = (value: number) =>
@@ -149,6 +152,43 @@ export const DailyCollectorDetailTable: React.FC<
     0
   );
 
+  const { setShowPdfPreview, PdfPreviewModal } =
+    useTablePdfExport<DailyCollectorDetail>({
+      data,
+      availableColumns: columns.map((c) => ({
+        id: typeof c.accessor === 'string' ? c.accessor : c.header as string,
+        label: c.header as string,
+        isDefault: true
+      })),
+      reportTitle: 'REPORTE DE TASA DE RECOLECCIÓN DE BASURA',
+      reportDescription:
+        'Reporte de tasa de recolección de basura por recaudador o cobrador (Detalle Diario)',
+      labelsHorizontal: {
+        'Rango de Fecha': `${startDate} - ${endDate}`,
+        'Fecha de Exportación':
+          new Date().toLocaleDateString() +
+          ' ' +
+          new Date().toLocaleTimeString()
+      },
+      mapRowData: (item, selectedCols) => {
+        const rowData: Record<string, string> = {
+          'Colector': item.collectorId || '-',
+          'Fecha Pago': item.paymentDate ? ConverDate(item.paymentDate) : '-',
+          'Estado Ingreso': item.incomeStatus || '-',
+          'N° de Facturas': String(item.transactionsCount || 0),
+          'TB Datos Ingreso': formatCurrency(item.sourceTrashRateDaily),
+          'TB Tabla Valor': formatCurrency(item.valorTableDaily),
+          'Diferencia (TBDI - TBTV)': formatCurrency(item.integrityGapDaily),
+          'Monto Facturado': formatCurrency(item.grossDailyTotal),
+          'DesC. Aplicados': formatCurrency(item.discountsDailyTotal),
+          'Recaudación Neta': formatCurrency(item.netDailyCollection),
+          'Valor Fact. (A - B)': formatCurrency(item.cancelledValueDaily),
+          'Fact. (A - B)': String(item.cancelledCountDaily || 0)
+        };
+        return selectedCols.map((col) => rowData[col.label] || '-');
+      }
+    });
+
   const totalRows = [
     { label: 'TOTAL FACTURAS', value: totalTransactions },
     { label: 'TOTAL TB DATOS INGRESO', value: sourceTrashRateTotal },
@@ -179,12 +219,21 @@ export const DailyCollectorDetailTable: React.FC<
         pagination
         pageSize={15}
         onSort={onSort}
-        onExportPdf={onExportPdf}
+        onExportPdf={() => setShowPdfPreview(true)}
         sortConfig={sortConfig}
         fullHeight
         emptyState={<EmptyState message="Data not found!" />}
         totalRows={totalRows}
+        getRowColor={(r) => {
+          if (r.cancelledValueDaily !== 0 || r.cancelledCountDaily > 0) {
+            return 'warning';
+          }
+          if (r.integrityGapDaily !== 0) {
+            return 'error';
+          }
+        }}
       />
+      {PdfPreviewModal}
     </div>
   );
 };

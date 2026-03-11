@@ -1,9 +1,9 @@
 import React from 'react';
-import '../styles/TrashRateReportFilters.css';
+import '../../styles/TrashRateReportFilters.css';
 import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { DatePicker } from '../../../../shared/presentation/components/DatePicker/DatePicker';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
 
 export interface TopDebtorsFiltersProps {
   startDate: string;
@@ -34,18 +34,17 @@ export const TopDebtorsFilters: React.FC<TopDebtorsFiltersProps> = ({
       <div className="trash-report-filter-left">
         <div className="trash-report-filter-group">
           <label className="trash-report-filter-label">
-            {t('trashRateReport.filters.startDate', 'Desde')}
+            {t('trashRateReport.filters.dateRange', 'Rango de Fechas')}
           </label>
           <div className="trash-report-filter-input-wrapper">
-            <DatePicker value={startDate} onChange={onStartDateChange} />
-          </div>
-        </div>
-        <div className="trash-report-filter-group">
-          <label className="trash-report-filter-label">
-            {t('trashRateReport.filters.endDate', 'Hasta')}
-          </label>
-          <div className="trash-report-filter-input-wrapper">
-            <DatePicker value={endDate} onChange={onEndDateChange} />
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onChange={(start, end) => {
+                onStartDateChange(start);
+                onEndDateChange(end);
+              }}
+            />
           </div>
         </div>
         <div className="trash-report-filter-group">

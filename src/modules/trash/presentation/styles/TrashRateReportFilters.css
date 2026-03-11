@@ -4,16 +4,15 @@
 .trash-report-filters {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
+  flex-wrap: wrap; /* Changed to wrap to handle smaller screens better */
   align-items: flex-end;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
   background-color: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
-  flex-shrink: 0;
-  margin-bottom: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.25rem;
 }
 
 /* ── Sections ────────────────────────────────────────────────────────── */
@@ -36,17 +35,31 @@
   justify-content: flex-end;
 }
 
-/* ── Individual group ────────────────────────────────────────────────── */
 .trash-report-filter-group {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.4rem;
   flex-shrink: 0;
-  width: 11.5rem;
+  min-width: 0;
+  width: 180px; /* Default width for standard inputs like search/selectors */
 }
 
+/* Specific widths based on content */
+.trash-report-filter-group:has(.date-range-picker-container) {
+  width: 260px;
+}
+
+.trash-report-filter-group:has(.datepicker-container) {
+  width: 170px;
+}
+
+.trash-report-filter-group:has(input[type='number']) {
+  width: 85px;
+}
+
+/* Fallback for components not using :has or for older browsers */
 .trash-report-filter-group--range {
-  width: 22rem;
+  width: 260px;
 }
 
 /* ── Label ───────────────────────────────────────────────────────────── */
@@ -65,25 +78,22 @@
   width: 100%;
 }
 
-/* ── Inputs & selects ────────────────────────────────────────────────── */
 .trash-report-filter-input,
 .trash-report-filter-input[type='date'],
 .trash-report-filter-input[type='text'],
+.trash-report-filter-input[type='number'],
 .trash-report-filter-select {
   width: 100%;
-  height: 36px;
-  padding: 0 0.5rem;
+  height: 38px;
+  padding: 0 0.75rem;
   background-color: var(--background);
   border: 1px solid var(--border-color);
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
   color: var(--text-main);
   font-family: inherit;
-  font-size: 0.8125rem;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
   box-sizing: border-box;
-  white-space: nowrap;
 }
 
 .trash-report-filter-input:focus,
@@ -121,9 +131,17 @@
   }
 }
 
-/* Alignment fix for button height */
-.trash-report-filters .btn-pro {
-  height: 36px;
+/* Alignment fix for button height - Ensure it matches inputs exactly */
+.trash-report-filters
+  button:not(.datepicker-trigger):not(.date-range-picker-trigger) {
+  height: 38px;
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
 }
 
 @media (max-width: 640px) {

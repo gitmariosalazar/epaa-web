@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/TrashRateReportFilters.css';
+import '../../styles/TrashRateReportFilters.css';
 import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
@@ -75,12 +75,7 @@ export const TrashRateKPIFilters: React.FC<TrashRateKPIFiltersProps> = ({
           </div>
         </div>
 
-        <Button
-          onClick={onFetch}
-          disabled={!canFetch}
-          size="sm"
-          style={{ height: '36px' }}
-        >
+        <Button onClick={onFetch} disabled={!canFetch} size="sm">
           {isLoading ? (
             <div className="trash-report-filter-spinner" />
           ) : (

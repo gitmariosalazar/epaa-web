@@ -1,11 +1,13 @@
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import type { CollectorPerformanceKPI } from '../../domain/models/trash-rate-report.model';
+import type { CollectorPerformanceKPI } from '../../../domain/models/trash-rate-report.model';
 import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import { useTranslation } from 'react-i18next';
-import '../styles/PaymentsTable.css';
+import '../../styles/PaymentsTable.css';
+
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 
 interface CollectorPerformanceKPITableProps {
   data: CollectorPerformanceKPI[];
@@ -13,12 +15,13 @@ interface CollectorPerformanceKPITableProps {
   onSort?: (key: string, direction: 'asc' | 'desc') => void;
   sortConfig?: { key: string; direction: 'asc' | 'desc' } | null;
   error: Error | null;
-  onExportPdf?: () => void;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const CollectorPerformanceKPITable: React.FC<
   CollectorPerformanceKPITableProps
-> = ({ data, isLoading, onSort, onExportPdf, sortConfig, error }) => {
+> = ({ data, isLoading, onSort, sortConfig, error, startDate, endDate }) => {
   const { t } = useTranslation();
 
   const formatCurrency = (value: number) =>
@@ -28,16 +31,6 @@ export const CollectorPerformanceKPITable: React.FC<
     }).format(value);
 
   const columns: Column<CollectorPerformanceKPI>[] = [
-    /*
-    {
-      header: t(
-        'trashRateReport.clientDetail.performanceRank',
-        'Ranking de Desempeño'
-      ),
-      accessor: 'performanceRank',
-      isNumeric: true
-    },
-    */
     {
       header: t('trashRateReport.clientDetail.collectorId', 'ID del Cobrador'),
       accessor: 'collectorId'
@@ -50,16 +43,6 @@ export const CollectorPerformanceKPITable: React.FC<
       accessor: 'totalTransactions',
       isNumeric: true
     },
-    /*
-    {
-      header: t(
-        'trashRateReport.clientDetail.uniqueCustomersServed',
-        'Clientes Únicos'
-      ),
-      accessor: 'uniqueCustomersServed',
-      isNumeric: true
-    },
-    */
     {
       header: t(
         'trashRateReport.clientDetail.sourceTrashRateTotal',
@@ -113,25 +96,6 @@ export const CollectorPerformanceKPITable: React.FC<
       accessor: (item) => formatCurrency(item.cancelledBillsValue),
       isNumeric: true
     },
-    /*
-    {
-      header: t(
-        'trashRateReport.clientDetail.avgTicketSize',
-        'Ticket Promedio'
-      ),
-      accessor: (item) => formatCurrency(item.avgTicketSize),
-      isNumeric: true
-    },
-    
-    {
-      header: t(
-        'trashRateReport.clientDetail.pctOfTotalRevenue',
-        '% de Contribución'
-      ),
-      accessor: (item) => formatCurrency(item.pctOfTotalRevenue),
-      isNumeric: true
-    },
-    */
     {
       header: t(
         'trashRateReport.clientDetail.cancelledBillsCount',
@@ -146,12 +110,6 @@ export const CollectorPerformanceKPITable: React.FC<
     (sum, row) => sum + row.totalTransactions,
     0
   );
-  /*
-  const totalUniqueCustomers = data.reduce(
-    (sum, row) => sum + row.uniqueCustomersServed,
-    0
-  );
-  */
   const sourceTrashRateTotal = data.reduce(
     (sum, row) => sum + row.sourceTrashRateTotal,
     0
@@ -177,24 +135,49 @@ export const CollectorPerformanceKPITable: React.FC<
     (sum, row) => sum + row.cancelledBillsValue,
     0
   );
-  /*
-  const avgTicketSize =
-    totalTransactions > 0 ? netCollectionTotal / totalTransactions : 0;
-
-  const totalPctContribution = data.reduce(
-    (sum, row) => sum + row.pctOfTotalRevenue,
-    0
-  );
-  */
 
   const totalCancelledCount = data.reduce(
     (sum, row) => sum + row.cancelledBillsCount,
     0
   );
 
+  const { setShowPdfPreview, PdfPreviewModal } =
+    useTablePdfExport<CollectorPerformanceKPI>({
+      data,
+      availableColumns: columns.map((c) => ({
+        id: typeof c.accessor === 'string' ? c.accessor : (c.header as string),
+        label: c.header as string,
+        isDefault: true
+      })),
+      reportTitle: 'REPORTE DE TASA DE RECOLECCIÓN DE BASURA',
+      reportDescription:
+        'Reporte de tasa de recolección de basura por recaudador o cobrador (Rendimiento del Recolector)',
+      labelsHorizontal: {
+        'Rango de Fecha': `${startDate} - ${endDate}`,
+        'Fecha de Exportación':
+          new Date().toLocaleDateString() +
+          ' ' +
+          new Date().toLocaleTimeString()
+      },
+      mapRowData: (item, selectedCols) => {
+        const rowData: Record<string, string> = {
+          'ID del Cobrador': item.collectorId || '-',
+          'N° de Facturas': String(item.totalTransactions || 0),
+          'TB Datos Ingreso': formatCurrency(item.sourceTrashRateTotal),
+          'TB Tabla Valor': formatCurrency(item.valorTableTotal),
+          'Diferencia (TBDI - TBTV)': formatCurrency(item.integrityGapAmount),
+          'Monto Facturado': formatCurrency(item.grossAmount),
+          'DesC. Aplicados': formatCurrency(item.totalDiscountsApplied),
+          'Recaudación Neta': formatCurrency(item.netCollectionTotal),
+          'Valor Fact. (A - B)': formatCurrency(item.cancelledBillsValue),
+          'Fact. (A - B)': String(item.cancelledBillsCount || 0)
+        };
+        return selectedCols.map((col) => rowData[col.label] || '-');
+      }
+    });
+
   const totalRows = [
     { label: 'TOTAL FACTURAS', value: totalTransactions },
-    //{ label: 'TOTAL CLIENTES', value: totalUniqueCustomers },
     { label: 'TOTAL TB DATOS INGRESO', value: sourceTrashRateTotal },
     { label: 'TOTAL TB TABLA VALOR', value: valorTableTotal },
     { label: 'TOTAL DIF. (TBDI - TBTV)', value: integrityGapAmount },
@@ -209,10 +192,6 @@ export const CollectorPerformanceKPITable: React.FC<
       value: netCollectionTotal - cancelledBillsValueTotal,
       highlight: true
     },
-    /*
-    { label: 'TOTAL TICKET PROMEDIO', value: avgTicketSize },
-    { label: 'TOTAL % DE CONTRIBUCIÓN', value: totalPctContribution },
-    */
     { label: 'TOTAL FACT. (A - B)', value: totalCancelledCount }
   ];
 
@@ -227,12 +206,21 @@ export const CollectorPerformanceKPITable: React.FC<
         pagination
         pageSize={15}
         onSort={onSort}
-        onExportPdf={onExportPdf}
+        onExportPdf={() => setShowPdfPreview(true)}
         sortConfig={sortConfig}
         fullHeight
         emptyState={<EmptyState message="Data not found!" />}
         totalRows={totalRows}
+        getRowColor={(r) => {
+          if (r.integrityGapAmount !== 0) {
+            return 'error';
+          }
+          if (r.cancelledBillsValue !== 0) {
+            return 'warning';
+          }
+        }}
       />
+      {PdfPreviewModal}
     </div>
   );
 };
