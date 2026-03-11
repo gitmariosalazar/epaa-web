@@ -94,7 +94,7 @@ export const TopDebtorsTable: React.FC<TopDebtorsTableProps> = ({
         label: c.header as string,
         isDefault: true
       })),
-      reportTitle: 'REPORTE DE PRINCIPALES DEUDORES',
+      reportTitle: 'REPORTE DE PRINCIPALES DEUDORES DE TASA DE BASURA',
       reportDescription:
         'Ranking de clientes con mayor deuda acumulada por tasa de recolección de basura.',
       labelsHorizontal: {

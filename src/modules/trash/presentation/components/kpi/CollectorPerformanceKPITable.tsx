@@ -151,7 +151,7 @@ export const CollectorPerformanceKPITable: React.FC<
       })),
       reportTitle: 'REPORTE DE TASA DE RECOLECCIÓN DE BASURA',
       reportDescription:
-        'Reporte de tasa de recolección de basura por recaudador o cobrador (Rendimiento del Recolector)',
+        'Reporte de tasa de recolección de basura por recaudador o cobrador (Rendimiento del Recolector mensual)',
       labelsHorizontal: {
         'Rango de Fecha': `${startDate} - ${endDate}`,
         'Fecha de Exportación':

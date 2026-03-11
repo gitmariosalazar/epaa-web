@@ -119,7 +119,7 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
         label: c.header as string,
         isDefault: true
       })),
-      reportTitle: 'REPORTE DE RESUMEN MENSUAL',
+      reportTitle: 'REPORTE DE RESUMEN MENSUAL DE TASA DE BASURA',
       reportDescription:
         'Resumen consolidado de valores y estados de facturación.',
       labelsHorizontal: {

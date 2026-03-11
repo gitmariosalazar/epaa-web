@@ -125,7 +125,7 @@ export const CreditNotesTable: React.FC<CreditNotesTableProps> = ({
         label: c.header as string,
         isDefault: true
       })),
-      reportTitle: 'REPORTE DE NOTAS DE CRÉDITO',
+      reportTitle: 'REPORTE DE NOTAS DE CRÉDITO DE TASA DE BASURA',
       reportDescription:
         'Registro de notas de crédito aplicadas y saldos a favor de clientes.',
       labelsHorizontal: {

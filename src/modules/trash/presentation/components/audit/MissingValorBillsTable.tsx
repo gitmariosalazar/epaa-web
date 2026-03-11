@@ -119,7 +119,7 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
         label: c.header as string,
         isDefault: true
       })),
-      reportTitle: 'FACTURAS FALTANTES EN TABLA DE VALOR',
+      reportTitle: 'FACTURAS FALTANTES EN TABLA DE VALOR DE TASA DE BASURA',
       reportDescription:
         'Registro de facturas presentes en el sistema de ingresos pero faltantes en la tabla de valor.',
       labelsHorizontal: {

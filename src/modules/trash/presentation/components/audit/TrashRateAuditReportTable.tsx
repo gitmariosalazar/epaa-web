@@ -136,7 +136,7 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
         label: c.header as string,
         isDefault: true
       })),
-      reportTitle: 'REPORTE DE AUDITORÍA DE TASAS',
+      reportTitle: 'REPORTE DE AUDITORÍA DE TASAS DE BASURA',
       reportDescription:
         'Auditoría comparativa entre la Tabla de Ingreso y Tabla de Valor.',
       labelsHorizontal: {
