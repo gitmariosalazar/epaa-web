@@ -33,7 +33,8 @@ export const CollectorPerformanceKPITable: React.FC<
   const columns: Column<CollectorPerformanceKPI>[] = [
     {
       header: t('trashRateReport.clientDetail.collectorId', 'ID del Cobrador'),
-      accessor: 'collectorId'
+      accessor: 'collectorId',
+      sortable: true
     },
     {
       header: t(
@@ -41,7 +42,8 @@ export const CollectorPerformanceKPITable: React.FC<
         'N° de Facturas'
       ),
       accessor: 'totalTransactions',
-      isNumeric: true
+      isNumeric: true,
+      id: 'totalTransactions'
     },
     {
       header: t(
@@ -49,7 +51,8 @@ export const CollectorPerformanceKPITable: React.FC<
         'TB Datos Ingreso'
       ),
       accessor: (item) => formatCurrency(item.sourceTrashRateTotal),
-      isNumeric: true
+      isNumeric: true,
+      id: 'sourceTrashRateTotal'
     },
     {
       header: t(
@@ -57,7 +60,8 @@ export const CollectorPerformanceKPITable: React.FC<
         'TB Tabla Valor'
       ),
       accessor: (item) => formatCurrency(item.valorTableTotal),
-      isNumeric: true
+      isNumeric: true,
+      id: 'valorTableTotal'
     },
     {
       header: t(
@@ -65,12 +69,14 @@ export const CollectorPerformanceKPITable: React.FC<
         'Diferencia (TBDI - TBTV)'
       ),
       accessor: (item) => formatCurrency(item.integrityGapAmount),
-      isNumeric: true
+      isNumeric: true,
+      id: 'integrityGapAmount'
     },
     {
       header: t('trashRateReport.clientDetail.grossAmount', 'Monto Facturado'),
       accessor: (item) => formatCurrency(item.grossAmount),
-      isNumeric: true
+      isNumeric: true,
+      id: 'grossAmount'
     },
     {
       header: t(
@@ -78,7 +84,8 @@ export const CollectorPerformanceKPITable: React.FC<
         'DesC. Aplicados'
       ),
       accessor: (item) => formatCurrency(item.totalDiscountsApplied),
-      isNumeric: true
+      isNumeric: true,
+      id: 'totalDiscountsApplied'
     },
     {
       header: t(
@@ -86,7 +93,8 @@ export const CollectorPerformanceKPITable: React.FC<
         'Recaudación Neta'
       ),
       accessor: (item) => formatCurrency(item.netCollectionTotal),
-      isNumeric: true
+      isNumeric: true,
+      id: 'netCollectionTotal'
     },
     {
       header: t(
@@ -94,7 +102,8 @@ export const CollectorPerformanceKPITable: React.FC<
         'Valor Fact. (A - B)'
       ),
       accessor: (item) => formatCurrency(item.cancelledBillsValue),
-      isNumeric: true
+      isNumeric: true,
+      id: 'cancelledBillsValue'
     },
     {
       header: t(
@@ -102,7 +111,8 @@ export const CollectorPerformanceKPITable: React.FC<
         'Fact. (A - B)'
       ),
       accessor: 'cancelledBillsCount',
-      isNumeric: true
+      isNumeric: true,
+      id: 'cancelledBillsCount'
     }
   ];
 
@@ -141,11 +151,56 @@ export const CollectorPerformanceKPITable: React.FC<
     0
   );
 
+  const totalRows = [
+    {
+      label: 'N° de Facturas',
+      value: totalTransactions,
+      columnId: 'totalTransactions'
+    },
+    {
+      label: 'TB Datos Ingreso',
+      value: sourceTrashRateTotal,
+      columnId: 'sourceTrashRateTotal'
+    },
+    {
+      label: 'TB Tabla Valor',
+      value: valorTableTotal,
+      columnId: 'valorTableTotal'
+    },
+    {
+      label: 'Diferencia (TBDI - TBTV)',
+      value: integrityGapAmount,
+      columnId: 'integrityGapAmount'
+    },
+    { label: 'Monto Facturado', value: grossAmount, columnId: 'grossAmount' },
+    {
+      label: 'DesC. Aplicados',
+      value: totalDiscountsApplied,
+      columnId: 'totalDiscountsApplied'
+    },
+    {
+      label: 'Valor Fact. (A - B)',
+      value: cancelledBillsValueTotal,
+      columnId: 'cancelledBillsValue'
+    },
+    {
+      label: 'Recaudación Neta',
+      value: netCollectionTotal - cancelledBillsValueTotal,
+      highlight: true,
+      columnId: 'netCollectionTotal'
+    },
+    {
+      label: 'Fact. (A - B)',
+      value: totalCancelledCount,
+      columnId: 'cancelledBillsCount'
+    }
+  ];
+
   const { setShowPdfPreview, PdfPreviewModal } =
     useTablePdfExport<CollectorPerformanceKPI>({
       data,
       availableColumns: columns.map((c) => ({
-        id: typeof c.accessor === 'string' ? c.accessor : (c.header as string),
+        id: c.id || (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
         label: c.header as string,
         isDefault: true
       })),
@@ -155,10 +210,9 @@ export const CollectorPerformanceKPITable: React.FC<
       labelsHorizontal: {
         'Rango de Fecha': `${startDate} - ${endDate}`,
         'Fecha de Exportación':
-          new Date().toLocaleDateString() +
-          ' ' +
-          new Date().toLocaleTimeString()
+          new Date().toLocaleDateString() + new Date().toLocaleTimeString()
       },
+      totalRows,
       mapRowData: (item, selectedCols) => {
         const rowData: Record<string, string> = {
           'ID del Cobrador': item.collectorId || '-',
@@ -175,25 +229,6 @@ export const CollectorPerformanceKPITable: React.FC<
         return selectedCols.map((col) => rowData[col.label] || '-');
       }
     });
-
-  const totalRows = [
-    { label: 'TOTAL FACTURAS', value: totalTransactions },
-    { label: 'TOTAL TB DATOS INGRESO', value: sourceTrashRateTotal },
-    { label: 'TOTAL TB TABLA VALOR', value: valorTableTotal },
-    { label: 'TOTAL DIF. (TBDI - TBTV)', value: integrityGapAmount },
-    { label: 'TOTAL MONTO FACT.', value: grossAmount },
-    { label: 'TOTAL DESCUENTOS', value: totalDiscountsApplied },
-    {
-      label: 'TOTAL VALOR FACT. (A - B)',
-      value: cancelledBillsValueTotal
-    },
-    {
-      label: 'RECAUDACIÓN NETA',
-      value: netCollectionTotal - cancelledBillsValueTotal,
-      highlight: true
-    },
-    { label: 'TOTAL FACT. (A - B)', value: totalCancelledCount }
-  ];
 
   if (error) return null;
 

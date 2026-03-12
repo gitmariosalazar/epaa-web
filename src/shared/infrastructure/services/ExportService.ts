@@ -388,6 +388,8 @@ export class ExportService implements IExportService {
     autoTable(doc, {
       head: [options.columns],
       body: options.rows,
+      foot: options.totals ? [options.totals] : undefined,
+      showFoot: 'lastPage',
       startY,
       theme: 'grid',
       styles: {
@@ -399,6 +401,11 @@ export class ExportService implements IExportService {
       },
       headStyles: {
         fillColor: primary,
+        textColor: 255,
+        fontStyle: 'bold'
+      },
+      footStyles: {
+        fillColor: [225, 29, 72], // Red accent #e11d48
         textColor: 255,
         fontStyle: 'bold'
       },

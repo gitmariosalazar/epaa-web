@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import type { ClientTrashDetailRow } from '../../../domain/models/trash-rate-report.model';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
-import { maskString } from '@/shared/presentation/utils/maskString';
+
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 
 interface ClientTrashDetailTableProps {
@@ -50,11 +50,9 @@ export const ClientTrashDetailTable: React.FC<ClientTrashDetailTableProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Avatar name={item.customerName} size="sm" />
           <div>
-            <div style={{ fontWeight: 300 }}>
-              {maskString(item.customerName)}
-            </div>
+            <div style={{ fontWeight: 300 }}>{item.customerName}</div>
             <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
-              {maskString(item.cardId)}
+              {item.cardId}
             </div>
           </div>
         </div>
@@ -74,22 +72,26 @@ export const ClientTrashDetailTable: React.FC<ClientTrashDetailTableProps> = ({
     },
     {
       header: t('trashRateReport.clientDetail.officialRate', 'Tasa Oficial'),
-      accessor: (r) => fmt(r.officialRate)
+      accessor: (r) => fmt(r.officialRate),
+      id: 'officialRate'
     },
     {
       header: t('trashRateReport.clientDetail.discountApplied', 'Descuento'),
-      accessor: (r) => fmt(r.discountApplied)
+      accessor: (r) => fmt(r.discountApplied),
+      id: 'discountApplied'
     },
     {
       header: t('trashRateReport.clientDetail.netRateToPay', 'Neto a Pagar'),
-      accessor: (r) => fmt(r.netRateToPay)
+      accessor: (r) => fmt(r.netRateToPay),
+      id: 'netRateToPay'
     },
     {
       header: t(
         'trashRateReport.clientDetail.effectiveTrashToPay',
         'Efec. a Pagar'
       ),
-      accessor: (r) => fmt(r.effectiveTrashToPay)
+      accessor: (r) => fmt(r.effectiveTrashToPay),
+      id: 'effectiveTrashToPay'
     },
     {
       header: t('trashRateReport.clientDetail.diagnostic', 'Diagnóstico'),
@@ -118,11 +120,42 @@ export const ClientTrashDetailTable: React.FC<ClientTrashDetailTableProps> = ({
     0
   );
 
+  const totalRows = [
+    {
+      label: 'TOTAL TB',
+      value: fmt(totalOfficialRate),
+      columnId: 'officialRate'
+    },
+    {
+      label: 'TOTAL DESCUENTO',
+      value: fmt(totalDiscountApplied),
+      highlight: false,
+      columnId: 'discountApplied'
+    },
+    {
+      label: 'TOTAL NETO A PAGAR',
+      value: fmt(totalTrashRate),
+      highlight: false,
+      columnId: 'netRateToPay'
+    },
+    {
+      label: 'TOTAL EFECTIVO A PAGAR',
+      value: fmt(totalValue),
+      highlight: false,
+      columnId: 'effectiveTrashToPay'
+    },
+    {
+      label: 'TOTAL',
+      value: fmt(totalValue),
+      highlight: true
+    }
+  ];
+
   const { setShowPdfPreview, PdfPreviewModal } =
     useTablePdfExport<ClientTrashDetailRow>({
       data,
       availableColumns: columns.map((c) => ({
-        id: typeof c.accessor === 'string' ? c.accessor : (c.header as string),
+        id: c.id || (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
         label: c.header as string,
         isDefault: true
       })),
@@ -136,6 +169,7 @@ export const ClientTrashDetailTable: React.FC<ClientTrashDetailTableProps> = ({
           ' ' +
           new Date().toLocaleTimeString()
       },
+      totalRows,
       mapRowData: (item, selectedCols) => {
         const rowData: Record<string, string> = {
           'Cód. Ingreso': String(item.incomeCode || '-'),
@@ -154,33 +188,6 @@ export const ClientTrashDetailTable: React.FC<ClientTrashDetailTableProps> = ({
         return selectedCols.map((col) => rowData[col.label] || '-');
       }
     });
-
-  const totalRows = [
-    {
-      label: 'TOTAL TB',
-      value: fmt(totalOfficialRate)
-    },
-    {
-      label: 'TOTAL DESCUENTO',
-      value: fmt(totalDiscountApplied),
-      highlight: false
-    },
-    {
-      label: 'TOTAL NETO A PAGAR',
-      value: fmt(totalTrashRate),
-      highlight: false
-    },
-    {
-      label: 'TOTAL EFECTIVO A PAGAR',
-      value: fmt(totalValue),
-      highlight: false
-    },
-    {
-      label: 'TOTAL',
-      value: fmt(totalValue),
-      highlight: true
-    }
-  ];
 
   if (error) return null;
 

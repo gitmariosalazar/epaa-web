@@ -19,6 +19,7 @@ export interface Column<T> {
   sortable?: boolean;
   sortKey?: keyof T;
   isNumeric?: boolean;
+  id?: string;
 }
 
 export interface SummaryRow {
@@ -35,6 +36,7 @@ interface TotalRow {
   value: string | number;
   highlight?: boolean;
   percentage?: string;
+  columnId?: string;
 }
 
 interface TableProps<T> {
@@ -225,100 +227,84 @@ export const Table = <T extends { [key: string]: any }>({
                 </td>
               </tr>
             )}
+            {data && data.length > 0 && (
+              <tr style={{ height: '100%' }}>
+                <td colSpan={columns.length} style={{ padding: 0, border: 'none', background: 'transparent' }}></td>
+              </tr>
+            )}
           </tbody>
+          {totalRows.length > 0 && (
+            <tfoot>
+              <tr>
+                {columns.map((col, colIndex) => {
+                  // Find if there's a total row that somewhat matches the column or is exactly the very first column for "Total"
+                  let totalContent: React.ReactNode = null;
+                  let className = col.className || '';
+
+                  if (colIndex === 0) {
+                    totalContent = 'Total';
+                    className += ' total-label';
+                  } else {
+                    // Very simple matching heuristic: if the column isNumeric, find the corresponding total row
+                    // In a perfect architecture, `totalRows` would map directly by accessor/key. This is a visual approximation.
+                  const headerLower = typeof col.header === 'string' ? col.header.toLowerCase() : '';
+                  const colId = col.id;
+                  const colAccessor = typeof col.accessor === 'string' ? col.accessor : '';
+
+                  const matchingTotal =
+                    totalRows.find((r) => r.columnId && colId && r.columnId === colId) ||
+                    totalRows.find((r) => r.columnId && colAccessor && r.columnId === colAccessor) ||
+                    totalRows.find((r) => r.label === col.header) ||
+                    totalRows.find((r) => r.label.toLowerCase() === headerLower) ||
+                    totalRows.find(
+                      (r) =>
+                        r.label.toLowerCase().includes(headerLower) ||
+                        (col.accessor === 'transactionsCount' && r.label.includes('FACTURAS')) ||
+                        (col.accessor === 'totalTransactions' && r.label.includes('FACTURAS')) ||
+                        (headerLower && r.label.toLowerCase().includes(headerLower.replace('total', '').trim()))
+                    );
+
+                  if (matchingTotal) {
+                      totalContent =
+                        typeof matchingTotal.value === 'number'
+                          ? new Intl.NumberFormat('en-US', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            }).format(matchingTotal.value)
+                          : matchingTotal.value;
+                      if (matchingTotal.percentage) {
+                        totalContent = (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                            <span>{totalContent}</span>
+                            <span style={{ fontSize: '0.7em', color: 'var(--text-muted)' }}>{matchingTotal.percentage}</span>
+                          </div>
+                        );
+                      }
+                    }
+                  }
+
+                  return (
+                    <td
+                      key={colIndex}
+                      className={className}
+                      style={{
+                        ...col.style,
+                        textAlign: colIndex === 0 ? 'left' : 'right',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      {totalContent}
+                    </td>
+                  );
+                })}
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
 
-      {totalRows.length > 0 && (
-        <div
-          className="table-totals-horizontal"
-          style={{ paddingRight: onExportPdf ? '1rem' : undefined }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '1.5rem',
-              flex: 1
-            }}
-          >
-            {totalRows.map((row, idx) => (
-              <div
-                key={idx}
-                className={`table-total-item ${
-                  row.highlight ? 'table-total-item--highlight' : ''
-                }`}
-              >
-                <div className="table-total-label">
-                  {row.label}
-                  {row.percentage && (
-                    <span className="table-total-percentage">
-                      ({row.percentage})
-                    </span>
-                  )}
-                </div>
-                <div className="table-total-value">
-                  {typeof row.value === 'number'
-                    ? new Intl.NumberFormat('en-US', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                      }).format(row.value)
-                    : row.value}
-                </div>
-              </div>
-            ))}
-          </div>
-          {onExportPdf && (
-            <div
-              style={{
-                marginLeft: 'auto',
-                display: 'flex',
-                alignItems: 'center'
-              }}
-            >
-              <Button
-                onClick={onExportPdf}
-                variant="outline"
-                color="slate"
-                iconOnly
-                circle
-                size="sm"
-                disabled={data.length === 0}
-                title={t('common.exportPdf', 'Exportar PDF')}
-                leftIcon={ColoredIcons.Pdf}
-              />
-            </div>
-          )}
-        </div>
-      )}
 
-      {totalRows.length === 0 && onExportPdf && (
-        <div
-          className="table-totals-horizontal"
-          style={{ paddingRight: '1rem', alignItems: 'center' }}
-        >
-          <div style={{ flex: 1 }} />
-          <div
-            style={{
-              marginLeft: 'auto',
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            <Button
-              onClick={onExportPdf}
-              variant="ghost"
-              color="slate"
-              iconOnly
-              circle
-              size="sm"
-              disabled={data.length === 0}
-              title={t('common.exportPdf', 'Exportar PDF')}
-              leftIcon={ColoredIcons.Pdf}
-            />
-          </div>
-        </div>
-      )}
+
 
       {summaryRows.length > 0 && (
         <div className="table-summary-block">
@@ -353,45 +339,17 @@ export const Table = <T extends { [key: string]: any }>({
       )}
 
       {pagination && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '1rem',
-            borderTop: '1px solid var(--border-color)',
-            background: 'var(--surface)',
-            flexWrap: 'wrap',
-            gap: '1rem'
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1.5rem',
-              flexWrap: 'wrap'
-            }}
-          >
-            <span
-              style={{
-                fontSize: '0.875rem',
-                color: 'var(--text-secondary)',
-                fontWeight: 500
-              }}
-            >
+        <div className="table-pagination-container">
+          <div className="table-pagination-left">
+            <span className="table-pagination-records">
               {t('common.table.totalRecords', {
                 count: data.length,
                 defaultValue: `Total Registros: ${data.length}`
               })}
             </span>
 
-            <div
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-            >
-              <span
-                style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}
-              >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span className="table-pagination-records" style={{ color: 'var(--text-secondary)' }}>
                 {t('common.table.rowsPerPage', {
                   defaultValue: 'Rows per page:'
                 })}
@@ -414,57 +372,48 @@ export const Table = <T extends { [key: string]: any }>({
             </div>
           </div>
 
-          {totalPages > 1 && (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                justifyContent: 'center'
-              }}
-            >
-              <button
-                onClick={handlePrev}
-                disabled={currentPage === 1}
-                className="pagination-btn"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '0.35rem'
-                }}
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <span
-                style={{
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  color: 'var(--text-main)',
-                  minWidth: '90px',
-                  textAlign: 'center'
-                }}
-              >
-                {t('common.pagination.page', {
-                  current: currentPage,
-                  total: totalPages
-                }) || `Pág. ${currentPage} / ${totalPages}`}
-              </span>
-              <button
-                onClick={handleNext}
-                disabled={currentPage === totalPages}
-                className="pagination-btn"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '0.35rem'
-                }}
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
-          )}
+          <div className="table-pagination-center">
+            {totalPages > 1 && (
+              <>
+                <button
+                  onClick={handlePrev}
+                  disabled={currentPage === 1}
+                  className="pagination-btn"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <span className="table-pagination-page-text">
+                  {t('common.pagination.page', {
+                    current: currentPage,
+                    total: totalPages
+                  }) || `Pág. ${currentPage} / ${totalPages}`}
+                </span>
+                <button
+                  onClick={handleNext}
+                  disabled={currentPage === totalPages}
+                  className="pagination-btn"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className="table-pagination-right">
+            {onExportPdf && (
+              <Button
+                onClick={onExportPdf}
+                variant="outline"
+                color="slate"
+                iconOnly
+                circle
+                size="sm"
+                disabled={data.length === 0}
+                title={t('common.exportPdf', 'Exportar PDF')}
+                leftIcon={ColoredIcons.Pdf}
+              />
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -8,8 +8,8 @@ import { useTranslation } from 'react-i18next';
 import type { TopDebtorRow } from '../../../domain/models/trash-rate-report.model';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
-import { maskString } from '@/shared/presentation/utils/maskString';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
+import { ConverDate } from '@/shared/presentation/utils/datetime/ConverDate';
 
 interface TopDebtorsTableProps {
   data: TopDebtorRow[];
@@ -46,11 +46,9 @@ export const TopDebtorsTable: React.FC<TopDebtorsTableProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Avatar name={item.customerName} size="sm" />
           <div>
-            <div style={{ fontWeight: 300 }}>
-              {maskString(item.customerName)}
-            </div>
+            <div style={{ fontWeight: 300 }}>{item.customerName}</div>
             <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
-              {maskString(item.cardId)}
+              {item.cardId}
             </div>
           </div>
         </div>
@@ -62,21 +60,24 @@ export const TopDebtorsTable: React.FC<TopDebtorsTableProps> = ({
     },
     {
       header: t('trashRateReport.topDebtors.totalTrashDebt', 'Deuda Total'),
-      accessor: (r) => fmt(r.totalTrashDebt)
+      accessor: (r) => fmt(r.totalTrashDebt),
+      isNumeric: true,
+      id: 'totalTrashDebt'
     },
     {
       header: t(
         'trashRateReport.topDebtors.oldestDebtDate',
         'Deuda más Antigua'
       ),
-      accessor: 'oldestDebtDate'
+      accessor: (r) => ConverDate(r.oldestDebtDate)
     },
     {
       header: t(
         'trashRateReport.topDebtors.latestPendingBill',
         'Última Pendiente'
       ),
-      accessor: 'latestPendingBill'
+      accessor: (r) => ConverDate(r.latestPendingBill),
+      id: 'latestPendingBill'
     }
   ];
 
@@ -90,7 +91,7 @@ export const TopDebtorsTable: React.FC<TopDebtorsTableProps> = ({
     useTablePdfExport<TopDebtorRow>({
       data,
       availableColumns: columns.map((c) => ({
-        id: typeof c.accessor === 'string' ? c.accessor : (c.header as string),
+        id: c.id || (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
         label: c.header as string,
         isDefault: true
       })),
@@ -122,12 +123,14 @@ export const TopDebtorsTable: React.FC<TopDebtorsTableProps> = ({
     {
       label: 'TOTAL DEUDA',
       value: totalTrashDebt,
-      highlight: false
+      highlight: false,
+      columnId: 'totalTrashDebt'
     },
     {
       label: 'TOTAL',
       value: totalTrashDebt,
-      highlight: true
+      highlight: true,
+      columnId: 'totalTrashDebt'
     }
   ];
 

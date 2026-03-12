@@ -50,7 +50,8 @@ export const DailyCollectorDetailTable: React.FC<
         'N° de Facturas'
       ),
       accessor: 'transactionsCount',
-      isNumeric: true
+      isNumeric: true,
+      id: 'transactionsCount'
     },
     {
       header: t(
@@ -58,7 +59,8 @@ export const DailyCollectorDetailTable: React.FC<
         'TB Datos Ingreso'
       ),
       accessor: (item) => formatCurrency(item.sourceTrashRateDaily),
-      isNumeric: true
+      isNumeric: true,
+      id: 'sourceTrashRateDaily'
     },
     {
       header: t(
@@ -66,7 +68,8 @@ export const DailyCollectorDetailTable: React.FC<
         'TB Tabla Valor'
       ),
       accessor: (item) => formatCurrency(item.valorTableDaily),
-      isNumeric: true
+      isNumeric: true,
+      id: 'valorTableDaily'
     },
     {
       header: t(
@@ -74,7 +77,8 @@ export const DailyCollectorDetailTable: React.FC<
         'Diferencia (TBDI - TBTV)'
       ),
       accessor: (item) => formatCurrency(item.integrityGapDaily),
-      isNumeric: true
+      isNumeric: true,
+      id: 'integrityGapDaily'
     },
     {
       header: t(
@@ -82,7 +86,8 @@ export const DailyCollectorDetailTable: React.FC<
         'Monto Facturado'
       ),
       accessor: (item) => formatCurrency(item.grossDailyTotal),
-      isNumeric: true
+      isNumeric: true,
+      id: 'grossDailyTotal'
     },
     {
       header: t(
@@ -90,7 +95,8 @@ export const DailyCollectorDetailTable: React.FC<
         'DesC. Aplicados'
       ),
       accessor: (item) => formatCurrency(item.discountsDailyTotal),
-      isNumeric: true
+      isNumeric: true,
+      id: 'discountsDailyTotal'
     },
     {
       header: t(
@@ -98,7 +104,8 @@ export const DailyCollectorDetailTable: React.FC<
         'Recaudación Neta'
       ),
       accessor: (item) => formatCurrency(item.netDailyCollection),
-      isNumeric: true
+      isNumeric: true,
+      id: 'netDailyCollection'
     },
     {
       header: t(
@@ -106,7 +113,8 @@ export const DailyCollectorDetailTable: React.FC<
         'Valor Fact. (A - B)'
       ),
       accessor: (item) => formatCurrency(item.cancelledValueDaily),
-      isNumeric: true
+      isNumeric: true,
+      id: 'cancelledValueDaily'
     },
     {
       header: t(
@@ -114,7 +122,8 @@ export const DailyCollectorDetailTable: React.FC<
         'Fact. (A - B)'
       ),
       accessor: 'cancelledCountDaily',
-      isNumeric: true
+      isNumeric: true,
+      id: 'cancelledCountDaily'
     }
   ];
 
@@ -152,11 +161,62 @@ export const DailyCollectorDetailTable: React.FC<
     0
   );
 
+  const totalRows = [
+    {
+      label: 'N° de Facturas',
+      value: totalTransactions,
+      columnId: 'transactionsCount'
+    },
+    {
+      label: 'TB Datos Ingreso',
+      value: sourceTrashRateTotal,
+      columnId: 'sourceTrashRateDaily'
+    },
+    {
+      label: 'TB Tabla Valor',
+      value: valorTableTotal,
+      columnId: 'valorTableDaily'
+    },
+    {
+      label: 'Diferencia (TBDI - TBTV)',
+      value: integrityGapAmount,
+      columnId: 'integrityGapDaily'
+    },
+    {
+      label: 'Monto Facturado',
+      value: grossAmount,
+      columnId: 'grossDailyTotal'
+    },
+    {
+      label: 'DesC. Aplicados',
+      value: totalDiscountsApplied,
+      columnId: 'discountsDailyTotal'
+    },
+    {
+      label: 'Valor Fact. (A - B)',
+      value: cancelledValueTotal,
+      columnId: 'cancelledValueDaily'
+    },
+    {
+      label: 'Recaudación Neta',
+      value: netCollectionTotal - cancelledValueTotal,
+      highlight: true,
+      columnId: 'netDailyCollection'
+    },
+    {
+      label: 'Fact. (A - B)',
+      value: totalCancelledCount,
+      columnId: 'cancelledCountDaily'
+    }
+  ];
+
   const { setShowPdfPreview, PdfPreviewModal } =
     useTablePdfExport<DailyCollectorDetail>({
       data,
       availableColumns: columns.map((c) => ({
-        id: typeof c.accessor === 'string' ? c.accessor : c.header as string,
+        id:
+          c.id ||
+          (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
         label: c.header as string,
         isDefault: true
       })),
@@ -170,9 +230,10 @@ export const DailyCollectorDetailTable: React.FC<
           ' ' +
           new Date().toLocaleTimeString()
       },
+      totalRows,
       mapRowData: (item, selectedCols) => {
         const rowData: Record<string, string> = {
-          'Colector': item.collectorId || '-',
+          Colector: item.collectorId || '-',
           'Fecha Pago': item.paymentDate ? ConverDate(item.paymentDate) : '-',
           'Estado Ingreso': item.incomeStatus || '-',
           'N° de Facturas': String(item.transactionsCount || 0),
@@ -188,25 +249,6 @@ export const DailyCollectorDetailTable: React.FC<
         return selectedCols.map((col) => rowData[col.label] || '-');
       }
     });
-
-  const totalRows = [
-    { label: 'TOTAL FACTURAS', value: totalTransactions },
-    { label: 'TOTAL TB DATOS INGRESO', value: sourceTrashRateTotal },
-    { label: 'TOTAL TB TABLA VALOR', value: valorTableTotal },
-    { label: 'TOTAL DIF. (TBDI - TBTV)', value: integrityGapAmount },
-    { label: 'TOTAL MONTO FACT.', value: grossAmount },
-    { label: 'TOTAL DESCUENTOS', value: totalDiscountsApplied },
-    {
-      label: 'TOTAL VALOR FACT. (A - B)',
-      value: cancelledValueTotal
-    },
-    {
-      label: 'RECAUDACIÓN NETA',
-      value: netCollectionTotal - cancelledValueTotal,
-      highlight: true
-    },
-    { label: 'TOTAL FACT. (A - B)', value: totalCancelledCount }
-  ];
 
   if (error) return null;
 

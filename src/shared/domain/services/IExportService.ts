@@ -15,6 +15,7 @@ export interface ReportOptions {
   clientInfo?: Record<string, string>;
   orientation?: 'portrait' | 'landscape';
   signatures?: Signature[];
+  totals?: string[];
 }
 
 export interface IExportService {

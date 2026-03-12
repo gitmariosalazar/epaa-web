@@ -50,7 +50,8 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
     {
       header: t('trashRateReport.monthlySummary.billCount', 'Facturas'),
       accessor: 'billCount',
-      isNumeric: true
+      isNumeric: true,
+      id: 'billCount'
     },
     {
       header: t(
@@ -58,7 +59,8 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
         'Tasa Ingreso'
       ),
       accessor: (r) => formatCurrency(r.totalRateIncome),
-      isNumeric: true
+      isNumeric: true,
+      id: 'totalRateIncome'
     },
     {
       header: t(
@@ -66,17 +68,20 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
         'Tasa Valor'
       ),
       accessor: (r) => formatCurrency(r.totalRateValorTable),
-      isNumeric: true
+      isNumeric: true,
+      id: 'totalRateValorTable'
     },
     {
       header: t('trashRateReport.monthlySummary.totalDiscounts', 'Descuentos'),
       accessor: (r) => formatCurrency(r.totalDiscounts),
-      isNumeric: true
+      isNumeric: true,
+      id: 'totalDiscounts'
     },
     {
       header: t('trashRateReport.monthlySummary.totalTrashNet', 'Neto Basura'),
       accessor: (r) => formatCurrency(r.totalTrashNet),
-      isNumeric: true
+      isNumeric: true,
+      id: 'totalTrashNet'
     },
     {
       header: t(
@@ -84,7 +89,8 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
         'Sin Valor'
       ),
       accessor: 'missingValorRecords',
-      isNumeric: true
+      isNumeric: true,
+      id: 'missingValorRecords'
     }
   ];
 
@@ -111,11 +117,56 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
     0
   );
 
+  const totalRows = [
+    {
+      label: 'TOTAL FACTURAS',
+      value: totalBillCount,
+      highlight: false,
+      columnId: 'billCount'
+    },
+    {
+      label: 'TOTAL Tabla Ingreso',
+      value: totalRateIncome,
+      highlight: false,
+      columnId: 'totalRateIncome'
+    },
+    {
+      label: 'TOTAL Tabla Valor',
+      value: totalRateValor,
+      highlight: false,
+      columnId: 'totalRateValorTable'
+    },
+    {
+      label: 'TOTAL DESCUENTOS',
+      value: totalDiscounts,
+      highlight: false,
+      columnId: 'totalDiscounts'
+    },
+    {
+      label: 'TOTAL NETO',
+      value: totalNet,
+      highlight: false,
+      columnId: 'totalTrashNet'
+    },
+    {
+      label: 'TOTAL SIN VALOR',
+      value: totalMissing,
+      highlight: false,
+      columnId: 'missingValorRecords'
+    },
+    {
+      label: 'TOTAL',
+      value: totalNet,
+      highlight: true,
+      columnId: 'totalTrashNet'
+    }
+  ];
+
   const { setShowPdfPreview, PdfPreviewModal } =
     useTablePdfExport<MonthlySummaryRow>({
       data,
       availableColumns: columns.map((c) => ({
-        id: typeof c.accessor === 'string' ? c.accessor : (c.header as string),
+        id: c.id || (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
         label: c.header as string,
         isDefault: true
       })),
@@ -129,6 +180,7 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
           ' ' +
           new Date().toLocaleTimeString()
       },
+      totalRows,
       mapRowData: (item, selectedCols) => {
         const rowData: Record<string, string> = {
           'Estado Pago': item.paymentStatusCode || '-',
@@ -144,44 +196,6 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
         return selectedCols.map((col) => rowData[col.label] || '-');
       }
     });
-
-  const totalRows = [
-    {
-      label: 'TOTAL FACTURAS',
-      value: totalBillCount,
-      highlight: false
-    },
-    {
-      label: 'TOTAL Tabla Ingreso',
-      value: totalRateIncome,
-      highlight: false
-    },
-    {
-      label: 'TOTAL Tabla Valor',
-      value: totalRateValor,
-      highlight: false
-    },
-    {
-      label: 'TOTAL DESCUENTOS',
-      value: totalDiscounts,
-      highlight: false
-    },
-    {
-      label: 'TOTAL NETO',
-      value: totalNet,
-      highlight: false
-    },
-    {
-      label: 'TOTAL SIN VALOR',
-      value: totalMissing,
-      highlight: false
-    },
-    {
-      label: 'TOTAL',
-      value: totalNet,
-      highlight: true
-    }
-  ];
 
   if (isLoading) return null;
 

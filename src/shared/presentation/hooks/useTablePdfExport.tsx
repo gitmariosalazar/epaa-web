@@ -13,6 +13,12 @@ export interface UseTablePdfExportOptions<T> {
   labelsVertical?: Record<string, string>;
   clientInfo?: Record<string, string>;
   signatures?: Signature[];
+  totalRows?: {
+    label: string;
+    value: string | number;
+    highlight?: boolean;
+    columnId?: string;
+  }[];
   mapRowData: (row: T, selectedCols: ExportColumn[]) => any[];
 }
 
@@ -25,6 +31,7 @@ export const useTablePdfExport = <T,>({
   labelsVertical,
   clientInfo,
   signatures,
+  totalRows,
   mapRowData
 }: UseTablePdfExportOptions<T>) => {
   const [showPdfPreview, setShowPdfPreview] = useState(false);
@@ -37,6 +44,30 @@ export const useTablePdfExport = <T,>({
     const colLabels = selectedCols.map((c) => c.label);
     const rows = data.map((d) => mapRowData(d, selectedCols));
 
+    let totals: string[] | undefined;
+    if (totalRows && totalRows.length > 0) {
+      totals = selectedCols.map((col, colIndex) => {
+        if (colIndex === 0) return 'TOTAL';
+        const matchingTotal =
+          totalRows.find((r) => r.columnId && r.columnId === col.id) ||
+          totalRows.find((r) => r.label === col.label) ||
+          totalRows.find(
+            (r) =>
+              r.label.toLowerCase().includes(col.label.toLowerCase()) ||
+              r.label
+                .toLowerCase()
+                .includes(col.label.toLowerCase().replace('total', '').trim())
+          );
+        
+        if (matchingTotal) {
+           return typeof matchingTotal.value === 'number' 
+             ? new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(matchingTotal.value)
+             : String(matchingTotal.value);
+        }
+        return '';
+      });
+    }
+
     return exportService.generatePdfBlobUrl({
       rows,
       columns: colLabels,
@@ -47,7 +78,8 @@ export const useTablePdfExport = <T,>({
       labelsHorizontal,
       labelsVertical,
       clientInfo,
-      signatures
+      signatures,
+      totals
     });
   };
 
@@ -57,6 +89,30 @@ export const useTablePdfExport = <T,>({
     );
     const colLabels = selectedCols.map((c) => c.label);
     const rows = data.map((d) => mapRowData(d, selectedCols));
+
+    let totals: string[] | undefined;
+    if (totalRows && totalRows.length > 0) {
+      totals = selectedCols.map((col, colIndex) => {
+        if (colIndex === 0) return 'TOTAL';
+        const matchingTotal =
+          totalRows.find((r) => r.columnId && r.columnId === col.id) ||
+          totalRows.find((r) => r.label === col.label) ||
+          totalRows.find(
+            (r) =>
+              r.label.toLowerCase().includes(col.label.toLowerCase()) ||
+              r.label
+                .toLowerCase()
+                .includes(col.label.toLowerCase().replace('total', '').trim())
+          );
+        
+        if (matchingTotal) {
+           return typeof matchingTotal.value === 'number' 
+             ? new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(matchingTotal.value)
+             : String(matchingTotal.value);
+        }
+        return '';
+      });
+    }
 
     exportService.exportToPdf({
       rows,
@@ -68,7 +124,8 @@ export const useTablePdfExport = <T,>({
       labelsHorizontal,
       labelsVertical,
       clientInfo,
-      signatures
+      signatures,
+      totals
     });
     setShowPdfPreview(false);
   };

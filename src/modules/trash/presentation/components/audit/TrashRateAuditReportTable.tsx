@@ -10,7 +10,7 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 import { ConverDate } from '@/shared/presentation/utils/datetime/ConverDate';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
-import { maskString } from '@/shared/presentation/utils/maskString';
+
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
 import { CheckCircle } from 'lucide-react';
@@ -50,11 +50,9 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Avatar name={item.customerName} size="sm" />
           <div>
-            <div style={{ fontWeight: 300 }}>
-              {maskString(item.customerName)}
-            </div>
+            <div style={{ fontWeight: 300 }}>{item.customerName}</div>
             <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
-              {maskString(item.cardId)}
+              {item.cardId}
             </div>
           </div>
         </div>
@@ -94,12 +92,14 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
     {
       header: t('Tarifa en Ingreso'),
       accessor: (r) => formatCurrency(r.rateInIncome ?? 0),
-      isNumeric: true
+      isNumeric: true,
+      id: 'rateInIncome'
     },
     {
       header: t('Tarifa en Tabla de Valor'),
       accessor: (r) => formatCurrency(r.rateInValorTable ?? 0),
-      isNumeric: true
+      isNumeric: true,
+      id: 'rateInValorTable'
     },
     {
       header: t('Diagnóstico'),
@@ -108,7 +108,8 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
     {
       header: t('Diferencia'),
       accessor: (r) => formatCurrency(r.difference ?? 0),
-      isNumeric: true
+      isNumeric: true,
+      id: 'difference'
     }
   ];
 
@@ -128,11 +129,37 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
     0
   );
 
+  const totalRows = [
+    {
+      label: 'TOTAL Tarifa en Ingreso',
+      value: totalRateInIncome,
+      highlight: false,
+      columnId: 'rateInIncome'
+    },
+    {
+      label: 'TOTAL Tarifa en Tabla de Valor',
+      value: totalRateInValorTable,
+      highlight: false,
+      columnId: 'rateInValorTable'
+    },
+    {
+      label: 'TOTAL Diferencia',
+      value: totalDifference,
+      highlight: false,
+      columnId: 'difference'
+    },
+    {
+      label: 'TOTAL',
+      value: totalRateInIncome,
+      highlight: true
+    }
+  ];
+
   const { setShowPdfPreview, PdfPreviewModal } =
     useTablePdfExport<TrashRateAuditRow>({
       data,
       availableColumns: columns.map((c) => ({
-        id: typeof c.accessor === 'string' ? c.accessor : (c.header as string),
+        id: c.id || (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
         label: c.header as string,
         isDefault: true
       })),
@@ -146,6 +173,7 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
           ' ' +
           new Date().toLocaleTimeString()
       },
+      totalRows,
       mapRowData: (item, selectedCols) => {
         const rowData: Record<string, string> = {
           Cliente: item.customerName || '-',
@@ -167,29 +195,6 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
         });
       }
     });
-
-  const totalRows = [
-    {
-      label: 'TOTAL Tabla Ingreso',
-      value: totalRateInIncome,
-      highlight: false
-    },
-    {
-      label: 'TOTAL Tabla Valor',
-      value: totalRateInValorTable,
-      highlight: false
-    },
-    {
-      label: 'TOTAL DIFERENCIA',
-      value: totalDifference,
-      highlight: false
-    },
-    {
-      label: 'TOTAL',
-      value: totalRateInIncome,
-      highlight: true
-    }
-  ];
 
   if (isLoading) return null;
 

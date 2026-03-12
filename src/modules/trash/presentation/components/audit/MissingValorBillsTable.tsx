@@ -7,7 +7,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import type { MissingValorRow } from '../../../domain/models/trash-rate-report.model';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { maskString } from '@/shared/presentation/utils/maskString';
+
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
@@ -54,11 +54,9 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Avatar name={item.customerName} size="sm" />
           <div>
-            <div style={{ fontWeight: 300 }}>
-              {maskString(item.customerName)}
-            </div>
+            <div style={{ fontWeight: 300 }}>{item.customerName}</div>
             <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
-              {maskString(item.cardId)}
+              {item.cardId}
             </div>
           </div>
         </div>
@@ -74,7 +72,9 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
     },
     {
       header: t('trashRateReport.missingValor.trashRate', 'Tasa Basura'),
-      accessor: (r) => fmt(r.trashRate)
+      accessor: (r) => fmt(r.trashRate),
+      id: 'trashRate',
+      isNumeric: true
     },
     {
       header: t('trashRateReport.missingValor.paymentStatus', 'Estado'),
@@ -111,11 +111,26 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
     0
   );
 
+  const totalRows = [
+    {
+      label: 'TOTAL TB',
+      value: fmt(totalTrashRate),
+      highlight: false,
+      columnId: 'trashRate'
+    },
+    {
+      label: 'TOTAL',
+      value: fmt(totalTrashRate),
+      highlight: true,
+      columnId: 'trashRate'
+    }
+  ];
+
   const { setShowPdfPreview, PdfPreviewModal } =
     useTablePdfExport<MissingValorRow>({
       data,
       availableColumns: columns.map((c) => ({
-        id: typeof c.accessor === 'string' ? c.accessor : (c.header as string),
+        id: c.id || (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
         label: c.header as string,
         isDefault: true
       })),
@@ -129,6 +144,7 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
           ' ' +
           new Date().toLocaleTimeString()
       },
+      totalRows,
       mapRowData: (item, selectedCols) => {
         const rowData: Record<string, string> = {
           'Cód. Ingreso': String(item.incomeCode || '-'),
@@ -147,19 +163,6 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
         });
       }
     });
-
-  const totalRows = [
-    {
-      label: 'TOTAL TB',
-      value: fmt(totalTrashRate),
-      highlight: false
-    },
-    {
-      label: 'TOTAL',
-      value: fmt(totalTrashRate),
-      highlight: true
-    }
-  ];
 
   if (error) return null;
 
