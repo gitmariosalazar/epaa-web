@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '../../../../shared/presentation/components/DatePicker/DatePicker';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
 
 // ── Props (ISP: each consumer only passes what it needs) ─────────────────────
 interface PaymentFiltersProps {
@@ -118,21 +119,20 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
         {/* Date range inputs (range tab only) */}
         {activeTab === 'range' && (
           <>
-            <div className="filter-group">
+            <div className="filter-group filter-group--range">
               <label className="filter-label">
-                {t('accounting.filters.initDate', 'Desde')}
+                {t('trashRateKPI.filters.dateRange', 'Rango de Fechas')}
               </label>
               <div className="filter-input-wrapper">
-                <DatePicker value={initDate} onChange={onInitDateChange} />
-              </div>
-            </div>
-
-            <div className="filter-group">
-              <label className="filter-label">
-                {t('accounting.filters.endDate', 'Hasta')}
-              </label>
-              <div className="filter-input-wrapper">
-                <DatePicker value={endDate} onChange={onEndDateChange} />
+                <DateRangePicker
+                  startDate={initDate}
+                  endDate={endDate}
+                  onChange={(start, end) => {
+                    onInitDateChange(start);
+                    onEndDateChange(end);
+                  }}
+                  disabled={isLoading}
+                />
               </div>
             </div>
           </>

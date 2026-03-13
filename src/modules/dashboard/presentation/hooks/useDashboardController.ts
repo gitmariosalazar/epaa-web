@@ -119,8 +119,11 @@ export const useDashboardController = () => {
     return () => clearInterval(interval);
   }, [currentMonth]);
 
-  const handleMonthChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setCurrentMonth(e.target.value);
+  const handleMonthChange = (
+    e: ChangeEvent<HTMLInputElement> | string
+  ) => {
+    const value = typeof e === 'string' ? e : e.target.value;
+    setCurrentMonth(value);
   };
 
   return {

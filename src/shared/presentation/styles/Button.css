@@ -205,8 +205,8 @@
   ); /* Generic professional translucent highlight */
 }
 
-/* Base button primary dark mode override */
-.dark .btn-pro {
+/* Base button primary dark mode override - only for standard/unspecified buttons */
+.dark .btn-pro:not([class*="--primary"]):not([class*="--secondary"]):not([class*="--accent"]):not([class*="--success"]):not([class*="--error"]):not([class*="--warning"]):not([class*="--info"]):not([class*="--blue"]):not([class*="--red"]):not([class*="--green"]) {
   --btn-bg: rgba(255, 255, 255, 0.1);
   --btn-hover-bg: rgba(255, 255, 255, 0.15);
   --btn-active-bg: rgba(255, 255, 255, 0.2);

@@ -10,24 +10,35 @@ import { Eye } from 'lucide-react';
 import { PaymentReadingDetailModal } from './PaymentReadingDetailModal/PaymentReadingDetailModal';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 
 interface PaymentReadingsTableProps {
   data: PaymentReading[];
   isLoading: boolean;
   onSort?: (key: string, direction: 'asc' | 'desc') => void;
   sortConfig?: { key: string; direction: 'asc' | 'desc' } | null;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const PaymentReadingsTable: React.FC<PaymentReadingsTableProps> = ({
   data,
   isLoading,
   onSort,
-  sortConfig
+  sortConfig,
+  startDate,
+  endDate
 }) => {
   const { t } = useTranslation();
   const [selectedReading, setSelectedReading] = useState<PaymentReading | null>(
     null
   );
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
 
   const columns: Column<PaymentReading>[] = [
     {
@@ -68,42 +79,48 @@ export const PaymentReadingsTable: React.FC<PaymentReadingsTableProps> = ({
       accessor: (item) => `$${Number(item.surcharge).toFixed(2)}`,
       sortKey: 'surcharge',
       sortable: true,
-      isNumeric: true
+      isNumeric: true,
+      id: 'surcharge'
     },
     {
       header: t('accounting.columns.epaaValue'),
       accessor: (item) => `$${Number(item.epaaValue).toFixed(2)}`,
       sortKey: 'epaaValue',
       sortable: true,
-      isNumeric: true
+      isNumeric: true,
+      id: 'epaaValue'
     },
     {
       header: t('accounting.columns.thirdPartyValue'),
       accessor: (item) => `$${Number(item.thirdPartyValue).toFixed(2)}`,
       sortKey: 'thirdPartyValue',
       sortable: true,
-      isNumeric: true
+      isNumeric: true,
+      id: 'thirdPartyValue'
     },
     {
       header: t('accounting.columns.trashRateDt'),
       accessor: (item) => `$${Number(item.trashRate).toFixed(2)}`,
       sortKey: 'trashRate',
       sortable: true,
-      isNumeric: true
+      isNumeric: true,
+      id: 'trashRate'
     },
     {
       header: t('accounting.columns.trashRateVal'),
       accessor: (item) => `$${Number(item.value).toFixed(2)}`,
       sortKey: 'value',
       sortable: true,
-      isNumeric: true
+      isNumeric: true,
+      id: 'value'
     },
     {
       header: t('accounting.columns.total'),
       accessor: (item) => `$${Number(item.total).toFixed(2)}`,
       sortKey: 'total',
       sortable: true,
-      isNumeric: true
+      isNumeric: true,
+      id: 'total'
     },
     {
       header: t('accounting.columns.user'),
@@ -155,47 +172,77 @@ export const PaymentReadingsTable: React.FC<PaymentReadingsTableProps> = ({
     (sum, item) => sum + Number(item.surcharge),
     0
   );
-  /*
-  const summaryRows = [
-    {
-      label: t('accounting.readings.epaaValue', 'Epaa Value'),
-      value: epaaTotal
-    },
-    {
-      label: t('accounting.readings.thirdPartyValue', 'Third Party Value'),
-      value: thirdPartyTotal
-    },
-    { label: t('common.total', 'Total'), value: totalAmount, highlight: true }
-  ];
-  */
 
   const totalRows = [
     {
       label: 'TOTAL ' + t('accounting.columns.epaaValue'),
-      value: epaaTotal
+      value: epaaTotal,
+      columnId: 'epaaValue'
     },
     {
       label: 'TOTAL ' + t('accounting.columns.surcharge'),
-      value: surchargeTotal
+      value: surchargeTotal,
+      columnId: 'surcharge'
     },
     {
       label: 'TOTAL ' + t('accounting.columns.trashRateDt'),
-      value: trashRateTotalA
+      value: trashRateTotalA,
+      columnId: 'trashRate'
     },
     {
       label: 'TOTAL ' + t('accounting.columns.trashRateVal'),
-      value: trashRateTotalB
+      value: trashRateTotalB,
+      columnId: 'value'
     },
     {
       label: 'TOTAL ' + t('accounting.columns.thirdPartyValue'),
-      value: thirdPartyTotal
+      value: thirdPartyTotal,
+      columnId: 'thirdPartyValue'
     },
     {
       label: 'TOTAL',
       value: totalAmount,
-      highlight: true
+      highlight: true,
+      columnId: 'total'
     }
   ];
+
+  const { setShowPdfPreview, PdfPreviewModal } =
+    useTablePdfExport<PaymentReading>({
+      data,
+      availableColumns: columns.map((c) => ({
+        id:
+          c.id ||
+          (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
+        label: c.header as string,
+        isDefault: true
+      })),
+      reportTitle: 'REPORTE DE PAGOS DE LECTURAS',
+      reportDescription:
+        'Detalle de pagos realizados por conceptos de lecturas de agua y otros rubros relacionados.',
+      labelsHorizontal: {
+        'Rango de Fecha': `${startDate || '-'} - ${endDate || '-'}`,
+        'Fecha de Exportación':
+          new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+      },
+      totalRows,
+      mapRowData: (item, selectedCols) => {
+        const rowData: Record<string, string> = {
+          [t('accounting.columns.titleCode')]: item.titleCode,
+          'Cliente': `${item.name} ${item.lastName} (${item.cardId})`,
+          [t('accounting.columns.cadastralKey')]: item.cadastralKey,
+          [t('accounting.columns.surcharge')]: formatCurrency(item.surcharge),
+          [t('accounting.columns.epaaValue')]: formatCurrency(item.epaaValue),
+          [t('accounting.columns.thirdPartyValue')]: formatCurrency(item.thirdPartyValue),
+          [t('accounting.columns.trashRateDt')]: formatCurrency(item.trashRate),
+          [t('accounting.columns.trashRateVal')]: formatCurrency(item.value),
+          [t('accounting.columns.total')]: formatCurrency(item.total),
+          [t('accounting.columns.user')]: item.paymentUser,
+          [t('accounting.columns.paymentMethod')]: item.paymentMethod || '-'
+        };
+        return selectedCols.map((col) => rowData[col.label] || '-');
+      }
+    });
 
   return (
     <div className="payments-table-wrapper">
@@ -207,8 +254,8 @@ export const PaymentReadingsTable: React.FC<PaymentReadingsTableProps> = ({
         pageSize={15}
         onSort={onSort}
         sortConfig={sortConfig}
-        //summaryRows={summaryRows}
         totalRows={totalRows}
+        onExportPdf={() => setShowPdfPreview(true)}
         width="100"
         fullHeight
         emptyState={
@@ -228,6 +275,7 @@ export const PaymentReadingsTable: React.FC<PaymentReadingsTableProps> = ({
         onClose={() => setSelectedReading(null)}
         reading={selectedReading}
       />
+      {PdfPreviewModal}
     </div>
   );
 };

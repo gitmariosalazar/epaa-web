@@ -107,6 +107,8 @@ export const PaymentsPage: React.FC = () => {
           isLoading={false}
           onSort={actions.handleSort}
           sortConfig={state.sortConfig}
+          startDate={state.date}
+          endDate={state.date}
         />
       ) : state.activeTab === 'readings' ? (
         <PaymentReadingsTable
@@ -114,6 +116,8 @@ export const PaymentsPage: React.FC = () => {
           isLoading={false}
           onSort={actions.handleSort}
           sortConfig={state.sortConfig}
+          startDate={state.initDate}
+          endDate={state.endDate}
         />
       ) : (
         <PaymentsTable
@@ -121,6 +125,8 @@ export const PaymentsPage: React.FC = () => {
           isLoading={false}
           onSort={actions.handleSort}
           sortConfig={state.sortConfig}
+          startDate={state.initDate}
+          endDate={state.endDate}
         />
       )}
     </div>

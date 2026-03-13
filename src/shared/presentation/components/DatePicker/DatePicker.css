@@ -57,7 +57,7 @@
   position: absolute;
   top: calc(100% + 0.25rem);
   left: 0;
-  z-index: 50;
+  z-index: 1000; /* Increased to stay above table headers and other overlays */
   min-width: 280px;
   width: max-content;
   max-width: 90vw;
@@ -67,6 +67,16 @@
   box-shadow: var(--shadow-lg);
   padding: 1rem;
   animation: datepicker-fade-in 0.15s ease-out;
+}
+
+.datepicker-popover--right-aligned {
+  left: auto;
+  right: 0;
+}
+
+.datepicker-popover--top-aligned {
+  top: auto;
+  bottom: calc(100% + 0.25rem);
 }
 
 .datepicker-header {

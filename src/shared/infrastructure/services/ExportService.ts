@@ -73,7 +73,12 @@ export class ExportService implements IExportService {
    */
   private createPdfDoc(options: ReportOptions): jsPDF {
     const { orientation = 'portrait' } = options;
-    const doc = new jsPDF(orientation);
+    const doc = new jsPDF({
+      orientation,
+      unit: 'mm',
+      format: 'a4',
+      compress: true
+    });
 
     // 1. Initial Styles and Header
     this.renderHeaderAccent(doc);
@@ -144,7 +149,7 @@ export class ExportService implements IExportService {
     const img = new Image();
     img.src = logoEpaa;
     try {
-      doc.addImage(img, 'PNG', margin, logoY, logoSize, logoSize);
+      doc.addImage(img, 'PNG', margin, logoY, logoSize, logoSize, undefined, 'FAST');
     } catch {
       doc.setFillColor(240, 240, 240);
       doc.circle(

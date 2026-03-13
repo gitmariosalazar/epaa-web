@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Calendar, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Table, type Column } from '../Table/Table';
 import type { DailyReadingsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { ExportService } from '@/shared/infrastructure/services/ExportService';
@@ -15,6 +15,9 @@ import { ReportPreviewModal } from './ReportPreviewModal';
 import type { ExportColumn } from './ReportPreviewModal';
 import { Avatar } from '../Avatar/Avatar';
 import { useTranslation } from 'react-i18next';
+import { DatePicker } from '../DatePicker/DatePicker';
+import './DailyReport.css';
+import { Button } from '../Button/Button';
 
 export const DailyReport = () => {
   const { t } = useTranslation();
@@ -197,91 +200,65 @@ export const DailyReport = () => {
   );
 
   return (
-    <div>
-      <div className="reports-toolbar">
-        {/* Top Row: Date Selection */}
-        <div className="toolbar-row">
-          <div className="toolbar-group main">
-            <label className="toolbar-label">Select Date</label>
-            <div className="toolbar-controls">
-              <div
-                className="dashboard-controls"
-                onClick={() => pickerRef.current?.showPicker()}
-                title="Change Period"
-              >
-                <Calendar className="text-gray-400" size={20} color="#9ca3af" />
-                <input
-                  ref={pickerRef}
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="month-picker"
-                />
-              </div>
+    <div className="daily-report-container">
+      <div className="daily-report-toolbar">
+        {/* Unified Search Row */}
+        <div className="daily-toolbar-side">
+          <label className="toolbar-label-compact">Period</label>
+          <DatePicker
+            view="date"
+            value={date}
+            onChange={(value) => setDate(value)}
+            disabled={loading}
+            ref={pickerRef}
+          />
+          <Button
+            onClick={handleSearch}
+            isLoading={loading}
+            leftIcon={<Search size={14} />}
+            size="sm"
+            color="primary"
+          >
+            Load
+          </Button>
+
+          {data.length > 0 && (
+            <div className="filter-search-wrapper">
+              <Search size={12} />
+              <input
+                type="text"
+                className="toolbar-input-compact"
+                placeholder="Filter records..."
+                maxLength={60}
+                value={resultSearchTerm}
+                onChange={(e) => setResultSearchTerm(e.target.value)}
+              />
             </div>
-          </div>
-          <div className="toolbar-group actions">
-            <label className="toolbar-label">&nbsp;</label>
-            <div className="toolbar-controls">
-              <button
-                className="btn-search"
-                onClick={handleSearch}
-                disabled={loading}
-              >
-                {loading ? (
-                  'Loading...'
-                ) : (
-                  <>
-                    <Search size={18} />{' '}
-                    <span className="btn-text">Load Data</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Bottom Row: Filtering and Actions */}
         {data.length > 0 && (
-          <div className="toolbar-row">
-            <div className="toolbar-group main">
-              <label className="toolbar-label">Filter Results</label>
-              <div className="input-icon-wrapper">
-                <Search size={18} />
-                <input
-                  type="text"
-                  className="toolbar-input input-search"
-                  placeholder="Search client, key, or reading..."
-                  maxLength={60}
-                  value={resultSearchTerm}
-                  onChange={(e) => setResultSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="toolbar-group actions">
-              <label className="toolbar-label" style={{ visibility: 'hidden' }}>
-                Export
-              </label>
-              <div className="toolbar-controls">
-                <button
-                  className="btn-icon-text"
-                  onClick={() => setShowPdfPreview(true)}
-                >
-                  {ColoredIcons.Pdf}
-                  <span className="btn-text">PDF</span>
-                </button>
-                <button
-                  className="btn-icon-text"
-                  onClick={() => {
-                    exportService.exportToExcel(filteredData, 'daily_report');
-                  }}
-                >
-                  {ColoredIcons.Excel}
-                  <span className="btn-text">Excel</span>
-                </button>
-              </div>
-            </div>
+          <div className="daily-toolbar-side actions">
+            <Button
+              variant="outline"
+              color="red"
+              size="sm"
+              iconOnly
+              leftIcon={ColoredIcons.Pdf}
+              onClick={() => setShowPdfPreview(true)}
+              title="Export PDF"
+            />
+            <Button
+              variant="outline"
+              color="green"
+              size="sm"
+              iconOnly
+              leftIcon={ColoredIcons.Excel}
+              onClick={() => {
+                exportService.exportToExcel(filteredData, 'daily_report');
+              }}
+              title="Export Excel"
+            />
           </div>
         )}
       </div>

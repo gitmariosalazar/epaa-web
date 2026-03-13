@@ -4,10 +4,12 @@ import { GetYearlyReadingsReportUseCase } from '@/modules/dashboard/application/
 import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructure/repositories/http-report-dashboard.repository';
 import { ExportService } from '@/shared/infrastructure/services/ExportService';
 import { Search, Droplets, FileText, Calendar } from 'lucide-react';
+import { Button } from '../Button/Button';
 import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { EmptyState } from '../common/EmptyState';
 import { Table, type Column } from '../Table/Table';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import './YearlyReport.css';
 
 export const YearlyReport = () => {
   const [year, setYear] = useState<number>(
@@ -93,75 +95,52 @@ export const YearlyReport = () => {
   );
 
   return (
-    <div>
-      <style>{`
-        @media (max-width: 895px) {
-          .custom-hide-responsive {
-            display: none !important;
-          }
-        }
-      `}</style>
-      <div className="reports-toolbar">
-        <div className="toolbar-row">
-          <div className="toolbar-group main">
-            <label className="toolbar-label">Select Year</label>
-            <div className="toolbar-controls">
-              <input
-                type="number"
-                className="toolbar-input input-cadastral"
-                style={{ width: '120px' }}
-                value={year}
-                onChange={(e) => setYear(Number(e.target.value))}
-                min="2000"
-                max="2100"
-              />
-              <button
-                className="btn-search"
-                onClick={handleSearch}
-                disabled={loading}
-              >
-                {loading ? (
-                  'Loading...'
-                ) : (
-                  <>
-                    <Search size={18} />{' '}
-                    <span className="btn-text">Generate Report</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {data && (
-            <div className="toolbar-group actions">
-              <label className="toolbar-label" style={{ visibility: 'hidden' }}>
-                Export
-              </label>
-              <div className="toolbar-controls">
-                <button
-                  className="btn-icon-text"
-                  onClick={handleExportPdf}
-                  title="Export to PDF"
-                >
-                  {ColoredIcons.Pdf}
-                  <span className="btn-text custom-hide-responsive">
-                    Export PDF
-                  </span>
-                </button>
-                <button
-                  className="btn-icon-text"
-                  onClick={handleExportExcel}
-                  title="Export to Excel"
-                >
-                  {ColoredIcons.Excel}
-                  <span className="btn-text custom-hide-responsive">
-                    Export Excel
-                  </span>
-                </button>
-              </div>
-            </div>
-          )}
+    <div className="yearly-report-container">
+      <div className="yearly-report-toolbar">
+        <div className="yearly-toolbar-side">
+          <label className="toolbar-label-compact">Year</label>
+          <input
+            type="number"
+            className="toolbar-input-compact"
+            style={{ width: '80px' }}
+            value={year}
+            onChange={(e) => setYear(Number(e.target.value))}
+            min="2000"
+            max="2100"
+          />
+          <Button
+            onClick={handleSearch}
+            isLoading={loading}
+            leftIcon={<Search size={14} />}
+            size="sm"
+            color="primary"
+          >
+            Calculate
+          </Button>
         </div>
+
+        {data && (
+          <div className="yearly-toolbar-side actions">
+            <Button
+              variant="outline"
+              color="red"
+              size="sm"
+              iconOnly
+              leftIcon={ColoredIcons.Pdf}
+              onClick={handleExportPdf}
+              title="Export PDF"
+            />
+            <Button
+              variant="outline"
+              color="green"
+              size="sm"
+              iconOnly
+              leftIcon={ColoredIcons.Excel}
+              onClick={handleExportExcel}
+              title="Export Excel"
+            />
+          </div>
+        )}
       </div>
 
       {data ? (

@@ -472,7 +472,43 @@ export const useEntryDataViewModel = () => {
       item.totalCollected ?? item.grandTotal ?? item.totalValue ?? item.total
     );
 
-    return selectedCols.map((col) => rowData[col.id]);
+    return selectedCols.map((col) => rowData[col.id] || '');
+  };
+
+  const calculateTotals = (data: any[], selectedCols: ExportColumn[]) => {
+    return selectedCols.map((col) => {
+      // Solo sumamos si el id parece ser un campo numérico
+      const numericIds = [
+        'titleValue',
+        'thirdPartyValue',
+        'surchargeValue',
+        'trashRateValue',
+        'discountTrashRateValue',
+        'detailValue',
+        'incomeCount',
+        'paymentCount',
+        'recordCount',
+        'grandTotal',
+        'totalCollected',
+        'totalValue',
+        'total'
+      ];
+
+      if (numericIds.includes(col.id)) {
+        const sum = data.reduce((s, r) => s + Number(r[col.id] || 0), 0);
+        return fmt(sum);
+      }
+
+      if (
+        col.id === 'date' ||
+        col.id === 'collector' ||
+        col.id === 'paymentMethod'
+      ) {
+        return col.id === 'date' ? 'TOTAL' : '';
+      }
+
+      return '';
+    });
   };
 
   const handlePdfGenerator = ({ orientation, selectedColumnIds }: any) => {
@@ -481,13 +517,20 @@ export const useEntryDataViewModel = () => {
     );
     const colLabels = selectedCols.map((c) => c.label);
     const rows = currentFilteredData.map((d) => mapRowData(d, selectedCols));
+    const totals = calculateTotals(currentFilteredData, selectedCols);
 
     return exportService.generatePdfBlobUrl({
       rows: rows,
       columns: colLabels,
+      totals: totals,
       fileName: `reporte_${activeTab}`,
       title: currentReportTitle,
-      orientation
+      orientation,
+      labelsHorizontal: {
+        'Rango de Fecha': `${startDate} - ${endDate}`,
+        'Fecha de Exportación':
+          new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+      }
     });
   };
 
@@ -497,13 +540,20 @@ export const useEntryDataViewModel = () => {
     );
     const colLabels = selectedCols.map((c) => c.label);
     const rows = currentFilteredData.map((d) => mapRowData(d, selectedCols));
+    const totals = calculateTotals(currentFilteredData, selectedCols);
 
     exportService.exportToPdf({
       rows: rows,
       columns: colLabels,
+      totals: totals,
       fileName: `reporte_${activeTab}`,
       title: currentReportTitle,
-      orientation
+      orientation,
+      labelsHorizontal: {
+        'Rango de Fecha': `${startDate} - ${endDate}`,
+        'Fecha de Exportación':
+          new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+      }
     });
     setShowPdfPreview(false);
   };

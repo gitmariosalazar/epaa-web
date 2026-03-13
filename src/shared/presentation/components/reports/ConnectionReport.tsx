@@ -4,6 +4,7 @@ import { ExportService } from '@/shared/infrastructure/services/ExportService';
 import { GetConnectionLastReadingsReportUseCase } from '@/modules/dashboard/application/usecases/get-connection-last-readings-report.usecase';
 import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructure/repositories/http-report-dashboard.repository';
 import { Search } from 'lucide-react';
+import { Button } from '../Button/Button';
 import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { ColorChip } from '../chip/ColorChip';
 import { EmptyState } from '../common/EmptyState';
@@ -11,6 +12,7 @@ import { Table, type Column } from '../Table/Table';
 import { Avatar } from '../Avatar/Avatar';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { useTranslation } from 'react-i18next';
+import './ConnectionReport.css';
 
 export const ConnectionReport = () => {
   const { t } = useTranslation();
@@ -115,138 +117,114 @@ export const ConnectionReport = () => {
   );
 
   return (
-    <div>
-      <div className="reports-toolbar">
-        {/* Top Row: Primary Search */}
-        <div className="toolbar-row">
-          <div className="toolbar-group main">
-            <label className="toolbar-label">
-              {t('dashboard.reports.connection.filters.searchLabel')}
-            </label>
-            <div className="toolbar-controls">
+    <div className="connection-report-container">
+      <div className="connection-report-toolbar">
+        {/* Unified Search Row */}
+        <div className="connection-toolbar-side">
+          <label className="toolbar-label-compact">Connection</label>
+          <input
+            type="text"
+            className="toolbar-input-compact"
+            placeholder="Key (e.g. 1-1)"
+            maxLength={15}
+            style={{ width: '100px' }}
+            value={cadastralKey}
+            onChange={(e) => setCadastralKey(e.target.value)}
+          />
+          <select
+            className="toolbar-select-compact"
+            value={limit}
+            onChange={(e) => setLimit(Number(e.target.value))}
+          >
+            <option value={5}>Last 5</option>
+            <option value={10}>Last 10</option>
+            <option value={15}>Last 15</option>
+            <option value={20}>Last 20</option>
+            <option value={25}>Last 25</option>
+            <option value={30}>Last 30</option>
+          </select>
+          <Button
+            onClick={handleSearch}
+            isLoading={loading}
+            leftIcon={<Search size={14} />}
+            size="sm"
+            color="primary"
+          >
+            History
+          </Button>
+
+          {data.length > 0 && (
+            <div className="filter-search-wrapper">
+              <Search size={12} />
               <input
                 type="text"
-                className="toolbar-input input-cadastral"
-                placeholder={t(
-                  'dashboard.reports.connection.filters.searchPlaceholder'
-                )}
-                maxLength={15}
-                value={cadastralKey}
-                onChange={(e) => setCadastralKey(e.target.value)}
+                className="toolbar-input-compact"
+                placeholder="Filter results..."
+                maxLength={60}
+                value={resultSearchTerm}
+                onChange={(e) => setResultSearchTerm(e.target.value)}
               />
             </div>
-          </div>
-          <div className="toolbar-group actions">
-            <label className="toolbar-label">&nbsp;</label>{' '}
-            {/* Spacer for alignment */}
-            <div className="toolbar-controls">
-              <select
-                className="toolbar-select"
-                value={limit}
-                onChange={(e) => setLimit(Number(e.target.value))}
-              >
-                <option value={5}>Last 5</option>
-                <option value={10}>Last 10</option>
-                <option value={15}>Last 15</option>
-                <option value={20}>Last 20</option>
-                <option value={25}>Last 25</option>
-                <option value={30}>Last 30</option>
-              </select>
-              <button
-                className="btn-search"
-                onClick={handleSearch}
-                disabled={loading}
-              >
-                {loading ? (
-                  'Searching...'
-                ) : (
-                  <>
-                    <Search size={18} />{' '}
-                    <span className="btn-text">Search</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Bottom Row: Filtering and Actions */}
         {data.length > 0 && (
-          <div className="toolbar-row">
-            <div className="toolbar-group main">
-              <label className="toolbar-label">Filter History</label>
-              <div className="input-icon-wrapper">
-                <Search size={18} />
-                <input
-                  type="text"
-                  className="toolbar-input input-search"
-                  placeholder="Search date, client, or values..."
-                  maxLength={60}
-                  value={resultSearchTerm}
-                  onChange={(e) => setResultSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="toolbar-group actions">
-              <label className="toolbar-label" style={{ visibility: 'hidden' }}>
-                Export
-              </label>{' '}
-              {/* Spacer label */}
-              <div className="toolbar-controls">
-                <button
-                  className="btn-icon-text"
-                  onClick={() => {
-                    const rows = filteredData.map((d) => [
-                      dateService.formatToLocaleString(d.readingDate),
-                      d.readingValue.toString(),
-                      `${d.consumption} m³`,
-                      d.clientName,
-                      d.meterNumber,
-                      d.novelty
-                    ]);
-                    exportService.exportToPdf({
-                      rows,
-                      columns: [
-                        'Date',
-                        'Reading',
-                        'Consumption',
-                        'Client',
-                        'Meter',
-                        'Status'
-                      ],
-                      fileName: 'connection_history',
-                      title: 'Connection Reading History',
-                      clientInfo:
-                        filteredData.length > 0
-                          ? {
-                              'Client Name': filteredData[0].clientName || '',
-                              'Cadastral Key':
-                                filteredData[0].cadastralKey || '',
-                              'Meter Number': filteredData[0].meterNumber || '',
-                              Address: filteredData[0].address || ''
-                            }
-                          : undefined
-                    });
-                  }}
-                >
-                  {ColoredIcons.Pdf}
-                  <span className="btn-text">Export PDF</span>
-                </button>
-                <button
-                  className="btn-icon-text"
-                  onClick={() => {
-                    exportService.exportToExcel(
-                      filteredData,
-                      'connection_history'
-                    );
-                  }}
-                >
-                  {ColoredIcons.Excel}
-                  <span className="btn-text">Export Excel</span>
-                </button>
-              </div>
-            </div>
+          <div className="connection-toolbar-side actions">
+            <Button
+              variant="outline"
+              color="red"
+              size="sm"
+              iconOnly
+              leftIcon={ColoredIcons.Pdf}
+              onClick={() => {
+                const rows = filteredData.map((d) => [
+                  dateService.formatToLocaleString(d.readingDate),
+                  d.readingValue.toString(),
+                  `${d.consumption} m³`,
+                  d.clientName,
+                  d.meterNumber,
+                  d.novelty
+                ]);
+                exportService.exportToPdf({
+                  rows,
+                  columns: [
+                    'Date',
+                    'Reading',
+                    'Consumption',
+                    'Client',
+                    'Meter',
+                    'Status'
+                  ],
+                  fileName: 'connection_history',
+                  title: 'Connection Reading History',
+                  clientInfo:
+                    filteredData.length > 0
+                      ? {
+                          'Client Name': filteredData[0].clientName || '',
+                          'Cadastral Key':
+                            filteredData[0].cadastralKey || '',
+                          'Meter Number': filteredData[0].meterNumber || '',
+                          Address: filteredData[0].address || ''
+                        }
+                      : undefined
+                });
+              }}
+              title="Export PDF"
+            />
+            <Button
+              variant="outline"
+              color="green"
+              size="sm"
+              iconOnly
+              leftIcon={ColoredIcons.Excel}
+              onClick={() => {
+                exportService.exportToExcel(
+                  filteredData,
+                  'connection_history'
+                );
+              }}
+              title="Export Excel"
+            />
           </div>
         )}
       </div>

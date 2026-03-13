@@ -4,7 +4,6 @@ import { GlobalStats } from '@/shared/presentation/components/dashboard/GlobalSt
 import { DailyStatsTable } from '@/shared/presentation/components/dashboard/DailyStatsTable';
 import { SectorStatsTable } from '@/shared/presentation/components/dashboard/SectorStatsTable';
 import { NoveltyStats } from '@/shared/presentation/components/dashboard/NoveltyStats';
-import { Calendar } from 'lucide-react';
 
 import '@/shared/presentation/styles/dashboard.css';
 import './DashboardHome.css';
@@ -18,6 +17,8 @@ import {
 } from '@/shared/presentation/components/dashboard/DashboardWidgetWrapper';
 import { DashboardMaximizeButton } from '@/shared/presentation/components/dashboard/DashboardMaximizeButton';
 import { useDashboardController } from '@/modules/dashboard/presentation/hooks/useDashboardController';
+
+import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 
 export const DashboardHome = () => {
   const { t } = useTranslation();
@@ -55,13 +56,12 @@ export const DashboardHome = () => {
             onClick={() => pickerRef.current?.showPicker()}
             title="Change Period"
           >
-            <Calendar className="text-gray-400" size={20} color="#9ca3af" />
-            <input
-              ref={pickerRef}
-              type="month"
+            <DatePicker
+              view="month"
               value={currentMonth}
               onChange={handleMonthChange}
-              className="month-picker"
+              disabled={loading}
+              ref={pickerRef}
             />
           </div>
         </div>

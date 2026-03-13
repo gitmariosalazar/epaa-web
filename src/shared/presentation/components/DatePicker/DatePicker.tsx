@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useImperativeHandle } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,15 +16,20 @@ interface DatePickerProps {
   view?: 'date' | 'month';
 }
 
-export const DatePicker: React.FC<DatePickerProps> = ({
-  value,
-  onChange,
-  disabled = false,
-  view = 'date'
-}) => {
+export interface DatePickerRef {
+  showPicker: () => void;
+}
+
+export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
+  ({ value, onChange, disabled = false, view = 'date' }, ref) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [alignment, setAlignment] = useState<{
+    horizontal: 'left' | 'right';
+    vertical: 'bottom' | 'top';
+  }>({ horizontal: 'left', vertical: 'bottom' });
   const containerRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
 
   // Parse initial date or default to today in Ecuador time
   const initialDate = value
@@ -69,9 +74,26 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
   const toggleCalendar = () => {
     if (!disabled) {
+      if (!isOpen) {
+        // Calculate alignment before opening
+        if (containerRef.current) {
+          const rect = containerRef.current.getBoundingClientRect();
+          const spaceRight = window.innerWidth - rect.left;
+          const spaceBottom = window.innerHeight - rect.bottom;
+
+          const horizontal = spaceRight < 300 ? 'right' : 'left';
+          const vertical = spaceBottom < 350 ? 'top' : 'bottom';
+
+          setAlignment({ horizontal, vertical });
+        }
+      }
       setIsOpen(!isOpen);
     }
   };
+
+  useImperativeHandle(ref, () => ({
+    showPicker: toggleCalendar
+  }));
 
   const nextMonth = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -239,7 +261,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       </button>
 
       {isOpen && (
-        <div className="datepicker-popover">
+        <div
+          ref={popoverRef}
+          className={`datepicker-popover ${alignment.horizontal === 'right' ? 'datepicker-popover--right-aligned' : ''} ${alignment.vertical === 'top' ? 'datepicker-popover--top-aligned' : ''}`}
+        >
           <div className="datepicker-header">
             <button
               className="datepicker-nav-btn"
@@ -323,4 +348,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       )}
     </div>
   );
-};
+  }
+);
+
+DatePicker.displayName = 'DatePicker';

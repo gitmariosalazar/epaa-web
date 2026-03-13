@@ -2,8 +2,8 @@ import React from 'react';
 import '../styles/EntryDataFilters.css';
 import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { DatePicker } from '../../../../shared/presentation/components/DatePicker/DatePicker';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
 
 // ── Tab type ──────────────────────────────────────────────────────────────────
 export type EntryDataTab =
@@ -125,21 +125,20 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
     <div className="entry-filters">
       {/* ── LEFT: date range + Fetch ── */}
       <div className="entry-filter-left">
-        <div className="entry-filter-group">
-          <label className="entry-filter-label">
-            {t('entryData.filters.startDate', 'Desde')}
+        <div className="filter-group filter-group--range">
+          <label className="filter-label">
+            {t('trashRateKPI.filters.dateRange', 'Rango de Fechas')}
           </label>
-          <div className="entry-filter-input-wrapper">
-            <DatePicker value={startDate} onChange={onStartDateChange} />
-          </div>
-        </div>
-
-        <div className="entry-filter-group">
-          <label className="entry-filter-label">
-            {t('entryData.filters.endDate', 'Hasta')}
-          </label>
-          <div className="entry-filter-input-wrapper">
-            <DatePicker value={endDate} onChange={onEndDateChange} />
+          <div className="filter-input-wrapper">
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onChange={(start, end) => {
+                onStartDateChange(start);
+                onEndDateChange(end);
+              }}
+              disabled={isLoading}
+            />
           </div>
         </div>
 

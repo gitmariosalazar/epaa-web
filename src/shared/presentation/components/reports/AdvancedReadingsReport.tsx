@@ -2,7 +2,7 @@ import { GetAdvancedReportReadingsUseCase } from '@/modules/dashboard/applicatio
 import type { AdvancedReportReadings } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructure/repositories/http-report-dashboard.repository';
 import { ExportService } from '@/shared/infrastructure/services/ExportService';
-import { Calendar, List, Search } from 'lucide-react';
+import { List, Search } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { EmptyState } from '../common/EmptyState';
@@ -12,6 +12,8 @@ import { ProgressBar } from '../ProgressBar/ProgressBar';
 import { Table, type Column } from '../Table/Table';
 import { Button } from '../Button/Button';
 import { SectorReadingsModal } from '../dashboard/SectorReadingsModal';
+import { DatePicker } from '../DatePicker/DatePicker';
+import './AdvancedReadingsReport.css';
 
 export const AdvancedReadingsReport = () => {
   const pickerRef = useRef<HTMLInputElement>(null);
@@ -144,114 +146,86 @@ export const AdvancedReadingsReport = () => {
   );
 
   return (
-    <div>
-      <div className="reports-toolbar">
-        {/* Top Row: Date Selection */}
-        <div className="toolbar-row">
-          <div className="toolbar-group main">
-            <label className="toolbar-label">Select Date</label>
-            <div className="toolbar-controls">
-              <div
-                className="dashboard-controls"
-                onClick={() => pickerRef.current?.showPicker()}
-                title="Change Period"
-              >
-                <Calendar className="text-gray-400" size={20} color="#9ca3af" />
-                <input
-                  ref={pickerRef}
-                  type="month"
-                  value={month}
-                  onChange={(e) => setMonth(e.target.value)}
-                  className="month-picker"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="toolbar-group actions">
-            <label className="toolbar-label">&nbsp;</label>
-            <div className="toolbar-controls">
-              <button
-                className="btn-search"
-                onClick={handleSearch}
-                disabled={loading}
-              >
-                {loading ? (
-                  'Loading...'
-                ) : (
-                  <>
-                    <Search size={18} />{' '}
-                    <span className="btn-text">Load Data</span>
-                  </>
-                )}
-              </button>
-            </div>
+    <div className="advanced-report-container">
+      <div className="advanced-report-toolbar">
+        {/* Unified Search Row */}
+        <div className="advanced-toolbar-side">
+          <label className="toolbar-label-compact">Period</label>
+          <DatePicker
+            view="month"
+            value={month}
+            onChange={(value) => setMonth(value)}
+            disabled={loading}
+            ref={pickerRef}
+          />
+          <Button
+            onClick={handleSearch}
+            isLoading={loading}
+            leftIcon={<Search size={14} />}
+            size="sm"
+            color="primary"
+          >
+            Search
+          </Button>
+
+          <div className="filter-search-wrapper">
+            <Search size={12} />
+            <input
+              type="text"
+              className="toolbar-input-compact"
+              placeholder="Filter sector..."
+              maxLength={60}
+              value={resultSearchTerm}
+              onChange={(e) => setResultSearchTerm(e.target.value)}
+            />
           </div>
         </div>
 
-        {/* Bottom Row: Filtering and Actions */}
         {data.length > 0 && (
-          <div className="toolbar-row">
-            <div className="toolbar-group main">
-              <label className="toolbar-label">Filter Results</label>
-              <div className="input-icon-wrapper">
-                <Search size={18} />
-                <input
-                  type="text"
-                  className="toolbar-input input-search"
-                  placeholder="Search sector..."
-                  maxLength={60}
-                  value={resultSearchTerm}
-                  onChange={(e) => setResultSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="toolbar-group actions">
-              <label className="toolbar-label" style={{ visibility: 'hidden' }}>
-                Export
-              </label>
-              <div className="toolbar-controls">
-                <button
-                  className="btn-icon-text"
-                  onClick={() => {
-                    const rows = filteredData.map((d) => [
-                      d.sector.toString(),
-                      d.totalConnections.toString(),
-                      d.readingsCompleted.toString(),
-                      d.missingReadings.toString(),
-                      d.progressPercentage.toString()
-                    ]);
-                    exportService.exportToPdf({
-                      rows,
-                      columns: [
-                        'Sector',
-                        'Total Connections',
-                        'Readings Completed',
-                        'Missing Readings',
-                        'Progress Percentage'
-                      ],
-                      fileName: 'advanced_readings_report',
-                      title: 'Advanced Readings Report'
-                    });
-                  }}
-                >
-                  {ColoredIcons.Pdf}
-                  <span className="btn-text">PDF</span>
-                </button>
-                <button
-                  className="btn-icon-text"
-                  onClick={() => {
-                    exportService.exportToExcel(
-                      filteredData,
-                      'advanced_readings_report'
-                    );
-                  }}
-                >
-                  {ColoredIcons.Excel}
-                  <span className="btn-text">Excel</span>
-                </button>
-              </div>
-            </div>
+          <div className="advanced-toolbar-side actions">
+            <Button
+              variant="outline"
+              color="red"
+              size="sm"
+              iconOnly
+              leftIcon={ColoredIcons.Pdf}
+              onClick={() => {
+                const rows = filteredData.map((d) => [
+                  d.sector.toString(),
+                  d.totalConnections.toString(),
+                  d.readingsCompleted.toString(),
+                  d.missingReadings.toString(),
+                  d.progressPercentage.toString()
+                ]);
+                exportService.exportToPdf({
+                  rows,
+                  columns: [
+                    'Sector',
+                    'Total Connections',
+                    'Readings Completed',
+                    'Missing Readings',
+                    'Progress Percentage'
+                  ],
+                  fileName: 'advanced_readings_report',
+                  title: 'Advanced Readings Report'
+                });
+              }}
+              title="Export PDF"
+            />
+            <Button
+              variant="outline"
+              color="green"
+              size="sm"
+              iconOnly
+              leftIcon={ColoredIcons.Excel}
+              onClick={() => {
+                exportService.exportToExcel(
+                  filteredData,
+                  'advanced_readings_report'
+                );
+              }}
+              title="Export Excel"
+            />
           </div>
         )}
       </div>
