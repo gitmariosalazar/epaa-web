@@ -196,8 +196,8 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 <div style={{ width: 36 }} />
               </div>
               <div className="date-range-picker-weekdays">
-                {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map((d) => (
-                  <span key={d}>{d}</span>
+                {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map((d, i) => (
+                  <span key={`${d}-${i}`}>{d}</span>
                 ))}
               </div>
               <div className="date-range-picker-grid">
@@ -221,8 +221,8 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 </button>
               </div>
               <div className="date-range-picker-weekdays">
-                {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map((d) => (
-                  <span key={d}>{d}</span>
+                {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map((d, i) => (
+                  <span key={`${d}-${i}`}>{d}</span>
                 ))}
               </div>
               <div className="date-range-picker-grid">

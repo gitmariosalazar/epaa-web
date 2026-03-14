@@ -80,7 +80,15 @@ export const AdvancedReadingsTable = ({
     {
       header: t('dashboard.advancedReadings.columns.readingsCompleted'),
       accessor: (row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingLeft: '10px',
+            paddingRight: '10px'
+          }}
+        >
           <span className="font-bold text-emerald-600 dark:text-emerald-400">
             {row.readingsCompleted}
           </span>
@@ -103,7 +111,15 @@ export const AdvancedReadingsTable = ({
     {
       header: t('dashboard.advancedReadings.columns.missingReadings'),
       accessor: (row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingLeft: '10px',
+            paddingRight: '10px'
+          }}
+        >
           <span className="font-bold text-rose-600 dark:text-rose-400">
             {row.missingReadings}
           </span>
@@ -121,7 +137,8 @@ export const AdvancedReadingsTable = ({
         </div>
       ),
       sortable: true,
-      sortKey: 'missingReadings'
+      sortKey: 'missingReadings',
+      isNumeric: true
     },
     {
       header: t('dashboard.advancedReadings.columns.progress'),

@@ -42,7 +42,22 @@ export class FetchHttpClient implements HttpClientInterface {
       throw error;
     }
 
-    const fullUrl = `${environments.API_URL}${url}`;
+    let fullUrl = `${environments.API_URL}${url}`;
+
+    // Handle query parameters if they exist in options
+    const { params, ...fetchOptions } = options;
+    if (params) {
+      const queryParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
+        }
+      });
+      const queryString = queryParams.toString();
+      if (queryString) {
+        fullUrl += (fullUrl.includes('?') ? '&' : '?') + queryString;
+      }
+    }
 
     try {
       const response = await fetch(fullUrl, {
@@ -50,7 +65,7 @@ export class FetchHttpClient implements HttpClientInterface {
         headers,
         body: body ? JSON.stringify(body) : undefined,
         credentials: 'include',
-        ...options
+        ...fetchOptions
       });
 
       const responseData = await response.json();

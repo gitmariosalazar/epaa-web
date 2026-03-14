@@ -17,36 +17,43 @@ export class CadastralKeyFormatter {
     let sectorStr = '';
     let cuentaStr = '';
 
-    const firstDigit = parseInt(numbersOnly[0], 10);
-
-    // First Digit Logic
-    if (firstDigit >= 5) {
-      // Sector is immediately complete at 1 digit
-      sectorStr = numbersOnly[0];
-      cuentaStr = numbersOnly.slice(1);
+    // If the input already contains a dash, we honor that split point
+    const dashIndex = cleaned.indexOf('-');
+    if (dashIndex > 0) {
+      sectorStr = cleaned.slice(0, dashIndex);
+      cuentaStr = cleaned.slice(dashIndex + 1).replace(/-/g, '');
     } else {
-      // First digit is 1, 2, 3, or 4
-      if (numbersOnly.length >= 2) {
-        const secondDigitStr = numbersOnly[1];
-        const secondDigit = parseInt(secondDigitStr, 10);
+      const firstDigit = parseInt(numbersOnly[0], 10);
 
-        if (firstDigit === 4) {
-          if (secondDigit === 0) {
+      // First Digit Logic
+      if (firstDigit >= 5) {
+        // Sector is immediately complete at 1 digit
+        sectorStr = numbersOnly[0];
+        cuentaStr = numbersOnly.slice(1);
+      } else {
+        // First digit is 1, 2, 3, or 4
+        if (numbersOnly.length >= 2) {
+          const secondDigitStr = numbersOnly[1];
+          const secondDigit = parseInt(secondDigitStr, 10);
+
+          if (firstDigit === 4) {
+            if (secondDigit === 0) {
+              sectorStr = numbersOnly.slice(0, 2);
+              cuentaStr = numbersOnly.slice(2);
+            } else {
+              // Invalid second digit after 4. Keep only the 4.
+              sectorStr = numbersOnly[0];
+              cuentaStr = '';
+            }
+          } else {
+            // First digit is 1, 2, or 3. Any 0-9 is valid.
             sectorStr = numbersOnly.slice(0, 2);
             cuentaStr = numbersOnly.slice(2);
-          } else {
-            // Invalid second digit after 4. Keep only the 4.
-            sectorStr = numbersOnly[0];
-            cuentaStr = '';
           }
         } else {
-          // First digit is 1, 2, or 3. Any 0-9 is valid.
-          sectorStr = numbersOnly.slice(0, 2);
-          cuentaStr = numbersOnly.slice(2);
+          // Only 1 digit typed so far
+          sectorStr = numbersOnly;
         }
-      } else {
-        // Only 1 digit typed so far
-        sectorStr = numbersOnly;
       }
     }
 
@@ -57,9 +64,11 @@ export class CadastralKeyFormatter {
     }
 
     // Auto-append dash if sector is fully formed and no cuenta yet
+    // OR if the user manually added a dash
     if (
       (sectorStr.length === 1 && parseInt(sectorStr, 10) >= 5) ||
-      sectorStr.length === 2
+      sectorStr.length === 2 ||
+      (sectorStr.length > 0 && newValue.includes('-'))
     ) {
       // Don't auto-append if they just deleted the dash
       if (oldValue === `${sectorStr}-` && newValue === sectorStr) {

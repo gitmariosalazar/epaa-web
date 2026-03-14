@@ -159,7 +159,7 @@ export const DashboardHome = () => {
             )}
           </>
         )}
-        <DashboardMaximizeButton visible={false} disabled={true} />
+        <DashboardMaximizeButton visible={true} disabled={false} />
       </div>
     </DashboardFocusProvider>
   );

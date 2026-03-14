@@ -77,9 +77,19 @@ export const useTrashRateKPIViewModel = () => {
     direction: 'asc' | 'desc';
   } | null>(null);
 
-  const today = dateService.getCurrentDateString();
-  const [startDate, setStartDate] = useState(today);
-  const [endDate, setEndDate] = useState(today);
+  const [startDate, setStartDate] = useState(() => {
+    const month = dateService.getCurrentMonthString();
+    return `${month}-01`;
+  });
+
+  const [endDate, setEndDate] = useState(() => {
+    const now = dateService.getCurrentDate();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const lastDay = new Date(year, month, 0).getDate();
+    return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  });
+
   const [top, setTop] = useState<string>('100');
   const [limit, setLimit] = useState<string>('50');
   const [offset, setOffset] = useState<string>('0');

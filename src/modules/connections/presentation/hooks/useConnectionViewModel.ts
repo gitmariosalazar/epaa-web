@@ -17,7 +17,7 @@ export const useConnectionViewModel = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit] = useState(100);
   const [hasMore, setHasMore] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 

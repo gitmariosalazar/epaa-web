@@ -3,10 +3,13 @@ import { Table } from '@/shared/presentation/components/Table/Table';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Card } from '@/shared/presentation/components/Card/Card';
-import { Edit2, EyeIcon, Plus, Search, Trash } from 'lucide-react';
+import { Check, Edit2, EyeIcon, Plus, Search, Trash, X } from 'lucide-react';
 import { CreateConnectionWizard } from '../components/CreateConnectionWizard';
 import type { Connection } from '../../domain/models/Connection';
 import type { Column } from '@/shared/presentation/components/Table/Table';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 export const ConnectionsPage = () => {
   const {
@@ -46,14 +49,38 @@ export const ConnectionsPage = () => {
       header: 'Contract Number'
     },
     {
-      accessor: 'connectionSewerage',
-      header: 'Sewerage'
-      // accessor: (row) => (row.connectionSewerage ? 'Yes' : 'No') // Error: accessor expects key or function
+      header: 'Sewerage',
+      accessor: (item: Connection) => {
+        const color: string = getTrafficLightColor(
+          item.connectionSewerage ? 100 : 0
+        );
+        return (
+          <ColorChip
+            label={item.connectionSewerage ? 'Yes' : 'No'}
+            color={color}
+            icon={<Check size={16} />}
+            variant="soft"
+            size="sm"
+          />
+        );
+      }
     },
     {
-      accessor: 'connectionStatus',
-      header: 'Status'
-      // accessor: (row) => (row.connectionStatus ? 'Active' : 'Inactive')
+      header: 'Status',
+      accessor: (item: Connection) => {
+        const color: string = getTrafficLightColor(
+          item.connectionStatus ? 100 : 0
+        );
+        return (
+          <ColorChip
+            label={item.connectionStatus ? 'Active' : 'Inactive'}
+            color={color}
+            icon={item.connectionStatus ? <Check size={16} /> : <X size={16} />}
+            variant="soft"
+            size="sm"
+          />
+        );
+      }
     },
     {
       header: 'Actions',
@@ -161,6 +188,15 @@ export const ConnectionsPage = () => {
           data={filteredConnections}
           columns={columns}
           isLoading={loading}
+          pageSize={25}
+          pagination
+          emptyState={
+            <EmptyState
+              message="No connections found"
+              description={`No connections found matching your search criteria. Try adjusting your search or filters.`}
+            />
+          }
+          fullHeight
         />
       </Card>
 
