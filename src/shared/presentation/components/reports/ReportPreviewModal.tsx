@@ -39,40 +39,51 @@ export const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
 
-  // Initialize selected columns
+  // Initial load
   useEffect(() => {
-    if (isOpen && availableColumns.length > 0) {
-      // If no selection yet (first open), select defaults or all
-      if (selectedColumnIds.length === 0) {
-        const defaults = availableColumns
-          .filter((c) => c.isDefault !== false)
-          .map((c) => c.id);
-        setSelectedColumnIds(defaults);
-      }
-    }
-  }, [isOpen, availableColumns]);
-
-  useEffect(() => {
-    if (isOpen && pdfGenerator && selectedColumnIds.length > 0) {
+    if (isOpen && pdfGenerator && selectedColumnIds.length === 0 && availableColumns.length > 0) {
+      const defaults = availableColumns
+        .filter((c) => c.isDefault !== false)
+        .map((c) => c.id);
+      setSelectedColumnIds(defaults);
+      
+      // Auto-generate first time
       setLoadingPreview(true);
-      // Small timeout to allow UI to render before heavy PDF generation
       const timer = setTimeout(() => {
-        const url = pdfGenerator({ orientation, selectedColumnIds });
+        const url = pdfGenerator({ orientation, selectedColumnIds: defaults });
         setPreviewUrl(url);
         setLoadingPreview(false);
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, orientation, pdfGenerator, selectedColumnIds]);
+  }, [isOpen]);
+
+  const handleApply = () => {
+    if (!pdfGenerator || selectedColumnIds.length === 0) return;
+    setLoadingPreview(true);
+    // Small timeout to show loader
+    setTimeout(() => {
+      const url = pdfGenerator({ orientation, selectedColumnIds });
+      setPreviewUrl(url);
+      setLoadingPreview(false);
+    }, 200);
+  };
+
+  const selectAllColumns = () => {
+    setSelectedColumnIds(availableColumns.map((c) => c.id));
+  };
+
+  const deselectAllColumns = () => {
+    // Keep at least one or none? The UI currently prevents unchecking last.
+    // Let's just leave it empty and valid check happens in handleApply.
+    setSelectedColumnIds([]);
+  };
 
   const toggleColumn = (id: string) => {
     setSelectedColumnIds((prev) => {
       if (prev.includes(id)) {
-        // Don't allow unchecking the last column
-        if (prev.length <= 1) return prev;
         return prev.filter((colId) => colId !== id);
       } else {
-        // maintain order based on availableColumns
         const newSelection = [...prev, id];
         return availableColumns
           .filter((c) => newSelection.includes(c.id))
@@ -95,70 +106,94 @@ export const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
 
         <div className="modal-body-preview-layout">
           <div className="sidebar-controls">
-            <p className="modal-description">
-              You are about to download <strong>{reportTitle}</strong> with{' '}
-              <strong>{dataCount}</strong> rows.
-            </p>
+            <div className="sidebar-scrollable-content">
+              <p className="modal-description">
+                You are about to download <strong>{reportTitle}</strong> with{' '}
+                <strong>{dataCount}</strong> rows.
+              </p>
 
-            <div className="control-section">
-              <h4 className="section-title">Orientation</h4>
-              <div className="orientation-options vertical">
-                <div
-                  className={`orientation-card ${
-                    orientation === 'portrait' ? 'selected' : ''
-                  }`}
-                  onClick={() => setOrientation('portrait')}
-                >
-                  <div className="preview-icon portrait">
-                    <div className="preview-lines"></div>
+              <div className="control-section">
+                <h4 className="section-title">Orientation</h4>
+                <div className="orientation-options vertical">
+                  <div
+                    className={`orientation-card ${
+                      orientation === 'portrait' ? 'selected' : ''
+                    }`}
+                    onClick={() => setOrientation('portrait')}
+                  >
+                    <div className="preview-icon portrait">
+                      <div className="preview-lines"></div>
+                    </div>
+                    <div className="option-label">
+                      <span>Portrait</span>
+                      {orientation === 'portrait' && (
+                        <Check size={16} className="check-icon" />
+                      )}
+                    </div>
                   </div>
-                  <div className="option-label">
-                    <span>Portrait</span>
-                    {orientation === 'portrait' && (
-                      <Check size={16} className="check-icon" />
-                    )}
+
+                  <div
+                    className={`orientation-card ${
+                      orientation === 'landscape' ? 'selected' : ''
+                    }`}
+                    onClick={() => setOrientation('landscape')}
+                  >
+                    <div className="preview-icon landscape">
+                      <div className="preview-lines"></div>
+                    </div>
+                    <div className="option-label">
+                      <span>Landscape</span>
+                      {orientation === 'landscape' && (
+                        <Check size={16} className="check-icon" />
+                      )}
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                <div
-                  className={`orientation-card ${
-                    orientation === 'landscape' ? 'selected' : ''
-                  }`}
-                  onClick={() => setOrientation('landscape')}
-                >
-                  <div className="preview-icon landscape">
-                    <div className="preview-lines"></div>
+              <div className="control-section">
+                <div className="section-header-row">
+                  <h4 className="section-title">Columns</h4>
+                  <div className="section-actions">
+                    <button className="text-btn" onClick={selectAllColumns}>Select All</button>
+                    <span className="separator">|</span>
+                    <button className="text-btn" onClick={deselectAllColumns}>Clear</button>
                   </div>
-                  <div className="option-label">
-                    <span>Landscape</span>
-                    {orientation === 'landscape' && (
-                      <Check size={16} className="check-icon" />
-                    )}
-                  </div>
+                </div>
+                <div className="columns-list">
+                  {availableColumns.map((col) => (
+                    <div
+                      key={col.id}
+                      className={`column-option ${
+                        selectedColumnIds.includes(col.id) ? 'selected' : ''
+                      }`}
+                      onClick={() => toggleColumn(col.id)}
+                    >
+                      <div className="checkbox-custom">
+                        {selectedColumnIds.includes(col.id) && (
+                          <Check size={12} />
+                        )}
+                      </div>
+                      <span className="column-label">{col.label}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
-            <div className="control-section">
-              <h4 className="section-title">Columns</h4>
-              <div className="columns-list">
-                {availableColumns.map((col) => (
-                  <div
-                    key={col.id}
-                    className={`column-option ${
-                      selectedColumnIds.includes(col.id) ? 'selected' : ''
-                    }`}
-                    onClick={() => toggleColumn(col.id)}
-                  >
-                    <div className="checkbox-custom">
-                      {selectedColumnIds.includes(col.id) && (
-                        <Check size={12} />
-                      )}
-                    </div>
-                    <span className="column-label">{col.label}</span>
-                  </div>
-                ))}
-              </div>
+            <div className="apply-section">
+               <button 
+                 className="btn-apply" 
+                 onClick={handleApply}
+                 disabled={selectedColumnIds.length === 0 || loadingPreview}
+               >
+                 {loadingPreview ? (
+                   <Loader2 size={18} className="animate-spin" />
+                 ) : (
+                   <Check size={18} />
+                 )}
+                 <span>Aplicar Cambios</span>
+               </button>
             </div>
           </div>
 
