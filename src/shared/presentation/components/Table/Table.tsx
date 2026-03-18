@@ -240,6 +240,7 @@ export const Table = <T extends { [key: string]: any }>({
                   // Find if there's a total row that somewhat matches the column or is exactly the very first column for "Total"
                   let totalContent: React.ReactNode = null;
                   let className = col.className || '';
+                  let matchingTotal: TotalRow | undefined = undefined;
 
                   if (colIndex === 0) {
                     totalContent = 'Total';
@@ -251,7 +252,7 @@ export const Table = <T extends { [key: string]: any }>({
                   const colId = col.id;
                   const colAccessor = typeof col.accessor === 'string' ? col.accessor : '';
 
-                  const matchingTotal =
+                  matchingTotal =
                     totalRows.find((r) => r.columnId && colId && r.columnId === colId) ||
                     totalRows.find((r) => r.columnId && colAccessor && r.columnId === colAccessor) ||
                     totalRows.find((r) => r.label === col.header) ||
@@ -283,10 +284,13 @@ export const Table = <T extends { [key: string]: any }>({
                     }
                   }
 
+                  const isHighlighted = matchingTotal?.highlight;
+                  const cellClassName = `${className} ${isHighlighted ? 'total-cell--highlight' : ''}`.trim();
+
                   return (
                     <td
                       key={colIndex}
-                      className={className}
+                      className={cellClassName}
                       style={{
                         ...col.style,
                         textAlign: colIndex === 0 ? 'left' : 'right',
