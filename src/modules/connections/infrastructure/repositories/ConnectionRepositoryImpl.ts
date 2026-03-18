@@ -1,5 +1,5 @@
 import type { HttpClientInterface } from '@/shared/infrastructure/api/interfaces/HttpClientInterface';
-import type { Connection } from '../../domain/models/Connection';
+import type { Connection, Rate } from '../../domain/models/Connection';
 import type { ConnectionRepository } from '../../domain/repositories/ConnectionRepository';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
@@ -48,5 +48,11 @@ export class ConnectionRepositoryImpl implements ConnectionRepository {
     await this.client.delete<ApiResponse<void>>(
       `/connections/delete-connection/${id}`
     );
+  }
+  async getRates(): Promise<Rate[]> {
+    const response = await this.client.get<ApiResponse<Rate[]>>(
+      '/connection-gateway/get-all-rates'
+    );
+    return response.data.data;
   }
 }

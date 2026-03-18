@@ -18,6 +18,7 @@ export const CreateConnectionWizard: React.FC<CreateConnectionWizardProps> = ({
     activeStep,
     setActiveStep,
     formData,
+    rates,
     handleInputChange,
     handleWizardSave,
     searchClient,
@@ -47,6 +48,7 @@ export const CreateConnectionWizard: React.FC<CreateConnectionWizardProps> = ({
         return (
           <BasicConnectionStep
             formData={formData}
+            rates={rates}
             handleInputChange={handleInputChange}
             prevStep={prevStep}
             nextStep={nextStep}

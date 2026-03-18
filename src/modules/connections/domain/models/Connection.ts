@@ -14,13 +14,23 @@ export interface Connection {
   connectionInstallationDate: Date;
   connectionPeopleNumber: number;
   connectionZone: number;
+  longitude: number;
+  latitude: number;
   connectionCoordinates: string;
   connectionReference: string;
-  connectionMetaData: Record<string, any>;
+  ConnectionMetaData: Record<string, any>;
   connectionAltitude: number;
   connectionPrecision: number;
   connectionGeolocationDate: Date;
   connectionGeometricZone: string;
   propertyCadastralKey: string;
   zoneId: number;
+}
+
+export interface Rate {
+  rateId: number;
+  rateName: string;
+  rateDescription: string;
+  effectiveDate: Date;
+  endDate: Date | null;
 }

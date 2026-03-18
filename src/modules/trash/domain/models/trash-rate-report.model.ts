@@ -11,6 +11,8 @@ export interface TrashRateAuditRow {
   rateInValorTable: number | null;
   difference: number;
   diagnostic: string;
+  discountApplied: number;
+  creditNoteBalance: number | null;
 }
 
 export interface MonthlySummaryRow {

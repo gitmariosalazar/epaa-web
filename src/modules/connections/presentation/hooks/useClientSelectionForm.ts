@@ -151,6 +151,8 @@ export const useClientSelectionForm = ({
     }
   };
 
+  console.log(foundClient);
+
   return {
     activeTab,
     setActiveTab,

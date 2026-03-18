@@ -1,4 +1,4 @@
-import type { Connection } from '../models/Connection';
+import type { Connection, Rate } from '../models/Connection';
 
 export interface ConnectionRepository {
   getConnections(limit: number, offset: number): Promise<Connection[]>;
@@ -10,4 +10,5 @@ export interface ConnectionRepository {
     connection: Partial<Connection>
   ): Promise<Connection>;
   deleteConnection(id: string): Promise<void>;
+  getRates(): Promise<Rate[]>;
 }

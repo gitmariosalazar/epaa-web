@@ -110,6 +110,25 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
       accessor: (r) => formatCurrency(r.difference ?? 0),
       isNumeric: true,
       id: 'difference'
+    },
+    {
+      header: t('Descuento Aplicado'),
+      accessor: (r) => formatCurrency(r.discountApplied ?? 0),
+      isNumeric: true,
+      id: 'discountApplied'
+    },
+    {
+      header: t('Saldo de Nota de Crédito'),
+      accessor: (r) => formatCurrency(r.creditNoteBalance ?? 0),
+      isNumeric: true,
+      id: 'creditNoteBalance'
+    },
+    {
+      header: t('Recolectado'),
+      accessor: (r) =>
+        formatCurrency(r.rateInIncome - (r.discountApplied ?? 0)),
+      isNumeric: true,
+      id: 'effectiveTrashToPay'
     }
   ];
 
@@ -126,6 +145,22 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
   // Total Diferencia
   const totalDifference = data.reduce(
     (sum, row) => sum + (row.difference ?? 0),
+    0
+  );
+  // Total Descuento Aplicado
+  const totalDiscountApplied = data.reduce(
+    (sum, row) => sum + (row.discountApplied ?? 0),
+    0
+  );
+  // Total Saldo de Nota de Crédito
+  const totalCreditNoteBalance = data.reduce(
+    (sum, row) => sum + (row.creditNoteBalance ?? 0),
+    0
+  );
+
+  // Total Recolectado
+  const totalEffectiveTrashToPay = data.reduce(
+    (sum, row) => sum + (row.rateInIncome - (row.discountApplied ?? 0)),
     0
   );
 
@@ -152,6 +187,23 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
       label: 'TOTAL',
       value: totalRateInIncome,
       highlight: true
+    },
+    {
+      label: 'TOTAL Descuento Aplicado',
+      value: totalDiscountApplied,
+      highlight: false,
+      columnId: 'discountApplied'
+    },
+    {
+      label: 'TOTAL Saldo de Nota de Crédito',
+      value: totalCreditNoteBalance,
+      highlight: false,
+      columnId: 'creditNoteBalance'
+    },
+    {
+      label: 'TOTAL RECOLECTADO',
+      value: totalEffectiveTrashToPay,
+      highlight: true
     }
   ];
 
@@ -159,7 +211,9 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
     useTablePdfExport<TrashRateAuditRow>({
       data,
       availableColumns: columns.map((c) => ({
-        id: c.id || (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
+        id:
+          c.id ||
+          (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
         label: c.header as string,
         isDefault: true
       })),

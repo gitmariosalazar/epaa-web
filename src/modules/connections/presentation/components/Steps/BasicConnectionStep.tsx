@@ -1,9 +1,13 @@
 import React from 'react';
-import type { Connection } from '@/modules/connections/domain/models/Connection';
+import type {
+  Connection,
+  Rate
+} from '@/modules/connections/domain/models/Connection';
 import { Button } from '@/shared/presentation/components/Button/Button';
 
 interface BasicConnectionStepProps {
   formData: Omit<Connection, 'connectionId'>;
+  rates: any[];
   handleInputChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
@@ -13,6 +17,7 @@ interface BasicConnectionStepProps {
 
 export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
   formData,
+  rates,
   handleInputChange,
   nextStep,
   prevStep
@@ -29,15 +34,20 @@ export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
       <div className="form-grid">
         <div className="form-group">
           <label className="form-label">Rate Type</label>
-          <input
-            type="text"
-            name="connectionRateName"
-            value={formData.connectionRateName}
+          <select
+            name="connectionRateId"
+            value={formData.connectionRateId}
             onChange={handleInputChange}
             className="wizard-input"
-            placeholder="Residential / Commercial"
             required
-          />
+          >
+            <option value="">Select a rate...</option>
+            {rates.map((rate: Rate) => (
+              <option key={rate.rateId} value={rate.rateId}>
+                {rate.rateName}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="form-group">

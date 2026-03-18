@@ -26,14 +26,30 @@ export const TechnicalConnectionStep: React.FC<
 
       <div className="form-grid">
         <div className="form-group">
-          <label className="form-label">Coordinates (Combined)</label>
+          <label className="form-label">Longitude</label>
           <input
-            type="text"
-            name="connectionCoordinates"
-            value={formData.connectionCoordinates}
+            type="number"
+            step="any"
+            name="longitude"
+            value={formData.longitude}
             onChange={handleInputChange}
-            placeholder="e.g., -73.935242, 40.73061"
+            placeholder="-73.935242"
             className="wizard-input"
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Latitude</label>
+          <input
+            type="number"
+            step="any"
+            name="latitude"
+            value={formData.latitude}
+            onChange={handleInputChange}
+            placeholder="40.73061"
+            className="wizard-input"
+            required
           />
         </div>
 

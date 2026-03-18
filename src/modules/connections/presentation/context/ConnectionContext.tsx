@@ -1,5 +1,6 @@
 import React, { createContext, useContext, type ReactNode } from 'react';
 import { GetConnectionsUseCase } from '../../application/usecases/GetConnectionsUseCase';
+import { GetRatesUseCase } from '../../application/usecases/GetRatesUseCase';
 import { CreateConnectionUseCase } from '../../application/usecases/CreateConnectionUseCase';
 import { UpdateConnectionUseCase } from '../../application/usecases/UpdateConnectionUseCase';
 import { DeleteConnectionUseCase } from '../../application/usecases/DeleteConnectionUseCase';
@@ -12,6 +13,7 @@ import { CustomerRepositoryImpl } from '@/modules/customers/infrastructure/repos
 
 interface ConnectionContextType {
   getConnectionsUseCase: GetConnectionsUseCase;
+  getRatesUseCase: GetRatesUseCase;
   createConnectionUseCase: CreateConnectionUseCase;
   updateConnectionUseCase: UpdateConnectionUseCase;
   deleteConnectionUseCase: DeleteConnectionUseCase;
@@ -30,6 +32,7 @@ export const ConnectionProvider: React.FC<{ children: ReactNode }> = ({
   const companyRepository = new CompanyRepositoryImpl();
 
   const getConnectionsUseCase = new GetConnectionsUseCase(connectionRepository);
+  const getRatesUseCase = new GetRatesUseCase(connectionRepository);
   const createConnectionUseCase = new CreateConnectionUseCase(
     connectionRepository
   );
@@ -46,6 +49,7 @@ export const ConnectionProvider: React.FC<{ children: ReactNode }> = ({
 
   const value = {
     getConnectionsUseCase,
+    getRatesUseCase,
     createConnectionUseCase,
     updateConnectionUseCase,
     deleteConnectionUseCase,

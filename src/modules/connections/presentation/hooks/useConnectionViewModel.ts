@@ -5,6 +5,7 @@ import { useConnectionsContext } from '../context/ConnectionContext';
 export const useConnectionViewModel = () => {
   const {
     getConnectionsUseCase,
+    getRatesUseCase,
     createConnectionUseCase,
     updateConnectionUseCase,
     deleteConnectionUseCase,
@@ -13,6 +14,7 @@ export const useConnectionViewModel = () => {
     createCompanyUseCase
   } = useConnectionsContext();
   const [connections, setConnections] = useState<Connection[]>([]);
+  const [rates, setRates] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,9 +48,11 @@ export const useConnectionViewModel = () => {
     connectionInstallationDate: new Date(),
     connectionPeopleNumber: 0,
     connectionZone: 0,
+    longitude: 0,
+    latitude: 0,
     connectionCoordinates: '',
     connectionReference: '',
-    connectionMetaData: {},
+    ConnectionMetaData: {},
     connectionAltitude: 0,
     connectionPrecision: 0,
     connectionGeolocationDate: new Date(),
@@ -73,20 +77,45 @@ export const useConnectionViewModel = () => {
     }
   };
 
+  const loadRates = async () => {
+    try {
+      const result = await getRatesUseCase.execute();
+      setRates(result);
+    } catch (error) {
+      console.error('Error loading rates:', error);
+    }
+  };
+
   useEffect(() => {
     loadConnections();
+    loadRates();
   }, [page]);
 
   const handleSave = async () => {
     try {
       setLoading(true);
+      // Construct the payload to match the successful schema exactly
+      const sanitizedData = {
+        ...formData,
+        // The backend expects connectionId (Sector-Account format)
+        connectionId: formData.propertyCadastralKey,
+        ConnectionMetaData: (formData as any).ConnectionMetaData || (formData as any).connectionMetaData || {}
+      };
+
+      // Remove fields that should NOT be in the request according to the successful sample
+      delete (sanitizedData as any).connectionCoordinates;
+      delete (sanitizedData as any).connectionCadastralKey;
+      delete (sanitizedData as any).connectionSector;
+      delete (sanitizedData as any).connectionAccount;
+      delete (sanitizedData as any).connectionMetaData; // Remove secondary case
+
       if (selectedConnection) {
         await updateConnectionUseCase.execute(
           selectedConnection.connectionId,
-          formData
+          sanitizedData
         );
       } else {
-        await createConnectionUseCase.execute(formData);
+        await createConnectionUseCase.execute(sanitizedData);
       }
       setIsFormOpen(false);
       resetForm();
@@ -104,8 +133,18 @@ export const useConnectionViewModel = () => {
       // Ensure clientId is set from foundClient if available
       const finalData = {
         ...formData,
-        clientId: foundClient ? foundClient.customerId : formData.clientId
+        clientId: foundClient ? foundClient.customerId : formData.clientId,
+        // The backend expects connectionId
+        connectionId: formData.propertyCadastralKey,
+        ConnectionMetaData: (formData as any).ConnectionMetaData || (formData as any).connectionMetaData || {}
       };
+
+      // Remove conflicting/unnecessary fields
+      delete (finalData as any).connectionCoordinates;
+      delete (finalData as any).connectionCadastralKey;
+      delete (finalData as any).connectionSector;
+      delete (finalData as any).connectionAccount;
+      delete (finalData as any).connectionMetaData;
 
       await createConnectionUseCase.execute(finalData);
       setIsFormOpen(false);
@@ -161,7 +200,20 @@ export const useConnectionViewModel = () => {
       finalValue = checkbox.checked;
     }
 
-    setFormData({ ...formData, [name]: finalValue });
+    let updatedData = { ...formData, [name]: finalValue };
+
+    // Special handling for legacy/sync fields when ID changes
+    if (name === 'connectionRateId') {
+      const selectedRate = rates.find((r) => r.rateId === Number(value));
+      if (selectedRate) {
+        updatedData = {
+          ...updatedData,
+          connectionRateName: selectedRate.categoryName
+        };
+      }
+    }
+
+    setFormData(updatedData);
   };
 
   const resetForm = () => {
@@ -251,6 +303,7 @@ export const useConnectionViewModel = () => {
 
   return {
     connections,
+    rates,
     loading,
     error,
     page,
