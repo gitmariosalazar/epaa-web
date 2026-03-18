@@ -203,7 +203,8 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
     {
       label: 'TOTAL RECOLECTADO',
       value: totalEffectiveTrashToPay,
-      highlight: true
+      highlight: true,
+      columnId: 'effectiveTrashToPay'
     }
   ];
 
@@ -240,7 +241,14 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
             item.rateInValorTable ?? 0
           ),
           Diagnóstico: item.diagnostic || '-',
-          Diferencia: formatCurrency(item.difference ?? 0)
+          Diferencia: formatCurrency(item.difference ?? 0),
+          'Descuento Aplicado': formatCurrency(item.discountApplied ?? 0),
+          'Saldo de Nota de Crédito': formatCurrency(
+            item.creditNoteBalance ?? 0
+          ),
+          Recolectado: formatCurrency(
+            item.rateInIncome - (item.discountApplied ?? 0)
+          )
         };
 
         return selectedCols.map((col) => {
