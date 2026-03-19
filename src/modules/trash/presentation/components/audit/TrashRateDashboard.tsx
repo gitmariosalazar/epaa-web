@@ -26,6 +26,11 @@ import {
 } from '@/shared/presentation/components/Charts/VerticalBarChart';
 import '@/shared/presentation/components/Charts/Charts.css';
 
+interface DiscountAndCreditNoteItem {
+  Tipo: string;
+  value: number;
+}
+
 interface TrashRateDashboardProps {
   data: TrashDashboardKpi[];
   creditNotesData?: CreditNoteRow[];
@@ -244,6 +249,18 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
   }
 
   const k = data[0];
+  console.log(data, k);
+
+  const discountAndCreditNoteItems: DiscountAndCreditNoteItem[] = [
+    {
+      Tipo: 'Descuentos',
+      value: k.totalDiscounts ?? 0
+    },
+    {
+      Tipo: 'Notas de Crédito',
+      value: k.totalNotesAmount ?? 0
+    }
+  ];
 
   const moneySlices: DonutSlice[] = [
     {
@@ -368,14 +385,55 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
           color="rose"
           description="Documentos de ajuste"
         />
-        <KpiCard
-          className="trash-kpi--bottom"
-          label="Monto Notas Crédito"
-          value={fmtMoney(k.totalNotesAmount || 0)}
-          icon={<DollarSign size={16} />}
-          color="amber"
-          description="Documentos de ajuste"
-        />
+        <div className="trash-kpi-revenue-status">
+          <div className="revenue-status-card">
+            <div className="revenue-status-header">
+              <span className="revenue-status-title">
+                Descuentos y N.C. Total
+              </span>
+            </div>
+            <table className="revenue-status-table">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  try {
+                    const statusData: DiscountAndCreditNoteItem[] =
+                      JSON.parse('[]');
+                    return statusData.map((item, idx) => (
+                      <tr key={idx}>
+                        <td>
+                          <span
+                            className={`status-badge status-badge--${item.Tipo}`}
+                          >
+                            {item.Tipo === 'Descuentos'
+                              ? 'Descuentos'
+                              : item.Tipo === 'Notas de Crédito'
+                                ? 'Notas de Crédito'
+                                : item.Tipo}
+                          </span>
+                        </td>
+                        <td className="monto-value">{fmtMoney(item.value)}</td>
+                      </tr>
+                    ));
+                  } catch (e) {
+                    return (
+                      <tr>
+                        <td colSpan={2} className="error-text">
+                          Error al cargar datos
+                        </td>
+                      </tr>
+                    );
+                  }
+                })()}
+              </tbody>
+            </table>
+          </div>
+        </div>
         <KpiCard
           className="trash-kpi--bottom"
           label="Predios Únicos"
