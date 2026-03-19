@@ -403,7 +403,7 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
                 {(() => {
                   try {
                     const statusData: DiscountAndCreditNoteItem[] =
-                      JSON.parse('[]');
+                      discountAndCreditNoteItems;
                     return statusData.map((item, idx) => (
                       <tr key={idx}>
                         <td>
