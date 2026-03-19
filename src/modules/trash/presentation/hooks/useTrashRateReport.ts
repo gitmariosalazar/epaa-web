@@ -44,20 +44,21 @@ export const useTrashRateReport = () => {
   >([]);
   const [trashRateKPI, setTrashRateKPI] = useState<TrashRateKPI[]>([]);
 
-  const [loading, setLoading] = useState(false);
+  const [loadingCount, setLoadingCount] = useState(0);
+  const loading = loadingCount > 0;
   const [error, setError] = useState<Error | null>(null);
 
   const clearError = useCallback(() => setError(null), []);
 
   const withLoading = useCallback(async (fn: () => Promise<void>) => {
-    setLoading(true);
+    setLoadingCount((prev) => prev + 1);
     setError(null);
     try {
       await fn();
     } catch (error) {
       setError(error as Error);
     } finally {
-      setLoading(false);
+      setLoadingCount((prev) => Math.max(0, prev - 1));
     }
   }, []);
 

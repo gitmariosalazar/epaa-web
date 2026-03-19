@@ -32,6 +32,9 @@ export const TrashRateKPIPage: React.FC = () => {
             onEndDateChange={vm.setEndDate}
             onFetch={vm.handleFetch}
             isLoading={vm.isLoading}
+            categories={vm.trashRateKPI}
+            selectedCategoryIndex={vm.selectedCategoryIndex}
+            onCategoryChange={vm.setSelectedCategoryIndex}
           />
         );
       case 'collectorPerformance':
@@ -112,6 +115,7 @@ export const TrashRateKPIPage: React.FC = () => {
             data={vm.trashRateKPI}
             isLoading={vm.isLoading}
             error={vm.error}
+            selectedCategoryIndex={vm.selectedCategoryIndex}
           />
         );
       case 'collectorPerformance':

@@ -25,6 +25,7 @@ import {
   type BarItem
 } from '@/shared/presentation/components/Charts/VerticalBarChart';
 import '@/shared/presentation/components/Charts/Charts.css';
+import { FaMoneyCheckAlt } from 'react-icons/fa';
 
 interface DiscountAndCreditNoteItem {
   Tipo: string;
@@ -249,7 +250,6 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
   }
 
   const k = data[0];
-  console.log(data, k);
 
   const discountAndCreditNoteItems: DiscountAndCreditNoteItem[] = [
     {
@@ -388,8 +388,16 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
         <div className="trash-kpi-revenue-status">
           <div className="revenue-status-card">
             <div className="revenue-status-header">
-              <span className="revenue-status-title">
-                Descuentos y N.C. Total
+              <span
+                className="revenue-status-title"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                Descuentos y N.C. Total{' '}
+                <FaMoneyCheckAlt size={16} color="var(--warning)" />
               </span>
             </div>
             <table className="revenue-status-table">
@@ -408,7 +416,11 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
                       <tr key={idx}>
                         <td>
                           <span
-                            className={`status-badge status-badge--${item.Tipo}`}
+                            className={`status-badge status-badge--${
+                              item.Tipo === 'Descuentos'
+                                ? 'discount'
+                                : 'credit-note'
+                            }`}
                           >
                             {item.Tipo === 'Descuentos'
                               ? 'Descuentos'
@@ -417,7 +429,15 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
                                 : item.Tipo}
                           </span>
                         </td>
-                        <td className="monto-value">{fmtMoney(item.value)}</td>
+                        <td
+                          className={`monto-value monto-value--${
+                            item.Tipo === 'Descuentos'
+                              ? 'discount'
+                              : 'credit-note'
+                          }`}
+                        >
+                          {fmtMoney(item.value)}
+                        </td>
                       </tr>
                     ));
                   } catch (e) {

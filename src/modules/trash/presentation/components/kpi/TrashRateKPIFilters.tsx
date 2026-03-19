@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
+import type { TrashRateKPI } from '../../../domain/models/trash-rate-report.model';
 
 export interface TrashRateKPIFiltersProps {
   // Monthly selection (represented internally as startDate/endDate)
@@ -15,6 +16,11 @@ export interface TrashRateKPIFiltersProps {
   // Fetch
   onFetch: () => void;
   isLoading: boolean;
+
+  // Category filter
+  categories: TrashRateKPI[];
+  selectedCategoryIndex: number;
+  onCategoryChange: (index: number) => void;
 }
 
 /**
@@ -27,7 +33,10 @@ export const TrashRateKPIFilters: React.FC<TrashRateKPIFiltersProps> = ({
   endDate,
   onEndDateChange,
   onFetch,
-  isLoading
+  isLoading,
+  categories,
+  selectedCategoryIndex,
+  onCategoryChange
 }) => {
   const { t } = useTranslation();
 
@@ -87,9 +96,29 @@ export const TrashRateKPIFilters: React.FC<TrashRateKPIFiltersProps> = ({
         </Button>
       </div>
 
-      {/* ── RIGHT: Future specific filters ── */}
+      {/* ── RIGHT: Category selection ── */}
       <div className="trash-report-filter-right">
-        {/* Placeholder for future filters */}
+        {categories.length > 0 && (
+          <div className="trash-report-filter-group">
+            <label className="trash-report-filter-label">
+              {t('trashRateKPI.filters.category', 'CATEGORÍA')}
+            </label>
+            <div className="trash-report-filter-input-wrapper">
+              <select
+                className="trash-category-select"
+                value={selectedCategoryIndex}
+                onChange={(e) => onCategoryChange(Number(e.target.value))}
+                disabled={isLoading}
+              >
+                {categories.map((cat, index) => (
+                  <option key={index} value={index}>
+                    {cat.category}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

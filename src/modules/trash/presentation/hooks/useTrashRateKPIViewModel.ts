@@ -97,6 +97,7 @@ export const useTrashRateKPIViewModel = () => {
   // Local Filters for Daily Collector Detail
   const [selectedCollector, setSelectedCollector] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
 
   useEffect(() => {
     handleFetch();
@@ -109,6 +110,7 @@ export const useTrashRateKPIViewModel = () => {
     setOffset('0');
     setSelectedCollector('');
     setSelectedStatus('');
+    setSelectedCategoryIndex(0);
     clearError();
   }, [activeTab, clearError]);
 
@@ -121,14 +123,19 @@ export const useTrashRateKPIViewModel = () => {
       Number(offset) || 0
     );
 
-  const handleFetch = () => {
+  const handleFetch = async () => {
     if (activeTab === 'dashboard') {
-      getDashboardKPITrashRate(new DateRangeParams(startDate, endDate));
-      getTrashRateKPI(dateParams());
-    } else if (activeTab === 'collectorPerformance')
-      getCollectorPerformanceKPI(dateParams());
-    else if (activeTab === 'dailyCollectorDetail')
-      getDailyCollectorDetail(dateParams());
+      await Promise.all([
+        getDashboardKPITrashRate(new DateRangeParams(startDate, endDate)),
+        getTrashRateKPI(dateParams())
+      ]);
+    } else if (activeTab === 'collectorPerformance') {
+      await getCollectorPerformanceKPI(dateParams());
+    } else if (activeTab === 'dailyCollectorDetail') {
+      await getDailyCollectorDetail(dateParams());
+    }
+
+    setSelectedCategoryIndex(0);
   };
 
   const handleSort = (key: string, direction: 'asc' | 'desc') =>
@@ -196,6 +203,8 @@ export const useTrashRateKPIViewModel = () => {
     collectorList,
     selectedStatus,
     setSelectedStatus,
-    statusList
+    statusList,
+    selectedCategoryIndex,
+    setSelectedCategoryIndex
   };
 };

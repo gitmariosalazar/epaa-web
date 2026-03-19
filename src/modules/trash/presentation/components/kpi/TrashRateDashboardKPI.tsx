@@ -22,16 +22,23 @@ import {
   type BarItem
 } from '@/shared/presentation/components/Charts/VerticalBarChart';
 import '@/shared/presentation/components/Charts/Charts.css';
+import { FaMoneyCheckAlt } from 'react-icons/fa';
 
 interface RevenueStatusItem {
   Estado: string;
   Monto: number;
 }
 
+interface DiscountAndCreditNoteItem {
+  Tipo: string;
+  value: number;
+}
+
 interface TrashRateDashboardKPIProps {
   data: TrashRateKPI[];
   isLoading: boolean;
   error: string | null;
+  selectedCategoryIndex: number;
 }
 
 const fmtMoney = (n: number) =>
@@ -138,7 +145,8 @@ const ComplianceCard: React.FC<{ pct: number }> = ({ pct }) => {
 export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
   data,
   isLoading,
-  error
+  error,
+  selectedCategoryIndex
 }) => {
   const { t } = useTranslation();
 
@@ -158,18 +166,44 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
     );
   }
 
-  const k = data[0];
+  const k = data[selectedCategoryIndex] || data[0];
+
+  // Helper to parse revenue status
+  const revenueStatus: RevenueStatusItem[] = (() => {
+    try {
+      return JSON.parse(k.revenueStatusJson || '[]');
+    } catch (e) {
+      return [];
+    }
+  })();
+
+  const paidAmount =
+    revenueStatus.find((item) => item.Estado === 'P')?.Monto || 0;
+  const pendingAmount = revenueStatus
+    .filter((item) => item.Estado !== 'P')
+    .reduce((acc, item) => acc + item.Monto, 0);
+
+  const discountAndCreditNoteItems: DiscountAndCreditNoteItem[] = [
+    {
+      Tipo: 'Descuentos',
+      value: k.discounts ?? 0
+    },
+    {
+      Tipo: 'Notas de Crédito',
+      value: k.creditNotesAmount ?? 0
+    }
+  ];
 
   const moneySlices: DonutSlice[] = [
     {
       label: 'Cobrado',
-      value: k.netAmountCollected ?? 0,
+      value: paidAmount,
       color: '#22c55e',
       fmt: fmtMoney
     },
     {
       label: 'Pendiente',
-      value: k.totalAmountPending ?? 0,
+      value: pendingAmount,
       color: '#ef4444',
       fmt: fmtMoney
     }
@@ -178,39 +212,34 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
   const billSlices: DonutSlice[] = [
     {
       label: 'Emitidas',
-      value: k.totalBillsIssued ?? 0,
+      value: k.totalBills ?? 0,
       color: '#8b5cf6',
       fmt: fmtNum
     },
     {
-      label: 'Sin Valor',
-      value: k.integrityAuditMissingValor ?? 0,
+      label: 'Diferencia (Gap)',
+      value: k.integrityGap ?? 0,
       color: '#f43f5e',
-      fmt: fmtNum
+      fmt: fmtMoney
     }
   ];
 
   const barItems: BarItem[] = [
     {
       label: 'Total a Recaudar',
-      value: k.grossAmountToCollect ?? 0,
+      value: k.grossAmount ?? 0,
       color: 'blue',
       fmt: fmtMoney
     },
     {
       label: 'Notas de Crédito',
-      value: k.creditNotesTotalAmount ?? 0,
+      value: k.creditNotesAmount ?? 0,
       color: 'amber',
       fmt: fmtMoney
     },
     {
       label: 'Total Recaudado',
-      value:
-        JSON.parse(k.revenueStatusJsonArray ?? '[]').reduce(
-          (acc: number, item: RevenueStatusItem) =>
-            item.Estado === 'P' ? acc + item.Monto : acc,
-          0
-        ) ?? 0,
+      value: paidAmount,
       color: 'green',
       fmt: fmtMoney
     }
@@ -220,43 +249,30 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
     <div className="trash-dashboard">
       <div className="trash-dashboard-kpi-grid">
         <div className="trash-kpi--compliance">
-          <ComplianceCard pct={k.collectionCompliancePct ?? 0} />
+          <ComplianceCard pct={k.collectionRate ?? 0} />
         </div>
 
         {/* Row 1 */}
         <KpiCard
           className="trash-kpi--top"
           label="Bruto a Recaudar"
-          value={fmtMoney(k.grossAmountToCollect)}
+          value={fmtMoney(k.grossAmount)}
           icon={<DollarSign size={16} />}
           color="blue"
           description="Emisión total bruta"
         />
         <KpiCard
           className="trash-kpi--top"
-          label="Total sin ajustes"
-          value={fmtMoney(k.netAmountCollected)}
+          label="Total Neto"
+          value={fmtMoney(k.netAmount)}
           icon={<AlertTriangle size={16} />}
           color="amber"
-          description="Total sin ajustes/anulaciones"
+          description="Gross minus discounts"
         />
         <KpiCard
           className="trash-kpi--top"
           label="Total Recaudado (Pagos)"
-          value={fmtMoney(
-            (() => {
-              try {
-                const statusData: RevenueStatusItem[] = JSON.parse(
-                  k.revenueStatusJsonArray || '[]'
-                );
-                return (
-                  statusData.find((item) => item.Estado === 'P')?.Monto || 0
-                );
-              } catch (e) {
-                return 0;
-              }
-            })()
-          )}
+          value={fmtMoney(paidAmount)}
           icon={<CheckCircle size={16} />}
           color="green"
           valueColor="green"
@@ -265,7 +281,7 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
         <KpiCard
           className="trash-kpi--top"
           label="Total Pendiente"
-          value={fmtMoney(k.totalAmountPending)}
+          value={fmtMoney(pendingAmount)}
           icon={<Clock size={16} />}
           color="red"
           valueColor="red"
@@ -284,7 +300,7 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
         <KpiCard
           className="trash-kpi--bottom"
           label="Facturas Emitidas"
-          value={fmtNum(k.totalBillsIssued)}
+          value={fmtNum(k.totalBills)}
           icon={<FileText size={16} />}
           color="purple"
           description="Total de comprobantes"
@@ -297,21 +313,62 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
           color="purple"
           description="Total de creditos emitidos"
         />
+        <div className="trash-kpi-revenue-status">
+          <div className="revenue-status-card">
+            <div className="revenue-status-header">
+              <span
+                className="revenue-status-title"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                Descuentos y N.C. Total{' '}
+                <FaMoneyCheckAlt size={16} color="var(--warning)" />
+              </span>
+            </div>
+            <table className="revenue-status-table">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {discountAndCreditNoteItems.map((item, idx) => (
+                  <tr key={idx}>
+                    <td>
+                      <span
+                        className={`status-badge status-badge--${
+                          item.Tipo === 'Descuentos'
+                            ? 'discount'
+                            : 'credit-note'
+                        }`}
+                      >
+                        {item.Tipo}
+                      </span>
+                    </td>
+                    <td
+                      className={`monto-value monto-value--${
+                        item.Tipo === 'Descuentos' ? 'discount' : 'credit-note'
+                      }`}
+                    >
+                      {fmtMoney(item.value)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
         <KpiCard
           className="trash-kpi--bottom"
-          label="Valor Creditos"
-          value={fmtNum(k.creditNotesTotalAmount)}
-          icon={<DollarSign size={16} />}
-          color="purple"
-          description="Valor total de creditos emitidos"
-        />
-        <KpiCard
-          className="trash-kpi--bottom"
-          label="Sin Valor Table"
-          value={fmtNum(k.integrityAuditMissingValor)}
+          label="Diferencia de Integridad"
+          value={fmtMoney(k.integrityGap)}
           icon={<AlertCircle size={16} />}
           color="red"
-          description="Omitidos en auditoría"
+          description="Diferencia entre el valor de la fuente y el valor de la factura"
         />
 
         <div className="trash-kpi-revenue-status">
@@ -329,37 +386,44 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {(() => {
-                  try {
-                    const statusData: RevenueStatusItem[] = JSON.parse(
-                      k.revenueStatusJsonArray || '[]'
-                    );
-                    return statusData.map((item, idx) => (
-                      <tr key={idx}>
-                        <td>
-                          <span
-                            className={`status-badge status-badge--${item.Estado}`}
-                          >
-                            {item.Estado === 'B'
-                              ? 'Baja'
-                              : item.Estado === 'P'
-                                ? 'Pagado'
-                                : item.Estado}
-                          </span>
-                        </td>
-                        <td className="monto-value">{fmtMoney(item.Monto)}</td>
-                      </tr>
-                    ));
-                  } catch (e) {
-                    return (
-                      <tr>
-                        <td colSpan={2} className="error-text">
-                          Error al cargar datos
-                        </td>
-                      </tr>
-                    );
-                  }
-                })()}
+                {revenueStatus.map((item, idx) => (
+                  <tr key={idx}>
+                    <td>
+                      <span
+                        className={`status-badge status-badge--${
+                          item.Estado === 'P'
+                            ? 'P'
+                            : item.Estado === 'B'
+                              ? 'B'
+                              : item.Estado === 'S/E'
+                                ? 'S'
+                                : ''
+                        }`}
+                      >
+                        {item.Estado === 'P'
+                          ? 'Pagado'
+                          : item.Estado === 'B'
+                            ? 'Baja'
+                            : item.Estado === 'S/E'
+                              ? 'Sin Estado'
+                              : item.Estado}
+                      </span>
+                    </td>
+                    <td
+                      className={`monto-value color-value--${
+                        item.Estado === 'P'
+                          ? 'P'
+                          : item.Estado === 'B'
+                            ? 'B'
+                            : item.Estado === 'S/E'
+                              ? 'S'
+                              : ''
+                      }`}
+                    >
+                      {fmtMoney(item.Monto)}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -370,10 +434,8 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
         <DonutChart
           title="Distribución Monetaria"
           slices={moneySlices}
-          centerLabel="TOTAL"
-          centerValue={fmtMoney(
-            (k.netAmountCollected || 0) + (k.totalAmountPending || 0)
-          )}
+          centerLabel="TOTAL NETO"
+          centerValue={fmtMoney(k.netAmount)}
           description="Porcentaje en dólares recuperados vs cartera vencida"
         />
         <VerticalBarChart
@@ -385,8 +447,8 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
           title="Auditoría Integridad"
           slices={billSlices}
           centerLabel="BILL COUNT"
-          centerValue={fmtNum(k.totalBillsIssued)}
-          description="Proporción de facturas con respaldo en tabla de valor"
+          centerValue={fmtNum(k.totalBills)}
+          description="Diferencia de monto entre emisión original y cálculo actual"
         />
       </div>
     </div>
