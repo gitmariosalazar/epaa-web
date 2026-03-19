@@ -33,8 +33,12 @@ export const TrashRateKPITable: React.FC<TrashRateKPITableProps> = ({
 
   const columns: Column<TrashRateKPI>[] = [
     {
-      header: t('trashRateKPI.table.totalBillsIssued', 'Facturas Emitidas'),
-      accessor: 'totalBillsIssued',
+      header: t('trashRateKPI.table.category', 'Categoría'),
+      accessor: 'category'
+    },
+    {
+      header: t('trashRateKPI.table.totalBills', 'Facturas Emitidas'),
+      accessor: 'totalBills',
       isNumeric: true
     },
     {
@@ -43,43 +47,61 @@ export const TrashRateKPITable: React.FC<TrashRateKPITableProps> = ({
       isNumeric: true
     },
     {
-      header: t('trashRateKPI.table.sourceTrashRateTotal', 'Emisión Sistema'),
-      accessor: (r) => formatCurrency(r.sourceTrashRateTotal),
+      header: t('trashRateKPI.table.sourceAmount', 'Emisión Sistema'),
+      accessor: (r) => formatCurrency(r.sourceAmount),
       isNumeric: true
     },
     {
-      header: t('trashRateKPI.table.valorTableTotal', 'Emisión Vencimiento'),
-      accessor: (r) => formatCurrency(r.valorTableTotal),
+      header: t('trashRateKPI.table.valorAmount', 'Emisión Vencimiento'),
+      accessor: (r) => formatCurrency(r.valorAmount),
       isNumeric: true
     },
     {
-      header: t('trashRateKPI.table.integrityGapAmount', 'Brecha Integridad'),
-      accessor: (r) => formatCurrency(r.integrityGapAmount),
+      header: t('trashRateKPI.table.integrityGap', 'Brecha Integridad'),
+      accessor: (r) => formatCurrency(r.integrityGap),
       isNumeric: true
     },
     {
-      header: t('trashRateKPI.table.grossAmountToCollect', 'Bruto a Recaudar'),
-      accessor: (r) => formatCurrency(r.grossAmountToCollect),
+      header: t('trashRateKPI.table.grossAmount', 'Bruto a Recaudar'),
+      accessor: (r) => formatCurrency(r.grossAmount),
       isNumeric: true
     },
     {
-      header: t('trashRateKPI.table.netAmountCollected', 'Neto Recaudado'),
-      accessor: (r) => formatCurrency(r.netAmountCollected),
+      header: t('trashRateKPI.table.paidAmount', 'Neto Recaudado'),
+      accessor: (r) => {
+        try {
+          const status = JSON.parse(r.revenueStatusJson || '[]');
+          const paid = status.find((i: any) => i.Estado === 'P')?.Monto || 0;
+          return formatCurrency(paid);
+        } catch {
+          return formatCurrency(0);
+        }
+      },
       isNumeric: true
     },
     {
-      header: t('trashRateKPI.table.totalAmountPending', 'Total Pendiente'),
-      accessor: (r) => formatCurrency(r.totalAmountPending),
+      header: t('trashRateKPI.table.pendingAmount', 'Total Pendiente'),
+      accessor: (r) => {
+        try {
+          const status = JSON.parse(r.revenueStatusJson || '[]');
+          const pending = status
+            .filter((i: any) => i.Estado !== 'P')
+            .reduce((acc: number, i: any) => acc + i.Monto, 0);
+          return formatCurrency(pending);
+        } catch {
+          return formatCurrency(0);
+        }
+      },
       isNumeric: true
     },
     {
-      header: t('trashRateKPI.table.collectionCompliancePct', '% Cumplimiento'),
-      accessor: (r) => formatCurrency(r.collectionCompliancePct),
+      header: t('trashRateKPI.table.collectionRate', '% Cumplimiento'),
+      accessor: (r) => `${(r.collectionRate || 0).toFixed(1)}%`,
       isNumeric: true
     },
     {
-      header: t('trashRateKPI.table.paidBillsCount', 'Facturas Pagadas'),
-      accessor: 'paidBillsCount',
+      header: t('trashRateKPI.table.paidBills', 'Facturas Pagadas'),
+      accessor: 'paidBills',
       isNumeric: true
     }
   ];
@@ -99,9 +121,9 @@ export const TrashRateKPITable: React.FC<TrashRateKPITableProps> = ({
         sortConfig={sortConfig}
         fullHeight
         getRowColor={(r) => {
-          if (r.collectionCompliancePct >= 90) return 'success';
-          if (r.collectionCompliancePct < 60) return 'error';
-          if (r.collectionCompliancePct < 85) return 'warning';
+          if (r.collectionRate >= 90) return 'success';
+          if (r.collectionRate < 60) return 'error';
+          if (r.collectionRate < 85) return 'warning';
           //return 'neutral';
         }}
         emptyState={<EmptyState message="Data not found!" />}
