@@ -15,7 +15,7 @@ export interface SortConfig {
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const LIMIT_SIZE = 20000;
+const LIMIT_SIZE = 50;
 
 // ── Generic helpers ───────────────────────────────────────────────────────────
 function applySortConfig<T>(data: T[], sortConfig: SortConfig | null): T[] {
@@ -271,8 +271,16 @@ export const useConnectionsViewModel = () => {
           customerId: p.personId,
           firstName: p.firstName,
           lastName: p.lastName,
-          emails: p.emails?.map((e: any) => typeof e === 'string' ? e : (e.email || e.correo || '')) || [],
-          phoneNumbers: p.phones?.map((p_item: any) => typeof p_item === 'string' ? p_item : (p_item.numero || p_item.telefono || '')) || [],
+          emails:
+            p.emails?.map((e: any) =>
+              typeof e === 'string' ? e : e.email || e.correo || ''
+            ) || [],
+          phoneNumbers:
+            p.phones?.map((p_item: any) =>
+              typeof p_item === 'string'
+                ? p_item
+                : p_item.numero || p_item.telefono || ''
+            ) || [],
           dateOfBirth: p.birthDate,
           sexId: p.genderId,
           civilStatus: p.civilStatusId,
@@ -294,8 +302,16 @@ export const useConnectionsViewModel = () => {
           companyAddress: c.address,
           companyParishId: c.parishId,
           companyCountry: c.country,
-          companyEmails: c.emails?.map((e: any) => typeof e === 'string' ? e : (e.email || e.correo || '')) || [],
-          companyPhones: c.phones?.map((p_item: any) => typeof p_item === 'string' ? p_item : (p_item.numero || p_item.telefono || '')) || [],
+          companyEmails:
+            c.emails?.map((e: any) =>
+              typeof e === 'string' ? e : e.email || e.correo || ''
+            ) || [],
+          companyPhones:
+            c.phones?.map((p_item: any) =>
+              typeof p_item === 'string'
+                ? p_item
+                : p_item.numero || p_item.telefono || ''
+            ) || [],
           identificationType: 'RUC'
         };
         setFoundClient(companyData);
