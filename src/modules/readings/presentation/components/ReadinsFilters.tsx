@@ -3,6 +3,8 @@ import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
+import { Input } from '@/shared/presentation/components/Input/Input';
+import { TbChartPieFilled } from 'react-icons/tb';
 
 // ── Tab type ──────────────────────────────────────────────────────────────────
 export type ReadingDataTab = 'pending' | 'completed' | 'estimated' | 'all';
@@ -105,14 +107,15 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
               {t('readingData.filters.sector', 'Sector')}
             </label>
             <div className="entry-filter-input-wrapper">
-              <input
+              <Input
                 type="text"
                 placeholder={t(
                   'readingData.filters.sectorPlaceholder',
                   'Todos los sectores'
                 )}
-                className="entry-filter-input"
                 value={sector}
+                size="medium"
+                leftIcon={<TbChartPieFilled size={18} />}
                 onChange={(e) => onSectorChange(e.target.value)}
               />
             </div>

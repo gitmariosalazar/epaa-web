@@ -1,5 +1,7 @@
-import type { Customer } from '../../domain/models/Customer';
-import type { CustomerRepository } from '../../domain/repositories/CustomerRepository';
+import type {
+  CustomerRepository,
+  UpdateCustomerRequest
+} from '../../domain/repositories/CustomerRepository';
 
 export class UpdateCustomerUseCase {
   private readonly repository: CustomerRepository;
@@ -8,7 +10,7 @@ export class UpdateCustomerUseCase {
     this.repository = repository;
   }
 
-  async execute(id: string, customer: Partial<Customer>): Promise<void> {
+  async execute(id: string, customer: UpdateCustomerRequest): Promise<void> {
     return this.repository.update(id, customer);
   }
 }

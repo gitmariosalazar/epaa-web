@@ -43,6 +43,9 @@ import { ReadingImagesPage } from '@/modules/readings/presentation/pages/Reading
 import { TrashRateReportProvider } from './modules/trash/presentation/context/TrashRateReportContext';
 import { TrashRateReportPage } from './modules/trash/presentation/pages/TrashRateReportPage';
 import { TrashRateKPIPage } from './modules/trash/presentation/pages/TrashRateKPIPage';
+import { UpdateReadingPage } from './modules/readings/presentation/pages/UpdateReadingPage';
+import { GetPropertyContextProvider } from '@/modules/properties/presentation/context/GetPropertiesContext';
+import { PropertiesPage } from '@/modules/properties/presentation/pages/PropertiesPage';
 
 const ProtectedRoute = () => {
   const { token, isLoading } = useAuth();
@@ -149,6 +152,7 @@ function App() {
                         <Route path="add" element={<CreateReadingPage />} />
                         <Route path="list" element={<ReadingsListPage />} />
                         <Route path="images" element={<ReadingImagesPage />} />
+                        <Route path="update" element={<UpdateReadingPage />} />
                         {/* Other reading routes can be added here */}
                       </Routes>
                     </ReadingsProvider>
@@ -170,6 +174,19 @@ function App() {
                         {/* Add more trash-rate sub-routes here */}
                       </Routes>
                     </TrashRateReportProvider>
+                  }
+                />
+                <Route
+                  path="/properties/*"
+                  element={
+                    <GetPropertyContextProvider>
+                      <Routes>
+                        <Route
+                          path="list"
+                          element={<PropertiesPage />}
+                        />
+                      </Routes>
+                    </GetPropertyContextProvider>
                   }
                 />
                 {/* Add other protected routes here */}

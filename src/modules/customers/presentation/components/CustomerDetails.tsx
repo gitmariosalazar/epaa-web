@@ -1,11 +1,11 @@
 import React from 'react';
 import { CheckCircle, XCircle, User, Shield, Phone } from 'lucide-react';
-import type { Customer } from '../../domain/models/Customer';
+import type { CreateCustomerRequest } from '../../domain/repositories/CustomerRepository';
 import '../styles/UserDetails.css';
 import { useTranslation } from 'react-i18next';
 
 interface CustomerDetailsProps {
-  customer: Omit<Customer, 'customerId'> & { customerId: string };
+  customer: CreateCustomerRequest;
 }
 
 export const CustomerDetails: React.FC<CustomerDetailsProps> = ({
@@ -14,18 +14,6 @@ export const CustomerDetails: React.FC<CustomerDetailsProps> = ({
   const { t } = useTranslation();
   const isDeceased = customer.deceased;
   const initial = customer.firstName ? customer.firstName.charAt(0) : 'U';
-
-  const formatEmail = () => {
-    const email = customer.emails?.[0];
-    if (!email) return 'N/A';
-    return typeof email === 'object' ? (email as any).correo : email;
-  };
-
-  const formatPhone = () => {
-    const phone = customer.phoneNumbers?.[0];
-    if (!phone) return 'N/A';
-    return typeof phone === 'object' ? (phone as any).numero : phone;
-  };
 
   const civilStatusMap: Record<number, string> = {
     1: t('customers.form.single'),
@@ -84,8 +72,8 @@ export const CustomerDetails: React.FC<CustomerDetailsProps> = ({
               {t('customers.form.dob')}
             </span>
             <span className="user-details__value">
-              {customer.dateOfBirth
-                ? customer.dateOfBirth.split('T')[0]
+              {customer.dateOfBirth instanceof Date
+                ? customer.dateOfBirth.toISOString().split('T')[0]
                 : 'N/A'}
             </span>
           </div>
@@ -102,13 +90,37 @@ export const CustomerDetails: React.FC<CustomerDetailsProps> = ({
             <span className="user-details__label">
               {t('customers.form.email')}
             </span>
-            <span className="user-details__value">{formatEmail()}</span>
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
+            >
+              {customer.emails.length > 0 ? (
+                customer.emails.map((email, i) => (
+                  <span key={i} className="user-details__value">
+                    {email}
+                  </span>
+                ))
+              ) : (
+                <span className="user-details__value">N/A</span>
+              )}
+            </div>
           </div>
           <div className="user-details__field">
             <span className="user-details__label">
               {t('customers.form.phone')}
             </span>
-            <span className="user-details__value">{formatPhone()}</span>
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
+            >
+              {customer.phoneNumbers.length > 0 ? (
+                customer.phoneNumbers.map((phone, i) => (
+                  <span key={i} className="user-details__value">
+                    {phone}
+                  </span>
+                ))
+              ) : (
+                <span className="user-details__value">N/A</span>
+              )}
+            </div>
           </div>
           <div className="user-details__field" style={{ gridColumn: 'span 2' }}>
             <span className="user-details__label">

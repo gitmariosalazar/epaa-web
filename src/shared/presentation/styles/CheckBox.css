@@ -1,14 +1,16 @@
 .checkbox {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .checkbox input[type='checkbox'] {
-  width: 20px;
-  height: 20px;
+  width: 12px;
+  height: 12px;
+  cursor: pointer;
 }
 
 .checkbox span {
-  font-size: 14px;
+  font-size: 0.65rem;
+  color: var(--text-muted);
 }

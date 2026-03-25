@@ -31,15 +31,18 @@ export interface ReadingConfirmationViewModel {
  */
 export const useReadingConfirmationModal = (
   readingInfo: ReadingInfo,
-  currentReadingInput: number | ''
+  currentReadingInput: number | '',
+  method: 'create' | 'update'
 ): ReadingConfirmationViewModel => {
   return useMemo(() => {
     const previousReading =
-      Number(
-        readingInfo.currentReading !== null
-          ? readingInfo.currentReading
-          : readingInfo.previousReading
-      ) || 0;
+      method === 'create'
+        ? Number(
+            readingInfo.currentReading !== null
+              ? readingInfo.currentReading
+              : readingInfo.previousReading
+          ) || 0
+        : Number(readingInfo.previousReading) || 0;
 
     const currentReading = Number(currentReadingInput) || 0;
     const consumption = currentReading - previousReading;

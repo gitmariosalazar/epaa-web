@@ -1,5 +1,7 @@
-import type { CreateCompanyRequest } from '../../domain/repositories/CompanyRepository';
-import type { CompanyRepository } from '../../domain/repositories/CompanyRepository';
+import type {
+  CompanyRepository,
+  UpdateCompanyRequest
+} from '../../domain/repositories/CompanyRepository';
 
 export class UpdateCompanyUseCase {
   private readonly repository: CompanyRepository;
@@ -8,7 +10,7 @@ export class UpdateCompanyUseCase {
     this.repository = repository;
   }
 
-  async execute(id: string, company: CreateCompanyRequest): Promise<void> {
+  async execute(id: string, company: UpdateCompanyRequest): Promise<void> {
     return this.repository.update(id, company);
   }
 }

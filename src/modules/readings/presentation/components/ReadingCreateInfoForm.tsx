@@ -2,6 +2,7 @@ import React from 'react';
 import type { ReadingInfo } from '../../domain/models/ReadingInfoResponse';
 import { FaFileAlt, FaTachometerAlt, FaHistory } from 'react-icons/fa';
 import { Input } from '@/shared/presentation/components/Input/Input';
+import { TextArea } from '@/shared/presentation/components/TextArea/TextArea';
 import '@/shared/presentation/styles/Input.css';
 
 interface PropTypes {
@@ -12,7 +13,7 @@ interface PropTypes {
   setObservationInput: (value: string) => void;
 }
 
-export const ReadingInfoForm: React.FC<PropTypes> = ({
+export const ReadingCreateInfoForm: React.FC<PropTypes> = ({
   info,
   currentReadingInput,
   setCurrentReadingInput,
@@ -54,21 +55,14 @@ export const ReadingInfoForm: React.FC<PropTypes> = ({
         />
       </div>
 
-      <div className="input-component cr-textarea-col">
-        <label className="input__label">
-          Descripción o Novedades (Opcional)
-        </label>
-        <div className="input__container">
-          <span className="input__icon-left">
-            <FaFileAlt color="var(--text-muted)" />
-          </span>
-          <textarea
-            className="input__field input__field--with-icon cr-reading-textarea"
-            placeholder="Ingrese una descripción detallada..."
-            value={observationInput}
-            onChange={(e) => setObservationInput(e.target.value)}
-          />
-        </div>
+      <div className="cr-textarea-col">
+        <TextArea
+          label="Descripción o Novedades (Opcional)"
+          leftIcon={<FaFileAlt color="var(--text-muted)" />}
+          placeholder="Ingrese una descripción detallada..."
+          value={observationInput}
+          onChange={(e) => setObservationInput(e.target.value)}
+        />
       </div>
     </div>
   );

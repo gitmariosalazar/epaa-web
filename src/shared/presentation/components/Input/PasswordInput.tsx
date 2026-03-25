@@ -8,12 +8,13 @@ import '@/shared/presentation/styles/PasswordInput.css';
 
 interface PasswordInputProps extends Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
-  'type'
+  'type' | 'size'
 > {
   label?: string;
   error?: string;
   showStrength?: boolean;
   valueToMatch?: string;
+  size?: 'small' | 'compact' | 'medium' | 'large';
 }
 
 export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
@@ -26,6 +27,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
       valueToMatch,
       value,
       onChange,
+      size = 'medium',
       ...props
     },
     ref
@@ -73,7 +75,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
     };
 
     return (
-      <div className={`password-input-wrapper ${className}`}>
+      <div className={`password-input-wrapper input--${size} ${className}`}>
         {label && <label className="input__label">{label}</label>}
 
         <div className="password-input__container">
@@ -83,7 +85,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
 
           <input
             type={isVisible ? 'text' : 'password'}
-            className={`password-input__field ${getFieldClass()}`}
+            className={`password-input__field input__field--with-icon ${getFieldClass()}`}
             ref={ref}
             value={value}
             onChange={handleChange}

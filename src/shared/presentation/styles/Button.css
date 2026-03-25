@@ -71,6 +71,12 @@
   padding: 0 12px;
   font-size: 0.8125rem;
 }
+.btn-pro--compact {
+  --btn-h: 34px;
+  height: var(--btn-h);
+  padding: 0 14px;
+  font-size: 0.8125rem;
+}
 .btn-pro--md {
   --btn-h: 36px;
   height: var(--btn-h);

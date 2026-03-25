@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 // Extends InputHTMLAttributes but overrides type for strict onChange
 export interface InputCadastralKeyProps extends Omit<
   InputHTMLAttributes<HTMLInputElement>,
-  'onChange'
+  'onChange' | 'size'
 > {
   label?: string;
   error?: string;
@@ -14,6 +14,7 @@ export interface InputCadastralKeyProps extends Omit<
   value?: string;
   onChange?: (value: string) => void;
   className?: string;
+  size?: 'small' | 'compact' | 'medium' | 'large';
 }
 
 export const InputCadastralKey = forwardRef<
@@ -21,7 +22,7 @@ export const InputCadastralKey = forwardRef<
   InputCadastralKeyProps
 >(
   (
-    { value, onChange, className = '', label, error, leftIcon, ...props },
+    { value, onChange, className = '', size = 'medium', label, error, leftIcon, ...props },
     ref
   ) => {
     // Internal state to manage the controlled input if an external value isn't strictly provided
@@ -44,30 +45,22 @@ export const InputCadastralKey = forwardRef<
       }
     };
 
-    const inputElement = (
-      <div className="input__container">
-        {leftIcon && <span className="input__icon-left">{leftIcon}</span>}
-        <input
-          {...props}
-          ref={ref}
-          value={displayValue}
-          onChange={handleChange}
-          placeholder={props.placeholder || t('common.cadastralPlaceholder')}
-          type="text"
-          inputMode="numeric"
-          className={`input__field ${className} ${error ? 'input__field--error' : ''} ${leftIcon ? 'input__field--with-icon' : ''}`}
-        />
-      </div>
-    );
-
-    if (!label && !error) {
-      return inputElement;
-    }
-
     return (
-      <div className={`input-component`}>
+      <div className={`input-component input--${size}`}>
         {label && <label className="input__label">{label}</label>}
-        {inputElement}
+        <div className="input__container">
+          {leftIcon && <span className="input__icon-left">{leftIcon}</span>}
+          <input
+            {...props}
+            ref={ref}
+            value={displayValue}
+            onChange={handleChange}
+            placeholder={props.placeholder || t('common.cadastralPlaceholder')}
+            type="text"
+            inputMode="numeric"
+            className={`input__field ${className} ${error ? 'input__field--error' : ''} ${leftIcon ? 'input__field--with-icon' : ''}`}
+          />
+        </div>
         {error && <span className="input__error">{error}</span>}
       </div>
     );

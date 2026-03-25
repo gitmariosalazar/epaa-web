@@ -10,11 +10,13 @@ import { useTranslation } from 'react-i18next';
 interface PropTypes {
   info: ReadingInfo | null;
   currentReadingInput?: number | '';
+  method: 'create' | 'update';
 }
 
 export const ReadingSummaryCards: React.FC<PropTypes> = ({
   info,
-  currentReadingInput
+  currentReadingInput,
+  method
 }) => {
   const { t } = useTranslation();
 
@@ -24,11 +26,13 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
       : null;
 
   const previousVal =
-    Number(
-      info?.currentReading !== null
-        ? info?.currentReading
-        : info?.previousReading
-    ) || 0;
+    method === 'create'
+      ? Number(
+          info?.currentReading !== null
+            ? info?.currentReading
+            : info?.previousReading
+        ) || 0
+      : Number(info?.previousReading) || 0;
 
   const currentConsumption =
     currentVal !== null ? currentVal - previousVal : null;

@@ -1,0 +1,169 @@
+.searchable-select-container {
+  position: relative;
+  width: 100%;
+}
+
+.searchable-select-trigger {
+  position: relative;
+  width: 100%;
+}
+
+.input__label {
+  font-size: 0.675rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.searchable-select-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface);
+  color: var(--text-main);
+  transition: all var(--transition-fast);
+  outline: none;
+  cursor: text;
+  font-family: inherit;
+}
+
+.searchable-select-input:hover {
+  border-color: var(--text-muted);
+}
+
+.searchable-select-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.searchable-select-input--error {
+  border-color: var(--error) !important;
+}
+
+.searchable-select-input--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--surface-hover);
+}
+
+.searchable-select-chevron {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.searchable-select-container--open .searchable-select-chevron {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Sizes */
+.searchable-select--small .searchable-select-input {
+  height: 28px;
+  font-size: 0.7rem;
+  padding: 0.15rem 2rem 0.15rem 0.5rem;
+}
+
+.searchable-select--compact .searchable-select-input {
+  height: 34px;
+  font-size: 0.8125rem;
+  padding: 0.325rem 2.25rem 0.325rem 0.625rem;
+}
+
+.searchable-select--medium .searchable-select-input {
+  height: 40px;
+  font-size: 0.875rem;
+  padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+}
+
+.searchable-select--large .searchable-select-input {
+  height: 48px;
+  font-size: 1rem;
+  padding: 0.75rem 3rem 0.75rem 1rem;
+}
+
+/* Popover */
+.searchable-select-popover {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  width: 100%;
+  max-height: 250px;
+  overflow-y: auto;
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  animation: searchable-select-fade-in 0.15s ease-out;
+}
+
+.searchable-select-popover--top-aligned {
+  top: auto;
+  bottom: calc(100% + 0.25rem);
+}
+
+@keyframes searchable-select-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.searchable-select-options-list {
+  padding: 0.25rem;
+  margin: 0;
+  list-style: none;
+}
+
+.searchable-select-option {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--text-main);
+  transition: all 0.1s;
+}
+
+.searchable-select-option:hover {
+  background-color: var(--surface-hover);
+}
+
+.searchable-select-option--selected {
+  background-color: var(--accent) !important;
+  color: white !important;
+}
+
+.searchable-select-no-results {
+  padding: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+/* Custom Scrollbar for Popover */
+.searchable-select-popover::-webkit-scrollbar {
+  width: 6px;
+}
+
+.searchable-select-popover::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.searchable-select-popover::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.searchable-select-popover::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

@@ -1,5 +1,8 @@
 import type { Connection } from '../../domain/models/Connection';
-import type { ConnectionRepository } from '../../domain/repositories/ConnectionRepository';
+import type {
+  ConnectionRepository,
+  UpdateConnectionRequest
+} from '../../domain/repositories/ConnectionRepository';
 
 export class UpdateConnectionUseCase {
   private readonly repository: ConnectionRepository;
@@ -10,7 +13,7 @@ export class UpdateConnectionUseCase {
 
   async execute(
     id: string,
-    connection: Partial<Connection>
+    connection: UpdateConnectionRequest
   ): Promise<Connection> {
     return this.repository.updateConnection(id, connection);
   }

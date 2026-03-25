@@ -1,0 +1,118 @@
+/* src/modules/connections/presentation/styles/ConnectionsTable.css */
+
+.conn-table-wrapper {
+  background-color: var(--surface);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 0px;
+}
+
+.conn-table-actions {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+/* ── Detail Modal ──────────────────────────────────────────────────────────── */
+.conn-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: conn-fade-in 0.2s ease-out;
+}
+
+.conn-detail-modal {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  width: min(480px, 90vw);
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.2),
+    0 8px 24px rgba(0, 0, 0, 0.1);
+  animation: conn-slide-up 0.2s ease-out;
+}
+
+.conn-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.conn-detail-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.conn-detail-body {
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.conn-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--border-color);
+  gap: 1rem;
+}
+
+.conn-detail-row:last-child {
+  border-bottom: none;
+}
+
+.conn-detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.conn-detail-value {
+  font-size: 0.8125rem;
+  color: var(--text-main);
+  text-align: right;
+  word-break: break-all;
+}
+
+/* ── Compact table cells ──────────────────────────────────────────────────── */
+.conn-table-wrapper table th,
+.conn-table-wrapper table td {
+  padding: 0.4rem 0.75rem !important;
+  font-size: 0.8125rem !important;
+}
+
+@media (max-width: 640px) {
+  .conn-table-wrapper table th,
+  .conn-table-wrapper table td {
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+@keyframes conn-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes conn-slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}

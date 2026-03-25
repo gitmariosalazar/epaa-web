@@ -83,3 +83,29 @@
     gap: 0.5rem;
   }
 }
+
+.customer-form__dynamic-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.customer-form__dynamic-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.customer-form__dynamic-input {
+  flex: 1;
+}
+
+.customer-form__remove-btn {
+  margin-bottom: 0.25rem; /* Align with input field */
+}
+
+.customer-form__add-btn {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+}

@@ -39,18 +39,34 @@ export const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
 
-  // Initial load
+  // Sync selection with available columns
   useEffect(() => {
-    if (isOpen && pdfGenerator && selectedColumnIds.length === 0 && availableColumns.length > 0) {
-      const defaults = availableColumns
-        .filter((c) => c.isDefault !== false)
-        .map((c) => c.id);
-      setSelectedColumnIds(defaults);
-      
-      // Auto-generate first time
+    if (isOpen && availableColumns.length > 0) {
+      setSelectedColumnIds((prev) => {
+        // 1. Filter out orphan IDs that no longer exist
+        const validPrev = prev.filter((id) =>
+          availableColumns.some((col) => col.id === id)
+        );
+
+        // 2. If it's the very first time (prev is empty), use defaults
+        if (validPrev.length === 0) {
+          return availableColumns
+            .filter((c) => c.isDefault !== false)
+            .map((c) => c.id);
+        }
+
+        // 3. Keep current selection if it's still valid
+        return validPrev;
+      });
+    }
+  }, [isOpen, availableColumns]);
+
+  // Handle first generate
+  useEffect(() => {
+    if (isOpen && pdfGenerator && selectedColumnIds.length > 0) {
       setLoadingPreview(true);
       const timer = setTimeout(() => {
-        const url = pdfGenerator({ orientation, selectedColumnIds: defaults });
+        const url = pdfGenerator({ orientation, selectedColumnIds });
         setPreviewUrl(url);
         setLoadingPreview(false);
       }, 100);

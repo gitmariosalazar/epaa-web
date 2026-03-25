@@ -2,128 +2,36 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Clock, CheckCircle, Calculator, List } from 'lucide-react';
 
-// ── Componentes Compartidos ──────────────────────────────────────────────────
 import { Tabs } from '@/shared/presentation/components/Tabs';
 import type { TabItem } from '@/shared/presentation/components/Tabs';
-import {
-  Table,
-  type Column
-} from '@/shared/presentation/components/Table/Table';
 import {
   CircularProgress,
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
+import { Modal } from '@/shared/presentation/components/Modal/Modal';
 
-// ── Importación del Contexto de Lecturas ─────────────────────────────────────
-// Importamos nuestro filtro pulido (Filtro Segregado) y el Hook que orquesta (Adaptador)
 import {
   ReadingDataFilters,
   type ReadingDataTab
 } from '../components/ReadinsFilters';
 import { useReadingsList } from '../hooks/useReadingsList';
-
-// Importación de Tipos Limpios del Dominio
-import type {
-  PendingReadingConnection,
-  TakenReadingConnection
-} from '../../domain/models/Reading';
-import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
-// =========================================================================
-// 1. CONFIGURACIÓN ESTÁTICA (OCP - Open/Closed Principle)
-// =========================================================================
-// Mantenemos la estructura de pestañas generada dentro del componente.
+import { PendingReadingConnectionTable } from '../components/PendingReadingConnectionTable';
+import { CompletedReadingConnectionTable } from '../components/CompletedReadingConnectionTable';
+import { EstimatedReadingConnectionTable } from '../components/EstimatedReadingConnectionTable';
+import { AllReadingsTable } from '../components/AllReadingsTable';
+import { CreateReadingPage } from './CreateReadingPage';
+import { UpdateReadingPage } from './UpdateReadingPage';
 
-// ── Definición de Columnas de las Tablas (SRP - Responsabilidad Única) ──
-// Cada interfaz de modelo del dominio tiene su propia definición de tabla.
+interface ModalState {
+  isOpen: boolean;
+  mode: 'create' | 'update';
+  cadastralKey: string;
+}
 
-// (Migrating columns inside the component to use translations)
-
-// =========================================================================
-// 2. COMPONENTE PRINCIPAL (La Página Controller)
-// =========================================================================
 export const ReadingsListPage: React.FC = () => {
   const { t } = useTranslation();
-
-  const PENDING_COLUMNS: Column<PendingReadingConnection>[] = useMemo(
-    () => [
-      { header: t('readings.columns.cadastralKey'), accessor: 'cadastralKey' },
-      {
-        header: t('readings.columns.meter'),
-        accessor: (r) => r.meterNumber || t('readings.columns.noMeter')
-      },
-      {
-        header: t('readings.columns.client'),
-        accessor: (row) => (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Avatar name={row.clientName} size="sm" />
-            <div>
-              <div style={{ fontWeight: 300 }}>{row.clientName}</div>
-              <div
-                style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}
-              >
-                {row.cardId}
-              </div>
-            </div>
-          </div>
-        )
-      },
-      { header: t('readings.columns.sector'), accessor: 'sector' },
-      { header: t('readings.columns.account'), accessor: 'account' },
-      { header: t('readings.columns.address'), accessor: 'address' },
-      {
-        header: t('readings.columns.average'),
-        accessor: (r) => `${r.averageConsumption} m³`
-      }
-    ],
-    [t]
-  );
-
-  const TAKEN_COLUMNS: Column<TakenReadingConnection>[] = useMemo(
-    () => [
-      { header: t('readings.columns.cadastralKey'), accessor: 'cadastralKey' },
-      {
-        header: t('readings.columns.meter'),
-        accessor: (r) => r.meterNumber || t('readings.columns.noMeter')
-      },
-      {
-        header: t('readings.columns.client'),
-        accessor: (row) => (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Avatar name={row.clientName} size="sm" />
-            <div>
-              <div style={{ fontWeight: 300 }}>{row.clientName}</div>
-              <div
-                style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}
-              >
-                {row.cardId}
-              </div>
-            </div>
-          </div>
-        )
-      },
-      {
-        header: t('readings.columns.readingDate'),
-        accessor: (r) =>
-          r.readingDate ? dateService.formatToLocaleString(r.readingDate) : '-'
-      },
-      {
-        header: t('readings.columns.prevReading'),
-        accessor: 'previousReading'
-      },
-      { header: t('readings.columns.currReading'), accessor: 'currentReading' },
-      {
-        header: t('readings.columns.consumption'),
-        accessor: (r) => `${r.calculatedConsumption} m³`
-      },
-      {
-        header: t('readings.columns.novelty'),
-        accessor: (r) => r.novelty || t('readings.columns.none')
-      }
-    ],
-    [t]
-  );
 
   const READINGS_TABS: TabItem<ReadingDataTab>[] = useMemo(
     () => [
@@ -147,18 +55,12 @@ export const ReadingsListPage: React.FC = () => {
     [t]
   );
 
-  // ── A. ESTADO DE LOS FILTROS VISUALES ──────────────────────────────────────
   const [activeTab, setActiveTab] = useState<ReadingDataTab>('pending');
-
-  // Asumimos el mes actual como "YYYY-MM"
+  const [modalState, setModalState] = useState<ModalState | null>(null);
   const currentMonthStr = dateService.getCurrentMonthString();
   const [month, setMonth] = useState(currentMonthStr);
   const [sector, setSector] = useState('');
 
-  console.log('month', month);
-  console.log('sector', sector);
-
-  // ── B. OBTENCIÓN DE DATOS DEL HOOK (Clean Architecture - Controller) ───────
   const {
     pendingReadings,
     completedReadings,
@@ -168,24 +70,13 @@ export const ReadingsListPage: React.FC = () => {
     fetchReadings
   } = useReadingsList();
 
-  // El indicador de progreso circular
   const loadingProgress = useSimulatedProgress(isLoading);
 
-  // ── C. EFECTOS AUTOMÁTICOS ─────────────────────────────────────────────────
-  // Cuando se cambia de pestaña, limpiar los sub-filtros visuales (Sector),
-  // pero mantener el Mes intacto.
   useEffect(() => {
     setSector('');
   }, [activeTab]);
 
-  // Al montar la página, podemos hacer un fetch inicial automático si lo deseamos.
-  // useEffect(() => {
-  //   fetchReadings(month);
-  // }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── D. FILTRADO LOCAL (Memoria) ────────────────────────────────────────────
-  // Utilizamos `useMemo` para no recalcular la lista si solo cambiaron otros estados.
-  const filterBySector = <T extends { sector: number }>(list: T[]) => {
+  const filterBySector = <T extends { sector: number | string }>(list: T[]) => {
     if (!sector) return list;
     return list.filter((item) => String(item.sector).includes(sector));
   };
@@ -203,7 +94,6 @@ export const ReadingsListPage: React.FC = () => {
     [estimatedReadings, sector]
   );
 
-  // Unimos todo en caso de que quieran ver todas
   const filteredAll = useMemo(() => {
     return [
       ...filteredPending.map((item) => ({ ...item, _type: 'Pendiente' })),
@@ -211,20 +101,30 @@ export const ReadingsListPage: React.FC = () => {
     ];
   }, [filteredPending, filteredCompleted]);
 
-  // ── E. RENDERIZACIÓN DE LA VISTA ───────────────────────────────────────────
+  const handleTableAction = (mode: 'create' | 'update', cadastralKey: string) => {
+    setModalState({ isOpen: true, mode, cadastralKey });
+  };
+
+  const closeModal = () => {
+    setModalState(null);
+  };
+
+  const handleModalSuccess = () => {
+    closeModal();
+    fetchReadings(activeTab, month, sector);
+  };
+
   return (
     <div
       className="entry-data-page"
       style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
     >
-      {/* 1. SECCIÓN DE PESTAÑAS */}
       <Tabs
         tabs={READINGS_TABS}
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
 
-      {/* 2. SECCIÓN DE FILTROS (Inyectando Props por ISP) */}
       <ReadingDataFilters
         activeTab={activeTab}
         month={month}
@@ -235,7 +135,6 @@ export const ReadingsListPage: React.FC = () => {
         isLoading={isLoading}
       />
 
-      {/* 3. SECCIÓN DE RESULTADOS O ERRORES */}
       {error ? (
         <div
           className="entry-data-error"
@@ -260,54 +159,64 @@ export const ReadingsListPage: React.FC = () => {
           />
         </div>
       ) : (
-        /* 4. RENDERIZADO DE TABLAS DINÁMICO SEGÚN LA PESTAÑA ACTIVA */
         <>
           {activeTab === 'pending' && (
-            <Table<PendingReadingConnection>
+            <PendingReadingConnectionTable
               data={filteredPending}
-              columns={PENDING_COLUMNS}
               isLoading={isLoading}
-              pagination
-              pageSize={10}
+              onAction={handleTableAction}
             />
           )}
 
           {activeTab === 'completed' && (
-            <Table<TakenReadingConnection>
+            <CompletedReadingConnectionTable
               data={filteredCompleted}
-              columns={TAKEN_COLUMNS}
               isLoading={isLoading}
-              pagination
-              pageSize={10}
+              onAction={handleTableAction}
             />
           )}
 
           {activeTab === 'estimated' && (
-            <Table<TakenReadingConnection>
+            <EstimatedReadingConnectionTable
               data={filteredEstimated}
-              columns={TAKEN_COLUMNS}
               isLoading={isLoading}
-              pagination
-              pageSize={10}
+              onAction={handleTableAction}
             />
           )}
 
           {activeTab === 'all' && (
-            <Table<any>
+            <AllReadingsTable
               data={filteredAll}
-              columns={[
-                { header: 'Estado', accessor: '_type' },
-                { header: 'Clave Catastral', accessor: 'cadastralKey' },
-                { header: 'Cliente', accessor: 'clientName' },
-                { header: 'Medidor', accessor: (r) => r.meterNumber || 'S/M' }
-              ]}
               isLoading={isLoading}
-              pagination
-              pageSize={10}
             />
           )}
         </>
       )}
+
+      {/* MODAL DE CREACIÓN / EDICIÓN */}
+      <Modal
+        isOpen={!!modalState?.isOpen}
+        onClose={closeModal}
+        title=""
+        size="full"
+      >
+        <div style={{ padding: '0px 10px', height: '100%' }}>
+          {modalState?.mode === 'create' && (
+            <CreateReadingPage
+              initialCadastralKey={modalState?.cadastralKey}
+              onSuccess={handleModalSuccess}
+              onCancel={closeModal}
+            />
+          )}
+          {modalState?.mode === 'update' && (
+            <UpdateReadingPage
+              initialCadastralKey={modalState?.cadastralKey}
+              onSuccess={handleModalSuccess}
+              onCancel={closeModal}
+            />
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

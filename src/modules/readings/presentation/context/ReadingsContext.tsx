@@ -11,6 +11,8 @@ import { TakenReadingConnectionUseCase } from '../../application/usecases/TakenR
 import { TakenReadingConnectionRepositoryImpl } from '../../infrastructure/repositories/TakenReadingConnectionRepositoryImpl';
 import { ReadingImagesUseCase } from '../../application/usecases/ReadingImagesUseCase';
 import { ReadingImagesRepositoryImpl } from '../../infrastructure/repositories/ReadingImagesRepositoryImpl';
+import { UpdateReadingUseCase } from '../../application/usecases/UpdateReadingUseCase';
+import { UpdateReadingRepositoryImpl } from '../../infrastructure/repositories/UpdateReadingRepositoryImpl';
 
 interface ReadingsContextType {
   getReadingInfoUseCase: GetReadingInfoUseCase;
@@ -20,6 +22,7 @@ interface ReadingsContextType {
   getTakenReadingEstimatesOrAverageUseCase: TakenReadingConnectionUseCase;
   getTakenReadingsByMonthUseCase: TakenReadingConnectionUseCase;
   readingImagesUseCase: ReadingImagesUseCase;
+  updateReadingUseCase: UpdateReadingUseCase;
 }
 
 const ReadingsContext = createContext<ReadingsContextType | null>(null);
@@ -27,6 +30,7 @@ const ReadingsContext = createContext<ReadingsContextType | null>(null);
 export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
   children
 }) => {
+  // Repositories
   const readingInfoRepository = new ReadingInfoRepositoryImpl();
   const readingHistoryRepository = new ReadingHistoryRepositoryImpl();
   const createReadingRepository = new CreateReadingRepositoryImpl();
@@ -35,7 +39,9 @@ export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
   const takenReadingConnectionRepository =
     new TakenReadingConnectionRepositoryImpl();
   const readingImagesRepository = new ReadingImagesRepositoryImpl();
+  const updateReadingRepository = new UpdateReadingRepositoryImpl();
 
+  // Use Cases
   const getTakenReadingEstimatesOrAverageUseCase =
     new TakenReadingConnectionUseCase(takenReadingConnectionRepository);
   const getTakenReadingsByMonthUseCase = new TakenReadingConnectionUseCase(
@@ -56,6 +62,9 @@ export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
   const readingImagesUseCase = new ReadingImagesUseCase(
     readingImagesRepository
   );
+  const updateReadingUseCase = new UpdateReadingUseCase(
+    updateReadingRepository
+  );
 
   const value = {
     getReadingInfoUseCase,
@@ -64,7 +73,8 @@ export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
     getPendingReadingsByMonthUseCase,
     getTakenReadingEstimatesOrAverageUseCase,
     getTakenReadingsByMonthUseCase,
-    readingImagesUseCase
+    readingImagesUseCase,
+    updateReadingUseCase
   };
 
   return (

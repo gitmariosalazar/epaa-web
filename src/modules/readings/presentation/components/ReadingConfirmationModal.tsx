@@ -46,6 +46,7 @@ interface ReadingConfirmationModalProps {
   currentReadingInput: number | '';
   observationInput: string;
   isSubmitting: boolean;
+  method: 'create' | 'update';
 }
 
 // ── Sub-componentes atómicos (ISP: cada uno recibe sólo lo que necesita) ─────
@@ -100,13 +101,15 @@ interface ClientInfoCardProps {
   cardId: string;
   cadastralKey: string;
   address: string;
+  method: 'create' | 'update';
 }
 
 const ClientInfoCard: React.FC<ClientInfoCardProps> = ({
   clientName,
   cardId,
   cadastralKey,
-  address
+  address,
+  method
 }) => (
   <div className="cr-confirm-client-card">
     <h4>
@@ -139,7 +142,9 @@ interface ReadingStatsGridProps {
   viewModel: ReadingConfirmationViewModel;
 }
 
-const ReadingStatsGrid: React.FC<ReadingStatsGridProps> = ({ viewModel }) => {
+const ReadingStatsGrid: React.FC<ReadingStatsGridProps> = ({
+  viewModel
+}) => {
   const { previousReading, currentReading, consumption, visuals } = viewModel;
   const ConsumptionIcon = visuals.Icon;
 
@@ -170,7 +175,7 @@ const ReadingStatsGrid: React.FC<ReadingStatsGridProps> = ({ viewModel }) => {
           style={{ marginBottom: 4 }}
         />
         <span
-          className={`cr-confirm-val ${visuals.textClass} ${visuals.badgeClass} cr-confirm-val-badge`}
+          className={`${visuals.textClass} ${visuals.badgeClass} cr-confirm-val-badge`}
         >
           {consumption.toFixed(2)} <small>m³</small>
         </span>
@@ -283,11 +288,13 @@ export const ReadingConfirmationModal: React.FC<
   readingInfo,
   currentReadingInput,
   observationInput,
-  isSubmitting
+  isSubmitting,
+  method
 }) => {
   const viewModel = useReadingConfirmationModal(
     readingInfo,
-    currentReadingInput
+    currentReadingInput,
+    method
   );
 
   return (
@@ -314,6 +321,7 @@ export const ReadingConfirmationModal: React.FC<
           cardId={readingInfo.cardId}
           cadastralKey={readingInfo.cadastralKey}
           address={readingInfo.address}
+          method={method}
         />
 
         {/* 3. Grid: lecturas + consumo con colores sincronizados */}

@@ -1,4 +1,8 @@
-import type { CustomerRepository } from '../../domain/repositories/CustomerRepository';
+import type {
+  CreateCustomerRequest,
+  CustomerRepository,
+  UpdateCustomerRequest
+} from '../../domain/repositories/CustomerRepository';
 import type { Customer } from '../../domain/models/Customer';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 import type { HttpClientInterface } from '@/shared/infrastructure/api/interfaces/HttpClientInterface';
@@ -28,16 +32,14 @@ export class CustomerRepositoryImpl implements CustomerRepository {
     return response.data.data;
   }
 
-  async create(
-    customer: Omit<Customer, 'customerId'> & { customerId: string }
-  ): Promise<void> {
+  async create(customer: CreateCustomerRequest): Promise<void> {
     await this.client.post<ApiResponse<void>>(
       '/Customers/create-customer',
       customer
     );
   }
 
-  async update(id: string, customer: Partial<Customer>): Promise<void> {
+  async update(id: string, customer: UpdateCustomerRequest): Promise<void> {
     await this.client.put<ApiResponse<void>>(
       `/Customers/update-customer/${id}`,
       customer
@@ -50,10 +52,12 @@ export class CustomerRepositoryImpl implements CustomerRepository {
     );
   }
 
-  async findByIdentification(identification: string): Promise<Customer | null> {
+  async findByIdentification(
+    identification: string
+  ): Promise<Customer | null> {
     try {
       const response = await this.client.get<ApiResponse<Customer>>(
-        `/Customers/get-customer-by-id/${identification}`
+        `/Customers/get-customer-by-identification/${identification}`
       );
       return response.data.data;
     } catch (error) {

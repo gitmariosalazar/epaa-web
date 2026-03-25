@@ -1,9 +1,20 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type {
   Connection,
   Rate
 } from '@/modules/connections/domain/models/Connection';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { Input } from '@/shared/presentation/components/Input/Input';
+import { Select } from '@/shared/presentation/components/Input/Select';
+import { CheckBox } from '@/shared/presentation/components/Input/CheckBox';
+import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
+import { 
+  FaFileContract, 
+  FaHashtag, 
+  FaMapMarkerAlt, 
+  FaTag 
+} from 'react-icons/fa';
 
 interface BasicConnectionStepProps {
   formData: Omit<Connection, 'connectionId'>;
@@ -22,75 +33,70 @@ export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
   nextStep,
   prevStep
 }) => {
+  const { t } = useTranslation();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     nextStep();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="step-container step-animation">
-      <h3 className="step-title">Step 2: Basic Connection Details</h3>
+    <form
+      onSubmit={handleSubmit}
+      onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
+      className="step-container step-animation"
+    >
+      <h3 className="step-title">{t('connections.wizard.basicDetails.title')}</h3>
 
       <div className="form-grid">
         <div className="form-group">
-          <label className="form-label">Rate Type</label>
-          <select
+          <Select
+            label={t('connections.wizard.basicDetails.rateType')}
             name="connectionRateId"
+            size="small"
             value={formData.connectionRateId}
             onChange={handleInputChange}
-            className="wizard-input"
             required
+            leftIcon={<FaTag size={14} />}
           >
-            <option value="">Select a rate...</option>
+            <option value="">{t('connections.wizard.basicDetails.selectRate')}</option>
             {rates.map((rate: Rate) => (
               <option key={rate.rateId} value={rate.rateId}>
                 {rate.rateName}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
-
-        <div className="form-group">
-          <label className="form-label">Meter Number</label>
-          <input
-            type="text"
-            name="connectionMeterNumber"
-            value={formData.connectionMeterNumber}
-            onChange={handleInputChange}
-            className="wizard-input"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Contract Number</label>
-          <input
-            type="text"
-            name="connectionContractNumber"
-            value={formData.connectionContractNumber}
-            onChange={handleInputChange}
-            className="wizard-input"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Address</label>
-          <input
-            type="text"
-            name="connectionAddress"
-            value={formData.connectionAddress}
-            onChange={handleInputChange}
-            className="wizard-input"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Installation Date</label>
-          <input
-            type="date"
-            name="connectionInstallationDate"
+        <Input
+          label={t('connections.wizard.basicDetails.meterNumber')}
+          name="connectionMeterNumber"
+          size="small"
+          value={formData.connectionMeterNumber}
+          onChange={handleInputChange}
+          required
+          leftIcon={<FaHashtag size={14} />}
+        />
+        <Input
+          label={t('connections.wizard.basicDetails.contractNumber')}
+          name="connectionContractNumber"
+          size="small"
+          value={formData.connectionContractNumber}
+          onChange={handleInputChange}
+          required
+          leftIcon={<FaFileContract size={14} />}
+        />
+        <Input
+          label={t('connections.wizard.clientSelection.address')}
+          name="connectionAddress"
+          size="small"
+          value={formData.connectionAddress}
+          onChange={handleInputChange}
+          required
+          leftIcon={<FaMapMarkerAlt size={14} />}
+        />
+        <div className="input-component input--small">
+          <label className="input__label">{t('connections.wizard.basicDetails.installationDate')}</label>
+          <DatePicker
+            size="small"
             value={
               formData.connectionInstallationDate
                 ? new Date(formData.connectionInstallationDate)
@@ -98,52 +104,40 @@ export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
                     .split('T')[0]
                 : ''
             }
-            onChange={handleInputChange}
-            className="wizard-input"
-            required
+            onChange={(date) => handleInputChange({ target: { name: 'connectionInstallationDate', value: date } } as any)}
           />
         </div>
-
-        <div className="form-checkbox-group">
-          <input
-            type="checkbox"
-            id="connectionSewerage"
+        <div className="checkbox-group" style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+          <CheckBox
+            label={t('connections.wizard.basicDetails.sewerage')}
             name="connectionSewerage"
+            value="sewerage"
             checked={formData.connectionSewerage}
-            onChange={handleInputChange}
-            className="wizard-checkbox"
+            onCheckedChange={(checked) =>
+              handleInputChange({
+                target: { name: 'connectionSewerage', checked, type: 'checkbox' }
+              } as any)
+            }
           />
-          <label
-            htmlFor="connectionSewerage"
-            className="form-label checkbox-label"
-          >
-            Includes Sewerage
-          </label>
-        </div>
-
-        <div className="form-checkbox-group">
-          <input
-            type="checkbox"
-            id="connectionStatus"
+          <CheckBox
+            label={t('connections.wizard.basicDetails.activeStatus')}
             name="connectionStatus"
+            value="status"
             checked={formData.connectionStatus}
-            onChange={handleInputChange}
-            className="wizard-checkbox"
+            onCheckedChange={(checked) =>
+              handleInputChange({
+                target: { name: 'connectionStatus', checked, type: 'checkbox' }
+              } as any)
+            }
           />
-          <label
-            htmlFor="connectionStatus"
-            className="form-label checkbox-label"
-          >
-            Active Status
-          </label>
         </div>
       </div>
 
       <div className="step-actions">
         <Button type="button" variant="ghost" onClick={prevStep}>
-          Back
+          {t('common.back')}
         </Button>
-        <Button type="submit">Next: Technical Details</Button>
+        <Button type="submit">{t('connections.wizard.basicDetails.nextTechnical')}</Button>
       </div>
     </form>
   );

@@ -5,20 +5,58 @@
 
 .datepicker-trigger {
   width: 100%;
-  padding: 0.35rem 0.5rem 0.35rem 1.75rem;
-  background-color: var(--background);
+  padding: 0.35rem 0.5rem 0.35rem 2.2rem;
+  background-color: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 0.375rem;
+  border-radius: var(--radius-sm);
   color: var(--text-main);
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   box-sizing: border-box;
   font-family: inherit;
-  font-size: 0.8rem;
   display: flex;
   align-items: center;
   cursor: pointer;
-  height: 36px; /* Aumentado a petición para mejor apariencia */
   text-align: left;
+  outline: none;
+}
+
+/* Size: Small */
+.datepicker--small .datepicker-trigger {
+  height: 28px;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem 0.15rem 2.2rem;
+}
+
+.datepicker--small .datepicker-icon {
+  left: 0.6rem;
+  width: 14px;
+  height: 14px;
+}
+
+/* Size: Medium */
+.datepicker--medium .datepicker-trigger {
+  height: 40px;
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem 0.5rem 2.75rem;
+}
+
+.datepicker--medium .datepicker-icon {
+  left: 0.75rem;
+  width: 16px;
+  height: 16px;
+}
+
+/* Size: Large */
+.datepicker--large .datepicker-trigger {
+  height: 48px;
+  font-size: 1rem;
+  padding: 0.75rem 1rem 0.75rem 3rem;
+}
+
+.datepicker--large .datepicker-icon {
+  left: 1rem;
+  width: 18px;
+  height: 18px;
 }
 
 .datepicker-trigger:hover:not(.datepicker-trigger--disabled) {

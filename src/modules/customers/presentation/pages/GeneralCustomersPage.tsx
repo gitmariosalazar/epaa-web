@@ -184,6 +184,7 @@ export const GeneralCustomersPage: React.FC = () => {
           <CustomerForm
             formData={viewModel.customerFormData}
             onChange={viewModel.handleCustomerInputChange}
+            setFormData={viewModel.setCustomerFormData}
             isEditMode={!!viewModel.selectedCustomer}
             isViewOnly={viewModel.isViewOnly}
           />

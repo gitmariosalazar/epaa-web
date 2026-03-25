@@ -57,6 +57,8 @@ interface TableProps<T> {
   onExportPdf?: () => void;
   getRowColor?: (item: T) => RowColor | undefined;
   getRowClassName?: (item: T) => string | undefined;
+  onEndReached?: () => void;
+  hasMore?: boolean;
 }
 
 export const Table = <T extends { [key: string]: any }>({
@@ -76,7 +78,9 @@ export const Table = <T extends { [key: string]: any }>({
   fullHeight = false,
   onExportPdf,
   getRowColor,
-  getRowClassName
+  getRowClassName,
+  onEndReached,
+  hasMore
 }: TableProps<T>) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -109,7 +113,23 @@ export const Table = <T extends { [key: string]: any }>({
     onSort(key, direction);
   };
 
-  if (isLoading) {
+  const observerTarget = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!onEndReached || !hasMore) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onEndReached();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (observerTarget.current) observer.observe(observerTarget.current);
+    return () => observer.disconnect();
+  }, [onEndReached, hasMore]);
+
+  if (isLoading && data.length === 0) {
     return (
       <div className="table-loader">
         <div className="spinner"></div>{' '}
@@ -125,7 +145,18 @@ export const Table = <T extends { [key: string]: any }>({
     : data;
 
   const handlePrev = () => setCurrentPage((p) => Math.max(1, p - 1));
-  const handleNext = () => setCurrentPage((p) => Math.min(totalPages, p + 1));
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((p) => p + 1);
+      // Opcional: si nos estamos acercando, pre-fetchear
+      if (currentPage === totalPages - 1 && hasMore && onEndReached) {
+        onEndReached();
+      }
+    } else if (hasMore && onEndReached) {
+      onEndReached();
+      setCurrentPage((p) => p + 1);
+    }
+  };
 
   return (
     <div
@@ -219,7 +250,9 @@ export const Table = <T extends { [key: string]: any }>({
             ) : (
               <tr>
                 <td colSpan={columns.length} className="empty-state-cell">
-                  {emptyState || (
+                  {isLoading ? (
+                     <div className="table-loader" style={{ padding: '2rem' }}>{t('common.table.loading')}</div>
+                  ) : emptyState || (
                     <div className="default-empty-state">
                       {t('common.table.noData')}
                     </div>
@@ -230,6 +263,13 @@ export const Table = <T extends { [key: string]: any }>({
             {data && data.length > 0 && (
               <tr style={{ height: '100%' }}>
                 <td colSpan={columns.length} style={{ padding: 0, border: 'none', background: 'transparent' }}></td>
+              </tr>
+            )}
+            {onEndReached && hasMore && !pagination && (
+              <tr ref={observerTarget} style={{ height: '20px' }}>
+                <td colSpan={columns.length} style={{ textAlign: 'center', padding: '10px', color: 'var(--text-muted)' }}>
+                  {isLoading ? t('common.loading', 'Loading...') : ''}
+                </td>
               </tr>
             )}
           </tbody>
@@ -348,7 +388,7 @@ export const Table = <T extends { [key: string]: any }>({
             <span className="table-pagination-records">
               {t('common.table.totalRecords', {
                 count: data.length,
-                defaultValue: `Total Registros: ${data.length}`
+                defaultValue: `Total Registros: ${data.length}${hasMore ? '+' : ''}`
               })}
             </span>
 
@@ -389,12 +429,12 @@ export const Table = <T extends { [key: string]: any }>({
                 <span className="table-pagination-page-text">
                   {t('common.pagination.page', {
                     current: currentPage,
-                    total: totalPages
-                  }) || `Pág. ${currentPage} / ${totalPages}`}
+                    total: hasMore ? `${totalPages}+` : totalPages
+                  }) || `Pág. ${currentPage} / ${hasMore ? totalPages + '+' : totalPages}`}
                 </span>
                 <button
                   onClick={handleNext}
-                  disabled={currentPage === totalPages}
+                  disabled={currentPage >= totalPages && !hasMore}
                   className="pagination-btn"
                 >
                   <ChevronRight size={18} />

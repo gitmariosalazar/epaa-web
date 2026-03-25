@@ -26,7 +26,11 @@ export const useCompaniesViewModel = () => {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   // Form Data
-  const initialFormState: CreateCompanyRequest = {
+  const initialFormState: CreateCompanyRequest & {
+    companyCountryId?: string;
+    companyProvinceId?: string;
+    companyCantonId?: string;
+  } = {
     companyName: '',
     socialReason: '',
     companyRuc: '',
@@ -35,10 +39,13 @@ export const useCompaniesViewModel = () => {
     companyCountry: 'ECUADOR',
     companyEmails: [],
     companyPhones: [],
-    identificationType: 'RUC'
+    identificationType: 'RUC',
+    companyCountryId: 'ECU',
+    companyProvinceId: '10',
+    companyCantonId: '1001'
   };
   const [formData, setFormData] =
-    useState<CreateCompanyRequest>(initialFormState);
+    useState<any>(initialFormState);
 
   // Load Data
   const loadCompanies = async () => {
@@ -61,9 +68,22 @@ export const useCompaniesViewModel = () => {
 
   // Handlers
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { name: string; value: any } | any
   ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target) {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    } else if (e.countryId || e.companyCountryId) {
+      // Handle location object
+      setFormData((prev: any) => ({
+        ...prev,
+        companyCountryId: e.countryId || e.companyCountryId,
+        companyProvinceId: e.provinceId || e.companyProvinceId,
+        companyCantonId: e.cantonId || e.companyCantonId,
+        companyParishId: e.parishId || e.companyParishId
+      }));
+    } else {
+      setFormData({ ...formData, [(e as any).name]: (e as any).value });
+    }
   };
 
   const resetForm = () => {
@@ -118,9 +138,12 @@ export const useCompaniesViewModel = () => {
       companyAddress: company.companyAddress || '',
       companyParishId: company.companyParishId,
       companyCountry: company.companyCountry || 'ECUADOR',
-      companyEmails: company.companyEmails.map((e) => e.correo), // Map complex object to string array
-      companyPhones: company.companyPhones.map((p) => p.numero), // Map complex object to string array
-      identificationType: company.identificationType
+      companyEmails: company.companyEmails.map((e) => e.correo),
+      companyPhones: company.companyPhones.map((p) => p.numero),
+      identificationType: company.identificationType,
+      companyCountryId: 'ECU',
+      companyProvinceId: company.companyParishId ? company.companyParishId.substring(0, 2) : '10',
+      companyCantonId: company.companyParishId ? company.companyParishId.substring(0, 4) : '1001'
     });
     setIsFormOpen(true);
   };

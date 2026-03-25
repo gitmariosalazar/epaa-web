@@ -17,6 +17,8 @@ import { MdAssignmentAdd, MdOutlineCable } from 'react-icons/md';
 import { TiThList } from 'react-icons/ti';
 import { TbClock24 } from 'react-icons/tb';
 import type { NavSection } from '@/shared/domain/models/Navigation';
+import { FaEdit } from 'react-icons/fa';
+import { IoMdPhotos } from 'react-icons/io';
 
 export const useNavigation = (): NavSection[] => {
   const { t } = useTranslation();
@@ -150,7 +152,7 @@ export const useNavigation = (): NavSection[] => {
               to: '/readings/add'
             },
             {
-              icon: <TiThList size={18} />,
+              icon: <IoMdPhotos size={18} />,
               label: 'Foto Lecturas',
               to: '/readings/images'
             },
@@ -158,6 +160,11 @@ export const useNavigation = (): NavSection[] => {
               icon: <TiThList size={18} />,
               label: 'Lecturas',
               to: '/readings/list'
+            },
+            {
+              icon: <FaEdit size={18} />,
+              label: 'Actualizar Lectura',
+              to: '/readings/update'
             }
           ]
         }
@@ -180,6 +187,23 @@ export const useNavigation = (): NavSection[] => {
               icon: <BarChart3 size={18} />,
               label: 'KPI de Recolección',
               to: '/trash-rate/trash-rate-kpi'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      title: 'Propiedades',
+      hideTitle: true,
+      items: [
+        {
+          icon: <Building2 size={20} />,
+          label: 'Propiedades',
+          subItems: [
+            {
+              icon: <TiThList size={18} />,
+              label: 'List',
+              to: '/properties/list'
             }
           ]
         }

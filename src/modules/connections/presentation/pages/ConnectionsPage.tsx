@@ -1,228 +1,191 @@
-import { useConnectionViewModel } from '../hooks/useConnectionViewModel';
-import { Table } from '@/shared/presentation/components/Table/Table';
+import '../styles/ConnectionsPage.css';
+import {
+  useConnectionsViewModel,
+  type ConnectionTab
+} from '../hooks/useConnectionsViewModel';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
-import { Card } from '@/shared/presentation/components/Card/Card';
-import { Check, Edit2, EyeIcon, Plus, Search, Trash, X } from 'lucide-react';
+import { Plus, Network, Users, LayoutGrid } from 'lucide-react';
 import { CreateConnectionWizard } from '../components/CreateConnectionWizard';
-import type { Connection } from '../../domain/models/Connection';
-import type { Column } from '@/shared/presentation/components/Table/Table';
-import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
-import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
+import { ConnectionsTable } from '../components/ConnectionsTable';
+import { ConnectionsFilters } from '../components/ConnectionsFilters';
+import { Tabs } from '@/shared/presentation/components/Tabs';
+import type { TabItem } from '@/shared/presentation/components/Tabs';
+import {
+  CircularProgress,
+  useSimulatedProgress
+} from '@/shared/presentation/components/CircularProgress';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { useTranslation } from 'react-i18next';
+import { AlertCircle, SearchX } from 'lucide-react';
 
 export const ConnectionsPage = () => {
-  const {
-    loading,
-    searchTerm,
-    isFormOpen,
-    handleDelete,
-    openEdit,
-    openDelete,
-    setSearchTerm,
-    setIsFormOpen,
-    resetForm,
-    filteredConnections,
-    isDeleteOpen,
-    setIsDeleteOpen
-  } = useConnectionViewModel();
+  const { t } = useTranslation();
 
-  const columns: Column<Connection>[] = [
+  const CONNECTION_TABS: TabItem<ConnectionTab>[] = [
     {
-      accessor: 'connectionId',
-      header: 'ID'
+      id: 'all',
+      label: t('connections.tabs.all'),
+      icon: <LayoutGrid size={16} />
     },
     {
-      accessor: 'connectionMeterNumber',
-      header: 'Meter Number'
+      id: 'sector',
+      label: t('connections.tabs.sector'),
+      icon: <Network size={16} />
     },
     {
-      accessor: 'connectionAccount',
-      header: 'Account'
-    },
-    {
-      accessor: 'connectionCadastralKey',
-      header: 'Cadastral Key'
-    },
-    {
-      accessor: 'connectionContractNumber',
-      header: 'Contract Number'
-    },
-    {
-      header: 'Sewerage',
-      accessor: (item: Connection) => {
-        const color: string = getTrafficLightColor(
-          item.connectionSewerage ? 100 : 0
-        );
-        return (
-          <ColorChip
-            label={item.connectionSewerage ? 'Yes' : 'No'}
-            color={color}
-            icon={<Check size={16} />}
-            variant="soft"
-            size="sm"
-          />
-        );
-      }
-    },
-    {
-      header: 'Status',
-      accessor: (item: Connection) => {
-        const color: string = getTrafficLightColor(
-          item.connectionStatus ? 100 : 0
-        );
-        return (
-          <ColorChip
-            label={item.connectionStatus ? 'Active' : 'Inactive'}
-            color={color}
-            icon={item.connectionStatus ? <Check size={16} /> : <X size={16} />}
-            variant="soft"
-            size="sm"
-          />
-        );
-      }
-    },
-    {
-      header: 'Actions',
-      accessor: (row) => (
-        <div
-          style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}
-        >
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => openEdit(row)}
-            title="Edit Connection"
-            circle
-            style={{ color: 'var(--blue)' }}
-          >
-            <Edit2 size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => openDelete(row)}
-            title="Delete Connection"
-            circle
-            style={{ color: 'var(--error)' }}
-          >
-            <Trash size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => {
-              alert('View Connection');
-            }}
-            title="View Connection"
-            circle
-            style={{ color: 'var(--success)' }}
-          >
-            <EyeIcon size={16} />
-          </Button>
-        </div>
-      )
+      id: 'client',
+      label: t('connections.tabs.client'),
+      icon: <Users size={16} />
     }
   ];
 
+  // ── Unified ViewModel (Handles both List and CRUD/Wizard) ────────────────
+  const { state, actions } = useConnectionsViewModel();
+
+  const loadingProgress = useSimulatedProgress(state.isLoading);
+
+  // ── Content renderer (mirrors PropertiesPage pattern) ────────────────────
+  const renderContent = () => {
+    // Show spinner only on first load (no data yet)
+    if (state.isLoading && state.filteredConnections.length === 0) {
+      return (
+        <div className="connections-loading">
+          <CircularProgress
+            progress={loadingProgress}
+            size={112}
+            strokeWidth={9}
+            label={t('common.loading', 'Loading...')}
+          />
+        </div>
+      );
+    }
+
+    if (state.error) {
+      return (
+        <div className="connections-loading">
+          <EmptyState
+            message={t('common.error', 'Ocurrió un error')}
+            description={state.error}
+            icon={AlertCircle}
+            variant="error"
+            minHeight="300px"
+          />
+        </div>
+      );
+    }
+
+    if (!state.isLoading && state.filteredConnections.length === 0) {
+      return (
+        <div className="connections-loading">
+          <EmptyState
+            message={t('common.noResults', 'Sin resultados')}
+            description={t(
+              'connections.noDataDescription',
+              'No se encontraron conexiones con los filtros actuales. Usa Consultar para cargar datos.'
+            )}
+            icon={SearchX}
+            variant="warning"
+            minHeight="300px"
+          />
+        </div>
+      );
+    }
+
+    return (
+      <ConnectionsTable
+        data={state.filteredConnections}
+        isLoading={state.isLoading}
+        onEdit={actions.openEdit}
+        onDelete={actions.openDelete}
+        onSort={actions.handleSort}
+        sortConfig={state.sortConfig}
+        onEndReached={actions.loadMore}
+        hasMore={state.hasMore}
+      />
+    );
+  };
+
   return (
     <div className="connections-page">
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: 'var(--spacing-lg)'
-        }}
-      >
-        <div className="connections-header">
-          <h1>Connections</h1>
-          <p>Manage connection details</p>
-        </div>
+      {/* ── Tabs & Action Button Row ── */}
+      <div className="connections-tabs-row">
+        <Tabs
+          tabs={CONNECTION_TABS}
+          activeTab={state.activeTab}
+          onTabChange={actions.handleTabChange}
+        />
         <Button
           leftIcon={<Plus size={18} />}
+          size="compact"
           onClick={() => {
-            resetForm();
-            setIsFormOpen(true);
+            actions.resetForm();
+            actions.setIsFormOpen(true);
           }}
         >
-          Create Connection
+          {t('connections.create', 'Nueva Conexión')}
         </Button>
       </div>
 
-      <Card>
-        <div
-          style={{
-            padding: 'var(--spacing-md)',
-            borderBottom: '1px solid var(--border-color)'
-          }}
-        >
-          <div style={{ position: 'relative', maxWidth: '300px' }}>
-            <Search
-              size={18}
-              style={{
-                position: 'absolute',
-                left: '10px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-secondary)'
-              }}
-            />
-            <input
-              type="text"
-              placeholder="Search connections..."
-              style={{
-                width: '100%',
-                padding: '8px 10px 8px 36px',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-color)',
-                backgroundColor: 'var(--surface)',
-                color: 'var(--text-main)',
-                outline: 'none'
-              }}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-        <Table
-          data={filteredConnections}
-          columns={columns}
-          isLoading={loading}
-          pageSize={25}
-          pagination
-          emptyState={
-            <EmptyState
-              message="No connections found"
-              description={`No connections found matching your search criteria. Try adjusting your search or filters.`}
-            />
-          }
-          fullHeight
-        />
-      </Card>
+      {/* ── Filters ── */}
+      <ConnectionsFilters
+        activeTab={state.activeTab}
+        sectorInput={state.sectorInput}
+        onSectorInputChange={actions.setSectorInput}
+        clientIdInput={state.clientIdInput}
+        onClientIdInputChange={actions.setClientIdInput}
+        onFetch={actions.handleFetch}
+        isLoading={state.isLoading}
+        canFetch={state.canFetch}
+        searchQuery={state.searchQuery}
+        onSearchQueryChange={actions.setSearchQuery}
+        searchField={state.searchField}
+        onSearchFieldChange={actions.setSearchField}
+        selectedStatus={state.selectedStatus}
+        onStatusChange={actions.setSelectedStatus}
+        selectedSewerage={state.selectedSewerage}
+        onSewerageChange={actions.setSelectedSewerage}
+      />
 
-      {isFormOpen && (
-        <CreateConnectionWizard onClose={() => setIsFormOpen(false)} />
+      {/* ── Content ── */}
+      <div className="connections-page-content">
+        {renderContent()}
+      </div>
+
+      {/* ── Create/Edit Wizard ── */}
+      {state.isFormOpen && (
+        <CreateConnectionWizard
+          viewModel={{ state, actions }}
+          onClose={() => actions.setIsFormOpen(false)}
+        />
       )}
 
+      {/* ── Delete Modal ── */}
       <Modal
-        isOpen={isDeleteOpen}
-        onClose={() => setIsDeleteOpen(false)}
-        title="Delete Connection"
+        isOpen={state.isDeleteOpen}
+        onClose={() => actions.setIsDeleteOpen(false)}
+        title={t('connections.deleteTitle', 'Eliminar Conexión')}
         footer={
           <>
-            <Button variant="subtle" onClick={() => setIsDeleteOpen(false)}>
-              Cancel
+            <Button variant="subtle" onClick={() => actions.setIsDeleteOpen(false)}>
+              {t('common.cancel', 'Cancelar')}
             </Button>
             <Button
-              onClick={handleDelete}
+              onClick={actions.handleDelete}
+              disabled={state.isLoading}
               style={{ backgroundColor: 'var(--error)' }}
             >
-              Delete
+              {t('common.delete', 'Eliminar')}
             </Button>
           </>
         }
       >
-        <p>Are you sure you want to delete this connection?</p>
+        <p>
+          {t(
+            'connections.deleteConfirm',
+            '¿Está seguro que desea eliminar esta conexión? Esta acción no se puede deshacer.'
+          )}
+        </p>
       </Modal>
     </div>
   );

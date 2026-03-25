@@ -51,7 +51,7 @@ export type ButtonRounded = 'none' | 'sm' | 'md' | 'lg' | 'full';
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   color?: ButtonColor;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'xs' | 'sm' | 'compact' | 'md' | 'lg' | 'xl';
   rounded?: ButtonRounded;
   fullWidth?: boolean;
   isLoading?: boolean;

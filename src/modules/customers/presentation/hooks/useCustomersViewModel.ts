@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Customer } from '../../domain/models/Customer';
 import { useCustomersContext } from '../context/CustomersContext';
+import type { CreateCustomerRequest } from '../../domain/repositories/CustomerRepository';
 
 export const useCustomersViewModel = () => {
   const {
@@ -27,15 +28,17 @@ export const useCustomersViewModel = () => {
   );
 
   // Form Data
-  const initialFormState: Omit<Customer, 'customerId'> & {
-    customerId: string;
+  const initialFormState: CreateCustomerRequest & {
+    countryId?: string;
+    provinceId?: string;
+    cantonId?: string;
   } = {
-    customerId: '', // Identity Type ID (Cedula)
+    customerId: 0,
     firstName: '',
     lastName: '',
     emails: [],
     phoneNumbers: [],
-    dateOfBirth: null,
+    dateOfBirth: new Date(),
     sexId: 1,
     civilStatus: 1,
     address: '',
@@ -43,9 +46,12 @@ export const useCustomersViewModel = () => {
     originCountry: 'ECUADOR',
     identificationType: 'CED',
     parishId: '',
-    deceased: false
+    deceased: false,
+    countryId: 'ECU',
+    provinceId: '10',
+    cantonId: '1001'
   };
-  const [formData, setFormData] = useState(initialFormState);
+  const [formData, setFormData] = useState<any>(initialFormState);
 
   // Load Data
   const loadCustomers = async () => {
@@ -68,15 +74,35 @@ export const useCustomersViewModel = () => {
 
   // Handlers
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { name: string; value: any }
   ) => {
-    const { name, value, type } = e.target;
-    let finalValue: any = value;
+    let name: string;
+    let value: any;
+    let type: string | undefined;
 
-    if (type === 'number') finalValue = Number(value);
-    if (name === 'deceased') finalValue = value === 'true';
-
-    setFormData({ ...formData, [name]: finalValue });
+    if ('target' in e) {
+      name = e.target.name;
+      value = e.target.value;
+      type = e.target.type;
+      
+      if (type === 'number') value = Number(value);
+      if (name === 'deceased') {
+        const checkbox = e.target as HTMLInputElement;
+        value = checkbox.checked;
+      }
+      if (name === 'dateOfBirth') value = new Date(value);
+      setFormData((prev: any) => ({ ...prev, [name]: value }));
+    } else if ('countryId' in e) {
+      // It's a location object
+      setFormData((prev: any) => ({ 
+        ...prev, 
+        ...e
+      }));
+    } else {
+      name = (e as any).name;
+      value = (e as any).value;
+      setFormData((prev: any) => ({ ...prev, [name]: value }));
+    }
   };
 
   const resetForm = () => {
@@ -129,9 +155,18 @@ export const useCustomersViewModel = () => {
     setSelectedCustomer(customer);
     setFormData({
       ...customer,
+      customerId: Number(customer.customerId),
       dateOfBirth: customer.dateOfBirth
-        ? customer.dateOfBirth.split('T')[0]
-        : null
+        ? new Date(customer.dateOfBirth)
+        : new Date(),
+      address: customer.address || '',
+      originCountry: customer.originCountry || '',
+      emails: customer.emails || [],
+      phoneNumbers: customer.phoneNumbers || [],
+      countryId: 'ECU', // Correct ID for Ecuador
+      provinceId: customer.parishId ? customer.parishId.substring(0, 2) : '10',
+      cantonId: customer.parishId ? customer.parishId.substring(0, 4) : '1001',
+      parishId: customer.parishId || ''
     });
     setIsFormOpen(true);
   };

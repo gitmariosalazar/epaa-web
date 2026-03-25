@@ -6,6 +6,8 @@ import {
 } from '@/shared/presentation/components/Table/Table';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { useTranslation } from 'react-i18next';
+import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 
 interface PropTypes {
   history: ReadingHistory[];
@@ -20,6 +22,10 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
 
   const columns: Column<ReadingHistory>[] = useMemo(
     () => [
+      {
+        header: t('readings.historyTable.readingId'),
+        accessor: 'readingId'
+      },
       {
         header: t('readings.historyTable.monthYear'),
         accessor: (row) => `${row.readingMonth} / ${row.readingYear}`
@@ -45,23 +51,33 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
       },
       {
         header: t('readings.historyTable.consumption'),
-        accessor: (row) => (
-          <span
-            style={{
-              fontWeight: 600,
-              color:
-                row.consumption > 20
-                  ? 'var(--error, #e74c3c)'
-                  : 'var(--success, #2ecc71)'
-            }}
-          >
-            {row.consumption}
-          </span>
-        )
+        accessor: (row) => {
+          const color: string = getNoveltyColor(row.observation);
+          return (
+            <span
+              style={{
+                fontWeight: 600,
+                color: color
+              }}
+            >
+              {row.consumption}
+            </span>
+          );
+        }
       },
       {
         header: t('readings.historyTable.observation'),
-        accessor: (row) => row.observation || t('readings.historyTable.none')
+        accessor: (row) => {
+          const color: string = getNoveltyColor(row.observation);
+          return (
+            <ColorChip
+              color={color}
+              label={row.observation}
+              size="sm"
+              variant="soft"
+            />
+          );
+        }
       }
     ],
     [t]

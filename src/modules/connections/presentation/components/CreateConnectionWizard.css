@@ -9,7 +9,7 @@
   justify-content: center;
   background-color: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm);
   animation: fadeInOverlay 0.3s ease-out;
 }
 
@@ -33,7 +33,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-lg) var(--spacing-xl);
+  padding: var(--spacing-md) var(--spacing-lg);
   border-bottom: 1px solid var(--border-color);
   background-color: var(--surface);
   position: sticky;
@@ -42,7 +42,7 @@
 }
 
 .wizard-title h2 {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   color: var(--text-main);
   margin: 0;
@@ -75,7 +75,7 @@
 }
 
 .wizard-content {
-  padding: var(--spacing-xl);
+  padding: var(--spacing-sm);
   background-color: var(--background);
   overflow-y: auto;
   flex: 1;
@@ -83,30 +83,88 @@
 
 /* Progress Bar */
 .wizard-progress {
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--spacing-sm);
   background-color: var(--surface);
-  padding: var(--spacing-lg);
-  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
 }
 
 .wizard-progress-labels {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
+  align-items: center;
   margin-bottom: var(--spacing-sm);
 }
 
-.wizard-progress-step {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-muted);
-  transition: color var(--transition-normal);
+.wizard-step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  position: relative;
+  transition: all var(--transition-normal);
 }
 
-.wizard-progress-step.active {
+.wizard-step-label {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-muted);
+  transition: all var(--transition-normal);
+  text-align: center;
+}
+
+.wizard-step-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--surface-hover);
+  border: 2px solid var(--border-color);
+  color: var(--text-muted);
+  transition: all var(--transition-normal);
+  z-index: 2;
+}
+
+.wizard-step-item.active .wizard-step-label {
   color: var(--accent);
   font-weight: var(--font-weight-semibold);
+}
+
+.wizard-step-item.active .wizard-step-icon {
+  border-color: var(--accent);
+  color: var(--accent);
+  background-color: rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.wizard-step-item.completed .wizard-step-label {
+  color: var(--success);
+}
+
+.wizard-step-item.completed .wizard-step-icon {
+  border-color: var(--success);
+  color: var(--success);
+  background-color: rgba(34, 197, 94, 0.1);
+}
+
+.success-icon {
+  animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .wizard-progress-track {
@@ -131,7 +189,7 @@
 /* Step Styles */
 .step-container {
   background-color: var(--surface);
-  padding: var(--spacing-xl);
+  padding: var(--spacing-lg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
@@ -145,7 +203,7 @@
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--text-main);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
   padding-bottom: var(--spacing-sm);
   border-bottom: 2px solid var(--border-color);
   display: inline-block;
@@ -154,7 +212,7 @@
 .step-description {
   font-size: var(--font-size-base);
   color: var(--text-secondary);
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
   line-height: 1.6;
 }
 
@@ -162,7 +220,7 @@
 .wizard-tabs {
   display: flex;
   gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -194,7 +252,7 @@
 .entity-toggle {
   display: flex;
   gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
 }
 
 .entity-option {
@@ -239,6 +297,16 @@
   margin-top: var(--spacing-md);
 }
 
+.explorer-row {
+  flex-direction: row !important;
+  gap: var(--spacing-md);
+  align-items: flex-end;
+}
+
+.explorer-row > * {
+  flex: 1;
+}
+
 /* Form layouts */
 .form-grid {
   display: grid;
@@ -249,19 +317,19 @@
 @media (min-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr 1fr;
-    column-gap: var(--spacing-xl);
-    row-gap: var(--spacing-lg);
+    column-gap: 8px;
+    row-gap: 4px;
   }
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
 }
 
 .form-label {
-  font-size: var(--font-size-sm);
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-secondary);
   letter-spacing: 0.01em;
@@ -439,4 +507,60 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Dynamic Input Styles */
+.dynamic-input-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.dynamic-input-row:last-child {
+  margin-bottom: 4px;
+}
+
+.remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+  color: var(--error);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  height: 32px;
+  width: 32px;
+}
+
+.remove-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: var(--error);
+}
+
+.add-btn-minimal {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--accent);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: all var(--transition-fast);
+  width: fit-content;
+}
+
+.add-btn-minimal:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.full-width {
+  grid-column: 1 / -1;
 }

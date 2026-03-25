@@ -149,6 +149,7 @@ export const NaturalPersonsPage: React.FC = () => {
         <CustomerForm
           formData={customerVM.formData}
           onChange={customerVM.handleInputChange}
+          setFormData={customerVM.setFormData}
           isEditMode={!!customerVM.selectedCustomer}
         />
       </Modal>

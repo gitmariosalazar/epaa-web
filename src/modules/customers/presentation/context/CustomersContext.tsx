@@ -14,7 +14,7 @@ import { GetCompaniesUseCase } from '../../application/usecases/GetCompaniesUseC
 import { CreateCompanyUseCase } from '../../application/usecases/CreateCompanyUseCase';
 import { UpdateCompanyUseCase } from '../../application/usecases/UpdateCompanyUseCase';
 import { DeleteCompanyUseCase } from '../../application/usecases/DeleteCompanyUseCase';
-import { GetCompanyByIdUseCase } from '../../application/usecases/GetCompanyByIdUseCase';
+import { GetCompanyByRucUseCase } from '../../application/usecases/GetCompanyByRucUseCase';
 import { GetGeneralCustomersUseCase } from '../../application/usecases/GetGeneralCustomersUseCase';
 import { GeneralCustomerRepositoryImpl } from '../../infrastructure/repositories/GeneralCustomerRepositoryImpl';
 
@@ -31,7 +31,7 @@ interface CustomersContextType {
   createCompanyUseCase: CreateCompanyUseCase;
   updateCompanyUseCase: UpdateCompanyUseCase;
   deleteCompanyUseCase: DeleteCompanyUseCase;
-  getCompanyByIdUseCase: GetCompanyByIdUseCase;
+  getCompanyByRucUseCase: GetCompanyByRucUseCase;
 
   // General Customers
   getGeneralCustomersUseCase: GetGeneralCustomersUseCase;
@@ -59,7 +59,7 @@ export const CustomersProvider: React.FC<{ children: ReactNode }> = ({
   const createCompanyUseCase = new CreateCompanyUseCase(companyRepository);
   const updateCompanyUseCase = new UpdateCompanyUseCase(companyRepository);
   const deleteCompanyUseCase = new DeleteCompanyUseCase(companyRepository);
-  const getCompanyByIdUseCase = new GetCompanyByIdUseCase(companyRepository);
+  const getCompanyByRucUseCase = new GetCompanyByRucUseCase(companyRepository);
 
   // Use Cases - General Customers
   const getGeneralCustomersUseCase = new GetGeneralCustomersUseCase(
@@ -76,7 +76,7 @@ export const CustomersProvider: React.FC<{ children: ReactNode }> = ({
     createCompanyUseCase,
     updateCompanyUseCase,
     deleteCompanyUseCase,
-    getCompanyByIdUseCase,
+    getCompanyByRucUseCase,
     getGeneralCustomersUseCase
   };
 

@@ -14,6 +14,7 @@ interface DatePickerProps {
   onChange: (date: string) => void;
   disabled?: boolean;
   view?: 'date' | 'month';
+  size?: 'small' | 'medium' | 'large';
 }
 
 export interface DatePickerRef {
@@ -21,7 +22,7 @@ export interface DatePickerRef {
 }
 
 export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
-  ({ value, onChange, disabled = false, view = 'date' }, ref) => {
+  ({ value, onChange, disabled = false, view = 'date', size = 'medium' }, ref) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [alignment, setAlignment] = useState<{
@@ -249,14 +250,14 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
   };
 
   return (
-    <div className="datepicker-container" ref={containerRef}>
+    <div className={`datepicker-container datepicker--${size}`} ref={containerRef}>
       <button
         className={`datepicker-trigger ${disabled ? 'datepicker-trigger--disabled' : ''} ${isOpen ? 'datepicker-trigger--active' : ''}`}
         onClick={toggleCalendar}
         disabled={disabled}
         type="button"
       >
-        <CalendarIcon className="datepicker-icon" size={16} />
+        <CalendarIcon className="datepicker-icon" />
         <span className="datepicker-value">{getFormattedDateDisplay()}</span>
       </button>
 

@@ -12,8 +12,6 @@ export const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company }) => {
   const { t } = useTranslation();
   const initial = company.companyName ? company.companyName.charAt(0) : 'C';
 
-  const email = company.companyEmails?.[0] || 'N/A';
-  const phone = company.companyPhones?.[0] || 'N/A';
 
   return (
     <div className="user-details">
@@ -66,17 +64,33 @@ export const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company }) => {
             <span className="user-details__label">
               {t('customers.form.email')}
             </span>
-            <span className="user-details__value">
-              {typeof email === 'object' ? (email as any).correo : email}
-            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {company.companyEmails.length > 0 ? (
+                company.companyEmails.map((email, i) => (
+                  <span key={i} className="user-details__value">
+                    {email}
+                  </span>
+                ))
+              ) : (
+                <span className="user-details__value">N/A</span>
+              )}
+            </div>
           </div>
           <div className="user-details__field">
             <span className="user-details__label">
               {t('customers.form.phone')}
             </span>
-            <span className="user-details__value">
-              {typeof phone === 'object' ? (phone as any).numero : phone}
-            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {company.companyPhones.length > 0 ? (
+                company.companyPhones.map((phone, i) => (
+                  <span key={i} className="user-details__value">
+                    {phone}
+                  </span>
+                ))
+              ) : (
+                <span className="user-details__value">N/A</span>
+              )}
+            </div>
           </div>
         </div>
       </div>

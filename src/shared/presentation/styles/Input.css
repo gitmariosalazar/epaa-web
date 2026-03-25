@@ -1,35 +1,39 @@
+/* Input component styles */
 .input-component {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-sm);
+  gap: 4px;
+  margin-bottom: 8px;
   width: 100%;
 }
 
 .input__label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-secondary);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  pointer-events: none;
 }
 
 .input__container {
-  position: relative;
   display: flex;
   align-items: center;
+  position: relative;
   width: 100%;
 }
 
-.input__field {
+.input__field,
+select.input__field,
+textarea.input__field {
   width: 100%;
   box-sizing: border-box;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  border: 1px solid var(--secondary);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   background-color: var(--surface);
   color: var(--text-main);
   transition: all var(--transition-fast);
   outline: none;
+  cursor: pointer;
 }
 
 .input__field:hover {
@@ -37,29 +41,128 @@
 }
 
 .input__field:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent), transparent 85%); /* Softer, wider spread */
-  background-color: var(--surface);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 .input__field--error {
-  border-color: var(--error);
-}
-
-.input__field--with-icon {
-  padding-left: 2.5rem;
+  border-color: var(--error) !important;
 }
 
 .input__icon-left {
   position: absolute;
-  left: 0.75rem;
-  color: var(--text-muted);
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
   pointer-events: none;
+  z-index: 10;
 }
 
 .input__error {
-  font-size: 0.8rem;
+  font-size: 0.65rem;
   color: var(--error);
+  margin-top: 2px;
+}
+
+/* Size: Small (Wizard Compact Style) */
+.input--small {
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.input--small .input__label {
+  font-size: 0.6rem;
+}
+
+.input--small .input__field,
+.input--small select.input__field,
+.input--small .password-input__field {
+  height: 28px;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  line-height: normal;
+}
+
+.input--small .input__icon-left {
+  left: 0.6rem;
+  font-size: 14px;
+}
+
+.input--small .input__field--with-icon {
+  padding-left: 2.2rem !important;
+}
+
+/* Size: Compact (Intermediate between Small and Medium) */
+.input--compact {
+  gap: 3px;
+  margin-bottom: 6px;
+}
+
+.input--compact .input__label {
+  font-size: 0.675rem;
+}
+
+.input--compact .input__field,
+.input--compact select.input__field,
+.input--compact .password-input__field {
+  height: 34px;
+  font-size: 0.8125rem;
+  padding: 0.25rem 0.625rem;
+  line-height: normal;
+}
+
+.input--compact .input__icon-left {
+  left: 0.675rem;
+  font-size: 16px;
+}
+
+.input--compact .input__field--with-icon {
+  padding-left: 2.5rem !important;
+}
+
+/* Size: Medium (Standard) */
+.input--medium .input__label {
+  font-size: 0.75rem;
+}
+
+.input--medium .input__field,
+.input--medium select.input__field,
+.input--medium .password-input__field {
+  height: 40px;
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.input--medium .input__icon-left {
+  left: 0.75rem;
+  font-size: 18px;
+}
+
+.input--medium .input__field--with-icon {
+  padding-left: 2.75rem !important;
+}
+
+/* Size: Large */
+.input--large .input__label {
+  font-size: 0.875rem;
+}
+
+.input--large .input__field,
+.input--large select.input__field,
+.input--large .password-input__field {
+  height: 48px;
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+}
+
+/* Specific Select Styles */
+select.input__field {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
 }

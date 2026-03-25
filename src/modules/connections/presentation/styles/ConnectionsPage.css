@@ -1,0 +1,122 @@
+/* src/modules/connections/presentation/styles/ConnectionsPage.css */
+
+.connections-page {
+  padding: 0.5rem;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  animation: conn-fade-in 0.3s ease-out;
+  color: var(--text-main);
+  box-sizing: border-box;
+}
+
+@media (min-width: 1024px) {
+  .connections-page {
+    padding: 0.75rem;
+  }
+}
+
+/* ── Content area (table fills remaining space) ──────────────────────────────── */
+.connections-page-content {
+  flex: 1 1 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.connections-tabs-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 2px;
+}
+
+.connections-tabs-row > div:first-child {
+  flex: 1;
+}
+
+.connections-page-title {
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.connections-page-subtitle {
+  font-size: clamp(0.75rem, 3vw, 0.875rem);
+  color: var(--text-secondary);
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0.25rem 0 0;
+}
+
+/* ── Loading ─────────────────────────────────────────────────────────────────── */
+.connections-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 260px;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+  background: linear-gradient(
+    135deg,
+    var(--surface) 0%,
+    var(--background) 100%
+  );
+  animation: conn-fade-in 0.25s ease-out;
+}
+
+/* ── Error ───────────────────────────────────────────────────────────────────── */
+.connections-error-container {
+  padding: 1.5rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.connections-error-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: #ef4444;
+  flex-shrink: 0;
+  animation: conn-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.connections-error-text {
+  font-weight: 500;
+}
+
+/* ── Animations ──────────────────────────────────────────────────────────────── */
+@keyframes conn-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes conn-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

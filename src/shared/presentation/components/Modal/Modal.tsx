@@ -8,7 +8,7 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'full';
 }
 
 export const Modal: React.FC<ModalProps> = ({

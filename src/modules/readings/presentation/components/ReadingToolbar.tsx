@@ -15,6 +15,7 @@ interface ReadingToolbarProps {
   isLoadingInfo: boolean;
   isSubmitting: boolean;
   readingInfo: ReadingInfo | null;
+  method: 'create' | 'update';
 }
 
 export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
@@ -25,7 +26,8 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
   handleCancel,
   isLoadingInfo,
   isSubmitting,
-  readingInfo
+  readingInfo,
+  method
 }) => {
   return (
     <div className="cr-toolbar">
@@ -58,7 +60,11 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
           className="cr-action-btn"
           color="success"
           onClick={handleSave}
-          disabled={!readingInfo?.hasCurrentReading || isSubmitting}
+          disabled={
+            method === 'create'
+              ? !readingInfo?.hasCurrentReading || isSubmitting
+              : !readingInfo || isSubmitting
+          }
           leftIcon={<FaSave />}
           size="sm"
         >

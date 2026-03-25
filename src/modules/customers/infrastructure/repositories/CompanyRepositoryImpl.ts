@@ -1,6 +1,7 @@
 import type {
   CompanyRepository,
-  CreateCompanyRequest
+  CreateCompanyRequest,
+  UpdateCompanyRequest
 } from '../../domain/repositories/CompanyRepository';
 import type { Company } from '../../domain/models/Company';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
@@ -24,9 +25,9 @@ export class CompanyRepositoryImpl implements CompanyRepository {
     return response.data.data;
   }
 
-  async getById(id: string): Promise<Company> {
+  async getByRuc(ruc: string): Promise<Company> {
     const response = await this.client.get<ApiResponse<Company>>(
-      `/Customers/get-company/${id}`
+      `/Customers/get-company/${ruc}`
     );
     return response.data.data;
   }
@@ -38,7 +39,7 @@ export class CompanyRepositoryImpl implements CompanyRepository {
     );
   }
 
-  async update(id: string, company: CreateCompanyRequest): Promise<void> {
+  async update(id: string, company: UpdateCompanyRequest): Promise<void> {
     await this.client.put<ApiResponse<void>>(
       `/Customers/update-company/${id}`,
       company

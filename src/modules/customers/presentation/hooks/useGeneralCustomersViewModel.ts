@@ -3,7 +3,14 @@ import type { GeneralCustomer } from '../../domain/models/GeneralCustomer';
 import { useCustomersContext } from '../context/CustomersContext';
 import type { Customer } from '../../domain/models/Customer';
 import type { Company } from '../../domain/models/Company';
-import type { CreateCompanyRequest } from '../../domain/repositories/CompanyRepository';
+import type {
+  CreateCompanyRequest,
+  UpdateCompanyRequest
+} from '../../domain/repositories/CompanyRepository';
+import type {
+  CreateCustomerRequest,
+  UpdateCustomerRequest
+} from '../../domain/repositories/CustomerRepository';
 
 export const useGeneralCustomersViewModel = () => {
   const {
@@ -15,7 +22,7 @@ export const useGeneralCustomersViewModel = () => {
     createCompanyUseCase,
     updateCompanyUseCase,
     deleteCompanyUseCase,
-    getCompanyByIdUseCase
+    getCompanyByRucUseCase: getCompanyByIdUseCase
   } = useCustomersContext();
 
   // State
@@ -39,15 +46,13 @@ export const useGeneralCustomersViewModel = () => {
     null
   );
 
-  const initialCustomerFormState: Omit<Customer, 'customerId'> & {
-    customerId: string;
-  } = {
-    customerId: '', // Identity Type ID (Cedula)
+  const initialCustomerFormState: CreateCustomerRequest = {
+    customerId: 0, // Identity Type ID (Cedula)
     firstName: '',
     lastName: '',
     emails: [],
     phoneNumbers: [],
-    dateOfBirth: null,
+    dateOfBirth: new Date(),
     sexId: 1,
     civilStatus: 1,
     address: '',
@@ -101,13 +106,13 @@ export const useGeneralCustomersViewModel = () => {
 
   // Handlers - Customer
   const handleCustomerInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
     let finalValue: any = value;
     if (type === 'number') finalValue = Number(value);
     if (name === 'deceased') finalValue = value === 'true';
-    setCustomerFormData({ ...customerFormData, [name]: finalValue });
+    setCustomerFormData((prev: any) => ({ ...prev, [name]: finalValue }));
   };
 
   const resetCustomerForm = () => {
@@ -130,9 +135,20 @@ export const useGeneralCustomersViewModel = () => {
   const handleUpdateCustomer = async () => {
     if (!selectedCustomer) return;
     try {
+      const updateData: UpdateCustomerRequest = {
+        ...customerFormData,
+        customerId: Number(customerFormData.customerId),
+        dateOfBirth:
+          customerFormData.dateOfBirth instanceof Date
+            ? customerFormData.dateOfBirth
+            : new Date(customerFormData.dateOfBirth),
+        sexId: Number(customerFormData.sexId),
+        civilStatus: Number(customerFormData.civilStatus),
+        professionId: Number(customerFormData.professionId || 1)
+      };
       await updateCustomerUseCase.execute(
         selectedCustomer.customerId,
-        customerFormData
+        updateData
       );
       setIsCustomerFormOpen(false);
       resetCustomerForm();
@@ -147,8 +163,9 @@ export const useGeneralCustomersViewModel = () => {
   const handleCompanyInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    setCompanyFormData({ ...companyFormData, [e.target.name]: e.target.value });
+    setCompanyFormData((prev: any) => ({ ...prev, [e.target.name]: e.target.value }));
   };
+
 
   const resetCompanyForm = () => {
     setCompanyFormData(initialCompanyFormState);
@@ -170,9 +187,12 @@ export const useGeneralCustomersViewModel = () => {
   const handleUpdateCompany = async () => {
     if (!selectedCompany) return;
     try {
+      const updateData: UpdateCompanyRequest = {
+        ...companyFormData
+      };
       await updateCompanyUseCase.execute(
         selectedCompany.companyId,
-        companyFormData
+        updateData
       );
       setIsCompanyFormOpen(false);
       resetCompanyForm();
@@ -220,9 +240,14 @@ export const useGeneralCustomersViewModel = () => {
           setSelectedCustomer(customer);
           setCustomerFormData({
             ...customer,
+            customerId: Number(customer.customerId),
             dateOfBirth: customer.dateOfBirth
-              ? customer.dateOfBirth.split('T')[0]
-              : null
+              ? new Date(customer.dateOfBirth)
+              : new Date(),
+            address: customer.address || '',
+            originCountry: customer.originCountry || '',
+            emails: customer.emails || [],
+            phoneNumbers: customer.phoneNumbers || []
           });
           setIsCustomerFormOpen(true);
         }
@@ -280,6 +305,7 @@ export const useGeneralCustomersViewModel = () => {
     setIsCustomerFormOpen,
     selectedCustomer,
     customerFormData,
+    setCustomerFormData,
     handleCustomerInputChange,
     handleCreateCustomer,
     handleUpdateCustomer,

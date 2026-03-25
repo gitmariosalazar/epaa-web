@@ -13,10 +13,22 @@ export interface CreateCompanyRequest {
   identificationType: string;
 }
 
+export interface UpdateCompanyRequest {
+  companyName?: string;
+  socialReason?: string;
+  companyRuc?: string;
+  companyAddress?: string;
+  companyParishId?: string;
+  companyCountry?: string;
+  companyEmails?: string[];
+  companyPhones?: string[];
+  identificationType?: string;
+}
+
 export interface CompanyRepository {
   getAll(limit: number, offset: number): Promise<Company[]>;
-  getById(id: string): Promise<Company>;
+  getByRuc(ruc: string): Promise<Company>;
   create(company: CreateCompanyRequest): Promise<void>;
-  update(id: string, company: CreateCompanyRequest): Promise<void>;
+  update(id: string, company: UpdateCompanyRequest): Promise<void>;
   delete(id: string): Promise<void>;
 }

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useReading } from '../hooks/useReading';
 import { ReadingSummaryCards } from '../components/ReadingSummaryCards';
-import { ReadingInfoForm } from '../components/ReadingInfoForm';
+import { ReadingCreateInfoForm } from '../components/ReadingCreateInfoForm';
 import { AdditionalInfoAccordion } from '../components/AdditionalInfoAccordion';
 import { ReadingHistoryTable } from '../components/ReadingHistoryTable';
 import { ReadingToolbar } from '../components/ReadingToolbar';
@@ -10,7 +11,17 @@ import '../styles/create-reading.css';
 import { IdCard, User } from 'lucide-react';
 import type { CreateReadingRequest } from '../../domain/dto/request/CreateReadingRequest';
 
-export const CreateReadingPage: React.FC = () => {
+export interface CreateReadingPageProps {
+  initialCadastralKey?: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
+}
+
+export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
+  initialCadastralKey,
+  onSuccess,
+  onCancel
+}) => {
   const {
     readingInfo,
     readingHistory,
@@ -30,6 +41,16 @@ export const CreateReadingPage: React.FC = () => {
 
   // ── Estado del modal de confirmación ──────────────────────────────────────
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+  // ── Auto cargar desde navegacion o Props ──────────────────────────────────────────
+  const location = useLocation();
+  useEffect(() => {
+    const keyToLoad = initialCadastralKey || location.state?.cadastralKey;
+    if (keyToLoad) {
+      setCadastralKeyInput(keyToLoad as string);
+      fetchReadingData(keyToLoad as string);
+    }
+  }, [initialCadastralKey, location.state?.cadastralKey]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -92,10 +113,19 @@ export const CreateReadingPage: React.FC = () => {
    */
   const handleConfirm = async () => {
     try {
-      await submitReading(buildRequest());
+      const result = await submitReading(buildRequest());
       setIsConfirmModalOpen(false);
-      setCurrentReadingInput('');
-      setObservationInput('');
+
+      if (result) {
+        setIsConfirmModalOpen(false);
+        if (onSuccess) {
+          onSuccess();
+          return;
+        }
+        await fetchReadingData(cadastralKeyInput);
+        setCurrentReadingInput('');
+        setObservationInput('');
+      }
     } catch {
       // El error ya es manejado dentro del hook useReading
     }
@@ -110,6 +140,7 @@ export const CreateReadingPage: React.FC = () => {
     setCurrentReadingInput('');
     setObservationInput('');
     clearData();
+    if (onCancel) onCancel();
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -140,6 +171,7 @@ export const CreateReadingPage: React.FC = () => {
           isLoadingInfo={isLoadingInfo}
           isSubmitting={isSubmitting}
           readingInfo={readingInfo}
+          method="create"
         />
 
         {readingInfo && (
@@ -147,9 +179,10 @@ export const CreateReadingPage: React.FC = () => {
             <ReadingSummaryCards
               info={readingInfo}
               currentReadingInput={currentReadingInput}
+              method="create"
             />
 
-            <ReadingInfoForm
+            <ReadingCreateInfoForm
               info={readingInfo}
               currentReadingInput={currentReadingInput}
               setCurrentReadingInput={setCurrentReadingInput}
@@ -183,6 +216,7 @@ export const CreateReadingPage: React.FC = () => {
           currentReadingInput={currentReadingInput}
           observationInput={observationInput}
           isSubmitting={isSubmitting}
+          method="create"
         />
       )}
     </div>
