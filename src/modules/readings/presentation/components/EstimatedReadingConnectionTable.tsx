@@ -9,7 +9,6 @@ import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Eye } from 'lucide-react';
-import { IoSettings } from 'react-icons/io5';
 import { FaEdit } from 'react-icons/fa';
 
 interface PropTypes {
@@ -83,7 +82,9 @@ export const EstimatedReadingConnectionTable: React.FC<PropTypes> = ({
               size="sm"
               variant="ghost"
               color="warning"
-              onClick={() => onAction && onAction('update', reading.cadastralKey)}
+              onClick={() =>
+                onAction && onAction('update', reading.cadastralKey)
+              }
               title={t('common.edit', 'Editar')}
               circle
             >

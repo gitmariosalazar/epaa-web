@@ -108,8 +108,7 @@ const ClientInfoCard: React.FC<ClientInfoCardProps> = ({
   clientName,
   cardId,
   cadastralKey,
-  address,
-  method
+  address
 }) => (
   <div className="cr-confirm-client-card">
     <h4>
@@ -142,9 +141,7 @@ interface ReadingStatsGridProps {
   viewModel: ReadingConfirmationViewModel;
 }
 
-const ReadingStatsGrid: React.FC<ReadingStatsGridProps> = ({
-  viewModel
-}) => {
+const ReadingStatsGrid: React.FC<ReadingStatsGridProps> = ({ viewModel }) => {
   const { previousReading, currentReading, consumption, visuals } = viewModel;
   const ConsumptionIcon = visuals.Icon;
 
