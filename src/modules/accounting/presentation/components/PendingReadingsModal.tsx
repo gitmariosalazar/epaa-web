@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import {
   X,
@@ -258,9 +259,20 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
     [t]
   );
 
+  useEffect(() => {
+    if (isOpen) {
+      console.log('PendingReadingsModal opened with:', {
+        clientId,
+        clientName,
+        dataLength: safeData.length,
+        isLoading
+      });
+    }
+  }, [isOpen, clientId, clientName, safeData.length, isLoading]);
+
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="pending-readings-overlay" onClick={onClose}>
       <div
         className="pending-readings-modal premium-theme"
@@ -377,6 +389,7 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
           </span>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

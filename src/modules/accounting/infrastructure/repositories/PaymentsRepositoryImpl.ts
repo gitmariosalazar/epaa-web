@@ -14,14 +14,12 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
     this.client = client;
   }
 
-  private handleResponse<T>(response: ApiResponse<T>): T {
-    // Some endpoints return { data: { data: [...] } } while others return { data: [...] }
-    // This depends on how the backend wraps the response and how the HttpClient handles it.
-    const result = response.data;
-    if (result && typeof result === 'object' && 'data' in result) {
-      return (result as any).data;
+  private handleResponse<T>(data: any): T {
+    // Some endpoints return { data: [...] } while others return [...] directly.
+    if (data && typeof data === 'object' && 'data' in data) {
+      return data.data;
     }
-    return result as T;
+    return data as T;
   }
 
   async findAllPaymentReadingPayrollsByDate(

@@ -42,11 +42,15 @@ export const OverduePaymentsPage: React.FC = () => {
   >();
 
   const handleOpenPendingModal = (searchValue: string) => {
+    console.log('Opening Pending Modal for:', searchValue);
+    console.trace('Open Pending Modal Trace');
     // Find the client by matching either clientId or cadastralKey
     const client = overduePayments.find(
       (p) => p.clientId === searchValue || p.cadastralKey === searchValue
     );
-    setSelectedClientId(client?.clientId || searchValue);
+    const resolvedId = client?.clientId || searchValue;
+    console.log('Resolved Client ID:', resolvedId);
+    setSelectedClientId(resolvedId);
     setSelectedClientName(client?.name);
     fetchPendingReadings(searchValue);
   };

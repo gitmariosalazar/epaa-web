@@ -5,7 +5,7 @@
   inset: 0;
   background-color: rgba(0, 0, 0, 0.45); /* Darker overlay */
   backdrop-filter: blur(10px) saturate(140%);
-  z-index: 1200;
+  z-index: 20000;
   display: flex;
   align-items: center;
   justify-content: center;
