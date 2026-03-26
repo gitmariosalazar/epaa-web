@@ -14,13 +14,23 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
     this.client = client;
   }
 
+  private handleResponse<T>(response: ApiResponse<T>): T {
+    // Some endpoints return { data: { data: [...] } } while others return { data: [...] }
+    // This depends on how the backend wraps the response and how the HttpClient handles it.
+    const result = response.data;
+    if (result && typeof result === 'object' && 'data' in result) {
+      return (result as any).data;
+    }
+    return result as T;
+  }
+
   async findAllPaymentReadingPayrollsByDate(
     paymentDate: string
   ): Promise<PaymentReading[]> {
     const response = await this.client.get<ApiResponse<PaymentReading[]>>(
       `/readings/find-payment-readings-by-payment-date/${paymentDate}`
     );
-    return response.data.data;
+    return this.handleResponse(response.data);
   }
 
   async findAllPaymentByDateAndOrderValue(
@@ -30,7 +40,7 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
     const response = await this.client.get<ApiResponse<Payment[]>>(
       `/readings/find-payment-by-payment-date-and-order/${paymentDate}/${orderValue}`
     );
-    return response.data.data;
+    return this.handleResponse(response.data);
   }
 
   async findAllPaymentsByDateRange(
@@ -42,7 +52,7 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
     const response = await this.client.get<ApiResponse<Payment[]>>(
       `/readings/find-payment-by-init-date-and-end-date/${initDate}/${endDate}/${limit}/${offset}`
     );
-    return response.data.data;
+    return this.handleResponse(response.data);
   }
 
   async findAllOverduePayments(
@@ -52,7 +62,7 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
     const response = await this.client.get<ApiResponse<OverduePayment[]>>(
       `/readings/find-all-overdue-payments/${limit}/${offset}`
     );
-    return response.data.data;
+    return this.handleResponse(response.data);
   }
 
   async findPendingReadingsByCadastralKeyOrCardId(
@@ -61,6 +71,6 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
     const response = await this.client.get<ApiResponse<PendingReading[]>>(
       `/readings/find-pending-reading-by-cadastral-key-or-card-id-all/${searchValue}`
     );
-    return response.data.data;
+    return this.handleResponse(response.data);
   }
 }

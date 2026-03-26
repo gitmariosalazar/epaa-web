@@ -56,25 +56,28 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
   const fmt = (val: number | undefined | null) =>
     `$${(Number(val) || 0).toFixed(2)}`;
 
+  // Defensive check: ensure data is always an array to prevent crashes
+  const safeData = Array.isArray(data) ? data : [];
+
   const totalDue = useMemo(
     () =>
-      data.reduce(
+      safeData.reduce(
         (acc: number, item: PendingReading) => acc + (Number(item?.total) || 0),
         0
       ),
-    [data]
+    [safeData]
   );
 
   const clientMetadata = useMemo(() => {
-    if (!data || data.length === 0) return null;
-    const first = data[0];
+    if (!safeData || safeData.length === 0) return null;
+    const first = safeData[0];
     if (!first) return null;
     return {
       name: (first.name || '') + ' ' + (first.lastName || ''),
       clientId: first.cardId || '',
       address: first.address || ''
     };
-  }, [data]);
+  }, [safeData]);
 
   const columns: Column<PendingReading>[] = useMemo(
     () => [
@@ -305,6 +308,7 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
         <div className="pending-readings-body">
           {isLoading ? (
             <div className="pending-loading-state">
+              <div className="shimmer-table"></div>
               <CircularProgress
                 progress={loadingProgress}
                 size={112}
@@ -327,7 +331,7 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
             </div>
           ) : (
             <Table
-              data={data}
+              data={safeData}
               columns={columns}
               isLoading={isLoading}
               pagination={true}
