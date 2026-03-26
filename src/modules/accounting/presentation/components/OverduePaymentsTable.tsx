@@ -264,6 +264,8 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
                                 <span>{row.cadastralKey}</span>
                               </div>
                             </div>
+
+                            {/* Por Clave Catastral */}
                             {row.cadastralKey &&
                               row.cadastralKey !== '0' &&
                               row.cadastralKey.trim() !== '' && (
@@ -273,10 +275,10 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
                                     e.stopPropagation();
                                     e.preventDefault();
                                     const val = row.cadastralKey;
-                                    // Cerrar menú primero
+                                    // Cerramos primero el menú
                                     setActiveMenuRowId(null);
                                     setMenuCoords(null);
-                                    // Llamar directamente
+                                    // Llamamos directamente (sin setTimeout)
                                     onViewPendingReadings(val);
                                   }}
                                 >
@@ -284,15 +286,17 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
                                   <span>Por Clave Catastral</span>
                                 </div>
                               )}
+
+                            {/* Por ID Cliente (Todo) */}
                             <div
                               className="menu-item"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 e.preventDefault();
-                                // Cerrar menú primero
+                                // Cerramos primero el menú
                                 setActiveMenuRowId(null);
                                 setMenuCoords(null);
-                                // Llamar directamente
+                                // Llamamos directamente
                                 onViewPendingReadings(row.clientId);
                               }}
                             >
