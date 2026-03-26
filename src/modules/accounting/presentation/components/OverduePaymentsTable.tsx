@@ -264,31 +264,36 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
                                 <span>{row.cadastralKey}</span>
                               </div>
                             </div>
-                            {row.cadastralKey !== '0' && (
-                              <div
-                                className="menu-item"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  e.preventDefault();
-                                  const val = row.cadastralKey;
-                                  setActiveMenuRowId(null);
-                                  setMenuCoords(null);
-                                  setTimeout(() => onViewPendingReadings(val), 0);
-                                }}
-                              >
-                                <FaList size={12} />
-                                <span>Por Clave Catastral</span>
-                              </div>
-                            )}
+                            {row.cadastralKey &&
+                              row.cadastralKey !== '0' &&
+                              row.cadastralKey.trim() !== '' && (
+                                <div
+                                  className="menu-item"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    const val = row.cadastralKey;
+                                    // Cerrar menú primero
+                                    setActiveMenuRowId(null);
+                                    setMenuCoords(null);
+                                    // Llamar directamente
+                                    onViewPendingReadings(val);
+                                  }}
+                                >
+                                  <FaList size={12} />
+                                  <span>Por Clave Catastral</span>
+                                </div>
+                              )}
                             <div
                               className="menu-item"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 e.preventDefault();
-                                const val = row.clientId;
+                                // Cerrar menú primero
                                 setActiveMenuRowId(null);
                                 setMenuCoords(null);
-                                setTimeout(() => onViewPendingReadings(val), 0);
+                                // Llamar directamente
+                                onViewPendingReadings(row.clientId);
                               }}
                             >
                               <FaUser size={12} />
