@@ -270,9 +270,10 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   e.preventDefault();
-                                  onViewPendingReadings(row.cadastralKey);
+                                  const val = row.cadastralKey;
                                   setActiveMenuRowId(null);
                                   setMenuCoords(null);
+                                  setTimeout(() => onViewPendingReadings(val), 0);
                                 }}
                               >
                                 <FaList size={12} />
@@ -284,9 +285,10 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
                               onClick={(e) => {
                                 e.stopPropagation();
                                 e.preventDefault();
-                                onViewPendingReadings(row.clientId);
+                                const val = row.clientId;
                                 setActiveMenuRowId(null);
                                 setMenuCoords(null);
+                                setTimeout(() => onViewPendingReadings(val), 0);
                               }}
                             >
                               <FaUser size={12} />
