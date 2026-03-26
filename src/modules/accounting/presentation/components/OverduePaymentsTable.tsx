@@ -66,12 +66,13 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
         return;
       }
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        console.log('Closing menu because click was outside:', event.target);
         setActiveMenuRowId(null);
         setMenuCoords(null);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
   const handleMenuToggle = (
@@ -272,6 +273,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
                                 <div
                                   className="menu-item"
                                   onClick={(e) => {
+                                    console.log('Clicked: Por Clave Catastral', { val: row.cadastralKey });
                                     e.stopPropagation();
                                     e.preventDefault();
                                     const val = row.cadastralKey;
@@ -291,6 +293,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
                             <div
                               className="menu-item"
                               onClick={(e) => {
+                                console.log('Clicked: Por ID Cliente (Todo)', { val: row.clientId });
                                 e.stopPropagation();
                                 e.preventDefault();
                                 // Cerramos primero el menú
