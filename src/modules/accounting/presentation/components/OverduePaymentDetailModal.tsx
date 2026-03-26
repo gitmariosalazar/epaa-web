@@ -22,8 +22,8 @@ export const OverduePaymentDetailModal: React.FC<OverduePaymentDetailModalProps>
   const { t } = useTranslation();
   if (!isOpen || !item) return null;
 
-  const fmt = (val: number | undefined) =>
-    val !== undefined ? `$${val.toFixed(2)}` : '-';
+  const fmt = (val: number | undefined | null) =>
+    val != null ? `$${val.toFixed(2)}` : '-';
 
   const rows = [
     {

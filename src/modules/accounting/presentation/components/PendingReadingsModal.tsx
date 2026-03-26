@@ -21,6 +21,10 @@ import './PendingReadingsModal.css';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { FaAddressCard } from 'react-icons/fa';
 import { ConverDate } from '@/shared/presentation/utils/datetime/ConverDate';
+import {
+  CircularProgress,
+  useSimulatedProgress
+} from '@/shared/presentation/components/CircularProgress';
 
 interface PendingReadingsModalProps {
   isOpen: boolean;
@@ -47,15 +51,28 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const fmt = (val: number) => `$${val.toFixed(2)}`;
+  const loadingProgress = useSimulatedProgress(isLoading);
+
+  const fmt = (val: number | undefined | null) =>
+    `$${(Number(val) || 0).toFixed(2)}`;
+
+  const totalDue = useMemo(
+    () =>
+      data.reduce(
+        (acc: number, item: PendingReading) => acc + (Number(item?.total) || 0),
+        0
+      ),
+    [data]
+  );
 
   const clientMetadata = useMemo(() => {
-    if (data.length === 0) return null;
+    if (!data || data.length === 0) return null;
     const first = data[0];
+    if (!first) return null;
     return {
-      name: first.name + ' ' + first.lastName,
-      clientId: first.cardId,
-      address: first.address
+      name: (first.name || '') + ' ' + (first.lastName || ''),
+      clientId: first.cardId || '',
+      address: first.address || ''
     };
   }, [data]);
 
@@ -86,7 +103,7 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
             <span className="period-text">{item.cadastralKey}</span>
           </div>
         ),
-        id: 'incomeTitleCode'
+        id: 'cadastralKey'
       },
       {
         header: t('accounting.pending.incomeDate', 'Emisión'),
@@ -238,12 +255,6 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
     [t]
   );
 
-  const totalDue = useMemo(
-    () =>
-      data.reduce((acc: number, item: PendingReading) => acc + item.total, 0),
-    [data]
-  );
-
   if (!isOpen) return null;
 
   return (
@@ -294,8 +305,12 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
         <div className="pending-readings-body">
           {isLoading ? (
             <div className="pending-loading-state">
-              <div className="shimmer-table"></div>
-              <p>{t('common.loading', 'Cargando información...')}</p>
+              <CircularProgress
+                progress={loadingProgress}
+                size={112}
+                strokeWidth={9}
+                label={t('common.loading', 'Cargando...')}
+              />
             </div>
           ) : error ? (
             <div className="pending-error-state">
