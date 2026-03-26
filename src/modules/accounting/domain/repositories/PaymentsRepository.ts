@@ -1,5 +1,7 @@
+import type { OverduePayment } from '../models/OverdueReading';
 import type { Payment } from '../models/Payment';
 import type { PaymentReading } from '../models/PaymentReading';
+import type { PendingReading } from '../models/PendingReading';
 
 export interface PaymentsRepository {
   findAllPaymentReadingPayrollsByDate(
@@ -16,4 +18,13 @@ export interface PaymentsRepository {
     limit: number,
     offset: number
   ): Promise<Payment[]>;
+
+  findAllOverduePayments(
+    limit?: number,
+    offset?: number
+  ): Promise<OverduePayment[]>;
+
+  findPendingReadingsByCadastralKeyOrCardId(
+    searchValue: string
+  ): Promise<PendingReading[]>;
 }

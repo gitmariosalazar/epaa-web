@@ -12,11 +12,14 @@
   background-color: var(--surface);
   color: var(--text-main);
   border: 1px solid var(--border-color);
-  padding: 0.5rem 0.75rem;
+  padding: 0.6rem 0.9rem;
   border-radius: 0.5rem;
   font-size: 0.75rem;
   font-weight: 500;
-  white-space: nowrap;
+  max-width: 280px; /* Prevent 'to infinity' width */
+  white-space: normal; /* Allow wrapping */
+  word-break: break-word; /* Handle long words */
+  line-height: 1.4;
   pointer-events: none; /* Let mouse pass through */
   z-index: 10000;
   opacity: 0;

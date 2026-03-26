@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Search } from 'lucide-react';
 import { Table, type Column } from '../Table/Table';
 import type { DailyReadingsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
@@ -11,13 +11,13 @@ import { EmptyState } from '../common/EmptyState';
 import { getNoveltyColor } from '../../utils/colors/novelties.colors';
 
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
-import { ReportPreviewModal } from './ReportPreviewModal';
-import type { ExportColumn } from './ReportPreviewModal';
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { Avatar } from '../Avatar/Avatar';
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '../DatePicker/DatePicker';
 import './DailyReport.css';
 import { Button } from '../Button/Button';
+import type { ExportColumn } from './ReportPreviewModal';
 
 export const DailyReport = () => {
   const { t } = useTranslation();
@@ -25,62 +25,74 @@ export const DailyReport = () => {
   const AVAILABLE_COLUMNS: ExportColumn[] = useMemo(
     () => [
       {
+        columnId: 'time',
         id: 'time',
         label: t('dashboard.reports.daily.columns.dateTime'),
         isDefault: true
       },
       {
+        columnId: 'key',
         id: 'key',
         label: t('dashboard.reports.daily.columns.cadastralKey'),
         isDefault: true
       },
       {
+        columnId: 'block',
         id: 'block',
         label: t('dashboard.reports.daily.columns.block'),
         isDefault: true
       },
       {
+        columnId: 'client',
         id: 'client',
         label: t('dashboard.reports.daily.columns.client'),
         isDefault: true
       },
       {
+        columnId: 'average',
         id: 'average',
         label: t('dashboard.reports.daily.columns.average'),
         isDefault: false
       },
       {
+        columnId: 'preview',
         id: 'preview',
         label: t('dashboard.reports.daily.columns.preview'),
         isDefault: false
       },
       {
+        columnId: 'current',
         id: 'current',
         label: t('dashboard.reports.daily.columns.current'),
         isDefault: false
       },
       {
+        columnId: 'value',
         id: 'value',
         label: t('dashboard.reports.daily.columns.value'),
         isDefault: true
       },
       {
+        columnId: 'consumption',
         id: 'consumption',
         label: t('dashboard.reports.daily.columns.consumption'),
         isDefault: true
       },
       {
+        columnId: 'type',
         id: 'type',
         label: t('dashboard.reports.daily.columns.type'),
         isDefault: true
       },
       {
+        columnId: 'status',
         id: 'status',
         label: t('dashboard.reports.daily.columns.status'),
         isDefault: true
       },
       {
-        id: 'obs',
+        columnId: 'observation',
+        id: 'observation',
         label: t('dashboard.reports.daily.columns.observation'),
         isDefault: true
       }
@@ -93,9 +105,7 @@ export const DailyReport = () => {
   const [data, setData] = useState<DailyReadingsReport[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-
   const [resultSearchTerm, setResultSearchTerm] = useState('');
-  const [showPdfPreview, setShowPdfPreview] = useState(false);
 
   const repository = useMemo(() => new HttpReportDashboardRepository(), []);
   const exportService = useMemo(() => new ExportService(), []);
@@ -133,6 +143,61 @@ export const DailyReport = () => {
         row.readingValue.toString().includes(resultSearchTerm)
     );
   }, [data, resultSearchTerm]);
+
+  const mapRowData = useCallback(
+    (d: DailyReadingsReport, selectedCols: ExportColumn[]) => {
+      try {
+        const rowData: Record<string, string> = {};
+        // Se combina la fecha del reporte con el tiempo de lectura si solo viene el tiempo HH:MM:SS
+        const fullDateStr = d.readingTime && !d.readingTime.includes('-')
+          ? `${date}T${d.readingTime}`
+          : d.readingTime;
+
+        rowData['time'] = fullDateStr
+          ? dateService.formatToLocaleString(fullDateStr, {
+              dateStyle: 'short',
+              timeStyle: 'medium'
+            })
+          : '-';
+        rowData['key'] = d.cadastralKey;
+        rowData['block'] = d.blockNumber || '';
+        rowData['client'] = d.clientName;
+        rowData['average'] = `${d.averageConsumption} m³`;
+        rowData['preview'] = d.previewReading?.toString() || '0';
+        rowData['current'] = d.currentReading?.toString() || '0';
+        rowData['value'] = d.readingValue.toString();
+        rowData['consumption'] = `${d.consumption} m³`;
+        rowData['type'] = d.measureType || '';
+        rowData['status'] = d.status || '';
+        rowData['observation'] = `${d.observation || '-'}`;
+
+        return selectedCols.map((col) => {
+          const key = (col.columnId || col.id) as keyof typeof rowData;
+          return rowData[key] || '-';
+        });
+      } catch (error) {
+        console.error('Error mapping daily row data:', error);
+        return selectedCols.map(() => '-');
+      }
+    },
+    [date]
+  );
+
+  const {
+    setShowPdfPreview,
+    PdfPreviewModal
+  } = useTablePdfExport({
+    data: filteredData,
+    availableColumns: AVAILABLE_COLUMNS,
+    reportTitle: t('dashboard.reports.daily.title', 'REPORTE DIARIO DE LECTURAS'),
+    reportDescription: t('dashboard.reports.daily.description', 'Detalle de lecturas correspondientes al día seleccionado'),
+    labelsHorizontal: {
+      [t('common.date', 'Fecha')]: date,
+      [t('common.exportDate', 'Fecha de Exportación')]: 
+        new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+    },
+    mapRowData
+  });
 
   const columns = useMemo<Column<DailyReadingsReport>[]>(
     () => [
@@ -196,13 +261,12 @@ export const DailyReport = () => {
         }
       }
     ],
-    []
+    [t]
   );
 
   return (
     <div className="daily-report-container">
       <div className="daily-report-toolbar">
-        {/* Unified Search Row */}
         <div className="daily-toolbar-side">
           <label className="toolbar-label-compact">Period</label>
           <DatePicker
@@ -237,30 +301,30 @@ export const DailyReport = () => {
           )}
         </div>
 
-        {data.length > 0 && (
-          <div className="daily-toolbar-side actions">
-            <Button
-              variant="outline"
-              color="red"
-              size="sm"
-              iconOnly
-              leftIcon={ColoredIcons.Pdf}
-              onClick={() => setShowPdfPreview(true)}
-              title="Export PDF"
-            />
-            <Button
-              variant="outline"
-              color="green"
-              size="sm"
-              iconOnly
-              leftIcon={ColoredIcons.Excel}
-              onClick={() => {
-                exportService.exportToExcel(filteredData, 'daily_report');
-              }}
-              title="Export Excel"
-            />
-          </div>
-        )}
+        <div className="daily-toolbar-side actions">
+          <Button
+            variant="outline"
+            color="red"
+            size="sm"
+            iconOnly
+            leftIcon={ColoredIcons.Pdf}
+            onClick={() => setShowPdfPreview(true)}
+            disabled={loading || data.length === 0}
+            title={t('common.exportPdf', 'Export PDF')}
+          />
+          <Button
+            variant="outline"
+            color="green"
+            size="sm"
+            iconOnly
+            leftIcon={ColoredIcons.Excel}
+            onClick={() => {
+              exportService.exportToExcel(filteredData, 'daily_report');
+            }}
+            disabled={loading || data.length === 0}
+            title={t('common.exportExcel', 'Export Excel')}
+          />
+        </div>
       </div>
 
       <Table
@@ -282,94 +346,7 @@ export const DailyReport = () => {
           )
         }
       />
-      <ReportPreviewModal
-        isOpen={showPdfPreview}
-        onClose={() => setShowPdfPreview(false)}
-        dataCount={filteredData.length}
-        reportTitle="Daily Readings Report"
-        availableColumns={AVAILABLE_COLUMNS}
-        pdfGenerator={(options) => {
-          const { orientation, selectedColumnIds } = options;
-
-          // Filter columns based on selection
-          const selectedCols = AVAILABLE_COLUMNS.filter((col) =>
-            selectedColumnIds.includes(col.id)
-          );
-          const colLabels = selectedCols.map((c) => c.label);
-
-          const rows = filteredData.map((d) => {
-            const rowData: any = {};
-            rowData['time'] = d.readingTime
-              ? dateService.formatToLocaleString(d.readingTime, {
-                  dateStyle: 'short',
-                  timeStyle: 'medium'
-                })
-              : '-';
-            rowData['key'] = d.cadastralKey;
-            rowData['block'] = d.blockNumber || '';
-            rowData['client'] = d.clientName;
-            rowData['average'] = `${d.averageConsumption} m³`;
-            rowData['preview'] = d.previewReading;
-            rowData['current'] = d.currentReading;
-            rowData['value'] = d.readingValue.toString();
-            rowData['consumption'] = `${d.consumption} m³`;
-            rowData['type'] = d.measureType || '';
-            rowData['status'] = d.status || '';
-            rowData['obs'] = `${d.observation || '-'}`;
-
-            // Map to array in correct order
-            return selectedCols.map((col) => rowData[col.id]);
-          });
-
-          return exportService.generatePdfBlobUrl({
-            rows,
-            columns: colLabels,
-            fileName: 'daily_report',
-            title: 'Daily Readings Report',
-            orientation
-          });
-        }}
-        onDownload={(options) => {
-          const { orientation, selectedColumnIds } = options;
-
-          const selectedCols = AVAILABLE_COLUMNS.filter((col) =>
-            selectedColumnIds.includes(col.id)
-          );
-          const colLabels = selectedCols.map((c) => c.label);
-
-          const rows = filteredData.map((d) => {
-            const rowData: any = {};
-            rowData['time'] = d.readingTime
-              ? dateService.formatToLocaleString(d.readingTime, {
-                  dateStyle: 'short',
-                  timeStyle: 'medium'
-                })
-              : '-';
-            rowData['key'] = d.cadastralKey;
-            rowData['block'] = d.blockNumber || '';
-            rowData['client'] = d.clientName;
-            rowData['average'] = `${d.averageConsumption} m³`;
-            rowData['preview'] = d.previewReading;
-            rowData['current'] = d.currentReading;
-            rowData['value'] = d.readingValue.toString();
-            rowData['consumption'] = `${d.consumption} m³`;
-            rowData['type'] = d.measureType || '';
-            rowData['status'] = d.status || '';
-            rowData['obs'] = `${d.observation || '-'}`;
-
-            return selectedCols.map((col) => rowData[col.id]);
-          });
-
-          exportService.exportToPdf({
-            rows,
-            columns: colLabels,
-            fileName: 'daily_report',
-            title: 'Daily Readings Report',
-            orientation
-          });
-          setShowPdfPreview(false);
-        }}
-      />
+      {PdfPreviewModal}
     </div>
   );
 };

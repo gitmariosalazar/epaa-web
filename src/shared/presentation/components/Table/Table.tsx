@@ -261,7 +261,7 @@ export const Table = <T extends { [key: string]: any }>({
               </tr>
             )}
             {data && data.length > 0 && (
-              <tr style={{ height: '100%' }}>
+              <tr className="table-row--spacer" style={{ height: '100%', background: 'transparent' }}>
                 <td colSpan={columns.length} style={{ padding: 0, border: 'none', background: 'transparent' }}></td>
               </tr>
             )}

@@ -9,13 +9,15 @@ interface TooltipProps {
   children: ReactNode;
   position?: TooltipPosition;
   className?: string;
+  disabled?: boolean;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({
   content,
   children,
   position = 'top',
-  className = ''
+  className = '',
+  disabled = false
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
@@ -78,11 +80,17 @@ export const Tooltip: React.FC<TooltipProps> = ({
     }
   }, [isVisible, position]);
 
+  useLayoutEffect(() => {
+    if (disabled && isVisible) {
+      setIsVisible(false);
+    }
+  }, [disabled, isVisible]);
+
   return (
     <div
       ref={triggerRef}
       className={`tooltip-container ${className}`}
-      onMouseEnter={() => setIsVisible(true)}
+      onMouseEnter={() => !disabled && setIsVisible(true)}
       onMouseLeave={() => setIsVisible(false)}
     >
       {children}

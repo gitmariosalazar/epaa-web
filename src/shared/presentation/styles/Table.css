@@ -102,8 +102,12 @@
   height: 1px; /* Forces row to shrink-wrap its content, passing remaining height to the spacer */
 }
 
-.table tbody tr:hover {
+.table tbody tr:hover:not(.table-row--spacer) {
   background-color: var(--table-row-hover);
+}
+
+.table-row--spacer:hover {
+  background-color: transparent !important;
 }
 
 /* Semaphore / Information Row Styles - Stronger Colors */

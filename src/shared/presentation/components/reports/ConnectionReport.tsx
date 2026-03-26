@@ -12,6 +12,9 @@ import { Table, type Column } from '../Table/Table';
 import { Avatar } from '../Avatar/Avatar';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { useTranslation } from 'react-i18next';
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
+import type { ExportColumn } from './ReportPreviewModal';
+import { useCallback } from 'react';
 import './ConnectionReport.css';
 
 export const ConnectionReport = () => {
@@ -49,6 +52,18 @@ export const ConnectionReport = () => {
     handleSearch();
   }, []);
 
+  const AVAILABLE_COLUMNS: ExportColumn[] = useMemo(
+    () => [
+      { columnId: 'date', id: 'date', label: t('dashboard.reports.connection.columns.date'), isDefault: true },
+      { columnId: 'readingValue', id: 'readingValue', label: t('dashboard.reports.connection.columns.readingValue'), isDefault: true },
+      { columnId: 'consumption', id: 'consumption', label: t('dashboard.reports.connection.columns.consumption'), isDefault: true },
+      { columnId: 'client', id: 'client', label: t('dashboard.reports.connection.columns.client'), isDefault: true },
+      { columnId: 'meter', id: 'meter', label: t('dashboard.reports.connection.columns.meter'), isDefault: true },
+      { columnId: 'status', id: 'status', label: t('dashboard.reports.connection.columns.status'), isDefault: true }
+    ],
+    [t]
+  );
+
   const filteredData = useMemo(() => {
     if (!resultSearchTerm) return data;
     const lowerTerm = resultSearchTerm.toLowerCase();
@@ -61,6 +76,56 @@ export const ConnectionReport = () => {
           .includes(resultSearchTerm)
     );
   }, [data, resultSearchTerm]);
+
+  const mapRowData = useCallback(
+    (row: ConnectionLastReadingsReport, selectedCols: ExportColumn[]) => {
+      try {
+        const rowData: Record<string, string> = {
+          date: dateService.formatToLocaleString(row.readingDate),
+          readingValue: row.readingValue.toString(),
+          consumption: `${row.consumption} m³`,
+          clientName: row.clientName,
+          meterNumber: row.meterNumber,
+          novelty: row.novelty
+        };
+
+        return selectedCols.map((col) => {
+          const key = (col.columnId || col.id) as keyof typeof rowData;
+          return rowData[key] || '-';
+        });
+      } catch (error) {
+        console.error('Error mapping connection row data:', error);
+        return selectedCols.map(() => '-');
+      }
+    },
+    []
+  );
+
+  const labelsHorizontal = useMemo(() => {
+    if (data.length === 0) return undefined;
+    const first = data[0];
+    return {
+      [t('dashboard.reports.connection.metadata.client', 'Client Name')]: first.clientName || '',
+      [t('dashboard.reports.connection.metadata.cadastralKey', 'Cadastral Key')]: first.cadastralKey || '',
+      [t('dashboard.reports.connection.metadata.meter', 'Meter Number')]: first.meterNumber || '',
+      [t('dashboard.reports.connection.metadata.address', 'Address')]: first.address || '',
+      [t('common.exportDate', 'Fecha de Exportación')]: 
+        new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+    };
+  }, [data, t]);
+
+  const {
+    setShowPdfPreview,
+    PdfPreviewModal
+  } = useTablePdfExport({
+    data: filteredData,
+    availableColumns: AVAILABLE_COLUMNS,
+    reportTitle: t('dashboard.reports.connection.title', 'Historial de Lecturas'),
+    reportDescription: t('dashboard.reports.connection.description', 'Detalle histórico de lecturas por conexión'),
+    mapRowData,
+    labelsHorizontal
+  });
+
 
   const columns = useMemo<Column<ConnectionLastReadingsReport>[]>(
     () => [
@@ -168,65 +233,33 @@ export const ConnectionReport = () => {
           )}
         </div>
 
-        {data.length > 0 && (
-          <div className="connection-toolbar-side actions">
-            <Button
-              variant="outline"
-              color="red"
-              size="sm"
-              iconOnly
-              leftIcon={ColoredIcons.Pdf}
-              onClick={() => {
-                const rows = filteredData.map((d) => [
-                  dateService.formatToLocaleString(d.readingDate),
-                  d.readingValue.toString(),
-                  `${d.consumption} m³`,
-                  d.clientName,
-                  d.meterNumber,
-                  d.novelty
-                ]);
-                exportService.exportToPdf({
-                  rows,
-                  columns: [
-                    'Date',
-                    'Reading',
-                    'Consumption',
-                    'Client',
-                    'Meter',
-                    'Status'
-                  ],
-                  fileName: 'connection_history',
-                  title: 'Connection Reading History',
-                  clientInfo:
-                    filteredData.length > 0
-                      ? {
-                          'Client Name': filteredData[0].clientName || '',
-                          'Cadastral Key':
-                            filteredData[0].cadastralKey || '',
-                          'Meter Number': filteredData[0].meterNumber || '',
-                          Address: filteredData[0].address || ''
-                        }
-                      : undefined
-                });
-              }}
-              title="Export PDF"
-            />
-            <Button
-              variant="outline"
-              color="green"
-              size="sm"
-              iconOnly
-              leftIcon={ColoredIcons.Excel}
-              onClick={() => {
-                exportService.exportToExcel(
-                  filteredData,
-                  'connection_history'
-                );
-              }}
-              title="Export Excel"
-            />
-          </div>
-        )}
+        <div className="connection-toolbar-side actions">
+          <Button
+            variant="outline"
+            color="red"
+            size="sm"
+            iconOnly
+            leftIcon={ColoredIcons.Pdf}
+            onClick={() => setShowPdfPreview(true)}
+            disabled={loading || data.length === 0}
+            title={t('common.exportPdf', 'Export PDF')}
+          />
+          <Button
+            variant="outline"
+            color="green"
+            size="sm"
+            iconOnly
+            leftIcon={ColoredIcons.Excel}
+            onClick={() => {
+              exportService.exportToExcel(
+                filteredData,
+                'connection_history'
+              );
+            }}
+            disabled={loading || data.length === 0}
+            title={t('common.exportExcel', 'Export Excel')}
+          />
+        </div>
       </div>
 
       <Table
@@ -248,6 +281,7 @@ export const ConnectionReport = () => {
           )
         }
       />
+      {PdfPreviewModal}
     </div>
   );
 };

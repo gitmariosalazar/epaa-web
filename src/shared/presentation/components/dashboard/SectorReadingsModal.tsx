@@ -6,13 +6,12 @@ import {
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import { useSectorReadings } from '../../hooks/dashboard/useSectorReadings';
-import { ExportService } from '@/shared/infrastructure/services/ExportService';
 import type {
   PendingReadingConnection,
   TakenReadingConnection
 } from '@/modules/readings/domain/models/Reading';
-import { ReportPreviewModal } from '@/shared/presentation/components/reports/ReportPreviewModal';
 import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { FilterSectorReadingsUseCase } from '@/modules/readings/application/usecases/FilterSectorReadingsUseCase';
 import type { FilterCriteria } from '@/modules/readings/application/usecases/FilterSectorReadingsUseCase';
 import './SectorReadingsModal.css';
@@ -36,10 +35,6 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const { data, loading } = useSectorReadings(sector, month, type);
-  const exportService = useMemo(() => new ExportService(), []);
-
-  // PDF Preview State
-  const [showPdfPreview, setShowPdfPreview] = useState(false);
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -201,42 +196,15 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
     return selectedCols.map((col) => rowData[col.id]);
   };
 
-  const handlePdfGenerator = ({ orientation, selectedColumnIds }: any) => {
-    if (!data || data.length === 0) return '';
-
-    const selectedCols = currentAvailableColumns.filter((col) =>
-      selectedColumnIds.includes(col.id)
-    );
-    const colLabels = selectedCols.map((c) => c.label);
-    const rows = data.map((d) => mapRowData(d, selectedCols));
-
-    return exportService.generatePdfBlobUrl({
-      rows: rows,
-      columns: colLabels,
-      fileName: `Lecturas_${type === 'completed' ? 'Completadas' : 'Faltantes'}_Sector_${sector}_${month}`,
-      title: currentReportTitle,
-      orientation
-    });
-  };
-
-  const handleDownloadPdf = ({ orientation, selectedColumnIds }: any) => {
-    if (!data || data.length === 0) return;
-
-    const selectedCols = currentAvailableColumns.filter((col) =>
-      selectedColumnIds.includes(col.id)
-    );
-    const colLabels = selectedCols.map((c) => c.label);
-    const rows = data.map((d) => mapRowData(d, selectedCols));
-
-    exportService.exportToPdf({
-      rows: rows,
-      columns: colLabels,
-      fileName: `Lecturas_${type === 'completed' ? 'Completadas' : 'Faltantes'}_Sector_${sector}_${month}`,
-      title: currentReportTitle,
-      orientation
-    });
-    setShowPdfPreview(false);
-  };
+  const {
+    setShowPdfPreview,
+    PdfPreviewModal
+  } = useTablePdfExport({
+    data: data || [],
+    availableColumns: currentAvailableColumns,
+    reportTitle: currentReportTitle,
+    mapRowData
+  });
 
   const filteredData = useMemo(() => {
     if (!data) return [];
@@ -316,18 +284,10 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
             />
           </div>
         </div>
-      </div>
+        </div>
 
       {/* PDF Modal Preview */}
-      <ReportPreviewModal
-        isOpen={showPdfPreview}
-        onClose={() => setShowPdfPreview(false)}
-        dataCount={(data || []).length}
-        reportTitle={currentReportTitle}
-        availableColumns={currentAvailableColumns}
-        pdfGenerator={handlePdfGenerator}
-        onDownload={handleDownloadPdf}
-      />
+      {PdfPreviewModal}
     </div>
   );
 };

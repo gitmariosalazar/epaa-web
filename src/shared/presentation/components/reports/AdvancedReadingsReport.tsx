@@ -13,9 +13,14 @@ import { Table, type Column } from '../Table/Table';
 import { Button } from '../Button/Button';
 import { SectorReadingsModal } from '../dashboard/SectorReadingsModal';
 import { DatePicker } from '../DatePicker/DatePicker';
+import { useTranslation } from 'react-i18next';
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
+import type { ExportColumn } from './ReportPreviewModal';
+import { useCallback } from 'react';
 import './AdvancedReadingsReport.css';
 
 export const AdvancedReadingsReport = () => {
+  const { t } = useTranslation();
   const pickerRef = useRef<HTMLInputElement>(null);
   const [month, setMonth] = useState<string>(
     dateService.getCurrentMonthString()
@@ -63,12 +68,62 @@ export const AdvancedReadingsReport = () => {
     handleSearch();
   }, [month]);
 
+  const AVAILABLE_COLUMNS: ExportColumn[] = useMemo(
+    () => [
+      { columnId: 'sector', id: 'sector', label: t('dashboard.reports.advanced.columns.sector', 'Sector'), isDefault: true },
+      { columnId: 'totalConnections', id: 'totalConnections', label: t('dashboard.reports.advanced.columns.totalConnections', 'Total Connections'), isDefault: true },
+      { columnId: 'readingsCompleted', id: 'readingsCompleted', label: t('dashboard.reports.advanced.columns.readingsCompleted', 'Readings Completed'), isDefault: true },
+      { columnId: 'missingReadings', id: 'missingReadings', label: t('dashboard.reports.advanced.columns.missingReadings', 'Missing Readings'), isDefault: true },
+      { columnId: 'progressPercentage', id: 'progressPercentage', label: t('dashboard.reports.advanced.columns.progress', 'Progress %'), isDefault: true }
+    ],
+    [t]
+  );
+
+  const mapRowData = useCallback(
+    (row: AdvancedReportReadings, selectedCols: ExportColumn[]) => {
+      try {
+        const rowData: Record<string, string> = {
+          sector: (row.sector ?? '').toString(),
+          totalConnections: (row.totalConnections ?? 0).toString(),
+          readingsCompleted: (row.readingsCompleted ?? 0).toString(),
+          missingReadings: (row.missingReadings ?? 0).toString(),
+          progressPercentage: `${(row.progressPercentage ?? 0).toFixed(1)}%`
+        };
+
+        return selectedCols.map((col) => {
+          const key = (col.columnId || col.id) as keyof typeof rowData;
+          return rowData[key] || '-';
+        });
+      } catch (error) {
+        console.error('Error mapping row data:', error);
+        return selectedCols.map(() => '-');
+      }
+    },
+    []
+  );
+
   const filteredData = useMemo(() => {
     if (!resultSearchTerm) return data;
     return data.filter((item) =>
       item.sector.toString().includes(resultSearchTerm)
     );
   }, [data, resultSearchTerm]);
+
+  const {
+    setShowPdfPreview,
+    PdfPreviewModal
+  } = useTablePdfExport({
+    data: filteredData,
+    availableColumns: AVAILABLE_COLUMNS,
+    reportTitle: t('dashboard.reports.advanced.title', 'REPORTE DE LECTURAS AVANZADAS'),
+    reportDescription: t('dashboard.reports.advanced.description', 'Detalle de avance de lecturas por sector'),
+    labelsHorizontal: {
+      [t('common.period', 'Periodo')]: month,
+      [t('common.exportDate', 'Fecha de Exportación')]: 
+        new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+    },
+    mapRowData
+  });
 
   /* Pagination logic handled by Table component */
 
@@ -179,9 +234,6 @@ export const AdvancedReadingsReport = () => {
               onChange={(e) => setResultSearchTerm(e.target.value)}
             />
           </div>
-        </div>
-
-        {data.length > 0 && (
           <div className="advanced-toolbar-side actions">
             <Button
               variant="outline"
@@ -189,28 +241,9 @@ export const AdvancedReadingsReport = () => {
               size="sm"
               iconOnly
               leftIcon={ColoredIcons.Pdf}
-              onClick={() => {
-                const rows = filteredData.map((d) => [
-                  d.sector.toString(),
-                  d.totalConnections.toString(),
-                  d.readingsCompleted.toString(),
-                  d.missingReadings.toString(),
-                  d.progressPercentage.toString()
-                ]);
-                exportService.exportToPdf({
-                  rows,
-                  columns: [
-                    'Sector',
-                    'Total Connections',
-                    'Readings Completed',
-                    'Missing Readings',
-                    'Progress Percentage'
-                  ],
-                  fileName: 'advanced_readings_report',
-                  title: 'Advanced Readings Report'
-                });
-              }}
-              title="Export PDF"
+              onClick={() => setShowPdfPreview(true)}
+              disabled={loading || data.length === 0}
+              title={t('common.exportPdf', 'Export PDF')}
             />
             <Button
               variant="outline"
@@ -224,10 +257,11 @@ export const AdvancedReadingsReport = () => {
                   'advanced_readings_report'
                 );
               }}
-              title="Export Excel"
+              disabled={loading || data.length === 0}
+              title={t('common.exportExcel', 'Export Excel')}
             />
           </div>
-        )}
+        </div>
       </div>
 
       <Table
@@ -249,6 +283,7 @@ export const AdvancedReadingsReport = () => {
           )
         }
       />
+      {PdfPreviewModal}
       <SectorReadingsModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

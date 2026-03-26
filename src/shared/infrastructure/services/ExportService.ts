@@ -46,16 +46,26 @@ export class ExportService implements IExportService {
    * Public API to export data to PDF
    */
   exportToPdf(options: ReportOptions): void {
-    const doc = this.createPdfDoc(options);
-    doc.save(`${options.fileName}.pdf`);
+    try {
+      const doc = this.createPdfDoc(options);
+      doc.save(`${options.fileName}.pdf`);
+    } catch (error) {
+      console.error('[ExportService] Fatal error in exportToPdf:', error);
+    }
   }
 
   /**
    * Public API to generate a temporary PDF URL
    */
   generatePdfBlobUrl(options: ReportOptions): string {
-    const doc = this.createPdfDoc(options);
-    return doc.output('bloburl') as unknown as string;
+    try {
+      const doc = this.createPdfDoc(options);
+      const blob = doc.output('blob');
+      return URL.createObjectURL(blob);
+    } catch (error) {
+      console.error('[ExportService] Fatal error in generatePdfBlobUrl:', error);
+      throw error;
+    }
   }
 
   /**
@@ -85,7 +95,7 @@ export class ExportService implements IExportService {
     let currentY = this.renderBranding(doc);
 
     // 2. Metadata and Title
-    currentY = this.renderTitleSection(doc, options.title, currentY);
+    currentY = this.renderTitleSection(doc, options.title || 'REPORTE', currentY);
 
     // 2.1 Description
     if (options.description) {
@@ -97,7 +107,6 @@ export class ExportService implements IExportService {
     }
 
     // 2.2 Labels Horizontal
-    console.log('[ExportService] Received labelsHorizontal:', options.labelsHorizontal);
     if (options.labelsHorizontal) {
       currentY = this.renderLabelsHorizontal(
         doc,
@@ -117,7 +126,6 @@ export class ExportService implements IExportService {
 
     // 3. Client Information (if provided)
     if (options.clientInfo) {
-      // Small spacing after previous sections
       currentY = this.renderClientInfoBox(doc, options.clientInfo, currentY);
     }
 
@@ -136,7 +144,7 @@ export class ExportService implements IExportService {
     const pageWidth = doc.internal.pageSize.width;
     const { primary } = PDF_THEME.colors;
     doc.setFillColor(primary[0], primary[1], primary[2]);
-    doc.rect(0, 0, pageWidth, 3, 'F'); // Slightly thinner accent
+    doc.rect(0, 0, pageWidth, 3, 'F');
   }
 
   private renderBranding(doc: jsPDF): number {
@@ -145,35 +153,31 @@ export class ExportService implements IExportService {
     const { base: font, sizes } = PDF_THEME.fonts;
     const pageWidth = doc.internal.pageSize.width;
 
-    // Logo
-    const img = new Image();
-    img.src = logoEpaa;
-    try {
-      doc.addImage(img, 'PNG', margin, logoY, logoSize, logoSize, undefined, 'FAST');
-    } catch {
+    // Logo (Defensive handling)
+    if (logoEpaa && typeof logoEpaa === 'string') {
+      try {
+        // Use the imported logo - jspdf handles static imports better in some bundlers
+        doc.addImage(logoEpaa, 'PNG', margin, logoY, logoSize, logoSize, undefined, 'FAST');
+      } catch (err) {
+        console.warn('[ExportService] Logo rendering failed, falling back:', err);
+        doc.setFillColor(240, 240, 240);
+        doc.circle(margin + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 'F');
+      }
+    } else if (logoEpaa) {
+      // If it's not a string (e.g. a module object), fall back to circle
       doc.setFillColor(240, 240, 240);
-      doc.circle(
-        margin + logoSize / 2,
-        logoY + logoSize / 2,
-        logoSize / 2,
-        'F'
-      );
+      doc.circle(margin + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 'F');
     }
 
-    // Company Name (Dynamic font size based on available width)
-    const companyName =
-      'EMPRESA PÚBLICA DE AGUA POTABLE Y ALCANTARILLADO DE ANTONIO ANTE';
+    // Company Name
+    const companyName = 'EMPRESA PÚBLICA DE AGUA POTABLE Y ALCANTARILLADO DE ANTONIO ANTE';
     const availableTextWidth = pageWidth - margin * 2 - logoSize - 10;
 
     doc.setFont(font, 'normal');
     let dynamicFontSize = sizes.companyName;
     doc.setFontSize(dynamicFontSize);
 
-    // Simple scaling logic: if name is too wide, shrink it
-    while (
-      doc.getTextWidth(companyName) > availableTextWidth &&
-      dynamicFontSize > 8
-    ) {
+    while (doc.getTextWidth(companyName) > availableTextWidth && dynamicFontSize > 8) {
       dynamicFontSize -= 0.5;
       doc.setFontSize(dynamicFontSize);
     }
@@ -181,7 +185,7 @@ export class ExportService implements IExportService {
     doc.setTextColor(primary[0], primary[1], primary[2]);
     doc.text(companyName, margin + logoSize + 6, logoY + logoSize / 2 + 2);
 
-    // Generated Date (Right align)
+    // Generated Date
     const dateStr = new Date().toLocaleDateString('es-EC', {
       year: 'numeric',
       month: 'long',
@@ -191,23 +195,16 @@ export class ExportService implements IExportService {
     });
     doc.setFontSize(sizes.reportInfo);
     doc.setTextColor(secondary[0], secondary[1], secondary[2]);
-    doc.text(`Generado: ${dateStr}`, pageWidth - margin, logoY + 4, {
-      align: 'right'
-    });
+    doc.text(`Generado: ${dateStr}`, pageWidth - margin, logoY + 4, { align: 'right' });
 
     return logoY + logoSize + 10;
   }
 
-  private renderTitleSection(
-    doc: jsPDF,
-    title: string,
-    startY: number
-  ): number {
+  private renderTitleSection(doc: jsPDF, title: string, startY: number): number {
     const { text } = PDF_THEME.colors;
     const { sizes } = PDF_THEME.fonts;
     const pageWidth = doc.internal.pageSize.width;
 
-    // Title (Centered)
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(sizes.title);
     doc.setTextColor(text[0], text[1], text[2]);
@@ -216,11 +213,7 @@ export class ExportService implements IExportService {
     return startY + 8;
   }
 
-  private renderDescriptionSection(
-    doc: jsPDF,
-    description: string,
-    startY: number
-  ): number {
+  private renderDescriptionSection(doc: jsPDF, description: string, startY: number): number {
     const { text } = PDF_THEME.colors;
     const { sizes } = PDF_THEME.fonts;
     const { default: margin } = PDF_THEME.margins;
@@ -230,20 +223,14 @@ export class ExportService implements IExportService {
     doc.setFontSize(sizes.label);
     doc.setTextColor(text[0], text[1], text[2]);
 
-    // Handle long descriptions with wrapping
     const maxWidth = pageWidth - margin * 2;
     const lines = doc.splitTextToSize(description, maxWidth);
-
     doc.text(lines, pageWidth / 2, startY, { align: 'center' });
 
     return startY + lines.length * 5;
   }
 
-  private renderLabelsHorizontal(
-    doc: jsPDF,
-    labelsHorizontal: Record<string, string>,
-    startY: number
-  ): number {
+  private renderLabelsHorizontal(doc: jsPDF, labelsHorizontal: Record<string, string>, startY: number): number {
     const { background, border, primary, text } = PDF_THEME.colors;
     const { sizes } = PDF_THEME.fonts;
     const { default: margin } = PDF_THEME.margins;
@@ -252,71 +239,50 @@ export class ExportService implements IExportService {
     const entries = Object.entries(labelsHorizontal);
     if (entries.length === 0) return startY;
 
-    // Box Configuration (matching clientInfo style)
     const boxPadding = 4;
     const lineHeight = 5;
     const midPoint = Math.ceil(entries.length / 2);
     const boxHeight = midPoint * lineHeight + boxPadding * 2;
 
-    // Drawing the container box
     doc.setFillColor(background[0], background[1], background[2]);
     doc.setDrawColor(border[0], border[1], border[2]);
-    doc.roundedRect(
-      margin,
-      startY,
-      pageWidth - margin * 2,
-      boxHeight,
-      1.5,
-      1.5,
-      'FD'
-    );
+    doc.roundedRect(margin, startY, pageWidth - margin * 2, boxHeight, 1.5, 1.5, 'FD');
 
     doc.setFontSize(sizes.label - 1);
     const col1X = margin + boxPadding;
     const col2X = pageWidth / 2 + 5;
-    const labelOffset = 30; // Offset for the value after the label
+    const labelOffset = 30;
     let currentY = startY + boxPadding + 3.5;
 
     const col1Entries = entries.slice(0, midPoint);
     const col2Entries = entries.slice(midPoint);
 
-    // Render both columns inside the box
     for (let i = 0; i < midPoint; i++) {
-      // Column 1
       if (col1Entries[i]) {
         const [key, value] = col1Entries[i];
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(primary[0], primary[1], primary[2]);
         doc.text(`${key}:`, col1X, currentY);
-
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(text[0], text[1], text[2]);
         doc.text(String(value), col1X + labelOffset, currentY);
       }
-
-      // Column 2
       if (col2Entries[i]) {
         const [key, value] = col2Entries[i];
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(primary[0], primary[1], primary[2]);
         doc.text(`${key}:`, col2X, currentY);
-
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(text[0], text[1], text[2]);
         doc.text(String(value), col2X + labelOffset, currentY);
       }
-
       currentY += lineHeight;
     }
 
     return startY + boxHeight + 2;
   }
 
-  private renderLabelsVertical(
-    doc: jsPDF,
-    labelsVertical: Record<string, string>,
-    startY: number
-  ): number {
+  private renderLabelsVertical(doc: jsPDF, labelsVertical: Record<string, string>, startY: number): number {
     const { text } = PDF_THEME.colors;
     const { sizes } = PDF_THEME.fonts;
     const pageWidth = doc.internal.pageSize.width;
@@ -327,20 +293,14 @@ export class ExportService implements IExportService {
 
     let currentY = startY;
     Object.entries(labelsVertical).forEach(([key, value]) => {
-      doc.text(`${key}: ${value}`, pageWidth / 2, currentY, {
-        align: 'center'
-      });
+      doc.text(`${key}: ${value}`, pageWidth / 2, currentY, { align: 'center' });
       currentY += 5;
     });
 
     return currentY + 2;
   }
 
-  private renderClientInfoBox(
-    doc: jsPDF,
-    clientInfo: Record<string, any>,
-    startY: number
-  ): number {
+  private renderClientInfoBox(doc: jsPDF, clientInfo: Record<string, any>, startY: number): number {
     const { default: margin } = PDF_THEME.margins;
     const { background, border, primary, text } = PDF_THEME.colors;
     const { sizes } = PDF_THEME.fonts;
@@ -351,18 +311,9 @@ export class ExportService implements IExportService {
     const lineHeight = 5;
     const boxHeight = entries.length * lineHeight + boxPadding * 2;
 
-    // Styling the box
     doc.setFillColor(background[0], background[1], background[2]);
     doc.setDrawColor(border[0], border[1], border[2]);
-    doc.roundedRect(
-      margin,
-      startY,
-      pageWidth - margin * 2,
-      boxHeight,
-      1.5,
-      1.5,
-      'FD'
-    );
+    doc.roundedRect(margin, startY, pageWidth - margin * 2, boxHeight, 1.5, 1.5, 'FD');
 
     let currentY = startY + boxPadding + 3.5;
     doc.setFontSize(sizes.label);
@@ -371,7 +322,6 @@ export class ExportService implements IExportService {
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(primary[0], primary[1], primary[2]);
       doc.text(`${key}:`, margin + boxPadding, currentY);
-
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(text[0], text[1], text[2]);
       doc.text(String(value), margin + boxPadding + 35, currentY);
@@ -381,18 +331,14 @@ export class ExportService implements IExportService {
     return startY + boxHeight + 8;
   }
 
-  private renderDataTable(
-    doc: jsPDF,
-    options: ReportOptions,
-    startY: number
-  ): number {
+  private renderDataTable(doc: jsPDF, options: ReportOptions, startY: number): number {
     const { default: margin } = PDF_THEME.margins;
     const { primary, footer } = PDF_THEME.colors;
     const { sizes } = PDF_THEME.fonts;
 
     autoTable(doc, {
       head: [options.columns],
-      body: options.rows,
+      body: options.rows || [],
       foot: options.totals ? [options.totals] : undefined,
       showFoot: 'lastPage',
       startY,
@@ -410,7 +356,7 @@ export class ExportService implements IExportService {
         fontStyle: 'bold'
       },
       footStyles: {
-        fillColor: [225, 29, 72], // Red accent #e11d48
+        fillColor: [225, 29, 72],
         textColor: 255,
         fontStyle: 'bold'
       },
@@ -419,7 +365,6 @@ export class ExportService implements IExportService {
       },
       margin: { left: margin, right: margin },
       didDrawPage: (data) => {
-        // Footer (Page numbers)
         const pageHeight = doc.internal.pageSize.height;
         doc.setFontSize(sizes.footer);
         doc.setTextColor(footer[0], footer[1], footer[2]);
@@ -427,7 +372,7 @@ export class ExportService implements IExportService {
       }
     });
 
-    return (doc as any).lastAutoTable.finalY;
+    return (doc as any).lastAutoTable.finalY || startY;
   }
 
   private renderSignatureSection(doc: jsPDF, signatures?: Signature[]): void {
@@ -441,46 +386,34 @@ export class ExportService implements IExportService {
     const { text, secondary } = PDF_THEME.colors;
     const { sizes } = PDF_THEME.fonts;
 
-    // Default signature if none provided
     const signaturesToRender =
       signatures && signatures.length > 0
         ? signatures
         : [{ label: 'FIRMA RESPONSABLE', name: 'EPAA - Antonio Ante' }];
 
     const signatureCount = signaturesToRender.length;
-
-    // Position ALWAYS at the bottom of the page, but closer to the edge
     let signatureY = pageHeight - margin - blockHeight + 8;
 
-    // If the table crashed into this area, force a new page
     const lastAutoTable = (doc as any).lastAutoTable;
-    // signatureY is the start of the signatures. If table ends below the start, we break.
-    // Use a very small buffer to maximize space.
     if (lastAutoTable && lastAutoTable.finalY > signatureY - 5) {
       doc.addPage();
+      signatureY = 40; // Reset position on new page
     }
 
-    // Calculate horizontal spacing
     const totalWidth = pageWidth - margin * 2;
     const spacing = totalWidth / signatureCount;
 
     signaturesToRender.forEach((sig, index) => {
       const centerX = margin + spacing * index + spacing / 2;
-
-      // Line (More space for physical signature above)
       doc.setDrawColor(180, 180, 180);
       doc.setLineWidth(0.04);
       doc.line(centerX - 28, signatureY + 5, centerX + 28, signatureY + 5);
 
-      // Label (Uppercase, Bold)
       doc.setFontSize(sizes.label);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(text[0], text[1], text[2]);
-      doc.text(sig.label.toUpperCase(), centerX, signatureY + padding, {
-        align: 'center'
-      });
+      doc.text(sig.label.toUpperCase(), centerX, signatureY + padding, { align: 'center' });
 
-      // Name (Optional)
       let currentSubY = signatureY + padding + 4.5;
       if (sig.name) {
         doc.setFont('helvetica', 'normal');
@@ -490,12 +423,9 @@ export class ExportService implements IExportService {
         currentSubY += 4.5;
       }
 
-      // ID/Cedula (Optional)
       if (sig.idNumber) {
         doc.setFontSize(sizes.footer - 1);
-        doc.text(`C.I: ${sig.idNumber}`, centerX, currentSubY, {
-          align: 'center'
-        });
+        doc.text(`C.I: ${sig.idNumber}`, centerX, currentSubY, { align: 'center' });
       }
     });
   }

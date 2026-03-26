@@ -10,7 +10,6 @@ import {
   CircularProgress,
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
-import { ReportPreviewModal } from '@/shared/presentation/components/reports/ReportPreviewModal';
 import { useEntryDataViewModel } from '../hooks/useEntryDataViewModel';
 
 export const EntryDataPage: React.FC = () => {
@@ -38,20 +37,15 @@ export const EntryDataPage: React.FC = () => {
     paymentMethodList,
     selectedStatus,
     setSelectedStatus,
-    sortConfig,
     filteredGrouped,
     filteredCollector,
     filteredPaymentMethod,
     filteredFullBreakdown,
-    showPdfPreview,
-    setShowPdfPreview,
-    currentFilteredData,
-    currentReportTitle,
-    currentAvailableColumns,
     handleFetch,
     handleSort,
-    handlePdfGenerator,
-    handleDownloadPdf
+    sortConfig,
+    setShowPdfPreview,
+    PdfPreviewModal
   } = useEntryDataViewModel();
 
   const loadingProgress = useSimulatedProgress(isLoading);
@@ -135,15 +129,7 @@ export const EntryDataPage: React.FC = () => {
         />
       )}
 
-      <ReportPreviewModal
-        isOpen={showPdfPreview}
-        onClose={() => setShowPdfPreview(false)}
-        dataCount={currentFilteredData.length}
-        reportTitle={currentReportTitle}
-        availableColumns={currentAvailableColumns}
-        pdfGenerator={handlePdfGenerator}
-        onDownload={handleDownloadPdf}
-      />
+      {PdfPreviewModal}
     </div>
   );
 };

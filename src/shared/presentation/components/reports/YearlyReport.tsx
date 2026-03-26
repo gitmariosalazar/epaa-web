@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import type { YearlyReadingsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { GetYearlyReadingsReportUseCase } from '@/modules/dashboard/application/usecases/get-yearly-readings-report.usecase';
 import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructure/repositories/http-report-dashboard.repository';
@@ -9,9 +9,13 @@ import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { EmptyState } from '../common/EmptyState';
 import { Table, type Column } from '../Table/Table';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import { useTranslation } from 'react-i18next';
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
+import type { ExportColumn } from './ReportPreviewModal';
 import './YearlyReport.css';
 
 export const YearlyReport = () => {
+  const { t } = useTranslation();
   const [year, setYear] = useState<number>(
     dateService.getCurrentDate().getFullYear()
   );
@@ -44,27 +48,55 @@ export const YearlyReport = () => {
     handleSearch();
   }, []);
 
-  const handleExportPdf = () => {
-    if (!data || !data.monthlySummaries) return;
+  const AVAILABLE_COLUMNS: ExportColumn[] = useMemo(
+    () => [
+      { columnId: 'month', id: 'month', label: t('dashboard.reports.yearly.columns.month', 'Month'), isDefault: true },
+      { columnId: 'totalReadings', id: 'totalReadings', label: t('dashboard.reports.yearly.columns.readingsCount', 'Readings Count'), isDefault: true },
+      { columnId: 'totalConsumption', id: 'totalConsumption', label: t('dashboard.reports.yearly.columns.totalConsumption', 'Total Consumption'), isDefault: true }
+    ],
+    [t]
+  );
 
-    const rows = data.monthlySummaries.map((m) => [
-      m.month,
-      m.totalReadings.toString(),
-      `${Number(m.totalConsumption).toFixed(2)} m³`
-    ]);
+  const mapRowData = useCallback(
+    (m: any, selectedCols: ExportColumn[]) => {
+      try {
+        const rowData: Record<string, string> = {
+          month: m.month,
+          totalReadings: m.totalReadings.toString(),
+          totalConsumption: `${Number(m.totalConsumption).toFixed(2)} m³`
+        };
 
-    exportService.exportToPdf({
-      rows,
-      columns: ['Month', 'Readings Count', 'Total Consumption'],
-      fileName: `yearly_report_${year}`,
-      title: `Yearly Report - ${year}`
-    });
-  };
+        return selectedCols.map((col) => {
+          const key = (col.columnId || col.id) as keyof typeof rowData;
+          return rowData[key] || '-';
+        });
+      } catch (error) {
+        console.error('Error mapping yearly row data:', error);
+        return selectedCols.map(() => '-');
+      }
+    },
+    []
+  );
+
+  const {
+    setShowPdfPreview,
+    PdfPreviewModal
+  } = useTablePdfExport({
+    data: data?.monthlySummaries || [],
+    availableColumns: AVAILABLE_COLUMNS,
+    reportTitle: t('dashboard.reports.yearly.title', 'REPORTE ANUAL DE LECTURAS'),
+    reportDescription: t('dashboard.reports.yearly.description', 'Resumen mensual de lecturas y consumo por año'),
+    labelsHorizontal: {
+      [t('common.year', 'Año')]: year.toString(),
+      [t('common.exportDate', 'Fecha de Exportación')]: 
+        new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+    },
+    mapRowData
+  });
 
   const handleExportExcel = () => {
     if (!data || !data.monthlySummaries) return;
 
-    // Create a flat structure for Excel
     const excelData = data.monthlySummaries.map((m) => ({
       Month: m.month,
       'Readings Count': m.totalReadings,
@@ -74,7 +106,6 @@ export const YearlyReport = () => {
     exportService.exportToExcel(excelData, `yearly_report_${year}`);
   };
 
-  /* Define columns for the shared Table component */
   const columns = useMemo<Column<any>[]>(
     () => [
       {
@@ -119,28 +150,28 @@ export const YearlyReport = () => {
           </Button>
         </div>
 
-        {data && (
-          <div className="yearly-toolbar-side actions">
-            <Button
-              variant="outline"
-              color="red"
-              size="sm"
-              iconOnly
-              leftIcon={ColoredIcons.Pdf}
-              onClick={handleExportPdf}
-              title="Export PDF"
-            />
-            <Button
-              variant="outline"
-              color="green"
-              size="sm"
-              iconOnly
-              leftIcon={ColoredIcons.Excel}
-              onClick={handleExportExcel}
-              title="Export Excel"
-            />
-          </div>
-        )}
+        <div className="yearly-toolbar-side actions">
+          <Button
+            variant="outline"
+            color="red"
+            size="sm"
+            iconOnly
+            leftIcon={ColoredIcons.Pdf}
+            onClick={() => setShowPdfPreview(true)}
+            disabled={loading || !data || data.monthlySummaries.length === 0}
+            title={t('common.exportPdf', 'Export PDF')}
+          />
+          <Button
+            variant="outline"
+            color="green"
+            size="sm"
+            iconOnly
+            leftIcon={ColoredIcons.Excel}
+            onClick={handleExportExcel}
+            disabled={loading || !data || data.monthlySummaries.length === 0}
+            title={t('common.exportExcel', 'Export Excel')}
+          />
+        </div>
       </div>
 
       {data ? (
@@ -205,6 +236,7 @@ export const YearlyReport = () => {
           )}
         </div>
       )}
+      {PdfPreviewModal}
     </div>
   );
 };

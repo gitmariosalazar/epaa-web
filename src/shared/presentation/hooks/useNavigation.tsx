@@ -133,6 +133,11 @@ export const useNavigation = (): NavSection[] => {
               icon: <BarChart3 size={18} />,
               label: 'Reportes de Ingreso',
               to: '/accounting/entry-data'
+            },
+            {
+              icon: <BarChart3 size={18} />,
+              label: 'Cartera Vencida',
+              to: '/accounting/overdue'
             }
           ]
         }

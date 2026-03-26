@@ -61,11 +61,19 @@ export class EcuadorDateService implements IDateService {
     date: Date | string | number,
     options?: Intl.DateTimeFormatOptions
   ): string {
-    const d = new Date(date);
-    return new Intl.DateTimeFormat(this.locale, {
-      timeZone: this.timeZone,
-      ...options
-    }).format(d);
+    try {
+      const d = new Date(date);
+      if (isNaN(d.getTime())) {
+        return String(date || '');
+      }
+      return new Intl.DateTimeFormat(this.locale, {
+        timeZone: this.timeZone,
+        ...options
+      }).format(d);
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return String(date || '');
+    }
   }
 
   toISODateString(date: Date | string | number): string {

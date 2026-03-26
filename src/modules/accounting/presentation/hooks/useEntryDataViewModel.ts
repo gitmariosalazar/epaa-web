@@ -1,11 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useEntryData } from './useEntryData';
-import { ExportService } from '@/shared/infrastructure/services/ExportService';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import type { EntryDataTab } from '../components/EntryDataFilters';
 import type { TabItem } from '@/shared/presentation/components/Tabs';
 import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { BarChart3, Users, CreditCard, AlignLeft } from 'lucide-react';
 import React from 'react';
 
@@ -222,7 +222,6 @@ export const useEntryDataViewModel = () => {
     [t]
   );
 
-  const exportService = useMemo(() => new ExportService(), []);
   const translatedTabs = ENTRY_TABS;
 
   const {
@@ -254,8 +253,6 @@ export const useEntryDataViewModel = () => {
     key: string;
     direction: 'asc' | 'desc';
   } | null>(null);
-
-  const [showPdfPreview, setShowPdfPreview] = useState(false);
 
   useEffect(() => {
     setSearchQuery('');
@@ -475,88 +472,23 @@ export const useEntryDataViewModel = () => {
     return selectedCols.map((col) => rowData[col.id] || '');
   };
 
-  const calculateTotals = (data: any[], selectedCols: ExportColumn[]) => {
-    return selectedCols.map((col) => {
-      // Solo sumamos si el id parece ser un campo numérico
-      const numericIds = [
-        'titleValue',
-        'thirdPartyValue',
-        'surchargeValue',
-        'trashRateValue',
-        'discountTrashRateValue',
-        'detailValue',
-        'incomeCount',
-        'paymentCount',
-        'recordCount',
-        'grandTotal',
-        'totalCollected',
-        'totalValue',
-        'total'
-      ];
+  // calculateTotals logic can be removed or moved if needed by useTablePdfExport
 
-      if (numericIds.includes(col.id)) {
-        const sum = data.reduce((s, r) => s + Number(r[col.id] || 0), 0);
-        return fmt(sum);
-      }
-
-      if (
-        col.id === 'date' ||
-        col.id === 'collector' ||
-        col.id === 'paymentMethod'
-      ) {
-        return col.id === 'date' ? 'TOTAL' : '';
-      }
-
-      return '';
-    });
-  };
-
-  const handlePdfGenerator = ({ orientation, selectedColumnIds }: any) => {
-    const selectedCols = currentAvailableColumns.filter((col) =>
-      selectedColumnIds.includes(col.id)
-    );
-    const colLabels = selectedCols.map((c) => c.label);
-    const rows = currentFilteredData.map((d) => mapRowData(d, selectedCols));
-    const totals = calculateTotals(currentFilteredData, selectedCols);
-
-    return exportService.generatePdfBlobUrl({
-      rows: rows,
-      columns: colLabels,
-      totals: totals,
-      fileName: `reporte_${activeTab}`,
-      title: currentReportTitle,
-      orientation,
-      labelsHorizontal: {
-        'Rango de Fecha': `${startDate} - ${endDate}`,
-        'Fecha de Exportación':
-          new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
-      }
-    });
-  };
-
-  const handleDownloadPdf = ({ orientation, selectedColumnIds }: any) => {
-    const selectedCols = currentAvailableColumns.filter((col) =>
-      selectedColumnIds.includes(col.id)
-    );
-    const colLabels = selectedCols.map((c) => c.label);
-    const rows = currentFilteredData.map((d) => mapRowData(d, selectedCols));
-    const totals = calculateTotals(currentFilteredData, selectedCols);
-
-    exportService.exportToPdf({
-      rows: rows,
-      columns: colLabels,
-      totals: totals,
-      fileName: `reporte_${activeTab}`,
-      title: currentReportTitle,
-      orientation,
-      labelsHorizontal: {
-        'Rango de Fecha': `${startDate} - ${endDate}`,
-        'Fecha de Exportación':
-          new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
-      }
-    });
-    setShowPdfPreview(false);
-  };
+  const {
+    showPdfPreview,
+    setShowPdfPreview,
+    PdfPreviewModal
+  } = useTablePdfExport({
+    data: currentFilteredData as any[],
+    availableColumns: currentAvailableColumns,
+    reportTitle: currentReportTitle,
+    labelsHorizontal: {
+      'Rango de Fecha': `${startDate} - ${endDate}`,
+      'Fecha de Exportación':
+        new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+    },
+    mapRowData: (row, selectedCols) => mapRowData(row, selectedCols)
+  });
 
   return {
     t,
@@ -587,14 +519,11 @@ export const useEntryDataViewModel = () => {
     filteredCollector,
     filteredPaymentMethod,
     filteredFullBreakdown,
-    showPdfPreview,
-    setShowPdfPreview,
-    currentFilteredData,
-    currentReportTitle,
     currentAvailableColumns,
     handleFetch,
     handleSort,
-    handlePdfGenerator,
-    handleDownloadPdf
+    showPdfPreview,
+    setShowPdfPreview,
+    PdfPreviewModal
   };
 };

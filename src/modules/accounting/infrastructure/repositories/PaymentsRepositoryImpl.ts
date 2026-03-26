@@ -4,6 +4,8 @@ import type { PaymentReading } from '../../domain/models/PaymentReading';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 import type { Payment } from '../../domain/models/Payment';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
+import type { OverduePayment } from '../../domain/models/OverdueReading';
+import type { PendingReading } from '../../domain/models/PendingReading';
 
 export class PaymentsRepositoryImpl implements PaymentsRepository {
   private readonly client: HttpClientInterface;
@@ -39,6 +41,25 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
   ): Promise<Payment[]> {
     const response = await this.client.get<ApiResponse<Payment[]>>(
       `/readings/find-payment-by-init-date-and-end-date/${initDate}/${endDate}/${limit}/${offset}`
+    );
+    return response.data.data;
+  }
+
+  async findAllOverduePayments(
+    limit?: number,
+    offset?: number
+  ): Promise<OverduePayment[]> {
+    const response = await this.client.get<ApiResponse<OverduePayment[]>>(
+      `/readings/find-all-overdue-payments/${limit}/${offset}`
+    );
+    return response.data.data;
+  }
+
+  async findPendingReadingsByCadastralKeyOrCardId(
+    searchValue: string
+  ): Promise<PendingReading[]> {
+    const response = await this.client.get<ApiResponse<PendingReading[]>>(
+      `/readings/find-pending-reading-by-cadastral-key-or-card-id-all/${searchValue}`
     );
     return response.data.data;
   }

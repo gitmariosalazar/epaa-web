@@ -46,6 +46,7 @@ import { TrashRateKPIPage } from './modules/trash/presentation/pages/TrashRateKP
 import { UpdateReadingPage } from './modules/readings/presentation/pages/UpdateReadingPage';
 import { GetPropertyContextProvider } from '@/modules/properties/presentation/context/GetPropertiesContext';
 import { PropertiesPage } from '@/modules/properties/presentation/pages/PropertiesPage';
+import { OverduePaymentsPage } from './modules/accounting/presentation/pages';
 
 const ProtectedRoute = () => {
   const { token, isLoading } = useAuth();
@@ -145,6 +146,14 @@ function App() {
                   }
                 />
                 <Route
+                  path="/accounting/overdue"
+                  element={
+                    <PaymentsProvider>
+                      <OverduePaymentsPage />
+                    </PaymentsProvider>
+                  }
+                />
+                <Route
                   path="/readings/*"
                   element={
                     <ReadingsProvider>
@@ -181,10 +190,7 @@ function App() {
                   element={
                     <GetPropertyContextProvider>
                       <Routes>
-                        <Route
-                          path="list"
-                          element={<PropertiesPage />}
-                        />
+                        <Route path="list" element={<PropertiesPage />} />
                       </Routes>
                     </GetPropertyContextProvider>
                   }
