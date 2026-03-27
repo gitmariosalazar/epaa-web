@@ -40,7 +40,7 @@ export const ClientDetailFilters: React.FC<ClientDetailFiltersProps> = ({
               className="trash-report-filter-input"
               placeholder={t(
                 'trashRateReport.filters.clientSearchPlaceholder',
-                'Ej: 0102030405 o 01-02-03-04-05'
+                'Ej: 0102030405 o 12-3456'
               )}
               value={searchParams}
               onChange={(e) => onSearchParamsChange(e.target.value)}

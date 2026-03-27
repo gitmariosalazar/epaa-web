@@ -1,0 +1,39 @@
+.epaa-page-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Universal spacing between Header -> Filters -> Table */
+  height: 100%;
+  width: 100%;
+  /* 
+    Crucial: Overrides child expansion ensuring the layout frame acts 
+    as the strict maximum boundary matching the viewport ceiling. 
+  */
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.epaa-page-layout__header {
+  flex-shrink: 0;
+  z-index: 20;
+  min-width: 0; /* Prevents nested flex expansion blowouts (e.g. Tabs) */
+  max-width: 100%;
+}
+
+.epaa-page-layout__filters {
+  flex-shrink: 0;
+  z-index: 10;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.epaa-page-layout__body {
+  flex: 1;
+  min-height: 0; /* Allows the flex-item to shrink under content pressure, enabling overflow */
+  overflow-y: auto; /* Activates internal scrolling strictly for the body content */
+
+  /* Additional presentation defaults */
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  width: 100%;
+}

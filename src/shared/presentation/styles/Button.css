@@ -339,6 +339,7 @@
   align-items: center;
   justify-content: center;
   line-height: 1; /* Match the flex centering */
+  gap: 4px; /* Space between icons and text when passed as children */
 }
 
 .btn-pro__icon {

@@ -9,20 +9,25 @@ import { createPortal } from 'react-dom';
 import {
   Table,
   type Column
-} from '@/shared/presentation/components/Table/Table';
-import { Button } from '@/shared/presentation/components/Button/Button';
-import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
-import { type ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
-import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
+} from '../../../../shared/presentation/components/Table/Table';
+import { Button } from '../../../../shared/presentation/components/Button/Button';
+import { Avatar } from '../../../../shared/presentation/components/Avatar/Avatar';
+import { type ExportColumn } from '../../../../shared/presentation/components/reports/ReportPreviewModal';
+import { useTablePdfExport } from '../../../../shared/presentation/hooks/useTablePdfExport';
 import { useTranslation } from 'react-i18next';
 import { EyeIcon } from 'lucide-react';
 import { FaList, FaUser } from 'react-icons/fa';
-import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
-import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { Tooltip } from '../../../../shared/presentation/components/common/Tooltip/Tooltip';
+import { EmptyState } from '../../../../shared/presentation/components/common/EmptyState';
 import type { OverduePayment } from '../../domain/models/OverdueReading';
 import type { SortConfig } from '../hooks/useOverduePaymentsViewModel';
 import { OverduePaymentDetailModal } from './OverduePaymentDetailModal';
 import '../styles/OverduePaymentsTable.css';
+import { truncateText } from '@/shared/presentation/utils/text/truncate-text';
+import {
+  CircularProgress,
+  useSimulatedProgress
+} from '@/shared/presentation/components/CircularProgress';
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface OverduePaymentsTableProps {
@@ -46,6 +51,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
   hasMore
 }) => {
   const { t } = useTranslation();
+  const loadingProgress = useSimulatedProgress(isLoading);
   const [selectedItem, setSelectedItem] = useState<OverduePayment | null>(null);
   const [activeMenuRowId, setActiveMenuRowId] = useState<string | null>(null);
   const [menuPlacement, setMenuPlacement] = useState<'down' | 'up'>('down');
@@ -111,7 +117,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
 
   // Inject a unique ID to each row based on its index and data
   const dataWithIds = useMemo(() => {
-    return data.map((item, index) => ({
+    return data.map((item: OverduePayment, index: number) => ({
       ...item,
       _tempId: `${item.clientId}-${item.cadastralKey}-${index}`
     }));
@@ -127,18 +133,22 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
             <Avatar name={item.name || item.clientId} size="sm" />
             <div className="client-id-details">
               <div className="client-id-text">{item.clientId}</div>
-              <div className="client-name-text">{item.name}</div>
+              <div className="client-name-text">{truncateText(item.name)}</div>
             </div>
           </div>
         ),
         id: 'clientId',
-        sortable: true
+        sortable: true,
+        sortKey: 'clientId',
+        style: { width: '180px', minWidth: '180px' }
       },
       {
         header: t('accounting.overdue.cadastralKey', 'Clave Catastral'),
         accessor: 'cadastralKey',
         sortable: true,
-        id: 'cadastralKey'
+        id: 'cadastralKey',
+        sortKey: 'cadastralKey',
+        style: { width: '100px', textAlign: 'center' }
       },
       {
         header: t('accounting.overdue.monthsPastDue', 'Meses de mora'),
@@ -156,38 +166,48 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
           </span>
         ),
         sortable: true,
-        id: 'monthsPastDue'
+        id: 'monthsPastDue',
+        sortKey: 'monthsPastDue',
+        style: { width: '100px', textAlign: 'center' }
       },
       {
         header: t('accounting.overdue.totalTrashRate', 'Tasa Basura'),
         accessor: (item: OverduePayment) => fmt(item.totalTrashRate),
         sortable: true,
-        id: 'totalTrashRate'
+        id: 'totalTrashRate',
+        sortKey: 'totalTrashRate',
+        isNumeric: true,
+        style: { width: '100px' }
       },
       {
         header: t('accounting.overdue.totalEpaaValue', 'Valor EPAA'),
         accessor: (item: OverduePayment) => fmt(item.totalEpaaValue),
         sortable: true,
-        id: 'totalEpaaValue'
+        id: 'totalEpaaValue',
+        sortKey: 'totalEpaaValue',
+        isNumeric: true,
+        style: { width: '110px' }
       },
       {
         header: t('accounting.overdue.totalSurcharge', 'Recargo'),
         accessor: (item: OverduePayment) => fmt(item.totalSurcharge),
         sortable: true,
-        id: 'totalSurcharge'
+        id: 'totalSurcharge',
+        sortKey: 'totalSurcharge',
+        isNumeric: true,
+        style: { width: '100px' }
       },
       {
         header: t('accounting.overdue.totalDue', 'Total'),
         accessor: (item: OverduePayment) => {
-          const total =
-            (item.totalTrashRate ?? 0) +
-            (item.totalEpaaValue ?? 0) +
-            (item.totalSurcharge ?? 0) +
-            (item.totalOldSurcharge ?? 0) +
-            (item.totalOldImprovementsInterest ?? 0);
+          const total = item.totalDue ?? 0;
           return <span className="total-due-text">${total.toFixed(2)}</span>;
         },
-        id: 'totalDue'
+        id: 'totalDue',
+        sortable: true,
+        sortKey: 'totalDue',
+        isNumeric: true,
+        style: { width: '110px' }
       },
       {
         header: t('connections.table.options', 'Opciones'),
@@ -273,14 +293,16 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
                                 <div
                                   className="menu-item"
                                   onClick={(e) => {
-                                    console.log('Clicked: Por Clave Catastral', { val: row.cadastralKey });
+                                    console.log(
+                                      'Clicked: Por Clave Catastral',
+                                      { val: row.cadastralKey }
+                                    );
                                     e.stopPropagation();
                                     e.preventDefault();
                                     const val = row.cadastralKey;
-                                    // Cerramos primero el menú
-                                    setActiveMenuRowId(null);
-                                    setMenuCoords(null);
+                                    // NO cerramos el menú aquí para ver el Loading en toda la página
                                     // Llamamos directamente (sin setTimeout)
+                                    setActiveMenuRowId(null);
                                     onViewPendingReadings(val);
                                   }}
                                 >
@@ -293,13 +315,14 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
                             <div
                               className="menu-item"
                               onClick={(e) => {
-                                console.log('Clicked: Por ID Cliente (Todo)', { val: row.clientId });
+                                console.log('Clicked: Por ID Cliente (Todo)', {
+                                  val: row.clientId
+                                });
                                 e.stopPropagation();
                                 e.preventDefault();
-                                // Cerramos primero el menú
-                                setActiveMenuRowId(null);
-                                setMenuCoords(null);
+                                // NO cerramos el menú aquí para ver el Loading en toda la página
                                 // Llamamos directamente
+                                setActiveMenuRowId(null);
                                 onViewPendingReadings(row.clientId);
                               }}
                             >
@@ -317,7 +340,8 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
           </div>
         ),
         id: 'actions',
-        className: 'actions-column'
+        className: 'actions-column',
+        style: { width: '100px', textAlign: 'center' }
       }
     ],
     [t, onViewPendingReadings, activeMenuRowId]
@@ -333,7 +357,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
       totalOldImprovementsInterest: 0
     };
 
-    return data.reduce((acc, item) => {
+    return data.reduce((acc: typeof defaultTotals, item: OverduePayment) => {
       acc.totalValue +=
         (Number(item.totalTrashRate) || 0) +
         (Number(item.totalEpaaValue) || 0) +
@@ -521,14 +545,24 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
     });
 
   return (
-    <div className="conn-table-wrapper">
+    <div className={`payments-table-wrapper ${isLoading ? 'is-loading' : ''}`}>
+      {isLoading && data.length > 0 && (
+        <div className="table-loading-overlay">
+          <CircularProgress
+            progress={loadingProgress}
+            size={90}
+            strokeWidth={7}
+            label={t('common.loading', 'Cargando...')}
+          />
+        </div>
+      )}
       <Table
         data={dataWithIds}
         columns={columns}
         isLoading={isLoading}
         pagination
         pageSize={15}
-        onSort={onSort}
+        onSort={onSort ? (key, direction) => onSort(String(key), direction as 'asc' | 'desc') : undefined}
         sortConfig={sortConfig}
         onExportPdf={() => {
           setShowPdfPreview(true);

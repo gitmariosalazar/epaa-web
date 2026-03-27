@@ -1,10 +1,12 @@
 import React from 'react';
-import { Card } from '@/shared/presentation/components/Card/Card';
+import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Table } from '@/shared/presentation/components/Table/Table';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Pagination } from '@/shared/presentation/components/Pagination/Pagination';
-import { Plus, Trash2, Edit2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, SearchX } from 'lucide-react';
+import '@/shared/presentation/styles/Table.css';
 import { useCompaniesViewModel } from '../hooks/useCompaniesViewModel';
 import { CompanyForm } from '../components/CompanyForm';
 import { CustomerFilters } from '../components/CustomerFilters';
@@ -77,18 +79,20 @@ export const CompaniesPage: React.FC = () => {
   );
 
   return (
-    <div className="users-page">
-      <div className="users-page__header">
-        <h1>{t('sidebar.companies')}</h1>
-        <Button
-          onClick={() => companyVM.setIsFormOpen(true)}
-          leftIcon={<Plus size={20} />}
-        >
-          {t('customers.newCompany')}
-        </Button>
-      </div>
-
-      <Card className="users-page__content">
+    <PageLayout
+      className="users-page"
+      header={
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <h1 style={{ margin: 0 }}>{t('sidebar.companies')}</h1>
+          <Button
+            onClick={() => companyVM.setIsFormOpen(true)}
+            leftIcon={<Plus size={20} />}
+          >
+            {t('customers.newCompany')}
+          </Button>
+        </div>
+      }
+      filters={
         <CustomerFilters
           searchTerm={companyVM.searchTerm}
           onSearchTermChange={companyVM.setSearchTerm}
@@ -104,18 +108,27 @@ export const CompaniesPage: React.FC = () => {
           onRefresh={() => window.location.reload()}
           isLoading={companyVM.isLoading}
         />
-
+      }
+    >
+      <div className="table-responsive-wrapper" style={{ flex: 1, minHeight: '450px', display: 'flex', flexDirection: 'column' }}>
         <Table
           data={companyVM.filteredCompanies}
           columns={companyColumns}
           isLoading={companyVM.isLoading}
+          emptyState={
+            <EmptyState
+              message={t('common.noResults', 'No se encontraron resultados')}
+              icon={SearchX}
+              minHeight="300px"
+            />
+          }
         />
         <Pagination
           currentPage={companyVM.page}
           hasMore={companyVM.hasMore}
           onPageChange={companyVM.setPage}
         />
-      </Card>
+      </div>
 
       <Modal
         isOpen={companyVM.isFormOpen}
@@ -181,6 +194,6 @@ export const CompaniesPage: React.FC = () => {
           <strong>{companyVM.selectedCompany?.companyName}</strong>?
         </p>
       </Modal>
-    </div>
+    </PageLayout>
   );
 };

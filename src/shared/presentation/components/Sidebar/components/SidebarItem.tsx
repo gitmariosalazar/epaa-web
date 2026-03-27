@@ -20,6 +20,19 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
     setIsExpanded((prev) => !prev);
   };
 
+  const renderIcon = (icon: React.ReactNode | React.ElementType) => {
+    if (!icon) return null;
+    // Check if it's a component (function) or a Lucide icon (object that isn't a React Element)
+    if (
+      typeof icon === 'function' ||
+      (typeof icon === 'object' && !React.isValidElement(icon))
+    ) {
+      const IconComp = icon as React.ElementType;
+      return <IconComp size={18} />;
+    }
+    return icon as React.ReactNode;
+  };
+
   return (
     <div className="sidebar__item-wrapper">
       {item.subItems ? (
@@ -32,7 +45,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
             }`}
             onClick={toggleSubMenu}
           >
-            <span className="sidebar__icon">{item.icon}</span>
+            <span className="sidebar__icon">{renderIcon(item.icon)}</span>
             {!isCollapsed && (
               <>
                 <span className="sidebar__label">{item.label}</span>
@@ -66,7 +79,9 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
                   }`
                 }
               >
-                <span className="sidebar__icon">{subItem.icon}</span>
+                <span className="sidebar__icon">
+                  {renderIcon(subItem.icon)}
+                </span>
                 <span className="sidebar__label">{subItem.label}</span>
               </NavLink>
             ))}
@@ -81,7 +96,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
               `sidebar__link ${isActive ? 'sidebar__link--active' : ''}`
             }
           >
-            <span className="sidebar__icon">{item.icon}</span>
+            <span className="sidebar__icon">{renderIcon(item.icon)}</span>
             {!isCollapsed && (
               <span className="sidebar__label">{item.label}</span>
             )}

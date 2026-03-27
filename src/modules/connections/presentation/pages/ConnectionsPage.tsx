@@ -11,6 +11,7 @@ import { ConnectionsTable } from '../components/ConnectionsTable';
 import { ConnectionsFilters } from '../components/ConnectionsFilters';
 import { Tabs } from '@/shared/presentation/components/Tabs';
 import type { TabItem } from '@/shared/presentation/components/Tabs';
+import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import {
   CircularProgress,
   useSimulatedProgress
@@ -107,46 +108,48 @@ export const ConnectionsPage = () => {
   };
 
   return (
-    <div className="connections-page">
-      {/* ── Tabs & Action Button Row ── */}
-      <div className="connections-tabs-row">
-        <Tabs
-          tabs={CONNECTION_TABS}
+    <PageLayout
+      className="connections-page"
+      header={
+        <div className="connections-tabs-row">
+          <Tabs
+            tabs={CONNECTION_TABS}
+            activeTab={state.activeTab}
+            onTabChange={actions.handleTabChange}
+          />
+          <Button
+            leftIcon={<Plus size={18} />}
+            size="compact"
+            onClick={() => {
+              actions.resetForm();
+              actions.setIsFormOpen(true);
+            }}
+          >
+            {t('connections.create', 'Nueva Conexión')}
+          </Button>
+        </div>
+      }
+      filters={
+        <ConnectionsFilters
           activeTab={state.activeTab}
-          onTabChange={actions.handleTabChange}
+          sectorInput={state.sectorInput}
+          onSectorInputChange={actions.setSectorInput}
+          clientIdInput={state.clientIdInput}
+          onClientIdInputChange={actions.setClientIdInput}
+          onFetch={actions.handleFetch}
+          isLoading={state.isLoading}
+          canFetch={state.canFetch}
+          searchQuery={state.searchQuery}
+          onSearchQueryChange={actions.setSearchQuery}
+          searchField={state.searchField}
+          onSearchFieldChange={actions.setSearchField}
+          selectedStatus={state.selectedStatus}
+          onStatusChange={actions.setSelectedStatus}
+          selectedSewerage={state.selectedSewerage}
+          onSewerageChange={actions.setSelectedSewerage}
         />
-        <Button
-          leftIcon={<Plus size={18} />}
-          size="compact"
-          onClick={() => {
-            actions.resetForm();
-            actions.setIsFormOpen(true);
-          }}
-        >
-          {t('connections.create', 'Nueva Conexión')}
-        </Button>
-      </div>
-
-      {/* ── Filters ── */}
-      <ConnectionsFilters
-        activeTab={state.activeTab}
-        sectorInput={state.sectorInput}
-        onSectorInputChange={actions.setSectorInput}
-        clientIdInput={state.clientIdInput}
-        onClientIdInputChange={actions.setClientIdInput}
-        onFetch={actions.handleFetch}
-        isLoading={state.isLoading}
-        canFetch={state.canFetch}
-        searchQuery={state.searchQuery}
-        onSearchQueryChange={actions.setSearchQuery}
-        searchField={state.searchField}
-        onSearchFieldChange={actions.setSearchField}
-        selectedStatus={state.selectedStatus}
-        onStatusChange={actions.setSelectedStatus}
-        selectedSewerage={state.selectedSewerage}
-        onSewerageChange={actions.setSelectedSewerage}
-      />
-
+      }
+    >
       {/* ── Content ── */}
       <div className="connections-page-content">
         {renderContent()}
@@ -187,6 +190,6 @@ export const ConnectionsPage = () => {
           )}
         </p>
       </Modal>
-    </div>
+    </PageLayout>
   );
 };

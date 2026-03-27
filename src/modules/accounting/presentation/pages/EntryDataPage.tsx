@@ -6,6 +6,7 @@ import { DailyCollectorSummaryTable } from '../components/DailyCollectorSummaryT
 import { DailyPaymentMethodReportTable } from '../components/DailyPaymentMethodReportTable';
 import { FullBreakdownReportTable } from '../components/FullBreakdownReportTable';
 import { Tabs } from '@/shared/presentation/components/Tabs';
+import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import {
   CircularProgress,
   useSimulatedProgress
@@ -51,36 +52,40 @@ export const EntryDataPage: React.FC = () => {
   const loadingProgress = useSimulatedProgress(isLoading);
 
   return (
-    <div className="entry-data-page">
-      <Tabs
-        tabs={translatedTabs}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
-
-      <EntryDataFilters
-        activeTab={activeTab}
-        startDate={startDate}
-        onStartDateChange={setStartDate}
-        endDate={endDate}
-        onEndDateChange={setEndDate}
-        onFetch={handleFetch}
-        isLoading={isLoading}
-        searchQuery={searchQuery}
-        onSearchQueryChange={setSearchQuery}
-        selectedCollector={selectedCollector}
-        onCollectorChange={setSelectedCollector}
-        collectorList={collectorList}
-        selectedTitleCode={selectedTitleCode}
-        onTitleCodeChange={setSelectedTitleCode}
-        titleCodeList={titleCodeList}
-        selectedPaymentMethod={selectedPaymentMethod}
-        onPaymentMethodChange={setSelectedPaymentMethod}
-        paymentMethodList={paymentMethodList}
-        selectedStatus={selectedStatus}
-        onStatusChange={setSelectedStatus}
-      />
-
+    <PageLayout
+      className="entry-data-page"
+      header={
+        <Tabs
+          tabs={translatedTabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+      }
+      filters={
+        <EntryDataFilters
+          activeTab={activeTab}
+          startDate={startDate}
+          onStartDateChange={setStartDate}
+          endDate={endDate}
+          onEndDateChange={setEndDate}
+          onFetch={handleFetch}
+          isLoading={isLoading}
+          searchQuery={searchQuery}
+          onSearchQueryChange={setSearchQuery}
+          selectedCollector={selectedCollector}
+          onCollectorChange={setSelectedCollector}
+          collectorList={collectorList}
+          selectedTitleCode={selectedTitleCode}
+          onTitleCodeChange={setSelectedTitleCode}
+          titleCodeList={titleCodeList}
+          selectedPaymentMethod={selectedPaymentMethod}
+          onPaymentMethodChange={setSelectedPaymentMethod}
+          paymentMethodList={paymentMethodList}
+          selectedStatus={selectedStatus}
+          onStatusChange={setSelectedStatus}
+        />
+      }
+    >
       {error ? (
         <div className="entry-data-error">
           <div className="entry-data-error-dot" />
@@ -130,6 +135,6 @@ export const EntryDataPage: React.FC = () => {
       )}
 
       {PdfPreviewModal}
-    </div>
+    </PageLayout>
   );
 };

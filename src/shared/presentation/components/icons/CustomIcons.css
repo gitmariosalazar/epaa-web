@@ -1,0 +1,37 @@
+.icon-container__main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast, 150ms);
+}
+
+.icon-container__secondary {
+  position: absolute;
+  bottom: -2px; /* Ajuste fino de posicion */
+  right: -4px;
+  display: grid; /* Grid suele ser mejor para centrar elementos unicos */
+  place-items: center;
+  background-color: var(--surface);
+  border-radius: 50%;
+  width: 12px; /* Tamaño fijo para consistencia */
+  height: 12px;
+  border: 1px solid var(--icon-border, var(--border-color));
+  z-index: 1;
+  box-shadow: 0 0 0 1px var(--surface); /* Borde de fondo mas grueso para que resalte */
+  transition: all var(--transition-fast, 150ms);
+  color: var(--icon-secondary-color, inherit);
+  overflow: hidden;
+}
+
+.icon-container__secondary > svg {
+  display: block;
+}
+
+/* Efecto Hover */
+.icon-container__main:hover .icon-container__secondary,
+[class*='sidebar__link']:hover .icon-container__secondary {
+  color: var(--icon-secondary-hover, var(--text-main));
+  border-color: var(--icon-border-hover, var(--accent));
+  box-shadow: 0 0 0 1.5px var(--surface-hover, var(--surface));
+}

@@ -8,4 +8,46 @@ export interface OverduePayment {
   totalSurcharge: number;
   totalOldSurcharge: number;
   monthsPastDue: number;
+  totalDue?: number;
+}
+
+export interface OverdueSummary {
+  totalClientsWithDebt: number;
+  totalUniqueCadastralKeys: number;
+  totalMonthsPastDue: number;
+  totalDebtAmount: number;
+  totalEpaaValue: number;
+  totalTrashRate: number;
+  totalSurcharge: number;
+  totalOldSurcharge: number;
+  totalImprovementsInterest: number;
+  avgMonthsPastDue: number;
+  maxMonthsInDebt: number;
+  minMonthsInDebt: number;
+  clientsOver6Months: number;
+  clientsOver1Year: number;
+  maxDaysInDebt: number;
+  avgDebtPerClient: number;
+}
+
+export interface YearlyOverdueSummary {
+  year: number;
+  totalUniqueClients: number;
+  totalUniqueCadastralKeys: number;
+  clientsWithDebt: number;
+  totalUniqueCadastralKeysByYear: number;
+  totalMonthsPastDue: number;
+  totalDebtAmount: number;
+  totalEpaaValue: number;
+  totalTrashRate: number;
+  totalSurcharge: number;
+  totalOldSurcharge: number;
+  totalImprovementsInterest: number;
+  avgMonthsPastDue: number;
+  maxMonthsInDebt: number;
+  minMonthsInDebt: number;
+  clientsOver6Months: number;
+  clientsOver1Year: number;
+  maxDaysInDebt: number;
+  avgDebtPerClient: number;
 }

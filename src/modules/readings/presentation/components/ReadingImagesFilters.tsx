@@ -9,6 +9,7 @@ import { dateService } from '@/shared/infrastructure/services/EcuadorDateService
 
 // Importamos los estilos de entry-filters (asumiendo que están en Accounting o global)
 import '@/modules/accounting/presentation/styles/EntryDataFilters.css';
+import { Input } from '@/shared/presentation/components/Input/Input';
 
 export type SearchMode = 'month_sector' | 'cadastral_key';
 
@@ -48,76 +49,81 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
 
   return (
     <div className="entry-filters">
-      <div className="entry-filter-left">
-        {/* Dropdown de Modo de Búsqueda */}
-        <div className="entry-filter-group">
-          <label className="entry-filter-label">
-            {t('readings.filters.searchMode')}
-          </label>
-          <div className="entry-filter-input-wrapper">
-            <select
-              value={mode}
-              onChange={(e) => setMode(e.target.value as SearchMode)}
-              className="entry-filter-select"
-            >
-              <option value="month_sector">
-                {t('readings.filters.monthAndSector')}
-              </option>
-              <option value="cadastral_key">
-                {t('readings.filters.cadastralKey')}
-              </option>
-            </select>
-          </div>
+      {/* Dropdown de Modo de Búsqueda */}
+      <div className="entry-filter-group">
+        <label className="entry-filter-label">
+          {t('readings.filters.searchMode')}
+        </label>
+        <div className="entry-filter-input-wrapper">
+          <select
+            value={mode}
+            onChange={(e) => setMode(e.target.value as SearchMode)}
+            className="entry-filter-select"
+          >
+            <option value="month_sector">
+              {t('readings.filters.monthAndSector')}
+            </option>
+            <option value="cadastral_key">
+              {t('readings.filters.cadastralKey')}
+            </option>
+          </select>
         </div>
+      </div>
 
-        {/* Campos Condicionales según el Modo */}
-        {mode === 'month_sector' ? (
-          <>
-            <div className="entry-filter-group" style={{ flex: 1 }}>
-              <label className="entry-filter-label">
-                {t('readings.filters.exactCadastralKey')}
-              </label>
-              <div className="entry-filter-input-wrapper">
-                <DatePicker
-                  view="month"
-                  value={month ? `${month}-01` : ''}
-                  onChange={(val: string) => setMonth(val.substring(0, 7))}
-                />
-              </div>
-            </div>
-
-            <div className="entry-filter-group">
-              <label className="entry-filter-label">
-                {t('readings.filters.sectorOptional')}
-              </label>
-              <div className="entry-filter-input-wrapper">
-                <input
-                  type="text"
-                  placeholder={t('readings.filters.allSectors')}
-                  className="entry-filter-input"
-                  value={sector}
-                  onChange={(e) => setSector(e.target.value)}
-                />
-              </div>
-            </div>
-          </>
-        ) : (
+      {/* Campos Condicionales según el Modo */}
+      {mode === 'month_sector' ? (
+        <>
           <div className="entry-filter-group">
             <label className="entry-filter-label">
-              {t('common.cadastralKey', 'Clave Catastral')}
+              {t('readings.filters.month', 'Mes exacto')}
             </label>
             <div className="entry-filter-input-wrapper">
-              <InputCadastralKey
-                placeholder="Ej: 1-125 o 40-5"
-                className="entry-filter-input"
-                value={cadastralKey}
-                onChange={(val) => setCadastralKey(val)}
+              <DatePicker
+                view="month"
+                value={month ? `${month}-01` : ''}
+                onChange={(val: string) => setMonth(val.substring(0, 7))}
               />
             </div>
           </div>
-        )}
 
-        {/* Botón Consultar */}
+          <div className="entry-filter-group">
+            <label className="entry-filter-label">
+              {t('readings.filters.sectorOptional')}
+            </label>
+            <div className="entry-filter-input-wrapper">
+              <Input
+                placeholder={t('readings.filters.allSectors')}
+                value={sector}
+                onChange={(e) => setSector(e.target.value)}
+                leftIcon={<Search size={18} />}
+              />
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="entry-filter-group">
+          <label className="entry-filter-label">
+            {t('common.cadastralKey', 'Clave Catastral')}
+          </label>
+          <div className="entry-filter-input-wrapper">
+            <InputCadastralKey
+              placeholder="Ej: 1-125 o 40-5"
+              className="entry-filter-input"
+              value={cadastralKey}
+              onChange={(val) => setCadastralKey(val)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Botón Consultar */}
+      <div
+        className="entry-filter-group"
+        style={{ flex: '0 1 auto', width: 'auto' }}
+      >
+        <label className="entry-filter-label" style={{ visibility: 'hidden' }}>
+          &nbsp;
+        </label>
         <Button onClick={handleSearch} disabled={!canFetch} size="sm">
           {isLoading ? (
             <div className="entry-filter-spinner" />

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tabs } from '@/shared/presentation/components/Tabs';
-import { CircularProgress } from '@/shared/presentation/components/CircularProgress/CircularProgress';
+import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
+import { CircularProgress, useSimulatedProgress } from '@/shared/presentation/components/CircularProgress';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { useTrashRateKPIViewModel } from '../hooks/useTrashRateKPIViewModel';
 import { SearchX, AlertCircle } from 'lucide-react';
@@ -20,6 +21,7 @@ import '../styles/TrashRateKPIPage.css';
 
 export const TrashRateKPIPage: React.FC = () => {
   const vm = useTrashRateKPIViewModel();
+  const loadingProgress = useSimulatedProgress(vm.isLoading);
 
   const renderFilters = () => {
     switch (vm.activeTab) {
@@ -75,7 +77,7 @@ export const TrashRateKPIPage: React.FC = () => {
       return (
         <div className="trash-kpi-loading-overlay">
           <CircularProgress
-            progress={75}
+            progress={loadingProgress}
             size={140}
             strokeWidth={10}
             label={vm.t('common.loading', 'CARGANDO...').toUpperCase()}
@@ -148,14 +150,18 @@ export const TrashRateKPIPage: React.FC = () => {
   };
 
   return (
-    <div className="trash-kpi-page">
-      <Tabs
-        tabs={vm.translatedTabs}
-        activeTab={vm.activeTab}
-        onTabChange={vm.setActiveTab}
-      />
-      <div className="trash-kpi-filters-container">{renderFilters()}</div>
+    <PageLayout
+      className="trash-kpi-page"
+      header={
+        <Tabs
+          tabs={vm.translatedTabs}
+          activeTab={vm.activeTab}
+          onTabChange={vm.setActiveTab}
+        />
+      }
+      filters={<div className="trash-kpi-filters-container">{renderFilters()}</div>}
+    >
       <div className="trash-kpi-main-content">{renderContent()}</div>
-    </div>
+    </PageLayout>
   );
 };

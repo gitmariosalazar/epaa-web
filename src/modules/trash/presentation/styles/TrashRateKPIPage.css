@@ -1,16 +1,7 @@
 /* src/modules/trash/presentation/styles/TrashRateKPIPage.css */
 
 .trash-kpi-page {
-  padding: 0.75rem;
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  width: 100%;
-  min-height: 100%;
   animation: kpi-page-fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  background-color: var(--background);
-  box-sizing: border-box;
 }
 
 .trash-kpi-filters-container {
@@ -67,15 +58,13 @@
 
 @media (max-width: 640px) {
   .trash-kpi-page {
-    padding: 0.75rem;
-    gap: 0.75rem;
+    /* No longer breaking padding */
   }
 }
 
 @media (min-width: 1024px) {
   .trash-kpi-page {
-    padding: 1rem 1.25rem;
-    gap: 0.75rem;
+    /* No longer breaking padding */
   }
 }
 

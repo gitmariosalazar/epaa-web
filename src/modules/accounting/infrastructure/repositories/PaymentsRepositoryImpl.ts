@@ -4,7 +4,11 @@ import type { PaymentReading } from '../../domain/models/PaymentReading';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 import type { Payment } from '../../domain/models/Payment';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
-import type { OverduePayment } from '../../domain/models/OverdueReading';
+import type {
+  OverduePayment,
+  OverdueSummary,
+  YearlyOverdueSummary
+} from '../../domain/models/OverdueReading';
 import type { PendingReading } from '../../domain/models/PendingReading';
 
 export class PaymentsRepositoryImpl implements PaymentsRepository {
@@ -68,6 +72,20 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
   ): Promise<PendingReading[]> {
     const response = await this.client.get<ApiResponse<PendingReading[]>>(
       `/readings/find-pending-reading-by-cadastral-key-or-card-id-all/${searchValue}`
+    );
+    return this.handleResponse(response.data);
+  }
+
+  async findOverdueSummary(): Promise<OverdueSummary | null> {
+    const response = await this.client.get<ApiResponse<OverdueSummary>>(
+      `/readings/find-overdue-summary`
+    );
+    return this.handleResponse(response.data);
+  }
+
+  async findYearlyOverdueSummary(): Promise<YearlyOverdueSummary[]> {
+    const response = await this.client.get<ApiResponse<YearlyOverdueSummary[]>>(
+      `/readings/find-yearly-overdue-summary`
     );
     return this.handleResponse(response.data);
   }

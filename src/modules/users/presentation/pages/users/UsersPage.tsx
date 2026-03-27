@@ -2,12 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Table } from '@/shared/presentation/components/Table/Table';
 import type { Column } from '@/shared/presentation/components/Table/Table';
-import { Input } from '@/shared/presentation/components/Input/Input';
-import { Card } from '@/shared/presentation/components/Card/Card';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Pagination } from '@/shared/presentation/components/Pagination/Pagination';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
+import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import {
   Plus,
   Edit2,
@@ -17,9 +17,12 @@ import {
   XCircle,
   CheckCircle,
   Eye,
-  Settings
+  Settings,
+  SearchX
 } from 'lucide-react';
 import { UserDetailModal } from '../../components/UserDetailModal/UserDetailModal';
+import '@/shared/presentation/styles/Table.css';
+import '@/modules/accounting/presentation/styles/EntryDataFilters.css';
 import '@/shared/presentation/styles/Users.css';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { useUsersViewModel } from '../../hooks/useUsersViewModel';
@@ -218,48 +221,71 @@ const UsersLayout: React.FC = () => {
   ];
 
   return (
-    <div className="users-page">
-      <div className="users-page__header">
-        <h1>Users Management</h1>
-        <Button
-          onClick={() => {
-            resetForm();
-            setIsCreateOpen(true);
-          }}
-          leftIcon={<Plus size={20} />}
-        >
-          New User
-        </Button>
-      </div>
-
-      <Card className="users-page__content">
-        <div className="users-page__toolbar">
-          <div className="users-page__search">
-            <Search size={20} color="var(--text-secondary)" />
-            <Input
-              placeholder="Search users..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="users-page__search-input"
-            />
-          </div>
+    <PageLayout
+      className="users-page"
+      header={
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <h1 style={{ margin: 0 }}>Users Management</h1>
           <Button
-            variant="outline"
-            onClick={() => window.location.reload()}
-            leftIcon={<RefreshCw size={18} />}
+            onClick={() => {
+              resetForm();
+              setIsCreateOpen(true);
+            }}
+            leftIcon={<Plus size={20} />}
           >
-            Refresh
+            New User
           </Button>
         </div>
-
-        <Table data={filteredUsers} columns={columns} isLoading={isLoading} />
+      }
+      filters={
+        <div className="entry-filters">
+          <div className="entry-filter-group entry-filter-group--search">
+            <label className="entry-filter-label" style={{ visibility: 'hidden' }}>Search</label>
+            <div className="entry-filter-input-wrapper">
+              <Search className="entry-filter-icon" size={18} />
+              <input
+                type="text"
+                className="entry-filter-input"
+                style={{ paddingLeft: '2.25rem' }}
+                placeholder="Search users..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="entry-filter-group" style={{ flex: '0 1 auto', width: 'auto' }}>
+            <label className="entry-filter-label" style={{ visibility: 'hidden' }}>&nbsp;</label>
+            <Button
+              variant="outline"
+              onClick={() => window.location.reload()}
+              leftIcon={<RefreshCw size={16} />}
+            >
+              Refresh
+            </Button>
+          </div>
+        </div>
+      }
+    >
+      <div className="table-responsive-wrapper" style={{ flex: 1, minHeight: '450px', display: 'flex', flexDirection: 'column' }}>
+        <Table 
+          data={filteredUsers} 
+          columns={columns} 
+          isLoading={isLoading}
+          emptyState={
+            <EmptyState
+              message="No se encontraron usuarios"
+              icon={SearchX}
+              minHeight="300px"
+            />
+          }
+        />
 
         <Pagination
           currentPage={page}
           hasMore={hasMore}
           onPageChange={setPage}
         />
-      </Card>
+      </div>
 
       {/* Create Modal */}
       <Modal
@@ -401,7 +427,7 @@ const UsersLayout: React.FC = () => {
         user={viewUser}
         isLoading={isViewLoading}
       />
-    </div>
+    </PageLayout>
   );
 };
 

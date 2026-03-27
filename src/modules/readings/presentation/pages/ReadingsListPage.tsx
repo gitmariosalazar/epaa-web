@@ -4,6 +4,7 @@ import { Clock, CheckCircle, Calculator, List } from 'lucide-react';
 
 import { Tabs } from '@/shared/presentation/components/Tabs';
 import type { TabItem } from '@/shared/presentation/components/Tabs';
+import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import {
   CircularProgress,
   useSimulatedProgress
@@ -115,26 +116,27 @@ export const ReadingsListPage: React.FC = () => {
   };
 
   return (
-    <div
+    <PageLayout
       className="entry-data-page"
-      style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
+      header={
+        <Tabs
+          tabs={READINGS_TABS}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+      }
+      filters={
+        <ReadingDataFilters
+          activeTab={activeTab}
+          month={month}
+          onMonthChange={setMonth}
+          sector={sector}
+          onSectorChange={setSector}
+          onFetch={() => fetchReadings(activeTab, month, sector)}
+          isLoading={isLoading}
+        />
+      }
     >
-      <Tabs
-        tabs={READINGS_TABS}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
-
-      <ReadingDataFilters
-        activeTab={activeTab}
-        month={month}
-        onMonthChange={setMonth}
-        sector={sector}
-        onSectorChange={setSector}
-        onFetch={() => fetchReadings(activeTab, month, sector)}
-        isLoading={isLoading}
-      />
-
       {error ? (
         <div
           className="entry-data-error"
@@ -217,6 +219,6 @@ export const ReadingsListPage: React.FC = () => {
           )}
         </div>
       </Modal>
-    </div>
+    </PageLayout>
   );
 };

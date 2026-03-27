@@ -82,6 +82,8 @@ export interface TabPanelProps {
   /** The currently active tab id */
   activeTab: string;
   children: React.ReactNode;
+  /** Optional className for the panel container */
+  className?: string;
 }
 
 /**
@@ -91,7 +93,8 @@ export interface TabPanelProps {
 export const TabPanel: React.FC<TabPanelProps> = ({
   tabId,
   activeTab,
-  children
+  children,
+  className = ''
 }) => {
   const isActive = tabId === activeTab;
   return (
@@ -99,7 +102,7 @@ export const TabPanel: React.FC<TabPanelProps> = ({
       role="tabpanel"
       id={`tabpanel-${tabId}`}
       aria-labelledby={`tab-${tabId}`}
-      className={`tabs__panel ${isActive ? 'tabs__panel--active' : ''}`}
+      className={`tabs__panel ${isActive ? 'tabs__panel--active' : ''} ${className}`.trim()}
     >
       {children}
     </div>

@@ -1,0 +1,342 @@
+.overdue-payments-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem !important; /* Reduced main gap */
+  padding: 0.75rem;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.overdue-payments-tabs-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-shrink: 0;
+  margin-bottom: 0; /* Align with new gap strategy */
+}
+
+/* Override shared Tabs component for "super compact" look */
+.overdue-payments-tabs-row .tabs {
+  flex: 1;
+}
+
+.overdue-payments-tabs-row .tabs__list {
+  border-bottom: 2px solid var(--border-color) !important; /* Restore border-bottom as "track" */
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 0.25rem !important;
+}
+
+.overdue-payments-tabs-row .tabs__tab {
+  height: 38px !important; /* Even more compact */
+  border-bottom: 2px solid transparent !important;
+  margin-bottom: -2px !important;
+  border-radius: 0.5rem 0.5rem 0 0 !important;
+  font-weight: 700 !important;
+  transition: all 0.2s ease !important;
+}
+
+.overdue-payments-tabs-row .tabs__tab--active {
+  background-color: var(
+    --border-color
+  ) !important; /* Gray background from image */
+  color: var(--text-main) !important;
+  border-bottom-color: transparent !important; /* No primary accent line */
+}
+
+.overdue-payments-tabs-row .tabs__tab:not(.tabs__tab--active):hover {
+  background-color: rgba(var(--primary-rgb), 0.05) !important;
+}
+
+.overdue-payments-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem !important; /* Uniform gap between filters and content */
+}
+
+/* Rounded filters as per user request */
+.overdue-payments-content .payment-filters {
+  margin-top: 0 !important;
+  padding: 0.5rem 0.5rem !important; /* Reduced internal padding */
+  border-radius: 0.5rem !important; /* Constant rounded corners everywhere */
+}
+
+/* ── General Dashboard Layout ── */
+.overdue-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Clear separation between KPIs and Charts */
+  padding-bottom: 10px;
+}
+
+/* ── 10 KPI Grid - Compact ── */
+.overdue-dashboard-kpi-grid {
+  display: grid;
+  gap: 0.5rem; /* Reduced gap */
+  /* 5 columns on large desktop, 3 on tablet, 2 on small */
+  grid-template-columns: repeat(5, 1fr);
+  flex-shrink: 0;
+}
+
+@media (max-width: 1400px) {
+  .overdue-dashboard-kpi-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1100px) {
+  .overdue-dashboard-kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .overdue-dashboard-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .overdue-dashboard-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.overdue-kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem; /* Compact padding */
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
+}
+
+.overdue-kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  opacity: 0.8;
+}
+
+.overdue-kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+  border-color: rgba(var(--primary-rgb), 0.25);
+  z-index: 10;
+}
+
+/* Color Variants */
+.overdue-kpi-card--blue::before {
+  background: #3b82f6;
+}
+.overdue-kpi-card--green::before {
+  background: #10b981;
+}
+.overdue-kpi-card--red::before {
+  background: #ef4444;
+}
+.overdue-kpi-card--purple::before {
+  background: #a855f7;
+}
+.overdue-kpi-card--amber::before {
+  background: #f59e0b;
+}
+.overdue-kpi-card--rose::before {
+  background: #f43f5e;
+}
+.overdue-kpi-card--indigo::before {
+  background: #6366f1;
+}
+.overdue-kpi-card--teal::before {
+  background: #14b8a6;
+}
+.overdue-kpi-card--cyan::before {
+  background: #06b6d4;
+}
+.overdue-kpi-card--orange::before {
+  background: #f97316;
+}
+
+.overdue-kpi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.overdue-kpi-label {
+  font-size: 0.6rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.overdue-kpi-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+/* Icon Variations - Glass Effects */
+.overdue-kpi-card--blue .overdue-kpi-icon {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+.overdue-kpi-card--green .overdue-kpi-icon {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+.overdue-kpi-card--red .overdue-kpi-icon {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+.overdue-kpi-card--purple .overdue-kpi-icon {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+}
+.overdue-kpi-card--amber .overdue-kpi-icon {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+.overdue-kpi-card--rose .overdue-kpi-icon {
+  background: rgba(244, 63, 94, 0.1);
+  color: #f43f5e;
+}
+.overdue-kpi-card--indigo .overdue-kpi-icon {
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+}
+.overdue-kpi-card--teal .overdue-kpi-icon {
+  background: rgba(20, 184, 166, 0.1);
+  color: #14b8a6;
+}
+.overdue-kpi-card--cyan .overdue-kpi-icon {
+  background: rgba(6, 182, 212, 0.1);
+  color: #06b6d4;
+}
+.overdue-kpi-card--orange .overdue-kpi-icon {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+}
+
+.overdue-kpi-value {
+  font-size: 1.25rem;
+  font-weight: 850;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.overdue-kpi-description {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  opacity: 0.65;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Compact Charts Grid ── */
+.overdue-charts-grid {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: minmax(300px, auto);
+  flex: 1;
+}
+
+@media (max-width: 1024px) {
+  .overdue-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.overdue-chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+}
+
+.overdue-chart-header {
+  display: flex;
+  flex-direction: column;
+  border-left: 3px solid var(--primary);
+  padding-left: 0.6rem;
+}
+
+.overdue-chart-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-main);
+  text-transform: uppercase;
+}
+
+.overdue-chart-subtitle {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.overdue-chart-body {
+  flex: 1;
+  width: 100%;
+  min-height: 220px;
+}
+
+/* Page Loading Overlay */
+.overdue-page-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  min-height: 400px;
+  background: var(--surface);
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  margin-top: 1rem;
+  animation: dashboard-fade-in 0.5s ease-out;
+}
+
+@keyframes dashboard-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dark mode specific intensity */
+[data-theme='dark'] .overdue-kpi-card {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 0.5) 0%,
+    rgba(15, 23, 42, 0.8) 100%
+  );
+}

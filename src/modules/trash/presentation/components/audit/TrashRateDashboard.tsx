@@ -321,72 +321,71 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
 
   return (
     <div className="trash-dashboard">
-      <div className="trash-dashboard-kpi-grid">
-        <div className="trash-kpi--compliance">
+      {/* ── TOP IMPERIAL ROW: Compliance + All KPIs ── */}
+      <div className="trash-kpi-semantic-row trash-kpi-top-row">
+        <div className="trash-kpi-compliance-wrapper">
           <ComplianceCard pct={k.compliancePct ?? 0} />
         </div>
-        <KpiCard
-          className="trash-kpi--top"
-          label="Total a Recaudar"
-          value={fmtMoney(k.totalToCollect)}
-          icon={<DollarSign size={16} />}
-          color="blue"
-          description="Monto bruto emitido"
-        />
-        <KpiCard
-          className="trash-kpi--top"
-          label="Total Cobrado"
-          value={fmtMoney(k.totalCollected)}
-          icon={<CheckCircle size={16} />}
-          color="green"
-          valueColor="green"
-          description="Ingreso real recaudado"
-        />
-        <KpiCard
-          className="trash-kpi--top"
-          label="Total Pendiente"
-          value={fmtMoney(k.totalPending)}
-          icon={<AlertCircle size={16} />}
-          color="red"
-          valueColor="red"
-          description="Por cobrar (Cartera vencida)"
-        />
-        <KpiCard
-          className="trash-kpi--top"
-          label="Facturas Emitidas"
-          value={fmtNum(k.totalBillsIssued)}
-          icon={<FileText size={16} />}
-          color="purple"
-          description="Total de comprobantes"
-        />
-        <KpiCard
-          className="trash-kpi--bottom"
-          label="Facturas Pagadas"
-          value={fmtNum(k.paidBills)}
-          icon={<CheckCircle size={16} />}
-          color="teal"
-          valueColor="green"
-          description="Comprobantes cancelados"
-        />
-        <KpiCard
-          className="trash-kpi--bottom"
-          label="Pendientes"
-          value={fmtNum(k.pendingBills)}
-          icon={<Clock size={16} />}
-          color="amber"
-          valueColor="amber"
-          description="Comprobantes impagos"
-        />
-        <KpiCard
-          className="trash-kpi--bottom"
-          label="Notas Crédito"
-          value={fmtNum(k.countNotes || 0)}
-          icon={<FileText size={16} />}
-          color="rose"
-          description="Documentos de ajuste"
-        />
-        <div className="trash-kpi-revenue-status">
-          <div className="revenue-status-card">
+        <div className="trash-kpi-metrics-grid">
+          {/* Row 1 equivalents */}
+          <KpiCard
+            label="Total a Recaudar"
+            value={fmtMoney(k.totalToCollect)}
+            icon={<DollarSign size={16} />}
+            color="blue"
+            description="Monto bruto emitido"
+          />
+          <KpiCard
+            label="Total Cobrado"
+            value={fmtMoney(k.totalCollected)}
+            icon={<CheckCircle size={16} />}
+            color="green"
+            valueColor="green"
+            description="Ingreso real recaudado"
+          />
+          <KpiCard
+            label="Total Pendiente"
+            value={fmtMoney(k.totalPending)}
+            icon={<AlertCircle size={16} />}
+            color="red"
+            valueColor="red"
+            description="Por cobrar (Cartera vencida)"
+          />
+          <KpiCard
+            label="Facturas Emitidas"
+            value={fmtNum(k.totalBillsIssued)}
+            icon={<FileText size={16} />}
+            color="purple"
+            description="Total de comprobantes"
+          />
+          <KpiCard
+            label="Facturas Pagadas"
+            value={fmtNum(k.paidBills)}
+            icon={<CheckCircle size={16} />}
+            color="teal"
+            valueColor="green"
+            description="Comprobantes cancelados"
+          />
+
+          {/* Row 2 equivalents */}
+          <KpiCard
+            label="Pendientes"
+            value={fmtNum(k.pendingBills)}
+            icon={<Clock size={16} />}
+            color="amber"
+            valueColor="amber"
+            description="Comprobantes impagos"
+          />
+          <KpiCard
+            label="Notas Crédito"
+            value={fmtNum(k.countNotes || 0)}
+            icon={<FileText size={16} />}
+            color="rose"
+            description="Documentos de ajuste"
+          />
+
+          {/* Embedded Table Box directly into the grid lattice */}
+          <div className="revenue-status-card" style={{ gridColumn: 'span 1' }}>
             <div className="revenue-status-header">
               <span
                 className="revenue-status-title"
@@ -453,24 +452,23 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
               </tbody>
             </table>
           </div>
+
+          <KpiCard
+            label="Predios Únicos"
+            value={fmtNum(k.uniqueCadastralKeys)}
+            icon={<Home size={16} />}
+            color="blue"
+            description="Claves catastrales"
+          />
+          <KpiCard
+            label="Sin Valor"
+            value={fmtNum(k.missingValorRecords)}
+            icon={<AlertTriangle size={16} />}
+            color="rose"
+            valueColor="red"
+            description="Omitidos en tabla valor"
+          />
         </div>
-        <KpiCard
-          className="trash-kpi--bottom"
-          label="Predios Únicos"
-          value={fmtNum(k.uniqueCadastralKeys)}
-          icon={<Home size={16} />}
-          color="blue"
-          description="Claves catastrales"
-        />
-        <KpiCard
-          className="trash-kpi--bottom"
-          label="Sin Valor"
-          value={fmtNum(k.missingValorRecords)}
-          icon={<AlertTriangle size={16} />}
-          color="rose"
-          valueColor="red"
-          description="Omitidos en tabla valor"
-        />
       </div>
 
       <div className="trash-dashboard-charts-grid">

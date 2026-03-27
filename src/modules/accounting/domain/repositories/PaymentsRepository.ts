@@ -1,4 +1,8 @@
-import type { OverduePayment } from '../models/OverdueReading';
+import type {
+  OverduePayment,
+  OverdueSummary,
+  YearlyOverdueSummary
+} from '../models/OverdueReading';
 import type { Payment } from '../models/Payment';
 import type { PaymentReading } from '../models/PaymentReading';
 import type { PendingReading } from '../models/PendingReading';
@@ -27,4 +31,7 @@ export interface PaymentsRepository {
   findPendingReadingsByCadastralKeyOrCardId(
     searchValue: string
   ): Promise<PendingReading[]>;
+
+  findOverdueSummary(): Promise<OverdueSummary | null>;
+  findYearlyOverdueSummary(): Promise<YearlyOverdueSummary[]>;
 }

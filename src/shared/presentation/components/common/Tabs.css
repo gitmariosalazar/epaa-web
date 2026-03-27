@@ -7,6 +7,17 @@
      If responsive is strictly needed, we can use media queries or flex-wrap */
   flex-wrap: wrap;
   margin-bottom: 1.5rem; /* Separacion vertical request */
+  
+  /* Make tabs sticky globally */
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  
+  /* Solid background matching theme to avoid text overlapping while scrolling */
+  background: var(--background, #0f172a); 
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.05)); /* Subtle separation line */
 }
 
 /* Pill Variant */
@@ -49,10 +60,9 @@
 }
 
 .tabs-container.underline {
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  /* Merge specific overrides */
   padding-bottom: 0;
   border-radius: 0;
-  background: transparent;
   border: none;
   border-bottom: 2px solid var(--border-color);
   justify-content: flex-start; /* Align tabs to start */

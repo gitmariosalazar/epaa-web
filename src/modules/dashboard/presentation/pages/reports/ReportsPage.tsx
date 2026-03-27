@@ -6,6 +6,7 @@ import '@/shared/presentation/styles/reports.css';
 import { Calendar, FileText, Activity } from 'lucide-react';
 import { AdvancedReadingsReport } from '@/shared/presentation/components/reports/AdvancedReadingsReport';
 import { Tabs } from '@/shared/presentation/components/common/Tabs';
+import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 
 export const ReportsPage = () => {
   const [activeTab, setActiveTab] = useState<
@@ -13,52 +14,48 @@ export const ReportsPage = () => {
   >('daily');
 
   return (
-    <div className="reports-container">
-      {/*
-         <div className="reports-header">
-        <h1>Reports Center</h1>
-        <p>Generate detailed reports on system readings and anomalies.</p>
-      </div>
-      */}
-
-      <Tabs
-        tabs={[
-          {
-            id: 'daily',
-            label: 'Daily Report',
-            icon: <Calendar size={16} />
-          },
-          {
-            id: 'yearly',
-            label: 'Yearly Summary',
-            icon: <Activity size={16} />
-          },
-          {
-            id: 'connection',
-            label: 'Connection History',
-            icon: <FileText size={16} />
-          },
-          {
-            id: 'advanced',
-            label: 'Advanced Readings',
-            icon: <FileText size={16} />
+    <PageLayout
+      className="reports-container"
+      header={
+        <Tabs
+          tabs={[
+            {
+              id: 'daily',
+              label: 'Daily Report',
+              icon: <Calendar size={16} />
+            },
+            {
+              id: 'yearly',
+              label: 'Yearly Summary',
+              icon: <Activity size={16} />
+            },
+            {
+              id: 'connection',
+              label: 'Connection History',
+              icon: <FileText size={16} />
+            },
+            {
+              id: 'advanced',
+              label: 'Advanced Readings',
+              icon: <FileText size={16} />
+            }
+          ]}
+          activeTab={activeTab}
+          onTabChange={(id) =>
+            setActiveTab(id as 'daily' | 'yearly' | 'connection' | 'advanced')
           }
-        ]}
-        activeTab={activeTab}
-        onTabChange={(id) =>
-          setActiveTab(id as 'daily' | 'yearly' | 'connection' | 'advanced')
-        }
-        variant="underline"
-        className="reports-tabs"
-      />
-
+          variant="underline"
+          className="reports-tabs"
+        />
+      }
+    >
       <div className="report-content-area">
         {activeTab === 'daily' && <DailyReport />}
         {activeTab === 'yearly' && <YearlyReport />}
         {activeTab === 'connection' && <ConnectionReport />}
         {activeTab === 'advanced' && <AdvancedReadingsReport />}
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

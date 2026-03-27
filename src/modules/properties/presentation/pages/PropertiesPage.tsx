@@ -1,9 +1,10 @@
 import React from 'react';
 import { Tabs } from '@/shared/presentation/components/Tabs';
+import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress/CircularProgress';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { usePropertiesViewModel } from '../hooks/usePropertiesViewModel';
-import { SearchX, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 // Components
 import { PropertiesTable } from '../components/PropertiesTable';
 import { ByOwnerFilters } from '../components/ByOwnerFilters';
@@ -67,20 +68,6 @@ export const PropertiesPage: React.FC = () => {
       );
     }
 
-    if (!vm.isLoading && vm.filteredProperties.length === 0) {
-      return (
-        <div className="properties-page-flex-content">
-          <EmptyState
-            message={vm.t('common.noResults', 'No se encontraron resultados')}
-            description={vm.t('common.noResultsDesc', 'Verifica los parámetros de búsqueda e intenta nuevamente.')}
-            icon={SearchX}
-            variant="warning"
-            minHeight="300px"
-          />
-        </div>
-      );
-    }
-
     return (
       <PropertiesTable
         data={vm.filteredProperties}
@@ -94,16 +81,23 @@ export const PropertiesPage: React.FC = () => {
   };
 
   return (
-    <div className="properties-page-container">
-      <Tabs
-        tabs={vm.translatedTabs}
-        activeTab={vm.activeTab}
-        onTabChange={vm.setActiveTab}
-      />
-      <div>{renderFilters()}</div>
-      <div className="properties-page-content-wrapper">
+    <PageLayout
+      className="properties-page-container"
+      header={
+        <Tabs
+          tabs={vm.translatedTabs}
+          activeTab={vm.activeTab}
+          onTabChange={vm.setActiveTab}
+        />
+      }
+      filters={renderFilters()}
+    >
+      <div
+        className="properties-page-content-wrapper"
+        style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
+      >
         {renderContent()}
       </div>
-    </div>
+    </PageLayout>
   );
 };

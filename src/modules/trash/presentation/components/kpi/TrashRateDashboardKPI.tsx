@@ -247,85 +247,72 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
 
   return (
     <div className="trash-dashboard">
-      <div className="trash-dashboard-kpi-grid">
-        <div className="trash-kpi--compliance">
+      {/* ── TOP IMPERIAL ROW: Compliance + All KPIs ── */}
+      <div className="trash-kpi-semantic-row trash-kpi-top-row">
+        <div className="trash-kpi-compliance-wrapper">
           <ComplianceCard pct={k.collectionRate ?? 0} />
         </div>
+        <div className="trash-kpi-metrics-grid">
+          {/* Row 1 equivalents */}
+          <KpiCard
+            label="Bruto a Recaudar"
+            value={fmtMoney(k.grossAmount)}
+            icon={<DollarSign size={16} />}
+            color="blue"
+            description="Emisión total bruta"
+          />
+          <KpiCard
+            label="Total Neto"
+            value={fmtMoney(k.netAmount)}
+            icon={<AlertTriangle size={16} />}
+            color="amber"
+            description="Gross minus discounts"
+          />
+          <KpiCard
+            label="Total Recaudado (Pagos)"
+            value={fmtMoney(paidAmount)}
+            icon={<CheckCircle size={16} />}
+            color="green"
+            valueColor="green"
+            description="Pagos liquidados (Estado P)"
+          />
+          <KpiCard
+            label="Total Pendiente"
+            value={fmtMoney(pendingAmount)}
+            icon={<Clock size={16} />}
+            color="red"
+            valueColor="red"
+            description="Cartera por cobrar"
+          />
+          <KpiCard
+            label="Predios Únicos"
+            value={fmtNum(k.uniqueCadastralKeys)}
+            icon={<Home size={16} />}
+            color="blue"
+            description="Claves catastrales"
+          />
 
-        {/* Row 1 */}
-        <KpiCard
-          className="trash-kpi--top"
-          label="Bruto a Recaudar"
-          value={fmtMoney(k.grossAmount)}
-          icon={<DollarSign size={16} />}
-          color="blue"
-          description="Emisión total bruta"
-        />
-        <KpiCard
-          className="trash-kpi--top"
-          label="Total Neto"
-          value={fmtMoney(k.netAmount)}
-          icon={<AlertTriangle size={16} />}
-          color="amber"
-          description="Gross minus discounts"
-        />
-        <KpiCard
-          className="trash-kpi--top"
-          label="Total Recaudado (Pagos)"
-          value={fmtMoney(paidAmount)}
-          icon={<CheckCircle size={16} />}
-          color="green"
-          valueColor="green"
-          description="Pagos liquidados (Estado P)"
-        />
-        <KpiCard
-          className="trash-kpi--top"
-          label="Total Pendiente"
-          value={fmtMoney(pendingAmount)}
-          icon={<Clock size={16} />}
-          color="red"
-          valueColor="red"
-          description="Cartera por cobrar"
-        />
+          {/* Row 2 equivalents */}
+          <KpiCard
+            label="Facturas Emitidas"
+            value={fmtNum(k.totalBills)}
+            icon={<FileText size={16} />}
+            color="purple"
+            description="Total de comprobantes"
+          />
+          <KpiCard
+            label="Creditos Emitidos"
+            value={fmtNum(k.creditNotesVolume)}
+            icon={<FileText size={16} />}
+            color="purple"
+            description="Total de creditos emitidos"
+          />
 
-        {/* Row 2 */}
-        <KpiCard
-          className="trash-kpi--bottom"
-          label="Predios Únicos"
-          value={fmtNum(k.uniqueCadastralKeys)}
-          icon={<Home size={16} />}
-          color="blue"
-          description="Claves catastrales"
-        />
-        <KpiCard
-          className="trash-kpi--bottom"
-          label="Facturas Emitidas"
-          value={fmtNum(k.totalBills)}
-          icon={<FileText size={16} />}
-          color="purple"
-          description="Total de comprobantes"
-        />
-        <KpiCard
-          className="trash-kpi--bottom"
-          label="Creditos Emitidos"
-          value={fmtNum(k.creditNotesVolume)}
-          icon={<FileText size={16} />}
-          color="purple"
-          description="Total de creditos emitidos"
-        />
-        <div className="trash-kpi-revenue-status">
-          <div className="revenue-status-card">
+          {/* Table 1 */}
+          <div className="revenue-status-card" style={{ gridColumn: 'span 1' }}>
             <div className="revenue-status-header">
-              <span
-                className="revenue-status-title"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-              >
-                Descuentos y N.C. Total{' '}
-                <FaMoneyCheckAlt size={16} color="var(--warning)" />
+              <span className="revenue-status-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Descuentos y N.C. Total <FaMoneyCheckAlt size={16} color="var(--warning)" />
               </span>
             </div>
             <table className="revenue-status-table">
@@ -339,21 +326,11 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
                 {discountAndCreditNoteItems.map((item, idx) => (
                   <tr key={idx}>
                     <td>
-                      <span
-                        className={`status-badge status-badge--${
-                          item.Tipo === 'Descuentos'
-                            ? 'discount'
-                            : 'credit-note'
-                        }`}
-                      >
+                      <span className={`status-badge status-badge--${item.Tipo === 'Descuentos' ? 'discount' : 'credit-note'}`}>
                         {item.Tipo}
                       </span>
                     </td>
-                    <td
-                      className={`monto-value monto-value--${
-                        item.Tipo === 'Descuentos' ? 'discount' : 'credit-note'
-                      }`}
-                    >
+                    <td className={`monto-value monto-value--${item.Tipo === 'Descuentos' ? 'discount' : 'credit-note'}`}>
                       {fmtMoney(item.value)}
                     </td>
                   </tr>
@@ -361,22 +338,19 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
               </tbody>
             </table>
           </div>
-        </div>
-        <KpiCard
-          className="trash-kpi--bottom"
-          label="Diferencia de Integridad"
-          value={fmtMoney(k.integrityGap)}
-          icon={<AlertCircle size={16} />}
-          color="red"
-          description="Diferencia entre el valor de la fuente y el valor de la factura"
-        />
 
-        <div className="trash-kpi-revenue-status">
-          <div className="revenue-status-card">
+          <KpiCard
+            label="Diferencia de Integridad"
+            value={fmtMoney(k.integrityGap)}
+            icon={<AlertCircle size={16} />}
+            color="red"
+            description="Diferencia entre el valor de la fuente y factura"
+          />
+
+          {/* Table 2 */}
+          <div className="revenue-status-card" style={{ gridColumn: 'span 1' }}>
             <div className="revenue-status-header">
-              <span className="revenue-status-title">
-                Distribución por Estado
-              </span>
+              <span className="revenue-status-title">Distribución por Estado</span>
             </div>
             <table className="revenue-status-table">
               <thead>
@@ -391,33 +365,15 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
                     <td>
                       <span
                         className={`status-badge status-badge--${
-                          item.Estado === 'P'
-                            ? 'P'
-                            : item.Estado === 'B'
-                              ? 'B'
-                              : item.Estado === 'S/E'
-                                ? 'S'
-                                : ''
+                          item.Estado === 'P' ? 'P' : item.Estado === 'B' ? 'B' : item.Estado === 'S/E' ? 'S' : ''
                         }`}
                       >
-                        {item.Estado === 'P'
-                          ? 'Pagado'
-                          : item.Estado === 'B'
-                            ? 'Baja'
-                            : item.Estado === 'S/E'
-                              ? 'Sin Estado'
-                              : item.Estado}
+                        {item.Estado === 'P' ? 'Pagado' : item.Estado === 'B' ? 'Baja' : item.Estado === 'S/E' ? 'Sin Estado' : item.Estado}
                       </span>
                     </td>
                     <td
                       className={`monto-value color-value--${
-                        item.Estado === 'P'
-                          ? 'P'
-                          : item.Estado === 'B'
-                            ? 'B'
-                            : item.Estado === 'S/E'
-                              ? 'S'
-                              : ''
+                        item.Estado === 'P' ? 'P' : item.Estado === 'B' ? 'B' : item.Estado === 'S/E' ? 'S' : ''
                       }`}
                     >
                       {fmtMoney(item.Monto)}

@@ -5,6 +5,8 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  min-width: 0; /* CRITICAL: Enables flex child container shrinking */
+  max-width: 100%; /* Ensure it does not blow out the parent */
 }
 
 .tabs__list {

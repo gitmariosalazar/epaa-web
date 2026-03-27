@@ -6,8 +6,11 @@ import type { Column } from '@/shared/presentation/components/Table/Table';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Input } from '@/shared/presentation/components/Input/Input';
-import { Card } from '@/shared/presentation/components/Card/Card';
-import { Edit2, Plus, Search } from 'lucide-react';
+import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { Edit2, Plus, Search, SearchX } from 'lucide-react';
+import '@/shared/presentation/styles/Table.css';
+import '@/modules/accounting/presentation/styles/EntryDataFilters.css';
 import '@/shared/presentation/styles/Roles.css';
 import { MdAdd, MdClose, MdLockOpen } from 'react-icons/md';
 import { useRolesViewModel } from '../../hooks/useRolesViewModel';
@@ -109,66 +112,58 @@ export const RolesPage: React.FC = () => {
   ];
 
   return (
-    <div className="roles-page">
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: 'var(--spacing-lg)'
-        }}
-      >
-        <div className="roles-header">
-          <h1>Roles</h1>
-          <p>Manage role access and details</p>
+    <PageLayout
+      className="roles-page"
+      header={
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <div className="roles-header" style={{ marginBottom: 0 }}>
+            <h1 style={{ margin: 0 }}>Roles</h1>
+            <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Manage role access and details</p>
+          </div>
+          <Button
+            leftIcon={<Plus size={18} />}
+            onClick={() => {
+              resetForm();
+              setIsCreateOpen(true);
+            }}
+          >
+            Create Role
+          </Button>
         </div>
-        <Button
-          leftIcon={<Plus size={18} />}
-          onClick={() => {
-            resetForm();
-            setIsCreateOpen(true);
-          }}
-        >
-          Create Role
-        </Button>
-      </div>
-
-      <Card>
-        <div
-          style={{
-            padding: 'var(--spacing-md)',
-            borderBottom: '1px solid var(--border-color)'
-          }}
-        >
-          <div style={{ position: 'relative', maxWidth: '300px' }}>
-            <Search
-              size={18}
-              style={{
-                position: 'absolute',
-                left: '10px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-secondary)'
-              }}
-            />
-            <input
-              type="text"
-              placeholder="Search roles..."
-              style={{
-                width: '100%',
-                padding: '8px 10px 8px 36px',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-color)',
-                backgroundColor: 'var(--surface)',
-                color: 'var(--text-main)',
-                outline: 'none'
-              }}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+      }
+      filters={
+        <div className="entry-filters">
+          <div className="entry-filter-group entry-filter-group--search">
+            <label className="entry-filter-label" style={{ visibility: 'hidden' }}>Search</label>
+            <div className="entry-filter-input-wrapper">
+              <Search className="entry-filter-icon" size={18} />
+              <input
+                type="text"
+                className="entry-filter-input"
+                style={{ paddingLeft: '2.25rem' }}
+                placeholder="Search roles..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </div>
         </div>
-        <Table data={filteredRoles} columns={columns} isLoading={loading} />
-      </Card>
+      }
+    >
+      <div className="table-responsive-wrapper" style={{ flex: 1, minHeight: '450px', display: 'flex', flexDirection: 'column' }}>
+        <Table 
+          data={filteredRoles} 
+          columns={columns} 
+          isLoading={loading}
+          emptyState={
+            <EmptyState
+              message="No se encontraron roles"
+              icon={SearchX}
+              minHeight="300px"
+            />
+          }
+        />
+      </div>
 
       <Modal
         isOpen={isCreateOpen}
@@ -218,6 +213,6 @@ export const RolesPage: React.FC = () => {
         onClose={() => setIsPermissionOpen(false)}
         role={selectedRole}
       />
-    </div>
+    </PageLayout>
   );
 };

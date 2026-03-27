@@ -1,10 +1,12 @@
 import React from 'react';
-import { Card } from '@/shared/presentation/components/Card/Card';
+import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Table } from '@/shared/presentation/components/Table/Table';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Pagination } from '@/shared/presentation/components/Pagination/Pagination';
-import { Plus, Trash2, Edit2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, SearchX } from 'lucide-react';
+import '@/shared/presentation/styles/Table.css';
 import { useCustomersViewModel } from '../hooks/useCustomersViewModel';
 import { CustomerForm } from '../components/CustomerForm';
 import { CustomerFilters } from '../components/CustomerFilters';
@@ -77,18 +79,20 @@ export const NaturalPersonsPage: React.FC = () => {
   );
 
   return (
-    <div className="users-page">
-      <div className="users-page__header">
-        <h1>{t('sidebar.naturalPersons')}</h1>
-        <Button
-          onClick={() => customerVM.setIsFormOpen(true)}
-          leftIcon={<Plus size={20} />}
-        >
-          {t('customers.newClient')}
-        </Button>
-      </div>
-
-      <Card className="users-page__content">
+    <PageLayout
+      className="users-page"
+      header={
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <h1 style={{ margin: 0 }}>{t('sidebar.naturalPersons')}</h1>
+          <Button
+            onClick={() => customerVM.setIsFormOpen(true)}
+            leftIcon={<Plus size={20} />}
+          >
+            {t('customers.newClient')}
+          </Button>
+        </div>
+      }
+      filters={
         <CustomerFilters
           searchTerm={customerVM.searchTerm}
           onSearchTermChange={customerVM.setSearchTerm}
@@ -104,18 +108,27 @@ export const NaturalPersonsPage: React.FC = () => {
           onRefresh={() => window.location.reload()}
           isLoading={customerVM.isLoading}
         />
-
+      }
+    >
+      <div className="table-responsive-wrapper" style={{ flex: 1, minHeight: '450px', display: 'flex', flexDirection: 'column' }}>
         <Table
           data={customerVM.filteredCustomers}
           columns={customerColumns}
           isLoading={customerVM.isLoading}
+          emptyState={
+            <EmptyState
+              message={t('common.noResults', 'No se encontraron resultados')}
+              icon={SearchX}
+              minHeight="300px"
+            />
+          }
         />
         <Pagination
           currentPage={customerVM.page}
           hasMore={customerVM.hasMore}
           onPageChange={customerVM.setPage}
         />
-      </Card>
+      </div>
 
       <Modal
         isOpen={customerVM.isFormOpen}
@@ -185,6 +198,6 @@ export const NaturalPersonsPage: React.FC = () => {
           ?
         </p>
       </Modal>
-    </div>
+    </PageLayout>
   );
 };

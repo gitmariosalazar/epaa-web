@@ -10,6 +10,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Receipt, FileText, CalendarRange } from 'lucide-react';
 import { Tabs } from '@/shared/presentation/components/Tabs';
+import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import type { TabItem } from '@/shared/presentation/components/Tabs';
 import {
   CircularProgress,
@@ -54,39 +55,43 @@ export const PaymentsPage: React.FC = () => {
   const loadingProgress = useSimulatedProgress(state.isLoading);
 
   return (
-    <div className="payments-page">
-      <Tabs
-        tabs={translatedTabs}
-        activeTab={state.activeTab}
-        onTabChange={actions.setActiveTab}
-      />
-
-      <PaymentFilters
-        activeTab={state.activeTab}
-        searchQuery={state.searchQuery}
-        onSearchQueryChange={actions.setSearchQuery}
-        date={state.date}
-        onDateChange={actions.setDate}
-        orderValue={state.orderValue}
-        onOrderValueChange={actions.setOrderValue}
-        onFetch={actions.handleFetch}
-        isLoading={state.isLoading}
-        selectedUser={state.selectedUser}
-        onUserChange={actions.setSelectedUser}
-        userList={state.userList}
-        selectedPaymentMethod={state.selectedPaymentMethod}
-        onPaymentMethodChange={actions.setSelectedPaymentMethod}
-        paymentMethodList={state.paymentMethodList}
-        initDate={state.initDate}
-        onInitDateChange={actions.setInitDate}
-        endDate={state.endDate}
-        onEndDateChange={actions.setEndDate}
-        limit={state.limit}
-        onLimitChange={actions.setLimit}
-        offset={state.offset}
-        onOffsetChange={actions.setOffset}
-      />
-
+    <PageLayout
+      className="payments-page"
+      header={
+        <Tabs
+          tabs={translatedTabs}
+          activeTab={state.activeTab}
+          onTabChange={actions.setActiveTab}
+        />
+      }
+      filters={
+        <PaymentFilters
+          activeTab={state.activeTab}
+          searchQuery={state.searchQuery}
+          onSearchQueryChange={actions.setSearchQuery}
+          date={state.date}
+          onDateChange={actions.setDate}
+          orderValue={state.orderValue}
+          onOrderValueChange={actions.setOrderValue}
+          onFetch={actions.handleFetch}
+          isLoading={state.isLoading}
+          selectedUser={state.selectedUser}
+          onUserChange={actions.setSelectedUser}
+          userList={state.userList}
+          selectedPaymentMethod={state.selectedPaymentMethod}
+          onPaymentMethodChange={actions.setSelectedPaymentMethod}
+          paymentMethodList={state.paymentMethodList}
+          initDate={state.initDate}
+          onInitDateChange={actions.setInitDate}
+          endDate={state.endDate}
+          onEndDateChange={actions.setEndDate}
+          limit={state.limit}
+          onLimitChange={actions.setLimit}
+          offset={state.offset}
+          onOffsetChange={actions.setOffset}
+        />
+      }
+    >
       {state.error ? (
         <div className="payments-error-container">
           <div className="payments-error-dot" />
@@ -129,6 +134,6 @@ export const PaymentsPage: React.FC = () => {
           endDate={state.endDate}
         />
       )}
-    </div>
+    </PageLayout>
   );
 };

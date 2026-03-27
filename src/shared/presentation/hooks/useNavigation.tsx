@@ -19,6 +19,11 @@ import { TbClock24 } from 'react-icons/tb';
 import type { NavSection } from '@/shared/domain/models/Navigation';
 import { FaEdit } from 'react-icons/fa';
 import { IoMdPhotos } from 'react-icons/io';
+import {
+  IconAccounting,
+  IconOverduePayments,
+  IconPayments
+} from '../components/icons/custom-icons';
 
 export const useNavigation = (): NavSection[] => {
   const { t } = useTranslation();
@@ -121,11 +126,11 @@ export const useNavigation = (): NavSection[] => {
       hideTitle: true,
       items: [
         {
-          icon: <Receipt size={20} />,
+          icon: <IconAccounting size={20} />,
           label: 'Contabilidad',
           subItems: [
             {
-              icon: <Receipt size={18} />,
+              icon: <IconPayments size={18} />,
               label: 'Pagos',
               to: '/accounting'
             },
@@ -135,7 +140,7 @@ export const useNavigation = (): NavSection[] => {
               to: '/accounting/entry-data'
             },
             {
-              icon: <BarChart3 size={18} />,
+              icon: <IconOverduePayments />,
               label: 'Cartera Vencida',
               to: '/accounting/overdue'
             }

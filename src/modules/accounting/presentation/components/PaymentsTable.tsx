@@ -11,6 +11,7 @@ import { PaymentDetailModal } from './PaymentDetailModal/PaymentDetailModal';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 interface PaymentsTableProps {
   data: Payment[];
@@ -259,11 +260,10 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
         width="100"
         fullHeight
         emptyState={
-          <div className="payments-table-empty">
-            <p>
-              {t('common.noData', 'No records found matching the criteria')}
-            </p>
-          </div>
+          <EmptyState
+            message={t('accounting.empty.noPaymentsTitle', 'No se encontraron pagos')}
+            description={t('accounting.empty.noPaymentsDesc', 'No hay registros de pagos que coincidan con los filtros seleccionados.')}
+          />
         }
       />
 

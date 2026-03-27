@@ -1,10 +1,12 @@
 import React from 'react';
-import { Card } from '@/shared/presentation/components/Card/Card';
+import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Table } from '@/shared/presentation/components/Table/Table';
 import { Pagination } from '@/shared/presentation/components/Pagination/Pagination';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
-import { Edit2, Trash2, Plus, Eye } from 'lucide-react';
+import { Edit2, Trash2, Plus, Eye, SearchX } from 'lucide-react';
+import '@/shared/presentation/styles/Table.css';
 import { useGeneralCustomersViewModel } from '../hooks/useGeneralCustomersViewModel';
 import type { Column } from '@/shared/presentation/components/Table/Table';
 import type { GeneralCustomer } from '../../domain/models/GeneralCustomer';
@@ -96,51 +98,62 @@ export const GeneralCustomersPage: React.FC = () => {
   ];
 
   return (
-    <div className="users-page">
-      <div className="users-page__header">
-        <h1>{t('customers.pageTitle')}</h1>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <Button
-            onClick={() => {
-              viewModel.setIsViewOnly(false);
-              viewModel.setIsCustomerFormOpen(true);
-            }}
-            leftIcon={<Plus size={18} />}
-          >
-            {t('customers.newClient')}
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              viewModel.setIsViewOnly(false);
-              viewModel.setIsCompanyFormOpen(true);
-            }}
-            leftIcon={<Plus size={18} />}
-          >
-            {t('customers.newCompany')}
-          </Button>
+    <PageLayout
+      className="users-page"
+      header={
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <h1 style={{ margin: 0 }}>{t('customers.pageTitle')}</h1>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button
+              onClick={() => {
+                viewModel.setIsViewOnly(false);
+                viewModel.setIsCustomerFormOpen(true);
+              }}
+              leftIcon={<Plus size={18} />}
+            >
+              {t('customers.newClient')}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                viewModel.setIsViewOnly(false);
+                viewModel.setIsCompanyFormOpen(true);
+              }}
+              leftIcon={<Plus size={18} />}
+            >
+              {t('customers.newCompany')}
+            </Button>
+          </div>
         </div>
-      </div>
-
-      <Card className="users-page__content">
+      }
+      filters={
         <CustomerFilters
           searchTerm={viewModel.searchTerm}
           onSearchTermChange={viewModel.setSearchTerm}
           onRefresh={() => window.location.reload()}
           isLoading={viewModel.isLoading}
         />
-
+      }
+    >
+      <div className="table-responsive-wrapper" style={{ flex: 1, minHeight: '450px', display: 'flex', flexDirection: 'column' }}>
         <Table
           data={viewModel.filteredGeneralCustomers}
           columns={columns}
           isLoading={viewModel.isLoading}
+          emptyState={
+            <EmptyState
+              message={t('common.noResults', 'No se encontraron resultados')}
+              icon={SearchX}
+              minHeight="300px"
+            />
+          }
         />
         <Pagination
           currentPage={viewModel.page}
           hasMore={viewModel.hasMore}
           onPageChange={viewModel.setPage}
         />
-      </Card>
+      </div>
 
       {/* Customer Modal */}
       <Modal
@@ -268,6 +281,6 @@ export const GeneralCustomersPage: React.FC = () => {
           <strong>{viewModel.generalCustomerToDelete?.customerName}</strong>?
         </p>
       </Modal>
-    </div>
+    </PageLayout>
   );
 };

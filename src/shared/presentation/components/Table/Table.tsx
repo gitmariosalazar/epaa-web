@@ -43,6 +43,7 @@ interface TableProps<T> {
   data: T[];
   columns: Column<T>[];
   isLoading?: boolean;
+  loadingState?: React.ReactNode;
   containerClassName?: string;
   containerStyle?: React.CSSProperties;
   pagination?: boolean;
@@ -65,6 +66,7 @@ export const Table = <T extends { [key: string]: any }>({
   data,
   columns,
   isLoading,
+  loadingState,
   containerClassName = '',
   containerStyle = {},
   pagination = false,
@@ -130,6 +132,9 @@ export const Table = <T extends { [key: string]: any }>({
   }, [onEndReached, hasMore]);
 
   if (isLoading && data.length === 0) {
+    if (loadingState) {
+      return <>{loadingState}</>;
+    }
     return (
       <div className="table-loader">
         <div className="spinner"></div>{' '}
@@ -251,7 +256,7 @@ export const Table = <T extends { [key: string]: any }>({
               <tr>
                 <td colSpan={columns.length} className="empty-state-cell">
                   {isLoading ? (
-                     <div className="table-loader" style={{ padding: '2rem' }}>{t('common.table.loading')}</div>
+                     loadingState || <div className="table-loader" style={{ padding: '2rem' }}>{t('common.table.loading')}</div>
                   ) : emptyState || (
                     <div className="default-empty-state">
                       {t('common.table.noData')}

@@ -3,15 +3,9 @@
 .connections-page {
   padding: 0.5rem;
   max-width: 100%;
-  display: flex;
-  flex-direction: column;
   gap: 0.5rem;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
   animation: conn-fade-in 0.3s ease-out;
   color: var(--text-main);
-  box-sizing: border-box;
 }
 
 @media (min-width: 1024px) {
@@ -22,8 +16,7 @@
 
 /* ── Content area (table fills remaining space) ──────────────────────────────── */
 .connections-page-content {
-  flex: 1 1 auto;
-  overflow: hidden;
+  flex: 1;
   display: flex;
   flex-direction: column;
 }

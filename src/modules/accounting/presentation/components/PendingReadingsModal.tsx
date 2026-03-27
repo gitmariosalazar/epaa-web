@@ -14,10 +14,10 @@ import {
 import {
   Table,
   type Column
-} from '@/shared/presentation/components/Table/Table';
-import { Button } from '@/shared/presentation/components/Button/Button';
+} from '../../../../shared/presentation/components/Table/Table';
+import { Button } from '../../../../shared/presentation/components/Button/Button';
 import type { PendingReading } from '../../domain/models/PendingReading';
-import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { EmptyState } from '../../../../shared/presentation/components/common/EmptyState';
 import './PendingReadingsModal.css';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { FaAddressCard } from 'react-icons/fa';

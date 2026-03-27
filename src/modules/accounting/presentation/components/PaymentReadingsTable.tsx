@@ -11,6 +11,7 @@ import { PaymentReadingDetailModal } from './PaymentReadingDetailModal/PaymentRe
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 interface PaymentReadingsTableProps {
   data: PaymentReading[];
@@ -259,14 +260,10 @@ export const PaymentReadingsTable: React.FC<PaymentReadingsTableProps> = ({
         width="100"
         fullHeight
         emptyState={
-          <div className="payments-table-empty">
-            <p>
-              {t(
-                'common.noData',
-                'No reading payrolls found matching the criteria'
-              )}
-            </p>
-          </div>
+          <EmptyState
+            message={t('accounting.empty.noReadingsTitle', 'No se encontraron cobros de lecturas')}
+            description={t('accounting.empty.noReadingsDesc', 'Modifique el rango de fechas o los filtros para visualizar resultados.')}
+          />
         }
       />
 

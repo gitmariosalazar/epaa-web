@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface NavItem {
-  icon: React.ReactNode;
+  icon: React.ReactNode | React.ElementType;
   label: string;
   to?: string;
   subItems?: NavItem[];

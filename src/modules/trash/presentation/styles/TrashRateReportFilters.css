@@ -12,54 +12,59 @@
   border: 1px solid var(--border-color);
   border-radius: 0.75rem;
   box-shadow: var(--shadow-sm);
-  margin-bottom: 1.25rem;
 }
 
 /* ── Sections ────────────────────────────────────────────────────────── */
 .trash-report-filter-left {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
+  flex-wrap: wrap; /* CRITICAL: Enables wrapping on medium screens */
   align-items: flex-end;
   gap: 0.75rem;
-  flex-shrink: 0;
+  min-width: 0;
 }
 
 .trash-report-filter-right {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
+  flex-wrap: wrap; /* CRITICAL: Enables wrapping */
   align-items: flex-end;
   gap: 0.75rem;
-  flex: 1 1 auto;
-  justify-content: flex-end;
+  min-width: 0;
 }
 
 .trash-report-filter-group {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  flex-shrink: 0;
+  flex: 0 1 auto; /* Fluid growth logic decoupled from dimensions */
+  width: 140px;
   min-width: 0;
-  width: 180px; /* Default width for standard inputs like search/selectors */
+  max-width: 100%;
 }
 
-/* Specific widths based on content */
+/* Specific widths based on content utilizing responsive bounded explicit widths */
+.trash-report-filter-group:has(input[type='text']) {
+  width: 200px;
+}
+
+/* Specific widths based on content utilizing responsive bounded explicit widths */
 .trash-report-filter-group:has(.date-range-picker-container) {
   width: 260px;
 }
 
 .trash-report-filter-group:has(.datepicker-container) {
-  width: 170px;
+  width: 160px;
 }
 
 .trash-report-filter-group:has(input[type='number']) {
+  flex-grow: 0;
   width: 85px;
 }
 
-.trash-report-filter-group:has(.trash-category-select) {
-  width: fit-content;
-  min-width: 240px;
+.trash-report-filter-group:has(.trash-category-select),
+.trash-report-filter-group:has(.trash-report-filter-select) {
+  width: 160px;
 }
 
 /* Fallback for components not using :has or for older browsers */

@@ -4,8 +4,10 @@ import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
+import { SearchX } from 'lucide-react';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import type { Property } from '../../domain/models/Property';
-import '../styles/PropertiesTable.css';
+import '@/shared/presentation/styles/Table.css';
 
 interface PropertiesTableProps {
   data: Property[];
@@ -90,7 +92,7 @@ export const PropertiesTable: React.FC<PropertiesTableProps> = ({
   );
 
   return (
-    <div className="properties-table-container">
+    <div className="table-responsive-wrapper" style={{ flex: 1, minHeight: '450px' }}>
       <Table
         columns={columns}
         data={data}
@@ -101,9 +103,11 @@ export const PropertiesTable: React.FC<PropertiesTableProps> = ({
         hasMore={hasMore}
         pagination={true}
         emptyState={
-          <div className="properties-table-empty-state">
-            {t('properties.table.empty', 'No properties found')}
-          </div>
+          <EmptyState
+            message={t('properties.table.empty', 'No properties found')}
+            icon={SearchX}
+            minHeight="300px"
+          />
         }
       />
     </div>
