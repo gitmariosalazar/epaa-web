@@ -29,10 +29,10 @@ import {
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
 import '../styles/OverdueDashboard.css';
-
+/*
 const fmtMoney = (n: number) =>
   `$${Number(n || 0).toLocaleString('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
+*/
 interface YearlyOverdueDashboardProps {
   yearlyData: YearlyOverdueSummary[]; // All years for charts
   selectedYearData: YearlyOverdueSummary | null; // Specific year for KPIs
@@ -108,6 +108,7 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
     };
   }, [selectedYearData]);
 
+  /*
   const revenueStatus = useMemo(() => {
     if (!selectedYearData) return [];
     const totalTrashRate = selectedYearData.totalTrashRate;
@@ -122,6 +123,7 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
       S: totalSurcharge
     };
   }, [selectedYearData]);
+  */
 
   const epaaPct = metrics ? (metrics.totalEpaa / metrics.totalDebt) * 100 : 0;
 

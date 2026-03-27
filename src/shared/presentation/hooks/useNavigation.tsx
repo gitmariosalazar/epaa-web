@@ -9,7 +9,6 @@ import {
   User,
   Building2,
   Lock,
-  Receipt,
   BarChart3,
   List
 } from 'lucide-react';

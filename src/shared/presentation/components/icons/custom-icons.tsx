@@ -1,9 +1,7 @@
 import React from 'react';
 import { DollarSign, Clock, CheckCircle } from 'lucide-react';
 import './CustomIcons.css';
-import { FaFileInvoice, FaFileInvoiceDollar } from 'react-icons/fa';
-import { MdOutlineCalculate } from 'react-icons/md';
-import { CiDollar } from 'react-icons/ci';
+import { FaFileInvoice } from 'react-icons/fa';
 import { BiDollar } from 'react-icons/bi';
 
 interface CustomIconProps {
