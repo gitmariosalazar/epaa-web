@@ -4,6 +4,9 @@ import { Search } from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
 import '../../styles/DailyCollectorDetailFilter.css';
+import { Select } from '@/shared/presentation/components/Input/Select';
+import { TbUserDollar } from 'react-icons/tb';
+import { FaListUl } from 'react-icons/fa';
 
 export interface DailyCollectorDetailFilterProps {
   startDate: string;
@@ -57,6 +60,7 @@ export const DailyCollectorDetailFilter: React.FC<
           </label>
           <div className="filter-input-wrapper">
             <DateRangePicker
+              size="compact"
               startDate={startDate}
               endDate={endDate}
               onChange={handleRangeChange}
@@ -65,12 +69,13 @@ export const DailyCollectorDetailFilter: React.FC<
           </div>
         </div>
 
-        <Button onClick={onFetch} disabled={!canFetch} size="sm">
-          {isLoading ? (
-            <div className="filter-button-spinner" />
-          ) : (
-            <Search size={18} />
-          )}
+        <Button
+          onClick={onFetch}
+          disabled={!canFetch}
+          size="compact"
+          isLoading={isLoading}
+        >
+          {!isLoading && <Search size={18} />}
           {isLoading
             ? t('common.loading', 'Cargando...')
             : t('common.search', 'Consultar')}
@@ -84,10 +89,11 @@ export const DailyCollectorDetailFilter: React.FC<
             {t('trashRateKPI.filters.collector', 'Cobrador')}
           </label>
           <div className="filter-input-wrapper">
-            <select
-              className="filter-input filter-select"
+            <Select
+              size="compact"
               value={selectedCollector}
               onChange={(e) => onCollectorChange(e.target.value)}
+              leftIcon={<TbUserDollar size={18} />}
             >
               <option value="">{t('common.all', 'Todos')}</option>
               {collectorList.map((collector) => (
@@ -95,7 +101,7 @@ export const DailyCollectorDetailFilter: React.FC<
                   {collector}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
 
@@ -104,10 +110,11 @@ export const DailyCollectorDetailFilter: React.FC<
             {t('trashRateKPI.filters.status', 'Estado')}
           </label>
           <div className="filter-input-wrapper">
-            <select
-              className="filter-input filter-select"
+            <Select
+              size="compact"
               value={selectedStatus}
               onChange={(e) => onStatusChange(e.target.value)}
+              leftIcon={<FaListUl size={18} />}
             >
               <option value="">{t('common.all', 'Todos')}</option>
               {statusList.map((status) => (
@@ -115,7 +122,7 @@ export const DailyCollectorDetailFilter: React.FC<
                   {status}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
       </div>

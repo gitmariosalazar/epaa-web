@@ -29,6 +29,7 @@ import { useUsersViewModel } from '../../hooks/useUsersViewModel';
 import { UserFormWizard } from '../../components/UserFormWizard/UserFormWizard';
 import type { User } from '@/modules/users/domain/models/User';
 import { UsersProvider } from '../../context/UsersContext';
+import { Input } from '@/shared/presentation/components/Input/Input';
 
 const UsersLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -224,7 +225,14 @@ const UsersLayout: React.FC = () => {
     <PageLayout
       className="users-page"
       header={
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%'
+          }}
+        >
           <h1 style={{ margin: 0 }}>Users Management</h1>
           <Button
             onClick={() => {
@@ -240,21 +248,34 @@ const UsersLayout: React.FC = () => {
       filters={
         <div className="entry-filters">
           <div className="entry-filter-group entry-filter-group--search">
-            <label className="entry-filter-label" style={{ visibility: 'hidden' }}>Search</label>
+            <label
+              className="entry-filter-label"
+              style={{ visibility: 'hidden' }}
+            >
+              Search
+            </label>
             <div className="entry-filter-input-wrapper">
-              <Search className="entry-filter-icon" size={18} />
-              <input
+              <Input
                 type="text"
                 className="entry-filter-input"
                 style={{ paddingLeft: '2.25rem' }}
                 placeholder="Search users..."
                 value={searchTerm}
+                leftIcon={<Search size={18} />}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
-          <div className="entry-filter-group" style={{ flex: '0 1 auto', width: 'auto' }}>
-            <label className="entry-filter-label" style={{ visibility: 'hidden' }}>&nbsp;</label>
+          <div
+            className="entry-filter-group"
+            style={{ flex: '0 1 auto', width: 'auto' }}
+          >
+            <label
+              className="entry-filter-label"
+              style={{ visibility: 'hidden' }}
+            >
+              &nbsp;
+            </label>
             <Button
               variant="outline"
               onClick={() => window.location.reload()}
@@ -266,10 +287,18 @@ const UsersLayout: React.FC = () => {
         </div>
       }
     >
-      <div className="table-responsive-wrapper" style={{ flex: 1, minHeight: '450px', display: 'flex', flexDirection: 'column' }}>
-        <Table 
-          data={filteredUsers} 
-          columns={columns} 
+      <div
+        className="table-responsive-wrapper"
+        style={{
+          flex: 1,
+          minHeight: '450px',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <Table
+          data={filteredUsers}
+          columns={columns}
           isLoading={isLoading}
           emptyState={
             <EmptyState

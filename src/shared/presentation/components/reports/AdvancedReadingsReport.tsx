@@ -70,11 +70,45 @@ export const AdvancedReadingsReport = () => {
 
   const AVAILABLE_COLUMNS: ExportColumn[] = useMemo(
     () => [
-      { columnId: 'sector', id: 'sector', label: t('dashboard.reports.advanced.columns.sector', 'Sector'), isDefault: true },
-      { columnId: 'totalConnections', id: 'totalConnections', label: t('dashboard.reports.advanced.columns.totalConnections', 'Total Connections'), isDefault: true },
-      { columnId: 'readingsCompleted', id: 'readingsCompleted', label: t('dashboard.reports.advanced.columns.readingsCompleted', 'Readings Completed'), isDefault: true },
-      { columnId: 'missingReadings', id: 'missingReadings', label: t('dashboard.reports.advanced.columns.missingReadings', 'Missing Readings'), isDefault: true },
-      { columnId: 'progressPercentage', id: 'progressPercentage', label: t('dashboard.reports.advanced.columns.progress', 'Progress %'), isDefault: true }
+      {
+        columnId: 'sector',
+        id: 'sector',
+        label: t('dashboard.reports.advanced.columns.sector', 'Sector'),
+        isDefault: true
+      },
+      {
+        columnId: 'totalConnections',
+        id: 'totalConnections',
+        label: t(
+          'dashboard.reports.advanced.columns.totalConnections',
+          'Total Connections'
+        ),
+        isDefault: true
+      },
+      {
+        columnId: 'readingsCompleted',
+        id: 'readingsCompleted',
+        label: t(
+          'dashboard.reports.advanced.columns.readingsCompleted',
+          'Readings Completed'
+        ),
+        isDefault: true
+      },
+      {
+        columnId: 'missingReadings',
+        id: 'missingReadings',
+        label: t(
+          'dashboard.reports.advanced.columns.missingReadings',
+          'Missing Readings'
+        ),
+        isDefault: true
+      },
+      {
+        columnId: 'progressPercentage',
+        id: 'progressPercentage',
+        label: t('dashboard.reports.advanced.columns.progress', 'Progress %'),
+        isDefault: true
+      }
     ],
     [t]
   );
@@ -109,17 +143,20 @@ export const AdvancedReadingsReport = () => {
     );
   }, [data, resultSearchTerm]);
 
-  const {
-    setShowPdfPreview,
-    PdfPreviewModal
-  } = useTablePdfExport({
+  const { setShowPdfPreview, PdfPreviewModal } = useTablePdfExport({
     data: filteredData,
     availableColumns: AVAILABLE_COLUMNS,
-    reportTitle: t('dashboard.reports.advanced.title', 'REPORTE DE LECTURAS AVANZADAS'),
-    reportDescription: t('dashboard.reports.advanced.description', 'Detalle de avance de lecturas por sector'),
+    reportTitle: t(
+      'dashboard.reports.advanced.title',
+      'REPORTE DE LECTURAS AVANZADAS'
+    ),
+    reportDescription: t(
+      'dashboard.reports.advanced.description',
+      'Detalle de avance de lecturas por sector'
+    ),
     labelsHorizontal: {
       [t('common.period', 'Periodo')]: month,
-      [t('common.exportDate', 'Fecha de Exportación')]: 
+      [t('common.exportDate', 'Fecha de Exportación')]:
         new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
     },
     mapRowData
@@ -212,6 +249,7 @@ export const AdvancedReadingsReport = () => {
             onChange={(value) => setMonth(value)}
             disabled={loading}
             ref={pickerRef}
+            size="compact"
           />
           <Button
             onClick={handleSearch}

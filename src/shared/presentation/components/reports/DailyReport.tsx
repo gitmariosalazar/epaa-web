@@ -18,6 +18,7 @@ import { DatePicker } from '../DatePicker/DatePicker';
 import './DailyReport.css';
 import { Button } from '../Button/Button';
 import type { ExportColumn } from './ReportPreviewModal';
+import { truncateText } from '../../utils/text/truncate-text';
 
 export const DailyReport = () => {
   const { t } = useTranslation();
@@ -149,9 +150,10 @@ export const DailyReport = () => {
       try {
         const rowData: Record<string, string> = {};
         // Se combina la fecha del reporte con el tiempo de lectura si solo viene el tiempo HH:MM:SS
-        const fullDateStr = d.readingTime && !d.readingTime.includes('-')
-          ? `${date}T${d.readingTime}`
-          : d.readingTime;
+        const fullDateStr =
+          d.readingTime && !d.readingTime.includes('-')
+            ? `${date}T${d.readingTime}`
+            : d.readingTime;
 
         rowData['time'] = fullDateStr
           ? dateService.formatToLocaleString(fullDateStr, {
@@ -183,17 +185,20 @@ export const DailyReport = () => {
     [date]
   );
 
-  const {
-    setShowPdfPreview,
-    PdfPreviewModal
-  } = useTablePdfExport({
+  const { setShowPdfPreview, PdfPreviewModal } = useTablePdfExport({
     data: filteredData,
     availableColumns: AVAILABLE_COLUMNS,
-    reportTitle: t('dashboard.reports.daily.title', 'REPORTE DIARIO DE LECTURAS'),
-    reportDescription: t('dashboard.reports.daily.description', 'Detalle de lecturas correspondientes al día seleccionado'),
+    reportTitle: t(
+      'dashboard.reports.daily.title',
+      'REPORTE DIARIO DE LECTURAS'
+    ),
+    reportDescription: t(
+      'dashboard.reports.daily.description',
+      'Detalle de lecturas correspondientes al día seleccionado'
+    ),
     labelsHorizontal: {
       [t('common.date', 'Fecha')]: date,
-      [t('common.exportDate', 'Fecha de Exportación')]: 
+      [t('common.exportDate', 'Fecha de Exportación')]:
         new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
     },
     mapRowData
@@ -216,7 +221,9 @@ export const DailyReport = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Avatar name={row.clientName} size="sm" />
             <div>
-              <div style={{ fontWeight: 300 }}>{row.clientName}</div>
+              <div style={{ fontWeight: 300 }}>
+                {truncateText(row.clientName, 20)}
+              </div>
               <div
                 style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}
               >
@@ -275,6 +282,7 @@ export const DailyReport = () => {
             onChange={(value) => setDate(value)}
             disabled={loading}
             ref={pickerRef}
+            size="compact"
           />
           <Button
             onClick={handleSearch}

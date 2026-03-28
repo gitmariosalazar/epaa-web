@@ -1,10 +1,12 @@
 import React from 'react';
 import '../styles/PaymentFilters.css';
-import { Search } from 'lucide-react';
+import { CreditCard, Search, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '../../../../shared/presentation/components/DatePicker/DatePicker';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
+import { Select } from '@/shared/presentation/components/Input/Select';
+import { Input } from '@/shared/presentation/components/Input/Input';
 
 // ── Props (ISP: each consumer only passes what it needs) ─────────────────────
 interface PaymentFiltersProps {
@@ -77,7 +79,7 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
 
   return (
     <div className="payment-filters">
-      {/* ── LEFT: date / range / order inputs + Fetch ── */}
+      {/* ── LEFT: Primary Inputs & Actions ── */}
       <div className="filter-section-left">
         {/* Single-date picker (payments + readings tabs) */}
         {activeTab !== 'range' && (
@@ -86,7 +88,7 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
               {t('accounting.filters.date', 'Fecha de Pago')}
             </label>
             <div className="filter-input-wrapper">
-              <DatePicker value={date} onChange={onDateChange} />
+              <DatePicker value={date} onChange={onDateChange} size="compact" />
             </div>
           </div>
         )}
@@ -98,10 +100,10 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
               {t('accounting.filters.orderValue', 'Orden N°')}
             </label>
             <div className="filter-input-wrapper">
-              <select
-                className="filter-input filter-select"
+              <Select
                 value={orderValue}
                 onChange={(e) => onOrderValueChange(e.target.value)}
+                size="compact"
               >
                 <option value="">
                   {t('accounting.filters.selectOrder', 'Select order...')}
@@ -111,54 +113,49 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
                     {val}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
         )}
 
         {/* Date range inputs (range tab only) */}
         {activeTab === 'range' && (
-          <>
-            <div className="filter-group filter-group--range">
-              <label className="filter-label">
-                {t('trashRateKPI.filters.dateRange', 'Rango de Fechas')}
-              </label>
-              <div className="filter-input-wrapper">
-                <DateRangePicker
-                  startDate={initDate}
-                  endDate={endDate}
-                  onChange={(start, end) => {
-                    onInitDateChange(start);
-                    onEndDateChange(end);
-                  }}
-                  disabled={isLoading}
-                />
-              </div>
+          <div className="filter-group filter-group--range">
+            <label className="filter-label">
+              {t('trashRateKPI.filters.dateRange', 'Rango de Fechas')}
+            </label>
+            <div className="filter-input-wrapper">
+              <DateRangePicker
+                size="compact"
+                startDate={initDate}
+                endDate={endDate}
+                onChange={(start, end) => {
+                  onInitDateChange(start);
+                  onEndDateChange(end);
+                }}
+                disabled={isLoading}
+              />
             </div>
-          </>
+          </div>
         )}
 
-        <Button onClick={onFetch} disabled={!canFetch} size="sm">
-          {isLoading ? (
-            <div className="filter-button-spinner" />
-          ) : (
-            <Search size={18} />
-          )}
-          {isLoading
-            ? t('common.loading', 'Loading...')
-            : t('accounting.filters.fetch', 'Consultar')}
+        <Button
+          onClick={onFetch}
+          disabled={!canFetch}
+          size="compact"
+          isLoading={isLoading}
+          leftIcon={<Search size={18} />}
+        >
+          {t('accounting.filters.fetch', 'Consultar')}
         </Button>
-      </div>
 
-      {/* ── RIGHT: local search + dropdowns ── */}
-      <div className="filter-section-right">
+        {/* local search (all tabs) */}
         <div className="filter-group filter-group--search">
           <label className="filter-label">
             {t('accounting.filters.localSearch', 'Buscar')}
           </label>
           <div className="filter-input-wrapper">
-            <Search className="filter-icon" size={18} />
-            <input
+            <Input
               type="text"
               placeholder={t(
                 'accounting.filters.localSearchPlaceholder',
@@ -166,20 +163,25 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
               )}
               value={searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
-              className="filter-input"
+              size="compact"
+              leftIcon={<Search size={18} />}
             />
           </div>
         </div>
+      </div>
 
+      {/* ── RIGHT: Secondary Dropdown Filters ── */}
+      <div className="filter-section-right">
         <div className="filter-group">
           <label className="filter-label">
             {t('accounting.filters.chargingUser', 'Usuario')}
           </label>
           <div className="filter-input-wrapper">
-            <select
-              className="filter-input filter-select"
+            <Select
               value={selectedUser}
               onChange={(e) => onUserChange(e.target.value)}
+              size="compact"
+              leftIcon={<User size={18} />}
             >
               <option value="">
                 {t('accounting.filters.allUsers', 'Todos los usuarios')}
@@ -189,7 +191,7 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
                   {user}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
 
@@ -198,10 +200,11 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
             {t('accounting.filters.paymentMethod', 'Método de Pago')}
           </label>
           <div className="filter-input-wrapper">
-            <select
-              className="filter-input filter-select"
+            <Select
               value={selectedPaymentMethod}
               onChange={(e) => onPaymentMethodChange(e.target.value)}
+              size="compact"
+              leftIcon={<CreditCard size={18} />}
             >
               <option value="">
                 {t('accounting.filters.allMethods', 'Todos los métodos')}
@@ -211,7 +214,7 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
                   {method}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
       </div>

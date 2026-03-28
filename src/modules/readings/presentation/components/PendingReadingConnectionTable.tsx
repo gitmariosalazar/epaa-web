@@ -7,8 +7,9 @@ import {
 import type { PendingReadingConnection } from '../../domain/models/Reading';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { Eye } from 'lucide-react';
+import { Eye, SearchX } from 'lucide-react';
 import { IoAdd } from 'react-icons/io5';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 interface PropTypes {
   data: PendingReadingConnection[];
@@ -70,7 +71,9 @@ export const PendingReadingConnectionTable: React.FC<PropTypes> = ({
               size="sm"
               variant="ghost"
               color="success"
-              onClick={() => onAction && onAction('create', reading.cadastralKey)}
+              onClick={() =>
+                onAction && onAction('create', reading.cadastralKey)
+              }
               title={t('common.add', 'Agregar Lectura')}
               circle
             >
@@ -94,6 +97,13 @@ export const PendingReadingConnectionTable: React.FC<PropTypes> = ({
         isLoading={isLoading}
         pagination
         pageSize={10}
+        emptyState={
+          <EmptyState
+            message="No se encontraron lecturas pendientes"
+            icon={SearchX}
+            minHeight="300px"
+          />
+        }
       />
     </div>
   );

@@ -1,77 +1,56 @@
-/* src/modules/accounting/presentation/styles/PaymentFilters.css */
-
-/* ── Container: single horizontal row ──────────────────────────────── */
-/* IMPORTANT: no overflow property here — overflow:auto/hidden creates  */
-/* a new stacking context that clips the DatePicker absolute popover.   */
+/* ── Container ───────────────────────────────────────────────────────── */
 .payment-filters {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap; /* CRITICAL: Enables mobile stacking */
+  flex-wrap: wrap; /* Enables wrapping on smaller screens */
+  justify-content: space-between; /* Split left and right */
   align-items: flex-end;
-  justify-content: flex-start !important;
-  gap: 1rem;
-  margin-top: 0.25rem;
-  margin-bottom: 0.25rem;
   padding: 0.75rem 1rem;
   background-color: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
-  flex: 0 0 auto;
+  flex-shrink: 0;
 }
 
-/* ── Sections become flat flex rows (no wrapping) ───────────────────── */
-.filter-section-left {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap; /* CRITICAL: Enables wrapping */
-  align-items: flex-end;
-  gap: 0.4rem;
-  flex: 1 1 350px; /* Force minimum spatial claim before wrapping */
-  min-width: 0;
-  max-width: 100%;
-}
-
+.filter-section-left,
 .filter-section-right {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap; /* CRITICAL: Enables wrapping */
+  flex-wrap: wrap;
   align-items: flex-end;
-  gap: 0.4rem;
-  flex: 1 1 350px; /* Force minimum spatial claim before wrapping */
-  justify-content: flex-end;
-  min-width: 0;
-  max-width: 100%;
+  gap: 0.3rem;
 }
 
-/* ── Individual filter group ────────────────────────────────────────── */
+.filter-section-left {
+  justify-content: flex-start;
+  flex: 0 1 auto;
+}
+
+.filter-section-right {
+  justify-content: flex-end;
+  flex: 0 1 auto;
+}
+
+/* ── Individual group ────────────────────────────────────────────────── */
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  flex: 0 1 auto; /* Disabled fluid growth so inputs don't stretch */
-  width: 160px; /* Base width */
-  min-width: 0;
-  max-width: 100%;
+  gap: 4px;
+  min-width: max-content;
+  flex: 0 0 auto; /* Allow items to take only needed space */
 }
 
-/* Search bar slightly wider */
+.filter-group--range {
+  min-width: 240px;
+}
+
 .filter-group--search {
-  width: 260px;
+  flex: 1 1 200px; /* Search can grow a bit if there's space */
+  max-width: 300px;
 }
 
-/* Operator selector narrow but enough for text */
-.filter-group--operator {
-  width: 140px;
-}
-
-/* Button groups shouldn't stretch horizontally */
-.filter-group--btn {
-  flex: 0 1 auto;
-  width: auto;
-}
-
-/* ── Label ──────────────────────────────────────────────────────────── */
+/* ── Label ───────────────────────────────────────────────────────────── */
 .filter-label {
   font-size: 0.675rem;
   font-weight: 700;
@@ -81,73 +60,13 @@
   white-space: nowrap;
 }
 
-/* ── Input wrapper ──────────────────────────────────────────────────── */
+/* ── Input wrapper ───────────────────────────────────────────────────── */
 .filter-input-wrapper {
   position: relative;
   width: 100%;
 }
 
-.filter-icon {
-  position: absolute;
-  left: 0.625rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-secondary);
-  pointer-events: none;
-  transition: color 0.2s;
-}
-
-.filter-input-wrapper:focus-within .filter-icon {
-  color: var(--primary);
-}
-
-/* ── Inputs & selects ───────────────────────────────────────────────── */
-.filter-input,
-.filter-input[type='date'],
-.filter-input[type='number'],
-.filter-input[type='text'],
-.filter-select {
-  width: 100%;
-  height: 36px;
-  padding: 0 0.5rem 0 0.5rem;
-  background-color: var(--background);
-  border: 1px solid var(--border-color);
-  border-radius: 0.375rem;
-  color: var(--text-main);
-  font-family: inherit;
-  font-size: 0.8125rem;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
-  box-sizing: border-box;
-  white-space: nowrap;
-}
-
-.filter-input:focus,
-.filter-select:focus {
-  outline: none;
-  border-color: transparent;
-  box-shadow: 0 0 0 2px var(--primary);
-}
-
-/* Select-specific */
-.filter-select {
-  padding-left: 0.625rem;
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.5rem center;
-  background-size: 0.875rem;
-  padding-right: 1.75rem;
-}
-
-/* Text inputs keep icon padding */
-.filter-input[type='text'] {
-  padding-left: 2.25rem;
-}
-
-/* ── Spinner ────────────────────────────────────────────────────────── */
+/* ── Spinner ─────────────────────────────────────────────────────────── */
 .filter-button-spinner {
   width: 1.125rem;
   height: 1.125rem;
@@ -164,7 +83,7 @@
   }
 }
 
-/* Alignment fixes to ensure button has same height as inputs */
-.payment-filters .btn-pro {
-  height: 36px;
-}
+/* 
+   REMOVED: Legacy height overrides.
+   Utilizing standardized 'compact' size (34px) from global components.
+*/

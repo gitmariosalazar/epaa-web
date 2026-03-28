@@ -1,8 +1,11 @@
 import React from 'react';
 import '../styles/PaymentFilters.css';
-import { Search, X } from 'lucide-react';
+import { Search, X, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { Select } from '@/shared/presentation/components/Input/Select';
+import { Input } from '@/shared/presentation/components/Input/Input';
+import { FaFilter } from 'react-icons/fa';
 
 interface OverduePaymentFiltersProps {
   searchField: string;
@@ -55,92 +58,100 @@ export const OverduePaymentFilters: React.FC<OverduePaymentFiltersProps> = ({
 
   return (
     <div className="payment-filters">
-      {/* Field selector */}
-      <div className="filter-group">
-        <label className="filter-label">
-          {t('accounting.filters.field', 'Filtrar por')}
-        </label>
-        <div className="filter-input-wrapper">
-          <select
-            className="filter-input filter-select"
-            value={searchField}
-            onChange={(e) => setSearchField(e.target.value)}
-          >
-            {SEARCH_FIELDS.map((f) => (
-              <option key={f.value} value={f.value}>
-                {t(f.labelKey, f.labelDefault)}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Operator selector — only for monthsPastDue */}
-      {searchField === 'monthsPastDue' && (
-        <div className="filter-group filter-group--operator">
+      {/* ── LEFT: Search Config ── */}
+      <div className="filter-section-left">
+        {/* Field selector */}
+        <div className="filter-group">
           <label className="filter-label">
-            {t('accounting.filters.operator', 'Operador')}
+            {t('accounting.filters.field', 'Filtrar por')}
           </label>
           <div className="filter-input-wrapper">
-            <select
-              className="filter-input filter-select"
-              value={searchOperator}
-              onChange={(e) => setSearchOperator(e.target.value)}
+            <Select
+              value={searchField}
+              onChange={(e) => setSearchField(e.target.value)}
+              size="compact"
+              leftIcon={<FaFilter size={18} />}
             >
-              <option value="=">Igual a</option>
-              <option value=">">Mayor a</option>
-              <option value="<">Menor a</option>
-              <option value=">=">Mayor o igual a</option>
-              <option value="<=">Menor o igual a</option>
-              <option value="!=">Diferente a</option>
-            </select>
+              {SEARCH_FIELDS.map((f) => (
+                <option key={f.value} value={f.value}>
+                  {t(f.labelKey, f.labelDefault)}
+                </option>
+              ))}
+            </Select>
           </div>
         </div>
-      )}
 
-      {/* Search input */}
-      <div className="filter-group filter-group--search">
-        <label className="filter-label">
-          {t('accounting.filters.search', 'Buscar')}
-        </label>
-        <div className="filter-input-wrapper">
-          <Search className="filter-icon" size={16} />
-          <input
-            type="text"
-            className="filter-input filter-input--with-icon"
-            placeholder={t('accounting.filters.searchPlaceholder', 'Buscar...')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        {/* Operator selector — only for monthsPastDue */}
+        {searchField === 'monthsPastDue' && (
+          <div className="filter-group filter-group--operator">
+            <label className="filter-label">
+              {t('accounting.filters.operator', 'Operador')}
+            </label>
+            <div className="filter-input-wrapper">
+              <Select
+                value={searchOperator}
+                onChange={(e) => setSearchOperator(e.target.value)}
+                size="compact"
+              >
+                <option value="=">Igual a</option>
+                <option value=">">Mayor a</option>
+                <option value="<">Menor a</option>
+                <option value=">=">Mayor o igual a</option>
+                <option value="<=">Menor o igual a</option>
+                <option value="!=">Diferente a</option>
+              </Select>
+            </div>
+          </div>
+        )}
+
+        {/* Search input */}
+        <div className="filter-group filter-group--search">
+          <label className="filter-label">
+            {t('accounting.filters.search', 'Buscar')}
+          </label>
+          <div className="filter-input-wrapper">
+            <Input
+              type="text"
+              placeholder={t(
+                'accounting.filters.searchPlaceholder',
+                'Buscar...'
+              )}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              size="compact"
+              leftIcon={<Search size={16} />}
+            />
+          </div>
         </div>
+
+        {/* Clear button — only visible when there's a query */}
+        {searchQuery && (
+          <div className="filter-group">
+            <label className="filter-label" style={{ visibility: 'hidden' }}>
+              .
+            </label>
+            <Button
+              onClick={handleClearSearch}
+              size="compact"
+              variant="ghost"
+              leftIcon={<X size={16} />}
+            >
+              {t('common.clear', 'Limpiar')}
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Clear button — only visible when there's a query */}
-      {searchQuery && (
-        <div className="filter-group filter-group--btn">
-          <label className="filter-label" style={{ visibility: 'hidden' }}>
-            .
-          </label>
-          <Button onClick={handleClearSearch} size="sm" variant="ghost">
-            <X size={16} />
-            {t('common.clear', 'Limpiar')}
-          </Button>
-        </div>
-      )}
-
-      {/* Refresh button */}
+      {/* ── RIGHT: Global Actions ── */}
       {onRefresh && (
-        <div className="filter-group filter-group--btn">
-          <label className="filter-label" style={{ visibility: 'hidden' }}>
-            .
-          </label>
+        <div className="filter-section-right">
           <Button
             onClick={onRefresh}
-            size="sm"
+            size="compact"
             variant="outline"
             color="gray"
             isLoading={isLoading}
-            title={t('common.refresh', 'Refrescar')}
+            leftIcon={<RefreshCw size={16} />}
           >
             {t('common.refresh', 'Refrescar')}
           </Button>

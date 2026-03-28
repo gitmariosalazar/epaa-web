@@ -3,7 +3,6 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-bottom: 8px;
   width: 100%;
 }
 
@@ -49,7 +48,8 @@ textarea.input__field {
   border-color: var(--error) !important;
 }
 
-.input__icon-left {
+.input__icon-left,
+.input__icon-right {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -59,6 +59,15 @@ textarea.input__field {
   color: var(--text-muted);
   pointer-events: none;
   z-index: 10;
+  transition: transform 0.2s ease;
+}
+
+.input__icon-right {
+  right: 0.75rem;
+}
+
+.input__field:focus + .input__icon-right {
+  transform: translateY(-50%) rotate(180deg);
 }
 
 .input__error {
@@ -70,7 +79,6 @@ textarea.input__field {
 /* Size: Small (Wizard Compact Style) */
 .input--small {
   gap: 2px;
-  margin-bottom: 4px;
 }
 
 .input--small .input__label {
@@ -95,10 +103,18 @@ textarea.input__field {
   padding-left: 2.2rem !important;
 }
 
+.input--small .input__field--with-right-icon {
+  padding-right: 2.2rem !important;
+}
+
+.input--small .input__icon-right {
+  right: 0.6rem;
+  font-size: 12px;
+}
+
 /* Size: Compact (Intermediate between Small and Medium) */
 .input--compact {
   gap: 3px;
-  margin-bottom: 6px;
 }
 
 .input--compact .input__label {
@@ -123,6 +139,15 @@ textarea.input__field {
   padding-left: 2.5rem !important;
 }
 
+.input--compact .input__field--with-right-icon {
+  padding-right: 2.5rem !important;
+}
+
+.input--compact .input__icon-right {
+  right: 0.675rem;
+  font-size: 14px;
+}
+
 /* Size: Medium (Standard) */
 .input--medium .input__label {
   font-size: 0.75rem;
@@ -145,6 +170,15 @@ textarea.input__field {
   padding-left: 2.75rem !important;
 }
 
+.input--medium .input__field--with-right-icon {
+  padding-right: 2.75rem !important;
+}
+
+.input--medium .input__icon-right {
+  right: 0.75rem;
+  font-size: 16px;
+}
+
 /* Size: Large */
 .input--large .input__label {
   font-size: 0.875rem;
@@ -161,7 +195,7 @@ textarea.input__field {
 /* Specific Select Styles */
 select.input__field {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-image: none; /* Removing internal hack to use real Icon component */
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   padding-right: 2rem;

@@ -41,6 +41,7 @@ export const CollectorPerformanceKPIFilter: React.FC<
           </label>
           <div className="filter-input-wrapper">
             <DateRangePicker
+              size="compact"
               startDate={startDate}
               endDate={endDate}
               onChange={handleRangeChange}
@@ -49,12 +50,13 @@ export const CollectorPerformanceKPIFilter: React.FC<
           </div>
         </div>
 
-        <Button onClick={onFetch} disabled={!canFetch} size="sm">
-          {isLoading ? (
-            <div className="filter-button-spinner" />
-          ) : (
-            <Search size={18} />
-          )}
+        <Button
+          onClick={onFetch}
+          disabled={!canFetch}
+          size="compact"
+          isLoading={isLoading}
+        >
+          {!isLoading && <Search size={18} />}
           {isLoading
             ? t('common.loading', 'Cargando...')
             : t('common.search', 'Consultar')}

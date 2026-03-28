@@ -79,10 +79,7 @@ export const useReadingsList = () => {
         }
       } catch (err: any) {
         console.error('Error fetching readings list', err);
-        setError(
-          err.response?.data?.message ||
-            'Ocurrió un error al consultar las lecturas.'
-        );
+        setError(err.message);
 
         if (activeTab === 'pending' || activeTab === 'all')
           setPendingReadings([]);

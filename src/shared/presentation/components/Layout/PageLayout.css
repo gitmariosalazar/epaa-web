@@ -1,7 +1,7 @@
 .epaa-page-layout {
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* Universal spacing between Header -> Filters -> Table */
+  gap: 0.3rem !important; /* Universal spacing between Header -> Filters -> Table */
   height: 100%;
   width: 100%;
   /* 
@@ -14,14 +14,16 @@
 
 .epaa-page-layout__header {
   flex-shrink: 0;
-  z-index: 20;
-  min-width: 0; /* Prevents nested flex expansion blowouts (e.g. Tabs) */
+  z-index: 50; /* Above all body content and filters */
+  position: relative;
+  min-width: 0;
   max-width: 100%;
 }
 
 .epaa-page-layout__filters {
   flex-shrink: 0;
-  z-index: 10;
+  z-index: 40; /* Above body content so popovers overlap tables */
+  position: relative;
   min-width: 0;
   max-width: 100%;
 }

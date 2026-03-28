@@ -3,7 +3,7 @@
 .reading-images-page {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.3rem;
   width: 100%;
   animation: fadeSlideUp 0.4s ease-out;
 }
@@ -87,8 +87,6 @@
   align-items: center;
   gap: 0.5rem;
   color: var(--error);
-  margin-top: 1rem;
-  padding: 1rem;
   background-color: color-mix(in srgb, var(--error), transparent 95%);
   border: 1px solid color-mix(in srgb, var(--error), transparent 80%);
   border-radius: var(--radius-md);
@@ -101,6 +99,5 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 3rem 0;
   width: 100%;
 }

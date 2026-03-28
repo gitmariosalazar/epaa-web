@@ -4,6 +4,8 @@ import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
+import { Select } from '@/shared/presentation/components/Input/Select';
+import { FaListUl } from 'react-icons/fa';
 
 export interface CreditNotesFiltersProps {
   startDate: string;
@@ -41,6 +43,7 @@ export const CreditNotesFilters: React.FC<CreditNotesFiltersProps> = ({
           </label>
           <div className="trash-report-filter-input-wrapper">
             <DateRangePicker
+              size="small"
               startDate={startDate}
               endDate={endDate}
               onChange={(start, end) => {
@@ -50,7 +53,7 @@ export const CreditNotesFilters: React.FC<CreditNotesFiltersProps> = ({
             />
           </div>
         </div>
-        <Button onClick={onFetch} disabled={!canFetch} size="sm">
+        <Button onClick={onFetch} disabled={!canFetch} size="xs">
           {isLoading ? (
             <div className="trash-report-filter-spinner" />
           ) : (
@@ -68,10 +71,11 @@ export const CreditNotesFilters: React.FC<CreditNotesFiltersProps> = ({
               {t('trashRateReport.filters.creditCoverage', 'Cobertura NC')}
             </label>
             <div className="trash-report-filter-input-wrapper">
-              <select
-                className="trash-report-filter-select"
+              <Select
+                size="small"
                 value={selectedCreditCoverage}
                 onChange={(e) => onCreditCoverageChange(e.target.value)}
+                leftIcon={<FaListUl size={18} />}
               >
                 <option value="">
                   {t('trashRateReport.filters.all', 'Todos')}
@@ -81,7 +85,7 @@ export const CreditNotesFilters: React.FC<CreditNotesFiltersProps> = ({
                     {c}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
         )}

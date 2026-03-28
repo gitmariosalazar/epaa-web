@@ -42,6 +42,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
             if (e.key === 'Enter') handleSearch();
           }}
           leftIcon={<FaSchoolLock />}
+          size="compact"
         />
         <Button
           className="cr-search-btn"

@@ -115,10 +115,19 @@ export const RolesPage: React.FC = () => {
     <PageLayout
       className="roles-page"
       header={
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%'
+          }}
+        >
           <div className="roles-header" style={{ marginBottom: 0 }}>
             <h1 style={{ margin: 0 }}>Roles</h1>
-            <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Manage role access and details</p>
+            <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+              Manage role access and details
+            </p>
           </div>
           <Button
             leftIcon={<Plus size={18} />}
@@ -134,15 +143,20 @@ export const RolesPage: React.FC = () => {
       filters={
         <div className="entry-filters">
           <div className="entry-filter-group entry-filter-group--search">
-            <label className="entry-filter-label" style={{ visibility: 'hidden' }}>Search</label>
+            <label
+              className="entry-filter-label"
+              style={{ visibility: 'hidden' }}
+            >
+              Search
+            </label>
             <div className="entry-filter-input-wrapper">
-              <Search className="entry-filter-icon" size={18} />
-              <input
+              <Input
                 type="text"
                 className="entry-filter-input"
                 style={{ paddingLeft: '2.25rem' }}
                 placeholder="Search roles..."
                 value={searchTerm}
+                leftIcon={<Search size={18} />}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
@@ -150,10 +164,18 @@ export const RolesPage: React.FC = () => {
         </div>
       }
     >
-      <div className="table-responsive-wrapper" style={{ flex: 1, minHeight: '450px', display: 'flex', flexDirection: 'column' }}>
-        <Table 
-          data={filteredRoles} 
-          columns={columns} 
+      <div
+        className="table-responsive-wrapper"
+        style={{
+          flex: 1,
+          minHeight: '450px',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <Table
+          data={filteredRoles}
+          columns={columns}
           isLoading={loading}
           emptyState={
             <EmptyState

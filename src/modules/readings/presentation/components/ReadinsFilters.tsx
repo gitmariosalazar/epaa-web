@@ -6,6 +6,8 @@ import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePick
 
 import { TbChartPieFilled } from 'react-icons/tb';
 
+import { Input } from '@/shared/presentation/components/Input/Input';
+
 // ── Tab type ──────────────────────────────────────────────────────────────────
 export type ReadingDataTab = 'pending' | 'completed' | 'estimated' | 'all';
 
@@ -70,57 +72,60 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
 
   return (
     <div className="entry-filters">
-      {show.month && (
-        <div className="entry-filter-group">
-          <label className="entry-filter-label">
-            {t('readingData.filters.month', 'Mes')}
-          </label>
-          <div className="entry-filter-input-wrapper">
-            <DatePicker
-              view="month"
-              value={month ? `${month}-01` : ''}
-              onChange={(val: string) => onMonthChange(val.substring(0, 7))}
-            />
+      {/* ── LEFT: Filters ── */}
+      <div className="filter-section-left">
+        {show.month && (
+          <div className="filter-group">
+            <label className="filter-label">
+              {t('readingData.filters.month', 'Mes')}
+            </label>
+            <div className="filter-input-wrapper">
+              <DatePicker
+                size="compact"
+                view="month"
+                value={month ? `${month}-01` : ''}
+                onChange={(val: string) => onMonthChange(val.substring(0, 7))}
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {show.sector && (
-        <div className="entry-filter-group">
-          <label className="entry-filter-label">
-            {t('readingData.filters.sector', 'Sector')}
-          </label>
-          <div className="entry-filter-input-wrapper">
-            <TbChartPieFilled className="entry-filter-icon" size={18} />
-            <input
-              type="text"
-              placeholder={t(
-                'readingData.filters.sectorPlaceholder',
-                'Todos los sectores'
-              )}
-              value={sector}
-              className="entry-filter-input"
-              style={{ paddingLeft: '2.25rem' }}
-              onChange={(e) => onSectorChange(e.target.value)}
-            />
+        {show.sector && (
+          <div className="filter-group">
+            <label className="filter-label">
+              {t('readingData.filters.sector', 'Sector')}
+            </label>
+            <div className="filter-input-wrapper">
+              <Input
+                size="compact"
+                placeholder={t(
+                  'readingData.filters.sectorPlaceholder',
+                  'Todos los sectores'
+                )}
+                value={sector}
+                onChange={(e) => onSectorChange(e.target.value)}
+                leftIcon={<TbChartPieFilled size={18} />}
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="entry-filter-group" style={{ flex: '0 1 auto', width: 'auto' }}>
-        <label className="entry-filter-label" style={{ visibility: 'hidden' }}>
-          &nbsp;
-        </label>
-        <Button onClick={onFetch} disabled={!canFetch} size="sm">
-          {isLoading ? (
-            <div className="entry-filter-spinner" />
-          ) : (
-            <Search size={18} />
-          )}
-          {isLoading
-            ? t('common.loading', 'Cargando...')
-            : t('readingData.filters.fetch', 'Consultar')}
-        </Button>
+        <div className="filter-group">
+          <label className="filter-label" style={{ visibility: 'hidden' }}>
+            &nbsp;
+          </label>
+          <Button 
+            onClick={onFetch} 
+            disabled={!canFetch} 
+            size="compact"
+            isLoading={isLoading}
+          >
+            {!isLoading && <Search size={18} />}
+            {isLoading
+              ? t('common.loading', 'Cargando...')
+              : t('readingData.filters.fetch', 'Consultar')}
+          </Button>
+        </div>
       </div>
     </div>
   );

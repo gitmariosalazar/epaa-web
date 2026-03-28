@@ -4,6 +4,9 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { Search, RefreshCw } from 'lucide-react';
 import '@/modules/accounting/presentation/styles/EntryDataFilters.css';
 
+import { Select } from '@/shared/presentation/components/Input/Select';
+import { Input } from '@/shared/presentation/components/Input/Input';
+
 interface AllPropertiesFiltersProps {
   searchBy: string;
   setSearchBy: (val: string) => void;
@@ -23,47 +26,57 @@ export const AllPropertiesFilters: React.FC<AllPropertiesFiltersProps> = ({
 
   return (
     <div className="entry-filters">
-      {/* Search By Filter */}
-      <div className="entry-filter-group">
-        <label className="entry-filter-label">{t('common.searchBy', 'SEARCH BY')}</label>
-        <div className="entry-filter-input-wrapper">
-          <select
-            className="entry-filter-select"
-            value={searchBy}
-            onChange={(e) => setSearchBy(e.target.value)}
-          >
-            <option value="all">{t('properties.filters.allFields', 'All Fields')}</option>
-            <option value="cadastralKey">{t('properties.filters.cadastralKey', 'Clave Catastral')}</option>
-            <option value="clientId">{t('properties.filters.clientId', 'ID de Cliente')}</option>
-            <option value="sector">{t('properties.filters.sector', 'Sector')}</option>
-            <option value="propertyType">{t('properties.filters.propertyType', 'Tipo de Propiedad')}</option>
-          </select>
+      {/* ── LEFT: Search Config ── */}
+      <div className="filter-section-left">
+        <div className="filter-group">
+          <label className="filter-label">
+            {t('common.searchBy', 'SEARCH BY')}
+          </label>
+          <div className="filter-input-wrapper">
+            <Select
+              size="compact"
+              value={searchBy}
+              onChange={(e) => setSearchBy(e.target.value)}
+              leftIcon={<Search size={18} />}
+            >
+              <option value="all">
+                {t('properties.filters.allFields', 'All Fields')}
+              </option>
+              <option value="cadastralKey">
+                {t('properties.filters.cadastralKey', 'Clave Catastral')}
+              </option>
+              <option value="clientId">
+                {t('properties.filters.clientId', 'ID de Cliente')}
+              </option>
+              <option value="sector">
+                {t('properties.filters.sector', 'Sector')}
+              </option>
+              <option value="propertyType">
+                {t('properties.filters.propertyType', 'Tipo de Propiedad')}
+              </option>
+            </Select>
+          </div>
+        </div>
+
+        <div className="filter-group filter-group--search">
+          <label className="filter-label">{t('common.search', 'SEARCH')}</label>
+          <div className="filter-input-wrapper">
+            <Input
+              size="compact"
+              placeholder={t('common.searchRecords', 'Search records...')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              leftIcon={<Search size={18} />}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Query Input */}
-      <div className="entry-filter-group entry-filter-group--search">
-        <label className="entry-filter-label">{t('common.search', 'SEARCH')}</label>
-        <div className="entry-filter-input-wrapper">
-          <Search className="entry-filter-icon" size={18} />
-          <input
-            type="text"
-            className="entry-filter-input"
-            style={{ paddingLeft: '2.25rem' }}
-            placeholder={t('common.searchRecords', 'Search records...')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {/* Refresh Button */}
-      <div className="entry-filter-group" style={{ flex: '0 1 auto', width: 'auto' }}>
-        <label className="entry-filter-label" style={{ visibility: 'hidden' }}>
-          &nbsp;
-        </label>
+      {/* ── RIGHT: Actions ── */}
+      <div className="filter-section-right">
         <Button
           variant="outline"
+          size="compact"
           leftIcon={<RefreshCw size={16} />}
           onClick={onRefresh}
         >

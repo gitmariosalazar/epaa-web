@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import type { ExportColumn } from './ReportPreviewModal';
 import './YearlyReport.css';
+import { Input } from '../Input/Input';
 
 export const YearlyReport = () => {
   const { t } = useTranslation();
@@ -50,45 +51,66 @@ export const YearlyReport = () => {
 
   const AVAILABLE_COLUMNS: ExportColumn[] = useMemo(
     () => [
-      { columnId: 'month', id: 'month', label: t('dashboard.reports.yearly.columns.month', 'Month'), isDefault: true },
-      { columnId: 'totalReadings', id: 'totalReadings', label: t('dashboard.reports.yearly.columns.readingsCount', 'Readings Count'), isDefault: true },
-      { columnId: 'totalConsumption', id: 'totalConsumption', label: t('dashboard.reports.yearly.columns.totalConsumption', 'Total Consumption'), isDefault: true }
+      {
+        columnId: 'month',
+        id: 'month',
+        label: t('dashboard.reports.yearly.columns.month', 'Month'),
+        isDefault: true
+      },
+      {
+        columnId: 'totalReadings',
+        id: 'totalReadings',
+        label: t(
+          'dashboard.reports.yearly.columns.readingsCount',
+          'Readings Count'
+        ),
+        isDefault: true
+      },
+      {
+        columnId: 'totalConsumption',
+        id: 'totalConsumption',
+        label: t(
+          'dashboard.reports.yearly.columns.totalConsumption',
+          'Total Consumption'
+        ),
+        isDefault: true
+      }
     ],
     [t]
   );
 
-  const mapRowData = useCallback(
-    (m: any, selectedCols: ExportColumn[]) => {
-      try {
-        const rowData: Record<string, string> = {
-          month: m.month,
-          totalReadings: m.totalReadings.toString(),
-          totalConsumption: `${Number(m.totalConsumption).toFixed(2)} m³`
-        };
+  const mapRowData = useCallback((m: any, selectedCols: ExportColumn[]) => {
+    try {
+      const rowData: Record<string, string> = {
+        month: m.month,
+        totalReadings: m.totalReadings.toString(),
+        totalConsumption: `${Number(m.totalConsumption).toFixed(2)} m³`
+      };
 
-        return selectedCols.map((col) => {
-          const key = (col.columnId || col.id) as keyof typeof rowData;
-          return rowData[key] || '-';
-        });
-      } catch (error) {
-        console.error('Error mapping yearly row data:', error);
-        return selectedCols.map(() => '-');
-      }
-    },
-    []
-  );
+      return selectedCols.map((col) => {
+        const key = (col.columnId || col.id) as keyof typeof rowData;
+        return rowData[key] || '-';
+      });
+    } catch (error) {
+      console.error('Error mapping yearly row data:', error);
+      return selectedCols.map(() => '-');
+    }
+  }, []);
 
-  const {
-    setShowPdfPreview,
-    PdfPreviewModal
-  } = useTablePdfExport({
+  const { setShowPdfPreview, PdfPreviewModal } = useTablePdfExport({
     data: data?.monthlySummaries || [],
     availableColumns: AVAILABLE_COLUMNS,
-    reportTitle: t('dashboard.reports.yearly.title', 'REPORTE ANUAL DE LECTURAS'),
-    reportDescription: t('dashboard.reports.yearly.description', 'Resumen mensual de lecturas y consumo por año'),
+    reportTitle: t(
+      'dashboard.reports.yearly.title',
+      'REPORTE ANUAL DE LECTURAS'
+    ),
+    reportDescription: t(
+      'dashboard.reports.yearly.description',
+      'Resumen mensual de lecturas y consumo por año'
+    ),
     labelsHorizontal: {
       [t('common.year', 'Año')]: year.toString(),
-      [t('common.exportDate', 'Fecha de Exportación')]: 
+      [t('common.exportDate', 'Fecha de Exportación')]:
         new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
     },
     mapRowData
@@ -130,15 +152,17 @@ export const YearlyReport = () => {
       <div className="yearly-report-toolbar">
         <div className="yearly-toolbar-side">
           <label className="toolbar-label-compact">Year</label>
-          <input
-            type="number"
-            className="toolbar-input-compact"
-            style={{ width: '80px' }}
-            value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
-            min="2000"
-            max="2100"
-          />
+          <div>
+            <Input
+              type="number"
+              style={{ width: '80px' }}
+              size="compact"
+              value={year}
+              onChange={(val) => setYear(Number(val))}
+              min="2000"
+              max="2100"
+            />
+          </div>
           <Button
             onClick={handleSearch}
             isLoading={loading}
@@ -154,7 +178,7 @@ export const YearlyReport = () => {
           <Button
             variant="outline"
             color="red"
-            size="sm"
+            size="xs"
             iconOnly
             leftIcon={ColoredIcons.Pdf}
             onClick={() => setShowPdfPreview(true)}

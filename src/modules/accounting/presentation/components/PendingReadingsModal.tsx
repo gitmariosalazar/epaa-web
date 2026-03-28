@@ -32,8 +32,6 @@ interface PendingReadingsModalProps {
   onClose: () => void;
   data: PendingReading[];
   isLoading: boolean;
-  clientName?: string;
-  clientId?: string;
   hasMore?: boolean;
   onEndReached?: () => void;
   error?: string | null;
@@ -44,8 +42,6 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
   onClose,
   data,
   isLoading,
-  clientName,
-  clientId,
   hasMore,
   onEndReached,
   error
@@ -262,13 +258,11 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       console.log('PendingReadingsModal opened with:', {
-        clientId,
-        clientName,
         dataLength: safeData.length,
         isLoading
       });
     }
-  }, [isOpen, clientId, clientName, safeData.length, isLoading]);
+  }, [isOpen, safeData.length, isLoading]);
 
   if (!isOpen) return null;
 
@@ -292,12 +286,12 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
               <div className="client-badge">
                 <span className="id">
                   <FaAddressCard size={12} className="icon-muted" />
-                  {clientId}
+                  {clientMetadata?.clientId}
                 </span>
                 <span className="dot">|</span>
                 <span className="name">
                   <User size={12} className="icon-muted" />
-                  {clientName}
+                  {clientMetadata?.name}
                 </span>
               </div>
               <span className="info-address">

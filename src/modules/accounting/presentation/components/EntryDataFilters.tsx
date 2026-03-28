@@ -1,9 +1,13 @@
 import React from 'react';
 import '../styles/EntryDataFilters.css';
-import { Search } from 'lucide-react';
+import { CreditCard, Search, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
+import { Select } from '@/shared/presentation/components/Input/Select';
+import { Input } from '@/shared/presentation/components/Input/Input';
+import { VscSymbolString } from 'react-icons/vsc';
+import { FaFileInvoiceDollar, FaList } from 'react-icons/fa';
 
 // ── Tab type ──────────────────────────────────────────────────────────────────
 export type EntryDataTab =
@@ -103,8 +107,8 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
   onEndDateChange,
   onFetch,
   isLoading,
-  //searchQuery,
-  //onSearchQueryChange,
+  searchQuery,
+  onSearchQueryChange,
   selectedCollector,
   onCollectorChange,
   collectorList,
@@ -123,14 +127,15 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
 
   return (
     <div className="entry-filters">
-      {/* ── LEFT: date range + Fetch ── */}
-      <div className="entry-filter-left">
+      {/* ── LEFT: Primary Inputs & Actions ── */}
+      <div className="filter-section-left">
         <div className="filter-group filter-group--range">
           <label className="filter-label">
             {t('trashRateKPI.filters.dateRange', 'Rango de Fechas')}
           </label>
           <div className="filter-input-wrapper">
             <DateRangePicker
+              size="compact"
               startDate={startDate}
               endDate={endDate}
               onChange={(start, end) => {
@@ -142,53 +147,53 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
           </div>
         </div>
 
-        <Button onClick={onFetch} disabled={!canFetch} size="sm">
-          {isLoading ? (
-            <div className="entry-filter-spinner" />
-          ) : (
-            <Search size={18} />
-          )}
+        <Button
+          onClick={onFetch}
+          disabled={!canFetch}
+          size="compact"
+          isLoading={isLoading}
+        >
+          {!isLoading && <Search size={18} />}
           {isLoading
             ? t('common.loading', 'Cargando...')
             : t('entryData.filters.fetch', 'Consultar')}
         </Button>
-      </div>
 
-      {/* ── RIGHT: search + conditional dropdowns ── */}
-      <div className="entry-filter-right">
-        {/* Search — always visible */}
-        {/*
-          <div className="entry-filter-group entry-filter-group--search">
-          <label className="entry-filter-label">
-            {t('entryData.filters.search', 'Buscar')}
+        <div className="filter-group filter-group--search">
+          <label className="filter-label">
+            {t('accounting.filters.search', 'Buscar')}
           </label>
-          <div className="entry-filter-input-wrapper">
-            <Search className="entry-filter-icon" size={18} />
-            <input
+          <div className="filter-input-wrapper">
+            <Input
               type="text"
               placeholder={t(
-                'entryData.filters.searchPlaceholder',
-                'Buscar registros...'
+                'accounting.filters.searchPlaceholder',
+                'Buscar...'
               )}
               value={searchQuery}
-              onChange={(e) => onSearchQueryChange(e.target.value)}
-              className="entry-filter-input"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                onSearchQueryChange(e.target.value)
+              }
+              size="compact"
+              leftIcon={<Search size={16} />}
             />
           </div>
         </div>
-          */}
+      </div>
 
-        {/* Collector — grouped | collector | fullBreakdown */}
+      {/* ── RIGHT: Secondary Dropdown Filters ── */}
+      <div className="filter-section-right">
         {show.collector && (
-          <div className="entry-filter-group">
-            <label className="entry-filter-label">
+          <div className="filter-group">
+            <label className="filter-label">
               {t('entryData.filters.collector', 'Cobrador')}
             </label>
-            <div className="entry-filter-input-wrapper">
-              <select
-                className="entry-filter-select"
+            <div className="filter-input-wrapper">
+              <Select
                 value={selectedCollector}
                 onChange={(e) => onCollectorChange(e.target.value)}
+                size="compact"
+                leftIcon={<User size={18} />}
               >
                 <option value="">
                   {t('entryData.filters.allCollectors', 'Todos')}
@@ -198,22 +203,22 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
                     {c}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
         )}
 
-        {/* Title Code — grouped | fullBreakdown */}
         {show.titleCode && (
           <div className="entry-filter-group">
             <label className="entry-filter-label">
               {t('entryData.filters.titleCode', 'Código T.')}
             </label>
             <div className="entry-filter-input-wrapper">
-              <select
-                className="entry-filter-select"
+              <Select
                 value={selectedTitleCode}
                 onChange={(e) => onTitleCodeChange(e.target.value)}
+                size="compact"
+                leftIcon={<VscSymbolString size={18} />}
               >
                 <option value="">
                   {t('entryData.filters.allTitleCodes', 'Todos')}
@@ -223,22 +228,22 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
                     {tc}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
         )}
 
-        {/* Payment Method — grouped | paymentMethod | fullBreakdown */}
         {show.paymentMethod && (
           <div className="entry-filter-group">
             <label className="entry-filter-label">
               {t('entryData.filters.paymentMethod', 'Método de Pago')}
             </label>
             <div className="entry-filter-input-wrapper">
-              <select
-                className="entry-filter-select"
+              <Select
                 value={selectedPaymentMethod}
                 onChange={(e) => onPaymentMethodChange(e.target.value)}
+                size="compact"
+                leftIcon={<FaFileInvoiceDollar size={18} />}
               >
                 <option value="">
                   {t('entryData.filters.allMethods', 'Todos')}
@@ -248,22 +253,22 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
                     {m}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
         )}
 
-        {/* Status — grouped | paymentMethod | fullBreakdown */}
         {show.status && (
           <div className="entry-filter-group">
             <label className="entry-filter-label">
               {t('entryData.filters.status', 'Estado')}
             </label>
-            <div className="entry-filter-input-wrapper">
-              <select
-                className="entry-filter-select"
+            <div className="filter-input-wrapper">
+              <Select
                 value={selectedStatus}
                 onChange={(e) => onStatusChange(e.target.value)}
+                size="compact"
+                leftIcon={<FaList size={18} />}
               >
                 <option value="">
                   {t('entryData.filters.allStatuses', 'Todos')}
@@ -273,7 +278,7 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
                     {s}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
         )}

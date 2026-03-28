@@ -48,7 +48,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .payments-table-empty {
@@ -64,7 +66,10 @@
 }
 
 .payments-table-empty svg {
-  color: rgba(var(--primary-rgb, 148, 163, 184), 0.4); /* Professional faded icon */
+  color: rgba(
+    var(--primary-rgb, 148, 163, 184),
+    0.4
+  ); /* Professional faded icon */
   margin-bottom: 0.5rem;
 }
 
@@ -187,7 +192,8 @@
 }
 
 .table-actions-menu.menu-up {
-  animation: fadeInPortalSimpleUpBase 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeInPortalSimpleUpBase 0.2s cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
 }
 
 @keyframes fadeInUp {
@@ -345,4 +351,3 @@
 .btn-view-pending-list {
   color: var(--info) !important;
 }
-

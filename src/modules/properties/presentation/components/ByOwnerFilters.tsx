@@ -4,6 +4,8 @@ import { Search, Hash } from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import '@/modules/accounting/presentation/styles/EntryDataFilters.css';
 
+import { Input } from '@/shared/presentation/components/Input/Input';
+
 interface ByOwnerFiltersProps {
   clientId: string;
   onClientIdChange: (id: string) => void;
@@ -21,38 +23,34 @@ export const ByOwnerFilters: React.FC<ByOwnerFiltersProps> = ({
 
   return (
     <div className="entry-filters">
-      <div className="entry-filter-group entry-filter-group--search">
-        <label className="entry-filter-label">
-          {t('properties.filters.clientId', 'ID Cliente')}
-        </label>
-        <div className="entry-filter-input-wrapper">
-          <Hash className="entry-filter-icon" size={18} />
-          <input
-            type="text"
-            className="entry-filter-input"
-            style={{ paddingLeft: '2.25rem' }}
-            placeholder={t(
-              'properties.filters.clientIdPlaceholder',
-              'Ej: 1000472694'
-            )}
-            value={clientId}
-            onChange={(e) => onClientIdChange(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && clientId && !isLoading) {
-                e.preventDefault();
-                onFetch();
-              }
-            }}
-          />
+      <div className="filter-section-left">
+        <div className="filter-group filter-group--search">
+          <label className="filter-label">
+            {t('properties.filters.clientId', 'ID Cliente')}
+          </label>
+          <div className="filter-input-wrapper">
+            <Input
+              size="compact"
+              placeholder={t(
+                'properties.filters.clientIdPlaceholder',
+                'Ej: 1000472694'
+              )}
+              value={clientId}
+              onChange={(e) => onClientIdChange(e.target.value)}
+              leftIcon={<Hash size={18} />}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && clientId && !isLoading) {
+                  e.preventDefault();
+                  onFetch();
+                }
+              }}
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="entry-filter-group" style={{ flex: '0 1 auto', width: 'auto' }}>
-        <label className="entry-filter-label" style={{ visibility: 'hidden' }}>
-          &nbsp;
-        </label>
         <Button
           onClick={onFetch}
+          size="compact"
           disabled={isLoading || !clientId}
           leftIcon={isLoading ? undefined : <Search size={16} />}
           isLoading={isLoading}

@@ -14,7 +14,7 @@ interface DatePickerProps {
   onChange: (date: string) => void;
   disabled?: boolean;
   view?: 'date' | 'month';
-  size?: 'small' | 'medium' | 'large';
+  size?: 'xs' | 'small' | 'compact' | 'medium' | 'large';
 }
 
 export interface DatePickerRef {

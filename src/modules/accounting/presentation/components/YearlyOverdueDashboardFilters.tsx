@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { RefreshCw, Filter, X } from 'lucide-react';
 import { Button } from '../../../../shared/presentation/components/Button/Button';
+import { Select } from '@/shared/presentation/components/Input/Select';
 import '../styles/PaymentFilters.css';
 
 interface YearlyOverdueDashboardFiltersProps {
@@ -29,52 +30,60 @@ export const YearlyOverdueDashboardFilters: React.FC<
 
   return (
     <div className="payment-filters">
-      {!hideYearFilter && (
-        <div className="filter-group">
-        <label className="filter-label">
-          {t('accounting.filters.year', 'Filtrar por Año')}
-        </label>
-        <div className="filter-input-wrapper">
-          <Filter className="filter-icon" size={16} />
-          <select
-            className="filter-input filter-select"
-            value={selectedYear}
-            onChange={(e) => onYearChange(e.target.value)}
-            style={{ paddingLeft: '2.25rem' }}
-          >
-            {showAllOption && (
-              <option value="all">{t('common.all', 'Todos los años')}</option>
-            )}
-            {availableYears.sort((a, b) => b - a).map((year) => (
-              <option key={year} value={year.toString()}>
-                {year}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* ── LEFT: Filters ── */}
+      <div className="filter-section-left">
+        {!hideYearFilter && (
+          <div className="filter-group">
+            <label className="filter-label">
+              {t('accounting.filters.year', 'Filtrar por Año')}
+            </label>
+            <div className="filter-input-wrapper">
+              <Select
+                value={selectedYear}
+                onChange={(e) => onYearChange(e.target.value)}
+                size="compact"
+                leftIcon={<Filter size={16} />}
+              >
+                {showAllOption && (
+                  <option value="all">{t('common.all', 'Todos los años')}</option>
+                )}
+                {availableYears
+                  .sort((a, b) => b - a)
+                  .map((year) => (
+                    <option key={year} value={year.toString()}>
+                      {year}
+                    </option>
+                  ))}
+              </Select>
+            </div>
+          </div>
+        )}
+
+        {!hideYearFilter && selectedYear !== 'all' && (
+          <div className="filter-group">
+            <label className="filter-label" style={{ visibility: 'hidden' }}>.</label>
+            <Button
+              onClick={() => onYearChange('all')}
+              size="compact"
+              variant="ghost"
+              leftIcon={<X size={16} />}
+            >
+              {t('common.clear', 'Limpiar')}
+            </Button>
+          </div>
+        )}
       </div>
-      )}
 
-      {!hideYearFilter && selectedYear !== 'all' && (
-        <div className="filter-group filter-group--btn">
-          <label className="filter-label" style={{ visibility: 'hidden' }}>.</label>
-          <Button onClick={() => onYearChange('all')} size="sm" variant="ghost">
-            <X size={16} />
-            {t('common.clear', 'Limpiar')}
-          </Button>
-        </div>
-      )}
-
+      {/* ── RIGHT: Actions ── */}
       {onRefresh && (
-        <div className="filter-group filter-group--btn">
-          <label className="filter-label" style={{ visibility: 'hidden' }}>.</label>
+        <div className="filter-section-right">
           <Button
             onClick={onRefresh}
             variant="outline"
             color="gray"
-            size="sm"
-            disabled={isLoading}
-            leftIcon={<RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />}
+            size="compact"
+            isLoading={isLoading}
+            leftIcon={<RefreshCw size={16} />}
           >
             {t('common.refresh', 'Refrescar')}
           </Button>

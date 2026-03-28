@@ -5,11 +5,13 @@ import {
   ChevronRight,
   ArrowUp,
   ArrowDown,
-  ArrowUpDown
+  ArrowUpDown,
+  SearchX
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../Button/Button';
 import { ColoredIcons } from '../../utils/icons/CustomIcons';
+import { EmptyState } from '../common/EmptyState';
 
 export interface Column<T> {
   header: string;
@@ -255,24 +257,52 @@ export const Table = <T extends { [key: string]: any }>({
             ) : (
               <tr>
                 <td colSpan={columns.length} className="empty-state-cell">
-                  {isLoading ? (
-                     loadingState || <div className="table-loader" style={{ padding: '2rem' }}>{t('common.table.loading')}</div>
-                  ) : emptyState || (
-                    <div className="default-empty-state">
-                      {t('common.table.noData')}
-                    </div>
-                  )}
+                  {isLoading
+                    ? loadingState || (
+                        <div
+                          className="table-loader"
+                          style={{ padding: '2rem' }}
+                        >
+                          {t('common.table.loading')}
+                        </div>
+                      )
+                    : emptyState || (
+                        <div className="default-empty-state">
+                          <EmptyState
+                            message={t('common.table.noData')}
+                            icon={SearchX}
+                            minHeight="300px"
+                          />
+                        </div>
+                      )}
                 </td>
               </tr>
             )}
             {data && data.length > 0 && (
-              <tr className="table-row--spacer" style={{ height: '100%', background: 'transparent' }}>
-                <td colSpan={columns.length} style={{ padding: 0, border: 'none', background: 'transparent' }}></td>
+              <tr
+                className="table-row--spacer"
+                style={{ height: '100%', background: 'transparent' }}
+              >
+                <td
+                  colSpan={columns.length}
+                  style={{
+                    padding: 0,
+                    border: 'none',
+                    background: 'transparent'
+                  }}
+                ></td>
               </tr>
             )}
             {onEndReached && hasMore && !pagination && (
               <tr ref={observerTarget} style={{ height: '20px' }}>
-                <td colSpan={columns.length} style={{ textAlign: 'center', padding: '10px', color: 'var(--text-muted)' }}>
+                <td
+                  colSpan={columns.length}
+                  style={{
+                    textAlign: 'center',
+                    padding: '10px',
+                    color: 'var(--text-muted)'
+                  }}
+                >
                   {isLoading ? t('common.loading', 'Loading...') : ''}
                 </td>
               </tr>
@@ -293,24 +323,44 @@ export const Table = <T extends { [key: string]: any }>({
                   } else {
                     // Very simple matching heuristic: if the column isNumeric, find the corresponding total row
                     // In a perfect architecture, `totalRows` would map directly by accessor/key. This is a visual approximation.
-                  const headerLower = typeof col.header === 'string' ? col.header.toLowerCase() : '';
-                  const colId = col.id;
-                  const colAccessor = typeof col.accessor === 'string' ? col.accessor : '';
+                    const headerLower =
+                      typeof col.header === 'string'
+                        ? col.header.toLowerCase()
+                        : '';
+                    const colId = col.id;
+                    const colAccessor =
+                      typeof col.accessor === 'string' ? col.accessor : '';
 
-                  matchingTotal =
-                    totalRows.find((r) => r.columnId && colId && r.columnId === colId) ||
-                    totalRows.find((r) => r.columnId && colAccessor && r.columnId === colAccessor) ||
-                    totalRows.find((r) => r.label === col.header) ||
-                    totalRows.find((r) => r.label.toLowerCase() === headerLower) ||
-                    totalRows.find(
-                      (r) =>
-                        r.label.toLowerCase().includes(headerLower) ||
-                        (col.accessor === 'transactionsCount' && r.label.includes('FACTURAS')) ||
-                        (col.accessor === 'totalTransactions' && r.label.includes('FACTURAS')) ||
-                        (headerLower && r.label.toLowerCase().includes(headerLower.replace('total', '').trim()))
-                    );
+                    matchingTotal =
+                      totalRows.find(
+                        (r) => r.columnId && colId && r.columnId === colId
+                      ) ||
+                      totalRows.find(
+                        (r) =>
+                          r.columnId &&
+                          colAccessor &&
+                          r.columnId === colAccessor
+                      ) ||
+                      totalRows.find((r) => r.label === col.header) ||
+                      totalRows.find(
+                        (r) => r.label.toLowerCase() === headerLower
+                      ) ||
+                      totalRows.find(
+                        (r) =>
+                          r.label.toLowerCase().includes(headerLower) ||
+                          (col.accessor === 'transactionsCount' &&
+                            r.label.includes('FACTURAS')) ||
+                          (col.accessor === 'totalTransactions' &&
+                            r.label.includes('FACTURAS')) ||
+                          (headerLower &&
+                            r.label
+                              .toLowerCase()
+                              .includes(
+                                headerLower.replace('total', '').trim()
+                              ))
+                      );
 
-                  if (matchingTotal) {
+                    if (matchingTotal) {
                       totalContent =
                         typeof matchingTotal.value === 'number'
                           ? new Intl.NumberFormat('en-US', {
@@ -320,9 +370,22 @@ export const Table = <T extends { [key: string]: any }>({
                           : matchingTotal.value;
                       if (matchingTotal.percentage) {
                         totalContent = (
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'flex-end'
+                            }}
+                          >
                             <span>{totalContent}</span>
-                            <span style={{ fontSize: '0.7em', color: 'var(--text-muted)' }}>{matchingTotal.percentage}</span>
+                            <span
+                              style={{
+                                fontSize: '0.7em',
+                                color: 'var(--text-muted)'
+                              }}
+                            >
+                              {matchingTotal.percentage}
+                            </span>
                           </div>
                         );
                       }
@@ -330,7 +393,8 @@ export const Table = <T extends { [key: string]: any }>({
                   }
 
                   const isHighlighted = matchingTotal?.highlight;
-                  const cellClassName = `${className} ${isHighlighted ? 'total-cell--highlight' : ''}`.trim();
+                  const cellClassName =
+                    `${className} ${isHighlighted ? 'total-cell--highlight' : ''}`.trim();
 
                   return (
                     <td
@@ -351,9 +415,6 @@ export const Table = <T extends { [key: string]: any }>({
           )}
         </table>
       </div>
-
-
-
 
       {summaryRows.length > 0 && (
         <div className="table-summary-block">
@@ -397,8 +458,13 @@ export const Table = <T extends { [key: string]: any }>({
               })}
             </span>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span className="table-pagination-records" style={{ color: 'var(--text-secondary)' }}>
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              <span
+                className="table-pagination-records"
+                style={{ color: 'var(--text-secondary)' }}
+              >
                 {t('common.table.rowsPerPage', {
                   defaultValue: 'Rows per page:'
                 })}
@@ -435,7 +501,8 @@ export const Table = <T extends { [key: string]: any }>({
                   {t('common.pagination.page', {
                     current: currentPage,
                     total: hasMore ? `${totalPages}+` : totalPages
-                  }) || `Pág. ${currentPage} / ${hasMore ? totalPages + '+' : totalPages}`}
+                  }) ||
+                    `Pág. ${currentPage} / ${hasMore ? totalPages + '+' : totalPages}`}
                 </span>
                 <button
                   onClick={handleNext}
@@ -453,9 +520,8 @@ export const Table = <T extends { [key: string]: any }>({
               <Button
                 onClick={onExportPdf}
                 variant="outline"
-                color="slate"
+                color="red"
                 iconOnly
-                circle
                 size="sm"
                 disabled={data.length === 0}
                 title={t('common.exportPdf', 'Exportar PDF')}

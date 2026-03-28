@@ -213,6 +213,8 @@ export const useTablePdfExport = <T,>({
         return null;
       });
       setLoadingPreview(false);
+      setHasGenerationError(false);
+      setLastGeneratedKey('');
     }
   }, [showPdfPreview]);
 

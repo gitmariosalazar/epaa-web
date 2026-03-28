@@ -15,13 +15,15 @@ interface DateRangePickerProps {
   endDate: string;
   onChange: (start: string, end: string) => void;
   disabled?: boolean;
+  size?: 'xs' | 'small' | 'compact' | 'medium' | 'large';
 }
 
 export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   startDate,
   endDate,
   onChange,
-  disabled = false
+  disabled = false,
+  size = 'medium'
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -167,13 +169,13 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
     <div className="date-range-picker-container" ref={containerRef}>
       <button
         type="button"
-        className={`date-range-picker-trigger ${isOpen ? 'date-range-picker-trigger--active' : ''} ${disabled ? 'date-range-picker-trigger--disabled' : ''}`}
+        className={`date-range-picker-trigger date-range-picker--${size} ${isOpen ? 'date-range-picker-trigger--active' : ''} ${disabled ? 'date-range-picker-trigger--disabled' : ''}`}
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
       >
-        <CalendarIcon className="date-range-picker-icon" size={18} />
+        <CalendarIcon className="date-range-picker-icon" size={size === 'xs' || size === 'small' ? 14 : 18} />
         <span>{startDate || t('common.dateRange.start', 'Desde')}</span>
-        <ArrowRight size={14} className="date-separator" />
+        <ArrowRight size={size === 'xs' || size === 'small' ? 12 : 14} className="date-separator" />
         <span>{endDate || t('common.dateRange.end', 'Hasta')}</span>
       </button>
 

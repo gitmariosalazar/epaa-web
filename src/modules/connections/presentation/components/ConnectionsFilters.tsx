@@ -6,6 +6,7 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import type { ConnectionTab } from '../hooks/useConnectionsViewModel';
+import { FaCheck, FaFilter, FaList } from 'react-icons/fa';
 
 // ── Props (ISP: each consumer only passes what it needs) ──────────────────────
 interface ConnectionsFiltersProps {
@@ -115,6 +116,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
           size="compact"
           value={searchField}
           onChange={(e) => onSearchFieldChange(e.target.value)}
+          leftIcon={<FaFilter size={18} />}
         >
           <option value="all">{t('common.all', 'Todos')}</option>
           <option value="connectionCadastralKey">
@@ -165,6 +167,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
           size="compact"
           value={selectedStatus}
           onChange={(e) => onStatusChange(e.target.value)}
+          leftIcon={<FaCheck size={18} />}
         >
           <option value="">
             {t('connections.filters.allStatuses', 'Todos los estados')}
@@ -184,6 +187,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
           size="compact"
           value={selectedSewerage}
           onChange={(e) => onSewerageChange(e.target.value)}
+          leftIcon={<FaList size={18} />}
         >
           <option value="">
             {t('connections.filters.allSewerage', 'Todos')}

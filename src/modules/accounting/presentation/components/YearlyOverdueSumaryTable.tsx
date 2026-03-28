@@ -9,7 +9,10 @@ import { useCallback, useMemo } from 'react';
 import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { CircularProgress, useSimulatedProgress } from '@/shared/presentation/components/CircularProgress';
+import {
+  CircularProgress,
+  useSimulatedProgress
+} from '@/shared/presentation/components/CircularProgress';
 
 interface YearlyOverdueSumaryTableProps {
   data: YearlyOverdueSummary[];
@@ -149,10 +152,7 @@ export const YearlyOverdueSumaryTable: React.FC<
         style: { width: '120px', textAlign: 'right' }
       },
       {
-        header: t(
-          'accounting.overdue.avgDebtPerClient',
-          'Promedio p/ Cliente'
-        ),
+        header: t('accounting.overdue.avgDebtPerClient', 'Promedio p/ Cliente'),
         accessor: (item: YearlyOverdueSummary) => (
           <span>
             {item.avgDebtPerClient !== undefined
@@ -210,7 +210,8 @@ export const YearlyOverdueSumaryTable: React.FC<
         totalEpaaValue: acc.totalEpaaValue + (item.totalEpaaValue || 0),
         totalTrashRate: acc.totalTrashRate + (item.totalTrashRate || 0),
         totalSurcharge: acc.totalSurcharge + (item.totalSurcharge || 0),
-        totalOldSurcharge: acc.totalOldSurcharge + (item.totalOldSurcharge || 0),
+        totalOldSurcharge:
+          acc.totalOldSurcharge + (item.totalOldSurcharge || 0),
         totalImprovementsInterest:
           acc.totalImprovementsInterest + (item.totalImprovementsInterest || 0),
         totalDebtAmount: acc.totalDebtAmount + (item.totalDebtAmount || 0)
@@ -230,8 +231,9 @@ export const YearlyOverdueSumaryTable: React.FC<
       const rowData: Record<string, string> = {
         year: item.year.toString(),
         clientsWithDebt: item.clientsWithDebt.toString(),
-        totalUniqueCadastralKeysByYear:
-          (item.totalUniqueCadastralKeysByYear || 0).toString(),
+        totalUniqueCadastralKeysByYear: (
+          item.totalUniqueCadastralKeysByYear || 0
+        ).toString(),
         totalMonthsPastDue: item.totalMonthsPastDue.toString(),
         totalEpaaValue: item.totalEpaaValue.toFixed(2),
         totalTrashRate: item.totalTrashRate.toFixed(2),
@@ -250,17 +252,67 @@ export const YearlyOverdueSumaryTable: React.FC<
 
   const availableColumns = useMemo(
     () => [
-      { id: 'year', label: t('accounting.overdue.year', 'Año'), isDefault: true },
-      { id: 'clientsWithDebt', label: t('accounting.overdue.clientsWithDebt', 'Clientes con deuda'), isDefault: true },
-      { id: 'totalUniqueCadastralKeysByYear', label: t('accounting.overdue.totalUniqueCadastralKeysByYear', 'Claves Catastrales'), isDefault: true },
-      { id: 'totalMonthsPastDue', label: t('accounting.overdue.totalMonthsPastDue', 'Meses con mora'), isDefault: true },
-      { id: 'totalEpaaValue', label: t('accounting.overdue.epaaValue', 'Monto EPAA'), isDefault: true },
-      { id: 'totalTrashRate', label: t('accounting.overdue.trashRate', 'Tasa de desecho'), isDefault: true },
-      { id: 'totalSurcharge', label: t('accounting.overdue.currentSurcharge', 'Recargos actuales'), isDefault: true },
-      { id: 'totalOldSurcharge', label: t('accounting.overdue.oldSurcharge', 'Recargos anteriores'), isDefault: true },
-      { id: 'totalImprovementsInterest', label: t('accounting.overdue.improvementsInterest', 'Intereses de mejoras'), isDefault: true },
-      { id: 'avgDebtPerClient', label: t('accounting.overdue.avgDebtPerClient', 'Promedio p/ Cliente'), isDefault: true },
-      { id: 'totalDebtAmount', label: t('accounting.overdue.totalDebtAmount', 'Total deuda'), isDefault: true }
+      {
+        id: 'year',
+        label: t('accounting.overdue.year', 'Año'),
+        isDefault: true
+      },
+      {
+        id: 'clientsWithDebt',
+        label: t('accounting.overdue.clientsWithDebt', 'Clientes con deuda'),
+        isDefault: true
+      },
+      {
+        id: 'totalUniqueCadastralKeysByYear',
+        label: t(
+          'accounting.overdue.totalUniqueCadastralKeysByYear',
+          'Claves Catastrales'
+        ),
+        isDefault: true
+      },
+      {
+        id: 'totalMonthsPastDue',
+        label: t('accounting.overdue.totalMonthsPastDue', 'Meses con mora'),
+        isDefault: true
+      },
+      {
+        id: 'totalEpaaValue',
+        label: t('accounting.overdue.epaaValue', 'Monto EPAA'),
+        isDefault: true
+      },
+      {
+        id: 'totalTrashRate',
+        label: t('accounting.overdue.trashRate', 'Tasa de desecho'),
+        isDefault: true
+      },
+      {
+        id: 'totalSurcharge',
+        label: t('accounting.overdue.currentSurcharge', 'Recargos actuales'),
+        isDefault: true
+      },
+      {
+        id: 'totalOldSurcharge',
+        label: t('accounting.overdue.oldSurcharge', 'Recargos anteriores'),
+        isDefault: true
+      },
+      {
+        id: 'totalImprovementsInterest',
+        label: t(
+          'accounting.overdue.improvementsInterest',
+          'Intereses de mejoras'
+        ),
+        isDefault: true
+      },
+      {
+        id: 'avgDebtPerClient',
+        label: t('accounting.overdue.avgDebtPerClient', 'Promedio p/ Cliente'),
+        isDefault: true
+      },
+      {
+        id: 'totalDebtAmount',
+        label: t('accounting.overdue.totalDebtAmount', 'Total deuda'),
+        isDefault: true
+      }
     ],
     [t]
   );
@@ -272,24 +324,6 @@ export const YearlyOverdueSumaryTable: React.FC<
         value: data.length,
         highlight: false,
         columnId: 'year'
-      },
-      {
-        label: t('accounting.overdue.clientsWithDebt', 'Clientes con deuda'),
-        value: totals.clientsWithDebt,
-        highlight: false,
-        columnId: 'clientsWithDebt'
-      },
-      {
-        label: t('accounting.overdue.totalUniqueCadastralKeysByYear', 'Claves Catastrales'),
-        value: totals.totalUniqueCadastralKeysByYear,
-        highlight: false,
-        columnId: 'totalUniqueCadastralKeysByYear'
-      },
-      {
-        label: t('accounting.overdue.totalMonthsPastDue', 'Meses con mora'),
-        value: totals.totalMonthsPastDue,
-        highlight: false,
-        columnId: 'totalMonthsPastDue'
       },
       {
         label: t('accounting.overdue.epaaValue', 'Monto EPAA'),
@@ -316,7 +350,10 @@ export const YearlyOverdueSumaryTable: React.FC<
         columnId: 'totalOldSurcharge'
       },
       {
-        label: t('accounting.overdue.improvementsInterest', 'Intereses de mejoras'),
+        label: t(
+          'accounting.overdue.improvementsInterest',
+          'Intereses de mejoras'
+        ),
         value: `$${totals.totalImprovementsInterest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         highlight: false,
         columnId: 'totalImprovementsInterest'
@@ -349,8 +386,14 @@ export const YearlyOverdueSumaryTable: React.FC<
     useTablePdfExport<YearlyOverdueSummary>({
       data,
       availableColumns,
-      reportTitle: t('accounting.overdue.reportTitle', 'Reporte de Morosidad Anual'),
-      reportDescription: t('accounting.overdue.reportSubtitle', 'Resumen de morosidad por año'),
+      reportTitle: t(
+        'accounting.overdue.reportTitle',
+        'Reporte de Morosidad Anual'
+      ),
+      reportDescription: t(
+        'accounting.overdue.reportSubtitle',
+        'Resumen de morosidad por año'
+      ),
       labelsHorizontal,
       totalRows,
       mapRowData: handleMapRowData
@@ -363,7 +406,16 @@ export const YearlyOverdueSumaryTable: React.FC<
         data={data}
         isLoading={isLoading}
         loadingState={
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', width: '100%' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '60vh',
+              width: '100%'
+            }}
+          >
             <CircularProgress
               progress={loadingProgress}
               size={140}
@@ -385,7 +437,10 @@ export const YearlyOverdueSumaryTable: React.FC<
         emptyState={
           <EmptyState
             message={t('accounting.overdue.emptyStateTitle', 'No hay datos')}
-            description={t('accounting.overdue.emptyStateDescription', 'No hay datos para mostrar')}
+            description={t(
+              'accounting.overdue.emptyStateDescription',
+              'No hay datos para mostrar'
+            )}
           />
         }
       />

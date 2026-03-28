@@ -3,7 +3,6 @@
 .entry-data-page {
   padding: clamp(0.5rem, 2vw, 1rem);
   max-width: 100%;
-  gap: clamp(0.5rem, 2vw, 1rem);
   animation: entry-fade-in 0.3s ease-out;
   color: var(--text-main);
 }

@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
+import { Select } from '@/shared/presentation/components/Input/Select';
 
 export interface MissingValorFiltersProps {
   startDate: string;
@@ -41,6 +42,7 @@ export const MissingValorFilters: React.FC<MissingValorFiltersProps> = ({
           </label>
           <div className="trash-report-filter-input-wrapper">
             <DateRangePicker
+              size="small"
               startDate={startDate}
               endDate={endDate}
               onChange={(start, end) => {
@@ -50,7 +52,7 @@ export const MissingValorFilters: React.FC<MissingValorFiltersProps> = ({
             />
           </div>
         </div>
-        <Button onClick={onFetch} disabled={!canFetch} size="sm">
+        <Button onClick={onFetch} disabled={!canFetch} size="xs">
           {isLoading ? (
             <div className="trash-report-filter-spinner" />
           ) : (
@@ -68,8 +70,8 @@ export const MissingValorFilters: React.FC<MissingValorFiltersProps> = ({
               {t('trashRateReport.filters.paymentStatus', 'Estado Pago')}
             </label>
             <div className="trash-report-filter-input-wrapper">
-              <select
-                className="trash-report-filter-select"
+              <Select
+                size="small"
                 value={selectedPaymentStatus}
                 onChange={(e) => onPaymentStatusChange(e.target.value)}
               >
@@ -81,7 +83,7 @@ export const MissingValorFilters: React.FC<MissingValorFiltersProps> = ({
                     {s}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
         )}

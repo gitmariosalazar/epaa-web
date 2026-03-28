@@ -377,7 +377,6 @@ h2 {
   background: var(--surface);
   border-radius: var(--radius-sm);
   padding: 5px;
-  margin-top: 5px;
   flex: 1;
   display: flex;
   flex-direction: column;

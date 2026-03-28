@@ -102,7 +102,10 @@ export const ReadingsListPage: React.FC = () => {
     ];
   }, [filteredPending, filteredCompleted]);
 
-  const handleTableAction = (mode: 'create' | 'update', cadastralKey: string) => {
+  const handleTableAction = (
+    mode: 'create' | 'update',
+    cadastralKey: string
+  ) => {
     setModalState({ isOpen: true, mode, cadastralKey });
   };
 
@@ -117,7 +120,7 @@ export const ReadingsListPage: React.FC = () => {
 
   return (
     <PageLayout
-      className="entry-data-page"
+      className="reading-images-page"
       header={
         <Tabs
           tabs={READINGS_TABS}
@@ -140,7 +143,7 @@ export const ReadingsListPage: React.FC = () => {
       {error ? (
         <div
           className="entry-data-error"
-          style={{ color: 'red', marginTop: '1rem' }}
+          style={{ color: 'red', marginTop: '0rem' }}
         >
           <strong>Error: </strong> {error}
         </div>
@@ -150,7 +153,7 @@ export const ReadingsListPage: React.FC = () => {
           style={{
             display: 'flex',
             justifyContent: 'center',
-            marginTop: '3rem'
+            marginTop: '0rem'
           }}
         >
           <CircularProgress
@@ -187,10 +190,7 @@ export const ReadingsListPage: React.FC = () => {
           )}
 
           {activeTab === 'all' && (
-            <AllReadingsTable
-              data={filteredAll}
-              isLoading={isLoading}
-            />
+            <AllReadingsTable data={filteredAll} isLoading={isLoading} />
           )}
         </>
       )}

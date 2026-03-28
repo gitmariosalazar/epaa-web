@@ -34,6 +34,7 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
           </label>
           <div className="trash-report-filter-input-wrapper">
             <DateRangePicker
+              size="small"
               startDate={startDate}
               endDate={endDate}
               onChange={(start, end) => {
@@ -43,7 +44,7 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
             />
           </div>
         </div>
-        <Button onClick={onFetch} disabled={!canFetch} size="sm">
+        <Button onClick={onFetch} disabled={!canFetch} size="xs">
           {isLoading ? (
             <div className="trash-report-filter-spinner" />
           ) : (

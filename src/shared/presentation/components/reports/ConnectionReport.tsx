@@ -16,6 +16,8 @@ import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport
 import type { ExportColumn } from './ReportPreviewModal';
 import { useCallback } from 'react';
 import './ConnectionReport.css';
+import { InputCadastralKey } from '../Input/InputCadastralKey';
+import { Select } from '../Input/Select';
 
 export const ConnectionReport = () => {
   const { t } = useTranslation();
@@ -54,12 +56,42 @@ export const ConnectionReport = () => {
 
   const AVAILABLE_COLUMNS: ExportColumn[] = useMemo(
     () => [
-      { columnId: 'date', id: 'date', label: t('dashboard.reports.connection.columns.date'), isDefault: true },
-      { columnId: 'readingValue', id: 'readingValue', label: t('dashboard.reports.connection.columns.readingValue'), isDefault: true },
-      { columnId: 'consumption', id: 'consumption', label: t('dashboard.reports.connection.columns.consumption'), isDefault: true },
-      { columnId: 'client', id: 'client', label: t('dashboard.reports.connection.columns.client'), isDefault: true },
-      { columnId: 'meter', id: 'meter', label: t('dashboard.reports.connection.columns.meter'), isDefault: true },
-      { columnId: 'status', id: 'status', label: t('dashboard.reports.connection.columns.status'), isDefault: true }
+      {
+        columnId: 'date',
+        id: 'date',
+        label: t('dashboard.reports.connection.columns.date'),
+        isDefault: true
+      },
+      {
+        columnId: 'readingValue',
+        id: 'readingValue',
+        label: t('dashboard.reports.connection.columns.readingValue'),
+        isDefault: true
+      },
+      {
+        columnId: 'consumption',
+        id: 'consumption',
+        label: t('dashboard.reports.connection.columns.consumption'),
+        isDefault: true
+      },
+      {
+        columnId: 'client',
+        id: 'client',
+        label: t('dashboard.reports.connection.columns.client'),
+        isDefault: true
+      },
+      {
+        columnId: 'meter',
+        id: 'meter',
+        label: t('dashboard.reports.connection.columns.meter'),
+        isDefault: true
+      },
+      {
+        columnId: 'status',
+        id: 'status',
+        label: t('dashboard.reports.connection.columns.status'),
+        isDefault: true
+      }
     ],
     [t]
   );
@@ -105,27 +137,35 @@ export const ConnectionReport = () => {
     if (data.length === 0) return undefined;
     const first = data[0];
     return {
-      [t('dashboard.reports.connection.metadata.client', 'Client Name')]: first.clientName || '',
-      [t('dashboard.reports.connection.metadata.cadastralKey', 'Cadastral Key')]: first.cadastralKey || '',
-      [t('dashboard.reports.connection.metadata.meter', 'Meter Number')]: first.meterNumber || '',
-      [t('dashboard.reports.connection.metadata.address', 'Address')]: first.address || '',
-      [t('common.exportDate', 'Fecha de Exportación')]: 
+      [t('dashboard.reports.connection.metadata.client', 'Client Name')]:
+        first.clientName || '',
+      [t(
+        'dashboard.reports.connection.metadata.cadastralKey',
+        'Cadastral Key'
+      )]: first.cadastralKey || '',
+      [t('dashboard.reports.connection.metadata.meter', 'Meter Number')]:
+        first.meterNumber || '',
+      [t('dashboard.reports.connection.metadata.address', 'Address')]:
+        first.address || '',
+      [t('common.exportDate', 'Fecha de Exportación')]:
         new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
     };
   }, [data, t]);
 
-  const {
-    setShowPdfPreview,
-    PdfPreviewModal
-  } = useTablePdfExport({
+  const { setShowPdfPreview, PdfPreviewModal } = useTablePdfExport({
     data: filteredData,
     availableColumns: AVAILABLE_COLUMNS,
-    reportTitle: t('dashboard.reports.connection.title', 'Historial de Lecturas'),
-    reportDescription: t('dashboard.reports.connection.description', 'Detalle histórico de lecturas por conexión'),
+    reportTitle: t(
+      'dashboard.reports.connection.title',
+      'Historial de Lecturas'
+    ),
+    reportDescription: t(
+      'dashboard.reports.connection.description',
+      'Detalle histórico de lecturas por conexión'
+    ),
     mapRowData,
     labelsHorizontal
   });
-
 
   const columns = useMemo<Column<ConnectionLastReadingsReport>[]>(
     () => [
@@ -187,27 +227,30 @@ export const ConnectionReport = () => {
         {/* Unified Search Row */}
         <div className="connection-toolbar-side">
           <label className="toolbar-label-compact">Connection</label>
-          <input
-            type="text"
-            className="toolbar-input-compact"
-            placeholder="Key (e.g. 1-1)"
-            maxLength={15}
-            style={{ width: '100px' }}
-            value={cadastralKey}
-            onChange={(e) => setCadastralKey(e.target.value)}
-          />
-          <select
-            className="toolbar-select-compact"
-            value={limit}
-            onChange={(e) => setLimit(Number(e.target.value))}
-          >
-            <option value={5}>Last 5</option>
-            <option value={10}>Last 10</option>
-            <option value={15}>Last 15</option>
-            <option value={20}>Last 20</option>
-            <option value={25}>Last 25</option>
-            <option value={30}>Last 30</option>
-          </select>
+          <div>
+            <InputCadastralKey
+              placeholder="Key (e.g. 1-1)"
+              maxLength={15}
+              size="compact"
+              style={{ width: '100px' }}
+              value={cadastralKey}
+              onChange={(val) => setCadastralKey(val)}
+            />
+          </div>
+          <div>
+            <Select
+              value={limit}
+              onChange={(e) => setLimit(Number(e.target.value))}
+              size="compact"
+            >
+              <option value={5}>Last 5</option>
+              <option value={10}>Last 10</option>
+              <option value={15}>Last 15</option>
+              <option value={20}>Last 20</option>
+              <option value={25}>Last 25</option>
+              <option value={30}>Last 30</option>
+            </Select>
+          </div>
           <Button
             onClick={handleSearch}
             isLoading={loading}
@@ -251,10 +294,7 @@ export const ConnectionReport = () => {
             iconOnly
             leftIcon={ColoredIcons.Excel}
             onClick={() => {
-              exportService.exportToExcel(
-                filteredData,
-                'connection_history'
-              );
+              exportService.exportToExcel(filteredData, 'connection_history');
             }}
             disabled={loading || data.length === 0}
             title={t('common.exportExcel', 'Export Excel')}

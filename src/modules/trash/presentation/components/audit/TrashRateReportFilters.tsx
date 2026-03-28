@@ -4,6 +4,9 @@ import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
+import { Input } from '@/shared/presentation/components/Input/Input';
+import { Select } from '@/shared/presentation/components/Input/Select';
+import { FaListUl } from 'react-icons/fa';
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 export interface TrashRateReportFiltersProps {
@@ -72,6 +75,7 @@ export const TrashRateReportFilters: React.FC<TrashRateReportFiltersProps> = ({
           </label>
           <div className="trash-report-filter-input-wrapper">
             <DateRangePicker
+              size="small"
               startDate={startDate}
               endDate={endDate}
               onChange={(start, end) => {
@@ -87,12 +91,12 @@ export const TrashRateReportFilters: React.FC<TrashRateReportFiltersProps> = ({
             {t('trashRateReport.filters.limit', 'Límite')}
           </label>
           <div className="trash-report-filter-input-wrapper">
-            <input
+            <Input
               type="number"
               min="1"
+              size="small"
               value={limit}
               onChange={(e) => onLimitChange(e.target.value)}
-              className="trash-report-filter-input"
             />
           </div>
         </div>
@@ -102,17 +106,17 @@ export const TrashRateReportFilters: React.FC<TrashRateReportFiltersProps> = ({
             {t('trashRateReport.filters.offset', 'Desplazamiento')}
           </label>
           <div className="trash-report-filter-input-wrapper">
-            <input
+            <Input
               type="number"
               min="0"
+              size="small"
               value={offset}
               onChange={(e) => onOffsetChange(e.target.value)}
-              className="trash-report-filter-input"
             />
           </div>
         </div>
 
-        <Button onClick={onFetch} disabled={!canFetch} size="sm">
+        <Button onClick={onFetch} disabled={!canFetch} size="xs">
           {isLoading ? (
             <div className="trash-report-filter-spinner" />
           ) : (
@@ -132,15 +136,16 @@ export const TrashRateReportFilters: React.FC<TrashRateReportFiltersProps> = ({
             {t('trashRateReport.filters.search', 'Buscar')}
           </label>
           <div className="trash-report-filter-input-wrapper">
-            <input
+            <Input
               type="text"
+              size="small"
               placeholder={t(
                 'trashRateReport.filters.searchPlaceholder',
                 'Buscar...'
               )}
               value={searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
-              className="trash-report-filter-input"
+              leftIcon={<Search size={18} />}
             />
           </div>
         </div>
@@ -152,10 +157,11 @@ export const TrashRateReportFilters: React.FC<TrashRateReportFiltersProps> = ({
               {t('trashRateReport.filters.paymentStatus', 'Estado Pago')}
             </label>
             <div className="trash-report-filter-input-wrapper">
-              <select
-                className="trash-report-filter-select"
+              <Select
+                size="small"
                 value={selectedPaymentStatus}
                 onChange={(e) => onPaymentStatusChange(e.target.value)}
+                leftIcon={<FaListUl size={18} />}
               >
                 <option value="">
                   {t('trashRateReport.filters.all', 'Todos')}
@@ -165,7 +171,7 @@ export const TrashRateReportFilters: React.FC<TrashRateReportFiltersProps> = ({
                     {s}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
         )}
@@ -177,8 +183,8 @@ export const TrashRateReportFilters: React.FC<TrashRateReportFiltersProps> = ({
               {t('trashRateReport.filters.diagnostic', 'Diagnóstico')}
             </label>
             <div className="trash-report-filter-input-wrapper">
-              <select
-                className="trash-report-filter-select"
+              <Select
+                size="small"
                 value={selectedDiagnostic}
                 onChange={(e) => onDiagnosticChange(e.target.value)}
               >
@@ -190,7 +196,7 @@ export const TrashRateReportFilters: React.FC<TrashRateReportFiltersProps> = ({
                     {d}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
         )}

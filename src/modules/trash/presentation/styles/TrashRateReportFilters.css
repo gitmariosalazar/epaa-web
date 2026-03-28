@@ -4,14 +4,18 @@
 .trash-report-filters {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap; /* Changed to wrap to handle smaller screens better */
+  flex-wrap: wrap;
+  justify-content: space-between; /* Split left and right sections */
   align-items: flex-end;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
+  gap: 0.3rem;
+  padding: 0.75rem 1rem;
   background-color: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 0.75rem;
-  box-shadow: var(--shadow-sm);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 100;
 }
 
 /* ── Sections ────────────────────────────────────────────────────────── */
@@ -19,8 +23,9 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap; /* CRITICAL: Enables wrapping on medium screens */
+  justify-content: flex-end;
   align-items: flex-end;
-  gap: 0.75rem;
+  gap: 0.3rem;
   min-width: 0;
 }
 
@@ -28,18 +33,20 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap; /* CRITICAL: Enables wrapping */
+  justify-content: flex-end;
   align-items: flex-end;
-  gap: 0.75rem;
+  gap: 0.3rem;
   min-width: 0;
 }
 
 .trash-report-filter-group {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  flex: 0 1 auto; /* Fluid growth logic decoupled from dimensions */
+  gap: 4px;
+  min-width: max-content;
+  flex: 0 0 auto;
+  /* Fluid growth logic decoupled from dimensions */
   width: 140px;
-  min-width: 0;
   max-width: 100%;
 }
 
@@ -94,14 +101,12 @@
 .trash-report-filter-input[type='number'],
 .trash-report-filter-select {
   width: 100%;
-  height: 38px;
-  padding: 0 0.75rem;
   background-color: var(--background);
   border: 1px solid var(--border-color);
-  border-radius: 0.5rem;
+  border-radius: 0.375rem;
   color: var(--text-main);
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   transition: all 0.2s ease;
   box-sizing: border-box;
 }
@@ -144,14 +149,11 @@
 /* Alignment fix for button height - Ensure it matches inputs exactly */
 .trash-report-filters
   button:not(.datepicker-trigger):not(.date-range-picker-trigger) {
-  height: 38px;
   align-self: flex-end;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0 1rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
 }
 
 @media (max-width: 640px) {
@@ -172,21 +174,6 @@
 
 /* ── Category Filter ── */
 .trash-category-select {
-  background: var(--background);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  border-radius: 0.4rem;
-  padding: 0.35rem 2rem 0.35rem 0.75rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  outline: none;
-  transition: all 0.2s ease;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.5rem center;
-  height: 38px;
   width: 100%;
 }
 

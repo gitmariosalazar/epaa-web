@@ -11,6 +11,8 @@ import { dateService } from '@/shared/infrastructure/services/EcuadorDateService
 import '@/modules/accounting/presentation/styles/EntryDataFilters.css';
 import { Input } from '@/shared/presentation/components/Input/Input';
 
+import { Select } from '@/shared/presentation/components/Input/Select';
+
 export type SearchMode = 'month_sector' | 'cadastral_key';
 
 interface ReadingImagesFiltersProps {
@@ -49,91 +51,94 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
 
   return (
     <div className="entry-filters">
-      {/* Dropdown de Modo de Búsqueda */}
-      <div className="entry-filter-group">
-        <label className="entry-filter-label">
-          {t('readings.filters.searchMode')}
-        </label>
-        <div className="entry-filter-input-wrapper">
-          <select
-            value={mode}
-            onChange={(e) => setMode(e.target.value as SearchMode)}
-            className="entry-filter-select"
-          >
-            <option value="month_sector">
-              {t('readings.filters.monthAndSector')}
-            </option>
-            <option value="cadastral_key">
-              {t('readings.filters.cadastralKey')}
-            </option>
-          </select>
-        </div>
-      </div>
-
-      {/* Campos Condicionales según el Modo */}
-      {mode === 'month_sector' ? (
-        <>
-          <div className="entry-filter-group">
-            <label className="entry-filter-label">
-              {t('readings.filters.month', 'Mes exacto')}
-            </label>
-            <div className="entry-filter-input-wrapper">
-              <DatePicker
-                view="month"
-                value={month ? `${month}-01` : ''}
-                onChange={(val: string) => setMonth(val.substring(0, 7))}
-              />
-            </div>
-          </div>
-
-          <div className="entry-filter-group">
-            <label className="entry-filter-label">
-              {t('readings.filters.sectorOptional')}
-            </label>
-            <div className="entry-filter-input-wrapper">
-              <Input
-                placeholder={t('readings.filters.allSectors')}
-                value={sector}
-                onChange={(e) => setSector(e.target.value)}
-                leftIcon={<Search size={18} />}
-              />
-            </div>
-          </div>
-        </>
-      ) : (
-        <div className="entry-filter-group">
-          <label className="entry-filter-label">
-            {t('common.cadastralKey', 'Clave Catastral')}
+      {/* ── LEFT: Filters ── */}
+      <div className="filter-section-left">
+        {/* Dropdown de Modo de Búsqueda */}
+        <div className="filter-group">
+          <label className="filter-label">
+            {t('readings.filters.searchMode')}
           </label>
-          <div className="entry-filter-input-wrapper">
-            <InputCadastralKey
-              placeholder="Ej: 1-125 o 40-5"
-              className="entry-filter-input"
-              value={cadastralKey}
-              onChange={(val) => setCadastralKey(val)}
-            />
+          <div className="filter-input-wrapper">
+            <Select
+              size="compact"
+              value={mode}
+              onChange={(e) => setMode(e.target.value as SearchMode)}
+            >
+              <option value="month_sector">
+                {t('readings.filters.monthAndSector')}
+              </option>
+              <option value="cadastral_key">
+                {t('readings.filters.cadastralKey')}
+              </option>
+            </Select>
           </div>
         </div>
-      )}
 
-      {/* Botón Consultar */}
-      <div
-        className="entry-filter-group"
-        style={{ flex: '0 1 auto', width: 'auto' }}
-      >
-        <label className="entry-filter-label" style={{ visibility: 'hidden' }}>
-          &nbsp;
-        </label>
-        <Button onClick={handleSearch} disabled={!canFetch} size="sm">
-          {isLoading ? (
-            <div className="entry-filter-spinner" />
-          ) : (
-            <Search size={18} />
-          )}
-          {isLoading
-            ? t('common.loading', 'Cargando...')
-            : t('common.consult', 'Consultar')}
-        </Button>
+        {/* Campos Condicionales según el Modo */}
+        {mode === 'month_sector' ? (
+          <>
+            <div className="filter-group">
+              <label className="filter-label">
+                {t('readings.filters.month', 'Mes exacto')}
+              </label>
+              <div className="filter-input-wrapper">
+                <DatePicker
+                  size="compact"
+                  view="month"
+                  value={month ? `${month}-01` : ''}
+                  onChange={(val: string) => setMonth(val.substring(0, 7))}
+                />
+              </div>
+            </div>
+
+            <div className="filter-group">
+              <label className="filter-label">
+                {t('readings.filters.sectorOptional')}
+              </label>
+              <div className="filter-input-wrapper">
+                <Input
+                  size="compact"
+                  placeholder={t('readings.filters.allSectors')}
+                  value={sector}
+                  onChange={(e) => setSector(e.target.value)}
+                  leftIcon={<Search size={18} />}
+                />
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="filter-group">
+            <label className="filter-label">
+              {t('common.cadastralKey', 'Clave Catastral')}
+            </label>
+            <div className="filter-input-wrapper">
+              <InputCadastralKey
+                placeholder="Ej: 1-125 o 40-5"
+                size="compact"
+                value={cadastralKey}
+                onChange={(val) => setCadastralKey(val)}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Botón Consultar */}
+        <div className="filter-group">
+          <label className="filter-label" style={{ visibility: 'hidden' }}>
+            &nbsp;
+          </label>
+          <Button 
+            onClick={handleSearch} 
+            disabled={!canFetch} 
+            size="compact"
+            isLoading={isLoading}
+          >
+            {!isLoading && <Search size={18} />}
+            {isLoading
+              ? t('common.loading', 'Cargando...')
+              : t('common.consult', 'Consultar')}
+          </Button>
+        </div>
       </div>
     </div>
   );

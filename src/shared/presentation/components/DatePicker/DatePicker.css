@@ -20,20 +20,35 @@
   outline: none;
 }
 
-/* Size: Small */
+/* Size: XS (28px height, matching Input Small) */
+.datepicker--xs .datepicker-trigger,
 .datepicker--small .datepicker-trigger {
   height: 28px;
   font-size: 0.7rem;
   padding: 0.15rem 0.5rem 0.15rem 2.2rem;
 }
 
+.datepicker--xs .datepicker-icon,
 .datepicker--small .datepicker-icon {
   left: 0.6rem;
   width: 14px;
   height: 14px;
 }
 
-/* Size: Medium */
+/* Size: Compact (34px height) */
+.datepicker--compact .datepicker-trigger {
+  height: 34px;
+  font-size: 0.8125rem;
+  padding: 0.25rem 0.625rem 0.25rem 2.5rem;
+}
+
+.datepicker--compact .datepicker-icon {
+  left: 0.675rem;
+  width: 15px;
+  height: 15px;
+}
+
+/* Size: Medium (Standard - 40px) */
 .datepicker--medium .datepicker-trigger {
   height: 40px;
   font-size: 0.875rem;
@@ -46,7 +61,7 @@
   height: 16px;
 }
 
-/* Size: Large */
+/* Size: Large (48px) */
 .datepicker--large .datepicker-trigger {
   height: 48px;
   font-size: 1rem;
@@ -95,7 +110,7 @@
   position: absolute;
   top: calc(100% + 0.25rem);
   left: 0;
-  z-index: 1000; /* Increased to stay above table headers and other overlays */
+  z-index: 10000; /* Extremely high to stay above table headers and other overlays */
   min-width: 280px;
   width: max-content;
   max-width: 90vw;

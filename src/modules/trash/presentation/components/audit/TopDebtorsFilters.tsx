@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
+import { Input } from '@/shared/presentation/components/Input/Input';
 
 export interface TopDebtorsFiltersProps {
   startDate: string;
@@ -38,6 +39,7 @@ export const TopDebtorsFilters: React.FC<TopDebtorsFiltersProps> = ({
           </label>
           <div className="trash-report-filter-input-wrapper">
             <DateRangePicker
+              size="small"
               startDate={startDate}
               endDate={endDate}
               onChange={(start, end) => {
@@ -50,18 +52,17 @@ export const TopDebtorsFilters: React.FC<TopDebtorsFiltersProps> = ({
         <div className="trash-report-filter-group">
           <label className="trash-report-filter-label">Top</label>
           <div className="trash-report-filter-input-wrapper">
-            <input
+            <Input
+              size="small"
               type="number"
               min="1"
               max="500"
               value={top}
               onChange={(e) => onTopChange(e.target.value)}
-              className="trash-report-filter-input"
-              style={{ width: '80px' }}
             />
           </div>
         </div>
-        <Button onClick={onFetch} disabled={!canFetch} size="sm">
+        <Button onClick={onFetch} disabled={!canFetch} size="xs">
           {isLoading ? (
             <div className="trash-report-filter-spinner" />
           ) : (

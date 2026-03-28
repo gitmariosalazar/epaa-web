@@ -3,6 +3,7 @@ import '../../styles/TrashRateReportFilters.css';
 import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { Input } from '@/shared/presentation/components/Input/Input';
 
 export interface ClientDetailFiltersProps {
   searchParams: string;
@@ -35,9 +36,9 @@ export const ClientDetailFilters: React.FC<ClientDetailFiltersProps> = ({
             )}
           </label>
           <div className="trash-report-filter-input-wrapper">
-            <input
+            <Input
+              size="small"
               type="text"
-              className="trash-report-filter-input"
               placeholder={t(
                 'trashRateReport.filters.clientSearchPlaceholder',
                 'Ej: 0102030405 o 12-3456'
@@ -48,7 +49,7 @@ export const ClientDetailFilters: React.FC<ClientDetailFiltersProps> = ({
             />
           </div>
         </div>
-        <Button onClick={onFetch} disabled={!canFetch} size="sm">
+        <Button onClick={onFetch} disabled={!canFetch} size="xs">
           {isLoading ? (
             <div className="trash-report-filter-spinner" />
           ) : (

@@ -1,10 +1,11 @@
 import React from 'react';
 import '../../styles/TrashRateReportFilters.css';
-import { Search } from 'lucide-react';
+import { List, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import type { TrashRateKPI } from '../../../domain/models/trash-rate-report.model';
+import { Select } from '@/shared/presentation/components/Input/Select';
 
 export interface TrashRateKPIFiltersProps {
   // Monthly selection (represented internally as startDate/endDate)
@@ -76,6 +77,7 @@ export const TrashRateKPIFilters: React.FC<TrashRateKPIFiltersProps> = ({
           </label>
           <div className="trash-report-filter-input-wrapper">
             <DatePicker
+              size="compact"
               view="month"
               value={currentMonthValue}
               onChange={handleMonthChange}
@@ -84,12 +86,13 @@ export const TrashRateKPIFilters: React.FC<TrashRateKPIFiltersProps> = ({
           </div>
         </div>
 
-        <Button onClick={onFetch} disabled={!canFetch} size="sm">
-          {isLoading ? (
-            <div className="trash-report-filter-spinner" />
-          ) : (
-            <Search size={18} />
-          )}
+        <Button
+          onClick={onFetch}
+          disabled={!canFetch}
+          size="compact"
+          isLoading={isLoading}
+        >
+          {!isLoading && <Search size={18} />}
           {isLoading
             ? t('common.loading', 'Cargando...')
             : t('trashRateReport.filters.fetch', 'Consultar')}
@@ -101,21 +104,22 @@ export const TrashRateKPIFilters: React.FC<TrashRateKPIFiltersProps> = ({
         {categories.length > 0 && (
           <div className="trash-report-filter-group">
             <label className="trash-report-filter-label">
-              {t('trashRateKPI.filters.category', 'CATEGORÍA')}
+              {t('trashRateKPI.filters.category', 'Categoría')}
             </label>
             <div className="trash-report-filter-input-wrapper">
-              <select
-                className="trash-category-select"
+              <Select
+                size="compact"
                 value={selectedCategoryIndex}
                 onChange={(e) => onCategoryChange(Number(e.target.value))}
                 disabled={isLoading}
+                leftIcon={<List size={18} />}
               >
                 {categories.map((cat, index) => (
                   <option key={index} value={index}>
                     {cat.category}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
         )}

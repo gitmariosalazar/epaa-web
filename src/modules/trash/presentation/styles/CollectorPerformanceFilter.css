@@ -2,32 +2,35 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  justify-content: space-between; /* Consistent split layout */
   align-items: flex-end;
-  gap: 0.75rem;
+  gap: 0.3rem;
   padding: 0.75rem 1rem;
   background-color: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
-  margin-bottom: 1rem;
+  position: relative;
+  z-index: 100;
 }
 
 .filter-section-left {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
+  justify-content: flex-end;
   align-items: flex-end;
-  gap: 0.75rem;
+  gap: 0.3rem;
   flex-shrink: 0;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-  flex-shrink: 0;
-  width: 11rem;
+  gap: 4px;
+  min-width: max-content;
+  flex: 0 0 auto;
 }
 
 .filter-group--range {
@@ -64,9 +67,9 @@
   }
 }
 
-/* Consistent button height */
+/* Match button height to inputs */
 .collector-performance-filter button {
-  height: 36px;
+  align-self: flex-end;
 }
 
 @media (max-width: 640px) {
