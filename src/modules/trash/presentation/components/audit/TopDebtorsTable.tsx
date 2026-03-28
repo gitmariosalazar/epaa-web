@@ -91,7 +91,9 @@ export const TopDebtorsTable: React.FC<TopDebtorsTableProps> = ({
     useTablePdfExport<TopDebtorRow>({
       data,
       availableColumns: columns.map((c) => ({
-        id: c.id || (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
+        id:
+          c.id ||
+          (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
         label: c.header as string,
         isDefault: true
       })),
@@ -147,7 +149,6 @@ export const TopDebtorsTable: React.FC<TopDebtorsTableProps> = ({
         onSort={onSort}
         onExportPdf={() => setShowPdfPreview(true)}
         sortConfig={sortConfig}
-        fullHeight
         emptyState={<EmptyState message="Data not found!" />}
         totalRows={totalRows}
       />

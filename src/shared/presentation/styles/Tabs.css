@@ -76,7 +76,7 @@
 /* ── Active: soft tint + primary text + bottom accent ── */
 /* color-mix keeps it theme-adaptive: works in dark & light */
 .tabs__tab--active {
-  color: var(--primary);
+  color: var(--purple);
   background-color: color-mix(in srgb, var(--primary) 14%, transparent);
   border-bottom-color: var(--primary);
   box-shadow: none;
@@ -88,13 +88,9 @@
   filter: none;
 }
 
-.tabs__tab--active .tabs__tab-icon {
-  color: var(--primary);
-}
-
 /* ── Icon ──────────────────────────────────────── */
 .tabs__tab-icon {
-  color: var(--text-secondary);
+  color: inherit;
   flex-shrink: 0;
   display: flex;
   align-items: center;

@@ -10,10 +10,10 @@ import './DatePicker.css';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 interface DatePickerProps {
-  value: string; // Format: YYYY-MM-DD or YYYY-MM based on view
+  value: string; // Format: YYYY-MM-DD, YYYY-MM, or YYYY based on view
   onChange: (date: string) => void;
   disabled?: boolean;
-  view?: 'date' | 'month';
+  view?: 'date' | 'month' | 'year';
   size?: 'xs' | 'small' | 'compact' | 'medium' | 'large';
 }
 
@@ -98,24 +98,36 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
 
   const nextMonth = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setCurrentMonth(
-      new Date(
-        currentMonth.getFullYear() + (view === 'month' ? 1 : 0),
-        currentMonth.getMonth() + (view === 'month' ? 0 : 1),
-        1
-      )
-    );
+    if (view === 'year') {
+      setCurrentMonth(
+        new Date(currentMonth.getFullYear() + 12, 0, 1)
+      );
+    } else {
+      setCurrentMonth(
+        new Date(
+          currentMonth.getFullYear() + (view === 'month' ? 1 : 0),
+          currentMonth.getMonth() + (view === 'month' ? 0 : 1),
+          1
+        )
+      );
+    }
   };
 
   const prevMonth = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setCurrentMonth(
-      new Date(
-        currentMonth.getFullYear() - (view === 'month' ? 1 : 0),
-        currentMonth.getMonth() - (view === 'month' ? 0 : 1),
-        1
-      )
-    );
+    if (view === 'year') {
+      setCurrentMonth(
+        new Date(currentMonth.getFullYear() - 12, 0, 1)
+      );
+    } else {
+      setCurrentMonth(
+        new Date(
+          currentMonth.getFullYear() - (view === 'month' ? 1 : 0),
+          currentMonth.getMonth() - (view === 'month' ? 0 : 1),
+          1
+        )
+      );
+    }
   };
 
   const handleDateSelect = (day: number) => {
@@ -148,6 +160,9 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
       return view === 'month' ? 'Seleccionar Mes' : 'Select Date';
     if (view === 'month') {
       return `${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+    }
+    if (view === 'year') {
+      return selectedDate.getFullYear().toString();
     }
     return selectedDate.toLocaleDateString(undefined, {
       year: 'numeric',
@@ -243,6 +258,33 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
     });
   };
 
+  const renderYearGrid = () => {
+    const startYear = Math.floor(currentMonth.getFullYear() / 12) * 12;
+    const years = [];
+
+    for (let i = 0; i < 12; i++) {
+      const yearToRender = startYear + i;
+      const isSelected = selectedDate?.getFullYear() === yearToRender;
+
+      years.push(
+        <button
+          key={yearToRender}
+          type="button"
+          className={`datepicker-month-cell ${isSelected ? 'datepicker-month-cell--selected' : ''}`}
+          onClick={() => {
+            const newDate = new Date(yearToRender, 0, 1);
+            setSelectedDate(newDate);
+            onChange(yearToRender.toString());
+            setIsOpen(false);
+          }}
+        >
+          {yearToRender}
+        </button>
+      );
+    }
+    return years;
+  };
+
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
     onChange('');
@@ -275,9 +317,11 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
               <ChevronLeft size={16} />
             </button>
             <span className="datepicker-month-title">
-              {view === 'month'
-                ? currentMonth.getFullYear()
-                : `${monthNames[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`}
+              {view === 'year'
+                ? `${Math.floor(currentMonth.getFullYear() / 12) * 12} - ${Math.floor(currentMonth.getFullYear() / 12) * 12 + 11}`
+                : view === 'month'
+                  ? currentMonth.getFullYear()
+                  : `${monthNames[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`}
             </span>
             <button
               className="datepicker-nav-btn"
@@ -301,8 +345,10 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
               </div>
               <div className="datepicker-grid">{renderCalendarDays()}</div>
             </>
-          ) : (
+          ) : view === 'month' ? (
             <div className="datepicker-months-grid">{renderMonthGrid()}</div>
+          ) : (
+            <div className="datepicker-months-grid">{renderYearGrid()}</div>
           )}
           <div className="datepicker-footer">
             <Button variant="ghost" size="sm" onClick={handleClear}>
@@ -326,10 +372,12 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
                   e.stopPropagation();
                   if (selectedDate) {
                     const valueToEmit =
-                      view === 'month'
-                        ? `${selectedDate.getFullYear()}-${String(
-                            selectedDate.getMonth() + 1
-                          ).padStart(2, '0')}`
+                      view === 'year'
+                        ? `${selectedDate.getFullYear()}`
+                        : view === 'month'
+                          ? `${selectedDate.getFullYear()}-${String(
+                              selectedDate.getMonth() + 1
+                            ).padStart(2, '0')}`
                         : `${selectedDate.getFullYear()}-${String(
                             selectedDate.getMonth() + 1
                           ).padStart(2, '0')}-${String(

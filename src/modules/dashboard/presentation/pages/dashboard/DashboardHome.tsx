@@ -52,7 +52,7 @@ export const DashboardHome = () => {
           </div>
 
           <div
-            className="dashboard-controls"
+            className="dashboard-control"
             onClick={() => pickerRef.current?.showPicker()}
             title="Change Period"
           >

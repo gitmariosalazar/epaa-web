@@ -2,7 +2,7 @@
 .input-component {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
 }
 
@@ -78,7 +78,7 @@ textarea.input__field {
 
 /* Size: Small (Wizard Compact Style) */
 .input--small {
-  gap: 2px;
+  gap: 0px;
 }
 
 .input--small .input__label {
@@ -114,7 +114,7 @@ textarea.input__field {
 
 /* Size: Compact (Intermediate between Small and Medium) */
 .input--compact {
-  gap: 3px;
+  gap: 1.5px;
 }
 
 .input--compact .input__label {

@@ -61,7 +61,10 @@ export function Tabs<T extends string = string>({
               type="button"
             >
               {tab.icon && (
-                <span className="tabs__tab-icon" aria-hidden="true">
+                <span
+                  className={`tabs__tab-icon ${isActive ? 'tabs__tab-icon--active' : ''}`}
+                  aria-hidden="true"
+                >
                   {tab.icon}
                 </span>
               )}

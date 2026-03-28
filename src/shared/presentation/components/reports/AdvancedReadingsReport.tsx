@@ -4,7 +4,6 @@ import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructur
 import { ExportService } from '@/shared/infrastructure/services/ExportService';
 import { List, Search } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { EmptyState } from '../common/EmptyState';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
@@ -19,12 +18,28 @@ import type { ExportColumn } from './ReportPreviewModal';
 import { useCallback } from 'react';
 import './AdvancedReadingsReport.css';
 
-export const AdvancedReadingsReport = () => {
+interface AdvancedReadingsReportProps {
+  showToolbar?: boolean;
+  showTable?: boolean;
+  externalMonth?: string;
+  onMonthChange?: (month: string) => void;
+}
+
+export const AdvancedReadingsReport: React.FC<AdvancedReadingsReportProps> = ({
+  showToolbar = true,
+  showTable = true,
+  externalMonth,
+  onMonthChange
+}) => {
   const { t } = useTranslation();
   const pickerRef = useRef<HTMLInputElement>(null);
-  const [month, setMonth] = useState<string>(
+
+  const [monthInternal, setMonthInternal] = useState<string>(
     dateService.getCurrentMonthString()
   );
+
+  const month = externalMonth ?? monthInternal;
+  const setMonth = onMonthChange ?? setMonthInternal;
 
   const [data, setData] = useState<AdvancedReportReadings[]>([]);
   const [loading, setLoading] = useState(false);
@@ -68,72 +83,44 @@ export const AdvancedReadingsReport = () => {
     handleSearch();
   }, [month]);
 
-  const AVAILABLE_COLUMNS: ExportColumn[] = useMemo(
+  const availableColumns = useMemo(
     () => [
       {
-        columnId: 'sector',
         id: 'sector',
         label: t('dashboard.reports.advanced.columns.sector', 'Sector'),
         isDefault: true
       },
       {
-        columnId: 'totalConnections',
         id: 'totalConnections',
         label: t(
           'dashboard.reports.advanced.columns.totalConnections',
-          'Total Connections'
+          'Total Conexiones'
         ),
         isDefault: true
       },
       {
-        columnId: 'readingsCompleted',
         id: 'readingsCompleted',
         label: t(
           'dashboard.reports.advanced.columns.readingsCompleted',
-          'Readings Completed'
+          'Lecturas Completadas'
         ),
         isDefault: true
       },
       {
-        columnId: 'missingReadings',
         id: 'missingReadings',
         label: t(
           'dashboard.reports.advanced.columns.missingReadings',
-          'Missing Readings'
+          'Lecturas Faltantes'
         ),
         isDefault: true
       },
       {
-        columnId: 'progressPercentage',
         id: 'progressPercentage',
-        label: t('dashboard.reports.advanced.columns.progress', 'Progress %'),
+        label: t('dashboard.reports.advanced.columns.progress', 'Progreso %'),
         isDefault: true
       }
     ],
     [t]
-  );
-
-  const mapRowData = useCallback(
-    (row: AdvancedReportReadings, selectedCols: ExportColumn[]) => {
-      try {
-        const rowData: Record<string, string> = {
-          sector: (row.sector ?? '').toString(),
-          totalConnections: (row.totalConnections ?? 0).toString(),
-          readingsCompleted: (row.readingsCompleted ?? 0).toString(),
-          missingReadings: (row.missingReadings ?? 0).toString(),
-          progressPercentage: `${(row.progressPercentage ?? 0).toFixed(1)}%`
-        };
-
-        return selectedCols.map((col) => {
-          const key = (col.columnId || col.id) as keyof typeof rowData;
-          return rowData[key] || '-';
-        });
-      } catch (error) {
-        console.error('Error mapping row data:', error);
-        return selectedCols.map(() => '-');
-      }
-    },
-    []
   );
 
   const filteredData = useMemo(() => {
@@ -143,9 +130,106 @@ export const AdvancedReadingsReport = () => {
     );
   }, [data, resultSearchTerm]);
 
+  const mapRowData = useCallback(
+    (row: AdvancedReportReadings, selectedCols: ExportColumn[]) => {
+      const rowData: Record<string, string> = {
+        sector: (row.sector ?? '').toString(),
+        totalConnections: (row.totalConnections ?? 0).toString(),
+        readingsCompleted: (row.readingsCompleted ?? 0).toString(),
+        missingReadings: (row.missingReadings ?? 0).toString(),
+        progressPercentage: `${(row.progressPercentage ?? 0).toFixed(1)}%`
+      };
+
+      return selectedCols.map((col) => rowData[col.id] || '-');
+    },
+    []
+  );
+
+  const totals = useMemo(() => {
+    return filteredData.reduce(
+      (acc, item) => ({
+        connections: acc.connections + Number(item.totalConnections || 0),
+        completed: acc.completed + Number(item.readingsCompleted || 0),
+        missing: acc.missing + Number(item.missingReadings || 0)
+      }),
+      { connections: 0, completed: 0, missing: 0 }
+    );
+  }, [filteredData]);
+
+  const totalRows = useMemo(() => {
+    const overallProgress =
+      Number(totals.connections) > 0
+        ? (Number(totals.completed) / Number(totals.connections)) * 100
+        : 0;
+
+    return [
+      {
+        label: t('common.totalRecords', 'Total sectores'),
+        value: filteredData.length,
+        columnId: 'sector'
+      },
+      {
+        label: t(
+          'dashboard.reports.advanced.columns.totalConnections',
+          'Total'
+        ),
+        value: totals.connections,
+        highlight: false,
+        columnId: 'totalConnections'
+      },
+      {
+        label: t(
+          'dashboard.reports.advanced.columns.readingsCompleted',
+          'Completas'
+        ),
+        value: totals.completed,
+        highlight: false,
+        columnId: 'readingsCompleted'
+      },
+      {
+        label: t(
+          'dashboard.reports.advanced.columns.missingReadings',
+          'Faltantes'
+        ),
+        value: totals.missing,
+        highlight: false,
+        columnId: 'missingReadings'
+      },
+      {
+        label: t('dashboard.reports.advanced.columns.progress', 'Progreso'),
+        value: `${overallProgress.toFixed(1)}%`,
+        highlight: false,
+        columnId: 'progressPercentage'
+      }
+    ];
+  }, [t, filteredData.length, totals]);
+
+  const handleExportExcel = useCallback(() => {
+    const selectedCols = availableColumns;
+    const colLabels = selectedCols.map((c) => c.label);
+    const rows = filteredData.map((d) => mapRowData(d, selectedCols));
+
+    const totalsData = selectedCols.map((col, colIndex) => {
+      if (colIndex === 0) return 'TOTAL';
+      const matchingTotal = totalRows.find((r) => r.columnId === col.id);
+      return matchingTotal ? String(matchingTotal.value) : '';
+    });
+
+    exportService.exportToExcel({
+      rows,
+      columns: colLabels,
+      fileName: `reporte_avanzado_${new Date().toLocaleDateString()}`,
+      title: t(
+        'dashboard.reports.advanced.title',
+        'REPORTE AVANZADO DE LECTURAS'
+      ),
+      totals: totalsData
+    });
+  }, [availableColumns, filteredData, mapRowData, totalRows, exportService, t]);
+
   const { setShowPdfPreview, PdfPreviewModal } = useTablePdfExport({
     data: filteredData,
-    availableColumns: AVAILABLE_COLUMNS,
+    availableColumns,
     reportTitle: t(
       'dashboard.reports.advanced.title',
       'REPORTE DE LECTURAS AVANZADAS'
@@ -159,6 +243,7 @@ export const AdvancedReadingsReport = () => {
       [t('common.exportDate', 'Fecha de Exportación')]:
         new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
     },
+    totalRows,
     mapRowData
   });
 
@@ -173,10 +258,14 @@ export const AdvancedReadingsReport = () => {
       {
         header: 'Total Connections',
         accessor: 'totalConnections',
+        id: 'totalConnections',
+        isNumeric: true,
         style: { fontFamily: 'monospace' }
       },
       {
         header: 'Readings Completed',
+        id: 'readingsCompleted',
+        isNumeric: true,
         accessor: (row) => (
           <div
             className="flex items-center gap-2"
@@ -201,6 +290,8 @@ export const AdvancedReadingsReport = () => {
       },
       {
         header: 'Missing Readings',
+        id: 'missingReadings',
+        isNumeric: true,
         accessor: (row) => (
           <div
             className="flex items-center gap-2"
@@ -225,6 +316,8 @@ export const AdvancedReadingsReport = () => {
       },
       {
         header: 'Progress Percentage',
+        id: 'progressPercentage',
+        isNumeric: true,
         accessor: (row) => (
           <ProgressBar
             value={row.progressPercentage}
@@ -239,89 +332,70 @@ export const AdvancedReadingsReport = () => {
 
   return (
     <div className="advanced-report-container">
-      <div className="advanced-report-toolbar">
-        {/* Unified Search Row */}
-        <div className="advanced-toolbar-side">
-          <label className="toolbar-label-compact">Period</label>
-          <DatePicker
-            view="month"
-            value={month}
-            onChange={(value) => setMonth(value)}
-            disabled={loading}
-            ref={pickerRef}
-            size="compact"
-          />
-          <Button
-            onClick={handleSearch}
-            isLoading={loading}
-            leftIcon={<Search size={14} />}
-            size="sm"
-            color="primary"
-          >
-            Search
-          </Button>
+      {showToolbar && (
+        <div className="advanced-report-toolbar">
+          {/* Unified Search Row */}
+          <div className="advanced-toolbar-side">
+            <label className="toolbar-label-compact">Period</label>
+            <DatePicker
+              view="month"
+              value={month}
+              onChange={(value) => setMonth(value)}
+              disabled={loading}
+              ref={pickerRef}
+              size="compact"
+            />
+            <Button
+              onClick={handleSearch}
+              isLoading={loading}
+              leftIcon={<Search size={14} />}
+              size="sm"
+              color="primary"
+            >
+              Search
+            </Button>
 
-          <div className="filter-search-wrapper">
-            <Search size={12} />
-            <input
-              type="text"
-              className="toolbar-input-compact"
-              placeholder="Filter sector..."
-              maxLength={60}
-              value={resultSearchTerm}
-              onChange={(e) => setResultSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="advanced-toolbar-side actions">
-            <Button
-              variant="outline"
-              color="red"
-              size="sm"
-              iconOnly
-              leftIcon={ColoredIcons.Pdf}
-              onClick={() => setShowPdfPreview(true)}
-              disabled={loading || data.length === 0}
-              title={t('common.exportPdf', 'Export PDF')}
-            />
-            <Button
-              variant="outline"
-              color="green"
-              size="sm"
-              iconOnly
-              leftIcon={ColoredIcons.Excel}
-              onClick={() => {
-                exportService.exportToExcel(
-                  filteredData,
-                  'advanced_readings_report'
-                );
-              }}
-              disabled={loading || data.length === 0}
-              title={t('common.exportExcel', 'Export Excel')}
-            />
+            <div className="filter-search-wrapper">
+              <Search size={12} />
+              <input
+                type="text"
+                className="toolbar-input-compact"
+                placeholder="Filter sector..."
+                maxLength={60}
+                value={resultSearchTerm}
+                onChange={(e) => setResultSearchTerm(e.target.value)}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      <Table
-        data={filteredData}
-        columns={columns}
-        pagination={true}
-        pageSize={15}
-        emptyState={
-          hasSearched ? (
-            <EmptyState
-              message="No readings for this month"
-              description={`No readings found for ${month}`}
-            />
-          ) : (
-            <EmptyState
-              message="Select a date to view readings"
-              description="Select a date to view readings"
-            />
-          )
-        }
-      />
-      {PdfPreviewModal}
+      {showTable && (
+        <Table
+          data={filteredData}
+          columns={columns}
+          isLoading={loading}
+          pagination={true}
+          pageSize={15}
+          emptyState={
+            hasSearched ? (
+              <EmptyState
+                message="No readings for this month"
+                description={`No readings found for ${month}`}
+              />
+            ) : (
+              <EmptyState
+                message="Select a date to view readings"
+                description="Select a date to view readings"
+              />
+            )
+          }
+          onExportPdf={() => setShowPdfPreview(true)}
+          onExportExcel={handleExportExcel}
+          totalRows={totalRows}
+        />
+      )}
+      {showTable && PdfPreviewModal}
       <SectorReadingsModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

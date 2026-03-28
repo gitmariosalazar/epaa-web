@@ -38,6 +38,11 @@ export interface MonthlySummary {
   month: string;
   totalReadings: number;
   totalConsumption: number;
+  averageConsumption: number;
+  maxConsumption: number;
+  minConsumption: number;
+  incidentCount: number;
+  incidentRatePercentage: number;
 }
 
 export interface YearlyReadingsReport {

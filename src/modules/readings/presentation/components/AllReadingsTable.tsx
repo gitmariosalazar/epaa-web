@@ -1,6 +1,9 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Table, type Column } from '@/shared/presentation/components/Table/Table';
+import {
+  Table,
+  type Column
+} from '@/shared/presentation/components/Table/Table';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 
 interface PropTypes {
@@ -8,10 +11,7 @@ interface PropTypes {
   isLoading: boolean;
 }
 
-export const AllReadingsTable: React.FC<PropTypes> = ({
-  data,
-  isLoading
-}) => {
+export const AllReadingsTable: React.FC<PropTypes> = ({ data, isLoading }) => {
   const { t } = useTranslation();
 
   const columns: Column<any>[] = useMemo(

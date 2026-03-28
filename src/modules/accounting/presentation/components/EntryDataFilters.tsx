@@ -1,6 +1,6 @@
 import React from 'react';
 import '../styles/EntryDataFilters.css';
-import { CreditCard, Search, User } from 'lucide-react';
+import { Search, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';

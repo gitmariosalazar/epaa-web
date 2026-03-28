@@ -41,11 +41,13 @@
 .conn-filter-group {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
   flex-shrink: 0;
   width: 11rem;
 }
 
+.conn-filter-group--btn {
+  gap: 0.5rem;
+}
 /* Search bar slightly wider */
 .conn-filter-group--search {
   width: 14rem;
@@ -157,5 +159,4 @@
 .conn-filters .btn-pro {
   height: 34px !important;
   padding: 0 1rem;
-  margin-bottom: 6px; /* Offset the Input component's default margin-bottom: 6px from Input.css:100 */
 }

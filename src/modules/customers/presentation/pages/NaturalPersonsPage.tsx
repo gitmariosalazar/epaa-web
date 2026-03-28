@@ -4,7 +4,6 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Table } from '@/shared/presentation/components/Table/Table';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
-import { Pagination } from '@/shared/presentation/components/Pagination/Pagination';
 import { Plus, Trash2, Edit2, SearchX } from 'lucide-react';
 import '@/shared/presentation/styles/Table.css';
 import { useCustomersViewModel } from '../hooks/useCustomersViewModel';
@@ -82,7 +81,14 @@ export const NaturalPersonsPage: React.FC = () => {
     <PageLayout
       className="users-page"
       header={
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%'
+          }}
+        >
           <h1 style={{ margin: 0 }}>{t('sidebar.naturalPersons')}</h1>
           <Button
             onClick={() => customerVM.setIsFormOpen(true)}
@@ -110,11 +116,21 @@ export const NaturalPersonsPage: React.FC = () => {
         />
       }
     >
-      <div className="table-responsive-wrapper" style={{ flex: 1, minHeight: '450px', display: 'flex', flexDirection: 'column' }}>
+      <div
+        className="table-responsive-wrapper"
+        style={{
+          flex: 1,
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
         <Table
           data={customerVM.filteredCustomers}
           columns={customerColumns}
           isLoading={customerVM.isLoading}
+          pagination={true}
+          pageSize={10}
           emptyState={
             <EmptyState
               message={t('common.noResults', 'No se encontraron resultados')}
@@ -122,11 +138,6 @@ export const NaturalPersonsPage: React.FC = () => {
               minHeight="300px"
             />
           }
-        />
-        <Pagination
-          currentPage={customerVM.page}
-          hasMore={customerVM.hasMore}
-          onPageChange={customerVM.setPage}
         />
       </div>
 

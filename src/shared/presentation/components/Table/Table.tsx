@@ -58,6 +58,7 @@ interface TableProps<T> {
   width?: '100' | '70' | '50' | 'auto';
   fullHeight?: boolean;
   onExportPdf?: () => void;
+  onExportExcel?: () => void;
   getRowColor?: (item: T) => RowColor | undefined;
   getRowClassName?: (item: T) => string | undefined;
   onEndReached?: () => void;
@@ -79,8 +80,9 @@ export const Table = <T extends { [key: string]: any }>({
   summaryRows = [],
   totalRows = [],
   width = '100',
-  fullHeight = false,
+  fullHeight = true,
   onExportPdf,
+  onExportExcel,
   getRowColor,
   getRowClassName,
   onEndReached,
@@ -133,19 +135,7 @@ export const Table = <T extends { [key: string]: any }>({
     return () => observer.disconnect();
   }, [onEndReached, hasMore]);
 
-  if (isLoading && data.length === 0) {
-    if (loadingState) {
-      return <>{loadingState}</>;
-    }
-    return (
-      <div className="table-loader">
-        <div className="spinner"></div>{' '}
-        {/* You can replace this with a proper Spinner component if available */}
-        {t('common.table.loading')}
-      </div>
-    );
-  }
-
+  const hasExports = !!(onExportExcel || onExportPdf);
   const totalPages = Math.ceil(data.length / currentLimit);
   const paginatedData = pagination
     ? data.slice((currentPage - 1) * currentLimit, currentPage * currentLimit)
@@ -173,7 +163,7 @@ export const Table = <T extends { [key: string]: any }>({
       style={containerStyle}
     >
       <div className="table-body-wrapper">
-        <table className="table">
+        <table className="table custom-table">
           <thead>
             <tr>
               {columns.map((col, index) => {
@@ -203,18 +193,20 @@ export const Table = <T extends { [key: string]: any }>({
                     >
                       {col.header}
                       {isSortable && (
-                        <span style={{ display: 'inline-flex' }}>
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            opacity: isSorted ? 1 : 0.3
+                          }}
+                        >
                           {isSorted ? (
                             sortConfig?.direction === 'asc' ? (
-                              <ArrowUp size={14} />
+                              <ArrowUp size={14} strokeWidth={2.5} />
                             ) : (
-                              <ArrowDown size={14} />
+                              <ArrowDown size={14} strokeWidth={2.5} />
                             )
                           ) : (
-                            <ArrowUpDown
-                              size={14}
-                              className="text-gray-400 opacity-50"
-                            />
+                            <ArrowUpDown size={14} strokeWidth={2} />
                           )}
                         </span>
                       )}
@@ -263,6 +255,7 @@ export const Table = <T extends { [key: string]: any }>({
                           className="table-loader"
                           style={{ padding: '2rem' }}
                         >
+                          <div className="spinner"></div>
                           {t('common.table.loading')}
                         </div>
                       )
@@ -449,24 +442,26 @@ export const Table = <T extends { [key: string]: any }>({
       )}
 
       {pagination && (
-        <div className="table-pagination-container">
+        <div
+          className={`table-pagination-container ${!hasExports ? 'table-pagination-container--no-exports' : ''}`}
+        >
           <div className="table-pagination-left">
             <span className="table-pagination-records">
               {t('common.table.totalRecords', {
                 count: data.length,
-                defaultValue: `Total Registros: ${data.length}${hasMore ? '+' : ''}`
+                defaultValue: `Total: ${data.length}${hasMore ? '+' : ''}`
               })}
             </span>
 
             <div
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
             >
               <span
                 className="table-pagination-records"
-                style={{ color: 'var(--text-secondary)' }}
+                style={{ opacity: 0.7, fontSize: '0.75rem' }}
               >
                 {t('common.table.rowsPerPage', {
-                  defaultValue: 'Rows per page:'
+                  defaultValue: 'Mostrar:'
                 })}
               </span>
               <select
@@ -477,58 +472,73 @@ export const Table = <T extends { [key: string]: any }>({
                 }}
                 className="table-rows-select"
               >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={15}>15</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
+                {[5, 10, 15, 20, 50, 100].map((val) => (
+                  <option key={val} value={val}>
+                    {val}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
           <div className="table-pagination-center">
-            {totalPages > 1 && (
+            {totalPages >= 1 && (
               <>
                 <button
                   onClick={handlePrev}
                   disabled={currentPage === 1}
                   className="pagination-btn"
+                  title={t('common.pagination.previous')}
                 >
-                  <ChevronLeft size={18} />
+                  <ChevronLeft size={16} strokeWidth={2.5} />
                 </button>
                 <span className="table-pagination-page-text">
                   {t('common.pagination.page', {
                     current: currentPage,
                     total: hasMore ? `${totalPages}+` : totalPages
                   }) ||
-                    `Pág. ${currentPage} / ${hasMore ? totalPages + '+' : totalPages}`}
+                    `${currentPage} / ${hasMore ? totalPages + '+' : totalPages}`}
                 </span>
                 <button
                   onClick={handleNext}
                   disabled={currentPage >= totalPages && !hasMore}
                   className="pagination-btn"
+                  title={t('common.pagination.next')}
                 >
-                  <ChevronRight size={18} />
+                  <ChevronRight size={16} strokeWidth={2.5} />
                 </button>
               </>
             )}
           </div>
 
-          <div className="table-pagination-right">
-            {onExportPdf && (
-              <Button
-                onClick={onExportPdf}
-                variant="outline"
-                color="red"
-                iconOnly
-                size="sm"
-                disabled={data.length === 0}
-                title={t('common.exportPdf', 'Exportar PDF')}
-                leftIcon={ColoredIcons.Pdf}
-              />
-            )}
-          </div>
+          {hasExports && (
+            <div className="table-pagination-right">
+              {onExportExcel && (
+                <Button
+                  onClick={onExportExcel}
+                  variant="outline"
+                  color="green"
+                  iconOnly
+                  size="xs"
+                  disabled={data.length === 0}
+                  title={t('common.exportExcel', 'Exportar Excel')}
+                  leftIcon={ColoredIcons.Excel}
+                />
+              )}
+              {onExportPdf && (
+                <Button
+                  onClick={onExportPdf}
+                  variant="outline"
+                  color="red"
+                  iconOnly
+                  size="xs"
+                  disabled={data.length === 0}
+                  title={t('common.exportPdf', 'Exportar PDF')}
+                  leftIcon={ColoredIcons.Pdf}
+                />
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

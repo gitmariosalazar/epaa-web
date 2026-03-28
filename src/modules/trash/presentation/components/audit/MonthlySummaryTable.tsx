@@ -166,7 +166,9 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
     useTablePdfExport<MonthlySummaryRow>({
       data,
       availableColumns: columns.map((c) => ({
-        id: c.id || (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
+        id:
+          c.id ||
+          (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
         label: c.header as string,
         isDefault: true
       })),
@@ -210,7 +212,6 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
         onSort={onSort}
         onExportPdf={() => setShowPdfPreview(true)}
         sortConfig={sortConfig}
-        fullHeight
         emptyState={<EmptyState message="Data not found!" />}
         totalRows={totalRows}
         getRowColor={(item: MonthlySummaryRow) => {

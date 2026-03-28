@@ -258,11 +258,16 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
         onExportPdf={() => setShowPdfPreview(true)}
         totalRows={totalRows}
         width="100"
-        fullHeight
         emptyState={
           <EmptyState
-            message={t('accounting.empty.noPaymentsTitle', 'No se encontraron pagos')}
-            description={t('accounting.empty.noPaymentsDesc', 'No hay registros de pagos que coincidan con los filtros seleccionados.')}
+            message={t(
+              'accounting.empty.noPaymentsTitle',
+              'No se encontraron pagos'
+            )}
+            description={t(
+              'accounting.empty.noPaymentsDesc',
+              'No hay registros de pagos que coincidan con los filtros seleccionados.'
+            )}
           />
         }
       />

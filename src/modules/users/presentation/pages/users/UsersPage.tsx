@@ -4,7 +4,6 @@ import { Table } from '@/shared/presentation/components/Table/Table';
 import type { Column } from '@/shared/presentation/components/Table/Table';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
-import { Pagination } from '@/shared/presentation/components/Pagination/Pagination';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
@@ -38,9 +37,6 @@ const UsersLayout: React.FC = () => {
     // Data
     filteredUsers,
     isLoading,
-    page,
-    setPage,
-    hasMore,
     searchTerm,
     setSearchTerm,
 
@@ -291,7 +287,7 @@ const UsersLayout: React.FC = () => {
         className="table-responsive-wrapper"
         style={{
           flex: 1,
-          minHeight: '450px',
+          minHeight: 0,
           display: 'flex',
           flexDirection: 'column'
         }}
@@ -300,6 +296,8 @@ const UsersLayout: React.FC = () => {
           data={filteredUsers}
           columns={columns}
           isLoading={isLoading}
+          pagination={true}
+          pageSize={10}
           emptyState={
             <EmptyState
               message="No se encontraron usuarios"
@@ -307,12 +305,6 @@ const UsersLayout: React.FC = () => {
               minHeight="300px"
             />
           }
-        />
-
-        <Pagination
-          currentPage={page}
-          hasMore={hasMore}
-          onPageChange={setPage}
         />
       </div>
 

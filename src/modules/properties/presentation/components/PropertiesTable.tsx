@@ -8,6 +8,7 @@ import { SearchX } from 'lucide-react';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import type { Property } from '../../domain/models/Property';
 import '@/shared/presentation/styles/Table.css';
+import { truncateText } from '@/shared/presentation/utils/text/truncate-text';
 
 interface PropertiesTableProps {
   data: Property[];
@@ -59,7 +60,7 @@ export const PropertiesTable: React.FC<PropertiesTableProps> = ({
       },
       {
         header: t('properties.table.address', 'Dirección'),
-        accessor: 'propertyAddress',
+        accessor: (row) => `${truncateText(row.propertyAddress, 30)}`,
         sortable: true
       },
       /*
@@ -92,7 +93,7 @@ export const PropertiesTable: React.FC<PropertiesTableProps> = ({
   );
 
   return (
-    <div className="table-responsive-wrapper" style={{ flex: 1, minHeight: '450px' }}>
+    <div className="table-responsive-wrapper" style={{ flex: 1, minHeight: 0 }}>
       <Table
         columns={columns}
         data={data}

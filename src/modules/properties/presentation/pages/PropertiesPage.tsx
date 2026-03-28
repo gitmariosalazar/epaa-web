@@ -92,10 +92,7 @@ export const PropertiesPage: React.FC = () => {
       }
       filters={renderFilters()}
     >
-      <div
-        className="properties-page-content-wrapper"
-        style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
-      >
+      <div className="properties-page-content-wrapper">
         {renderContent()}
       </div>
     </PageLayout>

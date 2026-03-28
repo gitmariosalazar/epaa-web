@@ -271,7 +271,6 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
         onSort={onSort}
         onExportPdf={() => setShowPdfPreview(true)}
         sortConfig={sortConfig}
-        fullHeight
         emptyState={<EmptyState message={`Data not found!`} />}
         totalRows={totalRows}
         getRowColor={(row) => {

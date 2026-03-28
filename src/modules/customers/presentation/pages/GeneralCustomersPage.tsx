@@ -3,7 +3,6 @@ import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Table } from '@/shared/presentation/components/Table/Table';
-import { Pagination } from '@/shared/presentation/components/Pagination/Pagination';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Edit2, Trash2, Plus, Eye, SearchX } from 'lucide-react';
 import '@/shared/presentation/styles/Table.css';
@@ -101,7 +100,14 @@ export const GeneralCustomersPage: React.FC = () => {
     <PageLayout
       className="users-page"
       header={
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%'
+          }}
+        >
           <h1 style={{ margin: 0 }}>{t('customers.pageTitle')}</h1>
           <div style={{ display: 'flex', gap: '8px' }}>
             <Button
@@ -135,11 +141,21 @@ export const GeneralCustomersPage: React.FC = () => {
         />
       }
     >
-      <div className="table-responsive-wrapper" style={{ flex: 1, minHeight: '450px', display: 'flex', flexDirection: 'column' }}>
+      <div
+        className="table-responsive-wrapper"
+        style={{
+          flex: 1,
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
         <Table
           data={viewModel.filteredGeneralCustomers}
           columns={columns}
           isLoading={viewModel.isLoading}
+          pagination={true}
+          pageSize={10}
           emptyState={
             <EmptyState
               message={t('common.noResults', 'No se encontraron resultados')}
@@ -147,11 +163,6 @@ export const GeneralCustomersPage: React.FC = () => {
               minHeight="300px"
             />
           }
-        />
-        <Pagination
-          currentPage={viewModel.page}
-          hasMore={viewModel.hasMore}
-          onPageChange={viewModel.setPage}
         />
       </div>
 

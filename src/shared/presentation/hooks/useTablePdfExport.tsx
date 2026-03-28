@@ -295,7 +295,7 @@ export const useTablePdfExport = <T,>({
         availableColumns={availableColumns}
         onDownload={handleDownloadPdf}
         onApply={() => {
-          setPreviewUrl(null); // Force regenerate
+          generatePreview(orientation, selectedColumnIds);
         }}
         loadingPreview={loadingPreview}
         previewUrl={previewUrl}

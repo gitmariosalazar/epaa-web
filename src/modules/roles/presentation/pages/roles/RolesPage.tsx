@@ -168,7 +168,7 @@ export const RolesPage: React.FC = () => {
         className="table-responsive-wrapper"
         style={{
           flex: 1,
-          minHeight: '450px',
+          minHeight: 0,
           display: 'flex',
           flexDirection: 'column'
         }}
@@ -177,6 +177,8 @@ export const RolesPage: React.FC = () => {
           data={filteredRoles}
           columns={columns}
           isLoading={loading}
+          pagination={true}
+          pageSize={10}
           emptyState={
             <EmptyState
               message="No se encontraron roles"

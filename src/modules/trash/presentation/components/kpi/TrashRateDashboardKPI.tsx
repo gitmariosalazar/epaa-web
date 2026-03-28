@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { TrashRateKPI } from '../../../domain/models/trash-rate-report.model';
-import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import {
   DonutChart,
   type DonutSlice
@@ -23,6 +22,7 @@ import {
 } from '@/shared/presentation/components/Charts/VerticalBarChart';
 import '@/shared/presentation/components/Charts/Charts.css';
 import { FaMoneyCheckAlt } from 'react-icons/fa';
+import { KPICard } from '@/shared/presentation/components/Card/KPICard';
 
 interface RevenueStatusItem {
   Estado: string;
@@ -44,50 +44,6 @@ interface TrashRateDashboardKPIProps {
 const fmtMoney = (n: number) =>
   `$${Number(n || 0).toLocaleString('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const fmtNum = (n: number) => Number(n || 0).toLocaleString('es-EC');
-
-// ── KPI Card Component ──
-interface KpiCardProps {
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-  color:
-    | 'green'
-    | 'red'
-    | 'blue'
-    | 'amber'
-    | 'purple'
-    | 'teal'
-    | 'rose'
-    | 'indigo';
-  valueColor?: 'green' | 'red' | 'amber';
-  description?: string;
-  className?: string;
-}
-
-const KpiCard: React.FC<KpiCardProps> = ({
-  label,
-  value,
-  icon,
-  color,
-  valueColor,
-  description,
-  className
-}) => (
-  <div className={`trash-kpi-card trash-kpi-card--${color} ${className ?? ''}`}>
-    <div className="trash-kpi-header">
-      <span className="trash-kpi-label">{label}</span>
-      <div className={`trash-kpi-icon trash-kpi-icon--${color}`}>{icon}</div>
-    </div>
-    <div
-      className={`trash-kpi-value${valueColor ? ` trash-kpi-value--${valueColor}` : ''}`}
-    >
-      <Tooltip content={`${label}: ${value}`} position="bottom">
-        <span>{value}</span>
-      </Tooltip>
-    </div>
-    {description && <div className="trash-kpi-description">{description}</div>}
-  </div>
-);
 
 // ── Compliance Card Component ──
 const ComplianceCard: React.FC<{ pct: number }> = ({ pct }) => {
@@ -254,21 +210,21 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
         </div>
         <div className="trash-kpi-metrics-grid">
           {/* Row 1 equivalents */}
-          <KpiCard
+          <KPICard
             label="Bruto a Recaudar"
             value={fmtMoney(k.grossAmount)}
             icon={<DollarSign size={16} />}
             color="blue"
             description="Emisión total bruta"
           />
-          <KpiCard
+          <KPICard
             label="Total Neto"
             value={fmtMoney(k.netAmount)}
             icon={<AlertTriangle size={16} />}
             color="amber"
             description="Gross minus discounts"
           />
-          <KpiCard
+          <KPICard
             label="Total Recaudado (Pagos)"
             value={fmtMoney(paidAmount)}
             icon={<CheckCircle size={16} />}
@@ -276,7 +232,7 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
             valueColor="green"
             description="Pagos liquidados (Estado P)"
           />
-          <KpiCard
+          <KPICard
             label="Total Pendiente"
             value={fmtMoney(pendingAmount)}
             icon={<Clock size={16} />}
@@ -284,7 +240,7 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
             valueColor="red"
             description="Cartera por cobrar"
           />
-          <KpiCard
+          <KPICard
             label="Predios Únicos"
             value={fmtNum(k.uniqueCadastralKeys)}
             icon={<Home size={16} />}
@@ -293,14 +249,14 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
           />
 
           {/* Row 2 equivalents */}
-          <KpiCard
+          <KPICard
             label="Facturas Emitidas"
             value={fmtNum(k.totalBills)}
             icon={<FileText size={16} />}
             color="purple"
             description="Total de comprobantes"
           />
-          <KpiCard
+          <KPICard
             label="Creditos Emitidos"
             value={fmtNum(k.creditNotesVolume)}
             icon={<FileText size={16} />}
@@ -339,7 +295,7 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
             </table>
           </div>
 
-          <KpiCard
+          <KPICard
             label="Diferencia de Integridad"
             value={fmtMoney(k.integrityGap)}
             icon={<AlertCircle size={16} />}

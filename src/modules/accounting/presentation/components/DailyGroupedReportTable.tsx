@@ -171,7 +171,6 @@ export const DailyGroupedReportTable: React.FC<
         sortConfig={sortConfig}
         totalRows={totalRows}
         width="100"
-        fullHeight
         onExportPdf={onExportPdf}
         emptyState={
           <div className="payments-table-empty">

@@ -69,13 +69,45 @@ export class ExportService implements IExportService {
   }
 
   /**
-   * Public API to export data to Excel
+   * Public API to export data to Excel using structured options (columns, rows, totals)
    */
-  exportToExcel<T>(data: T[], fileName: string): void {
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    XLSX.writeFile(workbook, `${fileName}.xlsx`);
+  exportToExcel(options: ReportOptions): void {
+    try {
+      const { rows, columns, fileName, totals } = options;
+      
+      // Build Array of Arrays starting with headers
+      const aoa = [columns, ...rows];
+      
+      // Append totals if present
+      if (totals && totals.length > 0) {
+        aoa.push(totals);
+      }
+
+      const worksheet = XLSX.utils.aoa_to_sheet(aoa);
+      
+      // Basic styling for the header (optional but professional)
+      // JS-XLSX free doesn't support easy styling, but we ensure columns are clean
+      
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Reporte');
+      XLSX.writeFile(workbook, `${fileName}.xlsx`);
+    } catch (error) {
+      console.error('[ExportService] Fatal error in exportToExcel:', error);
+    }
+  }
+
+  /**
+   * Legacy/Raw API to export arbitrary JSON data to Excel
+   */
+  exportToExcelRaw<T>(data: T[], fileName: string): void {
+    try {
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos');
+      XLSX.writeFile(workbook, `${fileName}.xlsx`);
+    } catch (error) {
+      console.error('[ExportService] Fatal error in exportToExcelRaw:', error);
+    }
   }
 
   /**

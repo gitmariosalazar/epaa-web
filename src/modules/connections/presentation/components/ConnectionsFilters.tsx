@@ -6,7 +6,8 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import type { ConnectionTab } from '../hooks/useConnectionsViewModel';
-import { FaCheck, FaFilter, FaList } from 'react-icons/fa';
+import { FaCheck, FaFilter, FaList, FaUser } from 'react-icons/fa';
+import { HiChartPie } from 'react-icons/hi';
 
 // ── Props (ISP: each consumer only passes what it needs) ──────────────────────
 interface ConnectionsFiltersProps {
@@ -71,6 +72,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
             placeholder={t('connections.filters.sectorPlaceholder', 'Ej: 1')}
             value={sectorInput}
             onChange={(e) => onSectorInputChange(e.target.value)}
+            leftIcon={<HiChartPie size={18} />}
           />
         )}
 
@@ -87,6 +89,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
             )}
             value={clientIdInput}
             onChange={(e) => onClientIdInputChange(e.target.value)}
+            leftIcon={<FaUser size={18} />}
           />
         )}
 

@@ -14,7 +14,7 @@ export const GlobalStats: React.FC<GlobalStatsProps> = ({ stats, loading }) => {
   if (!stats) return null;
 
   return (
-    <div className="stats-grid">
+    <div className="stats-grid mb-4">
       {cards.map((card, idx) => (
         <div key={idx} className="stat-card">
           <div className={`stat-icon-wrapper ${card.color}`}>

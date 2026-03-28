@@ -69,12 +69,15 @@
   cursor: pointer;
 }
 
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
 /* Global Stats Grid */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 1rem;
-  margin-bottom: 2rem;
 }
 
 @media (min-width: 768px) {

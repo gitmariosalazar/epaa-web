@@ -130,7 +130,9 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
     useTablePdfExport<MissingValorRow>({
       data,
       availableColumns: columns.map((c) => ({
-        id: c.id || (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
+        id:
+          c.id ||
+          (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
         label: c.header as string,
         isDefault: true
       })),
@@ -177,7 +179,6 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
         onSort={onSort}
         onExportPdf={() => setShowPdfPreview(true)}
         sortConfig={sortConfig}
-        fullHeight
         emptyState={<EmptyState message="Data not found!" />}
         totalRows={totalRows}
         getRowColor={(row: MissingValorRow) => {

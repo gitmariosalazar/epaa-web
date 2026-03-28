@@ -365,7 +365,6 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
                   icon={Droplets}
                 />
               }
-              fullHeight
               hasMore={hasMore}
               onEndReached={onEndReached}
             />

@@ -35,6 +35,33 @@ interface ReportPreviewModalProps {
   hasError?: boolean;
 }
 
+interface OrientationCardProps {
+  type: 'portrait' | 'landscape';
+  label: string;
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+const OrientationCard: React.FC<OrientationCardProps> = ({
+  type,
+  label,
+  isSelected,
+  onClick
+}) => (
+  <div
+    className={`orientation-card ${isSelected ? 'selected' : ''}`}
+    onClick={onClick}
+  >
+    <div className={`preview-icon ${type}`}>
+      <div className="preview-lines"></div>
+    </div>
+    <div className="option-label">
+      <span>{label}</span>
+      {isSelected && <Check size={16} className="check-icon" />}
+    </div>
+  </div>
+);
+
 export const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
   isOpen,
   onClose,
@@ -51,7 +78,6 @@ export const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
   setSelectedColumnIds,
   hasError
 }) => {
-
   const selectAllColumns = () => {
     setSelectedColumnIds(availableColumns.map((c) => c.id));
   };
@@ -95,40 +121,19 @@ export const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
 
               <div className="control-section">
                 <h4 className="section-title">Orientación</h4>
-                <div className="orientation-options vertical">
-                  <div
-                    className={`orientation-card ${
-                      orientation === 'portrait' ? 'selected' : ''
-                    }`}
+                <div className="orientation-options">
+                  <OrientationCard
+                    type="portrait"
+                    label="Vertical"
+                    isSelected={orientation === 'portrait'}
                     onClick={() => setOrientation('portrait')}
-                  >
-                    <div className="preview-icon portrait">
-                      <div className="preview-lines"></div>
-                    </div>
-                    <div className="option-label">
-                      <span>Vertical</span>
-                      {orientation === 'portrait' && (
-                        <Check size={16} className="check-icon" />
-                      )}
-                    </div>
-                  </div>
-
-                  <div
-                    className={`orientation-card ${
-                      orientation === 'landscape' ? 'selected' : ''
-                    }`}
+                  />
+                  <OrientationCard
+                    type="landscape"
+                    label="Horizontal"
+                    isSelected={orientation === 'landscape'}
                     onClick={() => setOrientation('landscape')}
-                  >
-                    <div className="preview-icon landscape">
-                      <div className="preview-lines"></div>
-                    </div>
-                    <div className="option-label">
-                      <span>Horizontal</span>
-                      {orientation === 'landscape' && (
-                        <Check size={16} className="check-icon" />
-                      )}
-                    </div>
-                  </div>
+                  />
                 </div>
               </div>
 

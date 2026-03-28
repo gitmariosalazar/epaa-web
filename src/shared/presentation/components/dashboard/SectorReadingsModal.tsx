@@ -196,10 +196,7 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
     return selectedCols.map((col) => rowData[col.id]);
   };
 
-  const {
-    setShowPdfPreview,
-    PdfPreviewModal
-  } = useTablePdfExport({
+  const { setShowPdfPreview, PdfPreviewModal } = useTablePdfExport({
     data: data || [],
     availableColumns: currentAvailableColumns,
     reportTitle: currentReportTitle,
@@ -275,7 +272,6 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
               pagination={true}
               pageSize={20}
               onExportPdf={() => setShowPdfPreview(true)}
-              fullHeight={true}
               emptyState={
                 <div className="sector-readings-empty">
                   <p>No se encontraron lecturas para este sector.</p>
@@ -284,7 +280,7 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
             />
           </div>
         </div>
-        </div>
+      </div>
 
       {/* PDF Modal Preview */}
       {PdfPreviewModal}

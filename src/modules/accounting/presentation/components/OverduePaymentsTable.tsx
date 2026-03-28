@@ -10,6 +10,7 @@ import {
   Table,
   type Column
 } from '../../../../shared/presentation/components/Table/Table';
+import { ExportService } from '../../../../shared/infrastructure/services/ExportService';
 import { Button } from '../../../../shared/presentation/components/Button/Button';
 import { Avatar } from '../../../../shared/presentation/components/Avatar/Avatar';
 import { type ExportColumn } from '../../../../shared/presentation/components/reports/ReportPreviewModal';
@@ -544,6 +545,18 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
       mapRowData: handleMapRowData
     });
 
+  const handleExportExcel = useCallback(() => {
+    const colLabels = availableColumns.map((c) => c.label);
+    const rows = data.map((item) => handleMapRowData(item, availableColumns));
+
+    new ExportService().exportToExcel({
+      rows,
+      columns: colLabels,
+      fileName: `reporte_mora_${Date.now()}`,
+      title: t('accounting.overdue.reportTitle', 'Reporte de Pagos en Mora')
+    });
+  }, [availableColumns, data, handleMapRowData]);
+
   return (
     <div className={`payments-table-wrapper ${isLoading ? 'is-loading' : ''}`}>
       {isLoading && data.length > 0 && (
@@ -562,16 +575,21 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
         isLoading={isLoading}
         pagination
         pageSize={15}
-        onSort={onSort ? (key, direction) => onSort(String(key), direction as 'asc' | 'desc') : undefined}
+        onSort={
+          onSort
+            ? (key, direction) =>
+                onSort(String(key), direction as 'asc' | 'desc')
+            : undefined
+        }
         sortConfig={sortConfig}
         onExportPdf={() => {
           setShowPdfPreview(true);
         }}
+        onExportExcel={handleExportExcel}
         onEndReached={onEndReached}
         hasMore={hasMore}
         totalRows={totalRows}
         width="100"
-        fullHeight
         emptyState={
           <EmptyState
             message={t('accounting.overdue.noData', 'Sin registros en mora')}

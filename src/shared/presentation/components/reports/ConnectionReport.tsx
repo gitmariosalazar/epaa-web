@@ -1,27 +1,41 @@
-import { useState, useMemo, useEffect } from 'react';
-import type { ConnectionLastReadingsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
-import { ExportService } from '@/shared/infrastructure/services/ExportService';
-import { GetConnectionLastReadingsReportUseCase } from '@/modules/dashboard/application/usecases/get-connection-last-readings-report.usecase';
-import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructure/repositories/http-report-dashboard.repository';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
+import { Table, type Column } from '../Table/Table';
 import { Button } from '../Button/Button';
-import { ColoredIcons } from '../../utils/icons/CustomIcons';
+import { Avatar } from '../Avatar/Avatar';
 import { ColorChip } from '../chip/ColorChip';
 import { EmptyState } from '../common/EmptyState';
-import { Table, type Column } from '../Table/Table';
-import { Avatar } from '../Avatar/Avatar';
-import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
-import { useTranslation } from 'react-i18next';
-import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
-import type { ExportColumn } from './ReportPreviewModal';
-import { useCallback } from 'react';
-import './ConnectionReport.css';
 import { InputCadastralKey } from '../Input/InputCadastralKey';
 import { Select } from '../Input/Select';
+import { ExportService } from '@/shared/infrastructure/services/ExportService';
+import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructure/repositories/http-report-dashboard.repository';
+import { GetConnectionLastReadingsReportUseCase } from '@/modules/dashboard/application/usecases/get-connection-last-readings-report.usecase';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
+import type { ConnectionLastReadingsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
+import type { ExportColumn } from './ReportPreviewModal';
+import './ConnectionReport.css';
 
-export const ConnectionReport = () => {
+interface ConnectionReportProps {
+  showToolbar?: boolean;
+  showTable?: boolean;
+  externalKey?: string;
+  onKeyChange?: (key: string) => void;
+}
+
+export const ConnectionReport: React.FC<ConnectionReportProps> = ({
+  showToolbar = true,
+  showTable = true,
+  externalKey,
+  onKeyChange
+}) => {
   const { t } = useTranslation();
-  const [cadastralKey, setCadastralKey] = useState<string>('1-1');
+
+  const [keyInternal, setKeyInternal] = useState<string>('1-1');
+  const cadastralKey = externalKey ?? keyInternal;
+  const setCadastralKey = onKeyChange ?? setKeyInternal;
+
   const [limit, setLimit] = useState<number>(15);
   const [data, setData] = useState<ConnectionLastReadingsReport[]>([]);
   const [loading, setLoading] = useState(false);
@@ -36,60 +50,65 @@ export const ConnectionReport = () => {
     [repository]
   );
 
-  const handleSearch = async () => {
-    if (!cadastralKey) return;
-    setLoading(true);
-    try {
-      const result = await useCase.execute(cadastralKey, limit);
-      setData(result);
-      setHasSearched(true);
-    } catch (error) {
-      console.error('Error fetching connection report', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleSearch = useCallback(
+    async (searchKey?: string, searchLimit?: number) => {
+      const finalKey = searchKey || cadastralKey;
+      const finalLimit = searchLimit || limit;
+      if (!finalKey) return;
+
+      setLoading(true);
+      setData([]); // Reset to avoid stale data
+      setHasSearched(false);
+
+      try {
+        const result = await useCase.execute(finalKey, finalLimit);
+        setData(result || []);
+        setHasSearched(true);
+      } catch (error) {
+        console.error('Error fetching connection report', error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [cadastralKey, limit, useCase]
+  );
 
   useEffect(() => {
-    handleSearch();
-  }, []);
+    if (cadastralKey) {
+      handleSearch(cadastralKey, limit);
+    }
+  }, [cadastralKey, limit, handleSearch]);
 
-  const AVAILABLE_COLUMNS: ExportColumn[] = useMemo(
+  const availableColumns = useMemo(
     () => [
       {
-        columnId: 'date',
         id: 'date',
         label: t('dashboard.reports.connection.columns.date'),
         isDefault: true
       },
       {
-        columnId: 'readingValue',
         id: 'readingValue',
         label: t('dashboard.reports.connection.columns.readingValue'),
         isDefault: true
       },
       {
-        columnId: 'consumption',
         id: 'consumption',
         label: t('dashboard.reports.connection.columns.consumption'),
         isDefault: true
       },
       {
-        columnId: 'client',
         id: 'client',
         label: t('dashboard.reports.connection.columns.client'),
         isDefault: true
       },
       {
-        columnId: 'meter',
         id: 'meter',
         label: t('dashboard.reports.connection.columns.meter'),
         isDefault: true
       },
       {
-        columnId: 'status',
-        id: 'status',
-        label: t('dashboard.reports.connection.columns.status'),
+        id: 'novelty',
+        label: t('dashboard.reports.connection.columns.status', 'Novedad'),
         isDefault: true
       }
     ],
@@ -111,27 +130,80 @@ export const ConnectionReport = () => {
 
   const mapRowData = useCallback(
     (row: ConnectionLastReadingsReport, selectedCols: ExportColumn[]) => {
-      try {
-        const rowData: Record<string, string> = {
-          date: dateService.formatToLocaleString(row.readingDate),
-          readingValue: row.readingValue.toString(),
-          consumption: `${row.consumption} m³`,
-          clientName: row.clientName,
-          meterNumber: row.meterNumber,
-          novelty: row.novelty
-        };
+      const rowData: Record<string, string> = {
+        date: dateService.formatToLocaleString(row.readingDate),
+        readingValue: `$ ${row.readingValue}`,
+        consumption: `${row.consumption} m³`,
+        client: row.clientName || '-',
+        meter: row.meterNumber || '-',
+        novelty: row.novelty || '-'
+      };
 
-        return selectedCols.map((col) => {
-          const key = (col.columnId || col.id) as keyof typeof rowData;
-          return rowData[key] || '-';
-        });
-      } catch (error) {
-        console.error('Error mapping connection row data:', error);
-        return selectedCols.map(() => '-');
-      }
+      return selectedCols.map((col) => rowData[col.id] || '-');
     },
     []
   );
+
+  const totals = useMemo(() => {
+    return filteredData.reduce(
+      (acc, item) => ({
+        value: acc.value + Number(item.readingValue || 0),
+        consumption: acc.consumption + Number(item.consumption || 0)
+      }),
+      { value: 0, consumption: 0 }
+    );
+  }, [filteredData]);
+
+  const totalRows = useMemo(
+    () => [
+      {
+        label: t('common.totalRecords', 'Total registros'),
+        value: filteredData.length,
+        columnId: 'date'
+      },
+      {
+        label: t('dashboard.reports.connection.columns.readingValue', 'Valor'),
+        value: `$ ${Number(totals.value).toFixed(2)}`,
+        highlight: false,
+        columnId: 'readingValue'
+      },
+      {
+        label: t('dashboard.reports.connection.columns.consumption', 'Consumo'),
+        value: `${Number(totals.consumption).toFixed(2)} m³`,
+        highlight: false,
+        columnId: 'consumption'
+      }
+    ],
+    [t, filteredData.length, totals]
+  );
+
+  const handleExportExcel = useCallback(() => {
+    const selectedCols = availableColumns;
+    const colLabels = selectedCols.map((c) => c.label);
+    const rows = filteredData.map((d) => mapRowData(d, selectedCols));
+
+    const totalsData = selectedCols.map((col, colIndex) => {
+      if (colIndex === 0) return 'TOTAL';
+      const matchingTotal = totalRows.find((r) => r.columnId === col.id);
+      return matchingTotal ? String(matchingTotal.value) : '';
+    });
+
+    exportService.exportToExcel({
+      rows,
+      columns: colLabels,
+      fileName: `reporte_conexion_${cadastralKey}`,
+      title: t('dashboard.reports.connection.title', 'REPORTE DE CONEXIÓN'),
+      totals: totalsData
+    });
+  }, [
+    availableColumns,
+    filteredData,
+    mapRowData,
+    totalRows,
+    exportService,
+    cadastralKey,
+    t
+  ]);
 
   const labelsHorizontal = useMemo(() => {
     if (data.length === 0) return undefined;
@@ -154,7 +226,7 @@ export const ConnectionReport = () => {
 
   const { setShowPdfPreview, PdfPreviewModal } = useTablePdfExport({
     data: filteredData,
-    availableColumns: AVAILABLE_COLUMNS,
+    availableColumns,
     reportTitle: t(
       'dashboard.reports.connection.title',
       'Historial de Lecturas'
@@ -164,6 +236,7 @@ export const ConnectionReport = () => {
       'Detalle histórico de lecturas por conexión'
     ),
     mapRowData,
+    totalRows,
     labelsHorizontal
   });
 
@@ -176,11 +249,15 @@ export const ConnectionReport = () => {
       {
         header: t('dashboard.reports.connection.columns.readingValue'),
         accessor: 'readingValue',
-        className: 'font-medium'
+        className: 'font-medium',
+        id: 'readingValue',
+        isNumeric: true
       },
       {
         header: t('dashboard.reports.connection.columns.consumption'),
-        accessor: (row) => `${row.consumption} m³`
+        accessor: (row) => `${row.consumption} m³`,
+        id: 'consumption',
+        isNumeric: true
       },
       {
         header: t('dashboard.reports.connection.columns.client'),
@@ -223,105 +300,88 @@ export const ConnectionReport = () => {
 
   return (
     <div className="connection-report-container">
-      <div className="connection-report-toolbar">
-        {/* Unified Search Row */}
-        <div className="connection-toolbar-side">
-          <label className="toolbar-label-compact">Connection</label>
-          <div>
-            <InputCadastralKey
-              placeholder="Key (e.g. 1-1)"
-              maxLength={15}
-              size="compact"
-              style={{ width: '100px' }}
-              value={cadastralKey}
-              onChange={(val) => setCadastralKey(val)}
-            />
-          </div>
-          <div>
-            <Select
-              value={limit}
-              onChange={(e) => setLimit(Number(e.target.value))}
-              size="compact"
-            >
-              <option value={5}>Last 5</option>
-              <option value={10}>Last 10</option>
-              <option value={15}>Last 15</option>
-              <option value={20}>Last 20</option>
-              <option value={25}>Last 25</option>
-              <option value={30}>Last 30</option>
-            </Select>
-          </div>
-          <Button
-            onClick={handleSearch}
-            isLoading={loading}
-            leftIcon={<Search size={14} />}
-            size="sm"
-            color="primary"
-          >
-            History
-          </Button>
-
-          {data.length > 0 && (
-            <div className="filter-search-wrapper">
-              <Search size={12} />
-              <input
-                type="text"
-                className="toolbar-input-compact"
-                placeholder="Filter results..."
-                maxLength={60}
-                value={resultSearchTerm}
-                onChange={(e) => setResultSearchTerm(e.target.value)}
+      {showToolbar && (
+        <div className="connection-report-toolbar">
+          {/* Unified Search Row */}
+          <div className="connection-toolbar-side">
+            <label className="toolbar-label-compact">Connection</label>
+            <div>
+              <InputCadastralKey
+                placeholder="Key (e.g. 1-1)"
+                maxLength={15}
+                size="compact"
+                style={{ width: '100px' }}
+                value={cadastralKey}
+                onChange={(val) => setCadastralKey(val)}
               />
             </div>
-          )}
-        </div>
+            <div>
+              <Select
+                value={limit}
+                onChange={(e) => setLimit(Number(e.target.value))}
+                size="compact"
+              >
+                <option value={5}>Last 5</option>
+                <option value={10}>Last 10</option>
+                <option value={15}>Last 15</option>
+                <option value={20}>Last 20</option>
+                <option value={25}>Last 25</option>
+                <option value={30}>Last 30</option>
+              </Select>
+            </div>
+            <Button
+              onClick={() => handleSearch()}
+              isLoading={loading}
+              leftIcon={<Search size={14} />}
+              size="sm"
+              color="primary"
+            >
+              History
+            </Button>
 
-        <div className="connection-toolbar-side actions">
-          <Button
-            variant="outline"
-            color="red"
-            size="sm"
-            iconOnly
-            leftIcon={ColoredIcons.Pdf}
-            onClick={() => setShowPdfPreview(true)}
-            disabled={loading || data.length === 0}
-            title={t('common.exportPdf', 'Export PDF')}
-          />
-          <Button
-            variant="outline"
-            color="green"
-            size="sm"
-            iconOnly
-            leftIcon={ColoredIcons.Excel}
-            onClick={() => {
-              exportService.exportToExcel(filteredData, 'connection_history');
-            }}
-            disabled={loading || data.length === 0}
-            title={t('common.exportExcel', 'Export Excel')}
-          />
+            {data.length > 0 && (
+              <div className="filter-search-wrapper">
+                <Search size={12} />
+                <input
+                  type="text"
+                  className="toolbar-input-compact"
+                  placeholder="Filter results..."
+                  maxLength={60}
+                  value={resultSearchTerm}
+                  onChange={(e) => setResultSearchTerm(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      <Table
-        data={filteredData}
-        columns={columns}
-        pagination={true}
-        pageSize={15}
-        emptyState={
-          hasSearched ? (
-            <EmptyState
-              message="No history found"
-              description={`No history found for ${cadastralKey}`}
-            />
-          ) : (
-            <EmptyState
-              message="Enter a Cadastral Key"
-              description="Enter a Cadastral Key to search history."
-            />
-          )
-        }
-      />
-      {PdfPreviewModal}
+      {showTable && (
+        <Table
+          data={filteredData}
+          columns={columns}
+          isLoading={loading}
+          pagination={true}
+          pageSize={15}
+          emptyState={
+            hasSearched ? (
+              <EmptyState
+                message="No history found"
+                description={`No history found for ${cadastralKey}`}
+              />
+            ) : (
+              <EmptyState
+                message="Enter a Cadastral Key"
+                description="Enter a Cadastral Key to search history."
+              />
+            )
+          }
+          onExportPdf={() => setShowPdfPreview(true)}
+          onExportExcel={handleExportExcel}
+          totalRows={totalRows}
+        />
+      )}
+      {showTable && PdfPreviewModal}
     </div>
   );
 };

@@ -5,7 +5,6 @@ import type { DailyReadingsReport } from '@/modules/dashboard/domain/models/repo
 import { ExportService } from '@/shared/infrastructure/services/ExportService';
 import { GetDailyReadingsReportUseCase } from '@/modules/dashboard/application/usecases/get-daily-readings-report.usecase';
 import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructure/repositories/http-report-dashboard.repository';
-import { ColoredIcons } from '../../utils/icons/CustomIcons';
 import { ColorChip } from '../chip/ColorChip';
 import { EmptyState } from '../common/EmptyState';
 import { getNoveltyColor } from '../../utils/colors/novelties.colors';
@@ -20,81 +19,68 @@ import { Button } from '../Button/Button';
 import type { ExportColumn } from './ReportPreviewModal';
 import { truncateText } from '../../utils/text/truncate-text';
 
-export const DailyReport = () => {
+interface DailyReportProps {
+  showToolbar?: boolean;
+  showTable?: boolean;
+  externalDate?: string;
+  onDateChange?: (date: string) => void;
+}
+
+export const DailyReport: React.FC<DailyReportProps> = ({
+  showToolbar = true,
+  showTable = true,
+  externalDate,
+  onDateChange
+}) => {
   const { t } = useTranslation();
 
-  const AVAILABLE_COLUMNS: ExportColumn[] = useMemo(
+  const [dateInternal, setDateInternal] = useState<string>(
+    dateService.getCurrentDateString()
+  );
+
+  const date = externalDate ?? dateInternal;
+  const setDate = onDateChange ?? setDateInternal;
+
+  const availableColumns = useMemo(
     () => [
       {
-        columnId: 'time',
         id: 'time',
-        label: t('dashboard.reports.daily.columns.dateTime'),
+        label: t('dashboard.reports.daily.columns.time'),
         isDefault: true
       },
       {
-        columnId: 'key',
         id: 'key',
         label: t('dashboard.reports.daily.columns.cadastralKey'),
         isDefault: true
       },
       {
-        columnId: 'block',
-        id: 'block',
-        label: t('dashboard.reports.daily.columns.block'),
-        isDefault: true
-      },
-      {
-        columnId: 'client',
         id: 'client',
         label: t('dashboard.reports.daily.columns.client'),
         isDefault: true
       },
       {
-        columnId: 'average',
-        id: 'average',
-        label: t('dashboard.reports.daily.columns.average'),
-        isDefault: false
-      },
-      {
-        columnId: 'preview',
-        id: 'preview',
-        label: t('dashboard.reports.daily.columns.preview'),
-        isDefault: false
-      },
-      {
-        columnId: 'current',
-        id: 'current',
-        label: t('dashboard.reports.daily.columns.current'),
-        isDefault: false
-      },
-      {
-        columnId: 'value',
         id: 'value',
         label: t('dashboard.reports.daily.columns.value'),
         isDefault: true
       },
       {
-        columnId: 'consumption',
         id: 'consumption',
         label: t('dashboard.reports.daily.columns.consumption'),
         isDefault: true
       },
       {
-        columnId: 'type',
         id: 'type',
         label: t('dashboard.reports.daily.columns.type'),
         isDefault: true
       },
       {
-        columnId: 'status',
         id: 'status',
         label: t('dashboard.reports.daily.columns.status'),
         isDefault: true
       },
       {
-        columnId: 'observation',
-        id: 'observation',
-        label: t('dashboard.reports.daily.columns.observation'),
+        id: 'novelty',
+        label: t('dashboard.reports.daily.columns.novelty', 'Novedad'),
         isDefault: true
       }
     ],
@@ -102,7 +88,6 @@ export const DailyReport = () => {
   );
 
   const pickerRef = useRef<HTMLInputElement>(null);
-  const [date, setDate] = useState<string>(dateService.getCurrentDateString());
   const [data, setData] = useState<DailyReadingsReport[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -116,23 +101,33 @@ export const DailyReport = () => {
     [repository]
   );
 
-  const handleSearch = async () => {
-    if (!date) return;
-    setLoading(true);
-    try {
-      const result = await useCase.execute(date);
-      setData(result);
-      setHasSearched(true);
-    } catch (error) {
-      console.error('Error fetching daily report', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleSearch = useCallback(
+    async (searchDate?: string) => {
+      const finalDate = searchDate || date;
+      if (!finalDate) return;
+
+      setLoading(true);
+      setData([]); // Reset data to avoid stale view during loading
+      setHasSearched(false);
+
+      try {
+        const result = await useCase.execute(finalDate);
+        setData(result || []);
+        setHasSearched(true);
+      } catch (error) {
+        console.error('Error fetching daily report', error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [date, useCase]
+  );
 
   useEffect(() => {
-    handleSearch();
-  }, []);
+    if (date) {
+      handleSearch(date);
+    }
+  }, [date, handleSearch]);
 
   const filteredData = useMemo(() => {
     if (!resultSearchTerm) return data;
@@ -147,47 +142,86 @@ export const DailyReport = () => {
 
   const mapRowData = useCallback(
     (d: DailyReadingsReport, selectedCols: ExportColumn[]) => {
-      try {
-        const rowData: Record<string, string> = {};
-        // Se combina la fecha del reporte con el tiempo de lectura si solo viene el tiempo HH:MM:SS
-        const fullDateStr =
-          d.readingTime && !d.readingTime.includes('-')
-            ? `${date}T${d.readingTime}`
-            : d.readingTime;
+      const rowData: Record<string, string> = {
+        time: d.readingTime || '-',
+        key: d.cadastralKey || '-',
+        client: d.clientName || '-',
+        value: `$ ${d.readingValue}`,
+        consumption: `${d.consumption} m³`,
+        type: d.measureType || '-',
+        status: d.status || '-',
+        novelty: d.novelty || '-'
+      };
 
-        rowData['time'] = fullDateStr
-          ? dateService.formatToLocaleString(fullDateStr, {
-              dateStyle: 'short',
-              timeStyle: 'medium'
-            })
-          : '-';
-        rowData['key'] = d.cadastralKey;
-        rowData['block'] = d.blockNumber || '';
-        rowData['client'] = d.clientName;
-        rowData['average'] = `${d.averageConsumption} m³`;
-        rowData['preview'] = d.previewReading?.toString() || '0';
-        rowData['current'] = d.currentReading?.toString() || '0';
-        rowData['value'] = d.readingValue.toString();
-        rowData['consumption'] = `${d.consumption} m³`;
-        rowData['type'] = d.measureType || '';
-        rowData['status'] = d.status || '';
-        rowData['observation'] = `${d.observation || '-'}`;
-
-        return selectedCols.map((col) => {
-          const key = (col.columnId || col.id) as keyof typeof rowData;
-          return rowData[key] || '-';
-        });
-      } catch (error) {
-        console.error('Error mapping daily row data:', error);
-        return selectedCols.map(() => '-');
-      }
+      return selectedCols.map((col) => rowData[col.id] || '-');
     },
-    [date]
+    []
   );
+
+  const totals = useMemo(() => {
+    return filteredData.reduce(
+      (acc, item) => ({
+        value: acc.value + Number(item.readingValue || 0),
+        consumption: acc.consumption + Number(item.consumption || 0)
+      }),
+      { value: 0, consumption: 0 }
+    );
+  }, [filteredData]);
+
+  const totalRows = useMemo(
+    () => [
+      {
+        label: t('common.totalRecords', 'Total registros'),
+        value: filteredData.length,
+        columnId: 'time'
+      },
+      {
+        label: t('dashboard.reports.daily.columns.value', 'Valor'),
+        value: `$ ${Number(totals.value).toFixed(2)}`,
+        highlight: false,
+        columnId: 'value'
+      },
+      {
+        label: t('dashboard.reports.daily.columns.consumption', 'Consumo'),
+        value: `${Number(totals.consumption).toFixed(2)} m³`,
+        highlight: false,
+        columnId: 'consumption'
+      }
+    ],
+    [t, filteredData.length, totals]
+  );
+
+  const handleExportExcel = useCallback(() => {
+    const selectedCols = availableColumns;
+    const colLabels = selectedCols.map((c) => c.label);
+    const rows = filteredData.map((d) => mapRowData(d, selectedCols));
+
+    const totalsData = selectedCols.map((col, colIndex) => {
+      if (colIndex === 0) return 'TOTAL';
+      const matchingTotal = totalRows.find((r) => r.columnId === col.id);
+      return matchingTotal ? String(matchingTotal.value) : '';
+    });
+
+    exportService.exportToExcel({
+      rows,
+      columns: colLabels,
+      fileName: `reporte_diario_${date}`,
+      title: t('dashboard.reports.daily.title', 'REPORTE DIARIO DE LECTURAS'),
+      totals: totalsData
+    });
+  }, [
+    availableColumns,
+    filteredData,
+    mapRowData,
+    totalRows,
+    exportService,
+    date,
+    t
+  ]);
 
   const { setShowPdfPreview, PdfPreviewModal } = useTablePdfExport({
     data: filteredData,
-    availableColumns: AVAILABLE_COLUMNS,
+    availableColumns,
     reportTitle: t(
       'dashboard.reports.daily.title',
       'REPORTE DIARIO DE LECTURAS'
@@ -201,6 +235,7 @@ export const DailyReport = () => {
       [t('common.exportDate', 'Fecha de Exportación')]:
         new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
     },
+    totalRows,
     mapRowData
   });
 
@@ -247,11 +282,15 @@ export const DailyReport = () => {
       },
       {
         header: 'Reading Value',
-        accessor: (row) => `$ ${row.readingValue}`
+        accessor: (row) => `$ ${row.readingValue}`,
+        id: 'value',
+        isNumeric: true
       },
       {
         header: 'Consumption',
-        accessor: (row) => `${row.consumption} m³`
+        accessor: (row) => `${row.consumption} m³`,
+        id: 'consumption',
+        isNumeric: true
       },
       {
         header: 'Novelty',
@@ -273,88 +312,71 @@ export const DailyReport = () => {
 
   return (
     <div className="daily-report-container">
-      <div className="daily-report-toolbar">
-        <div className="daily-toolbar-side">
-          <label className="toolbar-label-compact">Period</label>
-          <DatePicker
-            view="date"
-            value={date}
-            onChange={(value) => setDate(value)}
-            disabled={loading}
-            ref={pickerRef}
-            size="compact"
-          />
-          <Button
-            onClick={handleSearch}
-            isLoading={loading}
-            leftIcon={<Search size={14} />}
-            size="sm"
-            color="primary"
-          >
-            Load
-          </Button>
+      {showToolbar && (
+        <div className="daily-report-toolbar">
+          <div className="daily-toolbar-side">
+            <label className="toolbar-label-compact">Period</label>
+            <DatePicker
+              view="date"
+              value={date}
+              onChange={(value) => setDate(value)}
+              disabled={loading}
+              ref={pickerRef}
+              size="compact"
+            />
+            <Button
+              onClick={() => handleSearch()}
+              isLoading={loading}
+              leftIcon={<Search size={14} />}
+              size="sm"
+              color="primary"
+            >
+              Load
+            </Button>
 
-          {data.length > 0 && (
-            <div className="filter-search-wrapper">
-              <Search size={12} />
-              <input
-                type="text"
-                className="toolbar-input-compact"
-                placeholder="Filter records..."
-                maxLength={60}
-                value={resultSearchTerm}
-                onChange={(e) => setResultSearchTerm(e.target.value)}
+            {data.length > 0 && (
+              <div className="filter-search-wrapper">
+                <Search size={12} />
+                <input
+                  type="text"
+                  className="toolbar-input-compact"
+                  placeholder="Filter records..."
+                  maxLength={60}
+                  value={resultSearchTerm}
+                  onChange={(e) => setResultSearchTerm(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showTable && (
+        <Table
+          data={filteredData}
+          columns={columns}
+          isLoading={loading}
+          pagination={true}
+          pageSize={10}
+          emptyState={
+            hasSearched ? (
+              <EmptyState
+                message="No readings found"
+                description={`No readings found for ${date}`}
               />
-            </div>
-          )}
-        </div>
-
-        <div className="daily-toolbar-side actions">
-          <Button
-            variant="outline"
-            color="red"
-            size="sm"
-            iconOnly
-            leftIcon={ColoredIcons.Pdf}
-            onClick={() => setShowPdfPreview(true)}
-            disabled={loading || data.length === 0}
-            title={t('common.exportPdf', 'Export PDF')}
-          />
-          <Button
-            variant="outline"
-            color="green"
-            size="sm"
-            iconOnly
-            leftIcon={ColoredIcons.Excel}
-            onClick={() => {
-              exportService.exportToExcel(filteredData, 'daily_report');
-            }}
-            disabled={loading || data.length === 0}
-            title={t('common.exportExcel', 'Export Excel')}
-          />
-        </div>
-      </div>
-
-      <Table
-        data={filteredData}
-        columns={columns}
-        pagination={true}
-        pageSize={15}
-        emptyState={
-          hasSearched ? (
-            <EmptyState
-              message="No readings found"
-              description={`No readings found for ${date}`}
-            />
-          ) : (
-            <EmptyState
-              message="Select a date to view readings"
-              description="Select a date to view readings"
-            />
-          )
-        }
-      />
-      {PdfPreviewModal}
+            ) : (
+              <EmptyState
+                message="Select a date to view readings"
+                description="Select a date to view readings"
+              />
+            )
+          }
+          onExportPdf={() => setShowPdfPreview(true)}
+          onExportExcel={handleExportExcel}
+          totalRows={totalRows}
+        />
+      )}
+      {showTable && PdfPreviewModal}
     </div>
   );
 };

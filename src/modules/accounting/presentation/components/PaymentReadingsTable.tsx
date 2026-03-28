@@ -224,17 +224,21 @@ export const PaymentReadingsTable: React.FC<PaymentReadingsTableProps> = ({
       labelsHorizontal: {
         'Rango de Fecha': `${startDate || '-'} - ${endDate || '-'}`,
         'Fecha de Exportación':
-          new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+          new Date().toLocaleDateString() +
+          ' ' +
+          new Date().toLocaleTimeString()
       },
       totalRows,
       mapRowData: (item, selectedCols) => {
         const rowData: Record<string, string> = {
           [t('accounting.columns.titleCode')]: item.titleCode,
-          'Cliente': `${item.name} ${item.lastName} (${item.cardId})`,
+          Cliente: `${item.name} ${item.lastName} (${item.cardId})`,
           [t('accounting.columns.cadastralKey')]: item.cadastralKey,
           [t('accounting.columns.surcharge')]: formatCurrency(item.surcharge),
           [t('accounting.columns.epaaValue')]: formatCurrency(item.epaaValue),
-          [t('accounting.columns.thirdPartyValue')]: formatCurrency(item.thirdPartyValue),
+          [t('accounting.columns.thirdPartyValue')]: formatCurrency(
+            item.thirdPartyValue
+          ),
           [t('accounting.columns.trashRateDt')]: formatCurrency(item.trashRate),
           [t('accounting.columns.trashRateVal')]: formatCurrency(item.value),
           [t('accounting.columns.total')]: formatCurrency(item.total),
@@ -258,11 +262,16 @@ export const PaymentReadingsTable: React.FC<PaymentReadingsTableProps> = ({
         totalRows={totalRows}
         onExportPdf={() => setShowPdfPreview(true)}
         width="100"
-        fullHeight
         emptyState={
           <EmptyState
-            message={t('accounting.empty.noReadingsTitle', 'No se encontraron cobros de lecturas')}
-            description={t('accounting.empty.noReadingsDesc', 'Modifique el rango de fechas o los filtros para visualizar resultados.')}
+            message={t(
+              'accounting.empty.noReadingsTitle',
+              'No se encontraron cobros de lecturas'
+            )}
+            description={t(
+              'accounting.empty.noReadingsDesc',
+              'Modifique el rango de fechas o los filtros para visualizar resultados.'
+            )}
           />
         }
       />

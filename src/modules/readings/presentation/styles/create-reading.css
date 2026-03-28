@@ -380,6 +380,8 @@ h2 {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  height: 100%;
   overflow: hidden;
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
@@ -392,9 +394,11 @@ h2 {
   color: var(--text-main);
 }
 
-.cr-table-container > div {
+.cr-table-container > div:not(h3) {
   flex: 1;
-  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Page Header and Client Info */

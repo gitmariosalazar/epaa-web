@@ -245,7 +245,6 @@ export const CollectorPerformanceKPITable: React.FC<
         onSort={onSort}
         onExportPdf={() => setShowPdfPreview(true)}
         sortConfig={sortConfig}
-        fullHeight
         emptyState={<EmptyState message="Data not found!" />}
         totalRows={totalRows}
         getRowColor={(r) => {

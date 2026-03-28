@@ -119,7 +119,6 @@ export const TrashRateKPITable: React.FC<TrashRateKPITableProps> = ({
         onSort={onSort}
         onExportPdf={onExportPdf}
         sortConfig={sortConfig}
-        fullHeight
         getRowColor={(r) => {
           if (r.collectionRate >= 90) return 'success';
           if (r.collectionRate < 60) return 'error';

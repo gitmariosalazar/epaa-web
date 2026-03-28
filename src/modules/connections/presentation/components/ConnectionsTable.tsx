@@ -33,24 +33,51 @@ const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
   if (!isOpen || !connection) return null;
 
   const detailRows = [
-    { label: t('connections.table.connectionId'), value: connection.connectionId },
+    {
+      label: t('connections.table.connectionId'),
+      value: connection.connectionId
+    },
     { label: t('connections.table.clientId'), value: connection.clientId },
-    { label: t('connections.table.meterNumber'), value: connection.connectionMeterNumber },
-    { label: t('connections.table.cadastralKey'), value: connection.connectionCadastralKey },
-    { label: t('connections.table.contractNumber'), value: connection.connectionContractNumber },
-    { label: t('connections.wizard.clientSelection.address'), value: connection.connectionAddress },
-    { label: t('connections.table.rate'), value: connection.connectionRateName },
-    { label: t('connections.table.sector'), value: connection.connectionSector },
+    {
+      label: t('connections.table.meterNumber'),
+      value: connection.connectionMeterNumber
+    },
+    {
+      label: t('connections.table.cadastralKey'),
+      value: connection.connectionCadastralKey
+    },
+    {
+      label: t('connections.table.contractNumber'),
+      value: connection.connectionContractNumber
+    },
+    {
+      label: t('connections.wizard.clientSelection.address'),
+      value: connection.connectionAddress
+    },
+    {
+      label: t('connections.table.rate'),
+      value: connection.connectionRateName
+    },
+    {
+      label: t('connections.table.sector'),
+      value: connection.connectionSector
+    },
     { label: t('connections.table.zone'), value: connection.connectionZone },
-    { label: t('connections.table.people'), value: connection.connectionPeopleNumber },
+    {
+      label: t('connections.table.people'),
+      value: connection.connectionPeopleNumber
+    },
     { label: t('connections.table.latitude'), value: connection.latitude },
     { label: t('connections.table.longitude'), value: connection.longitude },
-    { label: t('connections.table.altitude'), value: connection.connectionAltitude },
-    { 
-      label: t('connections.table.installationDate'), 
-      value: connection.connectionInstallationDate 
+    {
+      label: t('connections.table.altitude'),
+      value: connection.connectionAltitude
+    },
+    {
+      label: t('connections.table.installationDate'),
+      value: connection.connectionInstallationDate
         ? new Date(connection.connectionInstallationDate).toLocaleDateString()
-        : '-' 
+        : '-'
     }
   ];
 
@@ -154,7 +181,11 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         header: t('connections.table.sewerage'),
         accessor: (item: Connection) => (
           <ColorChip
-            label={item.connectionSewerage ? t('connections.table.yes') : t('connections.table.no')}
+            label={
+              item.connectionSewerage
+                ? t('connections.table.yes')
+                : t('connections.table.no')
+            }
             color={item.connectionSewerage ? '#22c55e' : '#94a3b8'}
             icon={
               item.connectionSewerage ? <Check size={14} /> : <X size={14} />
@@ -169,7 +200,11 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         header: t('connections.table.status'),
         accessor: (item: Connection) => (
           <ColorChip
-            label={item.connectionStatus ? t('connections.table.active') : t('connections.table.inactive')}
+            label={
+              item.connectionStatus
+                ? t('connections.table.active')
+                : t('connections.table.inactive')
+            }
             color={item.connectionStatus ? '#22c55e' : '#ef4444'}
             icon={item.connectionStatus ? <Check size={14} /> : <X size={14} />}
             variant="soft"
@@ -204,7 +239,10 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
                 <FaTrashCan size={14} />
               </Button>
             </Tooltip>
-            <Tooltip content={t('connections.table.viewDetails')} position="top">
+            <Tooltip
+              content={t('connections.table.viewDetails')}
+              position="top"
+            >
               <Button
                 size="sm"
                 variant="ghost"
@@ -254,8 +292,12 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         connectionCadastralKey: item.connectionCadastralKey ?? '-',
         connectionContractNumber: item.connectionContractNumber ?? '-',
         connectionRateName: item.connectionRateName ?? '-',
-        connectionSewerage: item.connectionSewerage ? t('connections.table.yes') : t('connections.table.no'),
-        connectionStatus: item.connectionStatus ? t('connections.table.active') : t('connections.table.inactive')
+        connectionSewerage: item.connectionSewerage
+          ? t('connections.table.yes')
+          : t('connections.table.no'),
+        connectionStatus: item.connectionStatus
+          ? t('connections.table.active')
+          : t('connections.table.inactive')
       };
       return selectedCols.map((col) => rowData[col.id] || '-');
     }
@@ -283,7 +325,6 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
           }
         ]}
         width="100"
-        fullHeight
         emptyState={
           <EmptyState
             message={t('connections.table.noData')}

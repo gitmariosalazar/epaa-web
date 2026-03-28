@@ -27,9 +27,9 @@
 /* Report Content Area */
 .report-content {
   background: var(--surface);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   box-shadow: var(--shadow-sm);
-  padding: 1.5rem;
+  padding: 0.5rem;
   border: 1px solid var(--border-color);
 }
 
@@ -343,4 +343,33 @@
   text-align: center;
   padding: 3rem;
   color: var(--text-muted);
+}
+
+/* Layout Stretching for Full Height Tables */
+.report-main-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+.daily-report-container,
+.yearly-report-container,
+.connection-report-container,
+.advanced-report-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  gap: 0.3rem; /* Standard gap between toolbar and table */
+}
+
+/* Ensure the table within these containers fills the remaining space */
+.daily-report-container .table-container,
+.yearly-report-container .table-container,
+.connection-report-container .table-container,
+.advanced-report-container .table-container {
+  flex: 1;
 }
