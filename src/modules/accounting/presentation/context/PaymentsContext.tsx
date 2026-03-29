@@ -7,6 +7,7 @@ import { FindAllOverduePaymentsUseCase } from '../../application/usecases/FindAl
 import { FindPendingReadingsByCadastralKeyOrCardIdUseCase } from '../../application/usecases/FindPendingReadingsByCadastralKeyOrCardIdUseCase';
 import { FindOverdueSummaryUseCase } from '../../application/usecases/FindOverdueSummaryUseCase';
 import { FindYearlyOverdueSummaryUseCase } from '../../application/usecases/FindYearlyOverdueSummaryUseCase';
+import { FindMonthlyDebtSummaryUseCase } from '../../application/usecases/FindMonthlyDebtSummaryUseCase';
 
 interface PaymentsContextType {
   findAllPaymentReadingPayrollsByDate: FindAllPaymentReadingByDateUseCase;
@@ -16,6 +17,7 @@ interface PaymentsContextType {
   findPendingReadingsByCadastralKeyOrCardId: FindPendingReadingsByCadastralKeyOrCardIdUseCase;
   findOverdueSummary: FindOverdueSummaryUseCase;
   findYearlyOverdueSummary: FindYearlyOverdueSummaryUseCase;
+  findMonthlyDebtSummary: FindMonthlyDebtSummaryUseCase;
 }
 
 const PaymentsContext = createContext<PaymentsContextType | null>(null);
@@ -39,7 +41,8 @@ export const PaymentsProvider: React.FC<{ children: React.ReactNode }> = ({
     findPendingReadingsByCadastralKeyOrCardId:
       new FindPendingReadingsByCadastralKeyOrCardIdUseCase(repository),
     findOverdueSummary: new FindOverdueSummaryUseCase(repository),
-    findYearlyOverdueSummary: new FindYearlyOverdueSummaryUseCase(repository)
+    findYearlyOverdueSummary: new FindYearlyOverdueSummaryUseCase(repository),
+    findMonthlyDebtSummary: new FindMonthlyDebtSummaryUseCase(repository)
   };
 
   return (

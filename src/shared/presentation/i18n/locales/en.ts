@@ -358,8 +358,10 @@ export const en = {
     connections: {
       create: 'New Connection',
       deleteTitle: 'Delete Connection',
-      deleteConfirm: 'Are you sure you want to delete this connection? This action cannot be undone.',
-      noDataDescription: 'No connections found with current filters. Use Fetch to load data.',
+      deleteConfirm:
+        'Are you sure you want to delete this connection? This action cannot be undone.',
+      noDataDescription:
+        'No connections found with current filters. Use Fetch to load data.',
       table: {
         reportTitle: 'CONNECTIONS REPORT',
         reportDescription: 'List of system connections',
@@ -408,7 +410,8 @@ export const en = {
         },
         clientSelection: {
           title: 'Step 1: Client Selection',
-          description: 'Enter the client\'s identification to automatically find existing records or register a new one.',
+          description:
+            "Enter the client's identification to automatically find existing records or register a new one.",
           person: 'Person',
           company: 'Company',
           idCed: 'Identification (CED)',
@@ -452,14 +455,15 @@ export const en = {
           latitude: 'Latitude',
           zoneId: 'Zone ID',
           cadastralKey: 'Cadastral Key',
-          cadastralInfo: 'Format: 1-400 followed by \'-\' and >5000',
+          cadastralInfo: "Format: 1-400 followed by '-' and >5000",
           geometricZone: 'Geometric Zone',
           altitude: 'Altitude',
           precision: 'Precision',
           reference: 'Reference'
         },
         propertySelection: 'Property Selection',
-        propertySelectionDesc: 'Select an existing property or continue without assigning one.',
+        propertySelectionDesc:
+          'Select an existing property or continue without assigning one.',
         noProperties: 'The selected client has no registered properties.',
         saveWithProperty: 'Create with property',
         saveWithoutProperty: 'Create without property'

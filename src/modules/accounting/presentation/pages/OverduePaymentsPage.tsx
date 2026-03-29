@@ -1,14 +1,22 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useOverduePaymentsViewModel, type OverduePaymentTab } from '../hooks/useOverduePaymentsViewModel';
+import {
+  useOverduePaymentsViewModel,
+  type OverduePaymentTab
+} from '../hooks/useOverduePaymentsViewModel';
 import { OverduePaymentFilters } from '../components/OverduePaymentFilters';
 import { OverduePaymentsTable } from '../components/OverduePaymentsTable';
 import { YearlyOverdueSumaryTable } from '../components/YearlyOverdueSumaryTable';
 import { YearlyOverdueDashboard } from '../components/YearlyOverdueDashboard';
-import { GlobalOverdueDashboard} from '../components/GlobalOverdueDashboard';
+import { GlobalOverdueDashboard } from '../components/GlobalOverdueDashboard';
 import { YearlyOverdueDashboardFilters } from '../components/YearlyOverdueDashboardFilters';
 import { PendingReadingsModal } from '../components/PendingReadingsModal';
-import { Table as TableIcon, LayoutDashboard, Globe, FileText } from 'lucide-react';
+import {
+  Table as TableIcon,
+  LayoutDashboard,
+  Globe,
+  FileText
+} from 'lucide-react';
 import { Tabs } from '@/shared/presentation/components/Tabs';
 import type { TabItem } from '@/shared/presentation/components/Tabs';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
@@ -17,6 +25,8 @@ import {
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
 import '../styles/OverdueDashboard.css';
+import { MonthlyDebtSummaryFilters } from '../components/MonthlyDebtSummaryFilters';
+import { MonthlyDebtSummaryTable } from '../components/MonthlyDebtSummaryTable';
 
 export const OverduePaymentsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -50,18 +60,46 @@ export const OverduePaymentsPage: React.FC = () => {
     fetchYearlyOverdueSummary,
     fetchOverduePayments,
     sortConfig,
-    hasMore
+    hasMore,
+    displayedMonthlyDebtSummary,
+    isMonthlyDebtSummaryLoading
   } = useOverduePaymentsViewModel();
 
   const TABS_DEFINITION: TabItem<OverduePaymentTab>[] = [
-    { id: 'payments', label: t('accounting.overdue.paymentsTab', 'Pagos en Mora'), icon: <FileText size={16} /> },
-    { id: 'yearly_summary', label: t('accounting.overdue.yearlySummaryTab', 'Resumen Anual'), icon: <TableIcon size={16} /> },
-    { id: 'dashboard_global', label: t('accounting.overdue.globalDashboardTab', 'Dashboard Global'), icon: <Globe size={16} /> },
-    { id: 'dashboard_anual', label: t('accounting.overdue.yearlyDashboardTab', 'Dashboard Anual'), icon: <LayoutDashboard size={16} /> },
+    {
+      id: 'dashboard_global',
+      label: t('accounting.overdue.globalDashboardTab', 'Dashboard Global'),
+      icon: <Globe size={16} />
+    },
+    {
+      id: 'dashboard_anual',
+      label: t('accounting.overdue.yearlyDashboardTab', 'Dashboard Anual'),
+      icon: <LayoutDashboard size={16} />
+    },
+    {
+      id: 'payments',
+      label: t('accounting.overdue.paymentsTab', 'Pagos en Mora'),
+      icon: <FileText size={16} />
+    },
+    {
+      id: 'yearly_summary',
+      label: t('accounting.overdue.yearlySummaryTab', 'Resumen Anual'),
+      icon: <TableIcon size={16} />
+    },
+    {
+      id: 'monthly_debt_summary',
+      label: t('accounting.overdue.monthlyDebtSummaryTab', 'Resumen Mensual'),
+      icon: <TableIcon size={16} />
+    }
   ];
 
-  const selectedYearData = (yearlyOverdueSummary || []).find(item => item.year.toString() === resolvedDashboardYear) || null;
-  const loadingProgress = useSimulatedProgress(isLoading || isYearlySummaryLoading);
+  const selectedYearData =
+    (yearlyOverdueSummary || []).find(
+      (item) => item.year.toString() === resolvedDashboardYear
+    ) || null;
+  const loadingProgress = useSimulatedProgress(
+    isLoading || isYearlySummaryLoading
+  );
 
   const renderFilters = () => {
     switch (activeTab) {
@@ -81,17 +119,17 @@ export const OverduePaymentsPage: React.FC = () => {
         );
       case 'yearly_summary':
         return (
-          <YearlyOverdueDashboardFilters 
+          <YearlyOverdueDashboardFilters
             selectedYear={dashboardYear}
             onYearChange={setDashboardYear}
-            availableYears={(yearlyOverdueSummary || []).map(y => y.year)}
+            availableYears={(yearlyOverdueSummary || []).map((y) => y.year)}
             isLoading={isYearlySummaryLoading}
             onRefresh={() => fetchYearlyOverdueSummary(true)}
           />
         );
       case 'dashboard_global':
         return (
-          <YearlyOverdueDashboardFilters 
+          <YearlyOverdueDashboardFilters
             selectedYear="all"
             onYearChange={() => {}}
             isLoading={isYearlySummaryLoading || isLoading}
@@ -104,12 +142,26 @@ export const OverduePaymentsPage: React.FC = () => {
         );
       case 'dashboard_anual':
         return (
-          <YearlyOverdueDashboardFilters 
+          <YearlyOverdueDashboardFilters
             selectedYear={resolvedDashboardYear}
             onYearChange={setDashboardYear}
-            availableYears={(yearlyOverdueSummary || []).map(y => y.year)}
+            availableYears={(yearlyOverdueSummary || []).map((y) => y.year)}
             isLoading={isYearlySummaryLoading}
             showAllOption={false}
+            onRefresh={() => fetchYearlyOverdueSummary(true)}
+          />
+        );
+      case 'monthly_debt_summary':
+        return (
+          <MonthlyDebtSummaryFilters
+            selectedYear={dashboardYear}
+            selectedMonth=""
+            onYearChange={setDashboardYear}
+            onMonthChange={() => {}}
+            availableYears={(yearlyOverdueSummary || []).map((y) => y.year)}
+            isLoading={isYearlySummaryLoading}
+            showAllOption={false}
+            hideMonthFilter={true}
             onRefresh={() => fetchYearlyOverdueSummary(true)}
           />
         );
@@ -119,8 +171,12 @@ export const OverduePaymentsPage: React.FC = () => {
   };
 
   const renderContent = () => {
-    if ((activeTab === 'payments' && isLoading && overduePayments.length === 0) ||
-        (activeTab !== 'payments' && isYearlySummaryLoading && displayedYearlySummary.length === 0)) {
+    if (
+      (activeTab === 'payments' && isLoading && overduePayments.length === 0) ||
+      (activeTab !== 'payments' &&
+        isYearlySummaryLoading &&
+        displayedYearlySummary.length === 0)
+    ) {
       return (
         <div className="overdue-page-loading">
           <CircularProgress
@@ -157,7 +213,7 @@ export const OverduePaymentsPage: React.FC = () => {
         );
       case 'dashboard_global':
         return (
-          <GlobalOverdueDashboard 
+          <GlobalOverdueDashboard
             yearlyData={yearlyOverdueSummary || []}
             globalSummary={overdueSummary}
             isLoading={isYearlySummaryLoading}
@@ -165,10 +221,18 @@ export const OverduePaymentsPage: React.FC = () => {
         );
       case 'dashboard_anual':
         return (
-          <YearlyOverdueDashboard 
+          <YearlyOverdueDashboard
             yearlyData={yearlyOverdueSummary || []}
             selectedYearData={selectedYearData}
             isLoading={isYearlySummaryLoading}
+            monthlyDebtData={displayedMonthlyDebtSummary}
+          />
+        );
+      case 'monthly_debt_summary':
+        return (
+          <MonthlyDebtSummaryTable
+            data={displayedMonthlyDebtSummary}
+            isLoading={isMonthlyDebtSummaryLoading}
           />
         );
       default:
@@ -180,7 +244,7 @@ export const OverduePaymentsPage: React.FC = () => {
     <PageLayout
       className="overdue-payments-page"
       header={
-        <div className="overdue-payments-tabs-row">
+        <div>
           <Tabs
             tabs={TABS_DEFINITION}
             activeTab={activeTab}
@@ -190,13 +254,19 @@ export const OverduePaymentsPage: React.FC = () => {
       }
       filters={renderFilters()}
     >
-      <div className="overdue-payments-content">
+      <div
+        className={`overdue-payments-content ${
+          activeTab === 'dashboard_global' || activeTab === 'dashboard_anual'
+            ? 'overdue-payments-content--dashboard'
+            : 'overdue-payments-content--table'
+        }`}
+      >
         {renderContent()}
       </div>
 
-      <PendingReadingsModal 
+      <PendingReadingsModal
         isOpen={isPendingModalOpen}
-        onClose={() => setIsPendingModalOpen(false)} 
+        onClose={() => setIsPendingModalOpen(false)}
         data={pendingReadings}
         isLoading={isPendingLoading}
       />

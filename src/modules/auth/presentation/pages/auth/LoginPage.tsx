@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/shared/presentation/context/ThemeContext';
 import { Moon, Sun, Globe, User } from 'lucide-react';
+import { FaSignInAlt } from 'react-icons/fa';
 
 export const LoginPage: React.FC = () => {
   const { login, token, isLoading: isAuthLoading } = useAuth();
@@ -73,12 +74,13 @@ export const LoginPage: React.FC = () => {
             <img src="epaa.png" alt="" className="login-page__logo-img" />
           </div>
           <h2 className="login-page__title">{t('Sign In')}</h2>
-          <p className="login-page__subtitle">{t('Welcome to EPAA-Web')}</p>
+          <p className="login-page__subtitle">{t('Welcome to EPAA-AA Web')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-page__form">
           <Input
             label={t('Username or Email')}
+            className="login-page__input"
             placeholder={t('Username or Email')}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -87,6 +89,7 @@ export const LoginPage: React.FC = () => {
           />
           <PasswordInput
             label={t('Password')}
+            className="login-page__input"
             placeholder={t('Password')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -102,8 +105,9 @@ export const LoginPage: React.FC = () => {
             isLoading={isLoading}
             variant="primary"
             size="lg"
+            leftIcon={<FaSignInAlt size={20} />}
           >
-            {t('Sign In')}
+            {t('Iniciar Sesión')}
           </Button>
         </form>
       </Card>

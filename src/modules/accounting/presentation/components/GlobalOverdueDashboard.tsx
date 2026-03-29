@@ -1,20 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  AreaChart,
-  Area
-} from 'recharts';
+import { ResponsiveContainer } from 'recharts';
 import {
   DollarSign,
   Users,
@@ -35,6 +21,9 @@ import {
   CircularProgress,
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
+import { GradientAreaChart } from '@/shared/presentation/components/Charts/GradientAreaChart';
+import { DynamicBarChart } from '@/shared/presentation/components/Charts/DynamicBarChart';
+import { DynamicPieChart } from '@/shared/presentation/components/Charts/DynamicPieChart';
 import '../styles/OverdueDashboard.css';
 
 interface GlobalOverdueDashboardProps {
@@ -90,6 +79,15 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
   const { t } = useTranslation();
   const loadingProgress = useSimulatedProgress(isLoading);
 
+  // Auto-hide inner labels on tight screens where they inevitably overlap
+  const [isCompact, setIsCompact] = React.useState(false);
+  React.useEffect(() => {
+    const handleResize = () => setIsCompact(window.innerWidth < 1380); // Strict threshold to ensure perfect clarity
+    handleResize(); // trigger once immediately
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const chartData = useMemo(() => {
     return [...(yearlyData || [])].sort((a, b) => a.year - b.year);
   }, [yearlyData]);
@@ -136,6 +134,12 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
 
   const formatCurrency = (val: number) =>
     `$${(val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const formatShortCurrency = (val: number) => {
+    if (!val) return '$0';
+    if (val >= 1000) return `$${(val / 1000).toFixed(1)}k`;
+    return `$${val.toFixed(0)}`;
+  };
 
   const formatNumber = (val: number) => Math.round(val || 0).toLocaleString();
 
@@ -282,50 +286,49 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
           </div>
           <div className="overdue-chart-body">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <defs>
-                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
-                    <stop offset="100%" stopColor="#1d4ed8" stopOpacity={0.8} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="var(--border-color)"
-                />
-                <XAxis
-                  dataKey="year"
-                  stroke="var(--text-secondary)"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="var(--text-secondary)"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
-                />
-                <RechartsTooltip
-                  cursor={{ fill: 'rgba(var(--primary-rgb), 0.05)' }}
-                  contentStyle={{
-                    backgroundColor: 'var(--surface)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '12px'
-                  }}
-                  formatter={(val: number) => [
-                    formatCurrency(val),
-                    t('accounting.overdue.totalDebtAmount', 'Deuda Total')
-                  ]}
-                />
-                <Bar
-                  dataKey="totalDebtAmount"
-                  fill="url(#barGradient)"
-                  radius={[6, 6, 0, 0]}
-                />
-              </BarChart>
+              <DynamicBarChart
+                data={chartData}
+                dataKeyX="year"
+                dataKeyY="totalDebtAmount"
+                nameY={t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
+                nameX={t('accounting.overdue.year', 'Año')}
+                yAxisFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
+                tooltipFormatterOrComponent={(
+                  payload: YearlyOverdueSummary
+                ) => {
+                  return (
+                    <div className="year-tooltip">
+                      <span>
+                        {t('accounting.overdue.year', 'Año')}
+                        <p>{payload.year}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.totalMonthsPastDue',
+                          'Meses Mora'
+                        )}
+                        <p>{payload.totalMonthsPastDue}</p>
+                      </span>
+                      <span>
+                        {t('accounting.overdue.totalDebtAmount', 'Deuda Anual')}
+                        <p>{formatCurrency(payload.totalDebtAmount)}</p>
+                      </span>
+                      <span>
+                        {t('accounting.overdue.totalEpaaValue', 'Deuda EPAA')}
+                        <p>{formatCurrency(payload.totalEpaaValue)}</p>
+                      </span>
+                      <span>
+                        {t('accounting.overdue.totalUniqueClients', 'Clientes')}
+                        <p>{formatNumber(payload.totalUniqueClients)}</p>
+                      </span>
+                    </div>
+                  );
+                }}
+                valuePosition={
+                  isCompact ? 'none' : 'top'
+                } /* React intelligently unmounts labels completely */
+                labelFormatter={(val: number) => `$${(val / 1000).toFixed(0)}k`}
+              />
             </ResponsiveContainer>
           </div>
         </div>
@@ -344,36 +347,24 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
           </div>
           <div className="overdue-chart-body">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={compositionData}
-                  cx="40%"
-                  cy="50%"
-                  innerRadius="55%"
-                  outerRadius="75%"
-                  paddingAngle={8}
-                  dataKey="value"
-                >
-                  {compositionData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <RechartsTooltip
-                  formatter={(val: number) => formatCurrency(val)}
-                />
-                <Legend
-                  layout="vertical"
-                  verticalAlign="middle"
-                  align="right"
-                  iconType="circle"
-                  wrapperStyle={{ paddingRight: '1rem' }}
-                />
-              </PieChart>
+              <DynamicPieChart
+                data={compositionData}
+                dataKey="value"
+                nameKey="name"
+                tooltipFormatterOrComponent={(payload: {
+                  name: string;
+                  value: number;
+                  color: string;
+                }) => formatCurrency(payload.value)}
+              />
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="overdue-chart-card" style={{ gridColumn: 'span 2' }}>
+        <div
+          className="overdue-chart-card"
+          style={{ gridColumn: 'span 2', minHeight: '450px' }}
+        >
           <div className="overdue-chart-header">
             <h3 className="overdue-chart-title">
               {t('accounting.dashboard.trendTitle', 'Tendencia de Morosidad')}
@@ -387,53 +378,121 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
           </div>
           <div className="overdue-chart-body">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient
-                    id="trendGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="var(--border-color)"
-                />
-                <XAxis
-                  dataKey="year"
-                  stroke="var(--text-secondary)"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="var(--text-secondary)"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <RechartsTooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--surface)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '12px'
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  name="Meses Mora"
-                  dataKey="totalMonthsPastDue"
-                  stroke="#a855f7"
-                  strokeWidth={3}
-                  fill="url(#trendGradient)"
-                />
-              </AreaChart>
+              <GradientAreaChart
+                data={chartData}
+                dataKeyX="year"
+                dataKeyY="totalMonthsPastDue"
+                nameY={t('accounting.overdue.totalMonthsPastDue', 'Meses Mora')}
+                nameX={t('accounting.overdue.year', 'Año')}
+                startColor="#8b5cf6"
+                endColor="#00aeffff"
+                valuePosition={
+                  isCompact ? 'none' : 'top'
+                } /* React intelligently unmounts labels completely */
+                yAxisFormatter={(value: number) => value.toFixed(2)}
+                tooltipFormatterOrComponent={(
+                  payload: YearlyOverdueSummary
+                ) => {
+                  return (
+                    <div className="year-tooltip">
+                      <span>
+                        {t('accounting.overdue.year', 'Año')}
+                        <p>{payload.year}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.totalMonthsPastDue',
+                          'Meses Mora'
+                        )}
+                        <p>{payload.totalMonthsPastDue}</p>
+                      </span>
+                      <span>
+                        {t('accounting.overdue.totalDebtAmount', 'Deuda Anual')}
+                        <p>{formatCurrency(payload.totalDebtAmount)}</p>
+                      </span>
+                      <span>
+                        {t('accounting.overdue.totalEpaaValue', 'Deuda EPAA')}
+                        <p>{formatCurrency(payload.totalEpaaValue)}</p>
+                      </span>
+                      <span>
+                        {t('accounting.overdue.totalUniqueClients', 'Clientes')}
+                        <p>{formatNumber(payload.totalUniqueClients)}</p>
+                      </span>
+                    </div>
+                  );
+                }}
+                customLabel={({
+                  x,
+                  y,
+                  value,
+                  payload,
+                  index
+                }: {
+                  x: number;
+                  y: number;
+                  value: number;
+                  payload: { totalDebtAmount: number };
+                  index: number;
+                }) => {
+                  // Dynamic anchoring so the first and last labels don't get clipped or overlap the Y-axis
+                  let anchor = 'middle';
+                  let xOffset = x;
+                  if (index === 0) {
+                    anchor = 'start';
+                    xOffset = x - 5; // Push slightly right of the start dot line
+                  } else if (index === chartData.length - 1) {
+                    anchor = 'end';
+                    xOffset = x + 5; // Push slightly left of the end dot line
+                  }
+
+                  // Zig-zag pattern: one directly ABOVE the dot, the next directly BELOW the dot
+                  const isEven = index % 2 === 0;
+                  const yPosition = isEven ? y - 25 : y + 15;
+
+                  return (
+                    <text
+                      x={xOffset}
+                      y={yPosition} /* Exactly alternating up and down */
+                      textAnchor={anchor as any}
+                      className="responsive-chart-label"
+                      style={{
+                        paintOrder: 'stroke fill',
+                        stroke: 'var(--surface)',
+                        strokeLinejoin: 'round',
+                        strokeWidth: 3
+                      }}
+                    >
+                      <tspan
+                        x={xOffset}
+                        fill="#10b981" /* Green elegant color for the amount */
+                        fontSize={10}
+                        fontWeight={800}
+                      >
+                        {payload
+                          ? formatShortCurrency(payload.totalDebtAmount)
+                          : ''}
+                      </tspan>
+                      <tspan
+                        x={xOffset}
+                        dy={14}
+                        fill="var(--text-main)"
+                        fontSize={11}
+                        fontWeight={700}
+                      >
+                        {value}
+                      </tspan>
+                      <tspan
+                        fill="var(--text-secondary)"
+                        fontSize={10}
+                        fontWeight={500}
+                        dx={3}
+                      >
+                        {t('common.months', 'Meses')}
+                      </tspan>
+                    </text>
+                  );
+                }}
+              />
             </ResponsiveContainer>
           </div>
         </div>

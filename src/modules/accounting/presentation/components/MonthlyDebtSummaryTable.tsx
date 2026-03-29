@@ -1,21 +1,21 @@
 import { useTranslation } from 'react-i18next';
-import type { YearlyOverdueSummary } from '../../domain/models/OverdueReading';
-import type { SortConfig } from '../hooks/useOverduePaymentsViewModel';
-import {
-  Table,
-  type Column
-} from '@/shared/presentation/components/Table/Table';
-import { useCallback, useMemo } from 'react';
-import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
-import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
-import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import type { MonthlyDebtSummary } from '../../domain/models/OverdueReading';
+import type { SortConfig } from '../hooks/usePaymentsViewModel';
 import {
   CircularProgress,
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
+import { useCallback, useMemo } from 'react';
+import {
+  Table,
+  type Column
+} from '@/shared/presentation/components/Table/Table';
+import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
-interface YearlyOverdueSumaryTableProps {
-  data: YearlyOverdueSummary[];
+interface MonthlyDebtSummaryTableProps {
+  data: MonthlyDebtSummary[];
   isLoading: boolean;
   sortConfig?: SortConfig | null;
   onSort?: (key: string, direction: 'asc' | 'desc') => void;
@@ -23,16 +23,16 @@ interface YearlyOverdueSumaryTableProps {
   hasMore?: boolean;
 }
 
-export const YearlyOverdueSumaryTable: React.FC<
-  YearlyOverdueSumaryTableProps
+export const MonthlyDebtSummaryTable: React.FC<
+  MonthlyDebtSummaryTableProps
 > = ({ data, isLoading, sortConfig, onSort, onEndReached, hasMore }) => {
   const { t } = useTranslation();
   const loadingProgress = useSimulatedProgress(isLoading);
 
-  const columns: Column<YearlyOverdueSummary>[] = useMemo(
+  const columns: Column<MonthlyDebtSummary>[] = useMemo(
     () => [
       {
-        header: t('accounting.overdue.year', 'Año'),
+        header: t('accounting.monthlyDebtSummary.year', 'Año'),
         accessor: 'year',
         id: 'year',
         sortable: true,
@@ -40,27 +40,41 @@ export const YearlyOverdueSumaryTable: React.FC<
         style: { width: '80px', textAlign: 'center' }
       },
       {
-        header: t('accounting.overdue.clientsWithDebt', 'Clientes con deuda'),
-        accessor: 'clientsWithDebt',
+        header: t('accounting.monthlyDebtSummary.monthName', 'Mes'),
+        accessor: 'monthName',
+        id: 'monthName',
         sortable: true,
-        id: 'clientsWithDebt',
-        sortKey: 'clientsWithDebt',
+        sortKey: 'monthName',
+        style: { width: '80px', textAlign: 'center' }
+      },
+      {
+        header: t(
+          'accounting.monthlyDebtSummary.clientsWithDebt',
+          'Clientes con deuda'
+        ),
+        accessor: 'clientsWithDebtThisMonth',
+        sortable: true,
+        id: 'clientsWithDebtThisMonth',
+        sortKey: 'clientsWithDebtThisMonth',
         style: { width: '120px', textAlign: 'center' }
       },
       {
         header: t(
-          'accounting.overdue.totalUniqueCadastralKeysByYear',
+          'accounting.monthlyDebtSummary.totalUniqueCadastralKeysByYear',
           'Claves Catastrales'
         ),
-        accessor: 'totalUniqueCadastralKeysByYear',
+        accessor: 'totalUniqueCadastralKeys',
         sortable: true,
-        id: 'totalUniqueCadastralKeysByYear',
-        sortKey: 'totalUniqueCadastralKeysByYear',
+        id: 'totalUniqueCadastralKeys',
+        sortKey: 'totalUniqueCadastralKeys',
         style: { width: '120px', textAlign: 'center' }
       },
       {
-        header: t('accounting.overdue.totalMonthsPastDue', 'Meses con mora'),
-        accessor: (item: YearlyOverdueSummary) => (
+        header: t(
+          'accounting.monthlyDebtSummary.totalMonthsPastDue',
+          'Meses con mora'
+        ),
+        accessor: (item: MonthlyDebtSummary) => (
           <span
             className={`months-past-due-badge ${
               item.totalMonthsPastDue >= 6000
@@ -79,8 +93,8 @@ export const YearlyOverdueSumaryTable: React.FC<
         style: { width: '100px', textAlign: 'center' }
       },
       {
-        header: t('accounting.overdue.epaaValue', 'Monto EPAA'),
-        accessor: (item: YearlyOverdueSummary) => (
+        header: t('accounting.monthlyDebtSummary.epaaValue', 'Monto EPAA'),
+        accessor: (item: MonthlyDebtSummary) => (
           <span className="total-amount-cell">
             {item.totalEpaaValue !== undefined
               ? `$${item.totalEpaaValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -93,8 +107,8 @@ export const YearlyOverdueSumaryTable: React.FC<
         style: { width: '120px', textAlign: 'right' }
       },
       {
-        header: t('accounting.overdue.trashRate', 'Tasa de desecho'),
-        accessor: (item: YearlyOverdueSummary) => (
+        header: t('accounting.monthlyDebtSummary.trashRate', 'Tasa de desecho'),
+        accessor: (item: MonthlyDebtSummary) => (
           <span>
             {item.totalTrashRate !== undefined
               ? `$${item.totalTrashRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -107,8 +121,11 @@ export const YearlyOverdueSumaryTable: React.FC<
         style: { width: '120px', textAlign: 'right' }
       },
       {
-        header: t('accounting.overdue.currentSurcharge', 'Recargos actuales'),
-        accessor: (item: YearlyOverdueSummary) => (
+        header: t(
+          'accounting.monthlyDebtSummary.currentSurcharge',
+          'Recargos actuales'
+        ),
+        accessor: (item: MonthlyDebtSummary) => (
           <span>
             {item.totalSurcharge !== undefined
               ? `$${item.totalSurcharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -121,8 +138,11 @@ export const YearlyOverdueSumaryTable: React.FC<
         style: { width: '120px', textAlign: 'right' }
       },
       {
-        header: t('accounting.overdue.oldSurcharge', 'Recargos anteriores'),
-        accessor: (item: YearlyOverdueSummary) => (
+        header: t(
+          'accounting.monthlyDebtSummary.oldSurcharge',
+          'Recargos anteriores'
+        ),
+        accessor: (item: MonthlyDebtSummary) => (
           <span>
             {item.totalOldSurcharge !== undefined
               ? `$${item.totalOldSurcharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -136,10 +156,10 @@ export const YearlyOverdueSumaryTable: React.FC<
       },
       {
         header: t(
-          'accounting.overdue.improvementsInterest',
+          'accounting.monthlyDebtSummary.improvementsInterest',
           'Intereses de mejoras'
         ),
-        accessor: (item: YearlyOverdueSummary) => (
+        accessor: (item: MonthlyDebtSummary) => (
           <span>
             {item.totalImprovementsInterest !== undefined
               ? `$${item.totalImprovementsInterest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -152,8 +172,11 @@ export const YearlyOverdueSumaryTable: React.FC<
         style: { width: '120px', textAlign: 'right' }
       },
       {
-        header: t('accounting.overdue.avgDebtPerClient', 'Promedio p/ Cliente'),
-        accessor: (item: YearlyOverdueSummary) => (
+        header: t(
+          'accounting.monthlyDebtSummary.avgDebtPerClient',
+          'Promedio p/ Cliente'
+        ),
+        accessor: (item: MonthlyDebtSummary) => (
           <span>
             {item.avgDebtPerClient !== undefined
               ? `$${item.avgDebtPerClient.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -164,20 +187,6 @@ export const YearlyOverdueSumaryTable: React.FC<
         sortable: true,
         sortKey: 'avgDebtPerClient',
         style: { width: '120px', textAlign: 'right' }
-      },
-      {
-        header: t('accounting.overdue.totalDebtAmount', 'Total deuda'),
-        accessor: (item: YearlyOverdueSummary) => (
-          <span className="total-due-text">
-            {item.totalDebtAmount !== undefined
-              ? `$${item.totalDebtAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-              : '-'}
-          </span>
-        ),
-        id: 'totalDebtAmount',
-        sortable: true,
-        sortKey: 'totalDebtAmount',
-        style: { width: '120px', textAlign: 'right' }
       }
     ],
     [t]
@@ -185,63 +194,52 @@ export const YearlyOverdueSumaryTable: React.FC<
 
   const totals = useMemo(() => {
     const defaultTotals = {
-      yearLabel: t('accounting.overdue.total', 'Total'),
-      clientsWithDebt: 0,
-      totalUniqueCadastralKeysByYear: 0,
+      year: 'Total',
+      monthName: 'Mes',
+      clientsWithDebtThisMonth: 0,
+      totalUniqueCadastralKeys: 0,
       totalMonthsPastDue: 0,
       totalEpaaValue: 0,
       totalTrashRate: 0,
       totalSurcharge: 0,
       totalOldSurcharge: 0,
       totalImprovementsInterest: 0,
-      totalDebtAmount: 0,
       avgDebtPerClient: 0
     };
-
-    const aggregated = data.reduce((acc, item) => {
-      return {
-        ...acc,
-        clientsWithDebt: acc.clientsWithDebt + (item.clientsWithDebt || 0),
-        totalUniqueCadastralKeysByYear:
-          acc.totalUniqueCadastralKeysByYear +
-          (item.totalUniqueCadastralKeysByYear || 0),
-        totalMonthsPastDue:
-          acc.totalMonthsPastDue + (item.totalMonthsPastDue || 0),
-        totalEpaaValue: acc.totalEpaaValue + (item.totalEpaaValue || 0),
-        totalTrashRate: acc.totalTrashRate + (item.totalTrashRate || 0),
-        totalSurcharge: acc.totalSurcharge + (item.totalSurcharge || 0),
-        totalOldSurcharge:
-          acc.totalOldSurcharge + (item.totalOldSurcharge || 0),
-        totalImprovementsInterest:
-          acc.totalImprovementsInterest + (item.totalImprovementsInterest || 0),
-        totalDebtAmount: acc.totalDebtAmount + (item.totalDebtAmount || 0)
-      };
+    const aggregatedData = data.reduce((acc, item) => {
+      acc.clientsWithDebtThisMonth += item.clientsWithDebtThisMonth;
+      acc.totalUniqueCadastralKeys += item.totalUniqueCadastralKeys;
+      acc.totalMonthsPastDue += item.totalMonthsPastDue;
+      acc.totalEpaaValue += item.totalEpaaValue;
+      acc.totalTrashRate += item.totalTrashRate;
+      acc.totalSurcharge += item.totalSurcharge;
+      acc.totalOldSurcharge += item.totalOldSurcharge;
+      acc.totalImprovementsInterest += item.totalImprovementsInterest;
+      acc.avgDebtPerClient += item.avgDebtPerClient;
+      return acc;
     }, defaultTotals);
     // TODO: Fix this avgDebtPerClient calculation
-    if (aggregated.clientsWithDebt > 0) {
-      aggregated.avgDebtPerClient =
-        aggregated.totalDebtAmount / aggregated.clientsWithDebt;
+    if (aggregatedData.clientsWithDebtThisMonth > 0) {
+      aggregatedData.avgDebtPerClient =
+        aggregatedData.totalEpaaValue / aggregatedData.clientsWithDebtThisMonth;
     }
-
-    return aggregated;
-  }, [data, t]);
+    return aggregatedData;
+  }, [data]);
 
   const handleMapRowData = useCallback(
-    (item: YearlyOverdueSummary, selectedColumns: ExportColumn[]) => {
+    (item: MonthlyDebtSummary, selectedColumns: ExportColumn[]) => {
       const rowData: Record<string, string> = {
         year: item.year.toString(),
-        clientsWithDebt: item.clientsWithDebt.toString(),
-        totalUniqueCadastralKeysByYear: (
-          item.totalUniqueCadastralKeysByYear || 0
-        ).toString(),
-        totalMonthsPastDue: item.totalMonthsPastDue.toString(),
+        monthName: item.monthName.toString(),
+        clientsWithDebtThisMonth: item.clientsWithDebtThisMonth.toFixed(2),
+        totalUniqueCadastralKeys: item.totalUniqueCadastralKeys.toFixed(2),
+        totalMonthsPastDue: item.totalMonthsPastDue.toFixed(2),
         totalEpaaValue: item.totalEpaaValue.toFixed(2),
         totalTrashRate: item.totalTrashRate.toFixed(2),
         totalSurcharge: item.totalSurcharge.toFixed(2),
         totalOldSurcharge: item.totalOldSurcharge.toFixed(2),
         totalImprovementsInterest: item.totalImprovementsInterest.toFixed(2),
-        avgDebtPerClient: item.avgDebtPerClient.toFixed(2),
-        totalDebtAmount: item.totalDebtAmount.toFixed(2)
+        avgDebtPerClient: item.avgDebtPerClient.toFixed(2)
       };
       return selectedColumns.map(
         (column) => rowData[column.id as keyof typeof rowData] || '-'
@@ -250,149 +248,130 @@ export const YearlyOverdueSumaryTable: React.FC<
     []
   );
 
-  const availableColumns = useMemo(
-    () => [
+  const availableColumns = useMemo(() => {
+    return [
+      { id: 'year', label: 'Año', isDefault: true },
+      { id: 'monthName', label: 'Mes', isDefault: true },
       {
-        id: 'year',
-        label: t('accounting.overdue.year', 'Año'),
+        id: 'clientsWithDebtThisMonth',
+        label: 'Clientes con mora',
         isDefault: true
       },
       {
-        id: 'clientsWithDebt',
-        label: t('accounting.overdue.clientsWithDebt', 'Clientes con deuda'),
+        id: 'totalUniqueCadastralKeys',
+        label: 'Total C.C.',
         isDefault: true
       },
-      {
-        id: 'totalUniqueCadastralKeysByYear',
-        label: t(
-          'accounting.overdue.totalUniqueCadastralKeysByYear',
-          'Claves Catastrales'
-        ),
-        isDefault: true
-      },
-      {
-        id: 'totalMonthsPastDue',
-        label: t('accounting.overdue.totalMonthsPastDue', 'Meses con mora'),
-        isDefault: true
-      },
-      {
-        id: 'totalEpaaValue',
-        label: t('accounting.overdue.epaaValue', 'Monto EPAA'),
-        isDefault: true
-      },
-      {
-        id: 'totalTrashRate',
-        label: t('accounting.overdue.trashRate', 'Tasa de desecho'),
-        isDefault: true
-      },
-      {
-        id: 'totalSurcharge',
-        label: t('accounting.overdue.currentSurcharge', 'Recargos actuales'),
-        isDefault: true
-      },
+      { id: 'totalMonthsPastDue', label: 'Meses con mora', isDefault: true },
+      { id: 'totalEpaaValue', label: 'Monto EPAA', isDefault: true },
+      { id: 'totalTrashRate', label: 'Tasa de desecho', isDefault: true },
+      { id: 'totalSurcharge', label: 'Recargos actuales', isDefault: true },
       {
         id: 'totalOldSurcharge',
-        label: t('accounting.overdue.oldSurcharge', 'Recargos anteriores'),
+        label: 'Recargos anteriores',
         isDefault: true
       },
       {
         id: 'totalImprovementsInterest',
-        label: t(
-          'accounting.overdue.improvementsInterest',
-          'Intereses de mejoras'
-        ),
+        label: 'Intereses de mejoras',
         isDefault: true
       },
-      {
-        id: 'avgDebtPerClient',
-        label: t('accounting.overdue.avgDebtPerClient', 'Promedio p/ Cliente'),
-        isDefault: true
-      },
-      {
-        id: 'totalDebtAmount',
-        label: t('accounting.overdue.totalDebtAmount', 'Total deuda'),
-        isDefault: true
-      }
-    ],
-    [t]
-  );
+      { id: 'avgDebtPerClient', label: 'Promedio p/ Cliente', isDefault: true }
+    ];
+  }, []);
 
   const totalRows = useMemo(
     () => [
       {
-        label: t('accounting.overdue.year', 'Año'),
-        value: data.length,
+        label: '',
+        value: totals.year,
         highlight: false,
         columnId: 'year'
       },
       {
-        label: t('accounting.overdue.epaaValue', 'Monto EPAA'),
-        value: `$${totals.totalEpaaValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        label: '',
+        value: totals.monthName,
+        highlight: false,
+        columnId: 'monthName'
+      },
+      {
+        label: 'Total',
+        value: totals.clientsWithDebtThisMonth,
+        highlight: false,
+        columnId: 'clientsWithDebtThisMonth'
+      },
+      {
+        label: 'Total',
+        value: totals.totalUniqueCadastralKeys,
+        highlight: false,
+        columnId: 'totalUniqueCadastralKeys'
+      },
+      {
+        label: 'Total',
+        value: totals.totalMonthsPastDue,
+        highlight: false,
+        columnId: 'totalMonthsPastDue'
+      },
+      {
+        label: 'Total',
+        value: totals.totalEpaaValue,
         highlight: false,
         columnId: 'totalEpaaValue'
       },
       {
-        label: t('accounting.overdue.trashRate', 'Tasa de desecho'),
-        value: `$${totals.totalTrashRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        label: 'Total',
+        value: totals.totalTrashRate,
         highlight: false,
         columnId: 'totalTrashRate'
       },
       {
-        label: t('accounting.overdue.currentSurcharge', 'Recargos actuales'),
-        value: `$${totals.totalSurcharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        label: 'Total',
+        value: totals.totalSurcharge,
         highlight: false,
         columnId: 'totalSurcharge'
       },
       {
-        label: t('accounting.overdue.oldSurcharge', 'Recargos anteriores'),
-        value: `$${totals.totalOldSurcharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        label: 'Total',
+        value: totals.totalOldSurcharge,
         highlight: false,
         columnId: 'totalOldSurcharge'
       },
       {
-        label: t(
-          'accounting.overdue.improvementsInterest',
-          'Intereses de mejoras'
-        ),
-        value: `$${totals.totalImprovementsInterest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        label: 'Total',
+        value: totals.totalImprovementsInterest,
         highlight: false,
         columnId: 'totalImprovementsInterest'
       },
       {
-        label: t('accounting.overdue.avgDebtPerClient', 'Promedio p/ Cliente'),
-        value: `$${totals.avgDebtPerClient.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        label: 'Total',
+        value: totals.avgDebtPerClient,
         highlight: false,
         columnId: 'avgDebtPerClient'
-      },
-      {
-        label: t('accounting.overdue.totalDebtAmount', 'Total deuda'),
-        value: `$${totals.totalDebtAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-        highlight: true,
-        columnId: 'totalDebtAmount'
       }
     ],
-    [t, data.length, totals]
+    [totals]
   );
-
   const labelsHorizontal = useMemo(
     () => ({
       [t('readings.historyTable.date', 'Fecha de generación')]:
-        new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+        new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(),
+      [t('accounting.monthlyDebtSummary.year', 'Año')]: totals.year,
+      [t('accounting.monthlyDebtSummary.month', 'Mes')]: totals.monthName
     }),
     [t]
   );
 
   const { setShowPdfPreview, PdfPreviewModal } =
-    useTablePdfExport<YearlyOverdueSummary>({
+    useTablePdfExport<MonthlyDebtSummary>({
       data,
       availableColumns,
       reportTitle: t(
-        'accounting.overdue.reportTitle',
-        'Reporte de Morosidad Anual'
+        'accounting.monthlyDebtSummary.title',
+        'Resumen de deuda mensual'
       ),
       reportDescription: t(
-        'accounting.overdue.reportSubtitle',
-        'Resumen de morosidad por año'
+        'accounting.monthlyDebtSummary.description',
+        'Resumen de deuda mensual'
       ),
       labelsHorizontal,
       totalRows,

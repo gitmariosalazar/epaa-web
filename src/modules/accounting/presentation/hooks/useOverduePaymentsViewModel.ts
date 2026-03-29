@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
+  MonthlyDebtSummary,
   OverduePayment,
   OverdueSummary,
   YearlyOverdueSummary
@@ -7,7 +8,12 @@ import type {
 import type { PendingReading } from '../../domain/models/PendingReading';
 import { usePaymentsContext } from '../context/PaymentsContext';
 
-export type OverduePaymentTab = 'payments' | 'yearly_summary' | 'dashboard_global' | 'dashboard_anual';
+export type OverduePaymentTab =
+  | 'dashboard_global'
+  | 'yearly_summary'
+  | 'payments'
+  | 'dashboard_anual'
+  | 'monthly_debt_summary';
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -23,7 +29,7 @@ function applySortConfig<T>(data: T[], sortConfig: SortConfig | null): T[] {
   return [...data].sort((a: any, b: any) => {
     const valA = a[sortConfig.key];
     const valB = b[sortConfig.key];
-    
+
     if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
     if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
     return 0;
@@ -32,18 +38,25 @@ function applySortConfig<T>(data: T[], sortConfig: SortConfig | null): T[] {
 
 function compareNumeric(actual: number, op: string, target: number): boolean {
   switch (op) {
-    case '>': return actual > target;
-    case '<': return actual < target;
-    case '>=': return actual >= target;
-    case '<=': return actual <= target;
+    case '>':
+      return actual > target;
+    case '<':
+      return actual < target;
+    case '>=':
+      return actual >= target;
+    case '<=':
+      return actual <= target;
     case '=':
     case '==':
     case '===':
-    case '': return actual === target;
+    case '':
+      return actual === target;
     case '!=':
     case '!==':
-    case '<>': return actual !== target;
-    default: return false;
+    case '<>':
+      return actual !== target;
+    default:
+      return false;
   }
 }
 
@@ -65,7 +78,9 @@ function applyGenericFilters<T>(
   return data.filter((item: any) => {
     if (searchField === 'all') {
       return Object.values(item).some((val) =>
-        String(val ?? '').toLowerCase().includes(q)
+        String(val ?? '')
+          .toLowerCase()
+          .includes(q)
       );
     }
 
@@ -75,7 +90,9 @@ function applyGenericFilters<T>(
       return compareNumeric(Number(value || 0), searchOperator, numValue);
     }
 
-    return String(value ?? '').toLowerCase().includes(q);
+    return String(value ?? '')
+      .toLowerCase()
+      .includes(q);
   });
 }
 
@@ -85,7 +102,8 @@ export const useOverduePaymentsViewModel = () => {
     findAllOverduePayments,
     findPendingReadingsByCadastralKeyOrCardId,
     findOverdueSummary,
-    findYearlyOverdueSummary
+    findYearlyOverdueSummary,
+    findMonthlyDebtSummary
   } = usePaymentsContext();
 
   // ── 1. LIST STATE ──
@@ -99,6 +117,17 @@ export const useOverduePaymentsViewModel = () => {
   const [pendingError, setPendingError] = useState<string | null>(null);
   const [isPendingModalOpen, setIsPendingModalOpen] = useState(false);
 
+  const [monthlyDebtSummary, setMonthlyDebtSummary] = useState<
+    MonthlyDebtSummary[]
+  >([]);
+  const [isMonthlyDebtSummaryLoading, setIsMonthlyDebtSummaryLoading] =
+    useState(false);
+  const [monthlyDebtSummaryError, setMonthlyDebtSummaryError] = useState<
+    string | null
+  >(null);
+  const [isMonthlyDebtSummaryRefreshing, setIsMonthlyDebtSummaryRefreshing] =
+    useState(false);
+
   // ── SUMMARY STATE ──
   const [overdueSummary, setOverdueSummary] = useState<OverdueSummary | null>(
     null
@@ -111,10 +140,13 @@ export const useOverduePaymentsViewModel = () => {
     YearlyOverdueSummary[]
   >([]);
   const [isYearlySummaryLoading, setIsYearlySummaryLoading] = useState(false);
-  const [yearlySummaryError, setYearlySummaryError] = useState<string | null>(null);
+  const [yearlySummaryError, setYearlySummaryError] = useState<string | null>(
+    null
+  );
   const [isYearlyRefreshing, setIsYearlyRefreshing] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<OverduePaymentTab>('payments');
+  const [activeTab, setActiveTab] =
+    useState<OverduePaymentTab>('dashboard_global');
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
@@ -128,41 +160,74 @@ export const useOverduePaymentsViewModel = () => {
   const [dashboardYear, setDashboardYear] = useState('all');
 
   // ── 2. DATA FETCHING ──
-  const fetchOverdueSummary = useCallback(async (isRefresh = false) => {
-    setIsSummaryLoading(true);
-    if (isRefresh) {
-      setIsRefreshing(true);
-      setOverdueSummary(null); // Clear data to trigger loading state if needed
-    }
-    setSummaryError(null);
-    try {
-      const result = await findOverdueSummary.execute();
-      setOverdueSummary(result);
-    } catch (err) {
-      setSummaryError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setIsSummaryLoading(false);
-      setIsRefreshing(false);
-    }
-  }, [findOverdueSummary]);
+  const fetchOverdueSummary = useCallback(
+    async (isRefresh = false) => {
+      setIsSummaryLoading(true);
+      if (isRefresh) {
+        setIsRefreshing(true);
+        setOverdueSummary(null); // Clear data to trigger loading state if needed
+      }
+      setSummaryError(null);
+      try {
+        const result = await findOverdueSummary.execute();
+        setOverdueSummary(result);
+      } catch (err) {
+        setSummaryError(
+          err instanceof Error ? err.message : 'Error desconocido'
+        );
+      } finally {
+        setIsSummaryLoading(false);
+        setIsRefreshing(false);
+      }
+    },
+    [findOverdueSummary]
+  );
 
-  const fetchYearlyOverdueSummary = useCallback(async (isRefresh = false) => {
-    setIsYearlySummaryLoading(true);
-    if (isRefresh) {
-      setIsYearlyRefreshing(true);
-      setYearlyOverdueSummary([]); // Clear data to trigger loading UI
-    }
-    setYearlySummaryError(null);
-    try {
-      const result = await findYearlyOverdueSummary.execute();
-      setYearlyOverdueSummary(result || []);
-    } catch (err) {
-      setYearlySummaryError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setIsYearlySummaryLoading(false);
-      setIsYearlyRefreshing(false);
-    }
-  }, [findYearlyOverdueSummary]);
+  const fetchYearlyOverdueSummary = useCallback(
+    async (isRefresh = false) => {
+      setIsYearlySummaryLoading(true);
+      if (isRefresh) {
+        setIsYearlyRefreshing(true);
+        setYearlyOverdueSummary([]); // Clear data to trigger loading UI
+      }
+      setYearlySummaryError(null);
+      try {
+        const result = await findYearlyOverdueSummary.execute();
+        setYearlyOverdueSummary(result || []);
+      } catch (err) {
+        setYearlySummaryError(
+          err instanceof Error ? err.message : 'Error desconocido'
+        );
+      } finally {
+        setIsYearlySummaryLoading(false);
+        setIsYearlyRefreshing(false);
+      }
+    },
+    [findYearlyOverdueSummary]
+  );
+
+  const fetchMonthlyDebtSummary = useCallback(
+    async (isRefresh = false) => {
+      setIsMonthlyDebtSummaryLoading(true);
+      if (isRefresh) {
+        setIsMonthlyDebtSummaryRefreshing(true);
+        setMonthlyDebtSummary([]); // Clear data to trigger loading UI
+      }
+      setMonthlyDebtSummaryError(null);
+      try {
+        const result = await findMonthlyDebtSummary.execute();
+        setMonthlyDebtSummary(result || []);
+      } catch (err) {
+        setMonthlyDebtSummaryError(
+          err instanceof Error ? err.message : 'Error desconocido'
+        );
+      } finally {
+        setIsMonthlyDebtSummaryLoading(false);
+        setIsMonthlyDebtSummaryRefreshing(false);
+      }
+    },
+    [findMonthlyDebtSummary]
+  );
 
   const fetchOverduePayments = useCallback(
     async (currentOffset: number = 0, append = false, isRefresh = false) => {
@@ -174,24 +239,33 @@ export const useOverduePaymentsViewModel = () => {
       setError(null);
       try {
         if (activeTab === 'payments') {
-          const result = await findAllOverduePayments.execute(LIMIT_SIZE, currentOffset);
+          const result = await findAllOverduePayments.execute(
+            LIMIT_SIZE,
+            currentOffset
+          );
           const data: OverduePayment[] = (result || []).map((item) => ({
             ...item,
             totalDue:
               (Number(item.totalTrashRate) || 0) +
               (Number(item.totalEpaaValue) || 0) +
               (Number(item.totalSurcharge) || 0) +
-              (Number(item.totalOldSurcharge) || 0) +
+              //(Number(item.totalOldSurcharge) || 0) +
               (Number(item.totalOldImprovementsInterest) || 0)
           }));
           if (data.length < LIMIT_SIZE) setHasMore(false);
           setOverduePayments((prev) => (append ? [...prev, ...data] : data));
-        } else if (activeTab === 'yearly_summary' || activeTab === 'dashboard_anual') {
+        } else if (
+          activeTab === 'yearly_summary' ||
+          activeTab === 'dashboard_anual' ||
+          activeTab === 'monthly_debt_summary'
+        ) {
           await fetchYearlyOverdueSummary(isRefresh);
+          await fetchMonthlyDebtSummary(isRefresh);
         } else if (activeTab === 'dashboard_global') {
           await Promise.all([
             fetchYearlyOverdueSummary(isRefresh),
-            fetchOverdueSummary(isRefresh)
+            fetchOverdueSummary(isRefresh),
+            fetchMonthlyDebtSummary(isRefresh)
           ]);
         }
       } catch (err) {
@@ -199,9 +273,17 @@ export const useOverduePaymentsViewModel = () => {
       } finally {
         setIsLoading(false);
         setIsRefreshing(false);
+        setIsMonthlyDebtSummaryLoading(false);
+        setIsMonthlyDebtSummaryRefreshing(false);
       }
     },
-    [findAllOverduePayments, activeTab, fetchYearlyOverdueSummary, fetchOverdueSummary]
+    [
+      findAllOverduePayments,
+      activeTab,
+      fetchYearlyOverdueSummary,
+      fetchOverdueSummary,
+      fetchMonthlyDebtSummary
+    ]
   );
 
   useEffect(() => {
@@ -224,7 +306,9 @@ export const useOverduePaymentsViewModel = () => {
     setSortConfig((prevConfig) => ({
       key,
       direction:
-        prevConfig?.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
+        prevConfig?.key === key && prevConfig.direction === 'asc'
+          ? 'desc'
+          : 'asc'
     }));
   };
 
@@ -246,10 +330,13 @@ export const useOverduePaymentsViewModel = () => {
       setPendingError(null);
       setPendingReadings([]);
       try {
-        const result = await findPendingReadingsByCadastralKeyOrCardId.execute(searchValue);
+        const result =
+          await findPendingReadingsByCadastralKeyOrCardId.execute(searchValue);
         setPendingReadings(result || []);
       } catch (err) {
-        setPendingError(err instanceof Error ? err.message : 'Error al buscar lecturas');
+        setPendingError(
+          err instanceof Error ? err.message : 'Error al buscar lecturas'
+        );
       } finally {
         setIsPendingLoading(false);
       }
@@ -258,43 +345,91 @@ export const useOverduePaymentsViewModel = () => {
   );
 
   // ── 4. FILTERING LOGIC ──
-  
+
   // Define numeric fields for both types to enable operator search
-  const paymentNumericFields = ['monthsPastDue', 'totalDue', 'totalEpaaValue', 'totalTrashRate'];
+  const paymentNumericFields = [
+    'monthsPastDue',
+    'totalDue',
+    'totalEpaaValue',
+    'totalTrashRate'
+  ];
   const yearlyNumericFields = [
-    'year', 
-    'clientsWithDebt', 
-    'totalUniqueCadastralKeysByYear', 
+    'year',
+    'clientsWithDebt',
+    'totalUniqueCadastralKeysByYear',
     'totalMonthsPastDue',
     'totalDebtAmount',
     'totalEpaaValue'
   ];
 
   const displayedPayments = applySortConfig(
-    applyGenericFilters(overduePayments, searchQuery, searchField, searchOperator, paymentNumericFields),
+    applyGenericFilters(
+      overduePayments,
+      searchQuery,
+      searchField,
+      searchOperator,
+      paymentNumericFields
+    ),
     sortConfig
   );
 
   const displayedYearlySummary = applySortConfig(
     applyGenericFilters(
-      dashboardYear === 'all' 
-        ? yearlyOverdueSummary 
-        : yearlyOverdueSummary.filter(item => item.year.toString() === dashboardYear), 
-      searchQuery, searchField, searchOperator, yearlyNumericFields
+      dashboardYear === 'all'
+        ? yearlyOverdueSummary
+        : yearlyOverdueSummary.filter(
+            (item) => item.year.toString() === dashboardYear
+          ),
+      searchQuery,
+      searchField,
+      searchOperator,
+      yearlyNumericFields
+    ),
+    sortConfig
+  );
+
+  const monthlyNumericFields = [
+    'year',
+    'month',
+    'totalUniqueClients',
+    'totalUniqueCadastralKeys',
+    'clientsWithDebtThisMonth',
+    'totalMonthsPastDue',
+    'totalDebtAmount',
+    'totalEpaaValue'
+  ];
+
+  const displayedMonthlyDebtSummary = applySortConfig(
+    applyGenericFilters(
+      dashboardYear === 'all'
+        ? monthlyDebtSummary
+        : monthlyDebtSummary.filter(
+            (item) => item.year.toString() === dashboardYear
+          ),
+      searchQuery,
+      searchField,
+      searchOperator,
+      monthlyNumericFields
     ),
     sortConfig
   );
 
   const resolvedDashboardYear = useMemo(() => {
-    if (dashboardYear === 'all' && activeTab === 'dashboard_anual' && yearlyOverdueSummary.length > 0) {
-      return Math.max(...yearlyOverdueSummary.map(y => y.year)).toString();
+    if (
+      dashboardYear === 'all' &&
+      activeTab === 'dashboard_anual' &&
+      yearlyOverdueSummary.length > 0
+    ) {
+      return Math.max(...yearlyOverdueSummary.map((y) => y.year)).toString();
     }
     return dashboardYear;
   }, [dashboardYear, activeTab, yearlyOverdueSummary]);
 
   const dashboardData = useMemo(() => {
     if (resolvedDashboardYear === 'all') return yearlyOverdueSummary;
-    return yearlyOverdueSummary.filter(item => item.year.toString() === resolvedDashboardYear);
+    return yearlyOverdueSummary.filter(
+      (item) => item.year.toString() === resolvedDashboardYear
+    );
   }, [yearlyOverdueSummary, resolvedDashboardYear]);
 
   // ── 5. RETURNED VALUES ──
@@ -338,6 +473,12 @@ export const useOverduePaymentsViewModel = () => {
     isYearlyRefreshing,
     yearlySummaryError,
     fetchYearlyOverdueSummary,
-    fetchOverduePayments
+    fetchOverduePayments,
+    monthlyDebtSummary,
+    displayedMonthlyDebtSummary,
+    isMonthlyDebtSummaryLoading,
+    isMonthlyDebtSummaryRefreshing,
+    monthlyDebtSummaryError,
+    fetchMonthlyDebtSummary
   };
 };

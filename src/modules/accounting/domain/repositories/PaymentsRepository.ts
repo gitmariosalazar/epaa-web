@@ -1,4 +1,5 @@
 import type {
+  MonthlyDebtSummary,
   OverduePayment,
   OverdueSummary,
   YearlyOverdueSummary
@@ -34,4 +35,5 @@ export interface PaymentsRepository {
 
   findOverdueSummary(): Promise<OverdueSummary | null>;
   findYearlyOverdueSummary(): Promise<YearlyOverdueSummary[]>;
+  findMonthlyDebtSummary(): Promise<MonthlyDebtSummary[]>;
 }

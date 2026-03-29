@@ -20,7 +20,7 @@
 
 .chart-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md) !important;
 }
 
 .chart-card-heading {
@@ -88,6 +88,12 @@
   opacity: 0.8 !important;
   transform: scale(1.02);
   transform-origin: center;
+  filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.15));
+  stroke-width: 0.5 !important;
+  stroke: var(--text-main) !important;
+  stroke-opacity: 0.5 !important;
+  opacity: 0.8 !important;
+  box-shadow: 15px 4px 6px rgba(255, 0, 0, 0.15) !important;
 }
 
 .donut-bg {
@@ -260,4 +266,106 @@
   .donut-legend {
     width: 100%;
   }
+}
+
+/* ── Recharts Global Overrides ─────────────────────── */
+.custom-recharts-tooltip .recharts-default-tooltip {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-md) !important;
+  color: var(--text-main) !important;
+  font-size: 12px !important;
+}
+
+.custom-recharts-tooltip .recharts-tooltip-item {
+  color: var(--text-main) !important;
+  font-weight: 500 !important;
+}
+
+/* Specific wrappers */
+.custom-tooltip-wrapper-pie {
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* 
+  Make custom SVG text labels responsive 
+  Hides them gracefully on smaller mobile/tablet screens to prevent catastrophic overlap
+*/
+@media (max-width: 1024px) {
+  .responsive-chart-label {
+    display: none;
+  }
+}
+
+.custom-recharts-legend {
+  padding-right: 1rem !important;
+}
+
+.custom-recharts-legend-pie {
+  padding-right: 1rem !important;
+  font-size: 13px !important;
+}
+
+.custom-legend-text {
+  transition: all 0.2s ease;
+}
+
+.custom-legend-text--active {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.custom-legend-text--inactive {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.pie-active-sector {
+  filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.15));
+}
+
+/* ── Active Dot Pulsating Animation ────────────────── */
+@keyframes pulse-ring-animation {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(3.5);
+    opacity: 0;
+  }
+}
+
+.pulsating-active-dot-ring {
+  animation: pulse-ring-animation 1.5s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+.pulsating-active-dot-core {
+  transition: r 0.2s ease;
+}
+
+/* ── Active Bar Pulsating Animation ────────────────── */
+@keyframes pulse-bar-animation {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.15, 1.05); /* X width, Y height */
+    opacity: 0;
+  }
+}
+
+.pulsating-active-bar {
+  animation: pulse-bar-animation 1.5s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+  transform-origin: bottom center; /* Grow uniformly up and slightly out */
+  transform-box: fill-box;
+}
+
+.active-bar-core {
+  transition: all 0.2s ease;
 }

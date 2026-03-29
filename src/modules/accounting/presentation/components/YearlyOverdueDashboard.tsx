@@ -1,16 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-  AreaChart,
-  Area
-} from 'recharts';
+import { ResponsiveContainer } from 'recharts';
 import {
   DollarSign,
   Users,
@@ -23,11 +13,16 @@ import {
   Percent,
   Clock
 } from 'lucide-react';
-import type { YearlyOverdueSummary } from '../../domain/models/OverdueReading';
+import type {
+  MonthlyDebtSummary,
+  YearlyOverdueSummary
+} from '../../domain/models/OverdueReading';
 import {
   CircularProgress,
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
+import { GradientAreaChart } from '@/shared/presentation/components/Charts/GradientAreaChart';
+import { DynamicBarChart } from '@/shared/presentation/components/Charts/DynamicBarChart';
 import '../styles/OverdueDashboard.css';
 /*
 const fmtMoney = (n: number) =>
@@ -36,6 +31,7 @@ const fmtMoney = (n: number) =>
 interface YearlyOverdueDashboardProps {
   yearlyData: YearlyOverdueSummary[]; // All years for charts
   selectedYearData: YearlyOverdueSummary | null; // Specific year for KPIs
+  monthlyDebtData: MonthlyDebtSummary[];
   isLoading: boolean;
 }
 
@@ -81,10 +77,19 @@ const KpiCard: React.FC<KpiCardProps> = ({
 export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
   yearlyData,
   selectedYearData,
+  monthlyDebtData,
   isLoading
 }) => {
   const { t } = useTranslation();
   const loadingProgress = useSimulatedProgress(isLoading);
+
+  const [isCompact, setIsCompact] = useState(true);
+  useEffect(() => {
+    const handleResize = () => setIsCompact(window.innerWidth < 1380); // Strict threshold to ensure perfect clarity
+    handleResize(); // trigger once immediately
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const chartData = useMemo(() => {
     return [...(yearlyData || [])].sort((a, b) => a.year - b.year);
@@ -108,6 +113,14 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
     };
   }, [selectedYearData]);
 
+  const chartDataMonthly = useMemo(() => {
+    if (!monthlyDebtData) return [];
+    const selectedYear = monthlyDebtData.filter(
+      (m) => m.year === selectedYearData?.year
+    );
+    return [...(selectedYear || [])].sort((a, b) => a.month - b.month);
+  }, [monthlyDebtData]);
+
   /*
   const revenueStatus = useMemo(() => {
     if (!selectedYearData) return [];
@@ -129,6 +142,12 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
 
   const formatCurrency = (val: number) =>
     `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const formatShortCurrency = (val: number) => {
+    if (!val) return '$0';
+    if (val >= 1000) return `$${(val / 1000).toFixed(1)}k`;
+    return `$${val.toFixed(0)}`;
+  };
 
   const formatNumber = (val: number) => Math.round(val).toLocaleString();
 
@@ -156,6 +175,212 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
 
   return (
     <div className="overdue-dashboard">
+      {/* ── Charts Grid - Only Evolution Monthly debts ── */}
+
+      <div className="overdue-charts-grid">
+        <div className="overdue-chart-card">
+          <div className="overdue-chart-header">
+            <h3 className="overdue-chart-title">
+              {t(
+                'accounting.dashboard.trendTitle',
+                `Tendencia Mensual - Deuda - ${chartDataMonthly[0]?.year || selectedYearData?.year || ''}`
+              )}
+            </h3>
+            <p className="overdue-chart-subtitle">
+              {t(
+                'accounting.dashboard.trendSubtitle',
+                'Evolución de clientes con mora'
+              )}
+            </p>
+          </div>
+          <div className="overdue-chart-body">
+            <ResponsiveContainer width="100%" height="100%">
+              <GradientAreaChart
+                data={chartDataMonthly}
+                tooltipFormatterOrComponent={(payload: MonthlyDebtSummary) => {
+                  return (
+                    <div className="year-tooltip">
+                      <span>
+                        {t('accounting.overdue.month', 'Mes')}
+                        <p>{payload.monthName}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.totalMonthsPastDue',
+                          'Meses Mora'
+                        )}
+                        <p>{payload.totalMonthsPastDue}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.totalDebtAmountMonthly',
+                          'Deuda Mensual'
+                        )}
+                        <p>{formatCurrency(payload.totalDebtAmount)}</p>
+                      </span>
+                      <span>
+                        {t('accounting.overdue.totalEpaaValue', 'Deuda EPAA')}
+                        <p>{formatCurrency(payload.totalEpaaValue)}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.clientsWithDebtThisMonth',
+                          'Clientes con Mora'
+                        )}
+                        <p>{formatNumber(payload.clientsWithDebtThisMonth)}</p>
+                      </span>
+                    </div>
+                  );
+                }}
+                dataKeyX="monthName"
+                dataKeyY="clientsWithDebtThisMonth"
+                nameY="N° Clientes"
+                nameX="Meses"
+                startColor="#a855f7"
+                endColor="#06b6d4"
+                valuePosition={isCompact ? 'none' : 'top'}
+                customLabel={({
+                  x,
+                  y,
+                  payload,
+                  index
+                }: {
+                  x: number;
+                  y: number;
+                  payload: MonthlyDebtSummary;
+                  index: number;
+                }) => {
+                  // Dynamic anchoring so the first and last labels don't get clipped or overlap the Y-axis
+                  let anchor = 'middle';
+                  let xOffset = x;
+                  if (index === 0) {
+                    anchor = 'start';
+                    xOffset = x - 5; // Push slightly right of the start dot line
+                  } else if (index === chartData.length - 1) {
+                    anchor = 'end';
+                    xOffset = x + 5; // Push slightly left of the end dot line
+                  }
+
+                  // Zig-zag pattern: one directly ABOVE the dot, the next directly BELOW the dot
+                  const isEven = index % 2 === 0;
+                  const yPosition = isEven ? y - 25 : y + 15;
+
+                  return (
+                    <text
+                      x={xOffset}
+                      y={yPosition} /* Exactly alternating up and down */
+                      textAnchor={anchor as any}
+                      className="responsive-chart-label"
+                      style={{
+                        paintOrder: 'stroke fill',
+                        stroke: 'var(--surface)',
+                        strokeLinejoin: 'round',
+                        strokeWidth: 3
+                      }}
+                    >
+                      <tspan
+                        x={xOffset}
+                        fill="#10b981" /* Green elegant color for the amount */
+                        fontSize={10}
+                        fontWeight={800}
+                      >
+                        {payload
+                          ? formatShortCurrency(payload.totalDebtAmount)
+                          : ''}
+                      </tspan>
+                      <tspan
+                        x={xOffset}
+                        dy={14}
+                        fill="var(--text-main)"
+                        fontSize={11}
+                        fontWeight={700}
+                      >
+                        {payload.clientsWithDebtThisMonth}
+                      </tspan>
+                      <tspan
+                        fill="var(--text-secondary)"
+                        fontSize={10}
+                        fontWeight={500}
+                        dx={3}
+                      >
+                        {t('common.clients', 'Clientes')}
+                      </tspan>
+                    </text>
+                  );
+                }}
+              />
+            </ResponsiveContainer>
+          </div>
+        </div>
+        <div className="overdue-chart-card">
+          <div className="overdue-chart-header">
+            <h3 className="overdue-chart-title">
+              {t(
+                'accounting.dashboard.evolutionTitle',
+                `Evolución Mensual - ${chartDataMonthly[0]?.year || selectedYearData?.year || ''}`
+              )}
+            </h3>
+            <p className="overdue-chart-subtitle">
+              {t(
+                'accounting.dashboard.evolutionSubtitle',
+                'Deuda mensual comparada'
+              )}
+            </p>
+          </div>
+          <div className="overdue-chart-body">
+            <ResponsiveContainer width="100%" height="100%">
+              <DynamicBarChart
+                data={chartDataMonthly}
+                dataKeyX="monthName"
+                dataKeyY="totalDebtAmount"
+                nameY={t(
+                  'accounting.overdue.totalDebtAmountMonthly',
+                  'Deuda Mensual'
+                )}
+                nameX="Meses"
+                yAxisFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
+                tooltipFormatterOrComponent={(payload: MonthlyDebtSummary) => {
+                  return (
+                    <div className="year-tooltip">
+                      <span>
+                        {t('accounting.overdue.month', 'Mes')}
+                        <p>{payload.monthName}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.totalMonthsPastDue',
+                          'Meses Mora'
+                        )}
+                        <p>{payload.totalMonthsPastDue}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.totalDebtAmountMonthly',
+                          'Deuda Mensual'
+                        )}
+                        <p>{formatCurrency(payload.totalDebtAmount)}</p>
+                      </span>
+                      <span>
+                        {t('accounting.overdue.totalEpaaValue', 'Deuda EPAA')}
+                        <p>{formatCurrency(payload.totalEpaaValue)}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.clientsWithDebtThisMonth',
+                          'Clientes con Mora'
+                        )}
+                        <p>{formatNumber(payload.clientsWithDebtThisMonth)}</p>
+                      </span>
+                    </div>
+                  );
+                }}
+                valuePosition="top"
+                labelFormatter={(val: number) => `$${(val / 1000).toFixed(0)}k`}
+              />
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
       {/* ── 10 KPI Grid ── */}
       <div className="overdue-dashboard-kpi-grid">
         <KpiCard
@@ -276,50 +501,47 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
           </div>
           <div className="overdue-chart-body">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <defs>
-                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
-                    <stop offset="100%" stopColor="#1d4ed8" stopOpacity={0.8} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="var(--border-color)"
-                />
-                <XAxis
-                  dataKey="year"
-                  stroke="var(--text-secondary)"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="var(--text-secondary)"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
-                />
-                <RechartsTooltip
-                  cursor={{ fill: 'rgba(var(--primary-rgb), 0.05)' }}
-                  contentStyle={{
-                    backgroundColor: 'var(--surface)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '12px'
-                  }}
-                  formatter={(val: number) => [
-                    formatCurrency(val),
-                    t('accounting.overdue.totalDebtAmount', 'Monto')
-                  ]}
-                />
-                <Bar
-                  dataKey="totalDebtAmount"
-                  fill="url(#barGradient)"
-                  radius={[6, 6, 0, 0]}
-                />
-              </BarChart>
+              <DynamicBarChart
+                data={chartData}
+                dataKeyX="year"
+                dataKeyY="totalDebtAmount"
+                nameY={t('accounting.overdue.totalDebtAmount', 'Deuda Anual')}
+                nameX="Año"
+                yAxisFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
+                tooltipFormatterOrComponent={(
+                  payload: YearlyOverdueSummary
+                ) => {
+                  return (
+                    <div className="year-tooltip">
+                      <span>
+                        {t('accounting.overdue.year', 'Año')}
+                        <p>{payload.year}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.totalMonthsPastDue',
+                          'Meses Mora'
+                        )}
+                        <p>{payload.totalMonthsPastDue}</p>
+                      </span>
+                      <span>
+                        {t('accounting.overdue.totalDebtAmount', 'Deuda Anual')}
+                        <p>{formatCurrency(payload.totalDebtAmount)}</p>
+                      </span>
+                      <span>
+                        {t('accounting.overdue.totalEpaaValue', 'Deuda EPAA')}
+                        <p>{formatCurrency(payload.totalEpaaValue)}</p>
+                      </span>
+                      <span>
+                        {t('accounting.overdue.totalUniqueClients', 'Clientes')}
+                        <p>{formatNumber(payload.totalUniqueClients)}</p>
+                      </span>
+                    </div>
+                  );
+                }}
+                valuePosition="top"
+                labelFormatter={(val: number) => `$${(val / 1000).toFixed(0)}k`}
+              />
             </ResponsiveContainer>
           </div>
         </div>
@@ -338,56 +560,118 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
           </div>
           <div className="overdue-chart-body">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient
-                    id="trendGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="var(--border-color)"
-                />
-                <XAxis
-                  dataKey="year"
-                  stroke="var(--text-secondary)"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="var(--text-secondary)"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <RechartsTooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--surface)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '12px'
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  name="Meses Mora"
-                  dataKey="totalMonthsPastDue"
-                  stroke="#a855f7"
-                  strokeWidth={3}
-                  fill="url(#trendGradient)"
-                  dot={
-                    chartData.length === 1 ? { r: 6, fill: '#a855f7' } : false
+              <GradientAreaChart
+                data={chartData}
+                tooltipFormatterOrComponent={(
+                  payload: YearlyOverdueSummary
+                ) => {
+                  return (
+                    <div className="year-tooltip">
+                      <span>
+                        {t('accounting.overdue.year', 'Año')}
+                        <p>{payload.year}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.totalMonthsPastDue',
+                          'Meses Mora'
+                        )}
+                        <p>{payload.totalMonthsPastDue}</p>
+                      </span>
+                      <span>
+                        {t('accounting.overdue.totalDebtAmount', 'Deuda Anual')}
+                        <p>{formatCurrency(payload.totalDebtAmount)}</p>
+                      </span>
+                      <span>
+                        {t('accounting.overdue.totalEpaaValue', 'Deuda EPAA')}
+                        <p>{formatCurrency(payload.totalEpaaValue)}</p>
+                      </span>
+                      <span>
+                        {t('accounting.overdue.totalUniqueClients', 'Clientes')}
+                        <p>{formatNumber(payload.totalUniqueClients)}</p>
+                      </span>
+                    </div>
+                  );
+                }}
+                dataKeyX="year"
+                dataKeyY="totalMonthsPastDue"
+                nameY="Meses Mora"
+                nameX="Año"
+                startColor="#a855f7"
+                endColor="#06b6d4"
+                valuePosition={isCompact ? 'none' : 'top'}
+                customLabel={({
+                  x,
+                  y,
+                  value,
+                  payload,
+                  index
+                }: {
+                  x: number;
+                  y: number;
+                  value: number;
+                  payload: { totalDebtAmount: number };
+                  index: number;
+                }) => {
+                  // Dynamic anchoring so the first and last labels don't get clipped or overlap the Y-axis
+                  let anchor = 'middle';
+                  let xOffset = x;
+                  if (index === 0) {
+                    anchor = 'start';
+                    xOffset = x - 5; // Push slightly right of the start dot line
+                  } else if (index === chartData.length - 1) {
+                    anchor = 'end';
+                    xOffset = x + 5; // Push slightly left of the end dot line
                   }
-                />
-              </AreaChart>
+
+                  // Zig-zag pattern: one directly ABOVE the dot, the next directly BELOW the dot
+                  const isEven = index % 2 === 0;
+                  const yPosition = isEven ? y - 25 : y + 15;
+
+                  return (
+                    <text
+                      x={xOffset}
+                      y={yPosition} /* Exactly alternating up and down */
+                      textAnchor={anchor as any}
+                      className="responsive-chart-label"
+                      style={{
+                        paintOrder: 'stroke fill',
+                        stroke: 'var(--surface)',
+                        strokeLinejoin: 'round',
+                        strokeWidth: 3
+                      }}
+                    >
+                      <tspan
+                        x={xOffset}
+                        fill="#10b981" /* Green elegant color for the amount */
+                        fontSize={10}
+                        fontWeight={800}
+                      >
+                        {payload
+                          ? formatShortCurrency(payload.totalDebtAmount)
+                          : ''}
+                      </tspan>
+                      <tspan
+                        x={xOffset}
+                        dy={14}
+                        fill="var(--text-main)"
+                        fontSize={11}
+                        fontWeight={700}
+                      >
+                        {value}
+                      </tspan>
+                      <tspan
+                        fill="var(--text-secondary)"
+                        fontSize={10}
+                        fontWeight={500}
+                        dx={3}
+                      >
+                        {t('common.months', 'Meses')}
+                      </tspan>
+                    </text>
+                  );
+                }}
+              />
             </ResponsiveContainer>
           </div>
         </div>

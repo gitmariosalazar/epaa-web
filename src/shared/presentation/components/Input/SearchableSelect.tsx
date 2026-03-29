@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown, X, Check } from 'lucide-react';
 import '@/shared/presentation/styles/SearchableSelect.css';
 
 export interface SearchableSelectOption {
@@ -215,7 +215,8 @@ export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelect
                     className={`searchable-select-option ${opt.value === value ? 'searchable-select-option--selected' : ''}`}
                     onClick={() => handleOptionSelect(opt)}
                   >
-                    {opt.label}
+                    <span className="searchable-select-option-label">{opt.label}</span>
+                    {opt.value === value && <Check size={16} className="searchable-select-option-check" />}
                   </li>
                 ))
               ) : (

@@ -5,6 +5,7 @@ import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiRespon
 import type { Payment } from '../../domain/models/Payment';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 import type {
+  MonthlyDebtSummary,
   OverduePayment,
   OverdueSummary,
   YearlyOverdueSummary
@@ -86,6 +87,13 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
   async findYearlyOverdueSummary(): Promise<YearlyOverdueSummary[]> {
     const response = await this.client.get<ApiResponse<YearlyOverdueSummary[]>>(
       `/readings/find-yearly-overdue-summary`
+    );
+    return this.handleResponse(response.data);
+  }
+
+  async findMonthlyDebtSummary(): Promise<MonthlyDebtSummary[]> {
+    const response = await this.client.get<ApiResponse<MonthlyDebtSummary[]>>(
+      `/readings/find-monthly-debt-summary`
     );
     return this.handleResponse(response.data);
   }

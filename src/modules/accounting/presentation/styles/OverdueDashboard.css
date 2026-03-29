@@ -303,7 +303,7 @@
 .overdue-chart-body {
   flex: 1;
   width: 100%;
-  min-height: 220px;
+  min-height: 350px;
 }
 
 /* Page Loading Overlay */
@@ -319,6 +319,30 @@
   border: 1px solid var(--border-color);
   margin-top: 1rem;
   animation: dashboard-fade-in 0.5s ease-out;
+}
+
+.year-tooltip {
+  display: flex;
+  flex-direction: row;
+  gap: 1.25rem;
+  font-size: 0.7rem;
+}
+
+.year-tooltip span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-weight: bold;
+  color: var(--gray-500);
+}
+
+.year-tooltip p {
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+  font-weight: 500 !important;
+  color: var(--text-main) !important;
+  margin-left: 2px !important;
 }
 
 @keyframes dashboard-fade-in {
