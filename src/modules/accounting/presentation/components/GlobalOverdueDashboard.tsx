@@ -25,6 +25,7 @@ import { GradientAreaChart } from '@/shared/presentation/components/Charts/Gradi
 import { DynamicBarChart } from '@/shared/presentation/components/Charts/DynamicBarChart';
 import { DynamicPieChart } from '@/shared/presentation/components/Charts/DynamicPieChart';
 import '../styles/OverdueDashboard.css';
+import { MdCable } from 'react-icons/md';
 
 interface GlobalOverdueDashboardProps {
   yearlyData: YearlyOverdueSummary[];
@@ -284,6 +285,37 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
               )}
             </p>
           </div>
+          {globalSummary && (
+            <div className="year-tooltip year-tooltip-evolution">
+              <div className="year-tooltip-evolution-item gradient-color-clients">
+                <div className="year-tooltip-evolution-icon">
+                  <Users size={22} color="blue" />
+                </div>
+                <span>
+                  {t('accounting.overdue.clientsWithDebt', 'Total Clientes')}
+                  <p>{globalSummary.totalClientsWithDebt}</p>
+                </span>
+              </div>
+              <div className="year-tooltip-evolution-item gradient-color-keys">
+                <div className="year-tooltip-evolution-icon">
+                  <MdCable size={22} color="green" />
+                </div>
+                <span>
+                  {t('accounting.overdue.cadastralKeys', 'T. Acometidas')}
+                  <p>{globalSummary.totalUniqueCadastralKeys}</p>
+                </span>
+              </div>
+              <div className="year-tooltip-evolution-item gradient-color-debt">
+                <div className="year-tooltip-evolution-icon">
+                  <DollarSign size={22} color="red" />
+                </div>
+                <span>
+                  {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
+                  <p>{formatCurrency(globalSummary.totalDebtAmount)}</p>
+                </span>
+              </div>
+            </div>
+          )}
           <div className="overdue-chart-body">
             <ResponsiveContainer width="100%" height="100%">
               <DynamicBarChart
@@ -303,23 +335,29 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                         <p>{payload.year}</p>
                       </span>
                       <span>
-                        {t(
-                          'accounting.overdue.totalMonthsPastDue',
-                          'Meses Mora'
-                        )}
-                        <p>{payload.totalMonthsPastDue}</p>
-                      </span>
-                      <span>
-                        {t('accounting.overdue.totalDebtAmount', 'Deuda Anual')}
+                        {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
                         <p>{formatCurrency(payload.totalDebtAmount)}</p>
                       </span>
                       <span>
-                        {t('accounting.overdue.totalEpaaValue', 'Deuda EPAA')}
+                        {t(
+                          'accounting.overdue.totalTrashRate',
+                          'T. Tasa Basura'
+                        )}
+                        <p>{formatCurrency(payload.totalTrashRate)}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.totalEpaaValue',
+                          'T. Deuda EPAA'
+                        )}
                         <p>{formatCurrency(payload.totalEpaaValue)}</p>
                       </span>
                       <span>
-                        {t('accounting.overdue.totalUniqueClients', 'Clientes')}
-                        <p>{formatNumber(payload.totalUniqueClients)}</p>
+                        {t(
+                          'accounting.overdue.totalUniqueClients',
+                          'N° Clientes'
+                        )}
+                        <p>{formatNumber(payload.clientsWithDebt)}</p>
                       </span>
                     </div>
                   );
@@ -345,6 +383,37 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
               )}
             </p>
           </div>
+          {globalSummary && (
+            <div className="year-tooltip year-tooltip-evolution">
+              <div className="year-tooltip-evolution-item gradient-color-clients">
+                <div className="year-tooltip-evolution-icon">
+                  <Users size={22} color="blue" />
+                </div>
+                <span>
+                  {t('accounting.overdue.clientsWithDebt', 'Total Clientes')}
+                  <p>{globalSummary.totalClientsWithDebt}</p>
+                </span>
+              </div>
+              <div className="year-tooltip-evolution-item gradient-color-keys">
+                <div className="year-tooltip-evolution-icon">
+                  <MdCable size={22} color="green" />
+                </div>
+                <span>
+                  {t('accounting.overdue.cadastralKeys', 'T. Acometidas')}
+                  <p>{globalSummary.totalUniqueCadastralKeys}</p>
+                </span>
+              </div>
+              <div className="year-tooltip-evolution-item gradient-color-debt">
+                <div className="year-tooltip-evolution-icon">
+                  <DollarSign size={22} color="red" />
+                </div>
+                <span>
+                  {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
+                  <p>{formatCurrency(globalSummary.totalDebtAmount)}</p>
+                </span>
+              </div>
+            </div>
+          )}
           <div className="overdue-chart-body">
             <ResponsiveContainer width="100%" height="100%">
               <DynamicPieChart
@@ -376,6 +445,37 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
               )}
             </p>
           </div>
+          {globalSummary && (
+            <div className="year-tooltip year-tooltip-evolution">
+              <div className="year-tooltip-evolution-item gradient-color-clients">
+                <div className="year-tooltip-evolution-icon">
+                  <Users size={22} color="blue" />
+                </div>
+                <span>
+                  {t('accounting.overdue.clientsWithDebt', 'Total Clientes')}
+                  <p>{globalSummary.totalClientsWithDebt}</p>
+                </span>
+              </div>
+              <div className="year-tooltip-evolution-item gradient-color-keys">
+                <div className="year-tooltip-evolution-icon">
+                  <MdCable size={22} color="green" />
+                </div>
+                <span>
+                  {t('accounting.overdue.cadastralKeys', 'T. Acometidas')}
+                  <p>{globalSummary.totalUniqueCadastralKeys}</p>
+                </span>
+              </div>
+              <div className="year-tooltip-evolution-item gradient-color-debt">
+                <div className="year-tooltip-evolution-icon">
+                  <DollarSign size={22} color="red" />
+                </div>
+                <span>
+                  {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
+                  <p>{formatCurrency(globalSummary.totalDebtAmount)}</p>
+                </span>
+              </div>
+            </div>
+          )}
           <div className="overdue-chart-body">
             <ResponsiveContainer width="100%" height="100%">
               <GradientAreaChart
@@ -400,23 +500,29 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                         <p>{payload.year}</p>
                       </span>
                       <span>
-                        {t(
-                          'accounting.overdue.totalMonthsPastDue',
-                          'Meses Mora'
-                        )}
-                        <p>{payload.totalMonthsPastDue}</p>
-                      </span>
-                      <span>
-                        {t('accounting.overdue.totalDebtAmount', 'Deuda Anual')}
+                        {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
                         <p>{formatCurrency(payload.totalDebtAmount)}</p>
                       </span>
                       <span>
-                        {t('accounting.overdue.totalEpaaValue', 'Deuda EPAA')}
+                        {t(
+                          'accounting.overdue.totalTrashRate',
+                          'T. Tasa Basura'
+                        )}
+                        <p>{formatCurrency(payload.totalTrashRate)}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.totalEpaaValue',
+                          'T. Deuda EPAA'
+                        )}
                         <p>{formatCurrency(payload.totalEpaaValue)}</p>
                       </span>
                       <span>
-                        {t('accounting.overdue.totalUniqueClients', 'Clientes')}
-                        <p>{formatNumber(payload.totalUniqueClients)}</p>
+                        {t(
+                          'accounting.overdue.totalUniqueClients',
+                          'N° Clientes'
+                        )}
+                        <p>{formatNumber(payload.clientsWithDebt)}</p>
                       </span>
                     </div>
                   );

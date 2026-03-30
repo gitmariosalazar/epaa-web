@@ -24,6 +24,7 @@ import {
 import { GradientAreaChart } from '@/shared/presentation/components/Charts/GradientAreaChart';
 import { DynamicBarChart } from '@/shared/presentation/components/Charts/DynamicBarChart';
 import '../styles/OverdueDashboard.css';
+import { MdCable } from 'react-icons/md';
 /*
 const fmtMoney = (n: number) =>
   `$${Number(n || 0).toLocaleString('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -193,6 +194,37 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
               )}
             </p>
           </div>
+          {selectedYearData && (
+            <div className="year-tooltip year-tooltip-evolution">
+              <div className="year-tooltip-evolution-item gradient-color-clients">
+                <div className="year-tooltip-evolution-icon">
+                  <Users size={22} color="blue" />
+                </div>
+                <span>
+                  {t('accounting.overdue.clientsWithDebt', 'Total Clientes')}
+                  <p>{selectedYearData.clientsWithDebt}</p>
+                </span>
+              </div>
+              <div className="year-tooltip-evolution-item gradient-color-keys">
+                <div className="year-tooltip-evolution-icon">
+                  <MdCable size={22} color="green" />
+                </div>
+                <span>
+                  {t('accounting.overdue.cadastralKeys', 'T. Acometidas')}
+                  <p>{selectedYearData.totalUniqueCadastralKeys}</p>
+                </span>
+              </div>
+              <div className="year-tooltip-evolution-item gradient-color-debt">
+                <div className="year-tooltip-evolution-icon">
+                  <DollarSign size={22} color="red" />
+                </div>
+                <span>
+                  {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
+                  <p>{formatCurrency(selectedYearData.totalDebtAmount)}</p>
+                </span>
+              </div>
+            </div>
+          )}
           <div className="overdue-chart-body">
             <ResponsiveContainer width="100%" height="100%">
               <GradientAreaChart
@@ -205,27 +237,27 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                         <p>{payload.monthName}</p>
                       </span>
                       <span>
-                        {t(
-                          'accounting.overdue.totalMonthsPastDue',
-                          'Meses Mora'
-                        )}
-                        <p>{payload.totalMonthsPastDue}</p>
-                      </span>
-                      <span>
-                        {t(
-                          'accounting.overdue.totalDebtAmountMonthly',
-                          'Deuda Mensual'
-                        )}
+                        {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
                         <p>{formatCurrency(payload.totalDebtAmount)}</p>
                       </span>
                       <span>
-                        {t('accounting.overdue.totalEpaaValue', 'Deuda EPAA')}
+                        {t(
+                          'accounting.overdue.totalTrashRate',
+                          'T. Tasa Basura'
+                        )}
+                        <p>{formatCurrency(payload.totalTrashRate)}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.totalEpaaValue',
+                          'T. Deuda EPAA'
+                        )}
                         <p>{formatCurrency(payload.totalEpaaValue)}</p>
                       </span>
                       <span>
                         {t(
                           'accounting.overdue.clientsWithDebtThisMonth',
-                          'Clientes con Mora'
+                          'N° Clientes'
                         )}
                         <p>{formatNumber(payload.clientsWithDebtThisMonth)}</p>
                       </span>
@@ -327,6 +359,37 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
               )}
             </p>
           </div>
+          {selectedYearData && (
+            <div className="year-tooltip year-tooltip-evolution">
+              <div className="year-tooltip-evolution-item gradient-color-clients">
+                <div className="year-tooltip-evolution-icon">
+                  <Users size={22} color="blue" />
+                </div>
+                <span>
+                  {t('accounting.overdue.clientsWithDebt', 'Total Clientes')}
+                  <p>{selectedYearData.clientsWithDebt}</p>
+                </span>
+              </div>
+              <div className="year-tooltip-evolution-item gradient-color-keys">
+                <div className="year-tooltip-evolution-icon">
+                  <MdCable size={22} color="green" />
+                </div>
+                <span>
+                  {t('accounting.overdue.cadastralKeys', 'T. Acometidas')}
+                  <p>{selectedYearData.totalUniqueCadastralKeys}</p>
+                </span>
+              </div>
+              <div className="year-tooltip-evolution-item gradient-color-debt">
+                <div className="year-tooltip-evolution-icon">
+                  <DollarSign size={22} color="red" />
+                </div>
+                <span>
+                  {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
+                  <p>{formatCurrency(selectedYearData.totalDebtAmount)}</p>
+                </span>
+              </div>
+            </div>
+          )}
           <div className="overdue-chart-body">
             <ResponsiveContainer width="100%" height="100%">
               <DynamicBarChart
@@ -348,17 +411,17 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                       </span>
                       <span>
                         {t(
-                          'accounting.overdue.totalMonthsPastDue',
-                          'Meses Mora'
-                        )}
-                        <p>{payload.totalMonthsPastDue}</p>
-                      </span>
-                      <span>
-                        {t(
                           'accounting.overdue.totalDebtAmountMonthly',
                           'Deuda Mensual'
                         )}
                         <p>{formatCurrency(payload.totalDebtAmount)}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.totalTrashRate',
+                          'T. Tasa Basura'
+                        )}
+                        <p>{formatCurrency(payload.totalTrashRate)}</p>
                       </span>
                       <span>
                         {t('accounting.overdue.totalEpaaValue', 'Deuda EPAA')}
@@ -367,7 +430,7 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                       <span>
                         {t(
                           'accounting.overdue.clientsWithDebtThisMonth',
-                          'Clientes con Mora'
+                          'N° Clientes'
                         )}
                         <p>{formatNumber(payload.clientsWithDebtThisMonth)}</p>
                       </span>
@@ -499,6 +562,37 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
               )}
             </p>
           </div>
+          {yearlyData && (
+            <div className="year-tooltip year-tooltip-evolution">
+              <div className="year-tooltip-evolution-item gradient-color-clients">
+                <div className="year-tooltip-evolution-icon">
+                  <Users size={22} color="blue" />
+                </div>
+                <span>
+                  {t('accounting.overdue.clientsWithDebt', 'Total Clientes')}
+                  <p>{yearlyData[0].totalUniqueClients}</p>
+                </span>
+              </div>
+              <div className="year-tooltip-evolution-item gradient-color-keys">
+                <div className="year-tooltip-evolution-icon">
+                  <MdCable size={22} color="green" />
+                </div>
+                <span>
+                  {t('accounting.overdue.cadastralKeys', 'T. Acometidas')}
+                  <p>{yearlyData[0].totalUniqueCadastralKeys}</p>
+                </span>
+              </div>
+              <div className="year-tooltip-evolution-item gradient-color-debt">
+                <div className="year-tooltip-evolution-icon">
+                  <DollarSign size={22} color="red" />
+                </div>
+                <span>
+                  {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
+                  <p>{formatCurrency(yearlyData[0].totalDebtAmount)}</p>
+                </span>
+              </div>
+            </div>
+          )}
           <div className="overdue-chart-body">
             <ResponsiveContainer width="100%" height="100%">
               <DynamicBarChart
@@ -518,23 +612,26 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                         <p>{payload.year}</p>
                       </span>
                       <span>
-                        {t(
-                          'accounting.overdue.totalMonthsPastDue',
-                          'Meses Mora'
-                        )}
-                        <p>{payload.totalMonthsPastDue}</p>
-                      </span>
-                      <span>
-                        {t('accounting.overdue.totalDebtAmount', 'Deuda Anual')}
+                        {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
                         <p>{formatCurrency(payload.totalDebtAmount)}</p>
                       </span>
                       <span>
-                        {t('accounting.overdue.totalEpaaValue', 'Deuda EPAA')}
+                        {t(
+                          'accounting.overdue.totalTrashRate',
+                          'T. Tasa Basura'
+                        )}
+                        <p>{formatCurrency(payload.totalTrashRate)}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.totalEpaaValue',
+                          'T. Deuda EPAA'
+                        )}
                         <p>{formatCurrency(payload.totalEpaaValue)}</p>
                       </span>
                       <span>
-                        {t('accounting.overdue.totalUniqueClients', 'Clientes')}
-                        <p>{formatNumber(payload.totalUniqueClients)}</p>
+                        {t('accounting.overdue.clientsWithDebt', 'N° Clientes')}
+                        <p>{formatNumber(payload.clientsWithDebt)}</p>
                       </span>
                     </div>
                   );
@@ -558,6 +655,37 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
               )}
             </p>
           </div>
+          {yearlyData && (
+            <div className="year-tooltip year-tooltip-evolution">
+              <div className="year-tooltip-evolution-item gradient-color-clients">
+                <div className="year-tooltip-evolution-icon">
+                  <Users size={22} color="blue" />
+                </div>
+                <span>
+                  {t('accounting.overdue.clientsWithDebt', 'Total Clientes')}
+                  <p>{yearlyData[0].totalUniqueClients}</p>
+                </span>
+              </div>
+              <div className="year-tooltip-evolution-item gradient-color-keys">
+                <div className="year-tooltip-evolution-icon">
+                  <MdCable size={22} color="green" />
+                </div>
+                <span>
+                  {t('accounting.overdue.cadastralKeys', 'T. Acometidas')}
+                  <p>{yearlyData[0].totalUniqueCadastralKeys}</p>
+                </span>
+              </div>
+              <div className="year-tooltip-evolution-item gradient-color-debt">
+                <div className="year-tooltip-evolution-icon">
+                  <DollarSign size={22} color="red" />
+                </div>
+                <span>
+                  {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
+                  <p>{formatCurrency(yearlyData[0].totalDebtAmount)}</p>
+                </span>
+              </div>
+            </div>
+          )}
           <div className="overdue-chart-body">
             <ResponsiveContainer width="100%" height="100%">
               <GradientAreaChart
@@ -573,22 +701,28 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                       </span>
                       <span>
                         {t(
-                          'accounting.overdue.totalMonthsPastDue',
-                          'Meses Mora'
+                          'accounting.overdue.totalDebtAmount',
+                          'T. Deuda Anual'
                         )}
-                        <p>{payload.totalMonthsPastDue}</p>
-                      </span>
-                      <span>
-                        {t('accounting.overdue.totalDebtAmount', 'Deuda Anual')}
                         <p>{formatCurrency(payload.totalDebtAmount)}</p>
                       </span>
                       <span>
-                        {t('accounting.overdue.totalEpaaValue', 'Deuda EPAA')}
+                        {t(
+                          'accounting.overdue.totalTrashRate',
+                          'T. Tasa Basura'
+                        )}
+                        <p>{formatCurrency(payload.totalTrashRate)}</p>
+                      </span>
+                      <span>
+                        {t(
+                          'accounting.overdue.totalEpaaValue',
+                          'T. Deuda EPAA'
+                        )}
                         <p>{formatCurrency(payload.totalEpaaValue)}</p>
                       </span>
                       <span>
-                        {t('accounting.overdue.totalUniqueClients', 'Clientes')}
-                        <p>{formatNumber(payload.totalUniqueClients)}</p>
+                        {t('accounting.overdue.clientsWithDebt', 'N° Clientes')}
+                        <p>{formatNumber(payload.clientsWithDebt)}</p>
                       </span>
                     </div>
                   );
@@ -603,14 +737,12 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                 customLabel={({
                   x,
                   y,
-                  value,
                   payload,
                   index
                 }: {
                   x: number;
                   y: number;
-                  value: number;
-                  payload: { totalDebtAmount: number };
+                  payload: YearlyOverdueSummary;
                   index: number;
                 }) => {
                   // Dynamic anchoring so the first and last labels don't get clipped or overlap the Y-axis
@@ -658,7 +790,7 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                         fontSize={11}
                         fontWeight={700}
                       >
-                        {value}
+                        {payload.clientsWithDebt}
                       </tspan>
                       <tspan
                         fill="var(--text-secondary)"
@@ -666,7 +798,7 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                         fontWeight={500}
                         dx={3}
                       >
-                        {t('common.months', 'Meses')}
+                        {t('common.clients', 'Clientes')}
                       </tspan>
                     </text>
                   );
