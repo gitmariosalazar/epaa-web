@@ -9,6 +9,7 @@ import type {
   CreateConnectionRequest,
   UpdateConnectionRequest
 } from '../../domain/repositories/ConnectionRepository';
+import type { DashboardAdvanceResponse } from '../../domain/models/DashboardStats';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 
@@ -16,6 +17,13 @@ export class ConnectionRepositoryImpl implements ConnectionRepository {
   private readonly client: HttpClientInterface;
   constructor(client: HttpClientInterface = apiClient) {
     this.client = client;
+  }
+
+  async getAdvanceDashboardStats(): Promise<DashboardAdvanceResponse> {
+    const response = await this.client.get<ApiResponse<DashboardAdvanceResponse>>(
+      '/connections/dashboard/advancement-stats'
+    );
+    return response.data.data;
   }
 
   async getConnections(limit: number, offset: number): Promise<Connection[]> {

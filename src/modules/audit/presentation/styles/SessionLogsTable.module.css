@@ -1,0 +1,147 @@
+/* src/modules/audit/presentation/styles/SessionLogsTable.module.css */
+
+.userAgentLink {
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+
+.errorMessage {
+  color: var(--danger, #ef4444);
+  margin-bottom: 1rem;
+}
+
+.detailsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+}
+
+.headerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.infoCard {
+  background: var(--surface-light, rgba(255, 255, 255, 0.05));
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.cardValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.dateTimeValue {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.networkDeviceBox {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1.25rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.infoRow {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.iconWrapper {
+  padding: 0.6rem;
+  border-radius: 8px;
+}
+
+.iconIp {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.iconDevice {
+  background: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
+}
+
+.itemLabel {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.itemValue {
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin-top: 0.1rem;
+}
+
+.itemValueAgent {
+  font-weight: 500;
+  font-size: 0.95rem;
+  word-break: break-word;
+  opacity: 0.9;
+  margin-top: 0.1rem;
+}
+
+.failureAlert {
+  background: rgba(239, 68, 68, 0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.failureIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.failureTitle {
+  color: #ef4444;
+  margin: 0 0 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+.failureText {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+}
+
+.metadataHeader {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Syntax Highlighter Custom Styles passed as objects usually, 
+   but we can define the base container style here if needed */
+.syntaxContainer {
+  font-size: 0.85em;
+  max-height: 300px;
+  overflow-y: auto;
+}

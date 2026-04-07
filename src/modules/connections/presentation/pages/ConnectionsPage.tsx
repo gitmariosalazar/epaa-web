@@ -3,12 +3,15 @@ import {
   useConnectionsViewModel,
   type ConnectionTab
 } from '../hooks/useConnectionsViewModel';
+import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Plus, Network, Users, LayoutGrid } from 'lucide-react';
 import { CreateConnectionWizard } from '../components/CreateConnectionWizard';
 import { ConnectionsTable } from '../components/ConnectionsTable';
 import { ConnectionsFilters } from '../components/ConnectionsFilters';
+import { ConnectionMapFeature } from '../components/Map/ConnectionMapFeature';
 import { Tabs } from '@/shared/presentation/components/Tabs';
 import type { TabItem } from '@/shared/presentation/components/Tabs';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
@@ -43,6 +46,15 @@ export const ConnectionsPage = () => {
 
   // ── Unified ViewModel (Handles both List and CRUD/Wizard) ────────────────
   const { state, actions } = useConnectionsViewModel();
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (pathname.endsWith('/map')) {
+      actions.setViewMode('map');
+    } else {
+      actions.setViewMode('table');
+    }
+  }, [pathname, actions]);
 
   const loadingProgress = useSimulatedProgress(state.isLoading);
 
@@ -93,6 +105,10 @@ export const ConnectionsPage = () => {
       );
     }
 
+    if (state.viewMode === 'map') {
+      return <ConnectionMapFeature viewModel={{ state, actions }} />;
+    }
+
     return (
       <ConnectionsTable
         data={state.filteredConnections}
@@ -103,6 +119,10 @@ export const ConnectionsPage = () => {
         sortConfig={state.sortConfig}
         onEndReached={actions.loadMore}
         hasMore={state.hasMore}
+        onViewOnMap={(conn) => {
+          actions.setSelectedConnection(conn);
+          actions.setViewMode('map');
+        }}
       />
     );
   };
@@ -117,16 +137,18 @@ export const ConnectionsPage = () => {
             activeTab={state.activeTab}
             onTabChange={actions.handleTabChange}
           />
-          <Button
-            leftIcon={<Plus size={18} />}
-            size="compact"
-            onClick={() => {
-              actions.resetForm();
-              actions.setIsFormOpen(true);
-            }}
-          >
-            {t('connections.create', 'Nueva Conexión')}
-          </Button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <Button
+              leftIcon={<Plus size={18} />}
+              size="compact"
+              onClick={() => {
+                actions.resetForm();
+                actions.setIsFormOpen(true);
+              }}
+            >
+              {t('connections.create', 'Nueva Conexión')}
+            </Button>
+          </div>
         </div>
       }
       filters={

@@ -71,6 +71,11 @@ export const useNavigation = (): NavSection[] => {
               icon: <Settings size={18} />,
               label: t('sidebar.settings'),
               to: '/settings'
+            },
+            {
+              icon: <FileText size={18} />,
+              label: t('sidebar.audit', 'Auditoría'),
+              to: '/audit'
             }
           ]
         }
@@ -113,8 +118,18 @@ export const useNavigation = (): NavSection[] => {
           subItems: [
             {
               icon: <TiThList size={18} />,
-              label: 'List',
-              to: '/connections'
+              label: t('sidebar.connectionsList', 'Lista de Conexiones'),
+              to: '/connections/list'
+            },
+            {
+              icon: <BarChart3 size={18} />, // Using BarChart3 or similar Map icon
+              label: t('sidebar.connectionsMap', 'Mapa de Conexiones'),
+              to: '/connections/map'
+            },
+            {
+              icon: <LayoutDashboard size={18} />,
+              label: t('sidebar.connectionsDashboard', 'Dashboard de Avance'),
+              to: '/connections/dashboard'
             }
           ]
         }

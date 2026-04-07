@@ -26,6 +26,8 @@ import { DynamicBarChart } from '@/shared/presentation/components/Charts/Dynamic
 import { DynamicPieChart } from '@/shared/presentation/components/Charts/DynamicPieChart';
 import '../styles/OverdueDashboard.css';
 import { MdCable } from 'react-icons/md';
+import { CurrencyFormatter } from '@/shared/presentation/utils/formatters/CurrencyFormatter';
+import { NumberFormatter } from '@/shared/presentation/utils/formatters/NumberFormatter';
 
 interface GlobalOverdueDashboardProps {
   yearlyData: YearlyOverdueSummary[];
@@ -133,17 +135,6 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
       ]
     : [];
 
-  const formatCurrency = (val: number) =>
-    `$${(val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-  const formatShortCurrency = (val: number) => {
-    if (!val) return '$0';
-    if (val >= 1000) return `$${(val / 1000).toFixed(1)}k`;
-    return `$${val.toFixed(0)}`;
-  };
-
-  const formatNumber = (val: number) => Math.round(val || 0).toLocaleString();
-
   if (isLoading || !metrics) {
     return (
       <div
@@ -172,7 +163,7 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
       <div className="overdue-dashboard-kpi-grid">
         <KpiCard
           label={t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
-          value={formatCurrency(metrics.totalDebt)}
+          value={CurrencyFormatter.format(metrics.totalDebt)}
           icon={<DollarSign size={18} />}
           color="blue"
           description={t(
@@ -182,7 +173,7 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
         />
         <KpiCard
           label={t('accounting.overdue.clientsWithDebt', 'Clientes Mora')}
-          value={formatNumber(metrics.totalClients)}
+          value={NumberFormatter.formatInteger(metrics.totalClients)}
           icon={<Users size={18} />}
           color="purple"
           description={t(
@@ -192,7 +183,7 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
         />
         <KpiCard
           label={t('accounting.overdue.avgDebtPerClient', 'Deuda Prom.')}
-          value={formatCurrency(metrics.avgDebt)}
+          value={CurrencyFormatter.format(metrics.avgDebt)}
           icon={<TrendingUp size={18} />}
           color="green"
           description={t(
@@ -202,7 +193,7 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
         />
         <KpiCard
           label={t('accounting.overdue.totalMonthsPastDue', 'Meses Mora')}
-          value={formatNumber(metrics.totalMonths)}
+          value={NumberFormatter.formatInteger(metrics.totalMonths)}
           icon={<Calendar size={18} />}
           color="amber"
           description={t(
@@ -212,7 +203,7 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
         />
         <KpiCard
           label={t('accounting.overdue.cadastralKeys', 'Claves Cat.')}
-          value={formatNumber(metrics.totalKeys)}
+          value={NumberFormatter.formatInteger(metrics.totalKeys)}
           icon={<Map size={18} />}
           color="indigo"
           description={t(
@@ -222,7 +213,7 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
         />
         <KpiCard
           label={t('accounting.overdue.clientsOver6', '> 6 Meses')}
-          value={formatNumber(metrics.clientsOver6)}
+          value={NumberFormatter.formatInteger(metrics.clientsOver6)}
           icon={<ShieldAlert size={18} />}
           color="rose"
           description={t(
@@ -232,7 +223,7 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
         />
         <KpiCard
           label={t('accounting.overdue.clientsOver12', '> 1 Año')}
-          value={formatNumber(metrics.clientsOver12)}
+          value={NumberFormatter.formatInteger(metrics.clientsOver12)}
           icon={<AlertOctagon size={18} />}
           color="red"
           description={t(
@@ -252,7 +243,7 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
         />
         <KpiCard
           label={t('accounting.overdue.avgMonths', 'Mora Prom.')}
-          value={`${(metrics.avgMonths || 0).toFixed(1)} ${t('common.months', 'Meses')}`}
+          value={`${NumberFormatter.format(metrics.avgMonths, 1)} ${t('common.months', 'Meses')}`}
           icon={<Clock size={18} />}
           color="cyan"
           description={t(
@@ -311,7 +302,9 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                 </div>
                 <span>
                   {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
-                  <p>{formatCurrency(globalSummary.totalDebtAmount)}</p>
+                  <p>
+                    {CurrencyFormatter.format(globalSummary.totalDebtAmount)}
+                  </p>
                 </span>
               </div>
             </div>
@@ -336,28 +329,38 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                       </span>
                       <span>
                         {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
-                        <p>{formatCurrency(payload.totalDebtAmount)}</p>
+                        <p>
+                          {CurrencyFormatter.format(payload.totalDebtAmount)}
+                        </p>
                       </span>
                       <span>
                         {t(
                           'accounting.overdue.totalTrashRate',
                           'T. Tasa Basura'
                         )}
-                        <p>{formatCurrency(payload.totalTrashRate)}</p>
+                        <p>
+                          {CurrencyFormatter.format(payload.totalTrashRate)}
+                        </p>
                       </span>
                       <span>
                         {t(
                           'accounting.overdue.totalEpaaValue',
                           'T. Deuda EPAA'
                         )}
-                        <p>{formatCurrency(payload.totalEpaaValue)}</p>
+                        <p>
+                          {CurrencyFormatter.format(payload.totalEpaaValue)}
+                        </p>
                       </span>
                       <span>
                         {t(
                           'accounting.overdue.totalUniqueClients',
                           'N° Clientes'
                         )}
-                        <p>{formatNumber(payload.clientsWithDebt)}</p>
+                        <p>
+                          {NumberFormatter.formatInteger(
+                            payload.clientsWithDebt
+                          )}
+                        </p>
                       </span>
                     </div>
                   );
@@ -409,7 +412,9 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                 </div>
                 <span>
                   {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
-                  <p>{formatCurrency(globalSummary.totalDebtAmount)}</p>
+                  <p>
+                    {CurrencyFormatter.format(globalSummary.totalDebtAmount)}
+                  </p>
                 </span>
               </div>
             </div>
@@ -424,7 +429,7 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                   name: string;
                   value: number;
                   color: string;
-                }) => formatCurrency(payload.value)}
+                }) => CurrencyFormatter.format(payload.value)}
               />
             </ResponsiveContainer>
           </div>
@@ -453,7 +458,11 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                 </div>
                 <span>
                   {t('accounting.overdue.clientsWithDebt', 'Total Clientes')}
-                  <p>{globalSummary.totalClientsWithDebt}</p>
+                  <p>
+                    {NumberFormatter.formatInteger(
+                      globalSummary.totalClientsWithDebt
+                    )}
+                  </p>
                 </span>
               </div>
               <div className="year-tooltip-evolution-item gradient-color-keys">
@@ -462,7 +471,11 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                 </div>
                 <span>
                   {t('accounting.overdue.cadastralKeys', 'T. Acometidas')}
-                  <p>{globalSummary.totalUniqueCadastralKeys}</p>
+                  <p>
+                    {NumberFormatter.formatInteger(
+                      globalSummary.totalUniqueCadastralKeys
+                    )}
+                  </p>
                 </span>
               </div>
               <div className="year-tooltip-evolution-item gradient-color-debt">
@@ -471,7 +484,9 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                 </div>
                 <span>
                   {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
-                  <p>{formatCurrency(globalSummary.totalDebtAmount)}</p>
+                  <p>
+                    {CurrencyFormatter.format(globalSummary.totalDebtAmount)}
+                  </p>
                 </span>
               </div>
             </div>
@@ -501,28 +516,38 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                       </span>
                       <span>
                         {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
-                        <p>{formatCurrency(payload.totalDebtAmount)}</p>
+                        <p>
+                          {CurrencyFormatter.format(payload.totalDebtAmount)}
+                        </p>
                       </span>
                       <span>
                         {t(
                           'accounting.overdue.totalTrashRate',
                           'T. Tasa Basura'
                         )}
-                        <p>{formatCurrency(payload.totalTrashRate)}</p>
+                        <p>
+                          {CurrencyFormatter.format(payload.totalTrashRate)}
+                        </p>
                       </span>
                       <span>
                         {t(
                           'accounting.overdue.totalEpaaValue',
                           'T. Deuda EPAA'
                         )}
-                        <p>{formatCurrency(payload.totalEpaaValue)}</p>
+                        <p>
+                          {CurrencyFormatter.format(payload.totalEpaaValue)}
+                        </p>
                       </span>
                       <span>
                         {t(
                           'accounting.overdue.totalUniqueClients',
                           'N° Clientes'
                         )}
-                        <p>{formatNumber(payload.clientsWithDebt)}</p>
+                        <p>
+                          {NumberFormatter.formatInteger(
+                            payload.clientsWithDebt
+                          )}
+                        </p>
                       </span>
                     </div>
                   );
@@ -575,7 +600,7 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                         fontWeight={800}
                       >
                         {payload
-                          ? formatShortCurrency(payload.totalDebtAmount)
+                          ? CurrencyFormatter.format(payload.totalDebtAmount)
                           : ''}
                       </tspan>
                       <tspan

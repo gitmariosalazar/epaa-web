@@ -184,13 +184,15 @@ export const useClientSelectionForm = ({
           emails:
             customer.emails && customer.emails.length > 0
               ? (customer.emails as any[]).map((e) =>
-                  typeof e === 'string' ? e : (e.email || e.correo || '')
+                  typeof e === 'string' ? e : e.email || e.correo || ''
                 )
               : [''],
           phoneNumbers:
             customer.phoneNumbers && customer.phoneNumbers.length > 0
               ? (customer.phoneNumbers as any[]).map((p_item) =>
-                  typeof p_item === 'string' ? p_item : (p_item.numero || p_item.telefono || '')
+                  typeof p_item === 'string'
+                    ? p_item
+                    : p_item.numero || p_item.telefono || ''
                 )
               : [''],
           address: customer.address || '',
@@ -234,13 +236,15 @@ export const useClientSelectionForm = ({
           companyEmails:
             company.companyEmails && company.companyEmails.length > 0
               ? (company.companyEmails as any[]).map((e) =>
-                  typeof e === 'string' ? e : (e.email || e.correo || '')
+                  typeof e === 'string' ? e : e.email || e.correo || ''
                 )
               : [''],
           companyPhones:
             company.companyPhones && company.companyPhones.length > 0
               ? (company.companyPhones as any[]).map((p_item) =>
-                  typeof p_item === 'string' ? p_item : (p_item.numero || p_item.telefono || '')
+                  typeof p_item === 'string'
+                    ? p_item
+                    : p_item.numero || p_item.telefono || ''
                 )
               : [''],
           companyParishId: company.companyParishId || '1',

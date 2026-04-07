@@ -1,11 +1,29 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import type { Connection } from '../../domain/models/Connection';
+import type { Connection, Rate } from '../../domain/models/Connection';
+
 import { useConnectionsContext } from '../context/ConnectionContext';
-import type { UpdateCustomerRequest } from '@/modules/customers/domain/repositories/CustomerRepository';
-import type { UpdateCompanyRequest } from '@/modules/customers/domain/repositories/CompanyRepository';
+import type {
+  UpdateCustomerRequest,
+  CreateCustomerRequest
+} from '@/modules/customers/domain/repositories/CustomerRepository';
+import type {
+  UpdateCompanyRequest,
+  CreateCompanyRequest
+} from '@/modules/customers/domain/repositories/CompanyRepository';
+import type { Customer } from '@/modules/customers/domain/models/Customer';
+import type { Company } from '@/modules/customers/domain/models/Company';
+import { decodeEWKBPoint, type Coordinate } from '@/shared/utils/geoUtils';
+
+// -- Derived Client Types --
+export type ClientData = Customer | Company;
+export type ClientMutationRequest =
+  | CreateCustomerRequest
+  | UpdateCustomerRequest
+  | CreateCompanyRequest
+  | UpdateCompanyRequest;
 
 // ── Tab type (Open/Closed: add tabs here without touching logic) ─────────────
-export type ConnectionTab = 'all' | 'sector' | 'client';
+export type ConnectionTab = 'all' | 'sector' | 'client' | 'cadastral';
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -15,16 +33,17 @@ export interface SortConfig {
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const LIMIT_SIZE = 50;
+const LIMIT_SIZE = 1000;
 
 // ── Generic helpers ───────────────────────────────────────────────────────────
 function applySortConfig<T>(data: T[], sortConfig: SortConfig | null): T[] {
   if (!sortConfig) return data;
-  return [...data].sort((a: any, b: any) => {
-    if (a[sortConfig.key] < b[sortConfig.key])
-      return sortConfig.direction === 'asc' ? -1 : 1;
-    if (a[sortConfig.key] > b[sortConfig.key])
-      return sortConfig.direction === 'asc' ? 1 : -1;
+  const key = sortConfig.key as keyof T;
+  return [...data].sort((a: T, b: T) => {
+    const aVal = a[key];
+    const bVal = b[key];
+    if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
     return 0;
   });
 }
@@ -65,8 +84,8 @@ function applyLocalFilters(
       });
     } else {
       result = result.filter((item) => {
-        const value =
-          (item as any)[searchField]?.toString().toLowerCase().trim() ?? '';
+        const key = searchField as keyof Connection;
+        const value = item[key]?.toString().toLowerCase().trim() ?? '';
 
         // Si el usuario eligió específicamente el campo 'connectionSector', forzamos igualdad exacta
         if (
@@ -127,6 +146,7 @@ export const useConnectionsViewModel = () => {
   // Search/Filter inputs for fetching
   const [sectorInput, setSectorInput] = useState('');
   const [clientIdInput, setClientIdInput] = useState('');
+  const [cadastralKeyInput, setCadastralKeyInput] = useState('');
 
   // Local-only search + dropdowns
   const [searchQuery, setSearchQuery] = useState('');
@@ -134,18 +154,23 @@ export const useConnectionsViewModel = () => {
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedSewerage, setSelectedSewerage] = useState('');
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'map'>('table');
+  const [mapCenter, setMapCenter] = useState<Coordinate | null>(null);
+  const [mapZoom, setMapZoom] = useState(13);
 
   // ── 2. CRUD / WIZARD STATE ──
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedConnection, setSelectedConnection] =
     useState<Connection | null>(null);
-  const [rates, setRates] = useState<any[]>([]);
+  const [rates, setRates] = useState<Rate[]>([]);
   const [activeStep, setActiveStep] = useState(0);
 
   // Client selection info
-  const [foundClient, setFoundClient] = useState<any | null>(null);
-  const [pendingClientData, setPendingClientData] = useState<any | null>(null);
+  const [foundClient, setFoundClient] = useState<ClientData | null>(null);
+  const [pendingClientData, setPendingClientData] = useState<
+    CreateCustomerRequest | CreateCompanyRequest | null
+  >(null);
   const [isClientExisting, setIsClientExisting] = useState(false);
   const [clientType, setClientType] = useState<'person' | 'company'>('person');
 
@@ -205,13 +230,69 @@ export const useConnectionsViewModel = () => {
             LIMIT_SIZE,
             currentOffset
           );
+        } else if (activeTab === 'cadastral') {
+          const key = cadastralKeyInput.trim();
+          if (key) {
+            const detail =
+              await findConnectionWithPropertyByCadastralKeyUseCase.execute(
+                key
+              );
+            if (detail) {
+              // Convert ConnectionWithProperty to Connection for the list
+              const conn: Connection = {
+                connectionId: detail.connectionId,
+                clientId: detail.clientId,
+                connectionRateId: Number(detail.connectionRateId),
+                connectionRateName: detail.connectionRateName,
+                connectionMeterNumber: detail.connectionMeterNumber || '',
+                connectionSector: Number(detail.connectionSector || 0),
+                connectionAccount: Number(detail.connectionAccount || 0),
+                connectionCadastralKey: detail.connectionCadastralKey || '',
+                connectionContractNumber: detail.connectionContractNumber || '',
+                connectionSewerage: detail.connectionSewerage || false,
+                connectionStatus: detail.connectionStatus === 'ACTIVO',
+                connectionAddress: detail.connectionAddress || '',
+                connectionInstallationDate: detail.connectionInstallationDate
+                  ? new Date(detail.connectionInstallationDate)
+                  : new Date(),
+                connectionPeopleNumber: detail.connectionPeopleNumber || 0,
+                connectionZone: Number(detail.connectionZone || 0),
+                longitude: detail.longitude || 0,
+                latitude: detail.latitude || 0,
+                connectionCoordinates: detail.connectionCoordinates || '',
+                connectionReference: detail.connectionReference || '',
+                ConnectionMetaData: detail.connectionMetadata || {},
+                connectionAltitude: detail.connectionAltitude || 0,
+                connectionPrecision: detail.connectionPrecision || 0,
+                connectionGeolocationDate: detail.connectionGeolocationDate
+                  ? new Date(detail.connectionGeolocationDate)
+                  : new Date(),
+                connectionGeometricZone: detail.connectionGeometricZone || '',
+                propertyCadastralKey: detail.propertyCadastralKey || '',
+                zoneId: detail.zoneId || 0
+              };
+              result = [conn];
+            }
+          }
         }
 
-        setConnections((prev) => (append ? [...prev, ...result] : result));
+        const enhancedResults = result.map((conn) => {
+          if (!conn.latitude || !conn.longitude) {
+            const decoded = decodeEWKBPoint(conn.connectionCoordinates);
+            if (decoded) {
+              return { ...conn, latitude: decoded.lat, longitude: decoded.lng };
+            }
+          }
+          return conn;
+        });
+
+        setConnections((prev) => (append ? [...prev, ...enhancedResults] : enhancedResults));
         setHasMore(result.length >= LIMIT_SIZE);
         return result;
-      } catch (err: any) {
-        setError(err?.message ?? 'Error al cargar las conexiones');
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error ? err.message : 'Error al cargar las conexiones';
+        setError(message);
         return undefined;
       } finally {
         setIsLoading(false);
@@ -264,22 +345,21 @@ export const useConnectionsViewModel = () => {
         throw new Error('No se pudo encontrar la información detallada');
       }
 
+      // setFoundClient(fullData); // Removed: fullData is ConnectionWithProperty, not ClientData
+
       // 2. Map Client Data
       if (fullData.person) {
         const p = fullData.person;
-        const clientData = {
+        const clientData: Customer = {
           customerId: p.personId,
           firstName: p.firstName,
           lastName: p.lastName,
           emails:
-            p.emails?.map((e: any) =>
-              typeof e === 'string' ? e : e.email || e.correo || ''
-            ) || [],
+            p.emails?.map((e) => (typeof e === 'string' ? e : e.email || '')) ||
+            [],
           phoneNumbers:
-            p.phones?.map((p_item: any) =>
-              typeof p_item === 'string'
-                ? p_item
-                : p_item.numero || p_item.telefono || ''
+            p.phones?.map((p_item) =>
+              typeof p_item === 'string' ? p_item : p_item.numero || ''
             ) || [],
           dateOfBirth: p.birthDate,
           sexId: p.genderId,
@@ -288,14 +368,22 @@ export const useConnectionsViewModel = () => {
           originCountry: p.country,
           parishId: p.parishId,
           professionId: p.professionId || 1,
-          deceased: p.isDeceased
+          deceased: p.isDeceased,
+          identificationType: 'CEDULA' // Default or based on logic
         };
         setFoundClient(clientData);
-        setPendingClientData(clientData);
+        setPendingClientData({
+          ...clientData,
+          customerId: Number(clientData.customerId),
+          dateOfBirth: new Date(clientData.dateOfBirth || new Date()),
+          phoneNumbers: clientData.phoneNumbers,
+          emails: clientData.emails
+        } as CreateCustomerRequest);
         setClientType('person');
       } else if (fullData.company) {
         const c = fullData.company;
-        const companyData = {
+        const companyData: Company = {
+          companyId: c.companyId.toString(),
           companyRuc: c.ruc,
           companyName: c.businessName,
           socialReason: c.commercialName,
@@ -303,19 +391,30 @@ export const useConnectionsViewModel = () => {
           companyParishId: c.parishId,
           companyCountry: c.country,
           companyEmails:
-            c.emails?.map((e: any) =>
-              typeof e === 'string' ? e : e.email || e.correo || ''
-            ) || [],
+            c.emails?.map((e) => ({
+              correo: typeof e === 'string' ? e : e.email || '',
+              correo_electronico_id: typeof e === 'string' ? 0 : e.emailid || 0
+            })) || [],
           companyPhones:
-            c.phones?.map((p_item: any) =>
-              typeof p_item === 'string'
-                ? p_item
-                : p_item.numero || p_item.telefono || ''
-            ) || [],
+            c.phones?.map((p_item) => ({
+              numero: typeof p_item === 'string' ? p_item : p_item.numero || '',
+              telefono_id:
+                typeof p_item === 'string' ? 0 : p_item.telefonoid || 0
+            })) || [],
           identificationType: 'RUC'
         };
         setFoundClient(companyData);
-        setPendingClientData(companyData);
+        setPendingClientData({
+          companyName: companyData.companyName || '',
+          socialReason: companyData.socialReason || '',
+          companyRuc: companyData.companyRuc,
+          companyAddress: companyData.companyAddress || '',
+          companyParishId: companyData.companyParishId,
+          companyCountry: companyData.companyCountry || '',
+          companyEmails: companyData.companyEmails.map((e) => e.correo),
+          companyPhones: companyData.companyPhones.map((p) => p.numero),
+          identificationType: companyData.identificationType
+        } as CreateCompanyRequest);
         setClientType('company');
       }
 
@@ -357,11 +456,78 @@ export const useConnectionsViewModel = () => {
 
       setSelectedConnection(connection);
       setFormData(mappedFormData);
+
+      // If we are opening edit from map, ensure it's centered
+      if (mappedFormData.latitude && mappedFormData.longitude) {
+        setMapCenter({ lat: mappedFormData.latitude, lng: mappedFormData.longitude });
+      }
+
       setIsFormOpen(true);
       setActiveStep(0); // Ensure we start at the first step
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching full connection data:', err);
-      setError(err.message || 'Error al cargar los detalles de la conexión');
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Error al cargar los detalles de la conexión';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadByCadastralKeyAndEdit = async (key: string) => {
+    if (!key) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const fullData =
+        await findConnectionWithPropertyByCadastralKeyUseCase.execute(key);
+
+      if (!fullData) {
+        throw new Error('No se encontró ninguna conexión con esa clave');
+      }
+
+      // 1. Convert to a base Connection for selectedConnection
+      const conn: Connection = {
+        connectionId: fullData.connectionId,
+        clientId: fullData.clientId,
+        connectionRateId: Number(fullData.connectionRateId),
+        connectionRateName: fullData.connectionRateName,
+        connectionMeterNumber: fullData.connectionMeterNumber || '',
+        connectionSector: Number(fullData.connectionSector || 0),
+        connectionAccount: Number(fullData.connectionAccount || 0),
+        connectionCadastralKey: fullData.connectionCadastralKey || '',
+        connectionContractNumber: fullData.connectionContractNumber || '',
+        connectionSewerage: fullData.connectionSewerage || false,
+        connectionStatus: fullData.connectionStatus === 'ACTIVO',
+        connectionAddress: fullData.connectionAddress || '',
+        connectionInstallationDate: fullData.connectionInstallationDate
+          ? new Date(fullData.connectionInstallationDate)
+          : new Date(),
+        connectionPeopleNumber: fullData.connectionPeopleNumber || 0,
+        connectionZone: Number(fullData.connectionZone || 0),
+        longitude: fullData.longitude || 0,
+        latitude: fullData.latitude || 0,
+        connectionCoordinates: fullData.connectionCoordinates || '',
+        connectionReference: fullData.connectionReference || '',
+        ConnectionMetaData: fullData.connectionMetadata || {},
+        connectionAltitude: fullData.connectionAltitude || 0,
+        connectionPrecision: fullData.connectionPrecision || 0,
+        connectionGeolocationDate: fullData.connectionGeolocationDate
+          ? new Date(fullData.connectionGeolocationDate)
+          : new Date(),
+        connectionGeometricZone: fullData.connectionGeometricZone || '',
+        propertyCadastralKey: fullData.propertyCadastralKey || '',
+        zoneId: fullData.zoneId || 0
+      };
+
+      // 2. Reuse the Edit logic by calling openEdit with the newly created conn
+      await openEdit(conn);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Error al cargar la conexión';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -380,8 +546,9 @@ export const useConnectionsViewModel = () => {
       setIsDeleteOpen(false);
       setSelectedConnection(null);
       handleFetch(); // Refresh list
-    } catch (err: any) {
-      setError(err?.message ?? 'Error al eliminar');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al eliminar';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -401,20 +568,19 @@ export const useConnectionsViewModel = () => {
       | React.ChangeEvent<
           HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
         >
-      | { name: string; value: any }
+      | { name: string; value: string | number | boolean | Date | object }
   ) => {
     let name: string;
-    let value: any;
-    let type: string | undefined;
+    let value: string | number | boolean | Date | object;
 
     if ('target' in e) {
       name = e.target.name;
       value = e.target.value;
-      type = (e.target as any).type;
+      const target = e.target as HTMLInputElement;
 
-      if (type === 'number') value = Number(value);
+      if (target.type === 'number') value = Number(value);
       if (name === 'connectionSewerage' || name === 'connectionStatus') {
-        value = (e.target as HTMLInputElement).checked;
+        value = target.checked;
       }
     } else {
       name = e.name;
@@ -430,7 +596,7 @@ export const useConnectionsViewModel = () => {
         updatedData = {
           ...updatedData,
           connectionRateId: rateId,
-          connectionRateName: selectedRate.categoryName || selectedRate.rateName
+          connectionRateName: selectedRate.rateName
         };
       }
     }
@@ -457,14 +623,56 @@ export const useConnectionsViewModel = () => {
   };
 
   const onClientConfirm = (
-    data: any,
+    data: CreateCustomerRequest | CreateCompanyRequest,
     isExisting: boolean,
     type: 'person' | 'company'
   ) => {
     setPendingClientData(data);
     setIsClientExisting(isExisting);
     setClientType(type);
-    setFoundClient(data);
+
+    // Map to ClientData for state
+    if (type === 'person') {
+      const d = data as CreateCustomerRequest;
+      const customer: Customer = {
+        customerId: d.customerId.toString(),
+        firstName: d.firstName,
+        lastName: d.lastName,
+        emails: d.emails,
+        phoneNumbers: d.phoneNumbers,
+        dateOfBirth: d.dateOfBirth.toISOString(),
+        sexId: d.sexId,
+        civilStatus: d.civilStatus,
+        address: d.address,
+        professionId: d.professionId,
+        originCountry: d.originCountry,
+        identificationType: d.identificationType,
+        parishId: d.parishId,
+        deceased: d.deceased || false
+      };
+      setFoundClient(customer);
+    } else {
+      const d = data as CreateCompanyRequest;
+      const company: Company = {
+        companyId: '0', // Temporary or unknown until created
+        companyName: d.companyName,
+        socialReason: d.socialReason,
+        companyRuc: d.companyRuc,
+        companyAddress: d.companyAddress,
+        companyParishId: d.companyParishId,
+        companyCountry: d.companyCountry,
+        companyEmails: d.companyEmails.map((e) => ({
+          correo: e,
+          correo_electronico_id: 0
+        })),
+        companyPhones: d.companyPhones.map((p) => ({
+          numero: p,
+          telefono_id: 0
+        })),
+        identificationType: d.identificationType
+      };
+      setFoundClient(company);
+    }
     setActiveStep(1);
   };
 
@@ -474,88 +682,101 @@ export const useConnectionsViewModel = () => {
     try {
       // 1. Process Client Registration/Update
       if (pendingClientData) {
-        if (clientType === 'person') {
+        if (clientType === 'person' && pendingClientData) {
+          const personData = pendingClientData as CreateCustomerRequest;
           if (isClientExisting) {
             const updateData: UpdateCustomerRequest = {
-              customerId: Number(pendingClientData.customerId),
-              firstName: pendingClientData.firstName,
-              lastName: pendingClientData.lastName,
-              emails: pendingClientData.emails,
-              phoneNumbers: pendingClientData.phoneNumbers,
-              dateOfBirth: new Date(pendingClientData.dateOfBirth),
-              sexId: pendingClientData.sexId,
-              civilStatus: pendingClientData.civilStatus,
-              address: pendingClientData.address,
-              professionId: pendingClientData.professionId || 1,
-              originCountry: pendingClientData.originCountry,
-              identificationType: pendingClientData.identificationType,
-              parishId: pendingClientData.parishId,
-              deceased: pendingClientData.deceased
+              customerId: Number(personData.customerId),
+              firstName: personData.firstName,
+              lastName: personData.lastName,
+              emails: personData.emails,
+              phoneNumbers: personData.phoneNumbers,
+              dateOfBirth: new Date(personData.dateOfBirth),
+              sexId: personData.sexId,
+              civilStatus: personData.civilStatus,
+              address: personData.address,
+              professionId: personData.professionId || 1,
+              originCountry: personData.originCountry,
+              identificationType: personData.identificationType,
+              parishId: personData.parishId,
+              deceased: personData.deceased
             };
             await updateCustomerUseCase.execute(
-              pendingClientData.customerId.toString(),
+              personData.customerId.toString(),
               updateData
             );
           } else {
             try {
-              await createCustomerUseCase.execute(pendingClientData);
-            } catch (err: any) {
-              if (err.response?.status === 409 || err.statusCode === 409) {
-                // Handle conflict if needed
+              await createCustomerUseCase.execute(
+                pendingClientData as CreateCustomerRequest
+              );
+            } catch (err: unknown) {
+              if (
+                err &&
+                typeof err === 'object' &&
+                ('response' in err || 'statusCode' in err)
+              ) {
+                const e = err as {
+                  response?: { status: number };
+                  statusCode?: number;
+                };
+                if (e.response?.status === 409 || e.statusCode === 409) {
+                  // Handle conflict if needed
+                } else throw err;
               } else throw err;
             }
           }
         } else if (clientType === 'company') {
           if (isClientExisting) {
+            const data = pendingClientData as CreateCompanyRequest;
             const updateData: UpdateCompanyRequest = {
-              companyName: pendingClientData.companyName,
-              socialReason: pendingClientData.socialReason,
-              companyRuc: pendingClientData.companyRuc,
-              companyAddress: pendingClientData.companyAddress,
-              companyParishId: pendingClientData.companyParishId,
-              companyCountry: pendingClientData.companyCountry,
-              companyEmails: pendingClientData.companyEmails,
-              companyPhones: pendingClientData.companyPhones,
-              identificationType: pendingClientData.identificationType
+              companyName: data.companyName,
+              socialReason: data.socialReason,
+              companyRuc: data.companyRuc,
+              companyAddress: data.companyAddress,
+              companyParishId: data.companyParishId,
+              companyCountry: data.companyCountry,
+              companyEmails: data.companyEmails,
+              companyPhones: data.companyPhones,
+              identificationType: data.identificationType
             };
-            await updateCompanyUseCase.execute(
-              pendingClientData.companyRuc,
-              updateData
-            );
+            await updateCompanyUseCase.execute(data.companyRuc, updateData);
           } else {
-            await createCompanyUseCase.execute(pendingClientData);
+            await createCompanyUseCase.execute(
+              pendingClientData as CreateCompanyRequest
+            );
           }
         }
       }
 
       // 2. Format Payload (Sanitization)
+      const clientId =
+        clientType === 'person'
+          ? (pendingClientData as CreateCustomerRequest).customerId.toString()
+          : (pendingClientData as CreateCompanyRequest).companyRuc;
+
+      const {
+        connectionCoordinates: _unusedCoord,
+        connectionCadastralKey: _unusedCad,
+        connectionSector: _unusedSec,
+        connectionAccount: _unusedAcc,
+        ...connectionData
+      } = formData;
+
       const finalData = {
-        ...formData,
-        clientId:
-          clientType === 'person'
-            ? pendingClientData.customerId
-            : pendingClientData.companyRuc,
+        ...connectionData,
+        clientId,
         connectionId: formData.connectionCadastralKey,
         propertyCadastralKey: formData.propertyCadastralKey || null,
-        ConnectionMetaData:
-          (formData as any).ConnectionMetaData ||
-          (formData as any).connectionMetaData ||
-          {}
+        ConnectionMetaData: formData.ConnectionMetaData || {}
       };
-
-      // Remove legacy/frontend fields before sending
-      delete (finalData as any).connectionCoordinates;
-      delete (finalData as any).connectionCadastralKey;
-      delete (finalData as any).connectionSector;
-      delete (finalData as any).connectionAccount;
-      delete (finalData as any).connectionMetaData;
 
       console.log('Final Wizard Payload:', finalData);
 
       if (selectedConnection) {
         await updateConnectionUseCase.execute(
           selectedConnection.connectionId,
-          finalData as any
+          finalData as any // Use case expects specific type, but we ensured structure
         );
       } else {
         await createConnectionUseCase.execute(finalData as any);
@@ -564,9 +785,13 @@ export const useConnectionsViewModel = () => {
       setIsFormOpen(false);
       resetForm();
       handleFetch();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error in handleWizardSave:', err);
-      setError(err.message || 'Error occurred while creating connection');
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Error occurred while creating connection';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -576,7 +801,15 @@ export const useConnectionsViewModel = () => {
   const filteredConnections = useMemo(
     () =>
       applyLocalFilters(
-        connections,
+        connections.map((conn) => {
+          if (!conn.latitude || !conn.longitude) {
+            const coords = decodeEWKBPoint(conn.connectionCoordinates);
+            if (coords) {
+              return { ...conn, latitude: coords.lat, longitude: coords.lng };
+            }
+          }
+          return conn;
+        }),
         searchQuery,
         searchField,
         selectedStatus,
@@ -599,7 +832,9 @@ export const useConnectionsViewModel = () => {
       ? true
       : activeTab === 'sector'
         ? Boolean(sectorInput.trim())
-        : Boolean(clientIdInput.trim()));
+        : activeTab === 'client'
+          ? Boolean(clientIdInput.trim())
+          : Boolean(cadastralKeyInput.trim()));
 
   const handleTabChange = (tab: ConnectionTab) => {
     setActiveTab(tab);
@@ -621,7 +856,10 @@ export const useConnectionsViewModel = () => {
   // ── 6. INITIALIZATION ──
   useEffect(() => {
     loadRates();
+    handleFetch();
   }, [loadRates]);
+
+  console.log(selectedConnection);
 
   return {
     state: {
@@ -630,6 +868,7 @@ export const useConnectionsViewModel = () => {
       activeTab,
       sectorInput,
       clientIdInput,
+      cadastralKeyInput,
       searchQuery,
       searchField,
       selectedStatus,
@@ -638,6 +877,9 @@ export const useConnectionsViewModel = () => {
       filteredConnections,
       canFetch,
       hasMore,
+      viewMode,
+      mapCenter,
+      mapZoom,
       // CRUD/Wizard State
       isFormOpen,
       isDeleteOpen,
@@ -657,6 +899,12 @@ export const useConnectionsViewModel = () => {
       handleTabChange,
       setSectorInput,
       setClientIdInput,
+      setCadastralKeyInput,
+      setViewMode,
+      setMapCenter,
+      setMapZoom,
+      searchByCadastralKey: handleFetch, // Alias for better naming
+      loadByCadastralKeyAndEdit,
       setSearchQuery,
       setSearchField,
       setSelectedStatus,

@@ -6,6 +6,7 @@ import {
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import { useSectorStatsTable } from '@/shared/presentation/hooks/dashboard/useSectorStatsTable';
+import { EmptyState } from '../common/EmptyState';
 
 interface SectorStatsProps {
   data: SectorStatsReport[];
@@ -31,9 +32,10 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
     );
   if (!data.length)
     return (
-      <div style={{ color: 'var(--text-secondary)' }}>
-        {t('dashboard.sectorStats.empty')}
-      </div>
+      <EmptyState
+        message="No sector stats found"
+        description="No sector stats found"
+      />
     );
 
   const columns: Column<SectorStatsReport>[] = [

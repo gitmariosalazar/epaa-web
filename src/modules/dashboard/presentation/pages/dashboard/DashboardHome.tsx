@@ -66,7 +66,14 @@ export const DashboardHome = () => {
           </div>
         </div>
 
-        {globalStats && (
+        {globalStats ? (
+          <DashboardWidgetWrapper
+            id="global-stats"
+            title={t('dashboard.globalStats.title', 'System Overview')}
+          >
+            <GlobalStats stats={globalStats} loading={loading} />
+          </DashboardWidgetWrapper>
+        ) : (
           <DashboardWidgetWrapper
             id="global-stats"
             title={t('dashboard.globalStats.title', 'System Overview')}
@@ -75,7 +82,28 @@ export const DashboardHome = () => {
           </DashboardWidgetWrapper>
         )}
 
-        {dailyStats.length > 0 && (
+        {dailyStats.length > 0 ? (
+          <div className="dashboard-stats-grid">
+            <div className="stats-col">
+              <DashboardWidgetWrapper
+                id="daily-stats"
+                title="Daily Activity Logic"
+                className="h-full"
+              >
+                <DailyStatsTable data={dailyStats} loading={loading} />
+              </DashboardWidgetWrapper>
+            </div>
+            <div className="stats-col">
+              <DashboardWidgetWrapper
+                id="sector-stats"
+                title={t('dashboard.sectorStats.title')}
+                className="h-full"
+              >
+                <SectorStatsTable data={sectorStats} loading={loading} />
+              </DashboardWidgetWrapper>
+            </div>
+          </div>
+        ) : (
           <div className="dashboard-stats-grid">
             <div className="stats-col">
               <DashboardWidgetWrapper
@@ -98,7 +126,17 @@ export const DashboardHome = () => {
           </div>
         )}
 
-        {noveltyStats.length > 0 && (
+        {noveltyStats.length > 0 ? (
+          <div className="dashboard-novelties-row">
+            <DashboardWidgetWrapper
+              id="novelty-stats"
+              title="Novelty Distribution"
+              className="h-full"
+            >
+              <NoveltyStats data={noveltyStats} loading={loading} />
+            </DashboardWidgetWrapper>
+          </div>
+        ) : (
           <div className="dashboard-novelties-row">
             <DashboardWidgetWrapper
               id="novelty-stats"

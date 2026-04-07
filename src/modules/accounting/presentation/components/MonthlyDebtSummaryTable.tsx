@@ -13,6 +13,8 @@ import {
 import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { CurrencyFormatter } from '@/shared/presentation/utils/formatters/CurrencyFormatter';
+import { NumberFormatter } from '@/shared/presentation/utils/formatters/NumberFormatter';
 
 interface MonthlyDebtSummaryTableProps {
   data: MonthlyDebtSummary[];
@@ -97,7 +99,7 @@ export const MonthlyDebtSummaryTable: React.FC<
         accessor: (item: MonthlyDebtSummary) => (
           <span className="total-amount-cell">
             {item.totalEpaaValue !== undefined
-              ? `$${item.totalEpaaValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              ? CurrencyFormatter.format(item.totalEpaaValue)
               : '-'}
           </span>
         ),
@@ -111,7 +113,7 @@ export const MonthlyDebtSummaryTable: React.FC<
         accessor: (item: MonthlyDebtSummary) => (
           <span>
             {item.totalTrashRate !== undefined
-              ? `$${item.totalTrashRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              ? CurrencyFormatter.format(item.totalTrashRate)
               : '-'}
           </span>
         ),
@@ -128,7 +130,7 @@ export const MonthlyDebtSummaryTable: React.FC<
         accessor: (item: MonthlyDebtSummary) => (
           <span>
             {item.totalSurcharge !== undefined
-              ? `$${item.totalSurcharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              ? CurrencyFormatter.format(item.totalSurcharge)
               : '-'}
           </span>
         ),
@@ -145,7 +147,7 @@ export const MonthlyDebtSummaryTable: React.FC<
         accessor: (item: MonthlyDebtSummary) => (
           <span>
             {item.totalOldSurcharge !== undefined
-              ? `$${item.totalOldSurcharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              ? CurrencyFormatter.format(item.totalOldSurcharge)
               : '-'}
           </span>
         ),
@@ -162,7 +164,7 @@ export const MonthlyDebtSummaryTable: React.FC<
         accessor: (item: MonthlyDebtSummary) => (
           <span>
             {item.totalImprovementsInterest !== undefined
-              ? `$${item.totalImprovementsInterest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              ? CurrencyFormatter.format(item.totalImprovementsInterest)
               : '-'}
           </span>
         ),
@@ -179,7 +181,7 @@ export const MonthlyDebtSummaryTable: React.FC<
         accessor: (item: MonthlyDebtSummary) => (
           <span>
             {item.avgDebtPerClient !== undefined
-              ? `$${item.avgDebtPerClient.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              ? CurrencyFormatter.format(item.avgDebtPerClient)
               : '-'}
           </span>
         ),
@@ -231,15 +233,15 @@ export const MonthlyDebtSummaryTable: React.FC<
       const rowData: Record<string, string> = {
         year: item.year.toString(),
         monthName: item.monthName.toString(),
-        clientsWithDebtThisMonth: item.clientsWithDebtThisMonth.toFixed(2),
-        totalUniqueCadastralKeys: item.totalUniqueCadastralKeys.toFixed(2),
-        totalMonthsPastDue: item.totalMonthsPastDue.toFixed(2),
-        totalEpaaValue: item.totalEpaaValue.toFixed(2),
-        totalTrashRate: item.totalTrashRate.toFixed(2),
-        totalSurcharge: item.totalSurcharge.toFixed(2),
-        totalOldSurcharge: item.totalOldSurcharge.toFixed(2),
-        totalImprovementsInterest: item.totalImprovementsInterest.toFixed(2),
-        avgDebtPerClient: item.avgDebtPerClient.toFixed(2)
+        clientsWithDebtThisMonth: NumberFormatter.formatCount(item.clientsWithDebtThisMonth),
+        totalUniqueCadastralKeys: NumberFormatter.formatCount(item.totalUniqueCadastralKeys),
+        totalMonthsPastDue: NumberFormatter.formatCount(item.totalMonthsPastDue),
+        totalEpaaValue: CurrencyFormatter.format(item.totalEpaaValue),
+        totalTrashRate: CurrencyFormatter.format(item.totalTrashRate),
+        totalSurcharge: CurrencyFormatter.format(item.totalSurcharge),
+        totalOldSurcharge: CurrencyFormatter.format(item.totalOldSurcharge),
+        totalImprovementsInterest: CurrencyFormatter.format(item.totalImprovementsInterest),
+        avgDebtPerClient: CurrencyFormatter.format(item.avgDebtPerClient)
       };
       return selectedColumns.map(
         (column) => rowData[column.id as keyof typeof rowData] || '-'
@@ -296,55 +298,55 @@ export const MonthlyDebtSummaryTable: React.FC<
       },
       {
         label: 'Total',
-        value: totals.clientsWithDebtThisMonth,
+        value: NumberFormatter.formatCount(totals.clientsWithDebtThisMonth),
         highlight: false,
         columnId: 'clientsWithDebtThisMonth'
       },
       {
         label: 'Total',
-        value: totals.totalUniqueCadastralKeys,
+        value: NumberFormatter.formatCount(totals.totalUniqueCadastralKeys),
         highlight: false,
         columnId: 'totalUniqueCadastralKeys'
       },
       {
         label: 'Total',
-        value: totals.totalMonthsPastDue,
+        value: NumberFormatter.formatCount(totals.totalMonthsPastDue),
         highlight: false,
         columnId: 'totalMonthsPastDue'
       },
       {
         label: 'Total',
-        value: totals.totalEpaaValue,
+        value: CurrencyFormatter.format(totals.totalEpaaValue),
         highlight: false,
         columnId: 'totalEpaaValue'
       },
       {
         label: 'Total',
-        value: totals.totalTrashRate,
+        value: CurrencyFormatter.format(totals.totalTrashRate),
         highlight: false,
         columnId: 'totalTrashRate'
       },
       {
         label: 'Total',
-        value: totals.totalSurcharge,
+        value: CurrencyFormatter.format(totals.totalSurcharge),
         highlight: false,
         columnId: 'totalSurcharge'
       },
       {
         label: 'Total',
-        value: totals.totalOldSurcharge,
+        value: CurrencyFormatter.format(totals.totalOldSurcharge),
         highlight: false,
         columnId: 'totalOldSurcharge'
       },
       {
         label: 'Total',
-        value: totals.totalImprovementsInterest,
+        value: CurrencyFormatter.format(totals.totalImprovementsInterest),
         highlight: false,
         columnId: 'totalImprovementsInterest'
       },
       {
         label: 'Total',
-        value: totals.avgDebtPerClient,
+        value: CurrencyFormatter.format(totals.avgDebtPerClient),
         highlight: false,
         columnId: 'avgDebtPerClient'
       }

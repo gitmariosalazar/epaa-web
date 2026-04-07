@@ -3,8 +3,10 @@ import type {
   ConnectionWithProperty,
   Rate
 } from '../models/Connection';
+import type { DashboardAdvanceResponse } from '../models/DashboardStats';
 
 export interface ConnectionRepository {
+  getAdvanceDashboardStats(): Promise<DashboardAdvanceResponse>;
   getConnections(limit: number, offset: number): Promise<Connection[]>;
   createConnection(connection: CreateConnectionRequest): Promise<Connection>;
   updateConnection(

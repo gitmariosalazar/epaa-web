@@ -23,8 +23,10 @@ import {
 import { UserDetailPage } from '@/modules/users/presentation/pages/users/UserDetailPage';
 import { RolesPage } from '@/modules/roles/presentation/pages/roles/RolesPage';
 import { ConnectionsPage } from '@/modules/connections/presentation/pages/ConnectionsPage';
+import { ConnectionsDashboardPage } from '@/modules/connections/presentation/pages/ConnectionsDashboardPage/ConnectionsDashboardPage';
 import { PermissionsPage } from '@/modules/permissions/presentation/pages/permissions/PermissionsPage';
 import { PermissionsProvider } from '@/modules/permissions/presentation/context/PermissionsContext';
+import { AuditPage } from '@/modules/audit/presentation/pages/AuditPage';
 import { ProfilePage } from '@/modules/users/presentation/pages/profile/ProfilePage';
 import { UsersProvider } from '@/modules/users/presentation/context/UsersContext';
 import { SettingsPage } from '@/shared/presentation/pages/settings/SettingsPage';
@@ -97,10 +99,15 @@ function App() {
                   <Route path="general" element={<GeneralCustomersPage />} />
                 </Route>
                 <Route
-                  path="/connections"
+                  path="/connections/*"
                   element={
                     <ConnectionProvider>
-                      <ConnectionsPage />
+                      <Routes>
+                        <Route index element={<Navigate to="list" replace />} />
+                        <Route path="list" element={<ConnectionsPage />} />
+                        <Route path="map" element={<ConnectionsPage />} />
+                        <Route path="dashboard" element={<ConnectionsDashboardPage />} />
+                      </Routes>
                     </ConnectionProvider>
                   }
                 />
@@ -120,6 +127,7 @@ function App() {
                     </PermissionsProvider>
                   }
                 />
+                <Route path="/audit" element={<AuditPage />} />
                 <Route
                   path="/profile"
                   element={

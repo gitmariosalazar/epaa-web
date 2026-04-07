@@ -7,6 +7,7 @@ import {
 } from '@/shared/presentation/components/Table/Table';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { useDailyStatsTable } from '@/shared/presentation/hooks/dashboard/useDailyStatsTable';
+import { EmptyState } from '../common/EmptyState';
 
 interface DailyStatsProps {
   data: DailyStatsReport[];
@@ -31,9 +32,10 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
     );
   if (!data.length)
     return (
-      <div style={{ color: 'var(--text-secondary)' }}>
-        {t('dashboard.dailyStats.empty')}
-      </div>
+      <EmptyState
+        message="No daily stats found"
+        description="No daily stats found"
+      />
     );
 
   const columns: Column<DailyStatsReport>[] = [
@@ -177,6 +179,7 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
           overflowY: 'auto',
           borderRadius: '0 0 0.75rem 0.75rem' // Match card radius
         }}
+        emptyState={<EmptyState message="No daily stats found" />}
       />
     </div>
   );

@@ -31,38 +31,51 @@ import { MonthlyDebtSummaryTable } from '../components/MonthlyDebtSummaryTable';
 export const OverduePaymentsPage: React.FC = () => {
   const { t } = useTranslation();
   const {
-    overduePayments,
-    displayedYearlySummary,
-    yearlyOverdueSummary,
+    // UI & Navigation
+    activeTab,
+    setActiveTab,
     dashboardYear,
-    resolvedDashboardYear,
     setDashboardYear,
-    overdueSummary,
-    isLoading,
-    isYearlySummaryLoading,
+    resolvedDashboardYear,
+    selectedYearData,
+
+    // Filters & Sorting
     searchQuery,
     setSearchQuery,
     searchField,
     setSearchField,
     searchOperator,
     setSearchOperator,
-    activeTab,
-    setActiveTab,
+    sortConfig,
     handleClearSearch,
     handleSort,
+
+    // Payments List
+    overduePayments,
+    isLoading,
+    hasMore,
     handleLoadMore,
+    fetchOverduePayments,
+
+    // Summaries & Metrics
+    globalSummary,
+    isSummaryLoading,
+    isYearlySummaryLoading,
+    isMonthlyDebtSummaryLoading,
+    yearlyOverdueSummary,
+    displayedYearlySummary,
+    displayedMonthlyDebtSummary,
+
+    // Pending Readings
     pendingReadings,
     isPendingLoading,
     isPendingModalOpen,
     setIsPendingModalOpen,
     fetchPendingReadings,
+
+    // Data Fetching Actions
     fetchOverdueSummary,
-    fetchYearlyOverdueSummary,
-    fetchOverduePayments,
-    sortConfig,
-    hasMore,
-    displayedMonthlyDebtSummary,
-    isMonthlyDebtSummaryLoading
+    fetchYearlyOverdueSummary
   } = useOverduePaymentsViewModel();
 
   const TABS_DEFINITION: TabItem<OverduePaymentTab>[] = [
@@ -93,12 +106,8 @@ export const OverduePaymentsPage: React.FC = () => {
     }
   ];
 
-  const selectedYearData =
-    (yearlyOverdueSummary || []).find(
-      (item) => item.year.toString() === resolvedDashboardYear
-    ) || null;
   const loadingProgress = useSimulatedProgress(
-    isLoading || isYearlySummaryLoading
+    isLoading || isYearlySummaryLoading || isSummaryLoading
   );
 
   const renderFilters = () => {
@@ -215,7 +224,7 @@ export const OverduePaymentsPage: React.FC = () => {
         return (
           <GlobalOverdueDashboard
             yearlyData={yearlyOverdueSummary || []}
-            globalSummary={overdueSummary}
+            globalSummary={globalSummary}
             isLoading={isYearlySummaryLoading}
           />
         );
@@ -226,6 +235,7 @@ export const OverduePaymentsPage: React.FC = () => {
             selectedYearData={selectedYearData}
             isLoading={isYearlySummaryLoading}
             monthlyDebtData={displayedMonthlyDebtSummary}
+            globalSummary={globalSummary}
           />
         );
       case 'monthly_debt_summary':

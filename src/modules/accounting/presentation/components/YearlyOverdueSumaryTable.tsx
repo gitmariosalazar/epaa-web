@@ -9,6 +9,8 @@ import { useCallback, useMemo } from 'react';
 import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { CurrencyFormatter } from '@/shared/presentation/utils/formatters/CurrencyFormatter';
+import { NumberFormatter } from '@/shared/presentation/utils/formatters/NumberFormatter';
 import {
   CircularProgress,
   useSimulatedProgress
@@ -83,7 +85,7 @@ export const YearlyOverdueSumaryTable: React.FC<
         accessor: (item: YearlyOverdueSummary) => (
           <span className="total-amount-cell">
             {item.totalEpaaValue !== undefined
-              ? `$${item.totalEpaaValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              ? CurrencyFormatter.format(item.totalEpaaValue)
               : '-'}
           </span>
         ),
@@ -97,7 +99,7 @@ export const YearlyOverdueSumaryTable: React.FC<
         accessor: (item: YearlyOverdueSummary) => (
           <span>
             {item.totalTrashRate !== undefined
-              ? `$${item.totalTrashRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              ? CurrencyFormatter.format(item.totalTrashRate)
               : '-'}
           </span>
         ),
@@ -111,7 +113,7 @@ export const YearlyOverdueSumaryTable: React.FC<
         accessor: (item: YearlyOverdueSummary) => (
           <span>
             {item.totalSurcharge !== undefined
-              ? `$${item.totalSurcharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              ? CurrencyFormatter.format(item.totalSurcharge)
               : '-'}
           </span>
         ),
@@ -125,7 +127,7 @@ export const YearlyOverdueSumaryTable: React.FC<
         accessor: (item: YearlyOverdueSummary) => (
           <span>
             {item.totalOldSurcharge !== undefined
-              ? `$${item.totalOldSurcharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              ? CurrencyFormatter.format(item.totalOldSurcharge)
               : '-'}
           </span>
         ),
@@ -142,7 +144,7 @@ export const YearlyOverdueSumaryTable: React.FC<
         accessor: (item: YearlyOverdueSummary) => (
           <span>
             {item.totalImprovementsInterest !== undefined
-              ? `$${item.totalImprovementsInterest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              ? CurrencyFormatter.format(item.totalImprovementsInterest)
               : '-'}
           </span>
         ),
@@ -156,7 +158,7 @@ export const YearlyOverdueSumaryTable: React.FC<
         accessor: (item: YearlyOverdueSummary) => (
           <span>
             {item.avgDebtPerClient !== undefined
-              ? `$${item.avgDebtPerClient.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              ? CurrencyFormatter.format(item.avgDebtPerClient)
               : '-'}
           </span>
         ),
@@ -170,7 +172,7 @@ export const YearlyOverdueSumaryTable: React.FC<
         accessor: (item: YearlyOverdueSummary) => (
           <span className="total-due-text">
             {item.totalDebtAmount !== undefined
-              ? `$${item.totalDebtAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              ? CurrencyFormatter.format(item.totalDebtAmount)
               : '-'}
           </span>
         ),
@@ -230,18 +232,18 @@ export const YearlyOverdueSumaryTable: React.FC<
     (item: YearlyOverdueSummary, selectedColumns: ExportColumn[]) => {
       const rowData: Record<string, string> = {
         year: item.year.toString(),
-        clientsWithDebt: item.clientsWithDebt.toString(),
-        totalUniqueCadastralKeysByYear: (
+        clientsWithDebt: NumberFormatter.formatCount(item.clientsWithDebt),
+        totalUniqueCadastralKeysByYear: NumberFormatter.formatCount(
           item.totalUniqueCadastralKeysByYear || 0
-        ).toString(),
-        totalMonthsPastDue: item.totalMonthsPastDue.toString(),
-        totalEpaaValue: item.totalEpaaValue.toFixed(2),
-        totalTrashRate: item.totalTrashRate.toFixed(2),
-        totalSurcharge: item.totalSurcharge.toFixed(2),
-        totalOldSurcharge: item.totalOldSurcharge.toFixed(2),
-        totalImprovementsInterest: item.totalImprovementsInterest.toFixed(2),
-        avgDebtPerClient: item.avgDebtPerClient.toFixed(2),
-        totalDebtAmount: item.totalDebtAmount.toFixed(2)
+        ),
+        totalMonthsPastDue: NumberFormatter.formatCount(item.totalMonthsPastDue),
+        totalEpaaValue: CurrencyFormatter.format(item.totalEpaaValue),
+        totalTrashRate: CurrencyFormatter.format(item.totalTrashRate),
+        totalSurcharge: CurrencyFormatter.format(item.totalSurcharge),
+        totalOldSurcharge: CurrencyFormatter.format(item.totalOldSurcharge),
+        totalImprovementsInterest: CurrencyFormatter.format(item.totalImprovementsInterest),
+        avgDebtPerClient: CurrencyFormatter.format(item.avgDebtPerClient),
+        totalDebtAmount: CurrencyFormatter.format(item.totalDebtAmount)
       };
       return selectedColumns.map(
         (column) => rowData[column.id as keyof typeof rowData] || '-'
@@ -321,31 +323,31 @@ export const YearlyOverdueSumaryTable: React.FC<
     () => [
       {
         label: t('accounting.overdue.year', 'Año'),
-        value: data.length,
+        value: NumberFormatter.formatCount(data.length),
         highlight: false,
         columnId: 'year'
       },
       {
         label: t('accounting.overdue.epaaValue', 'Monto EPAA'),
-        value: `$${totals.totalEpaaValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        value: CurrencyFormatter.format(totals.totalEpaaValue),
         highlight: false,
         columnId: 'totalEpaaValue'
       },
       {
         label: t('accounting.overdue.trashRate', 'Tasa de desecho'),
-        value: `$${totals.totalTrashRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        value: CurrencyFormatter.format(totals.totalTrashRate),
         highlight: false,
         columnId: 'totalTrashRate'
       },
       {
         label: t('accounting.overdue.currentSurcharge', 'Recargos actuales'),
-        value: `$${totals.totalSurcharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        value: CurrencyFormatter.format(totals.totalSurcharge),
         highlight: false,
         columnId: 'totalSurcharge'
       },
       {
         label: t('accounting.overdue.oldSurcharge', 'Recargos anteriores'),
-        value: `$${totals.totalOldSurcharge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        value: CurrencyFormatter.format(totals.totalOldSurcharge),
         highlight: false,
         columnId: 'totalOldSurcharge'
       },
@@ -354,19 +356,19 @@ export const YearlyOverdueSumaryTable: React.FC<
           'accounting.overdue.improvementsInterest',
           'Intereses de mejoras'
         ),
-        value: `$${totals.totalImprovementsInterest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        value: CurrencyFormatter.format(totals.totalImprovementsInterest),
         highlight: false,
         columnId: 'totalImprovementsInterest'
       },
       {
         label: t('accounting.overdue.avgDebtPerClient', 'Promedio p/ Cliente'),
-        value: `$${totals.avgDebtPerClient.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        value: CurrencyFormatter.format(totals.avgDebtPerClient),
         highlight: false,
         columnId: 'avgDebtPerClient'
       },
       {
         label: t('accounting.overdue.totalDebtAmount', 'Total deuda'),
-        value: `$${totals.totalDebtAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        value: CurrencyFormatter.format(totals.totalDebtAmount),
         highlight: true,
         columnId: 'totalDebtAmount'
       }

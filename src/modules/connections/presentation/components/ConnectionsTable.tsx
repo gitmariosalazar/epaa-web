@@ -13,7 +13,7 @@ import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport
 import { useTranslation } from 'react-i18next';
 import { Check, EyeIcon, X } from 'lucide-react';
 import { FaTrashCan } from 'react-icons/fa6';
-import { FaEdit } from 'react-icons/fa';
+import { FaEdit, FaMapMarkerAlt } from 'react-icons/fa';
 import type { Connection } from '../../domain/models/Connection';
 import type { SortConfig } from '../hooks/useConnectionsViewModel';
 
@@ -113,6 +113,7 @@ interface ConnectionsTableProps {
   sortConfig?: SortConfig | null;
   onEndReached?: () => void;
   hasMore?: boolean;
+  onViewOnMap: (connection: Connection) => void;
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -124,7 +125,8 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
   onSort,
   sortConfig,
   onEndReached,
-  hasMore
+  hasMore,
+  onViewOnMap
 }) => {
   const { t } = useTranslation();
   const [selectedConnection, setSelectedConnection] =
@@ -253,6 +255,23 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
                 <EyeIcon size={14} />
               </Button>
             </Tooltip>
+            <Tooltip
+              content={t(
+                'connections.table.connectionCoordinates',
+                'Ver en mapa'
+              )}
+              position="top"
+            >
+              <Button
+                size="sm"
+                variant="ghost"
+                color="red"
+                onClick={() => onViewOnMap(row)}
+                circle
+              >
+                <FaMapMarkerAlt size={14} />
+              </Button>
+            </Tooltip>
           </div>
         )
       }
@@ -304,7 +323,7 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
   });
 
   return (
-    <div className="conn-table-wrapper">
+    <div>
       <Table
         data={data}
         columns={columns}

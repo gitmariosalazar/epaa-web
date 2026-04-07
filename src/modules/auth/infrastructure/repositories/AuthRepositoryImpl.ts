@@ -23,13 +23,21 @@ export class AuthRepositoryImpl implements AuthRepository {
   }
 
   async signOut(): Promise<void> {
-    await this.client.post('/auth/signout');
+    const refreshToken = localStorage.getItem('refreshToken');
+    await this.client.post('/auth/signout', { refreshToken });
   }
 
   async refreshToken(): Promise<AuthSession> {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) {
+      throw new Error('No refresh token found');
+    }
+
     const response = await this.client.post<ApiResponse<AuthSession>>(
-      '/auth/refresh-token'
+      '/auth/refresh',
+      { refreshToken }
     );
     return response.data.data;
   }
+
 }

@@ -97,7 +97,12 @@ function applyGenericFilters<T>(
 }
 
 // ── ViewModel Hook ────────────────────────────────────────────────────────────
+/**
+ * ViewModel for managing overdue payment data, summaries, and dashboards.
+ * Handles state, data fetching, filtering, and sorting logic.
+ */
 export const useOverduePaymentsViewModel = () => {
+  // ── 1. DEPENDENCIES & CONTEXT ──
   const {
     findAllOverduePayments,
     findPendingReadingsByCadastralKeyOrCardId,
@@ -106,17 +111,44 @@ export const useOverduePaymentsViewModel = () => {
     findMonthlyDebtSummary
   } = usePaymentsContext();
 
-  // ── 1. LIST STATE ──
+  // ── 2. UI & NAVIGATION STATE ──
+  const [activeTab, setActiveTab] =
+    useState<OverduePaymentTab>('dashboard_global');
+  const [dashboardYear, setDashboardYear] = useState('all');
+
+  // ── 3. FILTER & SORT STATE ──
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchField, setSearchField] = useState('all');
+  const [searchOperator, setSearchOperator] = useState('=');
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+
+  // ── 4. PAYMENTS LIST STATE ──
   const [overduePayments, setOverduePayments] = useState<OverduePayment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
-  const [pendingReadings, setPendingReadings] = useState<PendingReading[]>([]);
-  const [isPendingLoading, setIsPendingLoading] = useState(false);
-  const [pendingError, setPendingError] = useState<string | null>(null);
-  const [isPendingModalOpen, setIsPendingModalOpen] = useState(false);
+  // ── 5. SUMMARIES & DASHBOARD STATE ──
+  // Global Summary
+  const [overdueSummary, setOverdueSummary] = useState<OverdueSummary | null>(
+    null
+  );
+  const [isSummaryLoading, setIsSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
+  // Yearly Summary
+  const [yearlyOverdueSummary, setYearlyOverdueSummary] = useState<
+    YearlyOverdueSummary[]
+  >([]);
+  const [isYearlySummaryLoading, setIsYearlySummaryLoading] = useState(false);
+  const [yearlySummaryError, setYearlySummaryError] = useState<string | null>(
+    null
+  );
+  const [isYearlyRefreshing, setIsYearlyRefreshing] = useState(false);
+
+  // Monthly Summary
   const [monthlyDebtSummary, setMonthlyDebtSummary] = useState<
     MonthlyDebtSummary[]
   >([]);
@@ -128,44 +160,21 @@ export const useOverduePaymentsViewModel = () => {
   const [isMonthlyDebtSummaryRefreshing, setIsMonthlyDebtSummaryRefreshing] =
     useState(false);
 
-  // ── SUMMARY STATE ──
-  const [overdueSummary, setOverdueSummary] = useState<OverdueSummary | null>(
-    null
-  );
-  const [isSummaryLoading, setIsSummaryLoading] = useState(false);
-  const [summaryError, setSummaryError] = useState<string | null>(null);
+  // ── 6. PENDING READINGS STATE (Search Modal) ──
+  const [pendingReadings, setPendingReadings] = useState<PendingReading[]>([]);
+  const [isPendingLoading, setIsPendingLoading] = useState(false);
+  const [pendingError, setPendingError] = useState<string | null>(null);
+  const [isPendingModalOpen, setIsPendingModalOpen] = useState(false);
 
-  // ── YEARLY SUMMARY STATE ──
-  const [yearlyOverdueSummary, setYearlyOverdueSummary] = useState<
-    YearlyOverdueSummary[]
-  >([]);
-  const [isYearlySummaryLoading, setIsYearlySummaryLoading] = useState(false);
-  const [yearlySummaryError, setYearlySummaryError] = useState<string | null>(
-    null
-  );
-  const [isYearlyRefreshing, setIsYearlyRefreshing] = useState(false);
+  // ── 7. DATA FETCHING ACTIONS ──
 
-  const [activeTab, setActiveTab] =
-    useState<OverduePaymentTab>('dashboard_global');
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-
-  // Filter State (Shared between tabs or kept separate if needed, but here shared for simplicity)
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchField, setSearchField] = useState('all');
-  const [searchOperator, setSearchOperator] = useState('=');
-  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
-
-  // Dashboard specific filter
-  const [dashboardYear, setDashboardYear] = useState('all');
-
-  // ── 2. DATA FETCHING ──
+  /** Fetches global overdue summary metrics */
   const fetchOverdueSummary = useCallback(
     async (isRefresh = false) => {
       setIsSummaryLoading(true);
       if (isRefresh) {
         setIsRefreshing(true);
-        setOverdueSummary(null); // Clear data to trigger loading state if needed
+        setOverdueSummary(null);
       }
       setSummaryError(null);
       try {
@@ -183,12 +192,13 @@ export const useOverduePaymentsViewModel = () => {
     [findOverdueSummary]
   );
 
+  /** Fetches yearly summary data for charts and tables */
   const fetchYearlyOverdueSummary = useCallback(
     async (isRefresh = false) => {
       setIsYearlySummaryLoading(true);
       if (isRefresh) {
         setIsYearlyRefreshing(true);
-        setYearlyOverdueSummary([]); // Clear data to trigger loading UI
+        setYearlyOverdueSummary([]);
       }
       setYearlySummaryError(null);
       try {
@@ -206,12 +216,13 @@ export const useOverduePaymentsViewModel = () => {
     [findYearlyOverdueSummary]
   );
 
+  /** Fetches monthly breakdown of debt */
   const fetchMonthlyDebtSummary = useCallback(
     async (isRefresh = false) => {
       setIsMonthlyDebtSummaryLoading(true);
       if (isRefresh) {
         setIsMonthlyDebtSummaryRefreshing(true);
-        setMonthlyDebtSummary([]); // Clear data to trigger loading UI
+        setMonthlyDebtSummary([]);
       }
       setMonthlyDebtSummaryError(null);
       try {
@@ -229,12 +240,13 @@ export const useOverduePaymentsViewModel = () => {
     [findMonthlyDebtSummary]
   );
 
+  /** Primary orchestrator for fetching data based on active tab */
   const fetchOverduePayments = useCallback(
     async (currentOffset: number = 0, append = false, isRefresh = false) => {
       setIsLoading(true);
       if (isRefresh) {
         setIsRefreshing(true);
-        setOverduePayments([]); // Clear to trigger massive loading overlay
+        setOverduePayments([]);
       }
       setError(null);
       try {
@@ -249,7 +261,6 @@ export const useOverduePaymentsViewModel = () => {
               (Number(item.totalTrashRate) || 0) +
               (Number(item.totalEpaaValue) || 0) +
               (Number(item.totalSurcharge) || 0) +
-              //(Number(item.totalOldSurcharge) || 0) +
               (Number(item.totalOldImprovementsInterest) || 0)
           }));
           if (data.length < LIMIT_SIZE) setHasMore(false);
@@ -259,8 +270,10 @@ export const useOverduePaymentsViewModel = () => {
           activeTab === 'dashboard_anual' ||
           activeTab === 'monthly_debt_summary'
         ) {
-          await fetchYearlyOverdueSummary(isRefresh);
-          await fetchMonthlyDebtSummary(isRefresh);
+          await Promise.all([
+            fetchYearlyOverdueSummary(isRefresh),
+            fetchMonthlyDebtSummary(isRefresh)
+          ]);
         } else if (activeTab === 'dashboard_global') {
           await Promise.all([
             fetchYearlyOverdueSummary(isRefresh),
@@ -273,8 +286,6 @@ export const useOverduePaymentsViewModel = () => {
       } finally {
         setIsLoading(false);
         setIsRefreshing(false);
-        setIsMonthlyDebtSummaryLoading(false);
-        setIsMonthlyDebtSummaryRefreshing(false);
       }
     },
     [
@@ -286,45 +297,11 @@ export const useOverduePaymentsViewModel = () => {
     ]
   );
 
-  useEffect(() => {
-    setOffset(0);
-    setHasMore(true);
-    // Reset filters when changing tabs to avoid confusion
-    handleClearSearch();
-    fetchOverduePayments(0, false);
-  }, [activeTab]); // Trigger on tab change
-
-  // ── 3. HANDLERS ──
-  const handleClearSearch = () => {
-    setSearchQuery('');
-    setSearchField('all');
-    setSearchOperator('=');
-    setSortConfig(null);
-  };
-
-  const handleSort = (key: string) => {
-    setSortConfig((prevConfig) => ({
-      key,
-      direction:
-        prevConfig?.key === key && prevConfig.direction === 'asc'
-          ? 'desc'
-          : 'asc'
-    }));
-  };
-
-  const handleLoadMore = () => {
-    if (!hasMore || isLoading) return;
-    const newOffset = offset + LIMIT_SIZE;
-    setOffset(newOffset);
-    fetchOverduePayments(newOffset, true);
-  };
-
+  /** Searches for pending readings for a specific account */
   const fetchPendingReadings = useCallback(
     async (searchValue: string) => {
-      if (!searchValue || searchValue.trim() === '') {
-        console.warn('Empty search value for pending readings');
-        return;
-      }
+      if (!searchValue || searchValue.trim() === '') return;
+
       setIsPendingModalOpen(true);
       setIsPendingLoading(true);
       setPendingError(null);
@@ -344,76 +321,103 @@ export const useOverduePaymentsViewModel = () => {
     [findPendingReadingsByCadastralKeyOrCardId]
   );
 
-  // ── 4. FILTERING LOGIC ──
+  // ── 8. DERIVED DATA (MEMOS) ──
 
-  // Define numeric fields for both types to enable operator search
-  const paymentNumericFields = [
-    'monthsPastDue',
-    'totalDue',
-    'totalEpaaValue',
-    'totalTrashRate'
-  ];
-  const yearlyNumericFields = [
-    'year',
-    'clientsWithDebt',
-    'totalUniqueCadastralKeysByYear',
-    'totalMonthsPastDue',
-    'totalDebtAmount',
-    'totalEpaaValue'
-  ];
-
-  const displayedPayments = applySortConfig(
-    applyGenericFilters(
-      overduePayments,
-      searchQuery,
-      searchField,
-      searchOperator,
-      paymentNumericFields
-    ),
+  // Filtered/Sorted Payments
+  const displayedPayments = useMemo(() => {
+    const paymentNumericFields = [
+      'monthsPastDue',
+      'totalDue',
+      'totalEpaaValue',
+      'totalTrashRate'
+    ];
+    return applySortConfig(
+      applyGenericFilters(
+        overduePayments,
+        searchQuery,
+        searchField,
+        searchOperator,
+        paymentNumericFields
+      ),
+      sortConfig
+    );
+  }, [
+    overduePayments,
+    searchQuery,
+    searchField,
+    searchOperator,
     sortConfig
-  );
+  ]);
 
-  const displayedYearlySummary = applySortConfig(
-    applyGenericFilters(
-      dashboardYear === 'all'
-        ? yearlyOverdueSummary
-        : yearlyOverdueSummary.filter(
-            (item) => item.year.toString() === dashboardYear
-          ),
-      searchQuery,
-      searchField,
-      searchOperator,
-      yearlyNumericFields
-    ),
+  // Filtered/Sorted Yearly Summary
+  const displayedYearlySummary = useMemo(() => {
+    const yearlyNumericFields = [
+      'year',
+      'clientsWithDebt',
+      'totalUniqueCadastralKeysByYear',
+      'totalMonthsPastDue',
+      'totalDebtAmount',
+      'totalEpaaValue'
+    ];
+    return applySortConfig(
+      applyGenericFilters(
+        dashboardYear === 'all'
+          ? yearlyOverdueSummary
+          : yearlyOverdueSummary.filter(
+              (item) => item.year.toString() === dashboardYear
+            ),
+        searchQuery,
+        searchField,
+        searchOperator,
+        yearlyNumericFields
+      ),
+      sortConfig
+    );
+  }, [
+    yearlyOverdueSummary,
+    dashboardYear,
+    searchQuery,
+    searchField,
+    searchOperator,
     sortConfig
-  );
+  ]);
 
-  const monthlyNumericFields = [
-    'year',
-    'month',
-    'totalUniqueClients',
-    'totalUniqueCadastralKeys',
-    'clientsWithDebtThisMonth',
-    'totalMonthsPastDue',
-    'totalDebtAmount',
-    'totalEpaaValue'
-  ];
-
-  const displayedMonthlyDebtSummary = applySortConfig(
-    applyGenericFilters(
-      dashboardYear === 'all'
-        ? monthlyDebtSummary
-        : monthlyDebtSummary.filter(
-            (item) => item.year.toString() === dashboardYear
-          ),
-      searchQuery,
-      searchField,
-      searchOperator,
-      monthlyNumericFields
-    ),
+  // Filtered/Sorted Monthly Summary
+  const displayedMonthlyDebtSummary = useMemo(() => {
+    const monthlyNumericFields = [
+      'year',
+      'month',
+      'totalUniqueClients',
+      'totalUniqueCadastralKeys',
+      'clientsWithDebtThisMonth',
+      'totalMonthsPastDue',
+      'totalDebtAmount',
+      'totalEpaaValue'
+    ];
+    return applySortConfig(
+      applyGenericFilters(
+        dashboardYear === 'all'
+          ? monthlyDebtSummary
+          : monthlyDebtSummary.filter(
+              (item) => item.year.toString() === dashboardYear
+            ),
+        searchQuery,
+        searchField,
+        searchOperator,
+        monthlyNumericFields
+      ),
+      sortConfig
+    );
+  }, [
+    monthlyDebtSummary,
+    dashboardYear,
+    searchQuery,
+    searchField,
+    searchOperator,
     sortConfig
-  );
+  ]);
 
+  // Dashboard calculations
   const resolvedDashboardYear = useMemo(() => {
     if (
       dashboardYear === 'all' &&
@@ -425,6 +429,14 @@ export const useOverduePaymentsViewModel = () => {
     return dashboardYear;
   }, [dashboardYear, activeTab, yearlyOverdueSummary]);
 
+  /** Data for the specific year selected in the dashboard */
+  const selectedYearData = useMemo(() => {
+    return (yearlyOverdueSummary || []).find(
+      (item) => item.year.toString() === resolvedDashboardYear
+    ) || null;
+  }, [yearlyOverdueSummary, resolvedDashboardYear]);
+
+  /** Filtered yearly data for charts/tables */
   const dashboardData = useMemo(() => {
     if (resolvedDashboardYear === 'all') return yearlyOverdueSummary;
     return yearlyOverdueSummary.filter(
@@ -432,18 +444,56 @@ export const useOverduePaymentsViewModel = () => {
     );
   }, [yearlyOverdueSummary, resolvedDashboardYear]);
 
-  // ── 5. RETURNED VALUES ──
+  // ── 9. EVENT HANDLERS ──
+
+  /** Resets search and sort state */
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery('');
+    setSearchField('all');
+    setSearchOperator('=');
+    setSortConfig(null);
+  }, []);
+
+  /** Toggles sort direction for a given key */
+  const handleSort = useCallback((key: string) => {
+    setSortConfig((prevConfig) => ({
+      key,
+      direction:
+        prevConfig?.key === key && prevConfig.direction === 'asc'
+          ? 'desc'
+          : 'asc'
+    }));
+  }, []);
+
+  /** Pagination handler for the payments list */
+  const handleLoadMore = useCallback(() => {
+    if (!hasMore || isLoading) return;
+    const newOffset = offset + LIMIT_SIZE;
+    setOffset(newOffset);
+    fetchOverduePayments(newOffset, true);
+  }, [hasMore, isLoading, offset, fetchOverduePayments]);
+
+  // ── 10. SIDE EFFECTS ──
+
+  // Fetch initial data or data on tab change
+  useEffect(() => {
+    setOffset(0);
+    setHasMore(true);
+    handleClearSearch();
+    fetchOverduePayments(0, false);
+  }, [activeTab]);
+
+  // ── 11. EXPOSED API ──
   return {
-    overduePayments: displayedPayments,
-    displayedYearlySummary, // Return the filtered yearly data
-    dashboardData,
+    // UI & Navigation
+    activeTab,
+    setActiveTab,
     dashboardYear,
-    resolvedDashboardYear,
     setDashboardYear,
-    isLoading,
-    isRefreshing,
-    error,
-    hasMore,
+    resolvedDashboardYear,
+    selectedYearData,
+
+    // Filters & Sorting
     searchQuery,
     setSearchQuery,
     searchField,
@@ -452,33 +502,54 @@ export const useOverduePaymentsViewModel = () => {
     setSearchOperator,
     sortConfig,
     setSortConfig,
-    activeTab,
-    setActiveTab,
     handleClearSearch,
     handleSort,
+
+    // Payments List
+    overduePayments: displayedPayments,
+    isLoading,
+    isRefreshing,
+    error,
+    hasMore,
     handleLoadMore,
-    pendingReadings,
-    setPendingReadings,
-    isPendingLoading,
-    pendingError,
-    isPendingModalOpen,
-    setIsPendingModalOpen,
-    fetchPendingReadings,
+    fetchOverduePayments,
+
+    // Summaries & Metrics
+    globalSummary: overdueSummary, // Alias for better clarity in dashboards
     overdueSummary,
     isSummaryLoading,
     summaryError,
     fetchOverdueSummary,
-    yearlyOverdueSummary, // Restored actual raw array. Dropping alias mapping to `displayedYearlySummary` to prevent dropdown starvation.
+
+    yearlyOverdueSummary,
+    displayedYearlySummary,
     isYearlySummaryLoading,
     isYearlyRefreshing,
     yearlySummaryError,
     fetchYearlyOverdueSummary,
-    fetchOverduePayments,
+
     monthlyDebtSummary,
     displayedMonthlyDebtSummary,
     isMonthlyDebtSummaryLoading,
     isMonthlyDebtSummaryRefreshing,
     monthlyDebtSummaryError,
-    fetchMonthlyDebtSummary
+    fetchMonthlyDebtSummary,
+
+    // Dashboard Data
+    dashboardData,
+
+    // Pending Readings Modal
+    pendingReadings,
+    isPendingLoading,
+    pendingError,
+    isPendingModalOpen,
+    setIsPendingModalOpen,
+    setPendingReadings,
+    fetchPendingReadings,
+
+    // Low-level Use Case
+    findOverdueSummary
   };
 };
+
+

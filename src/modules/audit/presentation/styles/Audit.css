@@ -1,0 +1,67 @@
+.audit-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  height: 100%;
+}
+
+.audit-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.audit-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.audit-header p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.audit-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.audit-tabs {
+  padding: 0.5rem 1rem 0;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-card);
+}
+
+.audit-panel-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden; /* Ensure it doesn't create extra scrollbars */
+}
+
+/* 
+  Fix for sticky headers:
+  The PageLayout body normally has overflow-y: auto.
+  For tables with internal sticky headers, we must disable 
+  the outer body scroll so the table wrapper becomes the 
+  primary scrolling ancestor.
+*/
+:global(.connections-page-content) :global(.epaa-page-layout__body) {
+  overflow: hidden !important;
+}
+
+/* If not using CSS modules global, just standard nesting if imported globally */
+.connections-page-content .epaa-page-layout__body {
+  overflow: hidden !important;
+  margin-top: -15px !important;
+}

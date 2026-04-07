@@ -7,6 +7,7 @@ import { DeleteConnectionUseCase } from '../../application/usecases/DeleteConnec
 import { FindConnectionsBySectorUseCase } from '../../application/usecases/FindConnectionsBySectorUseCase';
 import { FindAllConnectionsByClientIdUseCase } from '../../application/usecases/FindAllConnectionsByClientIdUseCase';
 import { FindConnectionWithPropertyByCadastralKeyUseCase } from '../../application/usecases/FindConnectionWithPropertyByCadastralKeyUseCase';
+import { GetAdvanceDashboardStatsUseCase } from '../../application/usecases/getAdvanceDashboardStats.usecase';
 import { ConnectionRepositoryImpl } from '../../infrastructure/repositories/ConnectionRepositoryImpl';
 import { CreateCompanyUseCase } from '@/modules/customers/application/usecases/CreateCompanyUseCase';
 import { CreateCustomerUseCase } from '@/modules/customers/application/usecases/CreateCustomerUseCase';
@@ -25,6 +26,7 @@ interface ConnectionContextType {
   findConnectionsBySectorUseCase: FindConnectionsBySectorUseCase;
   findAllConnectionsByClientIdUseCase: FindAllConnectionsByClientIdUseCase;
   findConnectionWithPropertyByCadastralKeyUseCase: FindConnectionWithPropertyByCadastralKeyUseCase;
+  getAdvanceDashboardStatsUseCase: GetAdvanceDashboardStatsUseCase;
   getCustomerByIdentificationUseCase: GetCustomerByIdentificationUseCase;
   createCustomerUseCase: CreateCustomerUseCase;
   createCompanyUseCase: CreateCompanyUseCase;
@@ -49,6 +51,7 @@ export const ConnectionProvider: React.FC<{ children: ReactNode }> = ({
   const findConnectionsBySectorUseCase = new FindConnectionsBySectorUseCase(connectionRepository);
   const findAllConnectionsByClientIdUseCase = new FindAllConnectionsByClientIdUseCase(connectionRepository);
   const findConnectionWithPropertyByCadastralKeyUseCase = new FindConnectionWithPropertyByCadastralKeyUseCase(connectionRepository);
+  const getAdvanceDashboardStatsUseCase = new GetAdvanceDashboardStatsUseCase(connectionRepository);
   const getCustomerByIdentificationUseCase = new GetCustomerByIdentificationUseCase(customerRepository);
   const createCustomerUseCase = new CreateCustomerUseCase(customerRepository);
   const createCompanyUseCase = new CreateCompanyUseCase(companyRepository);
@@ -64,6 +67,7 @@ export const ConnectionProvider: React.FC<{ children: ReactNode }> = ({
     findConnectionsBySectorUseCase,
     findAllConnectionsByClientIdUseCase,
     findConnectionWithPropertyByCadastralKeyUseCase,
+    getAdvanceDashboardStatsUseCase,
     getCustomerByIdentificationUseCase,
     createCustomerUseCase,
     createCompanyUseCase,

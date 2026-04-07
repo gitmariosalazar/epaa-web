@@ -107,18 +107,35 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <button className={classes} disabled={disabled || isLoading} {...props}>
-      {isLoading && <span className={`${baseClass}__loader`} />}
-      {!isLoading && leftIcon && (
-        <span className={`${baseClass}__icon ${baseClass}__icon--left`}>
-          {leftIcon}
-        </span>
-      )}
-      {!iconOnly && <span className={`${baseClass}__text`}>{children}</span>}
-      {!isLoading && rightIcon && (
-        <span className={`${baseClass}__icon ${baseClass}__icon--right`}>
-          {rightIcon}
-        </span>
-      )}
+      <span className={`${baseClass}__content`}>
+        {/* Left Slot: Icon or Loading */}
+        {(isLoading || leftIcon) && (
+          <span className={`${baseClass}__slot ${baseClass}__slot--left`}>
+            {isLoading ? (
+              <span className={`${baseClass}__loader`} />
+            ) : (
+              leftIcon && (
+                <span className={`${baseClass}__icon ${baseClass}__icon--left`}>
+                  {leftIcon}
+                </span>
+              )
+            )}
+          </span>
+        )}
+
+        {/* Text Content */}
+        {!iconOnly && <span className={`${baseClass}__text`}>{children}</span>}
+
+        {/* Right Slot: Icon (only shown if not loading to maintain space if needed, or hidden) */}
+        {/* Right Slot: Icon */}
+        {!isLoading && rightIcon && (
+          <span className={`${baseClass}__slot ${baseClass}__slot--right`}>
+            <span className={`${baseClass}__icon ${baseClass}__icon--right`}>
+              {rightIcon}
+            </span>
+          </span>
+        )}
+      </span>
     </button>
   );
 };

@@ -8,6 +8,8 @@ import { PropertySelectionStep } from './Steps/PropertySelectionStep';
 import { BasicConnectionStep } from './Steps/BasicConnectionStep';
 import { TechnicalConnectionStep } from './Steps/TechnicalConnectionStep';
 import { GetPropertyContextProvider } from '@/modules/properties/presentation/context/GetPropertiesContext';
+import type { CreateCustomerRequest } from '@/modules/customers/domain/repositories/CustomerRepository';
+import type { CreateCompanyRequest } from '@/modules/customers/domain/repositories/CompanyRepository';
 import './CreateConnectionWizard.css';
 import { FaTools, FaUserCog, FaCheckCircle } from 'react-icons/fa';
 import { TbListDetails } from 'react-icons/tb';
@@ -78,9 +80,13 @@ export const CreateConnectionWizard: React.FC<CreateConnectionWizardProps> = ({
         return (
           <GetPropertyContextProvider>
             <PropertySelectionStep
-              clientId={clientType === 'person' ? pendingClientData?.customerId : pendingClientData?.companyRuc}
+              clientId={
+                clientType === 'person' 
+                  ? (pendingClientData as CreateCustomerRequest)?.customerId.toString() 
+                  : (pendingClientData as CreateCompanyRequest)?.companyRuc
+              }
               selectedPropertyKey={formData.propertyCadastralKey || null}
-              onSelectProperty={(key) => handleInputChange({ name: 'propertyCadastralKey', value: key })}
+              onSelectProperty={(key) => handleInputChange({ name: 'propertyCadastralKey', value: key || '' })}
               prevStep={prevStep}
               handleWizardSave={handleWizardSave}
               wizardLoading={loading}
