@@ -8,7 +8,7 @@ import { InputCadastralKey } from '@/shared/presentation/components/Input/InputC
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 // Importamos los estilos de entry-filters (asumiendo que están en Accounting o global)
-import '@/modules/accounting/presentation/styles/EntryDataFilters.css';
+import '@/modules/accounting/presentation/styles/entry-data/EntryDataFilters.css';
 import { Input } from '@/shared/presentation/components/Input/Input';
 
 import { Select } from '@/shared/presentation/components/Input/Select';

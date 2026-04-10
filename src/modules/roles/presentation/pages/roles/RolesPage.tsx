@@ -10,7 +10,7 @@ import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Edit2, Plus, Search, SearchX } from 'lucide-react';
 import '@/shared/presentation/styles/Table.css';
-import '@/modules/accounting/presentation/styles/EntryDataFilters.css';
+import '@/modules/accounting/presentation/styles/entry-data/EntryDataFilters.css';
 import '@/shared/presentation/styles/Roles.css';
 import { MdAdd, MdClose, MdLockOpen } from 'react-icons/md';
 import { useRolesViewModel } from '../../hooks/useRolesViewModel';

@@ -36,10 +36,10 @@ import { RolesProvider } from '@/modules/roles/presentation/context/RolesContext
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { ReadingsProvider } from '@/modules/readings/presentation/context/ReadingsContext';
 import { CreateReadingPage } from '@/modules/readings/presentation/pages/CreateReadingPage';
-import { PaymentsProvider } from '@/modules/accounting/presentation/context/PaymentsContext';
-import { PaymentsPage } from '@/modules/accounting/presentation/pages/PaymentsPage';
-import { EntryDataProvider } from '@/modules/accounting/presentation/context/EntryDataContext';
-import { EntryDataPage } from '@/modules/accounting/presentation/pages/EntryDataPage';
+import { PaymentsProvider } from '@/modules/accounting/presentation/context/payments/PaymentsContext';
+import { PaymentsPage } from '@/modules/accounting/presentation/pages/payments/PaymentsPage';
+import { EntryDataProvider } from '@/modules/accounting/presentation/context/entry-data/EntryDataContext';
+import { EntryDataPage } from '@/modules/accounting/presentation/pages/entry-data/EntryDataPage';
 import { ReadingsListPage } from '@/modules/readings/presentation/pages/ReadingsListPage';
 import { ReadingImagesPage } from '@/modules/readings/presentation/pages/ReadingImagesPage';
 import { TrashRateReportProvider } from './modules/trash/presentation/context/TrashRateReportContext';
@@ -48,9 +48,9 @@ import { TrashRateKPIPage } from './modules/trash/presentation/pages/TrashRateKP
 import { UpdateReadingPage } from './modules/readings/presentation/pages/UpdateReadingPage';
 import { GetPropertyContextProvider } from '@/modules/properties/presentation/context/GetPropertiesContext';
 import { PropertiesPage } from '@/modules/properties/presentation/pages/PropertiesPage';
-import { OverduePaymentsPage } from './modules/accounting/presentation/pages';
-import { GeneralCollectionProvider } from '@/modules/accounting/presentation/context/GeneralCollectionContext';
-import { GeneralCollectionPage } from '@/modules/accounting/presentation/pages';
+import { OverduePaymentsPage } from './modules/accounting/presentation/pages/overdue/OverduePaymentsPage';
+import { GeneralCollectionProvider } from '@/modules/accounting/presentation/context/general-collection/GeneralCollectionContext';
+import { GeneralCollectionPage } from '@/modules/accounting/presentation/pages/general-collection/GeneralCollectionPage';
 
 const ProtectedRoute = () => {
   const { token, isLoading } = useAuth();

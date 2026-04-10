@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Hash } from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import '@/modules/accounting/presentation/styles/EntryDataFilters.css';
+import '@/modules/accounting/presentation/styles/entry-data/EntryDataFilters.css';
 
 import { Input } from '@/shared/presentation/components/Input/Input';
 

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-export const ConvertMonth = (month: number): string => {
+export const ConvertMonth = (month: number | string): string => {
   const { t } = useTranslation();
   const HashMonths: Record<number, string> = {
     1: t('accounting:months.january', 'Enero'),
@@ -16,7 +16,7 @@ export const ConvertMonth = (month: number): string => {
     11: t('accounting:months.november', 'Noviembre'),
     12: t('accounting:months.december', 'Diciembre')
   };
-  return HashMonths[month];
+  return HashMonths[Number(month)];
 };
 
 export const ConvertDay = (day: number): string => {

@@ -10,7 +10,7 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Edit2, Plus, Trash2, Search, Check, X, SearchX } from 'lucide-react';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import '@/shared/presentation/styles/Table.css';
-import '@/modules/accounting/presentation/styles/EntryDataFilters.css';
+import '@/modules/accounting/presentation/styles/entry-data/EntryDataFilters.css';
 import '@/shared/presentation/styles/Permission.css';
 import { usePermissionsViewModel } from '../../hooks/usePermissionsViewModel';
 
