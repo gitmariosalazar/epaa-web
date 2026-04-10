@@ -4,7 +4,7 @@ import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
@@ -48,8 +48,7 @@ export const GeneralCollectionGroupedTable: React.FC<GeneralCollectionGroupedTab
   startDate,
   endDate
 }) => {
-  const { t } = useTranslation();
-
+  // const { t } = useTranslation();
   const columns: Column<GroupedReportItem>[] = [];
 
   if (type === 'daily') {
