@@ -1,7 +1,7 @@
 import React from 'react';
 import '../../../trash/presentation/styles/TrashRateDashboard.css';
 import {
-  DollarSign,
+  //DollarSign,
   FileText,
   Home,
   CheckCircle,
@@ -9,7 +9,7 @@ import {
   TrendingDown,
   Activity
 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+//import { useTranslation } from 'react-i18next';
 import {
   type GeneralKPIResponse,
   type GeneralMonthlyKPIResponse,
@@ -38,14 +38,10 @@ const fmtMoney = (n: number) =>
   `$${Number(n || 0).toLocaleString('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const fmtNum = (n: number) => Number(n || 0).toLocaleString('es-EC');
 
-export const GeneralCollectionDashboard: React.FC<GeneralCollectionDashboardProps> = ({
-  kpi,
-  monthlyKpi,
-  yearlyKpi,
-  isLoading,
-  activeTab
-}) => {
-  const { t } = useTranslation();
+export const GeneralCollectionDashboard: React.FC<
+  GeneralCollectionDashboardProps
+> = ({ kpi, monthlyKpi, yearlyKpi, isLoading, activeTab }) => {
+  // const { t } = useTranslation();
 
   if (isLoading) return null;
 
@@ -59,21 +55,43 @@ export const GeneralCollectionDashboard: React.FC<GeneralCollectionDashboardProp
     // Actually the easiest is to show the dashboard only if we have a summary.
     // We will aggregate it if possible:
     currentKpi = {
-      uniqueCadastralKeys: monthlyKpi.reduce((sum, k) => sum + k.uniqueCadastralKeys, 0),
-      totalBillsIssued: monthlyKpi.reduce((sum, k) => sum + k.totalBillsIssued, 0),
-      averagePaidBill: monthlyKpi.reduce((sum, k) => sum + k.averagePaidBill, 0) / monthlyKpi.length,
+      uniqueCadastralKeys: monthlyKpi.reduce(
+        (sum, k) => sum + k.uniqueCadastralKeys,
+        0
+      ),
+      totalBillsIssued: monthlyKpi.reduce(
+        (sum, k) => sum + k.totalBillsIssued,
+        0
+      ),
+      averagePaidBill:
+        monthlyKpi.reduce((sum, k) => sum + k.averagePaidBill, 0) /
+        monthlyKpi.length,
       countNotes: monthlyKpi.reduce((sum, k) => sum + k.countNotes, 0),
-      totalNotesAmount: monthlyKpi.reduce((sum, k) => sum + k.totalNotesAmount, 0),
+      totalNotesAmount: monthlyKpi.reduce(
+        (sum, k) => sum + k.totalNotesAmount,
+        0
+      ),
       codeTitle: 'Mensualizado',
       sections: [] // Simplified sections for aggregate
     };
   } else if (activeTab === 'yearly' && yearlyKpi.length > 0) {
     currentKpi = {
-      uniqueCadastralKeys: yearlyKpi.reduce((sum, k) => sum + k.uniqueCadastralKeys, 0),
-      totalBillsIssued: yearlyKpi.reduce((sum, k) => sum + k.totalBillsIssued, 0),
-      averagePaidBill: yearlyKpi.reduce((sum, k) => sum + k.averagePaidBill, 0) / yearlyKpi.length,
+      uniqueCadastralKeys: yearlyKpi.reduce(
+        (sum, k) => sum + k.uniqueCadastralKeys,
+        0
+      ),
+      totalBillsIssued: yearlyKpi.reduce(
+        (sum, k) => sum + k.totalBillsIssued,
+        0
+      ),
+      averagePaidBill:
+        yearlyKpi.reduce((sum, k) => sum + k.averagePaidBill, 0) /
+        yearlyKpi.length,
       countNotes: yearlyKpi.reduce((sum, k) => sum + k.countNotes, 0),
-      totalNotesAmount: yearlyKpi.reduce((sum, k) => sum + k.totalNotesAmount, 0),
+      totalNotesAmount: yearlyKpi.reduce(
+        (sum, k) => sum + k.totalNotesAmount,
+        0
+      ),
       codeTitle: 'Anualizado',
       sections: []
     };
@@ -84,13 +102,29 @@ export const GeneralCollectionDashboard: React.FC<GeneralCollectionDashboardProp
   }
 
   const sections = currentKpi.sections || [];
-  const totalAmountCollected = sections.reduce((sum, s) => sum + s.amountCollected, 0);
-  const totalAmountPending = sections.reduce((sum, s) => sum + s.amountPending, 0);
+  const totalAmountCollected = sections.reduce(
+    (sum, s) => sum + s.amountCollected,
+    0
+  );
+  const totalAmountPending = sections.reduce(
+    (sum, s) => sum + s.amountPending,
+    0
+  );
   const totalAmount = sections.reduce((sum, s) => sum + s.amountTotal, 0);
 
   const moneySlices: DonutSlice[] = [
-    { label: 'Recaudado', value: totalAmountCollected, color: '#22c55e', fmt: fmtMoney },
-    { label: 'Pendiente', value: totalAmountPending, color: '#ef4444', fmt: fmtMoney }
+    {
+      label: 'Recaudado',
+      value: totalAmountCollected,
+      color: '#22c55e',
+      fmt: fmtMoney
+    },
+    {
+      label: 'Pendiente',
+      value: totalAmountPending,
+      color: '#ef4444',
+      fmt: fmtMoney
+    }
   ];
 
   const barItems: BarItem[] = sections.map((s, idx) => {
@@ -106,7 +140,12 @@ export const GeneralCollectionDashboard: React.FC<GeneralCollectionDashboardProp
   return (
     <div className="trash-dashboard" style={{ padding: '0 0 24px 0' }}>
       <div className="trash-kpi-semantic-row">
-        <div className="trash-kpi-metrics-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+        <div
+          className="trash-kpi-metrics-grid"
+          style={{
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))'
+          }}
+        >
           <KPICard
             label="Total Recaudado"
             value={fmtMoney(totalAmountCollected)}
@@ -155,7 +194,10 @@ export const GeneralCollectionDashboard: React.FC<GeneralCollectionDashboardProp
       </div>
 
       {sections.length > 0 && (
-        <div className="trash-dashboard-charts-grid" style={{ marginTop: '24px' }}>
+        <div
+          className="trash-dashboard-charts-grid"
+          style={{ marginTop: '24px' }}
+        >
           <DonutChart
             title="Distribución de Montos"
             slices={moneySlices}

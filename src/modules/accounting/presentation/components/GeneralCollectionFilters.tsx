@@ -2,7 +2,7 @@ import React from 'react';
 import '../styles/PaymentFilters.css';
 import { CreditCard, Search, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
+//import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
 import { Select } from '@/shared/presentation/components/Input/Select';
@@ -56,8 +56,8 @@ export const GeneralCollectionFilters: React.FC<
   onInitDateChange,
   endDate,
   onEndDateChange,
-  year,
-  onYearChange,
+  //year,
+  //onYearChange,
   startYear,
   onStartYearChange,
   endYear,
