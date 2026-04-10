@@ -9,8 +9,8 @@ import { useCallback, useMemo } from 'react';
 import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { CurrencyFormatter } from '@/shared/presentation/utils/formatters/CurrencyFormatter';
-import { NumberFormatter } from '@/shared/presentation/utils/formatters/NumberFormatter';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
+import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
 import {
   CircularProgress,
   useSimulatedProgress
@@ -236,12 +236,16 @@ export const YearlyOverdueSumaryTable: React.FC<
         totalUniqueCadastralKeysByYear: NumberFormatter.formatCount(
           item.totalUniqueCadastralKeysByYear || 0
         ),
-        totalMonthsPastDue: NumberFormatter.formatCount(item.totalMonthsPastDue),
+        totalMonthsPastDue: NumberFormatter.formatCount(
+          item.totalMonthsPastDue
+        ),
         totalEpaaValue: CurrencyFormatter.format(item.totalEpaaValue),
         totalTrashRate: CurrencyFormatter.format(item.totalTrashRate),
         totalSurcharge: CurrencyFormatter.format(item.totalSurcharge),
         totalOldSurcharge: CurrencyFormatter.format(item.totalOldSurcharge),
-        totalImprovementsInterest: CurrencyFormatter.format(item.totalImprovementsInterest),
+        totalImprovementsInterest: CurrencyFormatter.format(
+          item.totalImprovementsInterest
+        ),
         avgDebtPerClient: CurrencyFormatter.format(item.avgDebtPerClient),
         totalDebtAmount: CurrencyFormatter.format(item.totalDebtAmount)
       };

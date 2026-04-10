@@ -5,7 +5,7 @@ import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
-import { ConverDate } from '@/shared/presentation/utils/datetime/ConverDate';
+import { ConverDate } from '@/shared/utils/datetime/ConverDate';
 import '../../styles/PaymentsTable.css';
 
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';

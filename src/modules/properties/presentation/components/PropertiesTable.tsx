@@ -8,7 +8,7 @@ import { SearchX } from 'lucide-react';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import type { Property } from '../../domain/models/Property';
 import '@/shared/presentation/styles/Table.css';
-import { truncateText } from '@/shared/presentation/utils/text/truncate-text';
+import { truncateText } from '@/shared/utils/text/truncate-text';
 
 interface PropertiesTableProps {
   data: Property[];

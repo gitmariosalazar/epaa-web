@@ -24,7 +24,7 @@ import type { OverduePayment } from '../../domain/models/OverdueReading';
 import type { SortConfig } from '../hooks/useOverduePaymentsViewModel';
 import { OverduePaymentDetailModal } from './OverduePaymentDetailModal';
 import '../styles/OverduePaymentsTable.css';
-import { truncateText } from '@/shared/presentation/utils/text/truncate-text';
+import { truncateText } from '@/shared/utils/text/truncate-text';
 import {
   CircularProgress,
   useSimulatedProgress

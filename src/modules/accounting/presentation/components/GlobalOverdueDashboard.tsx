@@ -26,8 +26,8 @@ import { DynamicBarChart } from '@/shared/presentation/components/Charts/Dynamic
 import { DynamicPieChart } from '@/shared/presentation/components/Charts/DynamicPieChart';
 import '../styles/OverdueDashboard.css';
 import { MdCable } from 'react-icons/md';
-import { CurrencyFormatter } from '@/shared/presentation/utils/formatters/CurrencyFormatter';
-import { NumberFormatter } from '@/shared/presentation/utils/formatters/NumberFormatter';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
+import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
 
 interface GlobalOverdueDashboardProps {
   yearlyData: YearlyOverdueSummary[];

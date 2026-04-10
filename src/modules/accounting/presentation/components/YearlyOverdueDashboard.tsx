@@ -26,8 +26,8 @@ import { GradientAreaChart } from '@/shared/presentation/components/Charts/Gradi
 import { DynamicBarChart } from '@/shared/presentation/components/Charts/DynamicBarChart';
 import '../styles/OverdueDashboard.css';
 import { MdCable } from 'react-icons/md';
-import { CurrencyFormatter } from '@/shared/presentation/utils/formatters/CurrencyFormatter';
-import { NumberFormatter } from '@/shared/presentation/utils/formatters/NumberFormatter';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
+import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
 /*
 const fmtMoney = (n: number) =>
   `$${Number(n || 0).toLocaleString('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

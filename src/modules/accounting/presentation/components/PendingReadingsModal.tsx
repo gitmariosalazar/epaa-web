@@ -21,7 +21,7 @@ import { EmptyState } from '../../../../shared/presentation/components/common/Em
 import './PendingReadingsModal.css';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { FaAddressCard } from 'react-icons/fa';
-import { ConverDate } from '@/shared/presentation/utils/datetime/ConverDate';
+import { ConverDate } from '@/shared/utils/datetime/ConverDate';
 import {
   CircularProgress,
   useSimulatedProgress

@@ -160,7 +160,7 @@ export const useNavigation = (): NavSection[] => {
             },
             {
               icon: <BarChart3 size={18} />,
-              label: 'Recolectado General',
+              label: 'Ingresos General',
               to: '/accounting/general-collection'
             }
           ]

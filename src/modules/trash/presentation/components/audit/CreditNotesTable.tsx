@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import type { CreditNoteRow } from '../../../domain/models/trash-rate-report.model';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
-import { ConverDate } from '@/shared/presentation/utils/datetime/ConverDate';
+import { ConverDate } from '@/shared/utils/datetime/ConverDate';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';

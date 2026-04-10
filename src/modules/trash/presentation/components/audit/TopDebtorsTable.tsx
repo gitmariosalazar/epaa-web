@@ -9,7 +9,7 @@ import type { TopDebtorRow } from '../../../domain/models/trash-rate-report.mode
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
-import { ConverDate } from '@/shared/presentation/utils/datetime/ConverDate';
+import { ConverDate } from '@/shared/utils/datetime/ConverDate';
 
 interface TopDebtorsTableProps {
   data: TopDebtorRow[];

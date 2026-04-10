@@ -17,7 +17,7 @@ import { DatePicker } from '../DatePicker/DatePicker';
 import './DailyReport.css';
 import { Button } from '../Button/Button';
 import type { ExportColumn } from './ReportPreviewModal';
-import { truncateText } from '../../utils/text/truncate-text';
+import { truncateText } from '../../../utils/text/truncate-text';
 
 interface DailyReportProps {
   showToolbar?: boolean;
