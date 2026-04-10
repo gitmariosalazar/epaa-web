@@ -1,10 +1,10 @@
 import { createContext, useContext } from 'react';
 import React from 'react';
 import { EntryDataRepositoryImpl } from '../../infrastructure/repositories/EntryDataRepositoryImpl';
-import { GetDailyGroupedReportUseCase } from '../../application/usecases/GetDailyGroupedReportUseCase';
-import { GetDailyCollectorSummaryUseCase } from '../../application/usecases/GetDailyCollectorSummaryUseCase';
-import { GetDailyPaymentMethodReportUseCase } from '../../application/usecases/GetDailyPaymentMethodReportUseCase';
-import { GetFullBreakdownReportUseCase } from '../../application/usecases/GetFullBreakdownReportUseCase';
+import { GetDailyGroupedReportUseCase } from '../../application/usecases/entry-data/GetDailyGroupedReportUseCase';
+import { GetDailyCollectorSummaryUseCase } from '../../application/usecases/entry-data/GetDailyCollectorSummaryUseCase';
+import { GetDailyPaymentMethodReportUseCase } from '../../application/usecases/entry-data/GetDailyPaymentMethodReportUseCase';
+import { GetFullBreakdownReportUseCase } from '../../application/usecases/entry-data/GetFullBreakdownReportUseCase';
 
 // ── Context type (Dependency Inversion: depends on use-case abstractions) ────
 interface EntryDataContextType {

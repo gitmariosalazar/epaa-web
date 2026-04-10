@@ -31,7 +31,7 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
     paymentDate: string
   ): Promise<PaymentReading[]> {
     const response = await this.client.get<ApiResponse<PaymentReading[]>>(
-      `/readings/find-payment-readings-by-payment-date/${paymentDate}`
+      `/accounting/find-payment-readings-by-payment-date/${paymentDate}`
     );
     return this.handleResponse(response.data);
   }
@@ -41,7 +41,7 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
     orderValue: number
   ): Promise<Payment[]> {
     const response = await this.client.get<ApiResponse<Payment[]>>(
-      `/readings/find-payment-by-payment-date-and-order/${paymentDate}/${orderValue}`
+      `/accounting/find-payment-by-payment-date-and-order/${paymentDate}/${orderValue}`
     );
     return this.handleResponse(response.data);
   }
@@ -53,7 +53,7 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
     offset: number
   ): Promise<Payment[]> {
     const response = await this.client.get<ApiResponse<Payment[]>>(
-      `/readings/find-payment-by-init-date-and-end-date/${initDate}/${endDate}/${limit}/${offset}`
+      `/accounting/find-payment-by-init-date-and-end-date/${initDate}/${endDate}/${limit}/${offset}`
     );
     return this.handleResponse(response.data);
   }
@@ -63,7 +63,7 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
     offset?: number
   ): Promise<OverduePayment[]> {
     const response = await this.client.get<ApiResponse<OverduePayment[]>>(
-      `/readings/find-all-overdue-payments/${limit}/${offset}`
+      `/accounting/find-all-overdue-payments/${limit}/${offset}`
     );
     return this.handleResponse(response.data);
   }
@@ -72,28 +72,28 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
     searchValue: string
   ): Promise<PendingReading[]> {
     const response = await this.client.get<ApiResponse<PendingReading[]>>(
-      `/readings/find-pending-reading-by-cadastral-key-or-card-id-all/${searchValue}`
+      `/accounting/find-pending-reading-by-cadastral-key-or-card-id-all/${searchValue}`
     );
     return this.handleResponse(response.data);
   }
 
   async findOverdueSummary(): Promise<OverdueSummary | null> {
     const response = await this.client.get<ApiResponse<OverdueSummary>>(
-      `/readings/find-overdue-summary`
+      `/accounting/find-overdue-summary`
     );
     return this.handleResponse(response.data);
   }
 
   async findYearlyOverdueSummary(): Promise<YearlyOverdueSummary[]> {
     const response = await this.client.get<ApiResponse<YearlyOverdueSummary[]>>(
-      `/readings/find-yearly-overdue-summary`
+      `/accounting/find-yearly-overdue-summary`
     );
     return this.handleResponse(response.data);
   }
 
   async findMonthlyDebtSummary(): Promise<MonthlyDebtSummary[]> {
     const response = await this.client.get<ApiResponse<MonthlyDebtSummary[]>>(
-      `/readings/find-monthly-debt-summary`
+      `/accounting/find-monthly-debt-summary`
     );
     return this.handleResponse(response.data);
   }

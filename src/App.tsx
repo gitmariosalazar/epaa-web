@@ -49,6 +49,8 @@ import { UpdateReadingPage } from './modules/readings/presentation/pages/UpdateR
 import { GetPropertyContextProvider } from '@/modules/properties/presentation/context/GetPropertiesContext';
 import { PropertiesPage } from '@/modules/properties/presentation/pages/PropertiesPage';
 import { OverduePaymentsPage } from './modules/accounting/presentation/pages';
+import { GeneralCollectionProvider } from '@/modules/accounting/presentation/context/GeneralCollectionContext';
+import { GeneralCollectionPage } from '@/modules/accounting/presentation/pages';
 
 const ProtectedRoute = () => {
   const { token, isLoading } = useAuth();
@@ -159,6 +161,14 @@ function App() {
                     <PaymentsProvider>
                       <OverduePaymentsPage />
                     </PaymentsProvider>
+                  }
+                />
+                <Route
+                  path="/accounting/general-collection"
+                  element={
+                    <GeneralCollectionProvider>
+                      <GeneralCollectionPage />
+                    </GeneralCollectionProvider>
                   }
                 />
                 <Route

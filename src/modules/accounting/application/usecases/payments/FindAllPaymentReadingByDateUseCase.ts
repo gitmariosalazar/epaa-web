@@ -1,5 +1,5 @@
-import type { PaymentReading } from '../../domain/models/PaymentReading';
-import type { PaymentsRepository } from '../../domain/repositories/PaymentsRepository';
+import type { PaymentReading } from '../../../domain/models/PaymentReading';
+import type { PaymentsRepository } from '../../../domain/repositories/PaymentsRepository';
 
 export class FindAllPaymentReadingByDateUseCase {
   private readonly paymentsRepository: PaymentsRepository;

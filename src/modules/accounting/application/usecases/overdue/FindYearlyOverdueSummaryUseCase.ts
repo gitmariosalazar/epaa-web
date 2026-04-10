@@ -1,5 +1,5 @@
-import type { YearlyOverdueSummary } from '../../domain/models/OverdueReading';
-import type { PaymentsRepository } from '../../domain/repositories/PaymentsRepository';
+import type { YearlyOverdueSummary } from '../../../domain/models/OverdueReading';
+import type { PaymentsRepository } from '../../../domain/repositories/PaymentsRepository';
 
 export class FindYearlyOverdueSummaryUseCase {
   private readonly paymentsRepository: PaymentsRepository;

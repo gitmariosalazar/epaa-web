@@ -157,6 +157,11 @@ export const useNavigation = (): NavSection[] => {
               icon: <IconOverduePayments />,
               label: 'Cartera Vencida',
               to: '/accounting/overdue'
+            },
+            {
+              icon: <BarChart3 size={18} />,
+              label: 'Recolectado General',
+              to: '/accounting/general-collection'
             }
           ]
         }

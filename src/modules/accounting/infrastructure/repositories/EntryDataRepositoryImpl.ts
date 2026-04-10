@@ -23,7 +23,7 @@ export class EntryDataRepositoryImpl implements EntryDataRepository {
     const response = await this.client.get<
       ApiResponse<DailyCollectorSummary[]>
     >(
-      `/readings/get-daily-collector-summary/${params.startDate}/${params.endDate}`
+      `/accounting/get-daily-collector-summary/${params.startDate}/${params.endDate}`
     );
     return response.data.data;
   }
@@ -32,7 +32,7 @@ export class EntryDataRepositoryImpl implements EntryDataRepository {
     params: DateRangeParams
   ): Promise<DailyGroupedReport[]> {
     const response = await this.client.get<ApiResponse<DailyGroupedReport[]>>(
-      `/readings/get-daily-grouped-report/${params.startDate}/${params.endDate}`
+      `/accounting/get-daily-grouped-report/${params.startDate}/${params.endDate}`
     );
     return response.data.data;
   }
@@ -43,7 +43,7 @@ export class EntryDataRepositoryImpl implements EntryDataRepository {
     const response = await this.client.get<
       ApiResponse<DailyPaymentMethodReport[]>
     >(
-      `/readings/get-daily-payment-method-report/${params.startDate}/${params.endDate}`
+      `/accounting/get-daily-payment-method-report/${params.startDate}/${params.endDate}`
     );
     return response.data.data;
   }
@@ -52,7 +52,7 @@ export class EntryDataRepositoryImpl implements EntryDataRepository {
     params: DateRangeParams
   ): Promise<FullBreakdownReport[]> {
     const response = await this.client.get<ApiResponse<FullBreakdownReport[]>>(
-      `/readings/get-full-breakdown-report/${params.startDate}/${params.endDate}`
+      `/accounting/get-full-breakdown-report/${params.startDate}/${params.endDate}`
     );
     return response.data.data;
   }

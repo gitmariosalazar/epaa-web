@@ -1,5 +1,5 @@
-import type { PendingReading } from '../../domain/models/PendingReading';
-import type { PaymentsRepository } from '../../domain/repositories/PaymentsRepository';
+import type { PendingReading } from '../../../domain/models/PendingReading';
+import type { PaymentsRepository } from '../../../domain/repositories/PaymentsRepository';
 
 export class FindPendingReadingsByCadastralKeyOrCardIdUseCase {
   private paymentsRepository: PaymentsRepository;

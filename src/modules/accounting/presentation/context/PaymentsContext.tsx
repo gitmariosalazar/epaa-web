@@ -1,13 +1,13 @@
-import { FindAllPaymentReadingByDateUseCase } from '../../application/usecases/FindAllPaymentReadingByDateUseCase';
-import { FindAllPaymentByDateAndOrderValueUseCase } from '../../application/usecases/FindAllPaymentByDateAndOrderValueUseCase';
-import { FindAllPaymentsByDateRangeUseCase } from '../../application/usecases/FindAllPaymentsByDateRange';
+import { FindAllPaymentReadingByDateUseCase } from '../../application/usecases/payments/FindAllPaymentReadingByDateUseCase';
+import { FindAllPaymentByDateAndOrderValueUseCase } from '../../application/usecases/payments/FindAllPaymentByDateAndOrderValueUseCase';
+import { FindAllPaymentsByDateRangeUseCase } from '../../application/usecases/payments/FindAllPaymentsByDateRange';
 import { createContext, useContext } from 'react';
 import { PaymentsRepositoryImpl } from '../../infrastructure/repositories/PaymentsRepositoryImpl';
-import { FindAllOverduePaymentsUseCase } from '../../application/usecases/FindAllOverduePaymentsUseCase';
-import { FindPendingReadingsByCadastralKeyOrCardIdUseCase } from '../../application/usecases/FindPendingReadingsByCadastralKeyOrCardIdUseCase';
-import { FindOverdueSummaryUseCase } from '../../application/usecases/FindOverdueSummaryUseCase';
-import { FindYearlyOverdueSummaryUseCase } from '../../application/usecases/FindYearlyOverdueSummaryUseCase';
-import { FindMonthlyDebtSummaryUseCase } from '../../application/usecases/FindMonthlyDebtSummaryUseCase';
+import { FindAllOverduePaymentsUseCase } from '../../application/usecases/overdue/FindAllOverduePaymentsUseCase';
+import { FindPendingReadingsByCadastralKeyOrCardIdUseCase } from '../../application/usecases/pending-readings/FindPendingReadingsByCadastralKeyOrCardIdUseCase';
+import { FindOverdueSummaryUseCase } from '../../application/usecases/overdue/FindOverdueSummaryUseCase';
+import { FindYearlyOverdueSummaryUseCase } from '../../application/usecases/overdue/FindYearlyOverdueSummaryUseCase';
+import { FindMonthlyDebtSummaryUseCase } from '../../application/usecases/overdue/FindMonthlyDebtSummaryUseCase';
 
 interface PaymentsContextType {
   findAllPaymentReadingPayrollsByDate: FindAllPaymentReadingByDateUseCase;
