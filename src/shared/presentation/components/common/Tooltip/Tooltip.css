@@ -60,67 +60,67 @@
 /* TOP */
 .tooltip-top::after {
   top: 100%;
-  left: 50%;
+  left: var(--tooltip-arrow-left, 50%);
   transform: translateX(-50%);
   border-width: 5px 5px 0 5px;
-  border-color: var(--surface) transparent transparent transparent;
+  border-color: var(--tooltip-arrow-color, var(--surface)) transparent transparent transparent;
 }
 .tooltip-top::before {
   top: 100%;
-  left: 50%;
+  left: var(--tooltip-arrow-left, 50%);
   transform: translate(-50%, 1px);
   border-width: 6px 6px 0 6px;
-  border-color: var(--border-color) transparent transparent transparent;
+  border-color: var(--tooltip-arrow-border-color, var(--border-color)) transparent transparent transparent;
   z-index: -1;
 }
 
 /* BOTTOM */
 .tooltip-bottom::after {
   bottom: 100%;
-  left: 50%;
+  left: var(--tooltip-arrow-left, 50%);
   transform: translateX(-50%);
   border-width: 0 5px 5px 5px;
-  border-color: transparent transparent var(--surface) transparent;
+  border-color: transparent transparent var(--tooltip-arrow-color, var(--surface)) transparent;
 }
 .tooltip-bottom::before {
   bottom: 100%;
-  left: 50%;
+  left: var(--tooltip-arrow-left, 50%);
   transform: translate(-50%, -1px);
   border-width: 0 6px 6px 6px;
-  border-color: transparent transparent var(--border-color) transparent;
+  border-color: transparent transparent var(--tooltip-arrow-border-color, var(--border-color)) transparent;
   z-index: -1;
 }
 
 /* LEFT */
 .tooltip-left::after {
   left: 100%;
-  top: 50%;
+  top: var(--tooltip-arrow-top, 50%);
   transform: translateY(-50%);
   border-width: 5px 0 5px 5px;
-  border-color: transparent transparent transparent var(--surface);
+  border-color: transparent transparent transparent var(--tooltip-arrow-color, var(--surface));
 }
 .tooltip-left::before {
   left: 100%;
-  top: 50%;
+  top: var(--tooltip-arrow-top, 50%);
   transform: translate(1px, -50%);
   border-width: 6px 0 6px 6px;
-  border-color: transparent transparent transparent var(--border-color);
+  border-color: transparent transparent transparent var(--tooltip-arrow-border-color, var(--border-color));
   z-index: -1;
 }
 
 /* RIGHT */
 .tooltip-right::after {
   right: 100%;
-  top: 50%;
+  top: var(--tooltip-arrow-top, 50%);
   transform: translateY(-50%);
   border-width: 5px 5px 5px 0;
-  border-color: transparent var(--surface) transparent transparent;
+  border-color: transparent var(--tooltip-arrow-color, var(--surface)) transparent transparent;
 }
 .tooltip-right::before {
   right: 100%;
-  top: 50%;
+  top: var(--tooltip-arrow-top, 50%);
   transform: translate(-1px, -50%);
   border-width: 6px 6px 6px 0;
-  border-color: transparent var(--border-color) transparent transparent;
+  border-color: transparent var(--tooltip-arrow-border-color, var(--border-color)) transparent transparent;
   z-index: -1;
 }

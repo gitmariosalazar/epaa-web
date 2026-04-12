@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   PieChart,
   Pie,
   Cell,
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
-  Legend,
-  Sector
+  Sector,
+  Label
 } from 'recharts';
 import { CustomTooltip } from './CustomTooltip';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
+import { PercentageFormatter } from '@/shared/utils/formatters/PercentageFormatter';
 
 export interface DynamicPieChartProps<T> {
   data: T[];
@@ -66,6 +68,17 @@ const renderActiveShape = (props: any) => {
     <g>
       <text
         x={cx}
+        y={cy - 25}
+        dy={8}
+        textAnchor="middle"
+        fill="var(--text-secondary)"
+        fontSize={14}
+        fontWeight={600}
+      >
+        {props.payload.name}
+      </text>
+      <text
+        x={cx}
         y={cy}
         dy={8}
         textAnchor="middle"
@@ -73,7 +86,18 @@ const renderActiveShape = (props: any) => {
         fontSize={14}
         fontWeight={600}
       >
-        {(percent * 100).toFixed(1)}%
+        {PercentageFormatter.formatWithDecimals(percent)}
+      </text>
+      <text
+        x={cx}
+        y={cy + 25}
+        dy={8}
+        textAnchor="middle"
+        fill={fill}
+        fontSize={14}
+        fontWeight={600}
+      >
+        {CurrencyFormatter.format(props.payload.value)}
       </text>
       <Sector
         cx={cx}
@@ -98,7 +122,7 @@ const renderActiveShape = (props: any) => {
   );
 };
 
-export function DynamicPieChart<T extends object>({
+export function DynamicPieChart<T extends Record<string, any>>({
   data,
   nameKey,
   dataKey,
@@ -112,78 +136,50 @@ export function DynamicPieChart<T extends object>({
     { x: number; y: number } | undefined
   >(undefined);
 
+  const onChartMouseMove = (state: any) => {
+    if (state && state.chartX != null && state.chartY != null) {
+      setTooltipPos({ x: state.chartX + 20, y: state.chartY - 20 });
+    }
+  };
+
+  const onChartMouseLeave = () => {
+    setTooltipPos(undefined);
+  };
+
   const onPieEnter = (_: any, index: number) => {
     setActiveIndex(index);
   };
 
   const onPieLeave = () => {
     setActiveIndex(-1);
-    setTooltipPos(undefined);
   };
 
-  const onChartMouseMove = (state: any) => {
-    if (state && state.chartX != null && state.chartY != null) {
-      // Estimate center using activeCoordinate if available, else fallback
-      const cx = state.activeCoordinate?.cx || 150;
-      const cy = state.activeCoordinate?.cy || 150;
-
-      const dx = state.chartX - cx;
-      const dy = state.chartY - cy;
-
-      let offsetX = state.chartX;
-      let offsetY = state.chartY;
-
-      // Quadrant-based tooltip placement to guarantee it never overlaps the center hole
-      if (dx >= 0) {
-        offsetX += 20; // Mouse on right, place tooltip to the right
-      } else {
-        offsetX -= 160; // Mouse on left, place tooltip far left (accounting for tooltip width)
-      }
-
-      if (dy >= 0) {
-        offsetY += 20; // Mouse on bottom, place tooltip below
-      } else {
-        offsetY -= 50; // Mouse on top, place tooltip above (accounting for tooltip height)
-      }
-
-      setTooltipPos({ x: offsetX, y: offsetY });
-    }
-  };
-
-  const onLegendEnter = (e: any) => {
-    // Find index of the hovered legend item by comparing its value to the data
-    const idx = data.findIndex((item: any) => item[nameKey] === e.value);
-    if (idx !== -1) setActiveIndex(idx);
-  };
-
-  const onLegendLeave = () => {
-    setActiveIndex(-1);
-  };
-
-  // Recharts Legend formatting to highlight the active legend text
-  const renderLegendText = (value: string, _: any, index: number) => {
-    const isActive = activeIndex === index;
+  const total = useMemo(() => {
     return (
-      <span
-        className={`custom-legend-text ${isActive ? 'custom-legend-text--active' : 'custom-legend-text--inactive'}`}
-      >
-        {value}
-      </span>
+      data.reduce((sum, item: any) => sum + (Number(item[dataKey]) || 0), 0) ||
+      1
     );
-  };
+  }, [data, dataKey]);
+
+  // renderCustomLegend and Recharts Legend logic removed in favor of external CSS Flexbox
 
   return (
-    <ResponsiveContainer width="100%" height={height}>
-      <PieChart
-        margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-        onMouseMove={onChartMouseMove}
-        onMouseLeave={() => setTooltipPos(undefined)}
+    <div className="donut-wrapper">
+      <div 
+        className="donut-svg-container" 
+        style={height !== '100%' ? { height, width: height, flexShrink: 0 } : undefined}
       >
-        <Pie
-          data={data}
-          nameKey={nameKey}
-          dataKey={dataKey}
-          cx={showLegend ? '40%' : '50%'}
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart
+            margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+            onMouseMove={onChartMouseMove}
+            onMouseLeave={onChartMouseLeave}
+          >
+            <Pie
+              data={data}
+              nameKey={nameKey}
+              dataKey={dataKey}
+              cx="50%"
           cy="50%"
           innerRadius="55%"
           outerRadius="75%"
@@ -200,6 +196,40 @@ export function DynamicPieChart<T extends object>({
             const color = entry.color || colors[index % colors.length];
             return <Cell key={`cell-${index}`} fill={color} />;
           })}
+          {activeIndex === -1 && (
+            <Label
+              position="center"
+              content={({ viewBox }) => {
+                const { cx, cy } = viewBox as any;
+                return (
+                  <g>
+                    <text
+                      x={cx}
+                      y={cy}
+                      dy={-6}
+                      textAnchor="middle"
+                      fill="var(--text-secondary)"
+                      fontSize={12}
+                      fontWeight={700}
+                    >
+                      TOTAL AMOUNT
+                    </text>
+                    <text
+                      x={cx}
+                      y={cy}
+                      dy={18}
+                      textAnchor="middle"
+                      fill="var(--text-main)"
+                      fontSize={22}
+                      fontWeight={800}
+                    >
+                      {total.toLocaleString()}
+                    </text>
+                  </g>
+                );
+              }}
+            />
+          )}
         </Pie>
 
         <RechartsTooltip
@@ -212,19 +242,51 @@ export function DynamicPieChart<T extends object>({
           }
         />
 
-        {showLegend && (
-          <Legend
-            layout="vertical"
-            verticalAlign="middle"
-            align="right"
-            iconType="circle"
-            className="custom-recharts-legend-pie"
-            onMouseEnter={onLegendEnter}
-            onMouseLeave={onLegendLeave}
-            formatter={renderLegendText}
-          />
-        )}
-      </PieChart>
-    </ResponsiveContainer>
+        </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      {showLegend && (
+        <div className="donut-legend">
+          <div className="donut-legend-header">
+            <div className="donut-legend-header-spacer" />
+            <span className="donut-legend-header-label">Descripción</span>
+            <span className="donut-legend-header-value">Porcentaje</span>
+            <span className="donut-legend-header-amount">Monto</span>
+          </div>
+          {data.map((item: any, index: number) => {
+            const isActive = activeIndex === index;
+            const value = Number(item[dataKey]) || 0;
+            const color = item.color || colors[index % colors.length];
+
+            return (
+              <div
+                key={`item-${index}`}
+                className={`donut-legend-item ${isActive ? 'is-active' : ''}`}
+                onMouseEnter={() => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(-1)}
+              >
+                <div
+                  className="donut-legend-dot"
+                  style={{ backgroundColor: color }}
+                />
+                <span className="donut-legend-label">{item[nameKey]}</span>
+                <span className="donut-legend-value">
+                  {((value / total) * 100).toFixed(1)}%
+                </span>
+                <span
+                  className="donut-legend-amount"
+                  style={{ color }}
+                >
+                  {(item as any)?.fmt
+                    ? (item as any).fmt(value)
+                    : value.toLocaleString()}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }

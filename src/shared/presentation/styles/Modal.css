@@ -15,8 +15,8 @@
 
 .modal-content {
   background: var(--surface);
-  padding: 2.5rem;
-  border-radius: 1.5rem;
+  padding: 1rem;
+  border-radius: 1rem;
   width: 90%;
   max-width: 480px;
   max-height: 90vh; /* Prevent modal from being taller than the screen */
@@ -78,7 +78,7 @@
 
 .modal-header h2,
 .modal-title {
-  font-size: 1.75rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-main);
   margin: 0;

@@ -310,7 +310,6 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
             </div>
           )}
           <div className="overdue-chart-body">
-            <ResponsiveContainer width="100%" height="100%">
               <DynamicBarChart
                 data={chartData}
                 dataKeyX="year"
@@ -370,7 +369,6 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                 } /* React intelligently unmounts labels completely */
                 labelFormatter={(val: number) => `$${(val / 1000).toFixed(0)}k`}
               />
-            </ResponsiveContainer>
           </div>
         </div>
 
@@ -420,18 +418,16 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
             </div>
           )}
           <div className="overdue-chart-body">
-            <ResponsiveContainer width="100%" height="100%">
-              <DynamicPieChart
-                data={compositionData}
-                dataKey="value"
-                nameKey="name"
-                tooltipFormatterOrComponent={(payload: {
-                  name: string;
-                  value: number;
-                  color: string;
-                }) => CurrencyFormatter.format(payload.value)}
-              />
-            </ResponsiveContainer>
+            <DynamicPieChart
+              data={compositionData}
+              dataKey="value"
+              nameKey="name"
+              tooltipFormatterOrComponent={(payload: {
+                name: string;
+                value: number;
+                color: string;
+              }) => CurrencyFormatter.format(payload.value)}
+            />
           </div>
         </div>
 
@@ -492,7 +488,6 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
             </div>
           )}
           <div className="overdue-chart-body">
-            <ResponsiveContainer width="100%" height="100%">
               <GradientAreaChart
                 data={chartData}
                 dataKeyX="year"
@@ -624,7 +619,6 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                   );
                 }}
               />
-            </ResponsiveContainer>
           </div>
         </div>
       </div>

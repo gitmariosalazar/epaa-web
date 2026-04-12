@@ -230,7 +230,6 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
             </div>
           )}
           <div className="overdue-chart-body">
-            <ResponsiveContainer width="100%" height="100%">
               <GradientAreaChart
                 data={chartDataMonthly}
                 tooltipFormatterOrComponent={(payload: MonthlyDebtSummary) => {
@@ -358,7 +357,6 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                   );
                 }}
               />
-            </ResponsiveContainer>
           </div>
         </div>
         <div className="overdue-chart-card">
@@ -418,7 +416,6 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
             </div>
           )}
           <div className="overdue-chart-body">
-            <ResponsiveContainer width="100%" height="100%">
               <DynamicBarChart
                 data={chartDataMonthly}
                 dataKeyX="monthName"
@@ -477,7 +474,6 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                 valuePosition="top"
                 labelFormatter={(val: number) => `$${(val / 1000).toFixed(0)}k`}
               />
-            </ResponsiveContainer>
           </div>
         </div>
       </div>
@@ -633,7 +629,6 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
             </div>
           )}
           <div className="overdue-chart-body">
-            <ResponsiveContainer width="100%" height="100%">
               <DynamicBarChart
                 data={chartData}
                 dataKeyX="year"
@@ -688,7 +683,6 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                 valuePosition="top"
                 labelFormatter={(val: number) => `$${(val / 1000).toFixed(0)}k`}
               />
-            </ResponsiveContainer>
           </div>
         </div>
 
@@ -738,7 +732,6 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
             </div>
           )}
           <div className="overdue-chart-body">
-            <ResponsiveContainer width="100%" height="100%">
               <GradientAreaChart
                 data={chartData}
                 tooltipFormatterOrComponent={(
@@ -865,7 +858,6 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                   );
                 }}
               />
-            </ResponsiveContainer>
           </div>
         </div>
       </div>

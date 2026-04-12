@@ -110,7 +110,7 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
 
   if (error || !data || data.length === 0) {
     return (
-      <div className="trash-dashboard">
+      <div className="trash-dashboard" style={{ padding: '5px 0 12px 0' }}>
         <div className="trash-dashboard-empty">
           <TrendingUp size={36} />
           <span>
@@ -202,7 +202,7 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
   ];
 
   return (
-    <div className="trash-dashboard">
+    <div className="trash-dashboard" style={{ padding: '5px 0 12px 0' }}>
       {/* ── TOP IMPERIAL ROW: Compliance + All KPIs ── */}
       <div className="trash-kpi-semantic-row trash-kpi-top-row">
         <div className="trash-kpi-compliance-wrapper">
@@ -267,8 +267,12 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
           {/* Table 1 */}
           <div className="revenue-status-card" style={{ gridColumn: 'span 1' }}>
             <div className="revenue-status-header">
-              <span className="revenue-status-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                Descuentos y N.C. Total <FaMoneyCheckAlt size={16} color="var(--warning)" />
+              <span
+                className="revenue-status-title"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                Descuentos y N.C. Total{' '}
+                <FaMoneyCheckAlt size={16} color="var(--warning)" />
               </span>
             </div>
             <table className="revenue-status-table">
@@ -282,11 +286,15 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
                 {discountAndCreditNoteItems.map((item, idx) => (
                   <tr key={idx}>
                     <td>
-                      <span className={`status-badge status-badge--${item.Tipo === 'Descuentos' ? 'discount' : 'credit-note'}`}>
+                      <span
+                        className={`status-badge status-badge--${item.Tipo === 'Descuentos' ? 'discount' : 'credit-note'}`}
+                      >
                         {item.Tipo}
                       </span>
                     </td>
-                    <td className={`monto-value monto-value--${item.Tipo === 'Descuentos' ? 'discount' : 'credit-note'}`}>
+                    <td
+                      className={`monto-value monto-value--${item.Tipo === 'Descuentos' ? 'discount' : 'credit-note'}`}
+                    >
                       {fmtMoney(item.value)}
                     </td>
                   </tr>
@@ -306,7 +314,9 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
           {/* Table 2 */}
           <div className="revenue-status-card" style={{ gridColumn: 'span 1' }}>
             <div className="revenue-status-header">
-              <span className="revenue-status-title">Distribución por Estado</span>
+              <span className="revenue-status-title">
+                Distribución por Estado
+              </span>
             </div>
             <table className="revenue-status-table">
               <thead>
@@ -321,15 +331,33 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
                     <td>
                       <span
                         className={`status-badge status-badge--${
-                          item.Estado === 'P' ? 'P' : item.Estado === 'B' ? 'B' : item.Estado === 'S/E' ? 'S' : ''
+                          item.Estado === 'P'
+                            ? 'P'
+                            : item.Estado === 'B'
+                              ? 'B'
+                              : item.Estado === 'S/E'
+                                ? 'S'
+                                : ''
                         }`}
                       >
-                        {item.Estado === 'P' ? 'Pagado' : item.Estado === 'B' ? 'Baja' : item.Estado === 'S/E' ? 'Sin Estado' : item.Estado}
+                        {item.Estado === 'P'
+                          ? 'Pagado'
+                          : item.Estado === 'B'
+                            ? 'Baja'
+                            : item.Estado === 'S/E'
+                              ? 'Sin Estado'
+                              : item.Estado}
                       </span>
                     </td>
                     <td
                       className={`monto-value color-value--${
-                        item.Estado === 'P' ? 'P' : item.Estado === 'B' ? 'B' : item.Estado === 'S/E' ? 'S' : ''
+                        item.Estado === 'P'
+                          ? 'P'
+                          : item.Estado === 'B'
+                            ? 'B'
+                            : item.Estado === 'S/E'
+                              ? 'S'
+                              : ''
                       }`}
                     >
                       {fmtMoney(item.Monto)}

@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import '@/shared/presentation/styles/Modal.css';
+import { Tooltip } from '../common/Tooltip/Tooltip';
+import { Button } from '../Button/Button';
 
 interface ModalProps {
   isOpen: boolean;
@@ -49,9 +51,17 @@ export const Modal: React.FC<ModalProps> = ({
       <div className={`modal-content modal--${size}`} ref={modalRef}>
         <div className="modal-header">
           <h2 className="modal-title">{title}</h2>
-          <button className="modal-close" onClick={onClose}>
-            <X size={24} />
-          </button>
+          <Tooltip content="Cerrar">
+            <Button
+              variant="outline"
+              className="modal-close"
+              onClick={onClose}
+              circle
+              color="error"
+            >
+              <X size={24} />
+            </Button>
+          </Tooltip>
         </div>
         <div className="modal-body">{children}</div>
         {footer && <div className="modal-footer">{footer}</div>}

@@ -235,7 +235,7 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
 
   if (!data || data.length === 0) {
     return (
-      <div className="trash-dashboard">
+      <div className="trash-dashboard" style={{ padding: '5px 0 12px 0' }}>
         <div className="trash-dashboard-empty">
           <TrendingUp size={36} />
           <span>
@@ -320,7 +320,7 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
   ];
 
   return (
-    <div className="trash-dashboard">
+    <div className="trash-dashboard" style={{ padding: '5px 0 12px 0' }}>
       {/* ── TOP IMPERIAL ROW: Compliance + All KPIs ── */}
       <div className="trash-kpi-semantic-row trash-kpi-top-row">
         <div className="trash-kpi-compliance-wrapper">

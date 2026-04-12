@@ -8,6 +8,7 @@ import {
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { ConvertMonth } from '@/shared/utils/datetime/Converts';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 // Hack to handle intersection of types
 export type GroupedReportItem = {
@@ -200,12 +201,6 @@ export const GeneralCollectionGroupedTable: React.FC<
     }
   ];
 
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
-
   const { setShowPdfPreview, PdfPreviewModal } =
     useTablePdfExport<GroupedReportItem>({
       data,
@@ -236,12 +231,12 @@ export const GeneralCollectionGroupedTable: React.FC<
           Método: item.paymentMethod || '-',
           Estado: item.status || '-',
           '# Registros': String(item.recordCount),
-          'Val. Título': formatCurrency(item.titleValue),
-          'Val. Terceros': formatCurrency(item.thirdPartyValue),
-          Recargo: formatCurrency(item.surchargeValue),
-          'Tasa Basura': formatCurrency(item.trashRateValue),
-          'Desc. TB': formatCurrency(item.discountTrashRateValue),
-          Total: formatCurrency(item.totalValue)
+          'Val. Título': CurrencyFormatter.format(item.titleValue),
+          'Val. Terceros': CurrencyFormatter.format(item.thirdPartyValue),
+          Recargo: CurrencyFormatter.format(item.surchargeValue),
+          'Tasa Basura': CurrencyFormatter.format(item.trashRateValue),
+          'Desc. TB': CurrencyFormatter.format(item.discountTrashRateValue),
+          Total: CurrencyFormatter.format(item.totalValue)
         };
         return selectedCols.map((col) => rowData[col.label] || '-');
       }
@@ -254,7 +249,7 @@ export const GeneralCollectionGroupedTable: React.FC<
         columns={columns}
         isLoading={isLoading}
         pagination
-        pageSize={15}
+        pageSize={20}
         onSort={onSort}
         sortConfig={sortConfig}
         onExportPdf={() => setShowPdfPreview(true)}

@@ -57,7 +57,7 @@ export interface KPISection {
   amountTotal: number;
   amountPending: number;
   amountCollected: number;
-  amountDiscounts?: number; // Solo aplica a trash_rate según tu SQL
+  amountDiscounts?: number;
 }
 
 export interface GeneralKPIResponse {

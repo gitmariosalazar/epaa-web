@@ -1,0 +1,76 @@
+/* ==========================================================================
+   Global Color Palette
+   Centralized variables for all 20 generic chart and UI colors.
+   Adheres to Clean Architecture & SOLID by creating a Single Source of Truth.
+   ========================================================================== */
+
+:root {
+  --palette-slate: #64748b;
+  --palette-gray: #6b7280;
+  --palette-zinc: #71717a;
+  --palette-neutral: #737373;
+  --palette-red: #ef4444;
+  --palette-orange: #f97316;
+  --palette-amber: #f59e0b;
+  --palette-yellow: #eab308;
+  --palette-lime: #84cc16;
+  --palette-green: #22c55e;
+  --palette-emerald: #10b981;
+  --palette-teal: #14b8a6;
+  --palette-cyan: #06b6d4;
+  --palette-sky: #0ea5e9;
+  --palette-blue: #3b82f6;
+  --palette-indigo: #6366f1;
+  --palette-purple: #8b5cf6;
+  --palette-fuchsia: #d946ef;
+  --palette-pink: #ec4899;
+  --palette-rose: #f43f5e;
+}
+
+/* Dark mode variations for the palette */
+.dark {
+  --palette-slate: #94a3b8;
+  --palette-gray: #9ca3af;
+  --palette-zinc: #a1a1aa;
+  --palette-neutral: #a3a3a3;
+  --palette-red: #f87171;
+  --palette-orange: #fb923c;
+  --palette-amber: #fbbf24;
+  --palette-yellow: #fde047;
+  --palette-lime: #bef264;
+  --palette-green: #4ade80;
+  --palette-emerald: #34d399;
+  --palette-teal: #2dd4bf;
+  --palette-cyan: #22d3ee;
+  --palette-sky: #38bdf8;
+  --palette-blue: #60a5fa;
+  --palette-indigo: #818cf8;
+  --palette-purple: #a78bfa;
+  --palette-fuchsia: #e879f9;
+  --palette-pink: #f472b6;
+  --palette-rose: #fb7185;
+}
+
+/* Gradients for UI elements */
+:root {
+  --gradient-slate: linear-gradient(180deg, #64748b, #475569);
+  --gradient-gray: linear-gradient(180deg, #6b7280, #4b5563);
+  --gradient-zinc: linear-gradient(180deg, #71717a, #52525b);
+  --gradient-neutral: linear-gradient(180deg, #737373, #525252);
+  --gradient-red: linear-gradient(180deg, #ef4444, #dc2626);
+  --gradient-orange: linear-gradient(180deg, #f97316, #ea580c);
+  --gradient-amber: linear-gradient(180deg, #f59e0b, #d97706);
+  --gradient-yellow: linear-gradient(180deg, #eab308, #ca8a04);
+  --gradient-lime: linear-gradient(180deg, #84cc16, #65a30d);
+  --gradient-green: linear-gradient(180deg, #22c55e, #16a34a);
+  --gradient-emerald: linear-gradient(180deg, #10b981, #059669);
+  --gradient-teal: linear-gradient(180deg, #14b8a6, #0d9488);
+  --gradient-cyan: linear-gradient(180deg, #06b6d4, #0891b2);
+  --gradient-sky: linear-gradient(180deg, #0ea5e9, #0284c7);
+  --gradient-blue: linear-gradient(180deg, #3b82f6, #2563eb);
+  --gradient-indigo: linear-gradient(180deg, #6366f1, #4f46e5);
+  --gradient-purple: linear-gradient(180deg, #8b5cf6, #7c3aed);
+  --gradient-fuchsia: linear-gradient(180deg, #d946ef, #c026d3);
+  --gradient-pink: linear-gradient(180deg, #ec4899, #db2777);
+  --gradient-rose: linear-gradient(180deg, #f43f5e, #e11d48);
+}

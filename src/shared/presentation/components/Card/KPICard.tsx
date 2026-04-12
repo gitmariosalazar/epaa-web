@@ -1,24 +1,18 @@
 import React from 'react';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import '../../styles/KPICard.css';
+import type { ChartColor } from '../../utils/colors/charts.colors';
 
 export interface KPICardProps {
   label: string;
   value: string | number;
   icon: React.ReactNode;
-  color:
-    | 'green'
-    | 'red'
-    | 'blue'
-    | 'amber'
-    | 'purple'
-    | 'teal'
-    | 'rose'
-    | 'indigo';
+  color: ChartColor | string;
   valueColor?: 'green' | 'red' | 'amber';
   description?: string;
   className?: string;
   tooltipText?: string;
+  activeTooltip?: boolean;
 }
 
 export const KPICard: React.FC<KPICardProps> = ({
@@ -29,7 +23,8 @@ export const KPICard: React.FC<KPICardProps> = ({
   valueColor,
   description,
   className,
-  tooltipText
+  tooltipText,
+  activeTooltip = false
 }) => {
   const finalTooltipText = tooltipText || `${label}: ${value}`;
 
@@ -43,9 +38,18 @@ export const KPICard: React.FC<KPICardProps> = ({
         <div
           className={`kpi-card-value${valueColor ? ` kpi-card-value--${valueColor}` : ''}`}
         >
-          <Tooltip content={finalTooltipText} position="bottom">
+          {activeTooltip ? (
+            <Tooltip
+              content={finalTooltipText}
+              position="top"
+              followCursor={true}
+              themeColor={color}
+            >
+              <span>{value}</span>
+            </Tooltip>
+          ) : (
             <span>{value}</span>
-          </Tooltip>
+          )}
         </div>
         {description && (
           <div className="kpi-card-description">{description}</div>

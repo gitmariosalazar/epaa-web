@@ -13,7 +13,10 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 interface GeneralCollectionTableProps {
   data: GeneralCollectionResponse[];
   isLoading: boolean;
-  onSort?: (key: keyof GeneralCollectionResponse | string, direction: 'asc' | 'desc') => void;
+  onSort?: (
+    key: keyof GeneralCollectionResponse | string,
+    direction: 'asc' | 'desc'
+  ) => void;
   sortConfig?: {
     key: keyof GeneralCollectionResponse | string;
     direction: 'asc' | 'desc';
@@ -119,55 +122,91 @@ export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
     }
   ];
 
-  const totalTitleValue = data.reduce((sum, item) => sum + Number(item.titleValue), 0);
-  const totalSurcharge = data.reduce((sum, item) => sum + Number(item.surcharge), 0);
-  const totalThirdParty = data.reduce((sum, item) => sum + Number(item.thirdPartyValue), 0);
-  const totalTrashRate = data.reduce((sum, item) => sum + Number(item.trashRate), 0);
+  const totalTitleValue = data.reduce(
+    (sum, item) => sum + Number(item.titleValue),
+    0
+  );
+  const totalSurcharge = data.reduce(
+    (sum, item) => sum + Number(item.surcharge),
+    0
+  );
+  const totalThirdParty = data.reduce(
+    (sum, item) => sum + Number(item.thirdPartyValue),
+    0
+  );
+  const totalTrashRate = data.reduce(
+    (sum, item) => sum + Number(item.trashRate),
+    0
+  );
   const totalAmount = data.reduce((sum, item) => sum + Number(item.total), 0);
 
   const totalRows = [
     { label: 'TOTAL EPAA', value: totalTitleValue, columnId: 'titleValue' },
-    { label: 'TOTAL Recargo', value: totalSurcharge, highlight: false, columnId: 'surcharge' },
-    { label: 'TOTAL 3er Val.', value: totalThirdParty, highlight: false, columnId: 'thirdPartyValue' },
-    { label: 'TOTAL Basura', value: totalTrashRate, highlight: false, columnId: 'trashRate' },
+    {
+      label: 'TOTAL Recargo',
+      value: totalSurcharge,
+      highlight: false,
+      columnId: 'surcharge'
+    },
+    {
+      label: 'TOTAL 3er Val.',
+      value: totalThirdParty,
+      highlight: false,
+      columnId: 'thirdPartyValue'
+    },
+    {
+      label: 'TOTAL Basura',
+      value: totalTrashRate,
+      highlight: false,
+      columnId: 'trashRate'
+    },
     { label: 'TOTAL', value: totalAmount, highlight: true, columnId: 'total' }
   ];
 
   const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+    new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
 
-  const { setShowPdfPreview, PdfPreviewModal } = useTablePdfExport<GeneralCollectionResponse>({
-    data,
-    availableColumns: columns.map((c) => ({
-      id: c.id || (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
-      label: c.header as string,
-      isDefault: true
-    })),
-    reportTitle: 'REPORTE DE RECOLECCIÓN GENERAL',
-    reportDescription: 'Detalle de recolección general',
-    labelsHorizontal: {
-      Fecha: `${startDate || '-'} - ${endDate || '-'}`,
-      'Fecha de Exportación': new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
-    },
-    totalRows,
-    mapRowData: (item, selectedCols) => {
-      const rowData: Record<string, string> = {
-        'Cód. Ingreso': item.incomeCode,
-        'Cód. Título': item.titleCode,
-        'Cliente': `${item.name} (${item.cardId})`,
-        'C.C': item.cadastralKey,
-        'EPAA Val.': formatCurrency(item.titleValue),
-        'Recargo': formatCurrency(item.surcharge),
-        '3er. Valor': formatCurrency(item.thirdPartyValue),
-        'Tasa Basura': formatCurrency(item.trashRate),
-        'Total': formatCurrency(item.total),
-        'Usuario': item.paymentUser,
-        'Método': item.paymentMethod || '-',
-        'Estado': item.incomeStatus || '-'
-      };
-      return selectedCols.map((col) => rowData[col.label] || '-');
-    }
-  });
+  const { setShowPdfPreview, PdfPreviewModal } =
+    useTablePdfExport<GeneralCollectionResponse>({
+      data,
+      availableColumns: columns.map((c) => ({
+        id:
+          c.id ||
+          (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
+        label: c.header as string,
+        isDefault: true
+      })),
+      reportTitle: 'REPORTE DE RECOLECCIÓN GENERAL',
+      reportDescription: 'Detalle de recolección general',
+      labelsHorizontal: {
+        Fecha: `${startDate || '-'} - ${endDate || '-'}`,
+        'Fecha de Exportación':
+          new Date().toLocaleDateString() +
+          ' ' +
+          new Date().toLocaleTimeString()
+      },
+      totalRows,
+      mapRowData: (item, selectedCols) => {
+        const rowData: Record<string, string> = {
+          'Cód. Ingreso': item.incomeCode,
+          'Cód. Título': item.titleCode,
+          Cliente: `${item.name} (${item.cardId})`,
+          'C.C': item.cadastralKey,
+          'EPAA Val.': formatCurrency(item.titleValue),
+          Recargo: formatCurrency(item.surcharge),
+          '3er. Valor': formatCurrency(item.thirdPartyValue),
+          'Tasa Basura': formatCurrency(item.trashRate),
+          Total: formatCurrency(item.total),
+          Usuario: item.paymentUser,
+          Método: item.paymentMethod || '-',
+          Estado: item.incomeStatus || '-'
+        };
+        return selectedCols.map((col) => rowData[col.label] || '-');
+      }
+    });
 
   return (
     <div className="payments-table-wrapper">
@@ -176,7 +215,7 @@ export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
         columns={columns}
         isLoading={isLoading}
         pagination
-        pageSize={15}
+        pageSize={20}
         onSort={onSort}
         sortConfig={sortConfig}
         onExportPdf={() => setShowPdfPreview(true)}

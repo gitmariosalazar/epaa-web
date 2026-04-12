@@ -12,8 +12,7 @@ import {
 //import { useTranslation } from 'react-i18next';
 import {
   type GeneralKPIResponse,
-  type GeneralMonthlyKPIResponse,
-  type GeneralYearlyKPIResponse
+  type KPISection
 } from '../../../domain/models/GenelarCollection';
 import {
   DonutChart,
@@ -25,83 +24,34 @@ import {
 } from '@/shared/presentation/components/Charts/VerticalBarChart';
 import '@/shared/presentation/components/Charts/Charts.css';
 import { KPICard } from '@/shared/presentation/components/Card/KPICard';
+import { CHART_COLORS } from '@/shared/presentation/utils/colors/charts.colors';
+import {
+  Table,
+  type Column
+} from '@/shared/presentation/components/Table/Table';
+import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 interface GeneralCollectionDashboardProps {
   kpi: GeneralKPIResponse | null;
-  monthlyKpi: GeneralMonthlyKPIResponse[];
-  yearlyKpi: GeneralYearlyKPIResponse[];
   isLoading: boolean;
-  activeTab: 'dashboard' | 'general' | 'daily' | 'monthly' | 'yearly';
 }
-
-const fmtMoney = (n: number) =>
-  `$${Number(n || 0).toLocaleString('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-const fmtNum = (n: number) => Number(n || 0).toLocaleString('es-EC');
 
 export const GeneralCollectionDashboard: React.FC<
   GeneralCollectionDashboardProps
-> = ({ kpi, monthlyKpi, yearlyKpi, isLoading, activeTab }) => {
-  // const { t } = useTranslation();
-
+> = ({ kpi, isLoading }) => {
   if (isLoading) return null;
 
-  // For monthly and yearly tabs, if we want an aggregate, we can just sum up the array or
-  // ideally the backend sends an aggregate `kpi` for those too if we call it. But for now,
-  // we will try to aggregate if there is no direct kpi.
-  let currentKpi: GeneralKPIResponse | null = kpi;
-
-  if (activeTab === 'monthly' && monthlyKpi.length > 0) {
-    // If we only have monthly array, aggregate it (simplify: just take the first or sum)
-    // Actually the easiest is to show the dashboard only if we have a summary.
-    // We will aggregate it if possible:
-    currentKpi = {
-      uniqueCadastralKeys: monthlyKpi.reduce(
-        (sum, k) => sum + k.uniqueCadastralKeys,
-        0
-      ),
-      totalBillsIssued: monthlyKpi.reduce(
-        (sum, k) => sum + k.totalBillsIssued,
-        0
-      ),
-      averagePaidBill:
-        monthlyKpi.reduce((sum, k) => sum + k.averagePaidBill, 0) /
-        monthlyKpi.length,
-      countNotes: monthlyKpi.reduce((sum, k) => sum + k.countNotes, 0),
-      totalNotesAmount: monthlyKpi.reduce(
-        (sum, k) => sum + k.totalNotesAmount,
-        0
-      ),
-      codeTitle: 'Mensualizado',
-      sections: [] // Simplified sections for aggregate
-    };
-  } else if (activeTab === 'yearly' && yearlyKpi.length > 0) {
-    currentKpi = {
-      uniqueCadastralKeys: yearlyKpi.reduce(
-        (sum, k) => sum + k.uniqueCadastralKeys,
-        0
-      ),
-      totalBillsIssued: yearlyKpi.reduce(
-        (sum, k) => sum + k.totalBillsIssued,
-        0
-      ),
-      averagePaidBill:
-        yearlyKpi.reduce((sum, k) => sum + k.averagePaidBill, 0) /
-        yearlyKpi.length,
-      countNotes: yearlyKpi.reduce((sum, k) => sum + k.countNotes, 0),
-      totalNotesAmount: yearlyKpi.reduce(
-        (sum, k) => sum + k.totalNotesAmount,
-        0
-      ),
-      codeTitle: 'Anualizado',
-      sections: []
-    };
-  }
-
-  if (!currentKpi) {
+  if (!kpi) {
     return null;
   }
 
-  const sections = currentKpi.sections || [];
+  const fmtMoney = (n: number) =>
+    `$${Number(n || 0).toLocaleString('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const fmtNum = (n: number) => Number(n || 0).toLocaleString('es-EC');
+
+  const sections = kpi.sections || [];
   const totalAmountCollected = sections.reduce(
     (sum, s) => sum + s.amountCollected,
     0
@@ -116,29 +66,268 @@ export const GeneralCollectionDashboard: React.FC<
     {
       label: 'Recaudado',
       value: totalAmountCollected,
-      color: '#22c55e',
+      color: 'green',
       fmt: fmtMoney
     },
     {
       label: 'Pendiente',
       value: totalAmountPending,
-      color: '#ef4444',
+      color: 'red',
       fmt: fmtMoney
     }
   ];
 
   const barItems: BarItem[] = sections.map((s, idx) => {
-    const colors = ['blue', 'amber', 'purple', 'rose', 'cyan'];
     return {
       label: s.typeKPI,
       value: s.amountCollected,
-      color: colors[idx % colors.length] as any,
+      color: CHART_COLORS[idx % CHART_COLORS.length] as any,
       fmt: fmtMoney
     };
   });
 
+  const columnsSections: Column<KPISection>[] = [
+    {
+      header: 'Tipo de Rubro',
+      accessor: 'typeKPI',
+      sortable: true,
+      id: 'typeKPI'
+    },
+    {
+      header: 'T. Facturas',
+      accessor: 'countTotal',
+      sortable: true,
+      isNumeric: true,
+      id: 'countTotal'
+    },
+    {
+      header: 'Fact. Recaudadas',
+      accessor: 'countCollected',
+      sortable: true,
+      isNumeric: true,
+      id: 'countCollected'
+    },
+    {
+      header: 'Fact. Pendientes',
+      accessor: 'countPending',
+      sortable: true,
+      isNumeric: true,
+      id: 'countPending'
+    },
+    {
+      header: 'Fact. > 0',
+      accessor: 'countGreaterThanZero',
+      sortable: true,
+      isNumeric: true,
+      id: 'countGreaterThanZero'
+    },
+    {
+      header: 'Fact. < 0',
+      accessor: 'countLessThanZero',
+      sortable: true,
+      isNumeric: true,
+      id: 'countLessThanZero'
+    },
+    {
+      header: 'Fact. 0',
+      accessor: 'countZero',
+      sortable: true,
+      isNumeric: true,
+      id: 'countZero'
+    },
+    {
+      header: 'Fact. Nulas',
+      accessor: 'countNull',
+      sortable: true,
+      isNumeric: true,
+      id: 'countNull'
+    },
+    {
+      header: 'Monto Recaudado',
+      accessor: (item: KPISection) => fmtMoney(item.amountCollected || 0),
+      sortable: true,
+      isNumeric: true,
+      id: 'amountCollected'
+    },
+    {
+      header: 'Monto Pendiente',
+      accessor: (item: KPISection) => fmtMoney(item.amountPending || 0),
+      sortable: true,
+      isNumeric: true,
+      id: 'amountPending'
+    },
+    {
+      header: 'Monto Descuentos',
+      accessor: (item: KPISection) => fmtMoney(item.amountDiscounts || 0),
+      sortable: true,
+      isNumeric: true,
+      id: 'amountDiscounts'
+    },
+    {
+      header: 'Total',
+      accessor: (item: KPISection) => (
+        <span className="total-due-text">
+          {item.amountTotal !== undefined ? fmtMoney(item.amountTotal) : '-'}
+        </span>
+      ),
+      id: 'amountTotal',
+      sortable: true,
+      sortKey: 'amountTotal',
+      style: { width: '120px', textAlign: 'right' }
+    }
+  ];
+
+  const totalCountSections: number = sections.reduce(
+    (sum, s) => sum + s.countTotal,
+    0
+  );
+  const totalCollectedCountSections: number = sections.reduce(
+    (sum, s) => sum + s.countCollected,
+    0
+  );
+  const totalPendingCountSections: number = sections.reduce(
+    (sum, s) => sum + s.countPending,
+    0
+  );
+  const totalGreaterThanZeroCountSections: number = sections.reduce(
+    (sum, s) => sum + s.countGreaterThanZero,
+    0
+  );
+  const totalLessThanZeroCountSections: number = sections.reduce(
+    (sum, s) => sum + s.countLessThanZero,
+    0
+  );
+  const totalZeroCountSections: number = sections.reduce(
+    (sum, s) => sum + s.countZero,
+    0
+  );
+  const totalNullCountSections: number = sections.reduce(
+    (sum, s) => sum + s.countNull,
+    0
+  );
+  const totalAmountCollectedSections: number = sections.reduce(
+    (sum, s) => sum + s.amountCollected,
+    0
+  );
+  const totalAmountPendingSections: number = sections.reduce(
+    (sum, s) => sum + s.amountPending,
+    0
+  );
+  const totalAmountDiscountsSections: number = sections.reduce(
+    (sum, s) => sum + (s.amountDiscounts || 0),
+    0
+  );
+  const totalAmountSections: number = sections.reduce(
+    (sum, s) => sum + (s.amountTotal || 0),
+    0
+  );
+
+  const totalRows = [
+    {
+      label: 'Total',
+      value: fmtMoney(totalAmountSections),
+      highlight: true,
+      columnId: 'amountTotal'
+    },
+    {
+      label: 'Total Pendiente',
+      value: fmtMoney(totalAmountPendingSections),
+      highlight: true,
+      columnId: 'amountPending'
+    },
+    {
+      label: 'Total Recaudado',
+      value: fmtMoney(totalAmountCollectedSections),
+      highlight: true,
+      columnId: 'amountCollected'
+    },
+    {
+      label: 'Total de Descuentos',
+      value: fmtMoney(totalAmountDiscountsSections),
+      highlight: true,
+      columnId: 'amountDiscounts'
+    },
+    {
+      label: 'Total de Facturas',
+      value: totalCountSections,
+      highlight: true,
+      columnId: 'countTotal'
+    },
+    {
+      label: 'Total de Facturas Recaudadas',
+      value: totalCollectedCountSections,
+      highlight: true,
+      columnId: 'countCollected'
+    },
+    {
+      label: 'Total de Facturas Pendientes',
+      value: totalPendingCountSections,
+      highlight: true,
+      columnId: 'countPending'
+    },
+    {
+      label: 'Total de Facturas con Monto Mayor a 0',
+      value: totalGreaterThanZeroCountSections,
+      highlight: true,
+      columnId: 'countGreaterThanZero'
+    },
+    {
+      label: 'Total de Facturas con Monto Menor a 0',
+      value: totalLessThanZeroCountSections,
+      highlight: true,
+      columnId: 'countLessThanZero'
+    },
+    {
+      label: 'Total de Facturas con Monto 0',
+      value: totalZeroCountSections,
+      highlight: true,
+      columnId: 'countZero'
+    },
+    {
+      label: 'Total de Facturas Nulas',
+      value: totalNullCountSections,
+      highlight: true,
+      columnId: 'countNull'
+    }
+  ];
+
+  const { setShowPdfPreview, PdfPreviewModal } = useTablePdfExport<KPISection>({
+    data: sections,
+    availableColumns: columnsSections.map((c) => ({
+      id:
+        c.id ||
+        (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
+      label: c.header as string,
+      isDefault: true
+    })),
+    reportTitle: `REPORTE AGRUPADO DE RECOLECCIÓN`,
+    reportDescription: 'Detalle agrupado de recolección',
+    labelsHorizontal: {
+      'Fecha de Exportación':
+        new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+    },
+    totalRows,
+    mapRowData: (item, selectedCols) => {
+      const rowData: Record<string, string> = {
+        'Tipo de Rubro': item.typeKPI,
+        'T. Facturas': String(item.countTotal),
+        'Fact. Recaudadas': String(item.countCollected),
+        'Fact. Pendientes': String(item.countPending),
+        'Fact. > 0': String(item.countGreaterThanZero),
+        'Fact. < 0': String(item.countLessThanZero),
+        'Fact. 0': String(item.countZero),
+        'Fact. Nulas': String(item.countNull),
+        'Monto Recaudado': CurrencyFormatter.format(item.amountCollected),
+        'Monto Pendiente': CurrencyFormatter.format(item.amountPending),
+        'Monto Descuentos': CurrencyFormatter.format(item.amountDiscounts),
+        Total: CurrencyFormatter.format(item.amountTotal)
+      };
+      return selectedCols.map((col) => rowData[col.label] || '-');
+    }
+  });
+
   return (
-    <div className="trash-dashboard" style={{ padding: '0 0 24px 0' }}>
+    <div className="trash-dashboard" style={{ padding: '5px 0 12px 0' }}>
       <div className="trash-kpi-semantic-row">
         <div
           className="trash-kpi-metrics-grid"
@@ -160,56 +349,80 @@ export const GeneralCollectionDashboard: React.FC<
             icon={<Clock size={16} />}
             color="red"
             valueColor="red"
-            description="Por cobrar"
+            description="Monto por cobrar"
           />
           <KPICard
-            label="Facturas Emitidas"
-            value={fmtNum(currentKpi.totalBillsIssued)}
+            label="Total de Facturas"
+            value={fmtNum(kpi.totalBillsIssued)}
             icon={<FileText size={16} />}
             color="blue"
             description="Total emitidas"
           />
           <KPICard
-            label="Predios Únicos"
-            value={fmtNum(currentKpi.uniqueCadastralKeys)}
+            label="Total de Acometidas"
+            value={fmtNum(kpi.uniqueCadastralKeys)}
             icon={<Home size={16} />}
             color="purple"
             description="Claves catastrales unicas"
           />
           <KPICard
-            label="Promedio por Pago"
-            value={fmtMoney(currentKpi.averagePaidBill)}
+            label="Promedio de Pago por Factura"
+            value={fmtMoney(kpi.averagePaidBill)}
             icon={<Activity size={16} />}
             color="amber"
             description="Pago promedio"
           />
           <KPICard
             label="Notas de Crédito"
-            value={fmtMoney(currentKpi.totalNotesAmount)}
+            value={fmtMoney(kpi.totalNotesAmount)}
             icon={<TrendingDown size={16} />}
             color="rose"
-            description={`${fmtNum(currentKpi.countNotes)} notas aplicadas`}
+            description={`${fmtNum(kpi.countNotes)} notas aplicadas`}
           />
         </div>
       </div>
 
       {sections.length > 0 && (
-        <div
-          className="trash-dashboard-charts-grid"
-          style={{ marginTop: '24px' }}
-        >
+        <div className="trash-dashboard-charts-grid">
           <DonutChart
             title="Distribución de Montos"
             slices={moneySlices}
             centerLabel="Total Acumulado"
             centerValue={fmtMoney(totalAmount)}
+            icon={<CheckCircle size={16} />}
+            label="Código de Título"
+            value={kpi.codeTitle}
             description="Distribución de recaudación vs pendiente"
           />
           <VerticalBarChart
             title="Recaudación por Rubro"
             items={barItems}
+            icon={<CheckCircle size={16} />}
+            label="Código de Título"
+            value={kpi.codeTitle}
             description="Montos liquidados por cada rubro principal"
           />
+        </div>
+      )}
+      {sections.length > 0 && (
+        <div className="payments-table-wrapper">
+          <Table
+            data={sections}
+            columns={columnsSections}
+            isLoading={false}
+            pagination
+            pageSize={20}
+            onExportPdf={() => setShowPdfPreview(true)}
+            totalRows={totalRows}
+            width="100"
+            emptyState={
+              <EmptyState
+                message="No se encontraron registros"
+                description="No hay registros agrupados que coincidan con los filtros seleccionados."
+              />
+            }
+          />
+          {PdfPreviewModal}
         </div>
       )}
     </div>

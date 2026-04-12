@@ -1,4 +1,5 @@
 @import './shared/presentation/styles/variables.css';
+@import './shared/presentation/styles/palette.css';
 
 :root {
   font-family: var(--font-sans);

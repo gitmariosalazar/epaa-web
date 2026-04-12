@@ -310,7 +310,8 @@
 .overdue-chart-body {
   flex: 1;
   width: 100%;
-  min-height: 350px;
+  min-height: 0;
+  height: 350px;
 }
 
 /* Page Loading Overlay */

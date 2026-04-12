@@ -53,16 +53,16 @@ export function CustomTooltip<T>({
       return (
         <div
           style={{
-            background: `rgba(${hexToRgb(color)}, 0.15)`,
+            background: color ? `color-mix(in srgb, var(--palette-${color}, ${color}) 15%, var(--surface))` : 'var(--surface)',
             borderRadius: '10px',
             padding: '12px 16px',
             color: 'var(--text-main)',
             boxShadow: 'var(--shadow-md)',
-            border: `1px solid rgba(${hexToRgb(color)}, 0.3)`,
+            border: color ? `1px solid color-mix(in srgb, var(--palette-${color}, ${color}) 40%, transparent)` : '1px solid var(--border-color)',
             position: 'relative',
             pointerEvents: 'none',
-            backdropFilter: 'blur(12px)',
-            zIndex: 1000
+            backdropFilter: 'blur(8px)',
+            zIndex: 10000
           }}
           className="dynamic-custom-tooltip-content"
         >
@@ -85,18 +85,16 @@ export function CustomTooltip<T>({
     return (
       <div
         style={{
-          background: `rgba(${hexToRgb(color)}, 0.15)` /* Highly transparent subtle tint */,
+          background: color ? `color-mix(in srgb, var(--palette-${color}, ${color}) 15%, var(--surface))` : 'var(--surface)',
           borderRadius: '10px',
           padding: '12px 16px',
-          color:
-            'var(--text-main)' /* Adapt to light/dark mode since background is mostly transparent */,
+          color: 'var(--text-main)',
           boxShadow: 'var(--shadow-md)',
-          border: `1px solid rgba(${hexToRgb(color)}, 0.3)`,
+          border: color ? `1px solid color-mix(in srgb, var(--palette-${color}, ${color}) 40%, transparent)` : '1px solid var(--border-color)',
           position: 'relative',
           pointerEvents: 'none',
-          backdropFilter:
-            'blur(12px)' /* Strong glassmorphism to compensate for high transparency */,
-          zIndex: 1000
+          backdropFilter: 'blur(8px)',
+          zIndex: 10000
         }}
         className="dynamic-custom-tooltip-content"
       >

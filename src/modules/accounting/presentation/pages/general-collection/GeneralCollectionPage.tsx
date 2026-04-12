@@ -86,10 +86,7 @@ export const GeneralCollectionPage: React.FC = () => {
       ) : state.activeTab === 'dashboard' ? (
         <GeneralCollectionDashboard
           kpi={state.kpi}
-          monthlyKpi={state.monthlyKpi}
-          yearlyKpi={state.yearlyKpi}
           isLoading={state.isLoading}
-          activeTab={state.activeTab}
         />
       ) : state.activeTab === 'general' ? (
             <GeneralCollectionTable

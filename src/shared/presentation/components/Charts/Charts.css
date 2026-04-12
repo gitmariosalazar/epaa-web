@@ -23,6 +23,22 @@
   box-shadow: var(--shadow-md) !important;
 }
 
+.chart-card-header-left-absolute {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chart-card-header-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
 .chart-card-heading {
   display: flex;
   flex-direction: column;
@@ -60,13 +76,33 @@
   align-items: center;
   gap: 2rem;
   width: 100%;
+  overflow-x: auto;
+  padding-bottom: 0.5rem; /* Space for scrollbar */
+}
+
+/* Custom minimal scrollbar for donut wrapper */
+.donut-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+.donut-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+.donut-wrapper::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+.donut-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
 }
 
 .donut-svg-container {
   position: relative;
-  width: 160px;
-  height: 160px;
+  width: 280px;
+  height: 280px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .donut-svg {
@@ -81,19 +117,30 @@
     opacity 0.2s ease,
     transform 0.2s ease;
   stroke: var(--surface);
-  stroke-width: 0.5;
+  stroke-width: 4px;
 }
 
-.donut-slice:hover {
-  opacity: 0.8 !important;
+.donut-slice:hover,
+.donut-slice.is-active {
+  opacity: 0.9 !important;
   transform: scale(1.02);
   transform-origin: center;
-  filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.15));
-  stroke-width: 0.5 !important;
-  stroke: var(--text-main) !important;
-  stroke-opacity: 0.5 !important;
-  opacity: 0.8 !important;
-  box-shadow: 15px 4px 6px rgba(255, 0, 0, 0.15) !important;
+}
+
+.donut-slice-hover-ring {
+  opacity: 0;
+  stroke-width: 2px;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+  transform-origin: center;
+}
+
+.donut-slice-tooltip-g:hover .donut-slice-hover-ring,
+.donut-slice-hover-ring.is-active {
+  opacity: 1;
+  transform: scale(1.02);
 }
 
 .donut-bg {
@@ -110,19 +157,30 @@
   text-align: center;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   pointer-events: none;
+  padding: 10px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-sizing: border-box;
+  z-index: 10;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
 .donut-center-label {
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  margin-bottom: 2px;
 }
 
 .donut-center-value {
-  font-size: 1.125rem;
+  font-size: 1.3rem;
   font-weight: 800;
   color: var(--text-main);
   line-height: 1.1;
@@ -133,6 +191,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  min-width: 360px; /* Forces scrollbar when container is too narrow */
 }
 
 .donut-legend-item {
@@ -140,24 +199,89 @@
   align-items: center;
   gap: 0.75rem;
   font-size: 0.8125rem;
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.donut-legend-item:hover,
+.donut-legend-item.is-active {
+  background-color: var(--surface-hover);
+  transform: translateX(6px);
+  border-color: var(--border-color);
 }
 
 .donut-legend-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
 }
 
 .donut-legend-label {
   flex: 1;
   color: var(--text-secondary);
   font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.donut-legend-item:hover .donut-legend-label,
+.donut-legend-item.is-active .donut-legend-label {
+  color: var(--text-main);
+  font-weight: 600;
 }
 
 .donut-legend-value {
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-main);
+  width: 60px;
+  text-align: right;
+}
+
+.donut-legend-amount {
+  width: 100px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.donut-legend-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.7rem;
+  padding: 0 1rem 0.5rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.donut-legend-header-spacer {
+  width: 10px;
+  flex-shrink: 0;
+}
+
+.donut-legend-header-label {
+  flex: 1;
+}
+
+.donut-legend-header-value {
+  width: 60px;
+  text-align: right;
+}
+
+.donut-legend-header-amount {
+  width: 100px;
+  text-align: right;
 }
 
 /* ── Vertical Bar Chart ───────────────────────────── */
@@ -197,6 +321,33 @@
   position: relative;
   transition: height 1s cubic-bezier(0.34, 1.56, 0.64, 1);
   animation: bar-grow 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes heartbeat-pulse {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(0.98);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+  }
+  28% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+  }
+  42% {
+    transform: scale(0.98);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+  }
+  70% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+  }
+}
+
+.v-bar-item:hover .v-bar-fill {
+  animation: heartbeat-pulse 1.5s infinite running;
+  transform-origin: bottom center;
 }
 
 .v-bar-value {
@@ -255,6 +406,51 @@
 .v-bar-fill--purple {
   background: linear-gradient(180deg, #8b5cf6, #7c3aed);
 }
+.v-bar-fill--orange {
+  background: linear-gradient(180deg, #f97316, #ea580c);
+}
+.v-bar-fill--yellow {
+  background: linear-gradient(180deg, #eab308, #ca8a04);
+}
+.v-bar-fill--lime {
+  background: linear-gradient(180deg, #84cc16, #65a30d);
+}
+.v-bar-fill--emerald {
+  background: linear-gradient(180deg, #10b981, #059669);
+}
+.v-bar-fill--teal {
+  background: linear-gradient(180deg, #14b8a6, #0d9488);
+}
+.v-bar-fill--cyan {
+  background: linear-gradient(180deg, #06b6d4, #0891b2);
+}
+.v-bar-fill--sky {
+  background: linear-gradient(180deg, #0ea5e9, #0284c7);
+}
+.v-bar-fill--indigo {
+  background: linear-gradient(180deg, #6366f1, #4f46e5);
+}
+.v-bar-fill--pink {
+  background: linear-gradient(180deg, #ec4899, #db2777);
+}
+.v-bar-fill--rose {
+  background: linear-gradient(180deg, #f43f5e, #e11d48);
+}
+.v-bar-fill--fuchsia {
+  background: linear-gradient(180deg, #d946ef, #c026d3);
+}
+.v-bar-fill--slate {
+  background: linear-gradient(180deg, #64748b, #475569);
+}
+.v-bar-fill--gray {
+  background: linear-gradient(180deg, #6b7280, #4b5563);
+}
+.v-bar-fill--zinc {
+  background: linear-gradient(180deg, #71717a, #52525b);
+}
+.v-bar-fill--neutral {
+  background: linear-gradient(180deg, #737373, #525252);
+}
 
 /* ── Responsive ───────────────────────────────────── */
 @media (max-width: 768px) {
@@ -265,6 +461,7 @@
   }
   .donut-legend {
     width: 100%;
+    min-width: min-content;
   }
 }
 
@@ -339,7 +536,8 @@
 }
 
 .pulsating-active-dot-ring {
-  animation: pulse-ring-animation 1.5s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+  animation: pulse-ring-animation 1.5s infinite
+    cubic-bezier(0.215, 0.61, 0.355, 1);
   transform-origin: center;
   transform-box: fill-box;
 }
@@ -361,7 +559,8 @@
 }
 
 .pulsating-active-bar {
-  animation: pulse-bar-animation 1.5s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+  animation: pulse-bar-animation 1.5s infinite
+    cubic-bezier(0.215, 0.61, 0.355, 1);
   transform-origin: bottom center; /* Grow uniformly up and slightly out */
   transform-box: fill-box;
 }

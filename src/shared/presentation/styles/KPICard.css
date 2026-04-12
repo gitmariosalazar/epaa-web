@@ -143,7 +143,7 @@
 
 /* Red / Danger */
 .kpi-card--red {
-  --kpi-theme-main: var(--danger);
+  --kpi-theme-main: var(--error);
   --kpi-theme-bg: rgba(239, 68, 68, 0.1);
   --kpi-theme-text: #dc2626;
 }
@@ -176,13 +176,104 @@
   --kpi-theme-text: #e11d48;
 }
 
+/* Orange */
+.kpi-card--orange {
+  --kpi-theme-main: #f97316;
+  --kpi-theme-bg: rgba(249, 115, 22, 0.1);
+  --kpi-theme-text: #ea580c;
+}
+
+/* Yellow */
+.kpi-card--yellow {
+  --kpi-theme-main: #eab308;
+  --kpi-theme-bg: rgba(234, 179, 8, 0.1);
+  --kpi-theme-text: #ca8a04;
+}
+
+/* Lime */
+.kpi-card--lime {
+  --kpi-theme-main: #84cc16;
+  --kpi-theme-bg: rgba(132, 204, 22, 0.1);
+  --kpi-theme-text: #65a30d;
+}
+
+/* Emerald */
+.kpi-card--emerald {
+  --kpi-theme-main: #10b981;
+  --kpi-theme-bg: rgba(16, 185, 129, 0.1);
+  --kpi-theme-text: #059669;
+}
+
+/* Cyan */
+.kpi-card--cyan {
+  --kpi-theme-main: #06b6d4;
+  --kpi-theme-bg: rgba(6, 182, 212, 0.1);
+  --kpi-theme-text: #0891b2;
+}
+
+/* Sky */
+.kpi-card--sky {
+  --kpi-theme-main: #0ea5e9;
+  --kpi-theme-bg: rgba(14, 165, 233, 0.1);
+  --kpi-theme-text: #0284c7;
+}
+
+/* Indigo */
+.kpi-card--indigo {
+  --kpi-theme-main: #6366f1;
+  --kpi-theme-bg: rgba(99, 102, 241, 0.1);
+  --kpi-theme-text: #4f46e5;
+}
+
+/* Pink */
+.kpi-card--pink {
+  --kpi-theme-main: #ec4899;
+  --kpi-theme-bg: rgba(236, 72, 153, 0.1);
+  --kpi-theme-text: #db2777;
+}
+
+/* Fuchsia */
+.kpi-card--fuchsia {
+  --kpi-theme-main: #d946ef;
+  --kpi-theme-bg: rgba(217, 70, 239, 0.1);
+  --kpi-theme-text: #c026d3;
+}
+
+/* Slate */
+.kpi-card--slate {
+  --kpi-theme-main: #64748b;
+  --kpi-theme-bg: rgba(100, 116, 139, 0.1);
+  --kpi-theme-text: #475569;
+}
+
+/* Gray */
+.kpi-card--gray {
+  --kpi-theme-main: #6b7280;
+  --kpi-theme-bg: rgba(107, 114, 128, 0.1);
+  --kpi-theme-text: #4b5563;
+}
+
+/* Zinc */
+.kpi-card--zinc {
+  --kpi-theme-main: #71717a;
+  --kpi-theme-bg: rgba(113, 113, 122, 0.1);
+  --kpi-theme-text: #52525b;
+}
+
+/* Neutral */
+.kpi-card--neutral {
+  --kpi-theme-main: #737373;
+  --kpi-theme-bg: rgba(115, 115, 115, 0.1);
+  --kpi-theme-text: #525252;
+}
+
 /* Value override colors */
 .kpi-card-value--green {
   --kpi-value-color: var(--success);
 }
 
 .kpi-card-value--red {
-  --kpi-value-color: var(--danger);
+  --kpi-value-color: var(--error);
 }
 
 .kpi-card-value--amber {
@@ -242,4 +333,69 @@
 .dark .kpi-card--rose {
   --kpi-theme-text: #fb7185;
   --kpi-theme-bg: rgba(244, 63, 94, 0.15);
+}
+
+.dark .kpi-card--orange {
+  --kpi-theme-text: #fb923c;
+  --kpi-theme-bg: rgba(249, 115, 22, 0.15);
+}
+
+.dark .kpi-card--yellow {
+  --kpi-theme-text: #fde047;
+  --kpi-theme-bg: rgba(234, 179, 8, 0.15);
+}
+
+.dark .kpi-card--lime {
+  --kpi-theme-text: #bef264;
+  --kpi-theme-bg: rgba(132, 204, 22, 0.15);
+}
+
+.dark .kpi-card--emerald {
+  --kpi-theme-text: #34d399;
+  --kpi-theme-bg: rgba(16, 185, 129, 0.15);
+}
+
+.dark .kpi-card--cyan {
+  --kpi-theme-text: #22d3ee;
+  --kpi-theme-bg: rgba(6, 182, 212, 0.15);
+}
+
+.dark .kpi-card--sky {
+  --kpi-theme-text: #38bdf8;
+  --kpi-theme-bg: rgba(14, 165, 233, 0.15);
+}
+
+.dark .kpi-card--indigo {
+  --kpi-theme-text: #818cf8;
+  --kpi-theme-bg: rgba(99, 102, 241, 0.15);
+}
+
+.dark .kpi-card--pink {
+  --kpi-theme-text: #f472b6;
+  --kpi-theme-bg: rgba(236, 72, 153, 0.15);
+}
+
+.dark .kpi-card--fuchsia {
+  --kpi-theme-text: #e879f9;
+  --kpi-theme-bg: rgba(217, 70, 239, 0.15);
+}
+
+.dark .kpi-card--slate {
+  --kpi-theme-text: #94a3b8;
+  --kpi-theme-bg: rgba(100, 116, 139, 0.15);
+}
+
+.dark .kpi-card--gray {
+  --kpi-theme-text: #9ca3af;
+  --kpi-theme-bg: rgba(107, 114, 128, 0.15);
+}
+
+.dark .kpi-card--zinc {
+  --kpi-theme-text: #a1a1aa;
+  --kpi-theme-bg: rgba(113, 113, 122, 0.15);
+}
+
+.dark .kpi-card--neutral {
+  --kpi-theme-text: #a3a3a3;
+  --kpi-theme-bg: rgba(115, 115, 115, 0.15);
 }
