@@ -13,8 +13,8 @@
   flex-shrink: 0;
 }
 
-.filter-section-left,
-.filter-section-right {
+.entry-filters .filter-section-left,
+.entry-filters .filter-section-right {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -22,19 +22,19 @@
   gap: 0.3rem;
 }
 
-.filter-section-left {
+.entry-filters .filter-section-left {
   justify-content: flex-start;
   flex: 0 1 auto;
 }
 
-.filter-section-right {
+.entry-filters .filter-section-right {
   justify-content: flex-end;
   flex: 0 1 auto;
 }
 
 /* ── Individual group ────────────────────────────────────────────────── */
 .entry-filter-group,
-.filter-group {
+.entry-filters .filter-group {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -50,13 +50,13 @@
   flex: 0 0 auto;
 }
 
-.filter-group--range {
+.entry-filters .filter-group--range {
   flex: 0 1 auto; /* Don't force 22rem if not needed, but allow it to shrink */
   min-width: 240px;
 }
 
 /* ── Label ───────────────────────────────────────────────────────────── */
-.filter-label,
+.entry-filters .filter-label,
 .entry-filter-label {
   font-size: 0.675rem;
   font-weight: 700;
@@ -67,7 +67,7 @@
 }
 
 /* ── Input wrapper ───────────────────────────────────────────────────── */
-.filter-input-wrapper,
+.entry-filters .filter-input-wrapper,
 .entry-filter-input-wrapper {
   position: relative;
   width: 100%;

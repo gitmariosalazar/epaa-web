@@ -1,0 +1,313 @@
+.dashboard-loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.dashboard-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dashboard-list-container.yearly {
+  gap: 0rem;
+}
+
+.dashboard-card {
+  background: var(--surface);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+/* ── Old vertical list — kept for backward compat but hidden ── */
+.dashboard-yearly {
+  display: none;
+}
+
+/* ── Horizontal Year Paginator Card ── */
+.yearly-paginator-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem 1.5rem;
+  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.12);
+  margin-bottom: 1.5rem;
+}
+
+.yearly-paginator-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.yearly-paginator-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.yearly-paginator-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.yearly-paginator-year {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+  line-height: 1.1;
+}
+
+.yearly-paginator-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.yearly-paginator-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-right: 0.5rem;
+}
+
+/* ── Embedded year select (monthly paginator) ── */
+.paginator-year-select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.paginator-year-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: color-mix(in srgb, var(--primary, #3b82f6) 10%, var(--surface));
+  border: 1.5px solid
+    color-mix(in srgb, var(--primary, #3b82f6) 40%, var(--border-color));
+  color: var(--text-main);
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 0.35rem 2.2rem 0.35rem 0.85rem;
+  cursor: pointer;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s,
+    background 0.18s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  min-width: 90px;
+}
+
+.paginator-year-select:hover {
+  border-color: var(--primary, #3b82f6);
+  background-color: color-mix(
+    in srgb,
+    var(--primary, #3b82f6) 16%,
+    var(--surface)
+  );
+}
+
+.paginator-year-select:focus {
+  outline: none;
+  border-color: var(--primary, #3b82f6);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--primary, #3b82f6) 20%, transparent);
+}
+
+.paginator-year-select option {
+  background: var(--surface);
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.yearly-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--border-color);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background 0.2s,
+    transform 0.2s,
+    width 0.2s;
+  flex-shrink: 0;
+}
+
+.yearly-dot.active {
+  background: var(--primary, #3b82f6);
+  width: 22px;
+  border-radius: 4px;
+  box-shadow: 0 0 8px
+    color-mix(in srgb, var(--primary, #3b82f6) 60%, transparent);
+}
+
+.yearly-dot:hover:not(.active) {
+  background: var(--text-secondary);
+  transform: scale(1.2);
+}
+
+.yearly-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-main);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    transform 0.12s;
+}
+
+.yearly-nav-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary, #3b82f6) 12%, transparent);
+  border-color: var(--primary, #3b82f6);
+  transform: scale(1.06);
+}
+
+.yearly-nav-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.yearly-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.yearly-paginator-counter {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 40px;
+  text-align: center;
+}
+
+.yearly-paginator-content {
+  animation: paginator-fade-in 0.25s ease;
+}
+
+@keyframes paginator-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.dashboard-card-title {
+  margin-bottom: 1rem;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+/* Specific to GeneralCollectionTable */
+.collection-table-owner-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.collection-table-owner-name {
+  font-weight: 300;
+}
+
+.collection-table-owner-meta {
+  font-size: 0.85em;
+  color: var(--text-secondary);
+}
+
+.dashboard-trash-section {
+  padding: 5px 0 12px 0;
+}
+
+.dashboard-trash-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.dashboard-trash-grid.compact {
+  min-height: auto;
+  flex: none;
+}
+
+.trash-kpi-metrics-grid-auto {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.compact-table {
+  min-height: auto;
+  flex: none;
+}
+
+/* ── Dynamic Bar Chart Dashboard ── */
+.dashboard-chart-body {
+  position: relative;
+  flex: 0 0 350px;
+  width: 100%;
+  min-height: 350px;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+  margin-bottom: 0rem;
+}
+
+.dashboard-year-tooltip {
+  display: flex;
+  flex-direction: row;
+  gap: 1.25rem;
+  font-size: 0.7rem;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-year-tooltip span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-weight: bold;
+  color: var(--gray-500);
+}
+
+.dashboard-year-tooltip p {
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+  font-weight: 500 !important;
+  color: var(--text-main) !important;
+  margin-left: 2px !important;
+  margin: 0;
+}
+
+.dashboard-stats-grid {
+  gap: 0.5rem;
+  margin-top: -1.5rem;
+}

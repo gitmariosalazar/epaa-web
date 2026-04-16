@@ -139,16 +139,21 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
           </div>
         )}
 
-        <Button
-          onClick={onFetch}
-          disabled={!canFetch}
-          size="compact"
-          isLoading={isLoading}
-          leftIcon={<Search size={18} />}
-        >
-          {t('accounting.filters.fetch', 'Consultar')}
-        </Button>
+        <div className="filter-group">
+          <Button
+            onClick={onFetch}
+            disabled={!canFetch}
+            size="compact"
+            isLoading={isLoading}
+            leftIcon={<Search size={18} />}
+          >
+            {t('accounting.filters.fetch', 'Consultar')}
+          </Button>
+        </div>
+      </div>
 
+      {/* ── RIGHT: Secondary Dropdown Filters ── */}
+      <div className="filter-section-right">
         {/* local search (all tabs) */}
         <div className="filter-group filter-group--search">
           <label className="filter-label">
@@ -168,10 +173,7 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
             />
           </div>
         </div>
-      </div>
 
-      {/* ── RIGHT: Secondary Dropdown Filters ── */}
-      <div className="filter-section-right">
         <div className="filter-group">
           <label className="filter-label">
             {t('accounting.filters.chargingUser', 'Usuario')}

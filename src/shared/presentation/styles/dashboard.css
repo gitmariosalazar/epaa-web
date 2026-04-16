@@ -328,3 +328,136 @@
   padding: 0.25rem 0.6rem;
   border-radius: 9999px;
 }
+
+/* ── Global Chart Evolution Badges ── */
+.year-tooltip-evolution {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  z-index: 10;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .year-tooltip-evolution {
+    position: relative;
+    top: 0;
+    right: 0;
+    margin: 0.5rem 0 1rem 0;
+    justify-content: center;
+    gap: 0.6rem;
+  }
+}
+
+.year-tooltip-evolution-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  box-shadow:
+    0 4px 12px -2px rgba(0, 0, 0, 0.08),
+    0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.year-tooltip-evolution-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.year-tooltip-evolution-icon {
+  width: 25px;
+  height: 25px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+  border: none !important;
+  background: rgba(var(--text-secondary-rgb), 0.1);
+}
+
+.year-tooltip-evolution-item:hover .year-tooltip-evolution-icon {
+  transform: scale(1.1);
+}
+
+.year-tooltip-evolution-item span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.6rem;
+  font-weight: 750;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+
+.year-tooltip-evolution-item span p {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 0.75rem;
+  font-weight: 850 !important;
+  color: var(--text-main) !important;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+/* Color Variants with Modern Gradients */
+.gradient-color-clients {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 131, 246, 0.132) 0%,
+    transparent 100%
+  ) !important;
+  border-left: 3px solid var(--color-clients, #3b82f6) !important;
+}
+.gradient-color-clients .year-tooltip-evolution-icon {
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.gradient-color-keys {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.08) 0%,
+    transparent 100%
+  ) !important;
+  border-left: 3px solid var(--color-keys, #10b981) !important;
+}
+.gradient-color-keys .year-tooltip-evolution-icon {
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.gradient-color-debt {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.08) 0%,
+    transparent 100%
+  ) !important;
+  border-left: 3px solid var(--color-debt, #f59e0b) !important;
+}
+.gradient-color-debt .year-tooltip-evolution-icon {
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.gradient-color-debt:hover {
+  opacity: 1;
+}
+
+[data-theme='dark'] .year-tooltip-evolution-item {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(8px);
+  border-color: rgba(255, 255, 255, 0.05);
+}

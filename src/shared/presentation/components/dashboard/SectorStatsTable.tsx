@@ -32,10 +32,16 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
     );
   if (!data.length)
     return (
-      <EmptyState
-        message="No sector stats found"
-        description="No sector stats found"
-      />
+      <div
+        style={{
+          marginTop: '2rem'
+        }}
+      >
+        <EmptyState
+          message="No sector stats found"
+          description="No sector stats found"
+        />
+      </div>
     );
 
   const columns: Column<SectorStatsReport>[] = [
@@ -108,7 +114,8 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
       style={{
         height: '100%', // Fill parent height
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        marginTop: '1rem'
       }}
     >
       <div

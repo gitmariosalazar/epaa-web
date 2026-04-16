@@ -11,7 +11,11 @@ interface TooltipProps {
   className?: string;
   disabled?: boolean;
   as?: React.ElementType;
-  themeColor?: string;
+  themeColor?: string; // Mantained for backward compatibility
+  backgroundColor?: string;
+  textColor?: string;
+  icon?: ReactNode;
+  variant?: 'soft' | 'solid' | 'transparent';
   followCursor?: boolean;
   onMouseEnter?: (e: React.MouseEvent) => void;
   onMouseLeave?: (e: React.MouseEvent) => void;
@@ -25,6 +29,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
   disabled = false,
   as: Component = 'div',
   themeColor,
+  backgroundColor,
+  textColor,
+  icon,
+  variant = 'soft',
   followCursor = false,
   onMouseEnter,
   onMouseLeave
@@ -175,25 +183,51 @@ export const Tooltip: React.FC<TooltipProps> = ({
               visibility: 'visible',
               transition: 'opacity 0.2s ease',
               zIndex: 10000,
-              background: themeColor 
-                ? `color-mix(in srgb, var(--palette-${themeColor}, var(--${themeColor}, ${themeColor})) 15%, var(--surface))` 
-                : 'var(--surface)',
-              color: 'var(--text-main)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              
+              background: (() => {
+                if (backgroundColor) return backgroundColor;
+                if (variant === 'transparent') return 'color-mix(in srgb, var(--surface) 40%, transparent)';
+                const baseColor = themeColor 
+                  ? `var(--palette-${themeColor}, var(--${themeColor}, ${themeColor}))` 
+                  : 'var(--surface)';
+                
+                if (variant === 'solid' && themeColor) return baseColor;
+                if (variant === 'soft' && themeColor) return `color-mix(in srgb, ${baseColor} 15%, var(--surface))`;
+                return 'var(--surface)';
+              })(),
+
+              color: textColor || 'var(--text-main)',
+              
               border: themeColor 
                 ? `1px solid color-mix(in srgb, var(--palette-${themeColor}, var(--${themeColor}, ${themeColor})) 40%, transparent)` 
-                : '1px solid var(--border-color)',
-              '--tooltip-arrow-color': themeColor 
-                ? `color-mix(in srgb, var(--palette-${themeColor}, var(--${themeColor}, ${themeColor})) 15%, var(--surface))` 
-                : 'var(--surface)',
+                : variant === 'transparent' ? '1px solid color-mix(in srgb, var(--text-main) 10%, transparent)' : '1px solid var(--border-color)',
+              
+              '--tooltip-arrow-color': (() => {
+                if (backgroundColor) return backgroundColor;
+                if (variant === 'transparent') return 'color-mix(in srgb, var(--surface) 95%, transparent)';
+                const baseColor = themeColor 
+                  ? `var(--palette-${themeColor}, var(--${themeColor}, ${themeColor}))` 
+                  : 'var(--surface)';
+                
+                if (variant === 'solid' && themeColor) return baseColor;
+                if (variant === 'soft' && themeColor) return `color-mix(in srgb, ${baseColor} 15%, var(--surface))`;
+                return 'var(--surface)';
+              })(),
+
               '--tooltip-arrow-border-color': themeColor 
                 ? `color-mix(in srgb, var(--palette-${themeColor}, var(--${themeColor}, ${themeColor})) 40%, transparent)` 
-                : 'var(--border-color)',
+                : variant === 'transparent' ? 'color-mix(in srgb, var(--text-main) 10%, transparent)' : 'var(--border-color)',
+              
               '--tooltip-arrow-left': coords.arrowLeft,
               '--tooltip-arrow-top': coords.arrowTop,
-              backdropFilter: 'blur(8px)',
+              backdropFilter: variant === 'transparent' ? 'blur(12px)' : 'blur(8px)',
             } as React.CSSProperties}
           >
-            {content}
+            {icon && <span className="tooltip-icon">{icon}</span>}
+            <span className="tooltip-content-text">{content}</span>
           </div>,
           document.body
         )}

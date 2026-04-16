@@ -1,7 +1,6 @@
 import React from 'react';
 import '../../../../trash/presentation/styles/TrashRateDashboard.css';
 import {
-  //DollarSign,
   FileText,
   Home,
   CheckCircle,
@@ -9,7 +8,6 @@ import {
   TrendingDown,
   Activity
 } from 'lucide-react';
-//import { useTranslation } from 'react-i18next';
 import {
   type GeneralKPIResponse,
   type KPISection
@@ -32,26 +30,21 @@ import {
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import '../../styles/payments/GeneralCollectionDashboards.css';
 
 interface GeneralCollectionDashboardProps {
   kpi: GeneralKPIResponse | null;
   isLoading: boolean;
+  isCompact?: boolean;
 }
 
 export const GeneralCollectionDashboard: React.FC<
   GeneralCollectionDashboardProps
-> = ({ kpi, isLoading }) => {
-  if (isLoading) return null;
-
-  if (!kpi) {
-    return null;
-  }
-
-  const fmtMoney = (n: number) =>
-    `$${Number(n || 0).toLocaleString('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+> = ({ kpi, isLoading, isCompact }) => {
+  // ── All data computations use safe defaults so hooks below are always called ──
   const fmtNum = (n: number) => Number(n || 0).toLocaleString('es-EC');
 
-  const sections = kpi.sections || [];
+  const sections = kpi?.sections || [];
   const totalAmountCollected = sections.reduce(
     (sum, s) => sum + s.amountCollected,
     0
@@ -67,24 +60,22 @@ export const GeneralCollectionDashboard: React.FC<
       label: 'Recaudado',
       value: totalAmountCollected,
       color: 'green',
-      fmt: fmtMoney
+      fmt: (n: number) => CurrencyFormatter.format(n)
     },
     {
       label: 'Pendiente',
       value: totalAmountPending,
       color: 'red',
-      fmt: fmtMoney
+      fmt: (n: number) => CurrencyFormatter.format(n)
     }
   ];
 
-  const barItems: BarItem[] = sections.map((s, idx) => {
-    return {
-      label: s.typeKPI,
-      value: s.amountCollected,
-      color: CHART_COLORS[idx % CHART_COLORS.length] as any,
-      fmt: fmtMoney
-    };
-  });
+  const barItems: BarItem[] = sections.map((s, idx) => ({
+    label: s.typeKPI,
+    value: s.amountCollected,
+    color: CHART_COLORS[idx % CHART_COLORS.length] as any,
+    fmt: (n: number) => CurrencyFormatter.format(n)
+  }));
 
   const columnsSections: Column<KPISection>[] = [
     {
@@ -144,21 +135,24 @@ export const GeneralCollectionDashboard: React.FC<
     },
     {
       header: 'Monto Recaudado',
-      accessor: (item: KPISection) => fmtMoney(item.amountCollected || 0),
+      accessor: (item: KPISection) =>
+        CurrencyFormatter.format(item.amountCollected || 0),
       sortable: true,
       isNumeric: true,
       id: 'amountCollected'
     },
     {
       header: 'Monto Pendiente',
-      accessor: (item: KPISection) => fmtMoney(item.amountPending || 0),
+      accessor: (item: KPISection) =>
+        CurrencyFormatter.format(item.amountPending || 0),
       sortable: true,
       isNumeric: true,
       id: 'amountPending'
     },
     {
       header: 'Monto Descuentos',
-      accessor: (item: KPISection) => fmtMoney(item.amountDiscounts || 0),
+      accessor: (item: KPISection) =>
+        CurrencyFormatter.format(item.amountDiscounts || 0),
       sortable: true,
       isNumeric: true,
       id: 'amountDiscounts'
@@ -167,7 +161,9 @@ export const GeneralCollectionDashboard: React.FC<
       header: 'Total',
       accessor: (item: KPISection) => (
         <span className="total-due-text">
-          {item.amountTotal !== undefined ? fmtMoney(item.amountTotal) : '-'}
+          {item.amountTotal !== undefined
+            ? CurrencyFormatter.format(item.amountTotal)
+            : '-'}
         </span>
       ),
       id: 'amountTotal',
@@ -225,25 +221,25 @@ export const GeneralCollectionDashboard: React.FC<
   const totalRows = [
     {
       label: 'Total',
-      value: fmtMoney(totalAmountSections),
+      value: CurrencyFormatter.format(totalAmountSections),
       highlight: true,
       columnId: 'amountTotal'
     },
     {
       label: 'Total Pendiente',
-      value: fmtMoney(totalAmountPendingSections),
+      value: CurrencyFormatter.format(totalAmountPendingSections),
       highlight: true,
       columnId: 'amountPending'
     },
     {
       label: 'Total Recaudado',
-      value: fmtMoney(totalAmountCollectedSections),
+      value: CurrencyFormatter.format(totalAmountCollectedSections),
       highlight: true,
       columnId: 'amountCollected'
     },
     {
       label: 'Total de Descuentos',
-      value: fmtMoney(totalAmountDiscountsSections),
+      value: CurrencyFormatter.format(totalAmountDiscountsSections),
       highlight: true,
       columnId: 'amountDiscounts'
     },
@@ -326,18 +322,17 @@ export const GeneralCollectionDashboard: React.FC<
     }
   });
 
+  // ── Early returns AFTER all hooks (Rules of Hooks: never return before a hook) ──
+  if (isLoading) return null;
+  if (!kpi) return null;
+
   return (
-    <div className="trash-dashboard" style={{ padding: '5px 0 12px 0' }}>
+    <div className="trash-dashboard dashboard-trash-section">
       <div className="trash-kpi-semantic-row">
-        <div
-          className="trash-kpi-metrics-grid"
-          style={{
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))'
-          }}
-        >
+        <div className="trash-kpi-metrics-grid trash-kpi-metrics-grid-auto">
           <KPICard
             label="Total Recaudado"
-            value={fmtMoney(totalAmountCollected)}
+            value={CurrencyFormatter.format(totalAmountCollected)}
             icon={<CheckCircle size={16} />}
             color="green"
             valueColor="green"
@@ -345,7 +340,7 @@ export const GeneralCollectionDashboard: React.FC<
           />
           <KPICard
             label="Monto Pendiente"
-            value={fmtMoney(totalAmountPending)}
+            value={CurrencyFormatter.format(totalAmountPending)}
             icon={<Clock size={16} />}
             color="red"
             valueColor="red"
@@ -367,14 +362,14 @@ export const GeneralCollectionDashboard: React.FC<
           />
           <KPICard
             label="Promedio de Pago por Factura"
-            value={fmtMoney(kpi.averagePaidBill)}
+            value={CurrencyFormatter.format(kpi.averagePaidBill)}
             icon={<Activity size={16} />}
             color="amber"
             description="Pago promedio"
           />
           <KPICard
             label="Notas de Crédito"
-            value={fmtMoney(kpi.totalNotesAmount)}
+            value={CurrencyFormatter.format(kpi.totalNotesAmount)}
             icon={<TrendingDown size={16} />}
             color="rose"
             description={`${fmtNum(kpi.countNotes)} notas aplicadas`}
@@ -388,7 +383,7 @@ export const GeneralCollectionDashboard: React.FC<
             title="Distribución de Montos"
             slices={moneySlices}
             centerLabel="Total Acumulado"
-            centerValue={fmtMoney(totalAmount)}
+            centerValue={CurrencyFormatter.format(totalAmount)}
             icon={<CheckCircle size={16} />}
             label="Código de Título"
             value={kpi.codeTitle}
@@ -405,12 +400,16 @@ export const GeneralCollectionDashboard: React.FC<
         </div>
       )}
       {sections.length > 0 && (
-        <div className="payments-table-wrapper">
+        <div
+          className={`payments-table-wrapper ${isCompact ? 'compact-table' : ''}`}
+        >
           <Table
+            key={`dashboard-sections-${isCompact ? 'compact' : 'full'}`}
             data={sections}
             columns={columnsSections}
             isLoading={false}
             pagination
+            fullHeight={!isCompact}
             pageSize={20}
             onExportPdf={() => setShowPdfPreview(true)}
             totalRows={totalRows}

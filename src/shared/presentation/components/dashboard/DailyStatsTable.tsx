@@ -32,10 +32,16 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
     );
   if (!data.length)
     return (
-      <EmptyState
-        message="No daily stats found"
-        description="No daily stats found"
-      />
+      <div
+        style={{
+          marginTop: '2rem'
+        }}
+      >
+        <EmptyState
+          message="No daily stats found"
+          description="No daily stats found"
+        />
+      </div>
     );
 
   const columns: Column<DailyStatsReport>[] = [
@@ -123,7 +129,8 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
       style={{
         height: '100%', // Fill parent height
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        marginTop: '1rem'
       }}
     >
       <div

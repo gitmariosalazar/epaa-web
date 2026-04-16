@@ -49,6 +49,24 @@
 /* ── Active State (Handled by React) ── */
 /* Deleted styles that relied on CSS :hover for visibility */
 
+.tooltip-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.1rem; /* Standard professional size */
+  opacity: 0.9;
+}
+
+.tooltip-icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.tooltip-content-text {
+  flex: 1;
+}
+
 /* ── Arrow Base ── */
 .tooltip-box::after,
 .tooltip-box::before {

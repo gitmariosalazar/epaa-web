@@ -20,6 +20,7 @@ import { FaEdit } from 'react-icons/fa';
 import { IoMdPhotos } from 'react-icons/io';
 import {
   IconAccounting,
+  IconIncomes,
   IconOverduePayments,
   IconPayments
 } from '../components/icons/custom-icons';
@@ -159,7 +160,7 @@ export const useNavigation = (): NavSection[] => {
               to: '/accounting/overdue'
             },
             {
-              icon: <BarChart3 size={18} />,
+              icon: <IconIncomes />,
               label: 'Ingresos General',
               to: '/accounting/general-collection'
             }

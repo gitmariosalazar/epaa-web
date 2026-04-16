@@ -1,5 +1,6 @@
 import React from 'react';
 import '@/shared/presentation/styles/Table.css';
+import '@/shared/presentation/styles/TableModal.css';
 import {
   ChevronLeft,
   ChevronRight,
@@ -558,7 +559,9 @@ export const Table = <T extends { [key: string]: any }>({
           <div className="table-pagination-center">
             {totalPages >= 1 && (
               <>
-                <Tooltip content={t('common.pagination.first', 'Primera página')}>
+                <Tooltip
+                  content={t('common.pagination.first', 'Primera página')}
+                >
                   <button
                     onClick={() => setCurrentPage(1)}
                     disabled={currentPage === 1}
@@ -659,83 +662,33 @@ export const Table = <T extends { [key: string]: any }>({
         )}
         size="xxl"
       >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '300px 1fr',
-            gap: '2rem',
-            minHeight: '60vh'
-          }}
-        >
+        <div className="table-modal-container">
           {/* Left Panel: Selection Menu */}
-          <div
-            style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-          >
-            <div style={{ marginBottom: '1rem' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'baseline',
-                  marginBottom: '0.5rem'
-                }}
-              >
-                <h4
-                  style={{
-                    textTransform: 'uppercase',
-                    color: 'var(--text-muted)',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    margin: 0,
-                    letterSpacing: '0.05em'
-                  }}
-                >
+          <div className="table-modal-left-panel">
+            <div className="table-modal-left-header">
+              <div className="table-modal-left-title">
+                <h4 className="table-modal-columns-label">
                   {t('common.table.columns', 'Columnas')}
                 </h4>
               </div>
-              <div
-                style={{ display: 'flex', gap: '0.75rem', fontSize: '0.8rem' }}
-              >
+              <div className="table-modal-header-actions">
                 <button
                   onClick={handleSelectAllColumns}
-                  className="table-columns-action-btn"
-                  style={{
-                    color: 'var(--accent)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 0
-                  }}
+                  className="table-columns-action-btn select-all"
                 >
                   {t('common.table.selectAll', 'Seleccionar Todo')}
                 </button>
                 <span style={{ color: 'var(--border-color)' }}>|</span>
                 <button
                   onClick={handleClearAllColumns}
-                  className="table-columns-action-btn"
-                  style={{
-                    color: 'var(--text-muted)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 0
-                  }}
+                  className="table-columns-action-btn clear"
                 >
                   {t('common.table.clear', 'Limpiar')}
                 </button>
               </div>
             </div>
 
-            <div
-              style={{
-                flex: 1,
-                overflowY: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem',
-                paddingRight: '0.5rem'
-              }}
-            >
+            <div className="table-modal-checkbox-list">
               {columns.map((col, index) => {
                 const key = getColumnKey(col, index);
                 const isVisible = !draftHiddenColumns.has(key);
@@ -755,49 +708,16 @@ export const Table = <T extends { [key: string]: any }>({
                   <div
                     key={key}
                     onClick={handleToggle}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px 16px',
-                      backgroundColor: isVisible
-                        ? 'color-mix(in srgb, var(--accent) 10%, transparent)'
-                        : 'var(--surface-hover)',
-                      borderRadius: 'var(--radius-md)',
-                      cursor:
-                        draftVisibleColumns.length <= 1 && isVisible
-                          ? 'not-allowed'
-                          : 'pointer',
-                      opacity:
-                        draftVisibleColumns.length <= 1 && isVisible ? 0.6 : 1,
-                      border: isVisible
-                        ? '1px solid color-mix(in srgb, var(--accent) 40%, transparent)'
-                        : '1px solid var(--border-color)',
-                      transition: 'all 0.2s ease',
-                      boxShadow: isVisible ? 'none' : 'var(--shadow-sm)'
-                    }}
+                    className={`table-modal-checkbox-item ${isVisible ? 'visible' : ''} ${draftVisibleColumns.length <= 1 && isVisible ? 'disabled' : ''}`}
                   >
                     <input
                       type="checkbox"
                       checked={isVisible}
                       onChange={handleToggle}
                       disabled={draftVisibleColumns.length <= 1 && isVisible}
-                      style={{
-                        width: '18px',
-                        height: '18px',
-                        cursor: 'inherit',
-                        pointerEvents: 'none',
-                        accentColor: 'var(--accent)'
-                      }}
+                      className="table-modal-checkbox-input"
                     />
-                    <span
-                      style={{
-                        fontSize: '0.95rem',
-                        color: isVisible ? 'var(--accent)' : 'var(--text-main)',
-                        userSelect: 'none',
-                        fontWeight: isVisible ? 600 : 500
-                      }}
-                    >
+                    <span className={`table-modal-checkbox-label ${isVisible ? 'visible' : ''}`}>
                       {typeof col.header === 'string'
                         ? col.header
                         : `Columna ${index + 1}`}
@@ -807,14 +727,7 @@ export const Table = <T extends { [key: string]: any }>({
               })}
             </div>
 
-            <div
-              style={{
-                marginTop: '1.5rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '10px'
-              }}
-            >
+            <div className="table-modal-footer-actions">
               <Button
                 variant="outline"
                 color="success"
@@ -839,31 +752,12 @@ export const Table = <T extends { [key: string]: any }>({
           </div>
 
           {/* Right Panel: Table Preview (Document Outline) */}
-          <div
-            style={{
-              backgroundColor: 'var(--surface)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '2rem',
-              border: '1px solid var(--border-color)',
-              overflow: 'auto',
-              maxHeight: '70vh',
-              boxShadow: 'var(--shadow-lg)'
-            }}
-          >
-            <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-              <h3
-                style={{
-                  color: 'var(--text-main)',
-                  fontWeight: 'bold',
-                  fontSize: '1.25rem',
-                  marginBottom: '4px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}
-              >
+          <div className="table-modal-right-panel">
+            <div className="table-modal-preview-header">
+              <h3 className="table-modal-preview-title">
                 {t('common.table.previewTitle', 'Vista Previa de la Tabla')}
               </h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              <p className="table-modal-preview-subtitle">
                 {t(
                   'common.table.previewSubtitle',
                   'Resumen de columnas visibles'
@@ -871,36 +765,14 @@ export const Table = <T extends { [key: string]: any }>({
               </p>
             </div>
 
-            <div
-              style={{
-                overflowX: 'auto',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--table-border)',
-                boxShadow: 'var(--shadow-sm)'
-              }}
-            >
-              <table
-                style={{
-                  width: '100%',
-                  borderCollapse: 'collapse',
-                  fontSize: '0.85rem',
-                  color: 'var(--text-main)'
-                }}
-              >
+            <div className="table-modal-preview-wrapper">
+              <table className="table-modal-preview-table">
                 <thead>
                   <tr>
                     {draftVisibleColumns.map((col, idx) => (
                       <th
                         key={idx}
-                        style={{
-                          backgroundColor: 'var(--table-header-bg)',
-                          color: 'var(--table-header-text)',
-                          padding: '12px 16px',
-                          textAlign: 'left',
-                          fontWeight: 600,
-                          borderBottom: '2px solid var(--table-border)',
-                          whiteSpace: 'nowrap'
-                        }}
+                        className="table-modal-preview-th"
                       >
                         {col.header}
                       </th>
@@ -913,27 +785,13 @@ export const Table = <T extends { [key: string]: any }>({
                     .map((item, rowIdx) => (
                       <tr
                         key={rowIdx}
-                        style={{
-                          backgroundColor:
-                            rowIdx % 2 === 0
-                              ? 'transparent'
-                              : 'var(--table-row-striped)',
-                          borderBottom: '1px solid var(--table-border)',
-                          transition: 'background-color 0.2s'
-                        }}
+                        className={`table-modal-preview-row ${rowIdx % 2 !== 0 ? 'striped' : ''}`}
                       >
                         {draftVisibleColumns.map((col, colIdx) => (
                           <td
                             key={colIdx}
-                            style={{
-                              padding: '12px 16px',
-                              textAlign: col.isNumeric ? 'right' : 'inherit',
-                              borderRight:
-                                colIdx < draftVisibleColumns.length - 1
-                                  ? '1px dashed var(--table-border)'
-                                  : 'none',
-                              whiteSpace: 'nowrap'
-                            }}
+                            className={`table-modal-preview-td ${colIdx < draftVisibleColumns.length - 1 ? 'dashed-border' : ''}`}
+                            style={{ textAlign: col.isNumeric ? 'right' : 'inherit' }}
                           >
                             {typeof col.accessor === 'function'
                               ? col.accessor(item)
@@ -946,11 +804,7 @@ export const Table = <T extends { [key: string]: any }>({
                     <tr>
                       <td
                         colSpan={draftVisibleColumns.length}
-                        style={{
-                          padding: '24px',
-                          textAlign: 'center',
-                          color: 'var(--text-muted)'
-                        }}
+                        className="table-modal-preview-empty"
                       >
                         {t(
                           'common.table.noDataPreview',

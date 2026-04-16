@@ -1,3 +1,4 @@
+/* src/shared/presentation/components/Header/Header.tsx */
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/shared/presentation/context/AuthContext';
 import { useTheme } from '@/shared/presentation/context/ThemeContext';
@@ -10,9 +11,10 @@ import {
   Sun,
   Moon
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import '@/shared/presentation/styles/Header.css';
+import { Tooltip } from '../common/Tooltip/Tooltip';
 
 export const Header: React.FC = () => {
   const { user, logout } = useAuth();
@@ -21,6 +23,7 @@ export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -36,7 +39,6 @@ export const Header: React.FC = () => {
 
   const handleLogout = async () => {
     await logout();
-    // logout() internally redirects to /login
   };
 
   const toggleLanguage = () => {
@@ -49,108 +51,56 @@ export const Header: React.FC = () => {
       ? `${user.firstName} ${user.lastName}`
       : user?.username || t('common.user');
 
+  // Derive title from path for professional feel
+  const currentPath = location.pathname.split('/').pop() || '';
+  const pageTitle = currentPath
+    ? t(
+        `menu.${currentPath}`,
+        currentPath.charAt(0).toUpperCase() + currentPath.slice(1)
+      )
+    : '';
+
   return (
     <header className="header">
       <div className="header__content">
-        <h2 className="header__title"></h2> {/* Dynamic title could be prop */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div className="header__left">
+          <h2 className="header__title">{pageTitle}</h2>
+        </div>
+
+        <div className="header__right">
           <button
             onClick={toggleLanguage}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--text-secondary)',
-              display: 'flex',
-              alignItems: 'center',
-              padding: '8px',
-              borderRadius: '50%',
-              fontSize: '0.9rem',
-              fontWeight: 600
-            }}
             title={t('header.switchLang')}
-            className="theme-toggle"
+            className="header__nav-btn"
           >
-            {i18n.language === 'en' ? '🇪🇨 ES' : '🇺🇸 EN'}
+            <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>
+              {i18n.language === 'en' ? '🇪🇨' : '🇺🇸'}
+            </span>
+            <span>{i18n.language === 'en' ? 'ES' : 'EN'}</span>
           </button>
-          <button
-            onClick={toggleTheme}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--text-secondary)',
-              display: 'flex',
-              alignItems: 'center',
-              padding: '8px',
-              borderRadius: '50%'
-            }}
-            title={t('header.switchTheme')}
-            className="theme-toggle"
-          >
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
+
+          <Tooltip content={t('header.switchTheme')}>
+            <button
+              onClick={toggleTheme}
+              className="header__nav-btn header__nav-btn--theme"
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+          </Tooltip>
 
           <div className="header__actions" ref={menuRef}>
             <div
-              className="header__user-menu-trigger"
+              className={`header__user-menu-trigger ${isMenuOpen ? 'header__user-menu-trigger--active' : ''}`}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '6px 16px 6px 6px', // Extra padding on right for balance
-                borderRadius: '9999px', // Pill shape
-                border: '1px solid var(--border-color)', // Border as requested
-                backgroundColor: 'var(--surface)', // Background
-                cursor: 'pointer',
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.02)' // Subtle shadow
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--primary)';
-                e.currentTarget.style.boxShadow =
-                  '0 4px 12px rgba(var(--primary-rgb), 0.15)';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border-color)';
-                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
             >
               <Avatar name={displayName} size="md" />
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  lineHeight: 1.2
-                }}
-              >
-                <span
-                  className="header__username"
-                  style={{ fontWeight: 600, fontSize: '0.875rem' }}
-                >
-                  {displayName}
-                </span>
-                <span
-                  style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}
-                >
-                  {user?.firstName ? 'Admin' : 'User'}
+              <div className="header__user-info">
+                <span className="header__username">{displayName}</span>
+                <span className="header__user-role">
+                  {user?.firstName ? 'Administrador' : 'Usuario'}
                 </span>
               </div>
-              <div
-                style={{
-                  width: '24px',
-                  height: '24px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '50%',
-                  backgroundColor: 'var(--background)',
-                  marginLeft: '4px'
-                }}
-              >
+              <div className="header__chevron-wrapper">
                 <ChevronDown
                   size={14}
                   className={`header__chevron ${isMenuOpen ? 'header__chevron--open' : ''}`}
@@ -167,22 +117,28 @@ export const Header: React.FC = () => {
                 <ul className="header__dropdown-list">
                   <li
                     className="header__dropdown-item"
-                    onClick={() => navigate('/profile')}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate('/profile');
+                    }}
                   >
-                    <UserIcon size={16} /> {t('header.profile')}
+                    <UserIcon size={18} /> {t('header.profile')}
                   </li>
                   <li
                     className="header__dropdown-item"
-                    onClick={() => navigate('/settings')}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      navigate('/settings');
+                    }}
                   >
-                    <Settings size={16} /> {t('header.settings')}
+                    <Settings size={18} /> {t('header.settings')}
                   </li>
                   <li className="header__dropdown-divider"></li>
                   <li
                     className="header__dropdown-item header__dropdown-item--danger"
                     onClick={handleLogout}
                   >
-                    <LogOut size={16} /> {t('header.signOut')}
+                    <LogOut size={18} /> {t('header.signOut')}
                   </li>
                 </ul>
               </div>

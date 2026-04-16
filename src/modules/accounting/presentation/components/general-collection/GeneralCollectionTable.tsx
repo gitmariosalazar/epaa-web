@@ -1,11 +1,12 @@
 import React from 'react';
 import '../../styles/payments/PaymentsTable.css';
+import '../../styles/payments/GeneralCollectionDashboards.css';
 import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import type { GeneralCollectionResponse } from '../../../domain/models/GenelarCollection';
-// import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
@@ -33,7 +34,7 @@ export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
   startDate,
   endDate
 }) => {
-  // const { t } = useTranslation();
+  const { t } = useTranslation();
 
   const columns: Column<GeneralCollectionResponse>[] = [
     {
@@ -49,11 +50,11 @@ export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
     {
       header: 'Cliente',
       accessor: (item: GeneralCollectionResponse) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="collection-table-owner-info">
           <Avatar name={item.name} size="sm" />
           <div>
-            <div style={{ fontWeight: 300 }}>{item.name}</div>
-            <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+            <div className="collection-table-owner-name">{item.name}</div>
+            <div className="collection-table-owner-meta">
               {item.cardId}
             </div>
           </div>

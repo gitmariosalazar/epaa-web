@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ResponsiveContainer } from 'recharts';
 import {
   DollarSign,
   Users,

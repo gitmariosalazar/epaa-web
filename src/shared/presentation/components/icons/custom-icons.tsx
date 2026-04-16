@@ -3,6 +3,7 @@ import { DollarSign, Clock, CheckCircle } from 'lucide-react';
 import './CustomIcons.css';
 import { FaFileInvoice } from 'react-icons/fa';
 import { BiDollar } from 'react-icons/bi';
+import { FaArrowDownWideShort, FaArrowUpWideShort } from 'react-icons/fa6';
 
 interface CustomIconProps {
   size?: number;
@@ -99,5 +100,29 @@ export const IconAccounting = ({ size = 18 }: { size?: number }) => (
     iconColorSecondaryHover="var(--accent)"
     iconColorBorder="var(--border-color)"
     iconColorBorderHover="var(--accent)"
+  />
+);
+
+export const IconIncomes = ({ size = 18 }: { size?: number }) => (
+  <CustomIcon
+    size={size}
+    mainIcon={<FaArrowUpWideShort size={size} strokeWidth={2} />}
+    secondaryIcon={<BiDollar size={size} strokeWidth={2} />}
+    iconColorSecondary="var(--success)"
+    iconColorSecondaryHover="var(--accent)"
+    iconColorBorder="var(--border-color)"
+    iconColorBorderHover="var(--accent)"
+  />
+);
+
+export const IconExpenses = ({ size = 18 }: { size?: number }) => (
+  <CustomIcon
+    size={size}
+    mainIcon={<FaArrowDownWideShort size={size} strokeWidth={2} />}
+    secondaryIcon={<BiDollar size={size} strokeWidth={2} />}
+    iconColorSecondary="var(--error)"
+    iconColorSecondaryHover="var(--error)"
+    iconColorBorder="var(--border-color)"
+    iconColorBorderHover="var(--error)"
   />
 );

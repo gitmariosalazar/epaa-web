@@ -1,10 +1,11 @@
-/* ── Container ───────────────────────────────────────────────────────── */
+/* ── Container — single flat flex row ────────────────────────────────── */
 .payment-filters {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap; /* Enables wrapping on smaller screens */
-  justify-content: space-between; /* Split left and right */
+  flex-wrap: wrap;
+  justify-content: space-between;
   align-items: flex-end;
+  gap: 16px;
   padding: 0.75rem 1rem;
   background-color: var(--surface);
   border: 1px solid var(--border-color);
@@ -13,45 +14,47 @@
   flex-shrink: 0;
 }
 
-.filter-section-left,
-.filter-section-right {
+.payment-filters .filter-section-left,
+.payment-filters .filter-section-right {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 0.3rem;
+  gap: 12px;
+  flex: 0 1 auto;
 }
 
-.filter-section-left {
+.payment-filters .filter-section-left {
   justify-content: flex-start;
-  flex: 0 1 auto;
 }
 
-.filter-section-right {
+.payment-filters .filter-section-right {
   justify-content: flex-end;
-  flex: 0 1 auto;
+  margin-left: auto;
 }
+
 
 /* ── Individual group ────────────────────────────────────────────────── */
-.filter-group {
+.payment-filters .filter-group {
   display: flex;
   flex-direction: column;
   gap: 4px;
   min-width: max-content;
-  flex: 0 0 auto; /* Allow items to take only needed space */
+  flex: 0 0 auto;
+  width: max-content;
 }
 
-.filter-group--range {
-  min-width: 240px;
+.payment-filters .filter-group--range {
+  min-width: unset;
 }
 
-.filter-group--search {
-  flex: 1 1 200px; /* Search can grow a bit if there's space */
-  max-width: 300px;
+.payment-filters .filter-group--search {
+  flex: 0 0 auto;
 }
+
 
 /* ── Label ───────────────────────────────────────────────────────────── */
-.filter-label {
+.payment-filters .filter-label {
   font-size: 0.675rem;
   font-weight: 700;
   color: var(--text-secondary);
@@ -61,8 +64,12 @@
 }
 
 /* ── Input wrapper ───────────────────────────────────────────────────── */
-.filter-input-wrapper {
+.payment-filters .filter-input-wrapper {
   position: relative;
+  width: max-content;
+}
+
+.payment-filters .filter-input-wrapper.full-width {
   width: 100%;
 }
 

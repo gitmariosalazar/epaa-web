@@ -33,7 +33,7 @@
 
 .btn-pro:hover {
   background-color: var(--btn-hover-bg);
-  transform: translateY(-4px); /* Even more lift */
+  transform: translateY(-1px); /* Even more lift */
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.15),
     0 4px 6px -4px rgba(0, 0, 0, 0.15),
@@ -214,7 +214,14 @@
 }
 
 /* Base button primary dark mode override - only for standard/unspecified buttons */
-.dark .btn-pro:not([class*="--primary"]):not([class*="--secondary"]):not([class*="--accent"]):not([class*="--success"]):not([class*="--error"]):not([class*="--warning"]):not([class*="--info"]):not([class*="--blue"]):not([class*="--red"]):not([class*="--green"]) {
+.dark
+  .btn-pro:not([class*='--primary']):not([class*='--secondary']):not(
+    [class*='--accent']
+  ):not([class*='--success']):not([class*='--error']):not(
+    [class*='--warning']
+  ):not([class*='--info']):not([class*='--blue']):not([class*='--red']):not(
+    [class*='--green']
+  ) {
   --btn-bg: rgba(255, 255, 255, 0.1);
   --btn-hover-bg: rgba(255, 255, 255, 0.15);
   --btn-active-bg: rgba(255, 255, 255, 0.2);
