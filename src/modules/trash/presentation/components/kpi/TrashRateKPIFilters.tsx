@@ -93,9 +93,7 @@ export const TrashRateKPIFilters: React.FC<TrashRateKPIFiltersProps> = ({
           isLoading={isLoading}
         >
           {!isLoading && <Search size={18} />}
-          {isLoading
-            ? t('common.loading', 'Cargando...')
-            : t('trashRateReport.filters.fetch', 'Consultar')}
+          {isLoading ? t('common.loading') : t('common.fetch')}
         </Button>
       </div>
 

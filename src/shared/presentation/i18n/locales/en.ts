@@ -295,7 +295,6 @@ export const en = {
         consumption: 'Consumption (m³)',
         observation: 'Observation',
         none: 'None',
-        readingId: 'Reading ID',
         title: 'Recent Readings History'
       },
       additionalInfo: {
@@ -318,6 +317,32 @@ export const en = {
       english: 'English',
       spanish: 'Spanish'
     },
+    pages: {
+      roles: {
+        title: 'Roles',
+        createRole: 'Create Role',
+        columns: {
+          id: 'ID',
+          name: 'Name',
+          description: 'Description',
+          active: 'Active',
+          actions: 'Actions'
+        }
+      },
+      common: {
+        user: 'User'
+      },
+      login: {
+        welcome: 'Welcome Back',
+        subtitle: 'Sign in to your EPAA account',
+        username: 'Username',
+        usernamePlaceholder: 'Enter your username',
+        password: 'Password',
+        passwordPlaceholder: 'Enter your password',
+        signIn: 'Sign In',
+        error: 'Invalid username or password'
+      }
+    },
     common: {
       pagination: {
         page: 'Page {{current}} of {{total}}'
@@ -334,6 +359,33 @@ export const en = {
         clear: 'Clear',
         selectDate: 'Select Date'
       },
+      days: {
+        monday: 'Monday',
+        tuesday: 'Tuesday',
+        wednesday: 'Wednesday',
+        thursday: 'Thursday',
+        friday: 'Friday',
+        saturday: 'Saturday',
+        sunday: 'Sunday'
+      },
+      months: {
+        january: 'January',
+        february: 'February',
+        march: 'March',
+        april: 'April',
+        may: 'May',
+        june: 'June'
+      },
+      years: {
+        year: 'Year',
+        years: 'Years'
+      },
+      all: 'All',
+      yes: 'Yes',
+      no: 'No',
+      yesNo: 'Yes/No',
+      paymentStatus: 'Payment Status',
+      paymentMethod: 'Payment Method',
       actions: 'Actions',
       save: 'Save',
       cancel: 'Cancel',
@@ -341,6 +393,7 @@ export const en = {
       delete: 'Delete',
       edit: 'Edit',
       search: 'Search',
+      searching: 'Searching...',
       searchMode: 'Search By',
       searchPlaceholder: 'Search records...',
       refresh: 'Refresh',
@@ -353,15 +406,28 @@ export const en = {
       add: 'Add',
       saving: 'Saving...',
       back: 'Back',
-      next: 'Next'
+      next: 'Next',
+      paid: 'Paid',
+      pending: 'Pending',
+      status: 'Status',
+      diagnostic: 'Diagnostic',
+      integrity: 'Integrity',
+      noValue: 'No Value',
+      trashRateDt: 'Waste Rate D.I.',
+      trashRateVal: 'Waste Rate (Valor Table)',
+      trashRate: 'Waste Rate',
+      incomeCode: 'Income Code',
+      cadastralKey: 'Cadastral Key',
+      customerName: 'Customer',
+      issueDate: 'Issue Date',
+      paymentDate: 'Payment Date',
+      dataNotFound: 'No data found',
+      dataNotFoundDescription: 'No data found with the current filters.',
+      fetch: 'Fetch Data'
     },
     connections: {
       create: 'New Connection',
       deleteTitle: 'Delete Connection',
-      deleteConfirm:
-        'Are you sure you want to delete this connection? This action cannot be undone.',
-      noDataDescription:
-        'No connections found with current filters. Use Fetch to load data.',
       table: {
         reportTitle: 'CONNECTIONS REPORT',
         reportDescription: 'List of system connections',
@@ -394,6 +460,10 @@ export const en = {
         altitude: 'Altitude',
         installationDate: 'Installation Date'
       },
+      deleteConfirm:
+        'Are you sure you want to delete this connection? This action cannot be undone.',
+      noDataDescription:
+        'No connections found with current filters. Use Fetch to load data.',
       tabs: {
         all: 'All Connections',
         sector: 'By Sector',
@@ -469,31 +539,19 @@ export const en = {
         saveWithoutProperty: 'Create without property'
       }
     },
-    pages: {
-      roles: {
-        title: 'Roles',
-        createRole: 'Create Role',
-        columns: {
-          id: 'ID',
-          name: 'Name',
-          description: 'Description',
-          active: 'Active',
-          actions: 'Actions'
-        }
-      },
-      common: {
-        user: 'User'
-      },
-      login: {
-        welcome: 'Welcome Back',
-        subtitle: 'Sign in to your EPAA account',
-        username: 'Username',
-        usernamePlaceholder: 'Enter your username',
-        password: 'Password',
-        passwordPlaceholder: 'Enter your password',
-        signIn: 'Sign In',
-        error: 'Invalid username or password'
-      }
+    trashRate: {
+      title: 'Waste Collection Rate',
+      trashRateDt: 'Waste Rate D.I.',
+      trashRateVal: 'Waste Rate (Valor Table)',
+      finalDiagnosis: 'Final Diagnosis',
+      paymentStatus: 'Payment Status',
+      paid: 'Paid',
+      pending: 'Pending',
+      all: 'All',
+      noAnomalies: 'No Anomalies',
+      finalDiagnosisCritical: 'Critical: Waste Rate NOT ADDED to this invoice',
+      finalDiagnosisWarning: 'Warning: No record in Valor Table (Ord 10)',
+      finalDiagnosisDiscrepancy: 'Critical: Different amount charged in invoice'
     }
   }
 };

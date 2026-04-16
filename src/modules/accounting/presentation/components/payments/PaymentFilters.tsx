@@ -147,7 +147,7 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
             isLoading={isLoading}
             leftIcon={<Search size={18} />}
           >
-            {t('accounting.filters.fetch', 'Consultar')}
+            {t('common.fetch')}
           </Button>
         </div>
       </div>
@@ -156,16 +156,11 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
       <div className="filter-section-right">
         {/* local search (all tabs) */}
         <div className="filter-group filter-group--search">
-          <label className="filter-label">
-            {t('accounting.filters.localSearch', 'Buscar')}
-          </label>
+          <label className="filter-label">{t('common.search')}</label>
           <div className="filter-input-wrapper">
             <Input
               type="text"
-              placeholder={t(
-                'accounting.filters.localSearchPlaceholder',
-                'Buscar registros...'
-              )}
+              placeholder={t('common.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
               size="compact"

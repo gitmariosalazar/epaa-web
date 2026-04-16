@@ -5,6 +5,7 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { type AuditTab } from '../context/AuditContext';
+import { useTranslation } from 'react-i18next';
 
 interface AuditFiltersProps {
   activeTab: AuditTab;
@@ -53,6 +54,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
   onEndDateChange,
   onFetch
 }) => {
+  const { t } = useTranslation();
   return (
     <div className={styles.container}>
       {/* -- LEFT: Consultar logic + User ID + Dates -- */}
@@ -105,7 +107,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
             ) : (
               <Search size={18} />
             )}
-            {isLoading ? 'Cargando...' : 'Consultar'}
+            {isLoading ? t('common.loading') : t('common.fetch')}
           </Button>
         </div>
       </div>
@@ -128,10 +130,10 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
 
         <Input
           className={`${styles.filterGroup} ${styles.filterGroupSearch}`}
-          label="Buscar"
+          label={t('common.search')}
           type="text"
           size="compact"
-          placeholder="Buscar registros..."
+          placeholder={t('common.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
           leftIcon={<Search size={18} />}

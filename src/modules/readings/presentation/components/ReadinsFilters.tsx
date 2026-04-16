@@ -114,16 +114,14 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
           <label className="filter-label" style={{ visibility: 'hidden' }}>
             &nbsp;
           </label>
-          <Button 
-            onClick={onFetch} 
-            disabled={!canFetch} 
+          <Button
+            onClick={onFetch}
+            disabled={!canFetch}
             size="compact"
             isLoading={isLoading}
           >
             {!isLoading && <Search size={18} />}
-            {isLoading
-              ? t('common.loading', 'Cargando...')
-              : t('readingData.filters.fetch', 'Consultar')}
+            {isLoading ? t('common.loading') : t('common.fetch')}
           </Button>
         </div>
       </div>

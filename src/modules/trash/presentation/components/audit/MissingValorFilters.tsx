@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
 import { Select } from '@/shared/presentation/components/Input/Select';
+import { MdPaid } from 'react-icons/md';
 
 export interface MissingValorFiltersProps {
   startDate: string;
@@ -58,29 +59,26 @@ export const MissingValorFilters: React.FC<MissingValorFiltersProps> = ({
           ) : (
             <Search size={18} />
           )}
-          {isLoading
-            ? t('common.loading', 'Cargando...')
-            : t('trashRateReport.filters.fetch', 'Consultar')}
+          {isLoading ? t('common.loading') : t('common.fetch')}
         </Button>
       </div>
       <div className="trash-report-filter-right">
         {paymentStatusList.length > 0 && (
           <div className="trash-report-filter-group">
             <label className="trash-report-filter-label">
-              {t('trashRateReport.filters.paymentStatus', 'Estado Pago')}
+              {t('common.paymentStatus')}
             </label>
             <div className="trash-report-filter-input-wrapper">
               <Select
                 size="small"
                 value={selectedPaymentStatus}
                 onChange={(e) => onPaymentStatusChange(e.target.value)}
+                leftIcon={<MdPaid />}
               >
-                <option value="">
-                  {t('trashRateReport.filters.all', 'Todos')}
-                </option>
+                <option value="">{t('common.all')}</option>
                 {paymentStatusList.map((s) => (
                   <option key={s} value={s}>
-                    {s}
+                    {t(`common.${s.toLowerCase()}`)}
                   </option>
                 ))}
               </Select>

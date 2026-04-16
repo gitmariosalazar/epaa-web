@@ -55,9 +55,7 @@ export const ClientDetailFilters: React.FC<ClientDetailFiltersProps> = ({
           ) : (
             <Search size={18} />
           )}
-          {isLoading
-            ? t('common.loading', 'Cargando...')
-            : t('trashRateReport.filters.fetch', 'Buscar')}
+          {isLoading ? t('common.loading') : t('common.search')}
         </Button>
       </div>
     </div>

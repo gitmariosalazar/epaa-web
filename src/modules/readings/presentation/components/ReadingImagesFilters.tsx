@@ -127,16 +127,14 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
           <label className="filter-label" style={{ visibility: 'hidden' }}>
             &nbsp;
           </label>
-          <Button 
-            onClick={handleSearch} 
-            disabled={!canFetch} 
+          <Button
+            onClick={handleSearch}
+            disabled={!canFetch}
             size="compact"
             isLoading={isLoading}
           >
             {!isLoading && <Search size={18} />}
-            {isLoading
-              ? t('common.loading', 'Cargando...')
-              : t('common.consult', 'Consultar')}
+            {isLoading ? t('common.loading') : t('common.fetch')}
           </Button>
         </div>
       </div>

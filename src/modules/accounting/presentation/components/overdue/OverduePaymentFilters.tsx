@@ -106,16 +106,11 @@ export const OverduePaymentFilters: React.FC<OverduePaymentFiltersProps> = ({
 
         {/* Search input */}
         <div className="filter-group filter-group--search">
-          <label className="filter-label">
-            {t('accounting.filters.search', 'Buscar')}
-          </label>
+          <label className="filter-label">{t('common.search')}</label>
           <div className="filter-input-wrapper">
             <Input
               type="text"
-              placeholder={t(
-                'accounting.filters.searchPlaceholder',
-                'Buscar...'
-              )}
+              placeholder={t('common.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               size="compact"

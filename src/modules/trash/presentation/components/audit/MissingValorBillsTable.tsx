@@ -42,17 +42,28 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
   const fmt = (n: number | null | undefined) =>
     n != null ? `$${Number(n).toFixed(2)}` : '-';
 
+  const getDiagnosisTranslation = (diagnosis: string) => {
+    const upper = (diagnosis || '').toUpperCase();
+    if (upper.includes('CRITICAL'))
+      return t('trashRate.finalDiagnosisCritical', diagnosis);
+    if (upper.includes('MISSING') || upper.includes('WARNING'))
+      return t('trashRate.finalDiagnosisWarning', diagnosis);
+    if (upper.includes('DISCREPANCY'))
+      return t('trashRate.finalDiagnosisDiscrepancy', diagnosis);
+    return t('trashRate.noAnomalies', 'Sin Anomalías');
+  };
+
   const columns: Column<MissingValorRow>[] = [
     {
-      header: t('trashRateReport.missingValor.incomeCode', 'Cód. Ingreso'),
+      header: t('common.incomeCode', 'Cód. Ingreso'),
       accessor: 'incomeCode'
     },
     {
-      header: t('trashRateReport.missingValor.cadastralKey', 'Clave Catastral'),
+      header: t('common.cadastralKey', 'Clave Catastral'),
       accessor: 'cadastralKey'
     },
     {
-      header: t('trashRateReport.missingValor.customerName', 'Cliente'),
+      header: t('common.customerName', 'Cliente'),
       accessor: (item: MissingValorRow) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Avatar name={item.customerName} size="sm" />
@@ -66,23 +77,20 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
       )
     },
     {
-      header: t('trashRateReport.missingValor.issueDate', 'Fecha Emisión'),
+      header: t('common.issueDate', 'Fecha Emisión'),
       accessor: 'issueDate'
     },
     {
-      header: t('trashRateReport.missingValor.paymentDate', 'Fecha Pago'),
+      header: t('common.paymentDate', 'Fecha Pago'),
       accessor: (r) => r.paymentDate ?? '-'
     },
     {
-      header: t(
-        'trashRateReport.missingValor.trashRate',
-        'Tasa Basura (T. D.I)'
-      ),
+      header: t('common.trashRateDt', 'Tasa Basura (T. D.I)'),
       accessor: (r) =>
         r.rateInIncome === null ? (
           <ColorChip
             color="var(--warning)"
-            label="Sin Valor"
+            label={t('common.noValue')}
             size="sm"
             variant="soft"
             icon={<TiWarningOutline />}
@@ -94,15 +102,12 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
       isNumeric: true
     },
     {
-      header: t(
-        'trashRateReport.missingValor.trashRateValor',
-        'Tasa Basura (T. V)'
-      ),
+      header: t('common.trashRateVal', 'Tasa Basura (T. V)'),
       accessor: (r) =>
         r.rateInValorTable === null ? (
           <ColorChip
             color="var(--warning)"
-            label="Sin Valor"
+            label={t('common.noValue')}
             size="sm"
             variant="soft"
             icon={<TiWarningOutline />}
@@ -114,17 +119,11 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
       isNumeric: true
     },
     {
-      header: t(
-        'trashRateReport.missingValor.integrityGapIndivual',
-        'Integridad'
-      ),
+      header: t('common.integrity', 'Integridad'),
       accessor: (r) =>
         r.integrityGapIndivual === 0 ? (
           <Tooltip
-            content={t(
-              'trashRateReport.missingValor.finalDiagnosis',
-              `${r.finalDiagnosis}`
-            )}
+            content={getDiagnosisTranslation(r.finalDiagnosis)}
             position="top"
             variant="transparent"
             icon={<MdOutlineInfo scale={25} />}
@@ -140,10 +139,7 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
           </Tooltip>
         ) : (
           <Tooltip
-            content={t(
-              'trashRateReport.missingValor.finalDiagnosis',
-              `${r.finalDiagnosis}`
-            )}
+            content={getDiagnosisTranslation(r.finalDiagnosis)}
             position="top"
             variant="transparent"
             icon={<TiWarningOutline scale={25} />}
@@ -163,7 +159,7 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
       sortable: true
     },
     {
-      header: t('trashRateReport.missingValor.paymentStatus', 'Estado'),
+      header: t('common.status', 'Estado'),
       accessor: (item: MissingValorRow) => {
         const color = getTrafficLightColor(
           item.paymentStatus === 'PENDING' ? 0 : 100
@@ -177,7 +173,11 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
         return (
           <ColorChip
             color={color}
-            label={item.paymentStatus}
+            label={
+              item.paymentStatus === 'PAID'
+                ? t('common.paid')
+                : t('common.pending')
+            }
             size="sm"
             variant="soft"
             icon={icon}
@@ -186,12 +186,12 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
       }
     },
     {
-      header: t('trashRateReport.missingValor.diagnostic', 'Diagnóstico'),
-      accessor: 'finalDiagnosis'
+      header: t('common.diagnostic', 'Diagnóstico'),
+      accessor: (r) => getDiagnosisTranslation(r.finalDiagnosis)
     }
   ];
 
-  // Total Tasa de Basura
+  // Totales
   const totalTrashRateIncome = data.reduce(
     (sum, row) => sum + (row.rateInIncome ?? 0),
     0
@@ -216,7 +216,7 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
       columnId: 'rateInValorTable'
     },
     {
-      label: 'Integridad',
+      label: t('common.integrity'),
       value: fmt(totalTrashRateIncome - totalTrashRateValor),
       highlight: true,
       columnId: 'integrityGapIndivual'
@@ -238,9 +238,8 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
           isDefault: true
         }))
       ],
-      reportTitle: 'FACTURAS FALTANTES EN TABLA DE VALOR DE TASA DE BASURA',
-      reportDescription:
-        'Registro de facturas presentes en el sistema de ingresos pero faltantes en la tabla de valor.',
+      reportTitle: t('common.trashRate', 'REPORTE TASA DE BASURA'),
+      reportDescription: t('common.dataNotFoundDescription'),
       labelsHorizontal: {
         'Rango de Fecha': `${startDate} - ${endDate}`,
         'Fecha de Exportación':
@@ -251,21 +250,25 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
       totalRows,
       mapRowData: (item, selectedCols) => {
         const rowData: Record<string, string> = {
-          'Cód. Ingreso': String(item.incomeCode || '-'),
-          'Clave Catastral': item.cadastralKey || '-',
-          Cliente: item.customerName || '-',
+          [t('common.incomeCode')]: String(item.incomeCode || '-'),
+          [t('common.cadastralKey')]: item.cadastralKey || '-',
+          [t('common.customerName')]: item.customerName || '-',
           'ID Cliente': item.cardId || '-',
-          'Fecha Emisión': item.issueDate || '-',
-          'Fecha Pago': item.paymentDate || '-',
-          Estado: item.paymentStatus || '-',
-          Diagnóstico: item.finalDiagnosis || '-',
-          'Tasa Basura (T. D.I)': fmt(item.rateInIncome),
-          'Tasa Basura (T. V)': fmt(item.rateInValorTable),
-          Integridad: fmt(item.integrityGapIndivual)
+          [t('common.issueDate')]: item.issueDate || '-',
+          [t('common.paymentDate')]: item.paymentDate || '-',
+          [t('common.status')]:
+            item.paymentStatus === 'PAID'
+              ? t('common.paid')
+              : t('common.pending'),
+          [t('common.diagnostic')]: getDiagnosisTranslation(
+            item.finalDiagnosis
+          ),
+          [t('common.trashRateDt')]: fmt(item.rateInIncome),
+          [t('common.trashRateVal')]: fmt(item.rateInValorTable),
+          [t('common.integrity')]: fmt(item.integrityGapIndivual)
         };
 
         return selectedCols.map((col) => {
-          // Find mapped data based on column header
           return rowData[col.label] || '-';
         });
       }
@@ -284,7 +287,12 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
         onSort={onSort}
         onExportPdf={() => setShowPdfPreview(true)}
         sortConfig={sortConfig}
-        emptyState={<EmptyState message="Data not found!" />}
+        emptyState={
+          <EmptyState
+            description={t('common.dataNotFoundDescription')}
+            message={t('common.dataNotFound')}
+          />
+        }
         totalRows={totalRows}
         getRowColor={(row: MissingValorRow) => {
           if (row.paymentStatus === 'PENDING') {

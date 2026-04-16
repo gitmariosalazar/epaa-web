@@ -55,9 +55,7 @@ export const ByOwnerFilters: React.FC<ByOwnerFiltersProps> = ({
           leftIcon={isLoading ? undefined : <Search size={16} />}
           isLoading={isLoading}
         >
-          {isLoading
-            ? t('common.searching', 'Buscando...')
-            : t('common.search', 'Buscar')}
+          {isLoading ? t('common.searching') : t('common.search')}
         </Button>
       </div>
     </div>

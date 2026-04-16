@@ -5,7 +5,7 @@ import { RefreshCw, Search, X } from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { Input } from '@/shared/presentation/components/Input/Input';
-import '../../styles/payments/PaymentFilters.css'; 
+import '../../styles/payments/PaymentFilters.css';
 
 interface YearlyOverdueSumaryFiltersProps {
   selectedYear: string;
@@ -97,8 +97,12 @@ export const YearlyOverdueSumaryFilters: React.FC<
               onChange={(e) => setSearchOperator(e.target.value)}
               size="compact"
             >
-              <option value="=">{t('common.operators.equal', 'Igual a')}</option>
-              <option value=">">{t('common.operators.greater', 'Mayor a')}</option>
+              <option value="=">
+                {t('common.operators.equal', 'Igual a')}
+              </option>
+              <option value=">">
+                {t('common.operators.greater', 'Mayor a')}
+              </option>
               <option value="<">{t('common.operators.less', 'Menor a')}</option>
               <option value=">=">
                 {t('common.operators.greaterEqual', 'Mayor o igual a')}
@@ -115,13 +119,11 @@ export const YearlyOverdueSumaryFilters: React.FC<
 
         {/* 3. Search input */}
         <div className="filter-group filter-group--search">
-          <label className="filter-label">
-            {t('accounting.filters.search', 'Buscar')}
-          </label>
+          <label className="filter-label">{t('common.search')}</label>
           <div className="filter-input-wrapper">
             <Input
               type="text"
-              placeholder={t('accounting.filters.searchPlaceholder', 'Buscar...')}
+              placeholder={t('common.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               size="compact"
@@ -133,7 +135,9 @@ export const YearlyOverdueSumaryFilters: React.FC<
         {/* 4. Clear button */}
         {searchQuery && (
           <div className="filter-group">
-            <label className="filter-label" style={{ visibility: 'hidden' }}>.</label>
+            <label className="filter-label" style={{ visibility: 'hidden' }}>
+              .
+            </label>
             <Button
               onClick={handleClearSearch}
               size="compact"

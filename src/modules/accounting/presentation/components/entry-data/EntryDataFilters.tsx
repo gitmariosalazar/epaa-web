@@ -154,22 +154,15 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
           isLoading={isLoading}
         >
           {!isLoading && <Search size={18} />}
-          {isLoading
-            ? t('common.loading', 'Cargando...')
-            : t('entryData.filters.fetch', 'Consultar')}
+          {isLoading ? t('common.loading') : t('common.fetch')}
         </Button>
 
         <div className="filter-group filter-group--search">
-          <label className="filter-label">
-            {t('accounting.filters.search', 'Buscar')}
-          </label>
+          <label className="filter-label">{t('common.search')}</label>
           <div className="filter-input-wrapper">
             <Input
               type="text"
-              placeholder={t(
-                'accounting.filters.searchPlaceholder',
-                'Buscar...'
-              )}
+              placeholder={t('common.searchPlaceholder')}
               value={searchQuery}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 onSearchQueryChange(e.target.value)

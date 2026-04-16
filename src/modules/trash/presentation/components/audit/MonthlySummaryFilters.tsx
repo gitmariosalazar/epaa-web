@@ -50,9 +50,7 @@ export const MonthlySummaryFilters: React.FC<MonthlySummaryFiltersProps> = ({
           ) : (
             <Search size={18} />
           )}
-          {isLoading
-            ? t('common.loading', 'Cargando...')
-            : t('trashRateReport.filters.fetch', 'Consultar')}
+          {isLoading ? t('common.loading') : t('common.fetch')}
         </Button>
       </div>
     </div>

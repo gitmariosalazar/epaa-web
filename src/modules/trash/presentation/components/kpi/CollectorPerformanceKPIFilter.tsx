@@ -57,9 +57,7 @@ export const CollectorPerformanceKPIFilter: React.FC<
           isLoading={isLoading}
         >
           {!isLoading && <Search size={18} />}
-          {isLoading
-            ? t('common.loading', 'Cargando...')
-            : t('common.search', 'Consultar')}
+          {isLoading ? t('common.loading') : t('common.fetch')}
         </Button>
       </div>
     </div>

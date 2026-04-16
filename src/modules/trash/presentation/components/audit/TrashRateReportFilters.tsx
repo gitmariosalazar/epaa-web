@@ -122,9 +122,7 @@ export const TrashRateReportFilters: React.FC<TrashRateReportFiltersProps> = ({
           ) : (
             <Search size={18} />
           )}
-          {isLoading
-            ? t('common.loading', 'Cargando...')
-            : t('trashRateReport.filters.fetch', 'Consultar')}
+          {isLoading ? t('common.loading') : t('common.fetch')}
         </Button>
       </div>
 
@@ -133,16 +131,13 @@ export const TrashRateReportFilters: React.FC<TrashRateReportFiltersProps> = ({
         {/* Search */}
         <div className="trash-report-filter-group">
           <label className="trash-report-filter-label">
-            {t('trashRateReport.filters.search', 'Buscar')}
+            {t('common.search')}
           </label>
           <div className="trash-report-filter-input-wrapper">
             <Input
               type="text"
               size="small"
-              placeholder={t(
-                'trashRateReport.filters.searchPlaceholder',
-                'Buscar...'
-              )}
+              placeholder={t('common.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
               leftIcon={<Search size={18} />}

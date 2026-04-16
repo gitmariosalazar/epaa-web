@@ -103,9 +103,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
             ) : (
               <Search size={18} />
             )}
-            {isLoading
-              ? t('common.loading', 'Loading...')
-              : t('connections.filters.fetch', 'Consultar')}
+            {isLoading ? t('common.loading') : t('common.fetch')}
           </Button>
         </div>
       </div>
@@ -151,13 +149,10 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
         {/* Multi-field search */}
         <Input
           className="conn-filter-group conn-filter-group--search"
-          label={t('connections.filters.search', 'Buscar')}
+          label={t('common.search')}
           type="text"
           size="compact"
-          placeholder={t(
-            'connections.filters.searchPlaceholder',
-            'Buscar registros...'
-          )}
+          placeholder={t('common.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
           leftIcon={<Search size={18} />}

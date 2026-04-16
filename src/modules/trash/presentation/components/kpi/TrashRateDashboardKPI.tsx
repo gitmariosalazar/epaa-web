@@ -115,7 +115,9 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PAID' | 'PENDING'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PAID' | 'PENDING'>(
+    'ALL'
+  );
 
   const handleCardClickOpenModal = (label: string) => {
     setModalTitle(label);
@@ -123,21 +125,23 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
     setStatusFilter('ALL'); // Reset filter when opening
   };
 
-
   const handleCardClickCloseModal = () => {
     setIsModalOpen(false);
   };
 
   const filteredMissingBills = useMemo(() => {
     if (statusFilter === 'ALL') return missingValorBills;
-    return missingValorBills.filter(item => item.paymentStatus === statusFilter);
+    return missingValorBills.filter(
+      (item) => item.paymentStatus === statusFilter
+    );
   }, [missingValorBills, statusFilter]);
 
   const filteredAuditReport = useMemo(() => {
     if (statusFilter === 'ALL') return trashRateAuditReport;
-    return trashRateAuditReport.filter(item => item.paymentStatus === statusFilter);
+    return trashRateAuditReport.filter(
+      (item) => item.paymentStatus === statusFilter
+    );
   }, [trashRateAuditReport, statusFilter]);
-
 
   if (isLoading) return null;
 
@@ -344,7 +348,9 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
             activeTooltip={true}
             description="Diferencia entre el valor de la fuente y factura"
             onClick={() => {
-              handleCardClickOpenModal('Missing Valor Bills');
+              handleCardClickOpenModal(
+                'Inconsistencia en el Valor de la Tasa de Recolección de Residuos'
+              );
             }}
           />
 
@@ -437,7 +443,13 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
         size="full"
         headerActions={
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+            <span
+              style={{
+                fontSize: '0.8rem',
+                color: 'var(--text-secondary)',
+                fontWeight: 600
+              }}
+            >
               FILTRAR POR ESTADO:
             </span>
             <select
@@ -482,7 +494,6 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
             />
           )}
         </div>
-
       </Modal>
     </div>
   );

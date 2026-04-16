@@ -5,6 +5,7 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import type { ReadingInfo } from '../../domain/models/ReadingInfoResponse';
 import { GrClear } from 'react-icons/gr';
 import { FaSchoolLock } from 'react-icons/fa6';
+import { useTranslation } from 'react-i18next';
 
 interface ReadingToolbarProps {
   cadastralKeyInput: string;
@@ -29,6 +30,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
   readingInfo,
   method
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="cr-toolbar">
       {/* Search Area */}
@@ -51,7 +53,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
           leftIcon={<FaSearch />}
           size="sm"
         >
-          {isLoadingInfo ? 'Buscando...' : 'Buscar'}
+          {isLoadingInfo ? t('common.searching') : t('common.search')}
         </Button>
       </div>
 
