@@ -13,6 +13,7 @@ export interface KPICardProps {
   className?: string;
   tooltipText?: string;
   activeTooltip?: boolean;
+  onClick?: () => void;
 }
 
 export const KPICard: React.FC<KPICardProps> = ({
@@ -24,12 +25,16 @@ export const KPICard: React.FC<KPICardProps> = ({
   description,
   className,
   tooltipText,
-  activeTooltip = false
+  activeTooltip = false,
+  onClick
 }) => {
   const finalTooltipText = tooltipText || `${label}: ${value}`;
 
   return (
-    <div className={`kpi-card kpi-card--${color} ${className || ''}`}>
+    <div
+      className={`kpi-card kpi-card--${color} ${className || ''}`}
+      onClick={onClick}
+    >
       <div className="kpi-card-header">
         <span className="kpi-card-label">{label}</span>
         <div className="kpi-card-icon">{icon}</div>

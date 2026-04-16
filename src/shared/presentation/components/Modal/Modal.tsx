@@ -8,8 +8,11 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
+  description?: string;
   children: React.ReactNode;
+  headerActions?: React.ReactNode;
   footer?: React.ReactNode;
+
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'full';
 }
 
@@ -17,9 +20,12 @@ export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   title,
+  description,
   children,
+  headerActions,
   footer,
   size = 'md'
+
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -50,8 +56,17 @@ export const Modal: React.FC<ModalProps> = ({
     >
       <div className={`modal-content modal--${size}`} ref={modalRef}>
         <div className="modal-header">
-          <h2 className="modal-title">{title}</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <h2 className="modal-title">{title}</h2>
+            {description && <p className="modal-description" style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{description}</p>}
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: 'auto', marginRight: '1rem' }}>
+            {headerActions}
+          </div>
+
           <Tooltip content="Cerrar">
+
             <Button
               variant="outline"
               className="modal-close"

@@ -118,8 +118,9 @@ export const TrashRateKPIPage: React.FC = () => {
             isLoading={vm.isLoading}
             error={vm.error}
             selectedCategoryIndex={vm.selectedCategoryIndex}
-          />
-        );
+            missingValorBills={vm.missingValorBills}
+            trashRateAuditReport={vm.trashRateAuditReport}
+          />        );
       case 'collectorPerformance':
         return (
           <CollectorPerformanceKPITable

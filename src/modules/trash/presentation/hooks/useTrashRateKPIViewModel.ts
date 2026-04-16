@@ -66,6 +66,10 @@ export const useTrashRateKPIViewModel = () => {
     getCollectorPerformanceKPI,
     getDailyCollectorDetail,
     getTrashRateKPI,
+    getMissingValorBills,
+    getTrashRateAuditReport, // New
+    missingValorBills,
+    trashRateAuditReport, // New
     loading: isLoading,
     error,
     clearError
@@ -127,7 +131,9 @@ export const useTrashRateKPIViewModel = () => {
     if (activeTab === 'dashboard') {
       await Promise.all([
         getDashboardKPITrashRate(new DateRangeParams(startDate, endDate)),
-        getTrashRateKPI(dateParams())
+        getTrashRateKPI(dateParams()),
+        getMissingValorBills(dateParams()),
+        getTrashRateAuditReport(dateParams()) // Fetch full audit
       ]);
     } else if (activeTab === 'collectorPerformance') {
       await getCollectorPerformanceKPI(dateParams());
@@ -194,6 +200,8 @@ export const useTrashRateKPIViewModel = () => {
     filteredCollectorPerformance,
     filteredDailyCollectorDetail,
     trashRateKPI,
+    missingValorBills,
+    trashRateAuditReport,
     handleFetch,
     handleSort,
     sortConfig,

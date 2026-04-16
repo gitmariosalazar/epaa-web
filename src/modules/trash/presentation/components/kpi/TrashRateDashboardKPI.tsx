@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import '../../styles/TrashRateDashboard.css';
 import {
   DollarSign,
@@ -23,6 +23,9 @@ import {
 import '@/shared/presentation/components/Charts/Charts.css';
 import { FaMoneyCheckAlt } from 'react-icons/fa';
 import { KPICard } from '@/shared/presentation/components/Card/KPICard';
+import { Modal } from '@/shared/presentation/components/Modal/Modal';
+import { MissingValorBillsTable } from '../audit/MissingValorBillsTable';
+import { TrashRateAuditReportTable } from '../audit/TrashRateAuditReportTable';
 
 interface RevenueStatusItem {
   Estado: string;
@@ -39,6 +42,8 @@ interface TrashRateDashboardKPIProps {
   isLoading: boolean;
   error: string | null;
   selectedCategoryIndex: number;
+  missingValorBills: any[];
+  trashRateAuditReport: any[];
 }
 
 const fmtMoney = (n: number) =>
@@ -102,9 +107,37 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
   data,
   isLoading,
   error,
-  selectedCategoryIndex
+  selectedCategoryIndex,
+  missingValorBills,
+  trashRateAuditReport
 }) => {
   const { t } = useTranslation();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PAID' | 'PENDING'>('ALL');
+
+  const handleCardClickOpenModal = (label: string) => {
+    setModalTitle(label);
+    setIsModalOpen(true);
+    setStatusFilter('ALL'); // Reset filter when opening
+  };
+
+
+  const handleCardClickCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const filteredMissingBills = useMemo(() => {
+    if (statusFilter === 'ALL') return missingValorBills;
+    return missingValorBills.filter(item => item.paymentStatus === statusFilter);
+  }, [missingValorBills, statusFilter]);
+
+  const filteredAuditReport = useMemo(() => {
+    if (statusFilter === 'ALL') return trashRateAuditReport;
+    return trashRateAuditReport.filter(item => item.paymentStatus === statusFilter);
+  }, [trashRateAuditReport, statusFilter]);
+
 
   if (isLoading) return null;
 
@@ -308,7 +341,11 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
             value={fmtMoney(k.integrityGap)}
             icon={<AlertCircle size={16} />}
             color="red"
+            activeTooltip={true}
             description="Diferencia entre el valor de la fuente y factura"
+            onClick={() => {
+              handleCardClickOpenModal('Missing Valor Bills');
+            }}
           />
 
           {/* Table 2 */}
@@ -391,6 +428,62 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
           description="Diferencia de monto entre emisión original y cálculo actual"
         />
       </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCardClickCloseModal}
+        title={modalTitle}
+        description={`Resumen detallado de auditoría para el periodo seleccionado.`}
+        size="full"
+        headerActions={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+              FILTRAR POR ESTADO:
+            </span>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+              style={{
+                padding: '4px 12px',
+                borderRadius: '6px',
+                backgroundColor: 'var(--tb-bg)',
+                color: 'var(--text-main)',
+                border: '1px solid var(--border-color)',
+                fontSize: '0.85rem',
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="ALL">TODOS</option>
+              <option value="PAID">PAGADOS</option>
+              <option value="PENDING">PENDIENTES</option>
+            </select>
+          </div>
+        }
+      >
+        <div
+          style={{
+            height: 'calc(100vh - 140px)',
+            width: '100%',
+            marginTop: '10px'
+          }}
+        >
+          {modalTitle === 'Diferencia de Integridad' ? (
+            <TrashRateAuditReportTable
+              data={filteredAuditReport}
+              isLoading={isLoading}
+              error={error ? new Error(error) : null}
+            />
+          ) : (
+            <MissingValorBillsTable
+              data={filteredMissingBills}
+              isLoading={isLoading}
+              error={error ? new Error(error) : null}
+            />
+          )}
+        </div>
+
+      </Modal>
     </div>
   );
 };
