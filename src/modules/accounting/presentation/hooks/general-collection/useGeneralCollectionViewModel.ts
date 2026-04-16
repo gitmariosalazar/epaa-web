@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import { useGeneralCollection } from './useGeneralCollection';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import type { dateFilter } from '../../../domain/dto/params/DataEntryParams';
@@ -78,20 +78,20 @@ interface TabFilters {
 
 function defaultFiltersForTab(tab: GeneralCollectionTab): TabFilters {
   const today = dateService.getCurrentDateString();
-  const year  = new Date().getFullYear();
+  const year = new Date().getFullYear();
   const base: TabFilters = {
-    filterType:           'paymentDate',
-    startYear:            year,
-    endYear:              year,
-    initDate:             today,
-    endDate:              today,
-    titleCode:            '',
-    searchQuery:          '',
-    selectedUser:         '',
-    selectedPaymentMethod:'',
-    sortConfig:           null,
-    localDashboardYear:   '',
-    localDashboardMonth:  ''
+    filterType: 'paymentDate',
+    startYear: year,
+    endYear: year,
+    initDate: today,
+    endDate: today,
+    titleCode: '',
+    searchQuery: '',
+    selectedUser: '',
+    selectedPaymentMethod: '',
+    sortConfig: null,
+    localDashboardYear: '',
+    localDashboardMonth: ''
   };
   // Dashboard tabs default to the last 10 years so the paginator is pre-populated
   if (tab === 'monthly-dashboard' || tab === 'yearly-dashboard') {
@@ -109,8 +109,8 @@ export const useGeneralCollectionViewModel = () => {
     monthlyReport,
     kpi,
     yearlyKpi,
-    monthlyKpi,               // yearly-query data store
-    monthlyKpiBase,           // monthly-dashboard data store
+    monthlyKpi, // yearly-query data store
+    monthlyKpiBase, // monthly-dashboard data store
     isLoading,
     error,
     fetchReport,
@@ -118,8 +118,8 @@ export const useGeneralCollectionViewModel = () => {
     fetchMonthlyReport,
     fetchYearlyReport,
     fetchYearlyKpi,
-    fetchMonthlyKpi,          // → used exclusively by yearly-query
-    fetchMonthlyKpiBase       // → used exclusively by monthly-dashboard
+    fetchMonthlyKpi, // → used exclusively by yearly-query
+    fetchMonthlyKpiBase // → used exclusively by monthly-dashboard
   } = useGeneralCollection();
 
   const [activeTab, setActiveTab] = useState<GeneralCollectionTab>('dashboard');
@@ -136,40 +136,55 @@ export const useGeneralCollectionViewModel = () => {
 
   // Destructure — same variable names used throughout the hook
   const {
-    filterType, startYear, endYear, initDate, endDate, titleCode,
-    searchQuery, selectedUser, selectedPaymentMethod, sortConfig,
-    localDashboardYear, localDashboardMonth
+    filterType,
+    startYear,
+    endYear,
+    initDate,
+    endDate,
+    titleCode,
+    searchQuery,
+    selectedUser,
+    selectedPaymentMethod,
+    sortConfig,
+    localDashboardYear,
+    localDashboardMonth
   } = currentFilters;
 
   // Generic patch — updates a single field for the active tab only.
   // Other tabs are NOT touched.
-  const patchFilter = <K extends keyof TabFilters>(key: K, value: TabFilters[K]) => {
-    setTabFiltersMap(prev => {
+  const patchFilter = <K extends keyof TabFilters>(
+    key: K,
+    value: TabFilters[K]
+  ) => {
+    setTabFiltersMap((prev) => {
       const existing = prev[activeTab] ?? defaultFiltersForTab(activeTab);
       return { ...prev, [activeTab]: { ...existing, [key]: value } };
     });
   };
 
   // Backwards-compatible individual setters
-  const setFilterType            = (val: dateFilter) => patchFilter('filterType',           val);
-  const setInitDate              = (val: string)     => patchFilter('initDate',             val);
-  const setEndDate               = (val: string)     => patchFilter('endDate',              val);
-  const setStartYear             = (val: number)     => patchFilter('startYear',            val);
-  const setEndYear               = (val: number)     => patchFilter('endYear',              val);
-  const setTitleCode             = (val: string)     => patchFilter('titleCode',            val);
-  const setSearchQuery           = (val: string)     => patchFilter('searchQuery',          val);
-  const setSelectedUser          = (val: string)     => patchFilter('selectedUser',         val);
-  const setSelectedPaymentMethod = (val: string)     => patchFilter('selectedPaymentMethod',val);
-  const setLocalDashboardYear    = (val: string)     => patchFilter('localDashboardYear',   val);
-  const setLocalDashboardMonth   = (val: string)     => patchFilter('localDashboardMonth',  val);
+  const setFilterType = (val: dateFilter) => patchFilter('filterType', val);
+  const setInitDate = (val: string) => patchFilter('initDate', val);
+  const setEndDate = (val: string) => patchFilter('endDate', val);
+  const setStartYear = (val: number) => patchFilter('startYear', val);
+  const setEndYear = (val: number) => patchFilter('endYear', val);
+  const setTitleCode = (val: string) => patchFilter('titleCode', val);
+  const setSearchQuery = (val: string) => patchFilter('searchQuery', val);
+  const setSelectedUser = (val: string) => patchFilter('selectedUser', val);
+  const setSelectedPaymentMethod = (val: string) =>
+    patchFilter('selectedPaymentMethod', val);
+  const setLocalDashboardYear = (val: string) =>
+    patchFilter('localDashboardYear', val);
+  const setLocalDashboardMonth = (val: string) =>
+    patchFilter('localDashboardMonth', val);
   // Legacy alias — year is the same concept as startYear
   const setYear = setStartYear;
 
   // ── First-visit auto-fetch for dashboard tabs ──────────────────────────────
   // Triggers ONCE per tab per session (tracked via a stable ref).
   // Re-visiting a tab preserves its last filter state and loaded data.
-  const visitedTabs = useRef(new Set<GeneralCollectionTab>());
-
+  //const visitedTabs = useRef(new Set<GeneralCollectionTab>());
+  /*
   useEffect(() => {
     const isFirstVisit = !visitedTabs.current.has(activeTab);
     if (!isFirstVisit) return;
@@ -181,7 +196,7 @@ export const useGeneralCollectionViewModel = () => {
       fetchMonthlyKpiBase({
         dateFilter: 'paymentDate',
         startYear: year - 9,
-        endYear:   year,
+        endYear: year,
         titleCode: ''
       });
     }
@@ -190,13 +205,13 @@ export const useGeneralCollectionViewModel = () => {
       fetchYearlyKpi({
         dateFilter: 'paymentDate',
         startYear: year - 9,
-        endYear:   year,
+        endYear: year,
         titleCode: ''
       });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
-
+*/
   // ── handleFetch ───────────────────────────────────────────────────────────
   // Each branch uses the CURRENT tab's own filter state — no cross-tab leakage.
   const handleFetch = () => {
@@ -243,7 +258,7 @@ export const useGeneralCollectionViewModel = () => {
       fetchMonthlyKpi({
         dateFilter: filterType,
         startYear,
-        endYear: startYear,   // single year → start === end
+        endYear: startYear, // single year → start === end
         titleCode
       });
       setEndYear(startYear);
@@ -287,7 +302,10 @@ export const useGeneralCollectionViewModel = () => {
       applyLocalFilters(
         report,
         ['name', 'cardId', 'cadastralKey', 'incomeCode'],
-        searchQuery, selectedUser, selectedPaymentMethod, sortConfig
+        searchQuery,
+        selectedUser,
+        selectedPaymentMethod,
+        sortConfig
       ),
     [report, searchQuery, selectedUser, selectedPaymentMethod, sortConfig]
   );
@@ -297,7 +315,10 @@ export const useGeneralCollectionViewModel = () => {
       applyLocalFilters(
         dailyReport,
         ['collector', 'titleCode', 'paymentMethod', 'status'],
-        searchQuery, selectedUser, selectedPaymentMethod, sortConfig
+        searchQuery,
+        selectedUser,
+        selectedPaymentMethod,
+        sortConfig
       ),
     [dailyReport, searchQuery, selectedUser, selectedPaymentMethod, sortConfig]
   );
@@ -307,9 +328,18 @@ export const useGeneralCollectionViewModel = () => {
       applyLocalFilters(
         monthlyReport,
         ['collector', 'titleCode', 'paymentMethod', 'status'],
-        searchQuery, selectedUser, selectedPaymentMethod, sortConfig
+        searchQuery,
+        selectedUser,
+        selectedPaymentMethod,
+        sortConfig
       ),
-    [monthlyReport, searchQuery, selectedUser, selectedPaymentMethod, sortConfig]
+    [
+      monthlyReport,
+      searchQuery,
+      selectedUser,
+      selectedPaymentMethod,
+      sortConfig
+    ]
   );
 
   const filteredYearlyReport = useMemo(
@@ -317,7 +347,10 @@ export const useGeneralCollectionViewModel = () => {
       applyLocalFilters(
         yearlyReport,
         ['collector', 'titleCode', 'paymentMethod', 'status'],
-        searchQuery, selectedUser, selectedPaymentMethod, sortConfig
+        searchQuery,
+        selectedUser,
+        selectedPaymentMethod,
+        sortConfig
       ),
     [yearlyReport, searchQuery, selectedUser, selectedPaymentMethod, sortConfig]
   );
@@ -333,15 +366,20 @@ export const useGeneralCollectionViewModel = () => {
   // monthly-dashboard: derived from monthlyKpiBase (its own isolated data store)
   const filteredMonthlyKpi = useMemo(() => {
     if (!localDashboardMonth) return monthlyKpiBase;
-    return monthlyKpiBase.filter((k) => k.month.toString() === localDashboardMonth);
+    return monthlyKpiBase.filter(
+      (k) => k.month.toString() === localDashboardMonth
+    );
   }, [monthlyKpiBase, localDashboardMonth]);
 
   const availableDashboardYears = useMemo(() => {
     if (activeTab === 'yearly-dashboard') {
-      return Array.from(new Set(yearlyKpi.map((k) => k.year.toString()))).sort();
+      return Array.from(
+        new Set(yearlyKpi.map((k) => k.year.toString()))
+      ).sort();
     } else if (activeTab === 'monthly-dashboard') {
-      return Array.from(new Set(monthlyKpiBase.map((k) => k.year.toString())))
-        .sort((a, b) => parseInt(a) - parseInt(b));
+      return Array.from(
+        new Set(monthlyKpiBase.map((k) => k.year.toString()))
+      ).sort((a, b) => parseInt(a) - parseInt(b));
     }
     return [];
   }, [activeTab, yearlyKpi, monthlyKpiBase]);
@@ -349,14 +387,17 @@ export const useGeneralCollectionViewModel = () => {
   // SRP: canFetch lives in the ViewModel — the filter component just receives a boolean.
   const canFetch = useMemo(() => {
     if (isLoading) return false;
-    if (activeTab === 'dashboard' || activeTab === 'general' || activeTab === 'daily')
+    if (
+      activeTab === 'dashboard' ||
+      activeTab === 'general' ||
+      activeTab === 'daily'
+    )
       return Boolean(initDate && endDate);
     if (activeTab === 'monthly' || activeTab === 'yearly')
       return Boolean(startYear && endYear);
     if (activeTab === 'monthly-dashboard' || activeTab === 'yearly-dashboard')
       return Boolean(startYear && endYear);
-    if (activeTab === 'yearly-query')
-      return Boolean(startYear);
+    if (activeTab === 'yearly-query') return Boolean(startYear);
     return false;
   }, [isLoading, activeTab, initDate, endDate, startYear, endYear]);
 
@@ -369,7 +410,7 @@ export const useGeneralCollectionViewModel = () => {
       filterType,
       initDate,
       endDate,
-      year: startYear,      // legacy — same concept as startYear
+      year: startYear, // legacy — same concept as startYear
       startYear,
       endYear,
       titleCode,
@@ -386,9 +427,9 @@ export const useGeneralCollectionViewModel = () => {
       kpi,
       yearlyKpi: filteredYearlyKpi,
       rawYearlyKpi: yearlyKpi,
-      monthlyKpi: filteredMonthlyKpi,       // monthly-dashboard
-      rawMonthlyKpi: monthlyKpiBase,         // monthly-dashboard (paginator allItems)
-      yearlyQueryKpi,                        // yearly-query (isolated)
+      monthlyKpi: filteredMonthlyKpi, // monthly-dashboard
+      rawMonthlyKpi: monthlyKpiBase, // monthly-dashboard (paginator allItems)
+      yearlyQueryKpi, // yearly-query (isolated)
       localDashboardYear,
       localDashboardMonth,
       availableDashboardYears,
