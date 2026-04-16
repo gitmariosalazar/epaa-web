@@ -31,6 +31,7 @@ import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport
 import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import '../../styles/payments/GeneralCollectionDashboards.css';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface GeneralCollectionDashboardProps {
   kpi: GeneralKPIResponse | null;
@@ -418,6 +419,8 @@ export const GeneralCollectionDashboard: React.FC<
               <EmptyState
                 message="No se encontraron registros"
                 description="No hay registros agrupados que coincidan con los filtros seleccionados."
+                icon={IoInformationCircleOutline}
+                variant="info"
               />
             }
           />

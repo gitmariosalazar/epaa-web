@@ -41,7 +41,8 @@ export const DashboardWidgetWrapper: React.FC<DashboardWidgetWrapperProps> = ({
 
 interface DashboardFocusOverlayProps {
   currentMonth?: string;
-  onMonthChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onMonthChange?: (e: React.ChangeEvent<HTMLInputElement> | string) => void;
+  isLoading?: boolean;
 }
 
 export const DashboardFocusOverlay: React.FC<DashboardFocusOverlayProps> = ({

@@ -10,6 +10,8 @@ import { dateService } from '@/shared/infrastructure/services/EcuadorDateService
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Eye } from 'lucide-react';
 import { FaEdit } from 'react-icons/fa';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface PropTypes {
   data: TakenReadingConnection[];
@@ -108,6 +110,14 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
         isLoading={isLoading}
         pagination
         pageSize={10}
+        emptyState={
+          <EmptyState
+            message="No se encontraron lecturas completadas."
+            description="Intenta ajustar los filtros de búsqueda para ver los resultados."
+            icon={IoInformationCircleOutline}
+            variant="info"
+          />
+        }
       />
     </div>
   );

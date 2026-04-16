@@ -4,7 +4,7 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Table } from '@/shared/presentation/components/Table/Table';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
-import { Edit2, Trash2, Plus, Eye, SearchX } from 'lucide-react';
+import { Edit2, Trash2, Plus, Eye } from 'lucide-react';
 import '@/shared/presentation/styles/Table.css';
 import { useGeneralCustomersViewModel } from '../hooks/useGeneralCustomersViewModel';
 import type { Column } from '@/shared/presentation/components/Table/Table';
@@ -16,6 +16,7 @@ import { CompanyDetails } from '../components/CompanyDetails';
 import { CustomerFilters } from '../components/CustomerFilters';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { useTranslation } from 'react-i18next';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 export const GeneralCustomersPage: React.FC = () => {
   const viewModel = useGeneralCustomersViewModel();
@@ -159,8 +160,13 @@ export const GeneralCustomersPage: React.FC = () => {
           emptyState={
             <EmptyState
               message={t('common.noResults', 'No se encontraron resultados')}
-              icon={SearchX}
+              icon={IoInformationCircleOutline}
+              description={t(
+                'common.noResultsDescription',
+                'Intenta ajustar los filtros de búsqueda para ver los resultados.'
+              )}
               minHeight="300px"
+              variant="info"
             />
           }
         />

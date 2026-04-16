@@ -19,6 +19,7 @@ import { EmptyState } from '../common/EmptyState';
 import { Tooltip } from '../common/Tooltip/Tooltip';
 import { Modal } from '../Modal/Modal';
 import { HiViewGridAdd } from 'react-icons/hi';
+import { CircularProgress } from '../CircularProgress';
 
 export interface Column<T> {
   header: string;
@@ -349,7 +350,13 @@ export const Table = <T extends { [key: string]: any }>({
                     color: 'var(--text-muted)'
                   }}
                 >
-                  {isLoading ? t('common.loading', 'Loading...') : ''}
+                  {isLoading ? (
+                    <CircularProgress
+                      label={t('common.loading', 'Loading...')}
+                    />
+                  ) : (
+                    t('common.loading', 'Loading...')
+                  )}
                 </td>
               </tr>
             )}
@@ -717,7 +724,9 @@ export const Table = <T extends { [key: string]: any }>({
                       disabled={draftVisibleColumns.length <= 1 && isVisible}
                       className="table-modal-checkbox-input"
                     />
-                    <span className={`table-modal-checkbox-label ${isVisible ? 'visible' : ''}`}>
+                    <span
+                      className={`table-modal-checkbox-label ${isVisible ? 'visible' : ''}`}
+                    >
                       {typeof col.header === 'string'
                         ? col.header
                         : `Columna ${index + 1}`}
@@ -770,10 +779,7 @@ export const Table = <T extends { [key: string]: any }>({
                 <thead>
                   <tr>
                     {draftVisibleColumns.map((col, idx) => (
-                      <th
-                        key={idx}
-                        className="table-modal-preview-th"
-                      >
+                      <th key={idx} className="table-modal-preview-th">
                         {col.header}
                       </th>
                     ))}
@@ -791,7 +797,9 @@ export const Table = <T extends { [key: string]: any }>({
                           <td
                             key={colIdx}
                             className={`table-modal-preview-td ${colIdx < draftVisibleColumns.length - 1 ? 'dashed-border' : ''}`}
-                            style={{ textAlign: col.isNumeric ? 'right' : 'inherit' }}
+                            style={{
+                              textAlign: col.isNumeric ? 'right' : 'inherit'
+                            }}
                           >
                             {typeof col.accessor === 'function'
                               ? col.accessor(item)

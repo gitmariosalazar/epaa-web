@@ -7,11 +7,13 @@ import {
   Sector,
   Tooltip
 } from 'recharts';
-import { Loader2 } from 'lucide-react';
+import { Search } from 'lucide-react';
 import type { NoveltyStatsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import './NoveltyStats.css';
 import { useNoveltyStats } from '@/shared/presentation/hooks/dashboard/useNoveltyStats';
+import { CircularProgress } from '../CircularProgress';
+import { useTranslation } from 'react-i18next';
 
 interface NoveltyStatsProps {
   data: NoveltyStatsReport[];
@@ -52,6 +54,7 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
   data,
   loading
 }) => {
+  const { t } = useTranslation();
   const {
     activeIndex,
     setActiveIndex,
@@ -64,11 +67,9 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
 
   if (loading) {
     return (
-      <EmptyState
-        message="Loading data..."
-        icon={Loader2}
-        description="Please wait while we fetch the latest statistics."
-      />
+      <div style={{ padding: '2.5rem', display: 'flex', justifyContent: 'center', width: '100%' }}>
+        <CircularProgress label={t('common.loading')} strokeWidth={9} size={110} />
+      </div>
     );
   }
 
@@ -77,7 +78,7 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
       <EmptyState
         message="No Novelties Found"
         description="There are no reading novelties recorded for this period."
-        icon={Loader2}
+        icon={Search}
       />
     );
   }

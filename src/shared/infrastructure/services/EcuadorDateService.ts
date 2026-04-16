@@ -88,6 +88,21 @@ export class EcuadorDateService implements IDateService {
     });
     return formatter.format(d);
   }
+  // 2026-04-16T16:07:29-05:00
+  toISODateStringWithOffset(date: Date | string | number): string {
+    const d = new Date(date);
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: this.timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+    return formatter.format(d);
+  }
 }
 
 export const dateService = new EcuadorDateService();

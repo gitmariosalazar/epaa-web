@@ -26,6 +26,7 @@ import {
 } from '@/shared/presentation/components/Charts/VerticalBarChart';
 import '@/shared/presentation/components/Charts/Charts.css';
 import { FaMoneyCheckAlt } from 'react-icons/fa';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 interface DiscountAndCreditNoteItem {
   Tipo: string;
@@ -229,23 +230,16 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
   data,
   isLoading
 }) => {
-  const { t } = useTranslation();
-
   if (isLoading) return null;
 
   if (!data || data.length === 0) {
     return (
-      <div className="trash-dashboard" style={{ padding: '5px 0 12px 0' }}>
-        <div className="trash-dashboard-empty">
-          <TrendingUp size={36} />
-          <span>
-            {t(
-              'trashRateReport.dashboard.empty',
-              'Selecciona un rango de fechas y haz clic en Consultar para ver los KPIs.'
-            )}
-          </span>
-        </div>
-      </div>
+      <EmptyState
+        message="No hay datos"
+        description="Selecciona un rango de fechas y haz clic en Consultar para ver los KPIs."
+        icon={<TrendingUp size={36} />}
+        variant="info"
+      />
     );
   }
 

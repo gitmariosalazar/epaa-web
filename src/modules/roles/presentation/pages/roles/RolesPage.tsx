@@ -8,12 +8,14 @@ import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { Edit2, Plus, Search, SearchX } from 'lucide-react';
+import { Edit2, Plus, Search } from 'lucide-react';
 import '@/shared/presentation/styles/Table.css';
 import '@/modules/accounting/presentation/styles/entry-data/EntryDataFilters.css';
 import '@/shared/presentation/styles/Roles.css';
 import { MdAdd, MdClose, MdLockOpen } from 'react-icons/md';
 import { useRolesViewModel } from '../../hooks/useRolesViewModel';
+import { IoInformationCircleOutline } from 'react-icons/io5';
+import { useTranslation } from 'react-i18next';
 
 export const RolesPage: React.FC = () => {
   const {
@@ -34,6 +36,8 @@ export const RolesPage: React.FC = () => {
     openPermissions,
     resetForm
   } = useRolesViewModel();
+
+  const { t } = useTranslation();
 
   const columns: Column<Role>[] = [
     { header: 'ID', accessor: 'rolId' },
@@ -182,8 +186,13 @@ export const RolesPage: React.FC = () => {
           emptyState={
             <EmptyState
               message="No se encontraron roles"
-              icon={SearchX}
+              icon={IoInformationCircleOutline}
+              description={t(
+                'common.noResultsDescription',
+                'Intenta ajustar los filtros de búsqueda para ver los resultados.'
+              )}
               minHeight="300px"
+              variant="info"
             />
           }
         />

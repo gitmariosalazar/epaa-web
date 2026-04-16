@@ -17,6 +17,7 @@ import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport
 import type { ExportColumn } from './ReportPreviewModal';
 import { useCallback } from 'react';
 import './AdvancedReadingsReport.css';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface AdvancedReadingsReportProps {
   showToolbar?: boolean;
@@ -382,11 +383,15 @@ export const AdvancedReadingsReport: React.FC<AdvancedReadingsReportProps> = ({
               <EmptyState
                 message="No readings for this month"
                 description={`No readings found for ${month}`}
+                icon={IoInformationCircleOutline}
+                variant="info"
               />
             ) : (
               <EmptyState
                 message="Select a date to view readings"
                 description="Select a date to view readings"
+                icon={IoInformationCircleOutline}
+                variant="info"
               />
             )
           }

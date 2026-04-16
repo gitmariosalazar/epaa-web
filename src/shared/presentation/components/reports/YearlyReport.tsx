@@ -17,6 +17,7 @@ import type { ExportColumn } from './ReportPreviewModal';
 import './YearlyReport.css';
 import { DatePicker } from '../DatePicker/DatePicker';
 import { KPICard } from '@/shared/presentation/components/Card/KPICard';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface YearlyReportProps {
   showToolbar?: boolean;
@@ -437,6 +438,8 @@ export const YearlyReport: React.FC<YearlyReportProps> = ({
               <EmptyState
                 message="No data found"
                 description={`No data found for ${year}`}
+                icon={IoInformationCircleOutline}
+                variant="info"
               />
             }
             onExportPdf={() => setShowPdfPreview(true)}
@@ -452,11 +455,13 @@ export const YearlyReport: React.FC<YearlyReportProps> = ({
             <EmptyState
               message="No data found"
               description={`No data found for ${year}`}
+              variant="info"
             />
           ) : (
             <EmptyState
               message="Select a year"
               description="Select a year to view the summary."
+              variant="info"
             />
           )}
         </div>

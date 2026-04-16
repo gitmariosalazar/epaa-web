@@ -17,6 +17,8 @@ import type { FilterCriteria } from '@/modules/readings/application/usecases/Fil
 import './SectorReadingsModal.css';
 import { ColorChip } from '../chip/ColorChip';
 import { Avatar } from '../Avatar/Avatar';
+import { IoInformationCircleOutline } from 'react-icons/io5';
+import { EmptyState } from '../common/EmptyState';
 
 interface SectorReadingsModalProps {
   isOpen: boolean;
@@ -273,9 +275,19 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
               pageSize={20}
               onExportPdf={() => setShowPdfPreview(true)}
               emptyState={
-                <div className="sector-readings-empty">
-                  <p>No se encontraron lecturas para este sector.</p>
-                </div>
+                <EmptyState
+                  message={t(
+                    'common.noResults',
+                    'No se encontraron resultados'
+                  )}
+                  icon={IoInformationCircleOutline}
+                  description={t(
+                    'common.noResultsDescription',
+                    'Intenta ajustar los filtros de búsqueda para ver los resultados.'
+                  )}
+                  minHeight="300px"
+                  variant="info"
+                />
               }
             />
           </div>

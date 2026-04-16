@@ -14,6 +14,11 @@
   pointer-events: none;
 }
 
+.input__required-mark {
+  color: var(--error);
+  font-weight: bold;
+}
+
 .input__container {
   display: flex;
   align-items: center;

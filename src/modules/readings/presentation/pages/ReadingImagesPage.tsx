@@ -22,6 +22,7 @@ import {
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ReadingImagesViewer } from '../components/ReadingImagesViewer';
 import '../styles/ReadingImagesPage.css';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 export const ReadingImagesPage: React.FC = () => {
   const { t } = useTranslation();
@@ -149,6 +150,14 @@ export const ReadingImagesPage: React.FC = () => {
             isLoading={isLoading}
             pagination
             pageSize={10}
+            emptyState={
+              <EmptyState
+                message="No se encontraron imágenes de lecturas."
+                description="Intenta ajustar los filtros de búsqueda para ver los resultados."
+                icon={ImageIcon}
+                variant="info"
+              />
+            }
           />
         </div>
       )}

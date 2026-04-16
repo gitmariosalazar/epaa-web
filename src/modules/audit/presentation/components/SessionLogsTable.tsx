@@ -19,6 +19,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 import { solarizedDarkAtom } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import styles from '../styles/SessionLogsTable.module.css';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 export const SessionLogsTable: React.FC = () => {
   const { state, actions } = useAuditViewModel();
@@ -90,7 +91,15 @@ export const SessionLogsTable: React.FC = () => {
   ];
 
   return (
-    <div className="conn-table-wrapper" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+    <div
+      className="conn-table-wrapper"
+      style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 0
+      }}
+    >
       {errorObj && <div className={styles.errorMessage}>{errorObj}</div>}
       <Table
         data={sessionLogs}
@@ -104,6 +113,8 @@ export const SessionLogsTable: React.FC = () => {
           <EmptyState
             message="No se encontraron registros de sesiones"
             description="Intenta ajustar los filtros de búsqueda para ver los registros."
+            icon={IoInformationCircleOutline}
+            variant="info"
           />
         }
       />

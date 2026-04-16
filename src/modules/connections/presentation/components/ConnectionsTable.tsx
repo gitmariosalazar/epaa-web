@@ -16,6 +16,7 @@ import { FaTrashCan } from 'react-icons/fa6';
 import { FaEdit, FaMapMarkerAlt } from 'react-icons/fa';
 import type { Connection } from '../../domain/models/Connection';
 import type { SortConfig } from '../hooks/useConnectionsViewModel';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 // ── DetailModal (lightweight inline modal for viewing a connection) ────────────
 interface ConnectionDetailModalProps {
@@ -348,6 +349,8 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
           <EmptyState
             message={t('connections.table.noData')}
             description={t('connections.table.noDataDescription')}
+            icon={IoInformationCircleOutline}
+            variant="info"
           />
         }
       />

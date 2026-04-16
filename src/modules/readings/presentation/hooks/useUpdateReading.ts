@@ -1,6 +1,8 @@
 import type { UpdateReadingRequest } from '../../domain/dto/request/UpdateReadingRequest';
 import { useReadingsContext } from '../context/ReadingsContext';
 import { useCallback, useState } from 'react';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
+
 import type { ReadingInfo } from '../../domain/models/ReadingInfoResponse';
 import type { ReadingHistory } from '../../domain/models/ReadingHistory';
 
@@ -39,13 +41,30 @@ export const useUpdateReading = () => {
           setReadingInfo(null);
           if (infoResultSettled.status === 'rejected') {
             console.error('Error fetching info:', infoResultSettled.reason);
-            alert(
-              infoResultSettled.reason?.response?.data?.message ||
-                'Error al obtener la información de lectura.'
+            
+            const errorData = infoResultSettled.reason?.response?.data;
+            let errorMessage = 'Error al obtener la información de lectura.';
+            
+            if (errorData?.message) {
+              errorMessage = Array.isArray(errorData.message) 
+                ? errorData.message[0] 
+                : errorData.message;
+            } else if (infoResultSettled.reason?.message) {
+              errorMessage = infoResultSettled.reason.message;
+            }
+
+            MessageToastCustom(
+              'error',
+              errorMessage,
+              'Error',
+              { position: 'top-right' }
             );
           } else {
-            alert(
-              'No se encontraron datos para la clave catastral proporcionada.'
+            MessageToastCustom(
+              'warning',
+              'No se encontraron datos para la clave catastral proporcionada.',
+              'Atención',
+              { position: 'top-right' }
             );
           }
         }
@@ -86,8 +105,23 @@ export const useUpdateReading = () => {
         return result;
       } catch (error: any) {
         console.error('Error updating reading:', error);
-        alert(
-          error?.response?.data?.message || 'Error al actualizar la lectura.'
+
+        const errorData = error?.response?.data;
+        let errorMessage = 'Error al actualizar la lectura.';
+        
+        if (errorData?.message) {
+          errorMessage = Array.isArray(errorData.message) 
+            ? errorData.message[0] 
+            : errorData.message;
+        } else if (error?.message) {
+          errorMessage = error.message;
+        }
+
+        MessageToastCustom(
+          'error',
+          errorMessage,
+          'Error',
+          { position: 'top-right' }
         );
       } finally {
         setIsSubmitting(false);

@@ -5,6 +5,8 @@ import {
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface PropTypes {
   data: any[];
@@ -67,6 +69,14 @@ export const AllReadingsTable: React.FC<PropTypes> = ({ data, isLoading }) => {
         isLoading={isLoading}
         pagination
         pageSize={10}
+        emptyState={
+          <EmptyState
+            message="No se encontraron lecturas"
+            description="Intenta ajustar los filtros de búsqueda para ver los resultados."
+            icon={IoInformationCircleOutline}
+            variant="info"
+          />
+        }
       />
     </div>
   );

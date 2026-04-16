@@ -1,9 +1,10 @@
 import React from 'react';
 import { DollarSign, Clock, CheckCircle } from 'lucide-react';
 import './CustomIcons.css';
-import { FaFileInvoice } from 'react-icons/fa';
+import { FaFileInvoice, FaLaptopCode } from 'react-icons/fa';
 import { BiDollar } from 'react-icons/bi';
 import { FaArrowDownWideShort, FaArrowUpWideShort } from 'react-icons/fa6';
+import { FcUnlock } from 'react-icons/fc';
 
 interface CustomIconProps {
   size?: number;
@@ -120,6 +121,18 @@ export const IconExpenses = ({ size = 18 }: { size?: number }) => (
     size={size}
     mainIcon={<FaArrowDownWideShort size={size} strokeWidth={2} />}
     secondaryIcon={<BiDollar size={size} strokeWidth={2} />}
+    iconColorSecondary="var(--error)"
+    iconColorSecondaryHover="var(--error)"
+    iconColorBorder="var(--border-color)"
+    iconColorBorderHover="var(--error)"
+  />
+);
+
+export const IconUnauthorized = ({ size = 18 }: { size?: number }) => (
+  <CustomIcon
+    size={size}
+    mainIcon={<FaLaptopCode size={size} strokeWidth={2} />}
+    secondaryIcon={<FcUnlock size={size} strokeWidth={2} />}
     iconColorSecondary="var(--error)"
     iconColorSecondaryHover="var(--error)"
     iconColorBorder="var(--border-color)"

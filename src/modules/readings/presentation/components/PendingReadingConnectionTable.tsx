@@ -7,8 +7,8 @@ import {
 import type { PendingReadingConnection } from '../../domain/models/Reading';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { Eye, SearchX } from 'lucide-react';
-import { IoAdd } from 'react-icons/io5';
+import { Eye } from 'lucide-react';
+import { IoAdd, IoInformationCircleOutline } from 'react-icons/io5';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 interface PropTypes {
@@ -100,8 +100,10 @@ export const PendingReadingConnectionTable: React.FC<PropTypes> = ({
         emptyState={
           <EmptyState
             message="No se encontraron lecturas pendientes"
-            icon={SearchX}
+            description="Intenta ajustar los filtros de búsqueda para ver los resultados."
+            icon={IoInformationCircleOutline}
             minHeight="300px"
+            variant="info"
           />
         }
       />

@@ -23,6 +23,7 @@ import { MdAdd, MdDeleteForever, MdLockOpen } from 'react-icons/md';
 import { CheckBox } from '@/shared/presentation/components/Input/CheckBox';
 import '@/shared/presentation/styles/UserDetailPage.css';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 
 // Mock component for roles table (will be implemented fully later)
 const UserRolesTable = ({ user }: { user: User }) => {
@@ -427,7 +428,9 @@ export const UserDetailPage = () => {
           height: '50vh'
         }}
       >
-        <div className="profile-page__loader">Loading...</div>
+        <div className="profile-page__loader">
+          <CircularProgress />
+        </div>
       </div>
     );
   }

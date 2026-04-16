@@ -8,6 +8,8 @@ import {
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { useDailyStatsTable } from '@/shared/presentation/hooks/dashboard/useDailyStatsTable';
 import { EmptyState } from '../common/EmptyState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
+import { CircularProgress } from '../CircularProgress';
 
 interface DailyStatsProps {
   data: DailyStatsReport[];
@@ -27,21 +29,20 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
   if (loading)
     return (
       <div style={{ color: 'var(--text-secondary)' }}>
-        {t('dashboard.dailyStats.loading')}
+        <CircularProgress
+          size={110}
+          strokeWidth={6}
+          label={t('dashboard.dailyStats.loading')}
+        />
       </div>
     );
   if (!data.length)
     return (
-      <div
-        style={{
-          marginTop: '2rem'
-        }}
-      >
-        <EmptyState
-          message="No daily stats found"
-          description="No daily stats found"
-        />
-      </div>
+      <EmptyState
+        message={t('common.noData', 'No se encontraron datos')}
+        description={t('dashboard.dailyStats.noData', 'No hay registros diarios para este periodo')}
+        variant="info"
+      />
     );
 
   const columns: Column<DailyStatsReport>[] = [
@@ -186,7 +187,18 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
           overflowY: 'auto',
           borderRadius: '0 0 0.75rem 0.75rem' // Match card radius
         }}
-        emptyState={<EmptyState message="No daily stats found" />}
+        emptyState={
+          <EmptyState
+            message={t('common.noResults', 'No se encontraron resultados')}
+            icon={IoInformationCircleOutline}
+            description={t(
+              'common.noResultsDescription',
+              'Intenta ajustar los filtros de búsqueda para ver los resultados.'
+            )}
+            minHeight="300px"
+            variant="info"
+          />
+        }
       />
     </div>
   );

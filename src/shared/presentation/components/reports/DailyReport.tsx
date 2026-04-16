@@ -18,6 +18,7 @@ import './DailyReport.css';
 import { Button } from '../Button/Button';
 import type { ExportColumn } from './ReportPreviewModal';
 import { truncateText } from '../../../utils/text/truncate-text';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface DailyReportProps {
   showToolbar?: boolean;
@@ -363,11 +364,15 @@ export const DailyReport: React.FC<DailyReportProps> = ({
               <EmptyState
                 message="No readings found"
                 description={`No readings found for ${date}`}
+                icon={IoInformationCircleOutline}
+                variant="info"
               />
             ) : (
               <EmptyState
                 message="Select a date to view readings"
                 description="Select a date to view readings"
+                icon={IoInformationCircleOutline}
+                variant="info"
               />
             )
           }

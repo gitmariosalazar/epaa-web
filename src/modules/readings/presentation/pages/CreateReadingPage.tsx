@@ -10,6 +10,7 @@ import { ReadingConfirmationModal } from '../components/ReadingConfirmationModal
 import '../styles/create-reading.css';
 import { IdCard, User } from 'lucide-react';
 import type { CreateReadingRequest } from '../../domain/dto/request/CreateReadingRequest';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
 export interface CreateReadingPageProps {
   initialCadastralKey?: string;
@@ -83,7 +84,12 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
 
   const handleSearch = () => {
     if (!cadastralKeyInput.trim()) {
-      alert('Ingrese una clave catastral para buscar.');
+      MessageToastCustom(
+        'error',
+        'Ingrese una clave catastral para buscar.',
+        'Error',
+        { position: 'top-right' }
+      );
       return;
     }
     setCurrentReadingInput('');
@@ -155,7 +161,7 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
             <div className="cr-client-badge">
               <IdCard size={16} />
               <span className="cr-client-id">{readingInfo.cardId}</span>
-              <span>-</span>
+              <span style={{ margin: '0 5px', color: '#0067f8ff' }}>|</span>
               <User size={16} />
               <span className="cr-client-name">{readingInfo.clientName}</span>
             </div>

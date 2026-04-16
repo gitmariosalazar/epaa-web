@@ -214,6 +214,7 @@ export const GeneralCollectionYearlyDashboard: React.FC<
       <EmptyState
         message="No hay datos"
         description="No hay datos de KPIs anuales para mostrar"
+        variant="info"
       />
     );
   }

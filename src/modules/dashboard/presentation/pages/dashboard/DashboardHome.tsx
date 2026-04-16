@@ -19,6 +19,7 @@ import { DashboardMaximizeButton } from '@/shared/presentation/components/dashbo
 import { useDashboardController } from '@/modules/dashboard/presentation/hooks/useDashboardController';
 
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
+import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 
 export const DashboardHome = () => {
   const { t } = useTranslation();
@@ -45,16 +46,22 @@ export const DashboardHome = () => {
           currentMonth={currentMonth}
           onMonthChange={handleMonthChange}
         />
+
         <div className="dashboard-header">
           <div className="dashboard-title">
-            <h1>Analytical Dashboard</h1>
-            <p>Overview of system readings and performance</p>
+            <h1>{t('dashboard.title', 'Analytical Dashboard')}</h1>
+            <p>
+              {t(
+                'dashboard.subtitle',
+                'Overview of system readings and performance'
+              )}
+            </p>
           </div>
 
           <div
-            className="dashboard-control"
+            className="dashboard-control pulse-hover"
             onClick={() => pickerRef.current?.showPicker()}
-            title="Change Period"
+            title={t('dashboard.changePeriod')}
           >
             <DatePicker
               view="month"
@@ -66,137 +73,130 @@ export const DashboardHome = () => {
           </div>
         </div>
 
-        {globalStats ? (
-          <DashboardWidgetWrapper
-            id="global-stats"
-            title={t('dashboard.globalStats.title', 'System Overview')}
+        {/* ── Dashboard Content Wrapper with Global Loader ── */}
+        <div className="dashboard-content-rel">
+          {loading && (
+            <div className="dashboard-global-loader fade-in">
+              <div className="loader-glass-card">
+                <CircularProgress
+                  size={140}
+                  strokeWidth={8}
+                  label={
+                    <div className="loader-text-group">
+                      <span className="loader-main-text">
+                        {t('common.loading')}
+                      </span>
+                      <span className="loader-sub-text">
+                        {t(
+                          'dashboard.loadingData',
+                          'Sincronizando estadísticas...'
+                        )}
+                      </span>
+                    </div>
+                  }
+                />
+              </div>
+            </div>
+          )}
+
+          <div
+            className={`dashboard-main-content ${loading ? 'content-blur' : ''}`}
           >
-            <GlobalStats stats={globalStats} loading={loading} />
-          </DashboardWidgetWrapper>
-        ) : (
-          <DashboardWidgetWrapper
-            id="global-stats"
-            title={t('dashboard.globalStats.title', 'System Overview')}
-          >
-            <GlobalStats stats={globalStats} loading={loading} />
-          </DashboardWidgetWrapper>
-        )}
+            <div style={{ marginBottom: '-1.5rem' }}>
+              <DashboardWidgetWrapper
+                id="global-stats"
+                title={t('dashboard.globalStats.title', 'System Overview')}
+              >
+                <GlobalStats stats={globalStats} loading={false} />
+              </DashboardWidgetWrapper>
+            </div>
 
-        {dailyStats.length > 0 ? (
-          <div className="dashboard-stats-grid">
-            <div className="stats-col">
-              <DashboardWidgetWrapper
-                id="daily-stats"
-                title="Daily Activity Logic"
-                className="h-full"
-              >
-                <DailyStatsTable data={dailyStats} loading={loading} />
-              </DashboardWidgetWrapper>
-            </div>
-            <div className="stats-col">
-              <DashboardWidgetWrapper
-                id="sector-stats"
-                title={t('dashboard.sectorStats.title')}
-                className="h-full"
-              >
-                <SectorStatsTable data={sectorStats} loading={loading} />
-              </DashboardWidgetWrapper>
-            </div>
-          </div>
-        ) : (
-          <div className="dashboard-stats-grid">
-            <div className="stats-col">
-              <DashboardWidgetWrapper
-                id="daily-stats"
-                title="Daily Activity Logic"
-                className="h-full"
-              >
-                <DailyStatsTable data={dailyStats} loading={loading} />
-              </DashboardWidgetWrapper>
-            </div>
-            <div className="stats-col">
-              <DashboardWidgetWrapper
-                id="sector-stats"
-                title={t('dashboard.sectorStats.title')}
-                className="h-full"
-              >
-                <SectorStatsTable data={sectorStats} loading={loading} />
-              </DashboardWidgetWrapper>
-            </div>
-          </div>
-        )}
-
-        {noveltyStats.length > 0 ? (
-          <div className="dashboard-novelties-row">
-            <DashboardWidgetWrapper
-              id="novelty-stats"
-              title="Novelty Distribution"
-              className="h-full"
+            <div
+              className="dashboard-stats-grid"
+              style={{ marginTop: '1.5rem' }}
             >
-              <NoveltyStats data={noveltyStats} loading={loading} />
-            </DashboardWidgetWrapper>
-          </div>
-        ) : (
-          <div className="dashboard-novelties-row">
-            <DashboardWidgetWrapper
-              id="novelty-stats"
-              title="Novelty Distribution"
-              className="h-full"
-            >
-              <NoveltyStats data={noveltyStats} loading={loading} />
-            </DashboardWidgetWrapper>
-          </div>
-        )}
-        {advancedReportReadings.length > 0 && (
-          <>
-            <div className="section-divider">
-              <h2 className="section-title">
-                {t('dashboard.tabs.detailedReports')}
-              </h2>
-            </div>
-
-            <Tabs
-              tabs={[
-                { id: 'visual', label: t('dashboard.tabs.visual') },
-                { id: 'table', label: t('dashboard.tabs.detailed') }
-              ]}
-              activeTab={activeTab}
-              onTabChange={(id) => setActiveTab(id as 'visual' | 'table')}
-              variant="pill"
-            />
-
-            {activeTab === 'visual' && (
-              <div className="dashboard-novelties-row">
+              <div className="stats-col">
                 <DashboardWidgetWrapper
-                  id="sector-progress"
-                  title={t('dashboard.sectorProgress.title')}
+                  id="daily-stats"
+                  title={t('dashboard.dailyStats.title', 'Daily Performance')}
                   className="h-full"
                 >
-                  <SectorProgressStats
-                    data={advancedReportReadings}
-                    loading={loading}
-                  />
+                  <DailyStatsTable data={dailyStats} loading={false} />
                 </DashboardWidgetWrapper>
               </div>
-            )}
-
-            {activeTab === 'table' && (
-              <div className="dashboard-advanced-readings-row">
+              <div className="stats-col">
                 <DashboardWidgetWrapper
-                  id="advanced-readings"
-                  title={t('dashboard.advancedReadings.title')}
+                  id="sector-stats"
+                  title={t('dashboard.sectorStats.title', 'Sector Analysis')}
                   className="h-full"
                 >
-                  <AdvancedReadingsTable
-                    data={advancedReportReadings}
-                    loading={loading}
-                    currentMonth={currentMonth}
-                  />
+                  <SectorStatsTable data={sectorStats} loading={false} />
                 </DashboardWidgetWrapper>
               </div>
+            </div>
+
+            <div className="dashboard-novelties-row">
+              <DashboardWidgetWrapper
+                id="novelty-stats"
+                title={t(
+                  'dashboard.noveltyStats.title',
+                  'Novelty Distribution'
+                )}
+                className="h-full"
+              >
+                <NoveltyStats data={noveltyStats} loading={false} />
+              </DashboardWidgetWrapper>
+            </div>
+
+            {advancedReportReadings.length > 0 && (
+              <div className="dashboard-advanced-section fade-in">
+                <div className="section-divider">
+                  <h2 className="section-title">
+                    {t('dashboard.tabs.detailedReports')}
+                  </h2>
+                </div>
+
+                <Tabs
+                  tabs={[
+                    { id: 'visual', label: t('dashboard.tabs.visual') },
+                    { id: 'table', label: t('dashboard.tabs.detailed') }
+                  ]}
+                  activeTab={activeTab}
+                  onTabChange={(id) => setActiveTab(id as 'visual' | 'table')}
+                  variant="pill"
+                />
+
+                <div className="tab-content-wrapper">
+                  {activeTab === 'visual' ? (
+                    <DashboardWidgetWrapper
+                      id="sector-progress"
+                      title={t('dashboard.sectorProgress.title')}
+                      className="h-full"
+                    >
+                      <SectorProgressStats
+                        data={advancedReportReadings}
+                        loading={false}
+                      />
+                    </DashboardWidgetWrapper>
+                  ) : (
+                    <DashboardWidgetWrapper
+                      id="advanced-readings"
+                      title={t('dashboard.advancedReadings.title')}
+                      className="h-full"
+                    >
+                      <AdvancedReadingsTable
+                        data={advancedReportReadings}
+                        loading={false}
+                        currentMonth={currentMonth}
+                      />
+                    </DashboardWidgetWrapper>
+                  )}
+                </div>
+              </div>
             )}
-          </>
-        )}
+          </div>
+        </div>
+
         <DashboardMaximizeButton visible={true} disabled={false} />
       </div>
     </DashboardFocusProvider>

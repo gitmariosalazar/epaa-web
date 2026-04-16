@@ -68,18 +68,20 @@ export const Header: React.FC = () => {
         </div>
 
         <div className="header__right">
-          <button
-            onClick={toggleLanguage}
-            title={t('header.switchLang')}
-            className="header__nav-btn"
-          >
-            <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>
-              {i18n.language === 'en' ? '🇪🇨' : '🇺🇸'}
-            </span>
-            <span>{i18n.language === 'en' ? 'ES' : 'EN'}</span>
-          </button>
+          <Tooltip content={t('header.switchLang')} themeColor="info">
+            <button
+              onClick={toggleLanguage}
+              title={t('header.switchLang')}
+              className="header__nav-btn"
+            >
+              <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>
+                {i18n.language === 'en' ? '🇪🇨' : '🇺🇸'}
+              </span>
+              <span>{i18n.language === 'en' ? 'ES' : 'EN'}</span>
+            </button>
+          </Tooltip>
 
-          <Tooltip content={t('header.switchTheme')}>
+          <Tooltip content={t('header.switchTheme')} themeColor="info">
             <button
               onClick={toggleTheme}
               className="header__nav-btn header__nav-btn--theme"

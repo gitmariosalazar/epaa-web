@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
+import { CircularProgress } from '../CircularProgress';
 import { useSectorProgressStats } from '@/shared/presentation/hooks/dashboard/useSectorProgressStats';
-
 interface SectorProgressStatsProps {
   data: AdvancedReportReadings[];
   loading: boolean;
@@ -39,8 +39,14 @@ export const SectorProgressStats: React.FC<SectorProgressStatsProps> = ({
 
   if (loading) {
     return (
-      <div className="p-4 text-center">
-        {t('dashboard.sectorProgress.loading')}
+      <div
+        style={{ padding: '3rem', display: 'flex', justifyContent: 'center' }}
+      >
+        <CircularProgress
+          label={t('dashboard.sectorProgress.loading')}
+          strokeWidth={6}
+          size={110}
+        />
       </div>
     );
   }

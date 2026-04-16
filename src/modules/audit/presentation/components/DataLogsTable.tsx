@@ -10,13 +10,17 @@ import { Eye } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solarizedDarkAtom } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import styles from '../styles/DataLogsTable.module.css';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 export const DataLogsTable: React.FC = () => {
   const { state, actions } = useAuditViewModel();
   const { auditLogs, isLoading, error: errorObj } = state;
   const { fetchAuditLogs } = actions;
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedLog, setSelectedLog] = useState<AuditRegistroResponse | null>(null);
+  const [selectedLog, setSelectedLog] = useState<AuditRegistroResponse | null>(
+    null
+  );
 
   useEffect(() => {
     fetchAuditLogs({ limit: 100, offset: 0 });
@@ -79,10 +83,16 @@ export const DataLogsTable: React.FC = () => {
   ];
 
   return (
-    <div className="conn-table-wrapper" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-      {errorObj && (
-        <div className={styles.errorMessage}>{errorObj}</div>
-      )}
+    <div
+      className="conn-table-wrapper"
+      style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 0
+      }}
+    >
+      {errorObj && <div className={styles.errorMessage}>{errorObj}</div>}
       <Table
         data={auditLogs}
         columns={columns}
@@ -90,6 +100,14 @@ export const DataLogsTable: React.FC = () => {
         pagination={true}
         pageSize={15}
         fullHeight={true}
+        emptyState={
+          <EmptyState
+            message="No se encontraron registros"
+            description="No hay registros de auditoría que coincidan con los filtros seleccionados."
+            icon={IoInformationCircleOutline}
+            variant="info"
+          />
+        }
       />
 
       <Modal

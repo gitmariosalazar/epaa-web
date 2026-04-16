@@ -427,11 +427,20 @@ export const en = {
       incomeCode: 'Income Code',
       cadastralKey: 'Cadastral Key',
       customerName: 'Customer',
+      dataTitleCode: 'Title Code',
       issueDate: 'Issue Date',
+
       paymentDate: 'Payment Date',
       dataNotFound: 'No data found',
       dataNotFoundDescription: 'No data found with the current filters.',
-      fetch: 'Fetch Data'
+      fetch: 'Fetch Data',
+      unauthorizedTitle: 'Access Denied',
+      unauthorizedDesc:
+        'You do not have the necessary permissions to access this resource. Please contact the system administrator.',
+      backToHome: 'Go to Home',
+      login: 'Sign In',
+      goToBack: 'Go Back',
+      goToLogin: 'Sign In'
     },
     connections: {
       create: 'New Connection',

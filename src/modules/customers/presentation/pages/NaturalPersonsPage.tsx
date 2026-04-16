@@ -136,6 +136,7 @@ export const NaturalPersonsPage: React.FC = () => {
               message={t('common.noResults', 'No se encontraron resultados')}
               icon={SearchX}
               minHeight="300px"
+              variant="info"
             />
           }
         />

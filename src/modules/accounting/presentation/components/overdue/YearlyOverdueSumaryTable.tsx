@@ -15,6 +15,7 @@ import {
   CircularProgress,
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface YearlyOverdueSumaryTableProps {
   data: YearlyOverdueSummary[];
@@ -412,23 +413,12 @@ export const YearlyOverdueSumaryTable: React.FC<
         data={data}
         isLoading={isLoading}
         loadingState={
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: '60vh',
-              width: '100%'
-            }}
-          >
-            <CircularProgress
-              progress={loadingProgress}
-              size={140}
-              strokeWidth={6}
-              label={t('common.loading', 'LOADING...')}
-            />
-          </div>
+          <CircularProgress
+            progress={loadingProgress}
+            size={140}
+            strokeWidth={6}
+            label={t('common.loading')}
+          />
         }
         sortConfig={sortConfig}
         onSort={onSort}
@@ -447,6 +437,8 @@ export const YearlyOverdueSumaryTable: React.FC<
               'accounting.overdue.emptyStateDescription',
               'No hay datos para mostrar'
             )}
+            icon={IoInformationCircleOutline}
+            variant="info"
           />
         }
       />

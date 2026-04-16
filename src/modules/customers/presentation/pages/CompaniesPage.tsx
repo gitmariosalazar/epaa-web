@@ -4,7 +4,7 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Table } from '@/shared/presentation/components/Table/Table';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
-import { Plus, Trash2, Edit2, SearchX } from 'lucide-react';
+import { Plus, Trash2, Edit2 } from 'lucide-react';
 import '@/shared/presentation/styles/Table.css';
 import { useCompaniesViewModel } from '../hooks/useCompaniesViewModel';
 import { CompanyForm } from '../components/CompanyForm';
@@ -14,6 +14,7 @@ import type { Company } from '../../domain/models/Company';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 export const CompaniesPage: React.FC = () => {
   const companyVM = useCompaniesViewModel();
@@ -134,8 +135,13 @@ export const CompaniesPage: React.FC = () => {
           emptyState={
             <EmptyState
               message={t('common.noResults', 'No se encontraron resultados')}
-              icon={SearchX}
+              icon={IoInformationCircleOutline}
+              description={t(
+                'common.noResultsDescription',
+                'Intenta ajustar los filtros de búsqueda para ver los resultados.'
+              )}
               minHeight="300px"
+              variant="info"
             />
           }
         />

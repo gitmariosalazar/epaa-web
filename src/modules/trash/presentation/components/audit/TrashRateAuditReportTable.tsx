@@ -16,6 +16,7 @@ import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic
 import { CheckCircle } from 'lucide-react';
 import { IoIosCloseCircle } from 'react-icons/io';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface TrashRateAuditRowProps {
   data: TrashRateAuditRow[];
@@ -271,7 +272,18 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
         onSort={onSort}
         onExportPdf={() => setShowPdfPreview(true)}
         sortConfig={sortConfig}
-        emptyState={<EmptyState message={`Data not found!`} />}
+        emptyState={
+          <EmptyState
+            message={t('common.noResults', 'No se encontraron resultados')}
+            icon={IoInformationCircleOutline}
+            description={t(
+              'common.noResultsDescription',
+              'Intenta ajustar los filtros de búsqueda para ver los resultados.'
+            )}
+            minHeight="300px"
+            variant="info"
+          />
+        }
         totalRows={totalRows}
         getRowColor={(row) => {
           if (row.diagnostic === 'No record in Valor (Ord 10)') {

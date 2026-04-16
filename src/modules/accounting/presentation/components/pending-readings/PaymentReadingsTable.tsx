@@ -272,6 +272,7 @@ export const PaymentReadingsTable: React.FC<PaymentReadingsTableProps> = ({
               'accounting.empty.noReadingsDesc',
               'Modifique el rango de fechas o los filtros para visualizar resultados.'
             )}
+            variant="info"
           />
         }
       />

@@ -6,6 +6,8 @@ import {
 } from '@/shared/presentation/components/Table/Table';
 import type { FullBreakdownReport } from '../../../domain/models/EntryData';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface FullBreakdownReportTableProps {
   data: FullBreakdownReport[];
@@ -174,9 +176,12 @@ export const FullBreakdownReportTable: React.FC<
         width="100"
         onExportPdf={onExportPdf}
         emptyState={
-          <div className="payments-table-empty">
-            <p>{t('common.noData', 'No se encontraron registros')}</p>
-          </div>
+          <EmptyState
+            message="No se encontraron registros"
+            description="Intenta ajustar los filtros de búsqueda para ver los resultados."
+            icon={IoInformationCircleOutline}
+            variant="info"
+          />
         }
       />
     </div>

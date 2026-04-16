@@ -51,12 +51,17 @@ import { PropertiesPage } from '@/modules/properties/presentation/pages/Properti
 import { OverduePaymentsPage } from './modules/accounting/presentation/pages/overdue/OverduePaymentsPage';
 import { GeneralCollectionProvider } from '@/modules/accounting/presentation/context/general-collection/GeneralCollectionContext';
 import { GeneralCollectionPage } from '@/modules/accounting/presentation/pages/general-collection/GeneralCollectionPage';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import UnAuthorizedPage from '@/shared/presentation/components/unauthorized/UnAuthorizedPage';
+import { CircularProgress } from './shared/presentation/components/CircularProgress';
 
 const ProtectedRoute = () => {
   const { token, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>; // TODO: Replace with nice loader
+    return <CircularProgress />; // TODO: Replace with nice loader
   }
 
   if (!token) {
@@ -66,28 +71,60 @@ const ProtectedRoute = () => {
   return <Outlet />;
 };
 
+/**
+ * RoleGuard - SOLID (Single Responsibility & Open/Closed)
+ * Protege rutas basadas en el rol del usuario sin acoplar la lógica al componente de la página.
+ */
+const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) return <CircularProgress />;
+
+  // Aseguramos que sea un array de strings y filtramos valores nulos
+  const rawRoles = Array.isArray(user?.roles) ? user?.roles : [user?.roles];
+  const userRoles = rawRoles.filter(Boolean) as string[];
+
+  const hasAccess = allowedRoles.some((role) => userRoles.includes(role));
+
+  if (!hasAccess) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  return <Outlet />;
+};
+
 function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
+        <ToastContainer />
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/unauthorized" element={<UnAuthorizedPage />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<DashboardLayout />}>
                 <Route path="/" element={<DashboardHome />} />
                 <Route path="/reports" element={<ReportsPage />} />
-                <Route
-                  path="/users/*"
-                  element={
-                    <UsersProvider>
-                      <Routes>
-                        <Route index element={<UsersPage />} />
-                        <Route path=":username" element={<UserDetailPage />} />
-                      </Routes>
-                    </UsersProvider>
-                  }
-                />
+
+                {/* Ejemplo de protección por Rol: Solo ADMIN puede ver usuarios */}
+                <Route element={<RoleGuard allowedRoles={['ADMIN']} />}>
+                  <Route
+                    path="/users/*"
+                    element={
+                      <UsersProvider>
+                        <Routes>
+                          <Route index element={<UsersPage />} />
+                          <Route
+                            path=":username"
+                            element={<UserDetailPage />}
+                          />
+                        </Routes>
+                      </UsersProvider>
+                    }
+                  />
+                </Route>
+
                 <Route path="/customers" element={<CustomersLayout />}>
                   <Route
                     index
@@ -108,7 +145,10 @@ function App() {
                         <Route index element={<Navigate to="list" replace />} />
                         <Route path="list" element={<ConnectionsPage />} />
                         <Route path="map" element={<ConnectionsPage />} />
-                        <Route path="dashboard" element={<ConnectionsDashboardPage />} />
+                        <Route
+                          path="dashboard"
+                          element={<ConnectionsDashboardPage />}
+                        />
                       </Routes>
                     </ConnectionProvider>
                   }

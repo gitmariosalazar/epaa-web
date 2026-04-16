@@ -34,28 +34,32 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
   return (
     <div className="cr-toolbar">
       {/* Search Area */}
-      <div className="cr-search-area">
+      <form 
+        className="cr-search-area"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSearch();
+        }}
+      >
         <InputCadastralKey
           className="entry-filter-input"
           placeholder="Ingrese la clave catastral (Ej: 12-364)"
           value={cadastralKeyInput}
           onChange={(val) => setCadastralKeyInput(val)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handleSearch();
-          }}
           leftIcon={<FaSchoolLock />}
           size="compact"
+          required={true}
         />
         <Button
+          type="submit"
           className="cr-search-btn"
-          onClick={handleSearch}
           disabled={isLoadingInfo}
           leftIcon={<FaSearch />}
           size="sm"
         >
           {isLoadingInfo ? t('common.searching') : t('common.search')}
         </Button>
-      </div>
+      </form>
 
       {/* Action Buttons Area */}
       <div className="cr-actions">

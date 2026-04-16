@@ -106,8 +106,13 @@ export const PropertiesTable: React.FC<PropertiesTableProps> = ({
         emptyState={
           <EmptyState
             message={t('properties.table.empty', 'No properties found')}
+            description={t(
+              'properties.table.emptyDescription',
+              'No properties found'
+            )}
             icon={SearchX}
             minHeight="300px"
+            variant="info"
           />
         }
       />

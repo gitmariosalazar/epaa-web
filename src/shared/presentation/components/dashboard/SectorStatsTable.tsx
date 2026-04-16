@@ -7,6 +7,9 @@ import {
 } from '@/shared/presentation/components/Table/Table';
 import { useSectorStatsTable } from '@/shared/presentation/hooks/dashboard/useSectorStatsTable';
 import { EmptyState } from '../common/EmptyState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
+
+import { CircularProgress } from '../CircularProgress';
 
 interface SectorStatsProps {
   data: SectorStatsReport[];
@@ -26,22 +29,17 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
 
   if (loading)
     return (
-      <div style={{ color: 'var(--text-secondary)' }}>
-        {t('dashboard.sectorStats.loading')}
+      <div style={{ padding: '2.5rem', display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress label={t('dashboard.sectorStats.loading')} strokeWidth={6} size={110} />
       </div>
     );
   if (!data.length)
     return (
-      <div
-        style={{
-          marginTop: '2rem'
-        }}
-      >
-        <EmptyState
-          message="No sector stats found"
-          description="No sector stats found"
-        />
-      </div>
+      <EmptyState
+        message={t('common.noData', 'No se encontraron datos')}
+        description={t('dashboard.sectorStats.noData', 'No hay estadísticas de sectores para este periodo')}
+        variant="info"
+      />
     );
 
   const columns: Column<SectorStatsReport>[] = [
@@ -171,6 +169,18 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
           overflowY: 'auto',
           borderRadius: '0 0 0.75rem 0.75rem'
         }}
+        emptyState={
+          <EmptyState
+            message={t('common.noResults', 'No se encontraron resultados')}
+            icon={IoInformationCircleOutline}
+            description={t(
+              'common.noResultsDescription',
+              'Intenta ajustar los filtros de búsqueda para ver los resultados.'
+            )}
+            minHeight="300px"
+            variant="info"
+          />
+        }
       />
     </div>
   );

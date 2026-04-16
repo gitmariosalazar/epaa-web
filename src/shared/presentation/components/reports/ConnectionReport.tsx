@@ -16,6 +16,7 @@ import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport
 import type { ConnectionLastReadingsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import type { ExportColumn } from './ReportPreviewModal';
 import './ConnectionReport.css';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface ConnectionReportProps {
   showToolbar?: boolean;
@@ -368,11 +369,15 @@ export const ConnectionReport: React.FC<ConnectionReportProps> = ({
               <EmptyState
                 message="No history found"
                 description={`No history found for ${cadastralKey}`}
+                icon={IoInformationCircleOutline}
+                variant="info"
               />
             ) : (
               <EmptyState
                 message="Enter a Cadastral Key"
                 description="Enter a Cadastral Key to search history."
+                icon={IoInformationCircleOutline}
+                variant="info"
               />
             )
           }

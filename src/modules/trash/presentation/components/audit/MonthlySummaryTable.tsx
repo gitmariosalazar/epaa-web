@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import type { MonthlySummaryRow } from '../../../domain/models/trash-rate-report.model';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface MonthlySummaryTableProps {
   data: MonthlySummaryRow[];
@@ -212,7 +213,18 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
         onSort={onSort}
         onExportPdf={() => setShowPdfPreview(true)}
         sortConfig={sortConfig}
-        emptyState={<EmptyState message="Data not found!" />}
+        emptyState={
+          <EmptyState
+            message={t('common.noResults', 'No se encontraron resultados')}
+            icon={IoInformationCircleOutline}
+            description={t(
+              'common.noResultsDescription',
+              'Intenta ajustar los filtros de búsqueda para ver los resultados.'
+            )}
+            minHeight="300px"
+            variant="info"
+          />
+        }
         totalRows={totalRows}
         getRowColor={(item: MonthlySummaryRow) => {
           const color = item.paymentStatusCode !== 'P' ? 'error' : undefined;

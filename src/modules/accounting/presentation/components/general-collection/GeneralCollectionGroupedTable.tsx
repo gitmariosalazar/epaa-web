@@ -8,6 +8,7 @@ import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { ConvertMonth } from '@/shared/utils/datetime/Converts';
 import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 // Hack to handle intersection of types
 export type GroupedReportItem = {
@@ -257,6 +258,8 @@ export const GeneralCollectionGroupedTable: React.FC<
           <EmptyState
             message="No se encontraron registros"
             description="No hay registros agrupados que coincidan con los filtros seleccionados."
+            icon={IoInformationCircleOutline}
+            variant="info"
           />
         }
       />

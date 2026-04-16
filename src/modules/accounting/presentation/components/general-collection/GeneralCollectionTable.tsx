@@ -9,6 +9,7 @@ import type { GeneralCollectionResponse } from '../../../domain/models/GenelarCo
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface GeneralCollectionTableProps {
   data: GeneralCollectionResponse[];
@@ -33,7 +34,6 @@ export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
   startDate,
   endDate
 }) => {
-
   const columns: Column<GeneralCollectionResponse>[] = [
     {
       header: 'Cód. Ingreso',
@@ -52,9 +52,7 @@ export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
           <Avatar name={item.name} size="sm" />
           <div>
             <div className="collection-table-owner-name">{item.name}</div>
-            <div className="collection-table-owner-meta">
-              {item.cardId}
-            </div>
+            <div className="collection-table-owner-meta">{item.cardId}</div>
           </div>
         </div>
       )
@@ -224,6 +222,8 @@ export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
           <EmptyState
             message="No se encontraron registros"
             description="No hay registros de recolección que coincidan con los filtros seleccionados."
+            icon={IoInformationCircleOutline}
+            variant="info"
           />
         }
       />

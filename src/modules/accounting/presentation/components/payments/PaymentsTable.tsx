@@ -268,6 +268,7 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
               'accounting.empty.noPaymentsDesc',
               'No hay registros de pagos que coincidan con los filtros seleccionados.'
             )}
+            variant="info"
           />
         }
       />

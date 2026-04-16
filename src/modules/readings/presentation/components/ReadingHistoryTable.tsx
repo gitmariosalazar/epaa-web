@@ -8,6 +8,8 @@ import { dateService } from '@/shared/infrastructure/services/EcuadorDateService
 import { useTranslation } from 'react-i18next';
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface PropTypes {
   history: ReadingHistory[];
@@ -94,6 +96,14 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
         isLoading={isLoading}
         pagination
         pageSize={7}
+        emptyState={
+          <EmptyState
+            message="No se encontraron lecturas"
+            description="Intenta ajustar los filtros de búsqueda para ver los resultados."
+            icon={IoInformationCircleOutline}
+            variant="info"
+          />
+        }
       />
     </div>
   );

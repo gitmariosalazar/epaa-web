@@ -301,8 +301,10 @@ const UsersLayout: React.FC = () => {
           emptyState={
             <EmptyState
               message="No se encontraron usuarios"
+              description="Intenta ajustar los filtros de búsqueda para ver los resultados."
               icon={SearchX}
               minHeight="300px"
+              variant="info"
             />
           }
         />

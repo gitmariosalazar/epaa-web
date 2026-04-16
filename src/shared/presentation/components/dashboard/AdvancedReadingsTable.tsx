@@ -8,6 +8,10 @@ import { Table, type Column } from '../Table/Table';
 import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
 import { useAdvancedReadingsTable } from '@/shared/presentation/hooks/dashboard/useAdvancedReadingsTable';
 import { SectorReadingsModal } from './SectorReadingsModal';
+import { EmptyState } from '../common/EmptyState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
+
+import { CircularProgress } from '../CircularProgress';
 
 interface AdvancedReadingsTableProps {
   data: AdvancedReportReadings[];
@@ -45,14 +49,18 @@ export const AdvancedReadingsTable = ({
 
   if (loading)
     return (
-      <div style={{ color: 'var(--text-secondary)' }}>
-        {t('dashboard.advancedReadings.loading')}
+      <div style={{ padding: '3rem', display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress label={t('dashboard.advancedReadings.loading')} strokeWidth={6} size={110} />
       </div>
     );
   if (!data.length)
     return (
-      <div style={{ color: 'var(--text-secondary)' }}>
-        {t('dashboard.advancedReadings.empty')}
+      <div style={{ marginTop: '1rem' }}>
+        <EmptyState
+          message={t('common.noData')}
+          description={t('dashboard.advancedReadings.empty')}
+          variant="info"
+        />
       </div>
     );
 
@@ -266,6 +274,18 @@ export const AdvancedReadingsTable = ({
             overflowY: 'auto',
             borderRadius: '0 0 0.75rem 0.75rem' // Match card radius
           }}
+          emptyState={
+            <EmptyState
+              message={t('common.noResults', 'No se encontraron resultados')}
+              icon={IoInformationCircleOutline}
+              description={t(
+                'common.noResultsDescription',
+                'Intenta ajustar los filtros de búsqueda para ver los resultados.'
+              )}
+              minHeight="300px"
+              variant="info"
+            />
+          }
         />
       </div>
 

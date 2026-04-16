@@ -409,7 +409,14 @@ export const MonthlyDebtSummaryTable: React.FC<
               progress={loadingProgress}
               size={140}
               strokeWidth={6}
-              label={t('common.loading', 'LOADING...')}
+              label={
+                <CircularProgress
+                  progress={loadingProgress}
+                  size={140}
+                  strokeWidth={6}
+                  label={t('common.loading')}
+                />
+              }
             />
           </div>
         }

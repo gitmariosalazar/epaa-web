@@ -1,0 +1,93 @@
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  border: 1px dashed var(--empty-state-border);
+  background-color: var(--empty-state-bg);
+  color: var(--text-secondary);
+  transition: all 0.2s ease-in-out;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+}
+
+.empty-state:hover {
+  border-style: solid;
+  border: 1px dashed var(--empty-state-text);
+}
+
+.empty-state__icon-wrapper {
+  background-color: var(--empty-state-icon-bg);
+  padding: 1.25rem;
+  border-radius: 50%;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.empty-state:hover .empty-state__icon-wrapper {
+  transform: scale(1.05) rotate(5deg);
+}
+
+.empty-state__message {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--empty-state-text);
+}
+
+.empty-state__description {
+  margin: 0;
+  font-size: 0.875rem;
+  max-width: 420px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* Variants */
+.empty-state--default {
+  --empty-state-text: var(--text-main);
+  --empty-state-bg: var(--surface);
+  --empty-state-border: var(--border-color);
+  --empty-state-icon-bg: var(--background-secondary);
+}
+
+.empty-state--success {
+  --empty-state-text: #22c55e;
+  --empty-state-bg: rgba(34, 197, 94, 0.05);
+  --empty-state-border: rgba(34, 197, 94, 0.3);
+  --empty-state-icon-bg: rgba(34, 197, 94, 0.15);
+}
+
+.empty-state--info {
+  --empty-state-text: #3b82f6;
+  --empty-state-bg: rgba(59, 130, 246, 0.05);
+  --empty-state-border: rgba(59, 130, 246, 0.3);
+  --empty-state-icon-bg: rgba(59, 130, 246, 0.15);
+}
+
+.empty-state--warning {
+  --empty-state-text: #f59e0b;
+  --empty-state-bg: rgba(245, 158, 11, 0.05);
+  --empty-state-border: rgba(245, 158, 11, 0.3);
+  --empty-state-icon-bg: rgba(245, 158, 11, 0.15);
+}
+
+.empty-state--error {
+  --empty-state-text: #ef4444;
+  --empty-state-bg: rgba(239, 68, 68, 0.05);
+  --empty-state-border: rgba(239, 68, 68, 0.3);
+  --empty-state-icon-bg: rgba(239, 68, 68, 0.15);
+}
+
+.empty-state--error .empty-state__description,
+.empty-state--warning .empty-state__description,
+.empty-state--info .empty-state__description,
+.empty-state--success .empty-state__description {
+  color: var(--text-secondary);
+}

@@ -18,7 +18,7 @@ interface PropTypes {
 
 export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
   const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div className="cr-accordion">
@@ -76,7 +76,9 @@ export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
               <div className="cr-date-badge cr-date-start">
                 <div className="cr-date-value">
                   {info?.startDatePeriod
-                    ? dateService.formatToLocaleString(info.startDatePeriod)
+                    ? dateService.toISODateStringWithOffset(
+                        info.startDatePeriod
+                      )
                     : '---'}
                 </div>
                 <div className="cr-date-label">
@@ -87,7 +89,7 @@ export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
               <div className="cr-date-badge cr-date-end">
                 <div className="cr-date-value">
                   {info?.endDatePeriod
-                    ? dateService.formatToLocaleString(info.endDatePeriod)
+                    ? dateService.toISODateStringWithOffset(info.endDatePeriod)
                     : '---'}
                 </div>
                 <div className="cr-date-label">

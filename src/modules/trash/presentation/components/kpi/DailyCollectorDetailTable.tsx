@@ -9,6 +9,7 @@ import { ConverDate } from '@/shared/utils/datetime/ConverDate';
 import '../../styles/PaymentsTable.css';
 
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface DailyCollectorDetailTableProps {
   data: DailyCollectorDetail[];
@@ -263,7 +264,18 @@ export const DailyCollectorDetailTable: React.FC<
         onSort={onSort}
         onExportPdf={() => setShowPdfPreview(true)}
         sortConfig={sortConfig}
-        emptyState={<EmptyState message="Data not found!" />}
+        emptyState={
+          <EmptyState
+            message={t('common.noResults', 'No se encontraron resultados')}
+            icon={IoInformationCircleOutline}
+            description={t(
+              'common.noResultsDescription',
+              'Intenta ajustar los filtros de búsqueda para ver los resultados.'
+            )}
+            minHeight="300px"
+            variant="info"
+          />
+        }
         totalRows={totalRows}
         getRowColor={(r) => {
           if (r.cancelledValueDaily !== 0 || r.cancelledCountDaily > 0) {

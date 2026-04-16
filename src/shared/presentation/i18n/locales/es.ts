@@ -427,12 +427,21 @@ export const es = {
       incomeCode: 'Código de Ingreso',
       cadastralKey: 'Clave Catastral',
       customerName: 'Cliente',
+      dataTitleCode: 'Código Título',
       issueDate: 'Fecha de Emisión',
+
       paymentDate: 'Fecha de Pago',
       dataNotFound: 'No se encontraron datos',
       dataNotFoundDescription:
         'No se encontraron datos con los filtros actuales.',
-      fetch: 'Consultar'
+      fetch: 'Consultar',
+      unauthorizedTitle: 'Acceso Restringido',
+      unauthorizedDesc:
+        'No tienes los permisos necesarios para acceder a este recurso. Por favor, contacta con el administrador del sistema.',
+      backToHome: 'Ir al Inicio',
+      login: 'Iniciar Sesión',
+      goToBack: 'Volver Atrás',
+      goToLogin: 'Iniciar Sesión'
     },
     connections: {
       create: 'Nueva Conexión',

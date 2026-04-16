@@ -150,7 +150,7 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
             <div className="cr-client-badge">
               <IdCard size={16} />
               <span className="cr-client-id">{readingInfo.cardId}</span>
-              <span>-</span>
+              <span style={{ margin: '0 5px', color: '#0067f8ff' }}>|</span>
               <User size={16} />
               <span className="cr-client-name">{readingInfo.clientName}</span>
             </div>

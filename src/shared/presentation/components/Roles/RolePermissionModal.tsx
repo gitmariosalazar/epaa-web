@@ -8,6 +8,7 @@ import { ManageRolePermissionsUseCase } from '@/modules/roles/application/usecas
 import { RolePermissionRepositoryImpl } from '@/modules/roles/infrastructure/repositories/RolePermissionRepositoryImpl';
 import { PermissionRepositoryImpl } from '@/modules/permissions/infrastructure/repositories/PermissionRepositoryImpl';
 import './RolePermissionModal.css';
+import { CircularProgress } from '../CircularProgress';
 
 interface RolePermissionModalProps {
   isOpen: boolean;
@@ -120,7 +121,7 @@ export const RolePermissionModal: React.FC<RolePermissionModalProps> = ({
         </div>
 
         {isLoading ? (
-          <div>Loading...</div>
+          <CircularProgress label="Loading..." />
         ) : (
           <div className="role-permission__list">
             {filteredPermissions.map((perm, index) => {

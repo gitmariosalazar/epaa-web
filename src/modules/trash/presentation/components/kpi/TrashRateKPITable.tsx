@@ -6,6 +6,7 @@ import {
 } from '@/shared/presentation/components/Table/Table';
 import { useTranslation } from 'react-i18next';
 import '../../styles/PaymentsTable.css';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface TrashRateKPITableProps {
   data: TrashRateKPI[];
@@ -125,7 +126,18 @@ export const TrashRateKPITable: React.FC<TrashRateKPITableProps> = ({
           if (r.collectionRate < 85) return 'warning';
           //return 'neutral';
         }}
-        emptyState={<EmptyState message="Data not found!" />}
+        emptyState={
+          <EmptyState
+            message={t('common.noResults', 'No se encontraron resultados')}
+            icon={IoInformationCircleOutline}
+            description={t(
+              'common.noResultsDescription',
+              'Intenta ajustar los filtros de búsqueda para ver los resultados.'
+            )}
+            minHeight="300px"
+            variant="info"
+          />
+        }
       />
     </div>
   );

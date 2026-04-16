@@ -29,6 +29,7 @@ import {
   CircularProgress,
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface OverduePaymentsTableProps {
@@ -597,6 +598,8 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
               'accounting.overdue.noDataDescription',
               'No se encontraron conexiones con pagos pendientes.'
             )}
+            icon={IoInformationCircleOutline}
+            variant="info"
           />
         }
       />

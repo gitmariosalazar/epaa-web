@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { useProfileViewModel } from '../../hooks/useProfileViewModel';
+import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 
 export const ProfilePage = () => {
   const { updateUserSession } = useAuth();
@@ -52,7 +53,9 @@ export const ProfilePage = () => {
           height: '50vh'
         }}
       >
-        <div className="profile-page__loader">Loading...</div>
+        <div className="profile-page__loader">
+          <CircularProgress />
+        </div>
       </div>
     );
   }

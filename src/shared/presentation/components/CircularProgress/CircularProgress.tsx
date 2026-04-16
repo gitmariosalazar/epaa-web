@@ -10,7 +10,7 @@ export interface CircularProgressProps {
   /** Ring thickness in px. Default 9. */
   strokeWidth?: number;
   /** Text below the percentage. */
-  label?: string;
+  label?: React.ReactNode;
   /** Show the numeric percentage in the center. Default true. */
   showPercentage?: boolean;
   className?: string;

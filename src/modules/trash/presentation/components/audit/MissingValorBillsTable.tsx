@@ -17,6 +17,7 @@ import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport
 import { TiWarningOutline } from 'react-icons/ti';
 import { MdOutlineInfo } from 'react-icons/md';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface MissingValorBillsTableProps {
   data: MissingValorRow[];
@@ -56,11 +57,18 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
   const columns: Column<MissingValorRow>[] = [
     {
       header: t('common.incomeCode', 'Cód. Ingreso'),
-      accessor: 'incomeCode'
+      accessor: 'incomeCode',
+      id: 'incomeCode'
+    },
+    {
+      header: t('common.dataTitleCode', 'Código Título'),
+      accessor: 'dataTitleCode',
+      id: 'dataTitleCode'
     },
     {
       header: t('common.cadastralKey', 'Clave Catastral'),
-      accessor: 'cadastralKey'
+      accessor: 'cadastralKey',
+      id: 'cadastralKey'
     },
     {
       header: t('common.customerName', 'Cliente'),
@@ -74,15 +82,18 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
             </div>
           </div>
         </div>
-      )
+      ),
+      id: 'customerName'
     },
     {
       header: t('common.issueDate', 'Fecha Emisión'),
-      accessor: 'issueDate'
+      accessor: 'issueDate',
+      id: 'issueDate'
     },
     {
       header: t('common.paymentDate', 'Fecha Pago'),
-      accessor: (r) => r.paymentDate ?? '-'
+      accessor: (r) => r.paymentDate ?? '-',
+      id: 'paymentDate'
     },
     {
       header: t('common.trashRateDt', 'Tasa Basura (T. D.I)'),
@@ -252,6 +263,8 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
         const rowData: Record<string, string> = {
           [t('common.incomeCode')]: String(item.incomeCode || '-'),
           [t('common.cadastralKey')]: item.cadastralKey || '-',
+          [t('common.dataTitleCode', 'Código Título')]:
+            item.dataTitleCode || '-',
           [t('common.customerName')]: item.customerName || '-',
           'ID Cliente': item.cardId || '-',
           [t('common.issueDate')]: item.issueDate || '-',
@@ -291,6 +304,8 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
           <EmptyState
             description={t('common.dataNotFoundDescription')}
             message={t('common.dataNotFound')}
+            variant="info"
+            icon={<IoInformationCircleOutline size={32} color="var(--info)" />}
           />
         }
         totalRows={totalRows}

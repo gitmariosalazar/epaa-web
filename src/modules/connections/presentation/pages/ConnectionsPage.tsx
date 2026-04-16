@@ -21,7 +21,7 @@ import {
 } from '@/shared/presentation/components/CircularProgress';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, SearchX } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 export const ConnectionsPage = () => {
   const { t } = useTranslation();
@@ -68,7 +68,14 @@ export const ConnectionsPage = () => {
             progress={loadingProgress}
             size={112}
             strokeWidth={9}
-            label={t('common.loading', 'Loading...')}
+            label={
+              <CircularProgress
+                progress={loadingProgress}
+                size={112}
+                strokeWidth={9}
+                label={t('common.loading', 'Loading...')}
+              />
+            }
           />
         </div>
       );
@@ -97,8 +104,7 @@ export const ConnectionsPage = () => {
               'connections.noDataDescription',
               'No se encontraron conexiones con los filtros actuales. Usa Consultar para cargar datos.'
             )}
-            icon={SearchX}
-            variant="warning"
+            variant="info"
             minHeight="300px"
           />
         </div>
@@ -173,9 +179,7 @@ export const ConnectionsPage = () => {
       }
     >
       {/* ── Content ── */}
-      <div className="connections-page-content">
-        {renderContent()}
-      </div>
+      <div className="connections-page-content">{renderContent()}</div>
 
       {/* ── Create/Edit Wizard ── */}
       {state.isFormOpen && (
@@ -192,7 +196,10 @@ export const ConnectionsPage = () => {
         title={t('connections.deleteTitle', 'Eliminar Conexión')}
         footer={
           <>
-            <Button variant="subtle" onClick={() => actions.setIsDeleteOpen(false)}>
+            <Button
+              variant="subtle"
+              onClick={() => actions.setIsDeleteOpen(false)}
+            >
               {t('common.cancel', 'Cancelar')}
             </Button>
             <Button

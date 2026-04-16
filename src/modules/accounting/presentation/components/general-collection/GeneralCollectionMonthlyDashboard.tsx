@@ -785,6 +785,7 @@ export const GeneralCollectionMonthlyDashboard: React.FC<
       <EmptyState
         message="No hay datos"
         description="No hay datos de KPIs mensuales para mostrar"
+        variant="info"
       />
     );
   }
