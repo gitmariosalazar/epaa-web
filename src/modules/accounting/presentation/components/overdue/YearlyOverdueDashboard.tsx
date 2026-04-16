@@ -229,133 +229,121 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
             </div>
           )}
           <div className="overdue-chart-body">
-              <GradientAreaChart
-                data={chartDataMonthly}
-                tooltipFormatterOrComponent={(payload: MonthlyDebtSummary) => {
-                  return (
-                    <div className="year-tooltip">
-                      <span>
-                        {t('accounting.overdue.month', 'Mes')}
-                        <p>{payload.monthName}</p>
-                      </span>
-                      <span>
-                        {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
-                        <p>
-                          {CurrencyFormatter.format(payload.totalDebtAmount)}
-                        </p>
-                      </span>
-                      <span>
-                        {t(
-                          'accounting.overdue.totalTrashRate',
-                          'T. Tasa Basura'
-                        )}
-                        <p>
-                          {CurrencyFormatter.format(payload.totalTrashRate)}
-                        </p>
-                      </span>
-                      <span>
-                        {t(
-                          'accounting.overdue.totalEpaaValue',
-                          'T. Deuda EPAA'
-                        )}
-                        <p>
-                          {CurrencyFormatter.format(payload.totalEpaaValue)}
-                        </p>
-                      </span>
-                      <span>
-                        {t(
-                          'accounting.overdue.clientsWithDebtThisMonth',
-                          'N° Clientes'
-                        )}
-                        <p>
-                          {NumberFormatter.formatInteger(
-                            payload.clientsWithDebtThisMonth
-                          )}
-                        </p>
-                      </span>
-                    </div>
-                  );
-                }}
-                dataKeyX="monthName"
-                dataKeyY="clientsWithDebtThisMonth"
-                yAxisFormatter={(val) => NumberFormatter.formatInteger(val)}
-                nameY="N° Clientes"
-                nameX="Meses"
-                startColor="#a855f7"
-                endColor="#06b6d4"
-                valuePosition={isCompact ? 'none' : 'top'}
-                customLabel={({
-                  x,
-                  y,
-                  payload,
-                  index
-                }: {
-                  x: number;
-                  y: number;
-                  payload: MonthlyDebtSummary;
-                  index: number;
-                }) => {
-                  // Dynamic anchoring so the first and last labels don't get clipped or overlap the Y-axis
-                  let anchor = 'middle';
-                  let xOffset = x;
-                  if (index === 0) {
-                    anchor = 'start';
-                    xOffset = x - 5; // Push slightly right of the start dot line
-                  } else if (index === chartData.length - 1) {
-                    anchor = 'end';
-                    xOffset = x + 5; // Push slightly left of the end dot line
-                  }
-
-                  // Zig-zag pattern: one directly ABOVE the dot, the next directly BELOW the dot
-                  const isEven = index % 2 === 0;
-                  const yPosition = isEven ? y - 25 : y + 15;
-
-                  return (
-                    <text
-                      x={xOffset}
-                      y={yPosition} /* Exactly alternating up and down */
-                      textAnchor={anchor as any}
-                      className="responsive-chart-label"
-                      style={{
-                        paintOrder: 'stroke fill',
-                        stroke: 'var(--surface)',
-                        strokeLinejoin: 'round',
-                        strokeWidth: 3
-                      }}
-                    >
-                      <tspan
-                        x={xOffset}
-                        fill="#10b981" /* Green elegant color for the amount */
-                        fontSize={10}
-                        fontWeight={800}
-                      >
-                        {payload
-                          ? CurrencyFormatter.format(payload.totalDebtAmount)
-                          : ''}
-                      </tspan>
-                      <tspan
-                        x={xOffset}
-                        dy={14}
-                        fill="var(--text-main)"
-                        fontSize={11}
-                        fontWeight={700}
-                      >
+            <GradientAreaChart
+              data={chartDataMonthly}
+              tooltipFormatterOrComponent={(payload: MonthlyDebtSummary) => {
+                return (
+                  <div className="year-tooltip">
+                    <span>
+                      {t('accounting.overdue.month', 'Mes')}
+                      <p>{payload.monthName}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
+                      <p>{CurrencyFormatter.format(payload.totalDebtAmount)}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.totalTrashRate', 'T. Tasa Basura')}
+                      <p>{CurrencyFormatter.format(payload.totalTrashRate)}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.totalEpaaValue', 'T. Deuda EPAA')}
+                      <p>{CurrencyFormatter.format(payload.totalEpaaValue)}</p>
+                    </span>
+                    <span>
+                      {t(
+                        'accounting.overdue.clientsWithDebtThisMonth',
+                        'N° Clientes'
+                      )}
+                      <p>
                         {NumberFormatter.formatInteger(
                           payload.clientsWithDebtThisMonth
                         )}
-                      </tspan>
-                      <tspan
-                        fill="var(--text-secondary)"
-                        fontSize={10}
-                        fontWeight={500}
-                        dx={3}
-                      >
-                        {t('common.clients', 'Clientes')}
-                      </tspan>
-                    </text>
-                  );
-                }}
-              />
+                      </p>
+                    </span>
+                  </div>
+                );
+              }}
+              dataKeyX="monthName"
+              dataKeyY="clientsWithDebtThisMonth"
+              yAxisFormatter={(val) => NumberFormatter.formatInteger(val)}
+              nameY="N° Clientes"
+              nameX="Meses"
+              startColor="#a855f7"
+              endColor="#06b6d4"
+              valuePosition={isCompact ? 'none' : 'top'}
+              customLabel={({
+                x,
+                y,
+                payload,
+                index
+              }: {
+                x: number;
+                y: number;
+                payload: MonthlyDebtSummary;
+                index: number;
+              }) => {
+                // Dynamic anchoring so the first and last labels don't get clipped or overlap the Y-axis
+                let anchor = 'middle';
+                let xOffset = x;
+                if (index === 0) {
+                  anchor = 'start';
+                  xOffset = x - 5; // Push slightly right of the start dot line
+                } else if (index === chartData.length - 1) {
+                  anchor = 'end';
+                  xOffset = x + 5; // Push slightly left of the end dot line
+                }
+
+                // Zig-zag pattern: one directly ABOVE the dot, the next directly BELOW the dot
+                const isEven = index % 2 === 0;
+                const yPosition = isEven ? y - 25 : y + 15;
+
+                return (
+                  <text
+                    x={xOffset}
+                    y={yPosition} /* Exactly alternating up and down */
+                    textAnchor={anchor as any}
+                    className="responsive-chart-label"
+                    style={{
+                      paintOrder: 'stroke fill',
+                      stroke: 'var(--surface)',
+                      strokeLinejoin: 'round',
+                      strokeWidth: 3
+                    }}
+                  >
+                    <tspan
+                      x={xOffset}
+                      fill="#10b981" /* Green elegant color for the amount */
+                      fontSize={10}
+                      fontWeight={800}
+                    >
+                      {payload
+                        ? CurrencyFormatter.format(payload.totalDebtAmount)
+                        : ''}
+                    </tspan>
+                    <tspan
+                      x={xOffset}
+                      dy={14}
+                      fill="var(--text-main)"
+                      fontSize={11}
+                      fontWeight={700}
+                    >
+                      {NumberFormatter.formatInteger(
+                        payload.clientsWithDebtThisMonth
+                      )}
+                    </tspan>
+                    <tspan
+                      fill="var(--text-secondary)"
+                      fontSize={10}
+                      fontWeight={500}
+                      dx={3}
+                    >
+                      {t('common.clients', 'Clientes')}
+                    </tspan>
+                  </text>
+                );
+              }}
+            />
           </div>
         </div>
         <div className="overdue-chart-card">
@@ -415,64 +403,55 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
             </div>
           )}
           <div className="overdue-chart-body">
-              <DynamicBarChart
-                data={chartDataMonthly}
-                dataKeyX="monthName"
-                dataKeyY="totalDebtAmount"
-                nameY={t(
-                  'accounting.overdue.totalDebtAmountMonthly',
-                  'Deuda Mensual'
-                )}
-                nameX="Meses"
-                yAxisFormatter={(val) => CurrencyFormatter.format(val, false)}
-                tooltipFormatterOrComponent={(payload: MonthlyDebtSummary) => {
-                  return (
-                    <div className="year-tooltip">
-                      <span>
-                        {t('accounting.overdue.month', 'Mes')}
-                        <p>{payload.monthName}</p>
-                      </span>
-                      <span>
-                        {t(
-                          'accounting.overdue.totalDebtAmountMonthly',
-                          'Deuda Mensual'
+            <DynamicBarChart
+              data={chartDataMonthly}
+              dataKeyX="monthName"
+              dataKeyY="totalDebtAmount"
+              nameY={t(
+                'accounting.overdue.totalDebtAmountMonthly',
+                'Deuda Mensual'
+              )}
+              nameX="Meses"
+              yAxisFormatter={(val) => CurrencyFormatter.format(val, false)}
+              tooltipFormatterOrComponent={(payload: MonthlyDebtSummary) => {
+                return (
+                  <div className="year-tooltip">
+                    <span>
+                      {t('accounting.overdue.month', 'Mes')}
+                      <p>{payload.monthName}</p>
+                    </span>
+                    <span>
+                      {t(
+                        'accounting.overdue.totalDebtAmountMonthly',
+                        'Deuda Mensual'
+                      )}
+                      <p>{CurrencyFormatter.format(payload.totalDebtAmount)}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.totalTrashRate', 'T. Tasa Basura')}
+                      <p>{CurrencyFormatter.format(payload.totalTrashRate)}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.totalEpaaValue', 'Deuda EPAA')}
+                      <p>{CurrencyFormatter.format(payload.totalEpaaValue)}</p>
+                    </span>
+                    <span>
+                      {t(
+                        'accounting.overdue.clientsWithDebtThisMonth',
+                        'N° Clientes'
+                      )}
+                      <p>
+                        {NumberFormatter.formatInteger(
+                          payload.clientsWithDebtThisMonth
                         )}
-                        <p>
-                          {CurrencyFormatter.format(payload.totalDebtAmount)}
-                        </p>
-                      </span>
-                      <span>
-                        {t(
-                          'accounting.overdue.totalTrashRate',
-                          'T. Tasa Basura'
-                        )}
-                        <p>
-                          {CurrencyFormatter.format(payload.totalTrashRate)}
-                        </p>
-                      </span>
-                      <span>
-                        {t('accounting.overdue.totalEpaaValue', 'Deuda EPAA')}
-                        <p>
-                          {CurrencyFormatter.format(payload.totalEpaaValue)}
-                        </p>
-                      </span>
-                      <span>
-                        {t(
-                          'accounting.overdue.clientsWithDebtThisMonth',
-                          'N° Clientes'
-                        )}
-                        <p>
-                          {NumberFormatter.formatInteger(
-                            payload.clientsWithDebtThisMonth
-                          )}
-                        </p>
-                      </span>
-                    </div>
-                  );
-                }}
-                valuePosition="top"
-                labelFormatter={(val: number) => `$${(val / 1000).toFixed(0)}k`}
-              />
+                      </p>
+                    </span>
+                  </div>
+                );
+              }}
+              valuePosition="top"
+              labelFormatter={(val: number) => `$${(val / 1000).toFixed(0)}k`}
+            />
           </div>
         </div>
       </div>
@@ -560,7 +539,7 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
         />
         <KpiCard
           label={t('accounting.overdue.avgMonths', 'Mora Prom.')}
-          value={`${metrics.avgMonths.toFixed(1)} ${t('common.months', 'Meses')}`}
+          value={`${metrics.avgMonths.toFixed(1)} ${t('common.monthsNames', 'Meses')}`}
           icon={<Clock size={18} />}
           color="cyan"
           description={t(
@@ -628,60 +607,44 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
             </div>
           )}
           <div className="overdue-chart-body">
-              <DynamicBarChart
-                data={chartData}
-                dataKeyX="year"
-                dataKeyY="totalDebtAmount"
-                nameY={t('accounting.overdue.totalDebtAmount', 'Deuda Anual')}
-                nameX="Año"
-                yAxisFormatter={(val) => CurrencyFormatter.formatAxis(val)}
-                tooltipFormatterOrComponent={(
-                  payload: YearlyOverdueSummary
-                ) => {
-                  return (
-                    <div className="year-tooltip">
-                      <span>
-                        {t('accounting.overdue.year', 'Año')}
-                        <p>{payload.year}</p>
-                      </span>
-                      <span>
-                        {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
-                        <p>
-                          {CurrencyFormatter.format(payload.totalDebtAmount)}
-                        </p>
-                      </span>
-                      <span>
-                        {t(
-                          'accounting.overdue.totalTrashRate',
-                          'T. Tasa Basura'
-                        )}
-                        <p>
-                          {CurrencyFormatter.format(payload.totalTrashRate)}
-                        </p>
-                      </span>
-                      <span>
-                        {t(
-                          'accounting.overdue.totalEpaaValue',
-                          'T. Deuda EPAA'
-                        )}
-                        <p>
-                          {CurrencyFormatter.format(payload.totalEpaaValue)}
-                        </p>
-                      </span>
-                      <span>
-                        {t('accounting.overdue.clientsWithDebt', 'N° Clientes')}
-                        <p>
-                          {NumberFormatter.formatInteger(
-                            payload.clientsWithDebt
-                          )}
-                        </p>
-                      </span>
-                    </div>
-                  );
-                }}
-                valuePosition="top"
-                labelFormatter={(val: number) => `$${(val / 1000).toFixed(0)}k`}
-              />
+            <DynamicBarChart
+              data={chartData}
+              dataKeyX="year"
+              dataKeyY="totalDebtAmount"
+              nameY={t('accounting.overdue.totalDebtAmount', 'Deuda Anual')}
+              nameX="Año"
+              yAxisFormatter={(val) => CurrencyFormatter.formatAxis(val)}
+              tooltipFormatterOrComponent={(payload: YearlyOverdueSummary) => {
+                return (
+                  <div className="year-tooltip">
+                    <span>
+                      {t('accounting.overdue.year', 'Año')}
+                      <p>{payload.year}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.totalDebtAmount', 'Deuda Total')}
+                      <p>{CurrencyFormatter.format(payload.totalDebtAmount)}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.totalTrashRate', 'T. Tasa Basura')}
+                      <p>{CurrencyFormatter.format(payload.totalTrashRate)}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.totalEpaaValue', 'T. Deuda EPAA')}
+                      <p>{CurrencyFormatter.format(payload.totalEpaaValue)}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.clientsWithDebt', 'N° Clientes')}
+                      <p>
+                        {NumberFormatter.formatInteger(payload.clientsWithDebt)}
+                      </p>
+                    </span>
+                  </div>
+                );
+              }}
+              valuePosition="top"
+              labelFormatter={(val: number) => `$${(val / 1000).toFixed(0)}k`}
+            />
           </div>
         </div>
 
@@ -731,132 +694,116 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
             </div>
           )}
           <div className="overdue-chart-body">
-              <GradientAreaChart
-                data={chartData}
-                tooltipFormatterOrComponent={(
-                  payload: YearlyOverdueSummary
-                ) => {
-                  return (
-                    <div className="year-tooltip">
-                      <span>
-                        {t('accounting.overdue.year', 'Año')}
-                        <p>{payload.year}</p>
-                      </span>
-                      <span>
-                        {t(
-                          'accounting.overdue.totalDebtAmount',
-                          'T. Deuda Anual'
-                        )}
-                        <p>
-                          {CurrencyFormatter.format(payload.totalDebtAmount)}
-                        </p>
-                      </span>
-                      <span>
-                        {t(
-                          'accounting.overdue.totalTrashRate',
-                          'T. Tasa Basura'
-                        )}
-                        <p>
-                          {CurrencyFormatter.format(payload.totalTrashRate)}
-                        </p>
-                      </span>
-                      <span>
-                        {t(
-                          'accounting.overdue.totalEpaaValue',
-                          'T. Deuda EPAA'
-                        )}
-                        <p>
-                          {CurrencyFormatter.format(payload.totalEpaaValue)}
-                        </p>
-                      </span>
-                      <span>
-                        {t('accounting.overdue.clientsWithDebt', 'N° Clientes')}
-                        <p>
-                          {NumberFormatter.formatInteger(
-                            payload.clientsWithDebt
-                          )}
-                        </p>
-                      </span>
-                    </div>
-                  );
-                }}
-                dataKeyX="year"
-                dataKeyY="totalMonthsPastDue"
-                nameY="Meses Mora"
-                nameX="Año"
-                startColor="#a855f7"
-                endColor="#06b6d4"
-                valuePosition={isCompact ? 'none' : 'top'}
-                customLabel={({
-                  x,
-                  y,
-                  payload,
-                  index
-                }: {
-                  x: number;
-                  y: number;
-                  payload: YearlyOverdueSummary;
-                  index: number;
-                }) => {
-                  // Dynamic anchoring so the first and last labels don't get clipped or overlap the Y-axis
-                  let anchor = 'middle';
-                  let xOffset = x;
-                  if (index === 0) {
-                    anchor = 'start';
-                    xOffset = x - 5; // Push slightly right of the start dot line
-                  } else if (index === chartData.length - 1) {
-                    anchor = 'end';
-                    xOffset = x + 5; // Push slightly left of the end dot line
-                  }
-
-                  // Zig-zag pattern: one directly ABOVE the dot, the next directly BELOW the dot
-                  const isEven = index % 2 === 0;
-                  const yPosition = isEven ? y - 25 : y + 15;
-
-                  return (
-                    <text
-                      x={xOffset}
-                      y={yPosition} /* Exactly alternating up and down */
-                      textAnchor={anchor as any}
-                      className="responsive-chart-label"
-                      style={{
-                        paintOrder: 'stroke fill',
-                        stroke: 'var(--surface)',
-                        strokeLinejoin: 'round',
-                        strokeWidth: 3
-                      }}
-                    >
-                      <tspan
-                        x={xOffset}
-                        fill="#10b981" /* Green elegant color for the amount */
-                        fontSize={10}
-                        fontWeight={800}
-                      >
-                        {payload
-                          ? CurrencyFormatter.format(payload.totalDebtAmount)
-                          : ''}
-                      </tspan>
-                      <tspan
-                        x={xOffset}
-                        dy={14}
-                        fill="var(--text-main)"
-                        fontSize={11}
-                        fontWeight={700}
-                      >
+            <GradientAreaChart
+              data={chartData}
+              tooltipFormatterOrComponent={(payload: YearlyOverdueSummary) => {
+                return (
+                  <div className="year-tooltip">
+                    <span>
+                      {t('accounting.overdue.year', 'Año')}
+                      <p>{payload.year}</p>
+                    </span>
+                    <span>
+                      {t(
+                        'accounting.overdue.totalDebtAmount',
+                        'T. Deuda Anual'
+                      )}
+                      <p>{CurrencyFormatter.format(payload.totalDebtAmount)}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.totalTrashRate', 'T. Tasa Basura')}
+                      <p>{CurrencyFormatter.format(payload.totalTrashRate)}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.totalEpaaValue', 'T. Deuda EPAA')}
+                      <p>{CurrencyFormatter.format(payload.totalEpaaValue)}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.clientsWithDebt', 'N° Clientes')}
+                      <p>
                         {NumberFormatter.formatInteger(payload.clientsWithDebt)}
-                      </tspan>
-                      <tspan
-                        fill="var(--text-secondary)"
-                        fontSize={10}
-                        fontWeight={500}
-                        dx={3}
-                      >
-                        {t('common.clients', 'Clientes')}
-                      </tspan>
-                    </text>
-                  );
-                }}
-              />
+                      </p>
+                    </span>
+                  </div>
+                );
+              }}
+              dataKeyX="year"
+              dataKeyY="totalMonthsPastDue"
+              nameY="Meses Mora"
+              nameX="Año"
+              startColor="#a855f7"
+              endColor="#06b6d4"
+              valuePosition={isCompact ? 'none' : 'top'}
+              customLabel={({
+                x,
+                y,
+                payload,
+                index
+              }: {
+                x: number;
+                y: number;
+                payload: YearlyOverdueSummary;
+                index: number;
+              }) => {
+                // Dynamic anchoring so the first and last labels don't get clipped or overlap the Y-axis
+                let anchor = 'middle';
+                let xOffset = x;
+                if (index === 0) {
+                  anchor = 'start';
+                  xOffset = x - 5; // Push slightly right of the start dot line
+                } else if (index === chartData.length - 1) {
+                  anchor = 'end';
+                  xOffset = x + 5; // Push slightly left of the end dot line
+                }
+
+                // Zig-zag pattern: one directly ABOVE the dot, the next directly BELOW the dot
+                const isEven = index % 2 === 0;
+                const yPosition = isEven ? y - 25 : y + 15;
+
+                return (
+                  <text
+                    x={xOffset}
+                    y={yPosition} /* Exactly alternating up and down */
+                    textAnchor={anchor as any}
+                    className="responsive-chart-label"
+                    style={{
+                      paintOrder: 'stroke fill',
+                      stroke: 'var(--surface)',
+                      strokeLinejoin: 'round',
+                      strokeWidth: 3
+                    }}
+                  >
+                    <tspan
+                      x={xOffset}
+                      fill="#10b981" /* Green elegant color for the amount */
+                      fontSize={10}
+                      fontWeight={800}
+                    >
+                      {payload
+                        ? CurrencyFormatter.format(payload.totalDebtAmount)
+                        : ''}
+                    </tspan>
+                    <tspan
+                      x={xOffset}
+                      dy={14}
+                      fill="var(--text-main)"
+                      fontSize={11}
+                      fontWeight={700}
+                    >
+                      {NumberFormatter.formatInteger(payload.clientsWithDebt)}
+                    </tspan>
+                    <tspan
+                      fill="var(--text-secondary)"
+                      fontSize={10}
+                      fontWeight={500}
+                      dx={3}
+                    >
+                      {t('common.clients', 'Clientes')}
+                    </tspan>
+                  </text>
+                );
+              }}
+            />
           </div>
         </div>
       </div>

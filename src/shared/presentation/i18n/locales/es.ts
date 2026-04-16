@@ -368,6 +368,8 @@ export const es = {
         saturday: 'Sabado',
         sunday: 'Domingo'
       },
+      monthName: 'Mes',
+      monthsNames: 'Meses',
       months: {
         january: 'Enero',
         february: 'Febrero',
