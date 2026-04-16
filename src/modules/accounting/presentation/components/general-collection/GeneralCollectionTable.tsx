@@ -6,7 +6,6 @@ import {
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import type { GeneralCollectionResponse } from '../../../domain/models/GenelarCollection';
-import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
@@ -34,7 +33,6 @@ export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
   startDate,
   endDate
 }) => {
-  const { t } = useTranslation();
 
   const columns: Column<GeneralCollectionResponse>[] = [
     {
