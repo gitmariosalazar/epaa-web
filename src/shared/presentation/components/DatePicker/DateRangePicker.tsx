@@ -152,8 +152,32 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
     [currentMonth]
   );
 
+  const isValidDate = (dateStr: string) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+    const date = new Date(dateStr + 'T00:00:00');
+    return !isNaN(date.getTime());
+  };
+
+  const handleManualStartChange = (val: string) => {
+    setTempStart(val);
+    if (isValidDate(val) && tempEnd && isValidDate(tempEnd)) {
+      onChange(val, tempEnd);
+      // Optional: jump calendar to the new date
+      setCurrentMonth(new Date(val + 'T00:00:00'));
+    } else if (isValidDate(val) && !tempEnd) {
+      setCurrentMonth(new Date(val + 'T00:00:00'));
+    }
+  };
+
+  const handleManualEndChange = (val: string) => {
+    setTempEnd(val);
+    if (tempStart && isValidDate(tempStart) && isValidDate(val)) {
+      onChange(tempStart, val);
+    }
+  };
+
   const handleApply = () => {
-    if (tempStart && tempEnd) {
+    if (tempStart && tempEnd && isValidDate(tempStart) && isValidDate(tempEnd)) {
       onChange(tempStart, tempEnd);
       setIsOpen(false);
     }
@@ -240,11 +264,23 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   <CalendarIcon size={14} />
                   {t('common.dateRange.selected', 'Rango seleccionado')}:
                 </span>
-                <span className="date-range-picker-label">
-                  <b>{tempStart || '-'}</b>
+                <div className="date-range-picker-input-boxes" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    className="date-range-picker-manual-input"
+                    value={tempStart}
+                    onChange={(e) => handleManualStartChange(e.target.value)}
+                    placeholder="YYYY-MM-DD"
+                  />
                   <ArrowRight size={12} style={{ opacity: 0.5 }} />
-                  <b>{tempEnd || '-'}</b>
-                </span>
+                  <input
+                    type="text"
+                    className="date-range-picker-manual-input"
+                    value={tempEnd}
+                    onChange={(e) => handleManualEndChange(e.target.value)}
+                    placeholder="YYYY-MM-DD"
+                  />
+                </div>
               </div>
             </div>
 

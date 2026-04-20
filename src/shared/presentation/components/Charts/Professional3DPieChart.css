@@ -1,0 +1,91 @@
+.pro-3d-pie-container {
+  position: relative;
+  width: 100%;
+  height: auto;
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  user-select: none;
+  padding: 2rem;
+}
+
+.tooltip-container {
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: translate(var(--tx), calc(var(--ty) + var(--lift)));
+}
+
+.pro-3d-pie-svg-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 450px;
+}
+
+.pro-3d-pie-svg {
+  filter: drop-shadow(0 25px 45px rgba(0, 0, 0, 0.5));
+  width: 100%;
+  height: auto;
+}
+
+.pro-3d-pie-slice-top,
+.pro-3d-pie-side {
+  stroke-linejoin: round;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.donut-legend-header {
+  color: var(--text-secondary);
+  font-weight: bold;
+  margin-bottom: 1rem;
+  background-color: var(--surface);
+  padding: 0.5rem;
+  border-radius: 5px;
+}
+
+/* Heartbeat Animation */
+@keyframes pro3dHeartbeat {
+  0% {
+    transform: scale(1) translateY(var(--lift)) translate(var(--tx), var(--ty));
+  }
+  14% {
+    transform: scale(1.04) translateY(var(--lift))
+      translate(var(--tx), var(--ty));
+  }
+  28% {
+    transform: scale(1) translateY(var(--lift)) translate(var(--tx), var(--ty));
+  }
+  42% {
+    transform: scale(1.04) translateY(var(--lift))
+      translate(var(--tx), var(--ty));
+  }
+  70% {
+    transform: scale(1) translateY(var(--lift)) translate(var(--tx), var(--ty));
+  }
+}
+
+.is-active-slice {
+  animation: pro3dHeartbeat 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 12px 15px rgba(0, 0, 0, 0.35));
+}
+
+/* Tooltip Overlay Fix */
+.pro-3d-tooltip {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1000;
+  transition: all 0.1s ease-out;
+}
+
+@media (max-width: 1024px) {
+  .donut-wrapper {
+    flex-direction: column !important;
+    align-items: center;
+  }
+}

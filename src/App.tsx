@@ -51,6 +51,8 @@ import { PropertiesPage } from '@/modules/properties/presentation/pages/Properti
 import { OverduePaymentsPage } from './modules/accounting/presentation/pages/overdue/OverduePaymentsPage';
 import { GeneralCollectionProvider } from '@/modules/accounting/presentation/context/general-collection/GeneralCollectionContext';
 import { GeneralCollectionPage } from '@/modules/accounting/presentation/pages/general-collection/GeneralCollectionPage';
+import { AgreementsProvider } from '@/modules/accounting/presentation/context/agreements/AgreementsContext';
+import { AgreementsPage } from '@/modules/accounting/presentation/pages/agreements/AgreementsPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -209,6 +211,14 @@ function App() {
                     <GeneralCollectionProvider>
                       <GeneralCollectionPage />
                     </GeneralCollectionProvider>
+                  }
+                />
+                <Route
+                  path="/accounting/agreements"
+                  element={
+                    <AgreementsProvider>
+                      <AgreementsPage />
+                    </AgreementsProvider>
                   }
                 />
                 <Route

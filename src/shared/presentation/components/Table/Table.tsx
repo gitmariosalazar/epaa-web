@@ -71,6 +71,9 @@ interface TableProps<T> {
   getRowClassName?: (item: T) => string | undefined;
   onEndReached?: () => void;
   hasMore?: boolean;
+  showColumnModal?: boolean;
+  showTotalRecords?: boolean;
+  showRowsPerPage?: boolean;
 }
 
 export const Table = <T extends { [key: string]: any }>({
@@ -94,7 +97,10 @@ export const Table = <T extends { [key: string]: any }>({
   getRowColor,
   getRowClassName,
   onEndReached,
-  hasMore
+  hasMore,
+  showColumnModal = true,
+  showTotalRecords = true,
+  showRowsPerPage = true
 }: TableProps<T>) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -505,62 +511,72 @@ export const Table = <T extends { [key: string]: any }>({
         <div
           className={`table-pagination-container ${!hasExports ? 'table-pagination-container--no-exports' : ''}`}
         >
-          <div className="table-hide-unhide-columns">
-            <Tooltip
-              content={t(
-                'common.table.hideUnhideColumns',
-                'Ocultar/Mostrar columnas'
-              )}
-              position="top"
-              followCursor={false}
-              themeColor="primary"
-            >
-              <Button
-                variant="dashed"
-                color="amber"
-                iconOnly
-                size="xs"
-                leftIcon={<HiViewGridAdd size={20} />}
-                onClick={() => setIsColumnModalOpen(true)}
-              />
-            </Tooltip>
-          </div>
-          <div className="table-pagination-left">
-            <span className="table-pagination-records">
-              {t('common.table.totalRecords', {
-                count: data.length,
-                defaultValue: `Total: ${data.length}${hasMore ? '+' : ''}`
-              })}
-            </span>
-
-            <div
-              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
-            >
-              <span
-                className="table-pagination-records"
-                style={{ opacity: 0.7, fontSize: '0.75rem' }}
+          {showColumnModal && (
+            <div className="table-hide-unhide-columns">
+              <Tooltip
+                content={t(
+                  'common.table.hideUnhideColumns',
+                  'Ocultar/Mostrar columnas'
+                )}
+                position="top"
+                followCursor={false}
+                themeColor="primary"
               >
-                {t('common.table.rowsPerPage', {
-                  defaultValue: 'Mostrar:'
-                })}
-              </span>
-              <Tooltip content={t('common.table.rowsPerPage', 'Mostrar:')}>
-                <select
-                  value={currentLimit}
-                  onChange={(e) => {
-                    setCurrentLimit(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="table-rows-select"
-                >
-                  {[5, 10, 15, 20, 50, 100].map((val) => (
-                    <option key={val} value={val}>
-                      {val}
-                    </option>
-                  ))}
-                </select>
+                <Button
+                  variant="dashed"
+                  color="amber"
+                  iconOnly
+                  size="xs"
+                  leftIcon={<HiViewGridAdd size={20} />}
+                  onClick={() => setIsColumnModalOpen(true)}
+                />
               </Tooltip>
             </div>
+          )}
+          <div className="table-pagination-left">
+            {showTotalRecords && (
+              <span className="table-pagination-records">
+                {t('common.table.totalRecords', {
+                  count: data.length,
+                  defaultValue: `Total: ${data.length}${hasMore ? '+' : ''}`
+                })}
+              </span>
+            )}
+
+            {showRowsPerPage && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem'
+                }}
+              >
+                <span
+                  className="table-pagination-records"
+                  style={{ opacity: 0.7, fontSize: '0.75rem' }}
+                >
+                  {t('common.table.rowsPerPage', {
+                    defaultValue: 'Mostrar:'
+                  })}
+                </span>
+                <Tooltip content={t('common.table.rowsPerPage', 'Mostrar:')}>
+                  <select
+                    value={currentLimit}
+                    onChange={(e) => {
+                      setCurrentLimit(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="table-rows-select"
+                  >
+                    {[5, 10, 15, 20, 50, 100].map((val) => (
+                      <option key={val} value={val}>
+                        {val}
+                      </option>
+                    ))}
+                  </select>
+                </Tooltip>
+              </div>
+            )}
           </div>
 
           <div className="table-pagination-center">

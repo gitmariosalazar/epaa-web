@@ -264,6 +264,26 @@
   border-top: 1px solid var(--border-color);
 }
 
+.datepicker-manual-input {
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  background-color: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  color: var(--text-main);
+  font-size: 0.85rem;
+  font-weight: 600;
+  outline: none;
+  transition: all 0.2s;
+  font-family: inherit;
+  margin-bottom: 0.25rem;
+}
+
+.datepicker-manual-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
 .datepicker-footer-actions {
   display: flex;
   gap: 0.5rem;

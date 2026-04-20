@@ -11,6 +11,7 @@ import {
 import { CustomTooltip } from './CustomTooltip';
 import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 import { PercentageFormatter } from '@/shared/utils/formatters/PercentageFormatter';
+import { DEFAULT_PALETTE } from '../../utils/colors/traffic-lights.colors';
 
 export interface DynamicPieChartProps<T> {
   data: T[];
@@ -27,29 +28,6 @@ export interface DynamicPieChartProps<T> {
   ) => React.ReactNode | [string, string] | string;
   showLegend?: boolean;
 }
-
-const DEFAULT_PALETTE = [
-  '#3b82f6', // blue-500
-  '#10b981', // emerald-500
-  '#f59e0b', // amber-500
-  '#8b5cf6', // violet-500
-  '#ef4444', // red-500
-  '#06b6d4', // cyan-500
-  '#f97316', // orange-500
-  '#6366f1', // indigo-500
-  '#84cc16', // lime-500
-  '#ec4899', // pink-500
-  '#14b8a6', // teal-500
-  '#eab308', // yellow-500
-  '#a855f7', // purple-500
-  '#f43f5e', // rose-500
-  '#0ea5e9', // sky-500
-  '#22c55e', // green-500
-  '#d946ef', // fuchsia-500
-  '#64748b', // slate-500
-  '#0284c7', // light blue-600
-  '#4f46e5' // indigo-600
-];
 
 // Custom active shape for a sleek hover effect on the donut slices
 const renderActiveShape = (props: any) => {
@@ -165,9 +143,13 @@ export function DynamicPieChart<T extends Record<string, any>>({
 
   return (
     <div className="donut-wrapper">
-      <div 
-        className="donut-svg-container" 
-        style={height !== '100%' ? { height, width: height, flexShrink: 0 } : undefined}
+      <div
+        className="donut-svg-container"
+        style={
+          height !== '100%'
+            ? { height, width: height, flexShrink: 0 }
+            : undefined
+        }
       >
         <ResponsiveContainer width="100%" height="100%">
           <PieChart
@@ -180,69 +162,70 @@ export function DynamicPieChart<T extends Record<string, any>>({
               nameKey={nameKey}
               dataKey={dataKey}
               cx="50%"
-          cy="50%"
-          innerRadius="55%"
-          outerRadius="75%"
-          paddingAngle={8}
-          activeIndex={activeIndex}
-          activeShape={renderActiveShape}
-          onMouseEnter={onPieEnter}
-          onMouseLeave={onPieLeave}
-          stroke="var(--surface)" // blends the border with background
-          strokeWidth={2}
-        >
-          {data.map((entry: any, index: number) => {
-            // Check if the object itself has a specific color mapping
-            const color = entry.color || colors[index % colors.length];
-            return <Cell key={`cell-${index}`} fill={color} />;
-          })}
-          {activeIndex === -1 && (
-            <Label
-              position="center"
-              content={({ viewBox }) => {
-                const { cx, cy } = viewBox as any;
-                return (
-                  <g>
-                    <text
-                      x={cx}
-                      y={cy}
-                      dy={-6}
-                      textAnchor="middle"
-                      fill="var(--text-secondary)"
-                      fontSize={12}
-                      fontWeight={700}
-                    >
-                      TOTAL AMOUNT
-                    </text>
-                    <text
-                      x={cx}
-                      y={cy}
-                      dy={18}
-                      textAnchor="middle"
-                      fill="var(--text-main)"
-                      fontSize={22}
-                      fontWeight={800}
-                    >
-                      {total.toLocaleString()}
-                    </text>
-                  </g>
-                );
-              }}
-            />
-          )}
-        </Pie>
+              cy="50%"
+              innerRadius="55%"
+              outerRadius="75%"
+              paddingAngle={8}
+              activeIndex={activeIndex}
+              activeShape={renderActiveShape}
+              onMouseEnter={onPieEnter}
+              onMouseLeave={onPieLeave}
+              stroke="var(--surface)" // blends the border with background
+              strokeWidth={2}
+            >
+              {data.map((entry: any, index: number) => {
+                // Check if the object itself has a specific color mapping
+                const color = entry.color || colors[index % colors.length];
+                return <Cell key={`cell-${index}`} fill={color} />;
+              })}
+              {activeIndex === -1 && (
+                <Label
+                  position="center"
+                  content={({ viewBox }) => {
+                    const { cx, cy } = viewBox as any;
+                    return (
+                      <g>
+                        <text
+                          x={cx}
+                          y={cy}
+                          dy={-6}
+                          textAnchor="middle"
+                          fill="var(--text-secondary)"
+                          fontSize={12}
+                          fontWeight={700}
+                        >
+                          TOTAL AMOUNT
+                        </text>
+                        <text
+                          x={cx}
+                          y={cy}
+                          dy={18}
+                          textAnchor="middle"
+                          fill="var(--text-main)"
+                          fontSize={22}
+                          fontWeight={800}
+                        >
+                          {total.toLocaleString()}
+                        </text>
+                      </g>
+                    );
+                  }}
+                />
+              )}
+            </Pie>
 
-        <RechartsTooltip
-          position={tooltipPos}
-          wrapperClassName="custom-recharts-tooltip custom-tooltip-wrapper-pie"
-          content={
-            <CustomTooltip
-              tooltipFormatterOrComponent={tooltipFormatterOrComponent as any}
+            <RechartsTooltip
+              position={tooltipPos}
+              wrapperClassName="custom-recharts-tooltip custom-tooltip-wrapper-pie"
+              content={
+                <CustomTooltip
+                  tooltipFormatterOrComponent={
+                    tooltipFormatterOrComponent as any
+                  }
+                />
+              }
             />
-          }
-        />
-
-        </PieChart>
+          </PieChart>
         </ResponsiveContainer>
       </div>
 
@@ -274,10 +257,7 @@ export function DynamicPieChart<T extends Record<string, any>>({
                 <span className="donut-legend-value">
                   {((value / total) * 100).toFixed(1)}%
                 </span>
-                <span
-                  className="donut-legend-amount"
-                  style={{ color }}
-                >
+                <span className="donut-legend-amount" style={{ color }}>
                   {(item as any)?.fmt
                     ? (item as any).fmt(value)
                     : value.toLocaleString()}

@@ -1,9 +1,11 @@
 .progress-bar-container {
-  width: 100%;
   background-color: var(--border-color, #e5e7eb);
   border-radius: 9999px;
   overflow: hidden;
   position: relative;
+  height: 8px;
+  width: 100%;
+  align-self: center;
 }
 
 .progress-bar-fill {
@@ -38,17 +40,19 @@
 }
 
 .progress-wrapper {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 12px;
   width: 100%;
+  height: auto;
 }
 
 .progress-label {
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: bold;
   min-width: 48px;
-  text-align: right;
+  text-align: center;
   font-feature-settings: 'tnum';
   font-variant-numeric: tabular-nums;
 }

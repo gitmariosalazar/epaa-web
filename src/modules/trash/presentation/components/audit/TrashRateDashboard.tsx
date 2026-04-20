@@ -295,18 +295,21 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
   const barItems: BarItem[] = [
     {
       label: 'Total a Recaudar',
+      name: 'Total a Recaudar',
       value: k.totalToCollect ?? 0,
       color: 'blue',
       fmt: fmtMoney
     },
     {
       label: 'Total Cobrado',
+      name: 'Total Cobrado',
       value: k.totalCollected ?? 0,
       color: 'green',
       fmt: fmtMoney
     },
     {
       label: 'Total Pendiente',
+      name: 'Total Pendiente',
       value: k.totalPending ?? 0,
       color: 'red',
       fmt: fmtMoney

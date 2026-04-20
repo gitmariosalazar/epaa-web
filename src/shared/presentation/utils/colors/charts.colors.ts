@@ -1,24 +1,36 @@
-export const CHART_COLORS = [
+import { chartColorService, type SemanticColor } from './ChartColorManager';
+
+export const CHART_COLORS: SemanticColor[] = [
   'blue',
   'amber',
-  'purple',
-  'red',
-  'green',
   'orange',
-  'yellow',
-  'lime',
-  'emerald',
-  'teal',
-  'cyan',
-  'sky',
+  'red',
   'indigo',
   'pink',
-  'rose',
+  'purple',
+  'teal',
+  'sky',
+  'cyan',
+  'lime',
   'fuchsia',
+  'rose',
   'slate',
-  'gray',
-  'zinc',
-  'neutral'
-] as const;
+  'emerald',
+  'green',
+  'yellow',
+  'violet'
+];
 
-export type ChartColor = typeof CHART_COLORS[number];
+export type { SemanticColor as ChartColor };
+
+/**
+ * Global accessor for chart colors to maintain SOLID principles
+ */
+export const getChartColor = (nameOrIndex: string | number): string => {
+  if (typeof nameOrIndex === 'number') {
+    return chartColorService.getColorByIndex(nameOrIndex);
+  }
+  return chartColorService.getColorByName(nameOrIndex);
+};
+
+export const DEFAULT_PALETTE = CHART_COLORS.map((c) => chartColorService.getColorByName(c));

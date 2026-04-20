@@ -163,6 +163,11 @@ export const useNavigation = (): NavSection[] => {
               icon: <IconIncomes />,
               label: 'Ingresos General',
               to: '/accounting/general-collection'
+            },
+            {
+              icon: <IconPayments size={18} />,
+              label: 'Convenios',
+              to: '/accounting/agreements'
             }
           ]
         }

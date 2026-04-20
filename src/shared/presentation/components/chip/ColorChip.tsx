@@ -50,7 +50,7 @@ export const ColorChip: React.FC<ColorChipProps> = ({
       {withDot && <span className="color-chip__dot" />}
 
       {icon && iconPosition === 'left' && icon}
-      <span>{label}</span>
+      <span style={{ fontWeight: 'bold' }}>{label}</span>
       {icon && iconPosition === 'right' && icon}
     </div>
   );

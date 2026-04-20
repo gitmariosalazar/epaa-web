@@ -1,6 +1,7 @@
 /* src/shared/presentation/components/Charts/DonutChart.tsx */
 import React, { useMemo, memo, useState } from 'react';
 import { Tooltip } from '../common/Tooltip/Tooltip';
+import { chartColorService } from '@/shared/presentation/utils/colors/ChartColorManager';
 import type { ChartColor } from '@/shared/presentation/utils/colors/charts.colors';
 import './Charts.css';
 import { Button } from '../Button/Button';
@@ -58,13 +59,7 @@ export const DonutChart: React.FC<DonutChartProps> = memo(
     const cy = 140; // Center Y
 
     // Resolver to map generic string colors to CSS variables
-    const resolveColor = (c: string) =>
-      c.startsWith('#') ||
-      c.startsWith('rgb') ||
-      c.startsWith('var') ||
-      c.startsWith('hsl')
-        ? c
-        : `var(--palette-${c}, ${c})`;
+    const resolveColor = (c: string) => chartColorService.getColorByName(c);
 
     const paths = useMemo(() => {
       let currentAngle = -Math.PI / 2; // Start from top

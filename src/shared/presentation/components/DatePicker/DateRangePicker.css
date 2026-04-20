@@ -314,11 +314,12 @@
   font-weight: 500;
 }
 
-.date-range-picker-label b {
+.date-range-picker-label b,
+.date-range-picker-manual-input {
   color: var(--text-main);
-  font-size: 1rem;
-  font-weight: 800;
-  padding: 0.35rem 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.35rem 0.5rem;
   background-color: var(--surface);
   border-radius: 0.5rem;
   border: 1px solid var(--border-color);
@@ -326,6 +327,14 @@
   min-width: 120px;
   text-align: center;
   letter-spacing: 0.02em;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.date-range-picker-manual-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .date-range-picker-actions {

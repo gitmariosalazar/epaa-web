@@ -260,7 +260,16 @@
 
 .compact-table {
   min-height: auto;
-  flex: none;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.payments-table-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 /* ── Dynamic Bar Chart Dashboard ── */
@@ -308,6 +317,24 @@
 }
 
 .dashboard-stats-grid {
-  gap: 0.5rem;
-  margin-top: -1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1rem;
+  margin-top: -1rem;
+  align-items: stretch;
+}
+
+.dashboard-chart-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  min-height: 440px;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }

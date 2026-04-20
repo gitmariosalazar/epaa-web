@@ -32,6 +32,10 @@ import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import '../../styles/payments/GeneralCollectionDashboards.css';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import {
+  chartColorService,
+  type SemanticColor
+} from '@/shared/presentation/utils/colors/ChartColorManager';
 
 interface GeneralCollectionDashboardProps {
   kpi: GeneralKPIResponse | null;
@@ -56,25 +60,29 @@ export const GeneralCollectionDashboard: React.FC<
   );
   const totalAmount = sections.reduce((sum, s) => sum + s.amountTotal, 0);
 
+  const SUCCESS_COLOR: SemanticColor = 'green';
+  const DANGER_COLOR: SemanticColor = 'red';
+
   const moneySlices: DonutSlice[] = [
     {
       label: 'Recaudado',
       value: totalAmountCollected,
-      color: 'green',
+      color: chartColorService.getColorByName(SUCCESS_COLOR),
       fmt: (n: number) => CurrencyFormatter.format(n)
     },
     {
       label: 'Pendiente',
       value: totalAmountPending,
-      color: 'red',
+      color: chartColorService.getColorByName(DANGER_COLOR),
       fmt: (n: number) => CurrencyFormatter.format(n)
     }
   ];
 
   const barItems: BarItem[] = sections.map((s, idx) => ({
     label: s.typeKPI,
+    name: s.typeKPI,
     value: s.amountCollected,
-    color: CHART_COLORS[idx % CHART_COLORS.length] as any,
+    color: CHART_COLORS[idx % CHART_COLORS.length],
     fmt: (n: number) => CurrencyFormatter.format(n)
   }));
 

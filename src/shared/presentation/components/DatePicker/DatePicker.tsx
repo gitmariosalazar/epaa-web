@@ -41,6 +41,12 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     value ? initialDate : null
   );
+  const [manualValue, setManualValue] = useState<string>(value || '');
+
+  // Sync manual value when value prop changes
+  useEffect(() => {
+    setManualValue(value || '');
+  }, [value]);
 
   // Close calendar if clicking outside
   useEffect(() => {
@@ -130,6 +136,26 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
     }
   };
 
+  const isValidDate = (dateStr: string) => {
+    if (view === 'date') return /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
+    if (view === 'month') return /^\d{4}-\d{2}$/.test(dateStr);
+    if (view === 'year') return /^\d{4}$/.test(dateStr);
+    return false;
+  };
+
+  const handleManualChange = (val: string) => {
+    setManualValue(val);
+    if (isValidDate(val)) {
+      onChange(val);
+      // Optional: jump calendar to the new date
+      const parsed = new Date(val + (view === 'date' ? 'T00:00:00' : view === 'month' ? '-01T00:00:00' : '-01-01T00:00:00'));
+      if (!isNaN(parsed.getTime())) {
+        setCurrentMonth(parsed);
+        setSelectedDate(parsed);
+      }
+    }
+  };
+
   const handleDateSelect = (day: number) => {
     const newDate = new Date(
       currentMonth.getFullYear(),
@@ -143,7 +169,9 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
     const month = String(newDate.getMonth() + 1).padStart(2, '0');
     const d = String(newDate.getDate()).padStart(2, '0');
 
-    onChange(`${year}-${month}-${d}`);
+    const formatted = `${year}-${month}-${d}`;
+    setManualValue(formatted);
+    onChange(formatted);
     setIsOpen(false);
   };
 
@@ -287,6 +315,7 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setManualValue('');
     onChange('');
     setIsOpen(false);
   };
@@ -351,6 +380,14 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
             <div className="datepicker-months-grid">{renderYearGrid()}</div>
           )}
           <div className="datepicker-footer">
+            <input
+              type="text"
+              className="datepicker-manual-input"
+              value={manualValue}
+              placeholder={view === 'date' ? 'YYYY-MM-DD' : view === 'month' ? 'YYYY-MM' : 'YYYY'}
+              onChange={(e) => handleManualChange(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
+            />
             <Button variant="ghost" size="sm" onClick={handleClear}>
               {t('common.datePicker.clear')}
             </Button>
@@ -370,24 +407,12 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (selectedDate) {
-                    const valueToEmit =
-                      view === 'year'
-                        ? `${selectedDate.getFullYear()}`
-                        : view === 'month'
-                          ? `${selectedDate.getFullYear()}-${String(
-                              selectedDate.getMonth() + 1
-                            ).padStart(2, '0')}`
-                        : `${selectedDate.getFullYear()}-${String(
-                            selectedDate.getMonth() + 1
-                          ).padStart(2, '0')}-${String(
-                            selectedDate.getDate()
-                          ).padStart(2, '0')}`;
-                    onChange(valueToEmit);
+                  if (manualValue) {
+                    onChange(manualValue);
                     setIsOpen(false);
                   }
                 }}
-                disabled={!selectedDate}
+                disabled={!manualValue}
               >
                 {t('common.datePicker.selectDate')}
               </Button>

@@ -123,3 +123,82 @@ WHERE (
       ABS(ISNULL(di.tasa_basura, 0) - ISNULL(V.Valor, 0)) > 0.01
   )
 ORDER BY integrity_gap_indivual DESC, di.Fecha_Pago DESC;
+
+
+/*
+Datos Ingreso Convenio
+*/
+-- Consultar Datos Ingreso Convenio General Individual
+SELECT
+    di.id                       AS income_id,
+    di.clave_catastral          AS cadastral_key,
+    c.CED_IDENT_CIUDADANO       AS card_id,
+    c.NOMBRES_CIUDADANO         AS first_name,
+    c.APELLIDOS_CIUDADANO       AS last_name,
+    di.fecha_emision            AS issue_date,
+    di.fecha_vencimiento        AS due_date,
+    di.fecha_pago               AS payment_date,
+    di.estado_pago              AS payment_status,
+    di.usuario_cobro            AS collected_by,
+    di.forma_de_pago            AS payment_method,
+    di.valor_capital            AS principal_value,
+    di.valor_interes            AS interest_value,
+    di.valor_recargo            AS penalty_value,
+    di.detalle                  AS details,
+    di.n_cuotas                 AS total_installments,
+    di.cuota                    AS current_installment
+FROM Datos_Ingreso_Convenio di
+INNER JOIN CIUDADANO c
+    ON c.CED_IDENT_CIUDADANO = di.ciudadano_id
+WHERE di.fecha_emision >= @Date_Start AND di.fecha_emision <= @Date_End
+ORDER BY di.fecha_emision DESC ;
+
+
+/*
+    Consultar Datos Ingreso Convenio Agrupado por Cliente
+forma_de_pago
+TransBanPI
+Tarjeta
+Transferencia
+Cheque
+
+Efectivo
+NotaDeCredito
+
+*/
+SET NOCOUNT ON;
+
+DECLARE @Date_Start DATETIME
+DECLARE @Date_End   DATETIME
+
+SET @Date_Start = CONVERT(DATETIME, '2026-01-01 00:00:00', 120)
+SET @Date_End   = CONVERT(DATETIME, '2026-04-15 23:59:59', 120)
+
+SELECT
+    di.clave_catastral          AS cadastral_key,
+    c.CED_IDENT_CIUDADANO       AS card_id,
+    c.NOMBRES_CIUDADANO         AS first_name,
+    c.APELLIDOS_CIUDADANO       AS last_name,
+    COUNT(di.id)                AS total_incomes,
+    SUM(di.valor_capital)       AS total_principal_value,
+    SUM(di.valor_interes)       AS total_interest_value,
+    SUM(di.valor_recargo)       AS total_surcharge_value,
+    SUM(di.valor_capital + di.valor_interes + di.valor_recargo) AS total_amount_value,
+    -- Contar por estado de pago
+    COUNT(CASE WHEN di.estado_pago = 0 THEN 1 END) AS pending_incomes,
+    COUNT(CASE WHEN di.estado_pago = 1 THEN 1 END) AS paid_incomes,
+    -- Contar por forma de pago
+    COUNT(CASE WHEN di.forma_de_pago = 'TransBanPI' THEN 1 END) AS transbanpi_incomes,
+    COUNT(CASE WHEN di.forma_de_pago = 'Tarjeta' THEN 1 END) AS card_incomes,
+    COUNT(CASE WHEN di.forma_de_pago = 'Transferencia' THEN 1 END) AS transfer_incomes,
+    COUNT(CASE WHEN di.forma_de_pago = 'Cheque' THEN 1 END) AS check_incomes,
+    COUNT(CASE WHEN di.forma_de_pago = 'Efectivo' THEN 1 END) AS cash_incomes,
+    COUNT(CASE WHEN di.forma_de_pago = 'NotaDeCredito' THEN 1 END) AS credit_note_incomes,
+    COUNT(CASE WHEN di.forma_de_pago IS NULL THEN 1 END) AS null_incomes
+FROM Datos_Ingreso_Convenio di
+INNER JOIN CIUDADANO c
+    ON c.CED_IDENT_CIUDADANO = di.ciudadano_id
+WHERE di.fecha_emision >= @Date_Start AND di.fecha_emision <= @Date_End
+GROUP BY c.CED_IDENT_CIUDADANO,
+         di.clave_catastral, c.CED_IDENT_CIUDADANO, c.NOMBRES_CIUDADANO, c.APELLIDOS_CIUDADANO
+ORDER BY c.CED_IDENT_CIUDADANO DESC ;

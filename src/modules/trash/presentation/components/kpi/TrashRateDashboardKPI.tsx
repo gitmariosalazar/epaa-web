@@ -220,18 +220,21 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
   const barItems: BarItem[] = [
     {
       label: 'Total a Recaudar',
+      name: 'Total a Recaudar',
       value: k.grossAmount ?? 0,
       color: 'blue',
       fmt: fmtMoney
     },
     {
       label: 'Notas de Crédito',
+      name: 'Notas de Crédito',
       value: k.creditNotesAmount ?? 0,
       color: 'amber',
       fmt: fmtMoney
     },
     {
       label: 'Total Recaudado',
+      name: 'Total Recaudado',
       value: paidAmount,
       color: 'green',
       fmt: fmtMoney

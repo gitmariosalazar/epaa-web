@@ -1,6 +1,7 @@
 import React from 'react';
 import './ProgressBar.css';
 import { ColorChip } from '../chip/ColorChip';
+import { PercentageFormatter } from '@/shared/utils/formatters/PercentageFormatter';
 
 interface ProgressBarProps {
   /** Current value (0-100) */
@@ -12,6 +13,7 @@ interface ProgressBarProps {
   /** Whether to show the percentage label next to the bar */
   showLabel?: boolean;
   /** Additional class name for the container */
+  showProgressBar?: boolean;
   className?: string;
 }
 
@@ -20,6 +22,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   color = '#3b82f6', // Default blue if no color provided
   height = '8px',
   showLabel = true,
+  showProgressBar = true,
   className = ''
 }) => {
   // Clamp value between 0 and 100
@@ -27,31 +30,33 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
 
   return (
     <div className={`progress-wrapper ${className}`}>
-      <div
-        className="progress-bar-container"
-        style={{ height }}
-        role="progressbar"
-        aria-valuenow={normalizedValue}
-        aria-valuemin={0}
-        aria-valuemax={100}
-      >
+      {showProgressBar && (
         <div
-          className="progress-bar-fill"
-          style={{
-            width: `${normalizedValue}%`,
-            backgroundColor: color
-          }}
-        />
-      </div>
+          className="progress-bar-container"
+          style={{ height }}
+          role="progressbar"
+          aria-valuenow={normalizedValue}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
+          <div
+            className="progress-bar-fill"
+            style={{
+              width: `${normalizedValue}%`,
+              backgroundColor: color
+            }}
+          />
+        </div>
+      )}
       {showLabel && (
-        <span className="progress-label" style={{ color }}>
+        <div className="progress-label">
           <ColorChip
             color={color}
-            label={`${normalizedValue.toFixed(1)}%`}
+            label={`${PercentageFormatter.formatWithDecimals(value / 100)}`}
             size="sm"
             variant="soft"
           />
-        </span>
+        </div>
       )}
     </div>
   );

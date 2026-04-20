@@ -455,7 +455,7 @@ export function MultiLineChart<T extends object>({
 
       {/* ── Legend: real DOM element below SVG — zero overlap with X axis ── */}
       {showLegend && (
-        <div style={{ flexShrink: 0, paddingTop: '8px' }}>
+        <div style={{ flexShrink: 0, paddingTop: '16px', paddingBottom: '8px', zIndex: 10 }}>
           <CustomLegend series={series} />
         </div>
       )}
