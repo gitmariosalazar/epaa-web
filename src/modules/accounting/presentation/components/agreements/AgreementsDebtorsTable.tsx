@@ -34,7 +34,20 @@ export const AgreementsDebtorsTable: React.FC<AgreementsDebtorsTableProps> = ({
     },
     {
       header: 'Clave Catastral',
-      accessor: 'cadastralKey',
+      accessor: (item) =>
+        item.cadastralKey === '0' ? (
+          <ColorChip
+            label={`${item.cadastralKey}`}
+            status="warning"
+            variant="soft"
+            size="sm"
+          />
+        ) : item.cadastralKey ? (
+          item.cadastralKey
+        ) : (
+          <ColorChip label="S/C" status="warning" variant="soft" size="sm" />
+        ),
+      sortKey: 'cadastralKey',
       sortable: true,
       id: 'cadastralKey'
     },

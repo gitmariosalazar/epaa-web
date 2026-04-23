@@ -4,6 +4,8 @@ import '@/shared/presentation/styles/ColorChip.css';
 export interface ColorChipProps {
   /** The main color of the chip. Can be a CSS variable or hex code. */
   color?: string;
+  /** Semantic status color. If provided, overrides 'color'. */
+  status?: 'success' | 'warning' | 'error' | 'info' | 'primary' | 'secondary' | 'accent';
   label: React.ReactNode;
   size?: 'xs' | 'sm' | 'md' | 'lg';
   variant?: 'solid' | 'filled' | 'outline' | 'soft' | 'ghost';
@@ -18,6 +20,7 @@ export interface ColorChipProps {
 
 export const ColorChip: React.FC<ColorChipProps> = ({
   color = 'var(--primary)',
+  status,
   label,
   size = 'md',
   variant = 'solid',
@@ -29,8 +32,10 @@ export const ColorChip: React.FC<ColorChipProps> = ({
 }) => {
   const isInteractive = !!onClick;
 
+  const finalColor = status ? `var(--${status})` : color;
+
   const style = {
-    '--chip-color': color
+    '--chip-color': finalColor
   } as CSSProperties;
 
   return (

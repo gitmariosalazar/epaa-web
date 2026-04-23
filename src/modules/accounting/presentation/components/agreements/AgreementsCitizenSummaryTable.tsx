@@ -9,6 +9,7 @@ import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import type { CitizenSummary } from '../../../domain/models/Agreements';
 import '../../styles/payments/PaymentsTable.css';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 
 interface AgreementsCitizenSummaryTableProps {
   data: CitizenSummary[];
@@ -26,7 +27,19 @@ export const AgreementsCitizenSummaryTable: React.FC<
     { header: 'Cédula/RUC', accessor: 'cardId', sortable: true, id: 'cardId' },
     {
       header: 'Clave Catastral',
-      accessor: (item) => item.cadastralKey || 'Sin Clave Catastral',
+      accessor: (item) =>
+        item.cadastralKey === '0' ? (
+          <ColorChip
+            label={`${item.cadastralKey}`}
+            status="warning"
+            variant="soft"
+            size="sm"
+          />
+        ) : item.cadastralKey ? (
+          item.cadastralKey
+        ) : (
+          <ColorChip label={'S/C'} status="warning" variant="soft" size="sm" />
+        ),
       sortable: true,
       id: 'cadastralKey'
     },
