@@ -20,6 +20,7 @@ import { useDashboardController } from '@/modules/dashboard/presentation/hooks/u
 
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
+import { useSimulatedProgress } from '@/shared/presentation/components/CircularProgress/useSimulatedProgress';
 
 export const DashboardHome = () => {
   const { t } = useTranslation();
@@ -38,6 +39,8 @@ export const DashboardHome = () => {
   } = useDashboardController();
 
   const pickerRef = React.useRef<HTMLInputElement>(null);
+
+  const progress = useSimulatedProgress(loading);
 
   return (
     <DashboardFocusProvider>
@@ -75,32 +78,23 @@ export const DashboardHome = () => {
 
         {/* ── Dashboard Content Wrapper with Global Loader ── */}
         <div className="dashboard-content-rel">
-          {loading && (
+          {(loading || progress > 0) && (
             <div className="dashboard-global-loader fade-in">
               <div className="loader-glass-card">
                 <CircularProgress
                   size={140}
                   strokeWidth={8}
-                  label={
-                    <div className="loader-text-group">
-                      <span className="loader-main-text">
-                        {t('common.loading')}
-                      </span>
-                      <span className="loader-sub-text">
-                        {t(
-                          'dashboard.loadingData',
-                          'Sincronizando estadísticas...'
-                        )}
-                      </span>
-                    </div>
-                  }
+                  progress={progress}
+                  label={t('common.loading', 'Loading...')}
                 />
               </div>
             </div>
           )}
 
           <div
-            className={`dashboard-main-content ${loading ? 'content-blur' : ''}`}
+            className={
+              'dashboard-main-content ' + (loading ? 'content-blur' : '')
+            }
           >
             <div style={{ marginBottom: '-1.5rem' }}>
               <DashboardWidgetWrapper

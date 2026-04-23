@@ -2,15 +2,17 @@ import { useState, useMemo } from 'react';
 import { useAgreements } from './useAgreements';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import type { dateFilter } from '../../../domain/dto/params/DataEntryParams';
+import type { SearchType } from '../../../domain/dto/params/AgreementsParams';
 
 export type AgreementsTab =
-  | 'dashboard'
+  | 'yearly-dashboard'
+  | 'monthly-dashboard'
   | 'debtors'
   | 'collector-performance'
   | 'payment-methods'
   | 'citizen-summary'
-  | 'monthly-summary'
-  | 'monthly-dashboard';
+  | 'yearly-summary'
+  | 'monthly-summary';
 
 export type SortDirection = 'asc' | 'desc';
 export interface SortConfig {
@@ -47,6 +49,7 @@ function applyLocalFilters<T extends Record<string, any>>(
 
 interface TabFilters {
   filterType: dateFilter;
+  searchType: SearchType;
   startYear: number;
   endYear: number;
   initDate: string;
@@ -60,6 +63,7 @@ function defaultFiltersForTab(): TabFilters {
   const year = new Date().getFullYear();
   return {
     filterType: 'paymentDate',
+    searchType: 'YEAR',
     startYear: year,
     endYear: year,
     initDate: today,
@@ -87,7 +91,7 @@ export const useAgreementsViewModel = () => {
     fetchCitizenSummary
   } = useAgreements();
 
-  const [activeTab, setActiveTab] = useState<AgreementsTab>('dashboard');
+  const [activeTab, setActiveTab] = useState<AgreementsTab>('yearly-dashboard');
   const [tabFiltersMap, setTabFiltersMap] = useState<
     Partial<Record<AgreementsTab, TabFilters>>
   >({});
@@ -97,6 +101,7 @@ export const useAgreementsViewModel = () => {
 
   const {
     filterType,
+    searchType,
     startYear,
     endYear,
     initDate,
@@ -116,6 +121,7 @@ export const useAgreementsViewModel = () => {
   };
 
   const setFilterType = (val: dateFilter) => patchFilter('filterType', val);
+  const setSearchType = (val: SearchType) => patchFilter('searchType', val);
   const setInitDate = (val: string) => patchFilter('initDate', val);
   const setEndDate = (val: string) => patchFilter('endDate', val);
   const setStartYear = (val: number) => patchFilter('startYear', val);
@@ -124,7 +130,7 @@ export const useAgreementsViewModel = () => {
 
   const handleFetch = () => {
     const rangeParams = { startDate: initDate, endDate };
-    if (activeTab === 'dashboard') {
+    if (activeTab === 'yearly-dashboard') {
       fetchKpi({
         searchType: 'YEAR',
         startYear,
@@ -149,6 +155,12 @@ export const useAgreementsViewModel = () => {
       };
       fetchCollectorPerformance(dashboardRange);
       fetchPaymentMethodSummary(dashboardRange);
+    } else if (activeTab === 'yearly-summary') {
+      fetchKpi({
+        searchType,
+        startYear,
+        endYear
+      });
     } else if (activeTab === 'monthly-summary') {
       fetchMonthlySummary();
     } else if (activeTab === 'debtors') {
@@ -167,8 +179,14 @@ export const useAgreementsViewModel = () => {
   };
 
   const filteredKpi = useMemo(
-    () => applySortConfig(kpi, sortConfig),
-    [kpi, sortConfig]
+    () =>
+      applyLocalFilters(
+        kpi,
+        ['year', 'month', 'day'],
+        searchQuery,
+        sortConfig
+      ),
+    [kpi, searchQuery, sortConfig]
   );
 
   const filteredDebtors = useMemo(
@@ -222,8 +240,18 @@ export const useAgreementsViewModel = () => {
 
   const canFetch = useMemo(() => {
     if (isLoading) return false;
-    if (activeTab === 'dashboard' || activeTab === 'monthly-dashboard') {
-      return Boolean(startYear && (activeTab === 'monthly-dashboard' || endYear));
+    if (
+      activeTab === 'yearly-dashboard' ||
+      activeTab === 'monthly-dashboard' ||
+      activeTab === 'yearly-summary' ||
+      activeTab === 'monthly-summary'
+    ) {
+      return Boolean(
+        startYear &&
+          (activeTab === 'monthly-dashboard' ||
+            activeTab === 'monthly-summary' ||
+            endYear)
+      );
     }
     if (
       activeTab === 'collector-performance' ||
@@ -241,6 +269,7 @@ export const useAgreementsViewModel = () => {
       error,
       activeTab,
       filterType,
+      searchType,
       initDate,
       endDate,
       startYear,
@@ -258,6 +287,7 @@ export const useAgreementsViewModel = () => {
     actions: {
       setActiveTab,
       setFilterType,
+      setSearchType,
       setInitDate,
       setEndDate,
       setStartYear,

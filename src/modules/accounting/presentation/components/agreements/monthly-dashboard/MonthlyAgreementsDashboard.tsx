@@ -330,7 +330,7 @@ export const MonthlyAgreementsDashboard: React.FC<
     )
   };
 
-  if (!kpis || kpis.length === 0) {
+  if (!kpis || kpis.length === 0 || !kpis[0].month) {
     return (
       <div className="trash-dashboard dashboard-trash-section">
         <EmptyState

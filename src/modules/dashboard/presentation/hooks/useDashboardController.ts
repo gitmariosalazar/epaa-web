@@ -18,7 +18,7 @@ export const useDashboardController = () => {
   const [currentMonth, setCurrentMonth] = useState<string>(
     dateService.getCurrentMonthString()
   ); // YYYY-MM
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [globalStats, setGlobalStats] = useState<GlobalStatsReport | null>(
     null

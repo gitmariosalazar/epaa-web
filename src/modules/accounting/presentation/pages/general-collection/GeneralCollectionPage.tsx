@@ -75,6 +75,7 @@ export const GeneralCollectionPage: React.FC = () => {
           onInitDateChange={actions.setInitDate}
           endDate={state.endDate}
           onEndDateChange={actions.setEndDate}
+          onDateRangeChange={actions.setDateRange}
           startYear={state.startYear}
           onStartYearChange={actions.setStartYear}
           endYear={state.endYear}

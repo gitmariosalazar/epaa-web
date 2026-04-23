@@ -10,6 +10,7 @@ import { PropertiesTable } from '../components/PropertiesTable';
 import { ByOwnerFilters } from '../components/ByOwnerFilters';
 import { AllPropertiesFilters } from '../components/AllPropertiesFilters';
 import '../styles/PropertiesPage.css';
+import { useSimulatedProgress } from '@/shared/presentation/components/CircularProgress/useSimulatedProgress';
 
 export const PropertiesPage: React.FC = () => {
   const vm = usePropertiesViewModel();
@@ -40,14 +41,17 @@ export const PropertiesPage: React.FC = () => {
     }
   };
 
+  const progress = useSimulatedProgress(vm.isLoading);
+
   const renderContent = () => {
     if (vm.isLoading && vm.filteredProperties.length === 0) {
       return (
         <div className="properties-page-centered-content">
           <CircularProgress
-            progress={75}
+            progress={progress}
             size={140}
             strokeWidth={10}
+            showPercentage
             label={vm.t('common.loading', 'CARGANDO...').toUpperCase()}
           />
         </div>
@@ -92,9 +96,7 @@ export const PropertiesPage: React.FC = () => {
       }
       filters={renderFilters()}
     >
-      <div className="properties-page-content-wrapper">
-        {renderContent()}
-      </div>
+      <div className="properties-page-content-wrapper">{renderContent()}</div>
     </PageLayout>
   );
 };

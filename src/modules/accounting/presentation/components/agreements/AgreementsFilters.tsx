@@ -9,6 +9,7 @@ import { Input } from '@/shared/presentation/components/Input/Input';
 import { listYears } from '@/shared/utils/listYears';
 import { BsCalendar2DateFill } from 'react-icons/bs';
 import type { AgreementsTab } from '../../hooks/agreements/useAgreementsViewModel';
+import type { SearchType } from '../../../domain/dto/params/AgreementsParams';
 
 interface AgreementsFiltersProps {
   activeTab: AgreementsTab;
@@ -29,6 +30,9 @@ interface AgreementsFiltersProps {
   searchQuery: string;
   onSearchQueryChange: (val: string) => void;
 
+  searchType: SearchType;
+  onSearchTypeChange: (val: SearchType) => void;
+
   canFetch: boolean;
 }
 
@@ -46,6 +50,8 @@ export const AgreementsFilters: React.FC<AgreementsFiltersProps> = ({
   isLoading,
   searchQuery,
   onSearchQueryChange,
+  searchType,
+  onSearchTypeChange,
   canFetch
 }) => {
   const { t } = useTranslation();
@@ -53,11 +59,38 @@ export const AgreementsFilters: React.FC<AgreementsFiltersProps> = ({
   return (
     <div className="payment-filters">
       <div className="filter-section-left">
+        {/* Selector de Tipo de Búsqueda (Solo para Resumen Anual/KPIs) */}
+        {activeTab === 'yearly-summary' && (
+          <div className="filter-group">
+            <label className="filter-label">Modo de Consulta</label>
+            <div className="filter-input-wrapper">
+              <Select
+                value={searchType}
+                onChange={(e) => onSearchTypeChange(e.target.value as SearchType)}
+                size="compact"
+              >
+                <option value="YEAR">Anual</option>
+                <option value="MONTH">Mensual</option>
+                <option value="DAY">Diario</option>
+              </Select>
+            </div>
+          </div>
+        )}
+
         {/* Rango de Años para Dashboard o Año para Resumen Mensual */}
-        {(activeTab === 'dashboard' || activeTab === 'monthly-summary' || activeTab === 'monthly-dashboard') && (
+        {(activeTab === 'yearly-dashboard' ||
+          activeTab === 'yearly-summary' ||
+          activeTab === 'monthly-summary' ||
+          activeTab === 'monthly-dashboard') && (
           <>
             <div className="filter-group">
-              <label className="filter-label">Año {(activeTab === 'monthly-summary' || activeTab === 'monthly-dashboard') ? 'Consulta' : 'Inicial'}</label>
+              <label className="filter-label">
+                Año{' '}
+                {activeTab === 'monthly-summary' ||
+                activeTab === 'monthly-dashboard'
+                  ? 'Consulta'
+                  : 'Inicial'}
+              </label>
               <div className="filter-input-wrapper">
                 <Select
                   value={startYear}
@@ -77,7 +110,8 @@ export const AgreementsFilters: React.FC<AgreementsFiltersProps> = ({
                 </Select>
               </div>
             </div>
-            {activeTab === 'dashboard' && (
+            {(activeTab === 'yearly-dashboard' ||
+              activeTab === 'yearly-summary') && (
               <div className="filter-group">
                 <label className="filter-label">Año Final</label>
                 <div className="filter-input-wrapper">
@@ -143,7 +177,8 @@ export const AgreementsFilters: React.FC<AgreementsFiltersProps> = ({
         {(activeTab === 'debtors' ||
           activeTab === 'collector-performance' ||
           activeTab === 'payment-methods' ||
-          activeTab === 'citizen-summary') && (
+          activeTab === 'citizen-summary' ||
+          activeTab === 'yearly-summary') && (
           <div className="filter-group filter-group--search">
             <label className="filter-label">{t('common.search')}</label>
             <div className="filter-input-wrapper">

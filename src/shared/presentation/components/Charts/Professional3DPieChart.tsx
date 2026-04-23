@@ -204,19 +204,18 @@ export const Professional3DPieChart: React.FC<Professional3DPieChartProps> = ({
             <g>
               {/* Ghost border base when empty */}
               {isEmpty && (
-                <g style={{ opacity: 0.3 }}>
+                <g style={{ opacity: 0.8 }}>
                   <path
                     d={getSlicesGeometry(0, 359.9, RX, RY, CX, CY, DEPTH).outer}
                     fill="none"
                     stroke="var(--border-color)"
-                    strokeWidth="1.5"
+                    strokeWidth="2"
                   />
                   <path
                     d={getSlicesGeometry(0, 359.9, RX, RY, CX, CY, DEPTH).top}
                     fill="none"
                     stroke="var(--border-color)"
-                    strokeWidth="1.5"
-                    strokeDasharray="4,4"
+                    strokeWidth="2"
                   />
                 </g>
               )}
@@ -359,7 +358,8 @@ export const Professional3DPieChart: React.FC<Professional3DPieChartProps> = ({
               })}
 
             {/* Labels and Lines (Callouts) - DRAWN ONLY IF showIndicators IS TRUE */}
-            {showIndicators && !isEmpty &&
+            {showIndicators &&
+              !isEmpty &&
               (() => {
                 const labels = processedData
                   .filter((d) => d.value > 0)

@@ -46,6 +46,7 @@ interface GeneralCollectionFiltersProps {
   onInitDateChange: (val: string) => void;
   endDate: string;
   onEndDateChange: (val: string) => void;
+  onDateRangeChange: (start: string, end: string) => void;
 
   startYear: number;
   onStartYearChange: (val: number) => void;
@@ -85,9 +86,8 @@ export const GeneralCollectionFilters: React.FC<
   filterType,
   onFilterTypeChange,
   initDate,
-  onInitDateChange,
   endDate,
-  onEndDateChange,
+  onDateRangeChange,
   startYear,
   onStartYearChange,
   endYear,
@@ -143,10 +143,7 @@ export const GeneralCollectionFilters: React.FC<
                 size="compact"
                 startDate={initDate}
                 endDate={endDate}
-                onChange={(start, end) => {
-                  onInitDateChange(start);
-                  onEndDateChange(end);
-                }}
+                onChange={onDateRangeChange}
                 disabled={isLoading}
               />
             </div>

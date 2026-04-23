@@ -27,9 +27,19 @@ import {
   CircularProgress,
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
+import { AgreementsAnuallySummaryTable } from '../../components/agreements/AgreementsAnuallySummaryTable';
 
 const AGREEMENTS_TABS: TabItem<AgreementsTab>[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
+  {
+    id: 'yearly-dashboard',
+    label: 'Dashboard Anual',
+    icon: <LayoutDashboard size={16} />
+  },
+  {
+    id: 'monthly-dashboard',
+    label: 'Dashboard Mensual',
+    icon: <CalendarRange size={16} />
+  },
   {
     id: 'debtors',
     label: 'Deudores de Riesgo',
@@ -51,14 +61,14 @@ const AGREEMENTS_TABS: TabItem<AgreementsTab>[] = [
     icon: <Users size={16} />
   },
   {
-    id: 'monthly-summary',
-    label: 'Resumen Mensual',
+    id: 'yearly-summary',
+    label: 'Resumen Anual',
     icon: <CalendarRange size={16} />
   },
   {
-    id: 'monthly-dashboard',
-    label: 'Dashboard Mensual',
-    icon: <LayoutDashboard size={16} />
+    id: 'monthly-summary',
+    label: 'Resumen Mensual',
+    icon: <CalendarRange size={16} />
   }
 ];
 
@@ -90,7 +100,7 @@ export const AgreementsPage: React.FC = () => {
     }
 
     switch (state.activeTab) {
-      case 'dashboard':
+      case 'yearly-dashboard':
         return (
           <AgreementsDashboard
             kpis={state.filteredKpi}
@@ -153,6 +163,14 @@ export const AgreementsPage: React.FC = () => {
             year={state.startYear}
           />
         );
+      case 'yearly-summary':
+        return (
+          <AgreementsAnuallySummaryTable
+            data={state.filteredKpi}
+            isLoading={state.isLoading}
+            searchType={state.searchType}
+          />
+        );
       case 'monthly-summary':
         return (
           <AgreementsMonthlySummaryTable
@@ -190,6 +208,8 @@ export const AgreementsPage: React.FC = () => {
           onEndYearChange={actions.setEndYear}
           searchQuery={state.searchQuery}
           onSearchQueryChange={actions.setSearchQuery}
+          searchType={state.searchType}
+          onSearchTypeChange={actions.setSearchType}
           onFetch={actions.handleFetch}
           isLoading={state.isLoading}
           canFetch={state.canFetch}

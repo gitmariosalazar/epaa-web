@@ -22,7 +22,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   message,
   description,
   icon: Icon = Info,
-  minHeight = '200px',
+  minHeight = '100%',
   variant = 'default'
 }) => {
   const isDefault = variant === 'default';

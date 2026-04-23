@@ -93,9 +93,9 @@ function defaultFiltersForTab(tab: GeneralCollectionTab): TabFilters {
     localDashboardYear: '',
     localDashboardMonth: ''
   };
-  // Dashboard tabs default to the last 10 years so the paginator is pre-populated
+  // Dashboard tabs default to the last 5 years (range of 5)
   if (tab === 'monthly-dashboard' || tab === 'yearly-dashboard') {
-    return { ...base, startYear: year - 9 };
+    return { ...base, startYear: year - 4 };
   }
   return base;
 }
@@ -164,10 +164,78 @@ export const useGeneralCollectionViewModel = () => {
 
   // Backwards-compatible individual setters
   const setFilterType = (val: dateFilter) => patchFilter('filterType', val);
-  const setInitDate = (val: string) => patchFilter('initDate', val);
-  const setEndDate = (val: string) => patchFilter('endDate', val);
-  const setStartYear = (val: number) => patchFilter('startYear', val);
-  const setEndYear = (val: number) => patchFilter('endYear', val);
+  const setInitDate = (val: string) => {
+    setTabFiltersMap((prev) => {
+      const existing = prev[activeTab] ?? defaultFiltersForTab(activeTab);
+      const start = new Date(val + 'T00:00:00');
+      let end = new Date(existing.endDate + 'T00:00:00');
+
+      const maxEnd = new Date(start);
+      maxEnd.setFullYear(start.getFullYear() + 5);
+
+      if (end > maxEnd) end = maxEnd;
+      if (start > end) end = start;
+
+      return {
+        ...prev,
+        [activeTab]: {
+          ...existing,
+          initDate: val,
+          endDate: dateService.toISODateString(end)
+        }
+      };
+    });
+  };
+
+  const setEndDate = (val: string) => {
+    setTabFiltersMap((prev) => {
+      const existing = prev[activeTab] ?? defaultFiltersForTab(activeTab);
+      const end = new Date(val + 'T00:00:00');
+      let start = new Date(existing.initDate + 'T00:00:00');
+
+      const minStart = new Date(end);
+      minStart.setFullYear(end.getFullYear() - 5);
+
+      if (start < minStart) start = minStart;
+      if (start > end) start = end;
+
+      return {
+        ...prev,
+        [activeTab]: {
+          ...existing,
+          initDate: dateService.toISODateString(start),
+          endDate: val
+        }
+      };
+    });
+  };
+
+  const setStartYear = (val: number) => {
+    setTabFiltersMap((prev) => {
+      const existing = prev[activeTab] ?? defaultFiltersForTab(activeTab);
+      let nextEnd = existing.endYear;
+      // Max range 5 years: end - start <= 4 (e.g. 2020 to 2024 is 5 years)
+      if (nextEnd - val > 4) nextEnd = val + 4;
+      if (val > nextEnd) nextEnd = val;
+      return {
+        ...prev,
+        [activeTab]: { ...existing, startYear: val, endYear: nextEnd }
+      };
+    });
+  };
+
+  const setEndYear = (val: number) => {
+    setTabFiltersMap((prev) => {
+      const existing = prev[activeTab] ?? defaultFiltersForTab(activeTab);
+      let nextStart = existing.startYear;
+      if (val - nextStart > 4) nextStart = val - 4;
+      if (val < nextStart) nextStart = val;
+      return {
+        ...prev,
+        [activeTab]: { ...existing, startYear: nextStart, endYear: val }
+      };
+    });
+  };
   const setTitleCode = (val: string) => patchFilter('titleCode', val);
   const setSearchQuery = (val: string) => patchFilter('searchQuery', val);
   const setSelectedUser = (val: string) => patchFilter('selectedUser', val);
@@ -214,6 +282,29 @@ export const useGeneralCollectionViewModel = () => {
 */
   // ── handleFetch ───────────────────────────────────────────────────────────
   // Each branch uses the CURRENT tab's own filter state — no cross-tab leakage.
+  const setDateRange = (startStr: string, endStr: string) => {
+    setTabFiltersMap((prev) => {
+      const existing = prev[activeTab] ?? defaultFiltersForTab(activeTab);
+      const start = new Date(startStr + 'T00:00:00');
+      let end = new Date(endStr + 'T00:00:00');
+
+      const maxEnd = new Date(start);
+      maxEnd.setFullYear(start.getFullYear() + 5);
+
+      if (end > maxEnd) end = maxEnd;
+      if (start > end) end = start;
+
+      return {
+        ...prev,
+        [activeTab]: {
+          ...existing,
+          initDate: startStr,
+          endDate: dateService.toISODateString(end)
+        }
+      };
+    });
+  };
+
   const handleFetch = () => {
     if (activeTab === 'dashboard' || activeTab === 'general') {
       fetchReport({
@@ -440,6 +531,7 @@ export const useGeneralCollectionViewModel = () => {
       setFilterType,
       setInitDate,
       setEndDate,
+      setDateRange,
       setYear,
       setStartYear,
       setEndYear,

@@ -134,8 +134,8 @@ export const NaturalPersonsPage: React.FC = () => {
           emptyState={
             <EmptyState
               message={t('common.noResults', 'No se encontraron resultados')}
+              description={`Por favor, revisa que hayas escrito correctamente el nombre, número de identificación o correo electrónico del cliente que deseas buscar. `}
               icon={SearchX}
-              minHeight="300px"
               variant="info"
             />
           }
