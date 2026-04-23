@@ -24,9 +24,24 @@ export const AgreementsCitizenSummaryTable: React.FC<
 > = ({ data, isLoading, onSort, sortConfig, startDate, endDate }) => {
   const columns: Column<CitizenSummary>[] = [
     { header: 'Cédula/RUC', accessor: 'cardId', sortable: true, id: 'cardId' },
-    { header: 'Clave Catastral', accessor: 'cadastralKey', sortable: true, id: 'cadastralKey' },
-    { header: 'Nombres', accessor: 'firstName', sortable: true, id: 'firstName' },
-    { header: 'Apellidos', accessor: 'lastName', sortable: true, id: 'lastName' },
+    {
+      header: 'Clave Catastral',
+      accessor: (item) => item.cadastralKey || 'Sin Clave Catastral',
+      sortable: true,
+      id: 'cadastralKey'
+    },
+    {
+      header: 'Nombres',
+      accessor: 'firstName',
+      sortable: true,
+      id: 'firstName'
+    },
+    {
+      header: 'Apellidos',
+      accessor: 'lastName',
+      sortable: true,
+      id: 'lastName'
+    },
     {
       header: 'Cuotas Totales',
       accessor: 'totalInstallments',
@@ -52,41 +67,63 @@ export const AgreementsCitizenSummaryTable: React.FC<
     }
   ];
 
-  const totalCollected = data.reduce((sum, item) => sum + (item.collectedAmount || 0), 0);
-  const totalPending = data.reduce((sum, item) => sum + (item.pendingAmount || 0), 0);
+  const totalCollected = data.reduce(
+    (sum, item) => sum + (item.collectedAmount || 0),
+    0
+  );
+  const totalPending = data.reduce(
+    (sum, item) => sum + (item.pendingAmount || 0),
+    0
+  );
 
   const totalRows = [
-    { label: 'TOTAL RECAUDADO', value: CurrencyFormatter.format(totalCollected), highlight: true, columnId: 'collectedAmount' },
-    { label: 'TOTAL PENDIENTE', value: CurrencyFormatter.format(totalPending), highlight: false, columnId: 'pendingAmount' }
+    {
+      label: 'TOTAL RECAUDADO',
+      value: CurrencyFormatter.format(totalCollected),
+      highlight: true,
+      columnId: 'collectedAmount'
+    },
+    {
+      label: 'TOTAL PENDIENTE',
+      value: CurrencyFormatter.format(totalPending),
+      highlight: false,
+      columnId: 'pendingAmount'
+    }
   ];
 
-  const { setShowPdfPreview, PdfPreviewModal } = useTablePdfExport<CitizenSummary>({
-    data,
-    availableColumns: columns.map((c) => ({
-      id: c.id || (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
-      label: c.header as string,
-      isDefault: true
-    })),
-    reportTitle: 'RESUMEN DE CIUDADANOS CON CONVENIOS',
-    reportDescription: 'Detalle consolidado de cuotas y montos por ciudadano',
-    labelsHorizontal: {
-      Rango: `${startDate || '-'} - ${endDate || '-'}`,
-      'Fecha de Exportación': new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
-    },
-    totalRows,
-    mapRowData: (item, selectedCols) => {
-      const rowData: Record<string, string> = {
-        'Cédula/RUC': item.cardId,
-        'Clave Catastral': item.cadastralKey,
-        Nombres: item.firstName,
-        Apellidos: item.lastName,
-        'Cuotas Totales': String(item.totalInstallments),
-        Recaudado: CurrencyFormatter.format(item.collectedAmount),
-        Pendiente: CurrencyFormatter.format(item.pendingAmount)
-      };
-      return selectedCols.map((col) => rowData[col.label] || '-');
-    }
-  });
+  const { setShowPdfPreview, PdfPreviewModal } =
+    useTablePdfExport<CitizenSummary>({
+      data,
+      availableColumns: columns.map((c) => ({
+        id:
+          c.id ||
+          (typeof c.accessor === 'string' ? c.accessor : (c.header as string)),
+        label: c.header as string,
+        isDefault: true
+      })),
+      reportTitle: 'RESUMEN DE CIUDADANOS CON CONVENIOS',
+      reportDescription: 'Detalle consolidado de cuotas y montos por ciudadano',
+      labelsHorizontal: {
+        Rango: `${startDate || '-'} - ${endDate || '-'}`,
+        'Fecha de Exportación':
+          new Date().toLocaleDateString() +
+          ' ' +
+          new Date().toLocaleTimeString()
+      },
+      totalRows,
+      mapRowData: (item, selectedCols) => {
+        const rowData: Record<string, string> = {
+          'Cédula/RUC': item.cardId,
+          'Clave Catastral': item.cadastralKey,
+          Nombres: item.firstName,
+          Apellidos: item.lastName,
+          'Cuotas Totales': String(item.totalInstallments),
+          Recaudado: CurrencyFormatter.format(item.collectedAmount),
+          Pendiente: CurrencyFormatter.format(item.pendingAmount)
+        };
+        return selectedCols.map((col) => rowData[col.label] || '-');
+      }
+    });
 
   return (
     <div className="payments-table-wrapper">
