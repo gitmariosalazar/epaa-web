@@ -4,9 +4,10 @@ import { FaFileAlt, FaTachometerAlt, FaHistory } from 'react-icons/fa';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { TextArea } from '@/shared/presentation/components/TextArea/TextArea';
 import '@/shared/presentation/styles/Input.css';
+import { ConverDate } from '@/shared/utils/datetime/ConverDate';
 
 interface PropTypes {
-  info: ReadingInfo | null;
+  info: ReadingInfo[];
   currentReadingInput: number | '';
   setCurrentReadingInput: (value: number | '') => void;
   observationInput: string;
@@ -20,17 +21,19 @@ export const ReadingUpdateInfoForm: React.FC<PropTypes> = ({
   observationInput,
   setObservationInput
 }) => {
+  const currentReadingInfo = info[0];
+  const previousReadingInfo = info[1];
   return (
     <div className="cr-reading-grid">
       <div className="cr-reading-col">
         <Input
-          label={`Lectura Anterior ${info?.monthReading || '---'}`}
+          label={`Lectura Anterior ${ConverDate(currentReadingInfo?.previousReadingDate) + ' ' + previousReadingInfo.readingTime || '---'}`}
           leftIcon={<FaHistory color="var(--text-muted)" />}
           type="text"
           value={
-            info?.hasCurrentReading
-              ? '' + info?.currentReading
-              : info?.previousReading
+            currentReadingInfo?.hasCurrentReading
+              ? '' + currentReadingInfo?.currentReading
+              : currentReadingInfo?.previousReading
           }
           readOnly
           disabled
@@ -46,6 +49,7 @@ export const ReadingUpdateInfoForm: React.FC<PropTypes> = ({
               e.target.value === '' ? '' : Number(e.target.value)
             )
           }
+          focused
         />
       </div>
 

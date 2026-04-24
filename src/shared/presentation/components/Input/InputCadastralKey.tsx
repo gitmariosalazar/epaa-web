@@ -1,4 +1,4 @@
-import React, { forwardRef, type InputHTMLAttributes, useState } from 'react';
+import React, { forwardRef, type InputHTMLAttributes, useState, useRef, useEffect } from 'react';
 import { CadastralKeyFormatter } from '../../../domain/utils/CadastralKeyFormatter';
 import '@/shared/presentation/styles/Input.css';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +15,7 @@ export interface InputCadastralKeyProps extends Omit<
   onChange?: (value: string) => void;
   className?: string;
   size?: 'small' | 'compact' | 'medium' | 'large';
+  focused?: boolean;
 }
 
 export const InputCadastralKey = forwardRef<
@@ -22,11 +23,28 @@ export const InputCadastralKey = forwardRef<
   InputCadastralKeyProps
 >(
   (
-    { value, onChange, className = '', size = 'medium', label, error, leftIcon, ...props },
+    { value, onChange, className = '', size = 'medium', label, error, leftIcon, focused, ...props },
     ref
   ) => {
     // Internal state to manage the controlled input if an external value isn't strictly provided
     const [internalValue, setInternalValue] = useState(value || '');
+    
+    const localRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+      if (focused && localRef.current) {
+        localRef.current.focus();
+      }
+    }, [focused]);
+
+    const handleRef = (node: HTMLInputElement | null) => {
+      localRef.current = node as HTMLInputElement;
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref) {
+        ref.current = node;
+      }
+    };
     const { t } = useTranslation();
 
     const displayValue = value !== undefined ? value : internalValue;
@@ -52,7 +70,7 @@ export const InputCadastralKey = forwardRef<
           {leftIcon && <span className="input__icon-left">{leftIcon}</span>}
           <input
             {...props}
-            ref={ref}
+            ref={handleRef}
             value={displayValue}
             onChange={handleChange}
             placeholder={props.placeholder || t('common.cadastralPlaceholder')}

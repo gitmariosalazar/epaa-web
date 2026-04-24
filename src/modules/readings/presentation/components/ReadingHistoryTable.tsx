@@ -25,7 +25,7 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
   const columns: Column<ReadingHistory>[] = useMemo(
     () => [
       {
-        header: t('readings.historyTable.readingId'),
+        header: t('readings.historyTable.readingId', 'Id'),
         accessor: 'readingId'
       },
       {

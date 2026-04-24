@@ -53,19 +53,33 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
     }
   }, [initialCadastralKey, location.state?.cadastralKey]);
 
+  // ── Pre-cargar datos para actualización ───────────────────────────────────────────
+  useEffect(() => {
+    if (readingInfo && readingInfo.length > 0) {
+      const info = readingInfo[0];
+      if (info.currentReading !== null && info.currentReading !== undefined) {
+        setCurrentReadingInput(info.currentReading);
+      } else {
+        setCurrentReadingInput('');
+      }
+    }
+  }, [readingInfo]);
+
+  const currentReadingInfoForRequest = readingInfo[0];
+
   // ── Helpers ───────────────────────────────────────────────────────────────
   const buildRequest = (): UpdateReadingRequest => ({
-    previousReading: Number(readingInfo!.previousReading),
+    previousReading: Number(currentReadingInfoForRequest.previousReading),
     currentReading: Number(currentReadingInput),
     rentalIncomeCode: 0,
     novelty: observationInput,
     incomeCode: 0,
-    cadastralKey: readingInfo!.cadastralKey,
-    sector: readingInfo!.sector,
-    account: readingInfo!.account,
-    connectionId: readingInfo!.cadastralKey,
-    averageConsumption: Number(readingInfo!.averageConsumption),
-    readingMonth: readingInfo!.monthReading
+    cadastralKey: currentReadingInfoForRequest.cadastralKey,
+    sector: currentReadingInfoForRequest.sector,
+    account: currentReadingInfoForRequest.account,
+    connectionId: currentReadingInfoForRequest.cadastralKey,
+    averageConsumption: Number(currentReadingInfoForRequest.averageConsumption),
+    readingMonth: currentReadingInfoForRequest.monthReading
   });
 
   const handleSearch = async () => {
@@ -146,13 +160,17 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
         <div className="cr-header-container">
           <h2 className="cr-page-title">Actualización de Lecturas</h2>
 
-          {readingInfo && (
+          {currentReadingInfoForRequest && (
             <div className="cr-client-badge">
               <IdCard size={16} />
-              <span className="cr-client-id">{readingInfo.cardId}</span>
+              <span className="cr-client-id">
+                {currentReadingInfoForRequest.cardId}
+              </span>
               <span style={{ margin: '0 5px', color: '#0067f8ff' }}>|</span>
               <User size={16} />
-              <span className="cr-client-name">{readingInfo.clientName}</span>
+              <span className="cr-client-name">
+                {currentReadingInfoForRequest.clientName}
+              </span>
             </div>
           )}
         </div>
@@ -165,11 +183,11 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
           handleCancel={handleCancel}
           isLoadingInfo={isLoadingInfo}
           isSubmitting={isSubmitting}
-          readingInfo={readingInfo}
+          readingInfo={currentReadingInfoForRequest}
           method="update"
         />
 
-        {readingInfo && (
+        {currentReadingInfoForRequest && (
           <>
             <ReadingSummaryCards
               info={readingInfo}
@@ -187,7 +205,7 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
           </>
         )}
 
-        {readingInfo && (
+        {currentReadingInfoForRequest && (
           <div className="cr-history-wrapper">
             <ReadingHistoryTable
               history={readingHistory}
@@ -197,17 +215,17 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
         )}
 
         <>
-          <AdditionalInfoAccordion info={readingInfo} />
+          <AdditionalInfoAccordion info={currentReadingInfoForRequest} />
         </>
       </div>
 
       {/* ── Modal de confirmación ─────────────────────────────────────────── */}
-      {readingInfo && (
+      {currentReadingInfoForRequest && (
         <ReadingConfirmationModal
           isOpen={isConfirmModalOpen}
           onClose={handleCloseModal}
           onConfirm={handleConfirm}
-          readingInfo={readingInfo}
+          readingInfo={currentReadingInfoForRequest}
           currentReadingInput={currentReadingInput}
           observationInput={observationInput}
           isSubmitting={isSubmitting}

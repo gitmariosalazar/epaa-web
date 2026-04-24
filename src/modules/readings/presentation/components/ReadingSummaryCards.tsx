@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/create-reading.css';
 import type { ReadingInfo } from '../../domain/models/ReadingInfoResponse';
 import { calculateConsumptionVisuals } from '../utils/consumptionVisuals';
@@ -6,9 +6,12 @@ import { Card } from '@/shared/presentation/components/Card/Card';
 import { FaPlug, FaTint, FaHistory } from 'react-icons/fa';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { useTranslation } from 'react-i18next';
+import { Alert } from '@/shared/presentation/components/Alert';
+import { ConverDate } from '@/shared/utils/datetime/ConverDate';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 
 interface PropTypes {
-  info: ReadingInfo | null;
+  info: ReadingInfo[];
   currentReadingInput?: number | '';
   method: 'create' | 'update';
 }
@@ -20,6 +23,16 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
 }) => {
   const { t } = useTranslation();
 
+  // alertKey fuerza a la alerta a reiniciarse cuando info cambia de referencia (ej. nueva consulta a la misma clave)
+  const [alertKey, setAlertKey] = useState(0);
+
+  useEffect(() => {
+    setAlertKey((prev) => prev + 1);
+  }, [info]);
+
+  const currentReadingInfoSelected = info[0];
+  const previousReadingInfoSelected = info[1];
+
   const currentVal =
     currentReadingInput !== undefined && currentReadingInput !== ''
       ? Number(currentReadingInput)
@@ -28,17 +41,17 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
   const previousVal =
     method === 'create'
       ? Number(
-          info?.currentReading !== null
-            ? info?.currentReading
-            : info?.previousReading
+          currentReadingInfoSelected?.currentReading !== null
+            ? currentReadingInfoSelected?.currentReading
+            : currentReadingInfoSelected?.previousReading
         ) || 0
-      : Number(info?.previousReading) || 0;
+      : Number(currentReadingInfoSelected?.previousReading) || 0;
 
   const currentConsumption =
     currentVal !== null ? currentVal - previousVal : null;
 
-  const averageConsumption = info?.averageConsumption
-    ? Number(info.averageConsumption)
+  const averageConsumption = currentReadingInfoSelected?.averageConsumption
+    ? Number(currentReadingInfoSelected.averageConsumption)
     : null;
 
   // Reutiliza el helper compartido — mismos colores que el modal de confirmación
@@ -48,78 +61,174 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
   );
 
   return (
-    <div className="cr-summary-cards">
-      <Card className="cr-card cr-card-connection">
-        <div className="cr-card-header">
-          <span>{t('readings.summaryCards.connectionId')}</span>
-          <FaPlug className="cr-icon-green" size={20} />
-        </div>
-        <div className="cr-card-body">
-          <div className="cr-card-value">{info?.cadastralKey || '---'}</div>
-        </div>
-        <div className="cr-card-footer">
+    <>
+      <div className="cr-summary-cards">
+        <Card className="cr-card cr-card-connection">
+          <div className="cr-card-header">
+            <span>{t('readings.summaryCards.connectionId')}</span>
+            <FaPlug className="cr-icon-green" size={20} />
+          </div>
+          <div className="cr-card-body">
+            <ColorChip
+              label={currentReadingInfoSelected?.cadastralKey || '---'}
+              status="info"
+              variant="soft"
+              size="lg"
+              borderRadius="10px"
+            />
+          </div>
+          <div className="cr-card-footer">
+            <div className="cr-description">
+              {t('readings.summaryCards.cadastralDesc')}
+            </div>
+          </div>
+        </Card>
+
+        <Card className="cr-card cr-card-average">
+          <div className="cr-card-header">
+            <span>{t('readings.summaryCards.avgConsumption')}</span>
+            <FaTint className="cr-icon-blue" size={20} />
+          </div>
+          <div className="cr-card-body">
+            <ColorChip
+              label={
+                currentReadingInfoSelected?.averageConsumption != null
+                  ? `${currentReadingInfoSelected.averageConsumption} m³`
+                  : '---'
+              }
+              status="info"
+              variant="soft"
+              size="lg"
+              borderRadius="10px"
+            />
+          </div>
           <div className="cr-description">
-            {t('readings.summaryCards.cadastralDesc')}
+            {t('readings.summaryCards.avgDesc')}
           </div>
-        </div>
-      </Card>
+        </Card>
 
-      <Card className="cr-card cr-card-average">
-        <div className="cr-card-header">
-          <span>{t('readings.summaryCards.avgConsumption')}</span>
-          <FaTint className="cr-icon-blue" size={20} />
-        </div>
-        <div className="cr-card-body">
-          <div className="cr-card-value">
-            {info?.averageConsumption != null
-              ? `${info.averageConsumption} m³`
-              : '---'}
-          </div>
-        </div>
-        <div className="cr-description">
-          {t('readings.summaryCards.avgDesc')}
-        </div>
-      </Card>
+        {method === 'create' ? (
+          <Card className="cr-card cr-card-average">
+            <div className="cr-card-header">
+              <span>{t('readings.summaryCards.prevConsumption')}</span>
+              <FaHistory className="cr-icon-gray" size={20} />
+            </div>
+            <div className="cr-card-body">
+              <ColorChip
+                label={
+                  previousReadingInfoSelected?.currentReading != null
+                    ? `${Number(previousReadingInfoSelected.currentReading - previousReadingInfoSelected.previousReading).toFixed(2)} m³`
+                    : '0.00 m³'
+                }
+                status="info"
+                variant="soft"
+                size="lg"
+                borderRadius="10px"
+              />
+            </div>
+            <div className="cr-card-footer">
+              <div className="cr-description">
+                {t('readings.summaryCards.date')}{' '}
+                {previousReadingInfoSelected?.previousReadingDate
+                  ? dateService.formatToLocaleString(
+                      `${previousReadingInfoSelected.previousReadingDate}`
+                    ) +
+                    ' ' +
+                    previousReadingInfoSelected.readingTime
+                  : '---'}
+              </div>
+            </div>
+          </Card>
+        ) : (
+          <Card className="cr-card cr-card-average">
+            <div className="cr-card-header">
+              <span>{t('readings.summaryCards.prevConsumption')}</span>
+              <FaHistory className="cr-icon-gray" size={20} />
+            </div>
+            <div className="cr-card-body">
+              <ColorChip
+                label={
+                  currentReadingInfoSelected?.currentReading != null
+                    ? `${Number(currentReadingInfoSelected.currentReading - currentReadingInfoSelected.previousReading).toFixed(2)} m³`
+                    : '0.00 m³'
+                }
+                status="info"
+                variant="soft"
+                size="lg"
+                borderRadius="10px"
+              />
+            </div>
+            <div className="cr-card-footer">
+              <div className="cr-description">
+                {t('readings.summaryCards.date')}{' '}
+                {currentReadingInfoSelected?.previousReadingDate
+                  ? dateService.formatToLocaleString(
+                      `${currentReadingInfoSelected.previousReadingDate}`
+                    ) +
+                    ' ' +
+                    currentReadingInfoSelected.readingTime
+                  : '---'}
+              </div>
+            </div>
+          </Card>
+        )}
 
-      <Card className="cr-card cr-card-previous">
-        <div className="cr-card-header">
-          <span>{t('readings.summaryCards.prevConsumption')}</span>
-          <FaHistory className="cr-icon-gray" size={20} />
-        </div>
-        <div className="cr-card-body">
-          <div className="cr-value cr-badge-gray">
-            {info?.currentReading != null
-              ? `${Number(info.currentReading - info.previousReading).toFixed(2)} m³`
-              : '0.00 m³'}
+        <Card className="cr-card cr-card-average">
+          <div className="cr-card-header">
+            <span>{t('readings.summaryCards.currentConsumption')}</span>
+            <visuals.Icon className={visuals.iconClass} size={20} />
           </div>
-          <div className="cr-date">
-            {t('readings.summaryCards.date')}{' '}
-            {info?.previousReadingDate
-              ? dateService.formatToLocaleString(info.previousReadingDate)
-              : '---'}
+          <div className="cr-card-body">
+            <ColorChip
+              label={
+                currentConsumption !== null
+                  ? `${currentConsumption.toFixed(2)} m³`
+                  : '0.00 m³'
+              }
+              status={visuals.chipStatus}
+              variant="soft"
+              size="lg"
+              borderRadius="10px"
+            />
           </div>
-        </div>
-      </Card>
 
-      <Card className="cr-card cr-card-current">
-        <div className="cr-card-header">
-          <span>{t('readings.summaryCards.currentConsumption')}</span>
-          <visuals.Icon className={visuals.iconClass} size={20} />
-        </div>
-        <div className="cr-card-body">
-          <div
-            className={`cr-value ${visuals.textClass} ${visuals.badgeClass}`}
-          >
-            {currentConsumption !== null
-              ? `${currentConsumption.toFixed(2)} m³`
-              : '0.00 m³'}
+          <div className="cr-card-footer">
+            <div className="cr-description">
+              <div className={`cr-date ${visuals.textClass}`}>
+                {t('readings.summaryCards.date')}{' '}
+                {dateService.formatToLocaleString(dateService.getCurrentDate())}
+              </div>
+            </div>
           </div>
-          <div className={`cr-date ${visuals.textClass}`}>
-            Fecha:{' '}
-            {dateService.formatToLocaleString(dateService.getCurrentDate())}
-          </div>
-        </div>
-      </Card>
-    </div>
+        </Card>
+      </div>
+      <div>
+        {method === 'create' ? (
+          <>
+            {!currentReadingInfoSelected?.hasCurrentReading ? (
+              <Alert
+                key={`info-${currentReadingInfoSelected?.cadastralKey}-${alertKey}`}
+                type="info"
+                message={`La lectura para este mes ya se ha registrado (Fecha: ${ConverDate(currentReadingInfoSelected.previousReadingDate)} - ${currentReadingInfoSelected.readingTime}). No se puede registrar otra lectura dentro del mismo mes.`}
+              />
+            ) : (
+              <Alert
+                key={`warn-${currentReadingInfoSelected?.cadastralKey}-${alertKey}`}
+                type="warning"
+                message="La lectura para este mes no se ha registrado. Por favor, registre la lectura."
+              />
+            )}
+          </>
+        ) : (
+          <>
+            <Alert
+              key={`warn-${currentReadingInfoSelected?.cadastralKey}-${alertKey}`}
+              type="warning"
+              message={`Para realizar la actualizacion, asegurese de que la lectura actual sea correcta y no haya sido facturada.`}
+            />
+          </>
+        )}
+      </div>
+    </>
   );
 };

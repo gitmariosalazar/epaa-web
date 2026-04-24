@@ -56,28 +56,29 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   /** Construye el DTO de creación a partir del estado actual del formulario. */
+  const readingInfoForRequest = readingInfo[0];
   const buildRequest = (): CreateReadingRequest => ({
-    connectionId: readingInfo!.cadastralKey,
-    sector: readingInfo!.sector,
-    account: readingInfo!.account,
-    cadastralKey: readingInfo!.cadastralKey,
+    connectionId: readingInfoForRequest.cadastralKey,
+    sector: readingInfoForRequest.sector,
+    account: readingInfoForRequest.account,
+    cadastralKey: readingInfoForRequest.cadastralKey,
     sewerRate: 0,
     previousReading: Number(
-      readingInfo!.currentReading !== null
-        ? readingInfo!.currentReading
-        : readingInfo!.previousReading
+      readingInfoForRequest.currentReading !== null
+        ? readingInfoForRequest.currentReading
+        : readingInfoForRequest.previousReading
     ),
     currentReading: Number(currentReadingInput),
     newCurrentReading: Number(currentReadingInput),
     incomeCode: 0,
     readingDate: new Date(),
     readingTime: new Date().toISOString(),
-    readingValue: Number(readingInfo!.readingValue),
+    readingValue: Number(readingInfoForRequest.readingValue),
     rentalIncomeCode: 0,
     novelty: observationInput,
-    averageConsumption: Number(readingInfo!.averageConsumption),
+    averageConsumption: Number(readingInfoForRequest.averageConsumption),
     typeNoveltyReadingId: 1,
-    previousMonthReading: readingInfo!.monthReading
+    previousMonthReading: readingInfoForRequest.monthReading
   });
 
   // ── Handlers ──────────────────────────────────────────────────────────────
@@ -102,7 +103,7 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
    * (SRP: la validación previa queda aquí, el guardado real en handleConfirm)
    */
   const handleSave = () => {
-    if (!readingInfo) {
+    if (!readingInfoForRequest) {
       alert('Primero debe buscar una conexión.');
       return;
     }
@@ -157,13 +158,17 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
         <div className="cr-header-container">
           <h2 className="cr-page-title">Registro de Lecturas</h2>
 
-          {readingInfo && (
+          {readingInfoForRequest && (
             <div className="cr-client-badge">
               <IdCard size={16} />
-              <span className="cr-client-id">{readingInfo.cardId}</span>
+              <span className="cr-client-id">
+                {readingInfoForRequest.cardId}
+              </span>
               <span style={{ margin: '0 5px', color: '#0067f8ff' }}>|</span>
               <User size={16} />
-              <span className="cr-client-name">{readingInfo.clientName}</span>
+              <span className="cr-client-name">
+                {readingInfoForRequest.clientName}
+              </span>
             </div>
           )}
         </div>
@@ -176,11 +181,11 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
           handleCancel={handleCancel}
           isLoadingInfo={isLoadingInfo}
           isSubmitting={isSubmitting}
-          readingInfo={readingInfo}
+          readingInfo={readingInfoForRequest}
           method="create"
         />
 
-        {readingInfo && (
+        {readingInfoForRequest && (
           <>
             <ReadingSummaryCards
               info={readingInfo}
@@ -198,7 +203,7 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
           </>
         )}
 
-        {readingInfo && (
+        {readingInfoForRequest && (
           <div className="cr-history-wrapper">
             <ReadingHistoryTable
               history={readingHistory}
@@ -208,17 +213,17 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
         )}
 
         <>
-          <AdditionalInfoAccordion info={readingInfo} />
+          <AdditionalInfoAccordion info={readingInfoForRequest} />
         </>
       </div>
 
       {/* ── Modal de confirmación ─────────────────────────────────────────── */}
-      {readingInfo && (
+      {readingInfoForRequest && (
         <ReadingConfirmationModal
           isOpen={isConfirmModalOpen}
           onClose={handleCloseModal}
           onConfirm={handleConfirm}
-          readingInfo={readingInfo}
+          readingInfo={readingInfoForRequest}
           currentReadingInput={currentReadingInput}
           observationInput={observationInput}
           isSubmitting={isSubmitting}

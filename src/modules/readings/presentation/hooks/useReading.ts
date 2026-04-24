@@ -32,7 +32,7 @@ export const useReading = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [readingInfo, setReadingInfo] = useState<ReadingInfo | null>(null);
+  const [readingInfo, setReadingInfo] = useState<ReadingInfo[]>([]);
   const [readingHistory, setReadingHistory] = useState<ReadingHistory[]>([]);
   const [pendingReadings, setPendingReadings] = useState<
     PendingReadingConnection[]
@@ -68,31 +68,28 @@ export const useReading = () => {
           infoResultSettled.value &&
           infoResultSettled.value.length > 0
         ) {
-          setReadingInfo(infoResultSettled.value[0]);
+          setReadingInfo(infoResultSettled.value);
         } else {
-          setReadingInfo(null);
+          setReadingInfo([]);
           console.log(infoResultSettled);
           if (infoResultSettled.status === 'rejected') {
             console.error('Error fetching info:', infoResultSettled.reason);
-            
+
             // Extraemos el mensaje de forma segura
             const errorData = infoResultSettled.reason?.response?.data;
             let errorMessage = 'Error al obtener la información de lectura.';
-            
+
             if (errorData?.message) {
-              errorMessage = Array.isArray(errorData.message) 
-                ? errorData.message[0] 
+              errorMessage = Array.isArray(errorData.message)
+                ? errorData.message[0]
                 : errorData.message;
             } else if (infoResultSettled.reason?.message) {
               errorMessage = infoResultSettled.reason.message;
             }
 
-            MessageToastCustom(
-              'error',
-              errorMessage,
-              'Error',
-              { position: 'top-right' }
-            );
+            MessageToastCustom('error', errorMessage, 'Error', {
+              position: 'top-right'
+            });
           } else {
             MessageToastCustom(
               'warning',
@@ -195,7 +192,7 @@ export const useReading = () => {
   );
 
   const clearData = useCallback(() => {
-    setReadingInfo(null);
+    setReadingInfo([]);
     setReadingHistory([]);
     setPendingReadings([]);
     setTakenReadings([]);
@@ -223,24 +220,21 @@ export const useReading = () => {
         return result;
       } catch (error: any) {
         console.error('Error creating reading:', error);
-        
+
         const errorData = error?.response?.data;
         let errorMessage = 'Error al guardar la lectura.';
-        
+
         if (errorData?.message) {
-          errorMessage = Array.isArray(errorData.message) 
-            ? errorData.message[0] 
+          errorMessage = Array.isArray(errorData.message)
+            ? errorData.message[0]
             : errorData.message;
         } else if (error?.message) {
           errorMessage = error.message;
         }
 
-        MessageToastCustom(
-          'error',
-          errorMessage,
-          'Error',
-          { position: 'top-right' }
-        );
+        MessageToastCustom('error', errorMessage, 'Error', {
+          position: 'top-right'
+        });
         throw error;
       } finally {
         setIsSubmitting(false);

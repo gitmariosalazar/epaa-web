@@ -1,16 +1,42 @@
-import React, { type InputHTMLAttributes, forwardRef } from 'react';
+import React, { type InputHTMLAttributes, forwardRef, useEffect, useRef } from 'react';
 import '@/shared/presentation/styles/Input.css';
 
-interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
+interface InputProps extends Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  'size'
+> {
   label?: string;
   error?: string;
   info?: string;
   leftIcon?: React.ReactNode;
   size?: 'small' | 'compact' | 'medium' | 'large';
+  focused?: boolean;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, info, leftIcon, className = '', size = 'medium', ...props }, ref) => {
+  (
+    { label, error, info, leftIcon, className = '', size = 'medium', focused, ...props },
+    ref
+  ) => {
+    const localRef = useRef<HTMLInputElement>(null);
+
+    // Efecto para hacer focus automáticamente cuando 'focused' cambie a true
+    useEffect(() => {
+      if (focused && localRef.current) {
+        localRef.current.focus();
+      }
+    }, [focused]);
+
+    // Función para manejar tanto el ref interno como el que viene por prop
+    const handleRef = (node: HTMLInputElement | null) => {
+      localRef.current = node as HTMLInputElement;
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref) {
+        ref.current = node;
+      }
+    };
+
     return (
       <div className={`input-component input--${size} ${className}`}>
         {label && (
@@ -24,11 +50,23 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           {leftIcon && <span className="input__icon-left">{leftIcon}</span>}
           <input
             className={`input__field ${error ? 'input__field--error' : ''} ${leftIcon ? 'input__field--with-icon' : ''}`}
-            ref={ref}
+            ref={handleRef}
             {...props}
           />
         </div>
-        {info && <span className="input__info" style={{ fontSize: '10px', color: '#666', marginTop: '2px', display: 'block' }}>{info}</span>}
+        {info && (
+          <span
+            className="input__info"
+            style={{
+              fontSize: '10px',
+              color: '#666',
+              marginTop: '2px',
+              display: 'block'
+            }}
+          >
+            {info}
+          </span>
+        )}
         {error && <span className="input__error">{error}</span>}
       </div>
     );

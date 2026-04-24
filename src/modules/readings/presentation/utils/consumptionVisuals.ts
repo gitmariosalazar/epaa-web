@@ -38,6 +38,8 @@ export interface ConsumptionVisuals {
   Icon: IconType;
   /** Texto de advertencia corto para mostrar bajo el valor (null si normal) */
   warningText: string | null;
+  /** Estado de color compatible con el componente ColorChip */
+  chipStatus: 'info' | 'success' | 'warning' | 'error';
 }
 
 // ── Umbrales ──────────────────────────────────────────────────────────────────
@@ -60,11 +62,8 @@ export const calculateConsumptionVisuals = (
   averageConsumption: number | null
 ): ConsumptionVisuals => {
   // Sin datos suficientes → neutral
-  if (
-    currentConsumption === null ||
-    averageConsumption === null ||
-    averageConsumption === 0
-  ) {
+  // Sin datos suficientes (null) → neutral
+  if (currentConsumption === null || averageConsumption === null) {
     return {
       level: 'neutral',
       badgeClass: 'cr-consumo-neutral',
@@ -72,8 +71,36 @@ export const calculateConsumptionVisuals = (
       textClass: 'cr-icon-consumo-neutral',
       statBoxClass: '',
       Icon: FaInfoCircle,
-      warningText: null
+      warningText: null,
+      chipStatus: 'info'
     };
+  }
+
+  // Si el promedio es exactamente 0 (ej. cliente nuevo o sin historial)
+  if (averageConsumption === 0) {
+    if (currentConsumption === 0) {
+      return {
+        level: 'green',
+        badgeClass: 'cr-consumo-green',
+        iconClass: 'cr-icon-consumo-green',
+        textClass: 'cr-icon-consumo-green',
+        statBoxClass: '',
+        Icon: FaCheckCircle,
+        warningText: null,
+        chipStatus: 'success'
+      };
+    } else {
+      return {
+        level: 'red',
+        badgeClass: 'cr-consumo-red',
+        iconClass: 'cr-icon-consumo-red',
+        textClass: 'cr-icon-consumo-red',
+        statBoxClass: 'cr-stat-critical',
+        Icon: FaTimesCircle,
+        warningText: '¡Consumo crítico! (Promedio histórico 0)',
+        chipStatus: 'error'
+      };
+    }
   }
 
   const lowerGreen = averageConsumption * 0.6;
@@ -89,7 +116,8 @@ export const calculateConsumptionVisuals = (
       textClass: 'cr-icon-consumo-green',
       statBoxClass: '',
       Icon: FaCheckCircle,
-      warningText: null
+      warningText: null,
+      chipStatus: 'success'
     };
   }
 
@@ -104,7 +132,8 @@ export const calculateConsumptionVisuals = (
       textClass: 'cr-icon-consumo-orange',
       statBoxClass: 'cr-stat-warn',
       Icon: FaExclamationTriangle,
-      warningText: '¡Consumo elevado!'
+      warningText: '¡Consumo elevado!',
+      chipStatus: 'warning'
     };
   }
 
@@ -116,6 +145,7 @@ export const calculateConsumptionVisuals = (
     textClass: 'cr-icon-consumo-red',
     statBoxClass: 'cr-stat-critical',
     Icon: FaTimesCircle,
-    warningText: '¡Consumo crítico!'
+    warningText: '¡Consumo crítico!',
+    chipStatus: 'error'
   };
 };

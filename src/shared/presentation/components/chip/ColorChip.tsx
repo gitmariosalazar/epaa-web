@@ -16,6 +16,8 @@ export interface ColorChipProps {
   onClick?: () => void;
   /** Add a dot indicator for status (useful in 'soft' or 'outline' variants) */
   withDot?: boolean;
+  /** Optional custom border radius (e.g. '4px', '50%') */
+  borderRadius?: string | number;
 }
 
 export const ColorChip: React.FC<ColorChipProps> = ({
@@ -28,14 +30,16 @@ export const ColorChip: React.FC<ColorChipProps> = ({
   icon,
   iconPosition = 'left',
   onClick,
-  withDot = false
+  withDot = false,
+  borderRadius
 }) => {
   const isInteractive = !!onClick;
 
   const finalColor = status ? `var(--${status})` : color;
 
   const style = {
-    '--chip-color': finalColor
+    '--chip-color': finalColor,
+    ...(borderRadius !== undefined && { borderRadius })
   } as CSSProperties;
 
   return (

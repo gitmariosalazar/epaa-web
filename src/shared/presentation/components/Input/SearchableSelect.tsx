@@ -18,6 +18,7 @@ interface SearchableSelectProps {
   disabled?: boolean;
   size?: 'small' | 'compact' | 'medium' | 'large';
   className?: string;
+  focused?: boolean;
 }
 
 export interface SearchableSelectRef {
@@ -27,7 +28,7 @@ export interface SearchableSelectRef {
 }
 
 export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelectProps>(
-  ({ label, value, onChange, options, placeholder = 'Select...', error, disabled = false, size = 'medium', className = '' }, ref) => {
+  ({ label, value, onChange, options, placeholder = 'Select...', error, disabled = false, size = 'medium', className = '', focused }, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [alignment, setAlignment] = useState<'bottom' | 'top'>('bottom');
@@ -40,6 +41,12 @@ export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelect
 
     // Find current label based on value
     const selectedOption = options.find(opt => opt.value === value);
+    
+    useEffect(() => {
+      if (focused && inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, [focused]);
     
     useEffect(() => {
       if (isClearingRef.current) {

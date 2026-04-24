@@ -17,7 +17,7 @@ export const useUpdateReading = () => {
   const [isLoadingInfo, setIsLoadingInfo] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [readingInfo, setReadingInfo] = useState<ReadingInfo | null>(null);
+  const [readingInfo, setReadingInfo] = useState<ReadingInfo[]>([]);
   const [readingHistory, setReadingHistory] = useState<ReadingHistory[]>([]);
 
   const fetchReadingData = useCallback(
@@ -36,29 +36,26 @@ export const useUpdateReading = () => {
           infoResultSettled.status === 'fulfilled' &&
           infoResultSettled.value
         ) {
-          setReadingInfo(infoResultSettled.value[0] || null);
+          setReadingInfo(infoResultSettled.value);
         } else {
-          setReadingInfo(null);
+          setReadingInfo([]);
           if (infoResultSettled.status === 'rejected') {
             console.error('Error fetching info:', infoResultSettled.reason);
-            
+
             const errorData = infoResultSettled.reason?.response?.data;
             let errorMessage = 'Error al obtener la información de lectura.';
-            
+
             if (errorData?.message) {
-              errorMessage = Array.isArray(errorData.message) 
-                ? errorData.message[0] 
+              errorMessage = Array.isArray(errorData.message)
+                ? errorData.message[0]
                 : errorData.message;
             } else if (infoResultSettled.reason?.message) {
               errorMessage = infoResultSettled.reason.message;
             }
 
-            MessageToastCustom(
-              'error',
-              errorMessage,
-              'Error',
-              { position: 'top-right' }
-            );
+            MessageToastCustom('error', errorMessage, 'Error', {
+              position: 'top-right'
+            });
           } else {
             MessageToastCustom(
               'warning',
@@ -93,7 +90,7 @@ export const useUpdateReading = () => {
   );
 
   const clearData = useCallback(() => {
-    setReadingInfo(null);
+    setReadingInfo([]);
     setReadingHistory([]);
   }, []);
 
@@ -108,21 +105,18 @@ export const useUpdateReading = () => {
 
         const errorData = error?.response?.data;
         let errorMessage = 'Error al actualizar la lectura.';
-        
+
         if (errorData?.message) {
-          errorMessage = Array.isArray(errorData.message) 
-            ? errorData.message[0] 
+          errorMessage = Array.isArray(errorData.message)
+            ? errorData.message[0]
             : errorData.message;
         } else if (error?.message) {
           errorMessage = error.message;
         }
 
-        MessageToastCustom(
-          'error',
-          errorMessage,
-          'Error',
-          { position: 'top-right' }
-        );
+        MessageToastCustom('error', errorMessage, 'Error', {
+          position: 'top-right'
+        });
       } finally {
         setIsSubmitting(false);
       }

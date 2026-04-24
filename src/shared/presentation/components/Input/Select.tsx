@@ -1,4 +1,4 @@
-import React, { type SelectHTMLAttributes, forwardRef } from 'react';
+import React, { type SelectHTMLAttributes, forwardRef, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import '@/shared/presentation/styles/Input.css';
 
@@ -11,10 +11,29 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'siz
   children?: React.ReactNode;
   options?: { value: string | number; label: string }[];
   size?: 'small' | 'compact' | 'medium' | 'large';
+  focused?: boolean;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, leftIcon, rightIcon = <ChevronDown size={14} />, className = '', children, size = 'medium', options, ...props }, ref) => {
+  ({ label, error, leftIcon, rightIcon = <ChevronDown size={14} />, className = '', children, size = 'medium', options, focused, ...props }, ref) => {
+    
+    const localRef = useRef<HTMLSelectElement>(null);
+
+    useEffect(() => {
+      if (focused && localRef.current) {
+        localRef.current.focus();
+      }
+    }, [focused]);
+
+    const handleRef = (node: HTMLSelectElement | null) => {
+      localRef.current = node as HTMLSelectElement;
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref) {
+        ref.current = node;
+      }
+    };
+
     return (
       <div className={`input-component input--${size} ${className}`}>
         {label && <label className="input__label">{label}</label>}
@@ -22,7 +41,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           {leftIcon && <span className="input__icon-left">{leftIcon}</span>}
           <select
             className={`input__field input__field--select ${error ? 'input__field--error' : ''} ${leftIcon ? 'input__field--with-icon' : ''} ${rightIcon !== null ? 'input__field--with-right-icon' : ''}`}
-            ref={ref}
+            ref={handleRef}
             {...props}
           >
             {options

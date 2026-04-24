@@ -1,4 +1,4 @@
-import React, { useState, forwardRef } from 'react';
+import React, { useState, forwardRef, useRef, useEffect } from 'react';
 import { Eye, EyeOff, Lock, Check, X } from 'lucide-react';
 import {
   calculatePasswordStrength,
@@ -15,6 +15,7 @@ interface PasswordInputProps extends Omit<
   showStrength?: boolean;
   valueToMatch?: string;
   size?: 'small' | 'compact' | 'medium' | 'large';
+  focused?: boolean;
 }
 
 export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
@@ -28,12 +29,30 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
       value,
       onChange,
       size = 'medium',
+      focused,
       ...props
     },
     ref
   ) => {
     const [isVisible, setIsVisible] = useState(false);
     const [strength, setStrength] = useState(0);
+
+    const localRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+      if (focused && localRef.current) {
+        localRef.current.focus();
+      }
+    }, [focused]);
+
+    const handleRef = (node: HTMLInputElement | null) => {
+      localRef.current = node as HTMLInputElement;
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref) {
+        ref.current = node;
+      }
+    };
 
     const toggleVisibility = () => setIsVisible(!isVisible);
 
@@ -86,7 +105,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           <input
             type={isVisible ? 'text' : 'password'}
             className={`password-input__field input__field--with-icon ${getFieldClass()}`}
-            ref={ref}
+            ref={handleRef}
             value={value}
             onChange={handleChange}
             {...props}
