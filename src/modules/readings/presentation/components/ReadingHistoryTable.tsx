@@ -75,8 +75,8 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
             <ColorChip
               color={color}
               label={row.observation}
-              size="sm"
-              variant="soft"
+              size="xs"
+              variant="outline"
             />
           );
         }

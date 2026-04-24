@@ -42,6 +42,7 @@ export const useReading = () => {
   );
   const [takenReadingsEstimatesOrAverage, setTakenReadingsEstimatesOrAverage] =
     useState<TakenReadingConnection[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   /**
    * Obtiene exclusivamente la información principal y el historial de una lectura
@@ -53,6 +54,7 @@ export const useReading = () => {
 
       setIsLoadingInfo(true);
       setIsLoadingHistory(true);
+      setError(null);
 
       try {
         // Ejecución concurrente pero tolerante a fallos independientes
@@ -86,11 +88,15 @@ export const useReading = () => {
             } else if (infoResultSettled.reason?.message) {
               errorMessage = infoResultSettled.reason.message;
             }
+            setError(errorMessage);
 
             MessageToastCustom('error', errorMessage, 'Error', {
               position: 'top-right'
             });
           } else {
+            setError(
+              'No se encontraron datos para la clave catastral proporcionada.'
+            );
             MessageToastCustom(
               'warning',
               'No se encontraron datos para la clave catastral proporcionada.',
@@ -196,6 +202,7 @@ export const useReading = () => {
     setReadingHistory([]);
     setPendingReadings([]);
     setTakenReadings([]);
+    setError(null);
     setTakenReadingsEstimatesOrAverage([]);
   }, []);
 
@@ -261,6 +268,8 @@ export const useReading = () => {
     takenReadings,
     isLoadingTakenReadings,
     takenReadingsEstimatesOrAverage,
-    isLoadingTakenReadingsEstimatesOrAverage
+    isLoadingTakenReadingsEstimatesOrAverage,
+    error,
+    setError
   };
 };

@@ -19,11 +19,13 @@ export const useUpdateReading = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [readingInfo, setReadingInfo] = useState<ReadingInfo[]>([]);
   const [readingHistory, setReadingHistory] = useState<ReadingHistory[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchReadingData = useCallback(
     async (cadastralKey: string) => {
       setIsLoadingInfo(true);
       setIsLoadingHistory(true);
+      setError(null);
 
       try {
         const [infoResultSettled, historyResultSettled] =
@@ -53,10 +55,12 @@ export const useUpdateReading = () => {
               errorMessage = infoResultSettled.reason.message;
             }
 
+            setError(errorMessage);
             MessageToastCustom('error', errorMessage, 'Error', {
               position: 'top-right'
             });
           } else {
+            setError('No se encontraron datos para la clave catastral proporcionada.');
             MessageToastCustom(
               'warning',
               'No se encontraron datos para la clave catastral proporcionada.',
@@ -92,6 +96,7 @@ export const useUpdateReading = () => {
   const clearData = useCallback(() => {
     setReadingInfo([]);
     setReadingHistory([]);
+    setError(null);
   }, []);
 
   const submitUpdateReading = useCallback(
@@ -130,6 +135,7 @@ export const useUpdateReading = () => {
     readingInfo,
     readingHistory,
     isSubmitting,
+    error,
     fetchReadingData,
     submitUpdateReading,
     clearData

@@ -10,6 +10,7 @@ import type { UpdateReadingRequest } from '../../domain/dto/request/UpdateReadin
 import { IdCard, User } from 'lucide-react';
 import { ReadingConfirmationModal } from '../components/ReadingConfirmationModal';
 import { ReadingUpdateInfoForm } from '../components/ReadingUpdateInfoForm';
+import { Alert } from '@/shared/presentation/components/Alert';
 
 export interface UpdateReadingPageProps {
   initialCadastralKey?: string;
@@ -28,6 +29,7 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
     isLoadingInfo,
     isLoadingHistory,
     isSubmitting,
+    error,
     fetchReadingData,
     submitUpdateReading,
     clearData
@@ -186,6 +188,10 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
           readingInfo={currentReadingInfoForRequest}
           method="update"
         />
+
+        {error && !currentReadingInfoForRequest && (
+          <Alert type="error" title="Búsqueda sin resultados" message={error} />
+        )}
 
         {currentReadingInfoForRequest && (
           <>

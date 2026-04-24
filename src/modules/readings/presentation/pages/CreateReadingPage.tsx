@@ -11,6 +11,7 @@ import '../styles/create-reading.css';
 import { IdCard, User } from 'lucide-react';
 import type { CreateReadingRequest } from '../../domain/dto/request/CreateReadingRequest';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
+import { Alert } from '@/shared/presentation/components/Alert';
 
 export interface CreateReadingPageProps {
   initialCadastralKey?: string;
@@ -31,7 +32,8 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
     isSubmitting,
     fetchReadingData,
     clearData,
-    submitReading
+    submitReading,
+    error
   } = useReading();
 
   const [cadastralKeyInput, setCadastralKeyInput] = useState('');
@@ -184,6 +186,10 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
           readingInfo={readingInfoForRequest}
           method="create"
         />
+
+        {error && !readingInfoForRequest && (
+          <Alert type="error" title="Búsqueda sin resultados" message={error} />
+        )}
 
         {readingInfoForRequest && (
           <>

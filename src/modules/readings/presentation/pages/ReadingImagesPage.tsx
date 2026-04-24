@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ImageIcon,
-  AlertCircle,
-  CheckCircle2,
-  AlertTriangle,
-  Droplet
-} from 'lucide-react';
+import { ImageIcon, AlertCircle, Droplet } from 'lucide-react';
 
 import { ReadingImagesFilters } from '../components/ReadingImagesFilters';
 import { useReadingImagesList } from '../hooks/useReadingImagesList';
@@ -23,6 +17,8 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { ReadingImagesViewer } from '../components/ReadingImagesViewer';
 import '../styles/ReadingImagesPage.css';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 
 export const ReadingImagesPage: React.FC = () => {
   const { t } = useTranslation();
@@ -47,24 +43,6 @@ export const ReadingImagesPage: React.FC = () => {
     });
   };
 
-  const getNoveltyBadge = (novelty?: string) => {
-    if (!novelty || novelty.toLowerCase() === 'ninguna') {
-      return (
-        <span className="badge-novelty badge-novelty--none">
-          <CheckCircle2 size={12} style={{ marginRight: '4px' }} />
-          Ninguna
-        </span>
-      );
-    }
-    // Simplistic logic: assume anything else is an alert/danger for visual difference
-    return (
-      <span className="badge-novelty badge-novelty--alert">
-        <AlertTriangle size={12} style={{ marginRight: '4px' }} />
-        {novelty}
-      </span>
-    );
-  };
-
   const IMAGES_COLUMNS: Column<ReadingImages>[] = [
     { header: 'CLAVE CATASTRAL', accessor: 'cadastralKey' },
     { header: 'MES', accessor: 'readingMonthName' },
@@ -82,7 +60,12 @@ export const ReadingImagesPage: React.FC = () => {
     },
     {
       header: 'NOVEDAD',
-      accessor: (r) => getNoveltyBadge(r.novelty)
+      accessor: (r) => {
+        const color: string = getNoveltyColor(r.novelty);
+        return (
+          <ColorChip label={r.novelty} color={color} size="xs" variant="soft" />
+        );
+      }
     },
     {
       header: 'IMÁGENES',
@@ -90,8 +73,8 @@ export const ReadingImagesPage: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {r.images && r.images.length > 0 ? (
             <Button
-              variant="outline"
-              size="sm"
+              variant="dashed"
+              size="xs"
               onClick={() => setSelectedReading(r)}
             >
               <ImageIcon size={16} />
@@ -120,10 +103,6 @@ export const ReadingImagesPage: React.FC = () => {
           <ImageIcon size={22} className="reading-images-header__icon" />
           {t('readings.imagesTitle', 'Registro Fotográfico de Lecturas')}
         </h2>
-        <p className="reading-images-header__subtitle">
-          Visualiza las evidencias fotográficas capturadas en campo de manera
-          rápida y profesional.
-        </p>
       </div>
 
       <ReadingImagesFilters isLoading={isLoading} onFetch={handleFetch} />
@@ -149,7 +128,7 @@ export const ReadingImagesPage: React.FC = () => {
             columns={IMAGES_COLUMNS}
             isLoading={isLoading}
             pagination
-            pageSize={10}
+            pageSize={15}
             emptyState={
               <EmptyState
                 message="No se encontraron imágenes de lecturas."
