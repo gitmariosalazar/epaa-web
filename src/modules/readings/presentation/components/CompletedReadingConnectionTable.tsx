@@ -12,6 +12,9 @@ import { Eye } from 'lucide-react';
 import { FaEdit } from 'react-icons/fa';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 
 interface PropTypes {
   data: TakenReadingConnection[];
@@ -65,33 +68,44 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
       },
       {
         header: t('readings.columns.novelty'),
-        accessor: (r) => r.novelty || t('readings.columns.none')
+        accessor: (r) => {
+          const color = getNoveltyColor(r.novelty || 'NOT_READ');
+          return (
+            <ColorChip
+              label={r.novelty || '-'}
+              color={color}
+              size="sm"
+              borderRadius="10px"
+              variant="soft"
+            />
+          );
+        }
       },
       {
         header: t('common.actions', 'Acciones'),
         accessor: (reading) => (
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => {}}
-              title={t('common.viewDetails', 'Ver Detalles')}
-              circle
+            <Tooltip
+              themeColor="info"
+              content={t('common.viewDetails', 'Ver Detalles')}
             >
-              <Eye size={16} />
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              color="warning"
-              onClick={() =>
-                onAction && onAction('update', reading.cadastralKey)
-              }
-              title={t('common.edit', 'Editar')}
-              circle
-            >
-              <FaEdit size={16} />
-            </Button>
+              <Button size="sm" variant="ghost" onClick={() => {}} circle>
+                <Eye size={16} />
+              </Button>
+            </Tooltip>
+            <Tooltip themeColor="warning" content={t('common.edit', 'Editar')}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() =>
+                  onAction && onAction('update', reading.cadastralKey)
+                }
+                color="warning"
+                circle
+              >
+                <FaEdit size={16} />
+              </Button>
+            </Tooltip>
           </div>
         )
       }

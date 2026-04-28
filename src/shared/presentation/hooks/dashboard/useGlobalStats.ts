@@ -21,59 +21,59 @@ export const useGlobalStats = ({ stats }: UseGlobalStatsProps) => {
 
     return [
       {
-        title: 'Total Readings',
+        title: 'Lecturas Totales',
         value: stats.totalReadings,
         icon: FileText,
-        desc: 'Readings associated this month',
+        desc: 'Lecturas asociadas este mes',
         color: 'icon-blue'
       },
       {
-        title: 'Avg Readings/Day',
+        title: 'Promedio de Lecturas/Día',
         value: Number(stats.averageReadingsPerDay).toFixed(2),
         icon: Activity,
-        desc: 'Average readings processed daily',
+        desc: 'Promedio de lecturas procesadas diariamente',
         color: 'icon-green'
       },
       {
-        title: 'Total Consumption',
+        title: 'Consumo Total',
         value: `${Number(stats.totalConsumption).toFixed(2)} m³`,
         icon: Droplet,
-        desc: 'Water consumption volume',
+        desc: 'Volumen de consumo de agua',
         color: 'icon-cyan'
       },
       {
-        title: 'Total Revenue',
+        title: 'Ingreso Total',
         value: `$${Number(stats.totalReadingValue).toFixed(2)}`,
         icon: TrendingUp,
-        desc: 'Total reading value calculated',
+        desc: 'Valor total de la lectura calculada',
         color: 'icon-yellow'
       },
       {
         title: 'Tasa Alcantarillado',
         value: `$${Number(stats.totalSewerRate).toFixed(2)}`,
         icon: AlertCircle,
-        desc: 'Total sewer rate collected',
+        desc: 'Total de la tasa de alcantarillado cobrada',
         color: 'icon-indigo'
       },
       {
-        title: 'Active Sectors',
+        title: 'Sectores Activos',
         value: stats.uniqueSectors,
         icon: MapPin,
-        desc: 'Unique sectors monitored',
+        desc: 'Sectores únicos monitoreados',
         color: 'icon-red'
       },
       {
-        title: 'Connections Completed',
+        title: 'Acometidas Completadas',
         value: stats.uniqueConnections,
         icon: MdCable,
-        desc: 'Unique meters/connections',
+        desc: 'Acometidas únicas',
         color: 'icon-green'
       },
       {
-        title: 'Total Connections',
+        title: 'Total de Acometidas',
         value: stats.totalConnections,
         icon: TbListNumbers,
-        desc: 'Total connections',
+        desc: 'Total de acometidas',
         color: 'icon-purple'
       }
     ];

@@ -2,10 +2,10 @@ import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProperties } from './useProperties';
 import type { TabItem } from '@/shared/presentation/components/Tabs';
-import { Building2, User } from 'lucide-react';
+import { Building2, ChartBarIcon, User } from 'lucide-react';
 import React from 'react';
 
-export type PropertiesTab = 'all' | 'byOwner';
+export type PropertiesTab = 'statistics' | 'all' | 'byOwner';
 
 function applySortConfig<T>(
   data: T[],
@@ -27,6 +27,11 @@ export const usePropertiesViewModel = () => {
   const PROPERTIES_TABS: TabItem<PropertiesTab>[] = useMemo(
     () => [
       {
+        id: 'statistics',
+        label: t('properties.tabs.statistics', 'Estadísticas'),
+        icon: React.createElement(ChartBarIcon, { size: 16 })
+      },
+      {
         id: 'all',
         label: t('properties.tabs.all', 'Todas las Propiedades'),
         icon: React.createElement(Building2, { size: 16 })
@@ -47,15 +52,17 @@ export const usePropertiesViewModel = () => {
     clearError,
     fetchAllProperties,
     fetchPropertiesByOwner,
-    clearProperties
+    clearProperties,
+    fetchPropertiesByType,
+    propertiesByType
   } = useProperties();
 
-  const [activeTab, setActiveTab] = useState<PropertiesTab>('all');
+  const [activeTab, setActiveTab] = useState<PropertiesTab>('statistics');
   const [clientId, setClientId] = useState<string>('');
-  
+
   const [searchBy, setSearchBy] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const limitSize = 50;
@@ -66,29 +73,46 @@ export const usePropertiesViewModel = () => {
   } | null>(null);
 
   useEffect(() => {
+    clearProperties();
     setSortConfig(null);
     clearError();
     setOffset(0);
     setHasMore(true);
-    // don't clear filter states on activeTab changes so they persist when returning
-    
-    if (activeTab === 'all') {
+    clearProperties();
+
+    if (activeTab === 'statistics') {
+      fetchPropertiesByType().then((res) => {
+        if (res && res.length < limitSize) setHasMore(false);
+      });
+    } else if (activeTab === 'all') {
+      clearProperties();
       fetchAllProperties(limitSize, 0, false).then((res) => {
         if (res && res.length < limitSize) setHasMore(false);
       });
-    } else {
+    } else if (activeTab === 'byOwner') {
       clearProperties();
+      if (clientId) {
+        fetchPropertiesByOwner(clientId, limitSize, 0, false).then((res) => {
+          if (res && res.length < limitSize) setHasMore(false);
+        });
+      }
     }
   }, [activeTab, clearError, fetchAllProperties, clearProperties]);
 
   const handleFetch = () => {
     setOffset(0);
     setHasMore(true);
-    if (activeTab === 'all') {
+    if (activeTab === 'statistics') {
+      fetchPropertiesByType().then((res) => {
+        if (res && res.length < limitSize) setHasMore(false);
+      });
+    } else if (activeTab === 'all') {
+      clearProperties();
       fetchAllProperties(limitSize, 0, false).then((res) => {
         if (res && res.length < limitSize) setHasMore(false);
       });
     } else if (activeTab === 'byOwner') {
+      clearProperties();
       if (clientId) {
         fetchPropertiesByOwner(clientId, limitSize, 0, false).then((res) => {
           if (res && res.length < limitSize) setHasMore(false);
@@ -102,14 +126,20 @@ export const usePropertiesViewModel = () => {
     const nextOffset = offset + limitSize;
     setOffset(nextOffset);
 
-    if (activeTab === 'all') {
+    if (activeTab === 'statistics') {
+      fetchPropertiesByType().then((res) => {
+        if (res && res.length < limitSize) setHasMore(false);
+      });
+    } else if (activeTab === 'all') {
       fetchAllProperties(limitSize, nextOffset, true).then((res) => {
         if (res && res.length < limitSize) setHasMore(false);
       });
     } else if (activeTab === 'byOwner' && clientId) {
-      fetchPropertiesByOwner(clientId, limitSize, nextOffset, true).then((res) => {
-        if (res && res.length < limitSize) setHasMore(false);
-      });
+      fetchPropertiesByOwner(clientId, limitSize, nextOffset, true).then(
+        (res) => {
+          if (res && res.length < limitSize) setHasMore(false);
+        }
+      );
     }
   };
 
@@ -119,24 +149,42 @@ export const usePropertiesViewModel = () => {
   const filteredProperties = useMemo(() => {
     let result = [...properties];
 
+    if (activeTab === 'statistics') return result;
+
     if (activeTab === 'all' && searchQuery) {
       const query = searchQuery.toLowerCase();
-      result = result.filter(p => {
+      result = result.filter((p) => {
         if (searchBy === 'all') {
           return (
-            String(p.propertyCadastralKey || '').toLowerCase().includes(query) ||
-            String(p.propertyClientId || '').toLowerCase().includes(query) ||
-            String(p.propertySector || '').toLowerCase().includes(query) ||
-            String(p.propertyTypeName || '').toLowerCase().includes(query)
+            String(p.propertyCadastralKey || '')
+              .toLowerCase()
+              .includes(query) ||
+            String(p.propertyClientId || '')
+              .toLowerCase()
+              .includes(query) ||
+            String(p.propertySector || '')
+              .toLowerCase()
+              .includes(query) ||
+            String(p.propertyTypeName || '')
+              .toLowerCase()
+              .includes(query)
           );
         } else if (searchBy === 'cadastralKey') {
-          return String(p.propertyCadastralKey || '').toLowerCase().includes(query);
+          return String(p.propertyCadastralKey || '')
+            .toLowerCase()
+            .includes(query);
         } else if (searchBy === 'clientId') {
-          return String(p.propertyClientId || '').toLowerCase().includes(query);
+          return String(p.propertyClientId || '')
+            .toLowerCase()
+            .includes(query);
         } else if (searchBy === 'sector') {
-          return String(p.propertySector || '').toLowerCase().includes(query);
+          return String(p.propertySector || '')
+            .toLowerCase()
+            .includes(query);
         } else if (searchBy === 'propertyType') {
-          return String(p.propertyTypeName || '').toLowerCase().includes(query);
+          return String(p.propertyTypeName || '')
+            .toLowerCase()
+            .includes(query);
         }
         return true;
       });
@@ -170,6 +218,7 @@ export const usePropertiesViewModel = () => {
     sortConfig,
     handleSort,
     filteredProperties,
+    propertiesByType,
     handleFetch,
     loadMore,
     hasMore

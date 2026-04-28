@@ -305,7 +305,7 @@ export const ConnectionReport: React.FC<ConnectionReportProps> = ({
         <div className="connection-report-toolbar">
           {/* Unified Search Row */}
           <div className="connection-toolbar-side">
-            <label className="toolbar-label-compact">Connection</label>
+            <label className="toolbar-label-compact">Clave Catastral: </label>
             <div>
               <InputCadastralKey
                 placeholder="Key (e.g. 1-1)"
@@ -322,12 +322,12 @@ export const ConnectionReport: React.FC<ConnectionReportProps> = ({
                 onChange={(e) => setLimit(Number(e.target.value))}
                 size="compact"
               >
-                <option value={5}>Last 5</option>
-                <option value={10}>Last 10</option>
-                <option value={15}>Last 15</option>
-                <option value={20}>Last 20</option>
-                <option value={25}>Last 25</option>
-                <option value={30}>Last 30</option>
+                <option value={5}>Últimas 5</option>
+                <option value={10}>Últimas 10</option>
+                <option value={15}>Últimas 15</option>
+                <option value={20}>Últimas 20</option>
+                <option value={25}>Últimas 25</option>
+                <option value={30}>Últimas 30</option>
               </Select>
             </div>
             <Button
@@ -337,7 +337,7 @@ export const ConnectionReport: React.FC<ConnectionReportProps> = ({
               size="sm"
               color="primary"
             >
-              History
+              Historial
             </Button>
 
             {data.length > 0 && (
@@ -346,7 +346,7 @@ export const ConnectionReport: React.FC<ConnectionReportProps> = ({
                 <input
                   type="text"
                   className="toolbar-input-compact"
-                  placeholder="Filter results..."
+                  placeholder="Filtrar resultados..."
                   maxLength={60}
                   value={resultSearchTerm}
                   onChange={(e) => setResultSearchTerm(e.target.value)}

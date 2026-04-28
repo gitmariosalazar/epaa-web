@@ -10,6 +10,7 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { Eye } from 'lucide-react';
 import { IoAdd, IoInformationCircleOutline } from 'react-icons/io5';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 interface PropTypes {
   data: PendingReadingConnection[];
@@ -58,27 +59,30 @@ export const PendingReadingConnectionTable: React.FC<PropTypes> = ({
         header: t('common.actions', 'Acciones'),
         accessor: (reading) => (
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => {}}
-              title={t('common.viewDetails', 'Ver Detalles')}
-              circle
+            <Tooltip
+              themeColor="info"
+              content={t('common.viewDetails', 'Ver Detalles')}
             >
-              <Eye size={16} />
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              color="success"
-              onClick={() =>
-                onAction && onAction('create', reading.cadastralKey)
-              }
-              title={t('common.add', 'Agregar Lectura')}
-              circle
+              <Button size="sm" variant="ghost" onClick={() => {}} circle>
+                <Eye size={16} />
+              </Button>
+            </Tooltip>
+            <Tooltip
+              themeColor="success"
+              content={t('common.add', 'Agregar Lectura')}
             >
-              <IoAdd size={16} />
-            </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                color="success"
+                onClick={() =>
+                  onAction && onAction('create', reading.cadastralKey)
+                }
+                circle
+              >
+                <IoAdd size={16} />
+              </Button>
+            </Tooltip>
           </div>
         )
       }

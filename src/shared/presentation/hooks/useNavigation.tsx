@@ -110,21 +110,21 @@ export const useNavigation = (): NavSection[] => {
       ]
     },
     {
-      title: 'Conexiones',
+      title: 'Actualizacion de Catastros',
       hideTitle: true,
       items: [
         {
           icon: <MdOutlineCable size={20} />,
-          label: 'Conexiones',
+          label: 'Actualizacion de Catastros',
           subItems: [
             {
               icon: <TiThList size={18} />,
-              label: t('sidebar.connectionsList', 'Lista de Conexiones'),
+              label: t('sidebar.connectionsList', 'Lista de Acometidas'),
               to: '/connections/list'
             },
             {
               icon: <BarChart3 size={18} />, // Using BarChart3 or similar Map icon
-              label: t('sidebar.connectionsMap', 'Mapa de Conexiones'),
+              label: t('sidebar.connectionsMap', 'Mapa de Acometidas'),
               to: '/connections/map'
             },
             {
@@ -237,7 +237,7 @@ export const useNavigation = (): NavSection[] => {
           subItems: [
             {
               icon: <TiThList size={18} />,
-              label: 'List',
+              label: t('sidebar.propertyList', 'Lista de Propiedades'),
               to: '/properties/list'
             }
           ]

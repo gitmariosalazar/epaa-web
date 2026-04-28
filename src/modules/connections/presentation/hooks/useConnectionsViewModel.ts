@@ -286,12 +286,14 @@ export const useConnectionsViewModel = () => {
           return conn;
         });
 
-        setConnections((prev) => (append ? [...prev, ...enhancedResults] : enhancedResults));
+        setConnections((prev) =>
+          append ? [...prev, ...enhancedResults] : enhancedResults
+        );
         setHasMore(result.length >= LIMIT_SIZE);
         return result;
       } catch (err: unknown) {
         const message =
-          err instanceof Error ? err.message : 'Error al cargar las conexiones';
+          err instanceof Error ? err.message : 'Error al cargar las Acometidas';
         setError(message);
         return undefined;
       } finally {
@@ -459,7 +461,10 @@ export const useConnectionsViewModel = () => {
 
       // If we are opening edit from map, ensure it's centered
       if (mappedFormData.latitude && mappedFormData.longitude) {
-        setMapCenter({ lat: mappedFormData.latitude, lng: mappedFormData.longitude });
+        setMapCenter({
+          lat: mappedFormData.latitude,
+          lng: mappedFormData.longitude
+        });
       }
 
       setIsFormOpen(true);

@@ -270,31 +270,40 @@ export const DailyReport: React.FC<DailyReportProps> = ({
         )
       },
       {
-        header: 'Average Consumption',
+        header: t(
+          'dashboard.reports.daily.columns.averageConsumption',
+          'Promedio de Consumo'
+        ),
         accessor: (row) => `${row.averageConsumption} m³`
       },
       {
-        header: 'Preview Reading',
+        header: t(
+          'dashboard.reports.daily.columns.previewReading',
+          'Lectura Previa'
+        ),
         accessor: 'previewReading'
       },
       {
-        header: 'Current Reading',
+        header: t(
+          'dashboard.reports.daily.columns.currentReading',
+          'Lectura Actual'
+        ),
         accessor: 'currentReading'
       },
       {
-        header: 'Reading Value',
+        header: t('dashboard.reports.daily.columns.value', 'Valor'),
         accessor: (row) => `$ ${row.readingValue}`,
         id: 'value',
         isNumeric: true
       },
       {
-        header: 'Consumption',
+        header: t('dashboard.reports.daily.columns.consumption', 'Consumo'),
         accessor: (row) => `${row.consumption} m³`,
         id: 'consumption',
         isNumeric: true
       },
       {
-        header: 'Novelty',
+        header: t('dashboard.reports.daily.columns.novelty', 'Novedad'),
         accessor: (row) => {
           const color = getNoveltyColor(row.novelty);
           return (
@@ -316,7 +325,7 @@ export const DailyReport: React.FC<DailyReportProps> = ({
       {showToolbar && (
         <div className="daily-report-toolbar">
           <div className="daily-toolbar-side">
-            <label className="toolbar-label-compact">Period</label>
+            <label className="toolbar-label-compact">Periodo</label>
             <DatePicker
               view="date"
               value={date}

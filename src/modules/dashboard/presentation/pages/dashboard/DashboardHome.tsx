@@ -56,7 +56,7 @@ export const DashboardHome = () => {
             <p>
               {t(
                 'dashboard.subtitle',
-                'Overview of system readings and performance'
+                'Descripción general de las lecturas y el rendimiento del sistema.'
               )}
             </p>
           </div>

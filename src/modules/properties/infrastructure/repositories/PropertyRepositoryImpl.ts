@@ -1,7 +1,7 @@
 import type { IPropertyRepository } from '../../domain/repositories/property.interface.repository';
 import type { HttpClientInterface } from '@/shared/infrastructure/api/interfaces/HttpClientInterface';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
-import type { Property } from '../../domain/models/Property';
+import type { Property, PropertyByType } from '../../domain/models/Property';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 
 export class PropertyRepositoryImpl implements IPropertyRepository {
@@ -41,6 +41,13 @@ export class PropertyRepositoryImpl implements IPropertyRepository {
   ): Promise<Property[]> {
     const response = await this.client.get<ApiResponse<Property[]>>(
       `/properties/get-properties-by-owner/${clientId}?limit=${limit}&offset=${offset}`
+    );
+    return response.data.data;
+  }
+
+  async findPropertiesByType(): Promise<PropertyByType[]> {
+    const response = await this.client.get<ApiResponse<PropertyByType[]>>(
+      `/properties/get-properties-by-type`
     );
     return response.data.data;
   }

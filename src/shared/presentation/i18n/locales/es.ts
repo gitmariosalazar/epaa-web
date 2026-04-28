@@ -133,7 +133,7 @@ export const es = {
         empty: 'No hay lecturas avanzadas disponibles.',
         columns: {
           sector: 'Sector',
-          totalConnections: 'Conexiones Totales',
+          totalConnections: 'Total de Acometidas',
           readingsCompleted: 'Lecturas Completadas',
           missingReadings: 'Lecturas Faltantes',
           progress: 'Porcentaje de Progreso'
@@ -444,14 +444,14 @@ export const es = {
       goToLogin: 'Iniciar Sesión'
     },
     connections: {
-      create: 'Nueva Conexión',
-      deleteTitle: 'Eliminar Conexión',
+      create: 'Nueva Acometida',
+      deleteTitle: 'Eliminar Acometida',
       table: {
-        reportTitle: 'REPORTE DE CONEXIONES',
-        reportDescription: 'Listado de conexiones del sistema',
-        noData: 'Sin conexiones',
+        reportTitle: 'REPORTE DE ACOMETIDAS',
+        reportDescription: 'Listado de Acometidas del sistema',
+        noData: 'Sin Acometidas',
         noDataDescription:
-          'No se encontraron conexiones con los filtros actuales.',
+          'No se encontraron Acometidas con los filtros actuales.',
         sector: 'Sector',
         client: 'Cliente',
         meterNumber: 'Nº Medidor',
@@ -461,16 +461,16 @@ export const es = {
         sewerage: 'Alcantarillado',
         status: 'Estado',
         options: 'Opciones',
-        edit: 'Editar Conexión',
-        delete: 'Eliminar Conexión',
+        edit: 'Editar Acometida',
+        delete: 'Eliminar Acometida',
         viewDetails: 'Ver Detalles',
-        totalConnections: 'TOTAL CONEXIONES',
+        totalConnections: 'TOTAL DE ACOMETIDAS',
         active: 'Activo',
         inactive: 'Inactivo',
         yes: 'Sí',
         no: 'No',
-        detailsTitle: 'Detalle de Conexión',
-        connectionId: 'ID Conexión',
+        detailsTitle: 'Detalle de Acometida',
+        connectionId: 'ID Acometida',
         clientId: 'Cliente ID',
         zone: 'Zona',
         people: 'Personas',
@@ -480,16 +480,16 @@ export const es = {
         installationDate: 'Fecha Instalación'
       },
       deleteConfirm:
-        '¿Está seguro que desea eliminar esta conexión? Esta acción no se puede deshacer.',
+        '¿Está seguro que desea eliminar esta Acometida? Esta acción no se puede deshacer.',
       noDataDescription:
-        'No se encontraron conexiones con los filtros actuales. Usa Consultar para cargar datos.',
+        'No se encontraron Acometidas con los filtros actuales. Usa Consultar para cargar datos.',
       tabs: {
-        all: 'Todas las Conexiones',
+        all: 'Todas las Acometidas',
         sector: 'Por Sector',
         client: 'Por Cliente'
       },
       wizard: {
-        title: 'Asistente de Nueva Conexión',
+        title: 'Asistente de Nueva Acometida',
         stepInfo: 'Paso {{current}} de {{total}}',
         steps: {
           client: 'Cliente',

@@ -2,13 +2,14 @@ import React from 'react';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import '../../styles/KPICard.css';
 import type { ChartColor } from '../../utils/colors/charts.colors';
+import { chartColorService } from '../../utils/colors/ChartColorManager';
 
 export interface KPICardProps {
   label: string;
   value: string | number;
   icon: React.ReactNode;
   color: ChartColor | string;
-  valueColor?: 'green' | 'red' | 'amber';
+  valueColor?: ChartColor | string;
   description?: string;
   className?: string;
   tooltipText?: string;
@@ -29,6 +30,9 @@ export const KPICard: React.FC<KPICardProps> = ({
   onClick
 }) => {
   const finalTooltipText = tooltipText || `${label}: ${value}`;
+  const resolvedValueColor = valueColor
+    ? chartColorService.getColorByName(valueColor)
+    : undefined;
 
   return (
     <div
@@ -41,7 +45,8 @@ export const KPICard: React.FC<KPICardProps> = ({
       </div>
       <div className="kpi-card-body">
         <div
-          className={`kpi-card-value${valueColor ? ` kpi-card-value--${valueColor}` : ''}`}
+          className="kpi-card-value"
+          style={resolvedValueColor ? { color: resolvedValueColor } : undefined}
         >
           {activeTooltip ? (
             <Tooltip

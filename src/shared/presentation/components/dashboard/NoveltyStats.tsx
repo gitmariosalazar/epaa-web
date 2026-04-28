@@ -67,8 +67,19 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
 
   if (loading) {
     return (
-      <div style={{ padding: '2.5rem', display: 'flex', justifyContent: 'center', width: '100%' }}>
-        <CircularProgress label={t('common.loading')} strokeWidth={9} size={110} />
+      <div
+        style={{
+          padding: '2.5rem',
+          display: 'flex',
+          justifyContent: 'center',
+          width: '100%'
+        }}
+      >
+        <CircularProgress
+          label={t('common.loading')}
+          strokeWidth={9}
+          size={110}
+        />
       </div>
     );
   }
@@ -92,7 +103,7 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
       }}
     >
       <div className="card-header">
-        <h3>Novelties Breakdown</h3>
+        <h3>Desglose por Novedad</h3>
       </div>
 
       <div className="novelty-content-wrapper" style={{ padding: '1.5rem' }}>

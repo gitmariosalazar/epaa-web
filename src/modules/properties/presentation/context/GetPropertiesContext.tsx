@@ -3,11 +3,13 @@ import { FindAllPropertiesUseCase } from '../../application/usecases/FindAllProp
 import { FindPropertiesByOwnerUseCase } from '../../application/usecases/FindPropertiesByOwnerUseCase';
 import { GetPropertyByIdUseCase } from '../../application/usecases/GetPropertyByIdUseCase';
 import { PropertyRepositoryImpl } from '../../infrastructure/repositories/PropertyRepositoryImpl';
+import { FindPropertiesByTypeUseCase } from '../../application/usecases/FindPropertiesByTypeUseCase';
 
 interface GetPropertiesContextType {
   getPropertyById: GetPropertyByIdUseCase;
   findAllProperties: FindAllPropertiesUseCase;
   findPropertiesByOwner: FindPropertiesByOwnerUseCase;
+  findPropertiesByType: FindPropertiesByTypeUseCase;
 }
 
 const GetPropertiesContext = createContext<GetPropertiesContextType | null>(
@@ -21,6 +23,7 @@ export const GetPropertyContextProvider: React.FC<{
   const getPropertyByIdUseRepository = new PropertyRepositoryImpl();
   const findAllPropertiesUseRepository = new PropertyRepositoryImpl();
   const findPropertiesByOwnerUseRepository = new PropertyRepositoryImpl();
+  const findPropertiesByTypeUseRepository = new PropertyRepositoryImpl();
 
   const getPropertyByIdUseCase: GetPropertyByIdUseCase =
     new GetPropertyByIdUseCase(getPropertyByIdUseRepository);
@@ -28,11 +31,14 @@ export const GetPropertyContextProvider: React.FC<{
     new FindAllPropertiesUseCase(findAllPropertiesUseRepository);
   const findPropertiesByOwnerUseCase: FindPropertiesByOwnerUseCase =
     new FindPropertiesByOwnerUseCase(findPropertiesByOwnerUseRepository);
+  const findPropertiesByTypeUseCase: FindPropertiesByTypeUseCase =
+    new FindPropertiesByTypeUseCase(findPropertiesByTypeUseRepository);
 
   const value = {
     getPropertyById: getPropertyByIdUseCase,
     findAllProperties: findAllPropertiesUseCase,
-    findPropertiesByOwner: findPropertiesByOwnerUseCase
+    findPropertiesByOwner: findPropertiesByOwnerUseCase,
+    findPropertiesByType: findPropertiesByTypeUseCase
   };
 
   return (

@@ -14,22 +14,22 @@ export const useReportsViewModel = () => {
     () => [
       {
         id: 'daily',
-        label: t('dashboard.reports.tabs.daily', 'Daily Report'),
+        label: t('dashboard.reports.tabs.daily', 'Reporte Diario'),
         icon: <Calendar size={16} />
       },
       {
         id: 'yearly',
-        label: t('dashboard.reports.tabs.yearly', 'Yearly Summary'),
+        label: t('dashboard.reports.tabs.yearly', 'Resumen Anual'),
         icon: <Activity size={16} />
       },
       {
         id: 'connection',
-        label: t('dashboard.reports.tabs.connection', 'Connection History'),
+        label: t('dashboard.reports.tabs.connection', 'Historial'),
         icon: <FileText size={16} />
       },
       {
         id: 'advanced',
-        label: t('dashboard.reports.tabs.advanced', 'Advanced Readings'),
+        label: t('dashboard.reports.tabs.advanced', 'Reporte de Avance'),
         icon: <FileText size={16} />
       }
     ],

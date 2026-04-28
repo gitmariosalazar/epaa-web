@@ -9,6 +9,7 @@ import { AlertCircle } from 'lucide-react';
 import { PropertiesTable } from '../components/PropertiesTable';
 import { ByOwnerFilters } from '../components/ByOwnerFilters';
 import { AllPropertiesFilters } from '../components/AllPropertiesFilters';
+import { PropertiesDashBoard } from '../components/PropertiesDashBoard';
 import '../styles/PropertiesPage.css';
 import { useSimulatedProgress } from '@/shared/presentation/components/CircularProgress/useSimulatedProgress';
 
@@ -17,6 +18,8 @@ export const PropertiesPage: React.FC = () => {
 
   const renderFilters = () => {
     switch (vm.activeTab) {
+      case 'statistics':
+        return null;
       case 'all':
         return (
           <AllPropertiesFilters
@@ -44,7 +47,12 @@ export const PropertiesPage: React.FC = () => {
   const progress = useSimulatedProgress(vm.isLoading);
 
   const renderContent = () => {
-    if (vm.isLoading && vm.filteredProperties.length === 0) {
+    const isDataEmpty =
+      vm.activeTab === 'statistics'
+        ? vm.propertiesByType.length === 0
+        : vm.filteredProperties.length === 0;
+
+    if (vm.isLoading && isDataEmpty) {
       return (
         <div className="properties-page-centered-content">
           <CircularProgress
@@ -70,6 +78,10 @@ export const PropertiesPage: React.FC = () => {
           />
         </div>
       );
+    }
+
+    if (vm.activeTab === 'statistics') {
+      return <PropertiesDashBoard data={vm.propertiesByType} />;
     }
 
     return (

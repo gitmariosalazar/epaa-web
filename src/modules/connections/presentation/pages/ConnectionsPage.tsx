@@ -102,7 +102,7 @@ export const ConnectionsPage = () => {
             message={t('common.noResults', 'Sin resultados')}
             description={t(
               'connections.noDataDescription',
-              'No se encontraron conexiones con los filtros actuales. Usa Consultar para cargar datos.'
+              'No se encontraron Acometidas con los filtros actuales. Usa Consultar para cargar datos.'
             )}
             variant="info"
             minHeight="300px"

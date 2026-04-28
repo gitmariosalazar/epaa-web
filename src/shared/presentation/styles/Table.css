@@ -17,7 +17,11 @@
   --tb-footer-bg: #f1f5f9; /* Slate 100 - Clean & Solid */
   --tb-footer-text: #1e40af; /* Indigo 800 */
   --tb-shadow-sticky: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  --tb-radius: 0.75rem;
+  --tb-radius-xs: 1px;
+  --tb-radius-sm: 2px;
+  --tb-radius-md: 5px;
+  --tb-radius-lg: 10px;
+  --tb-radius-xl: 15px;
 }
 
 .dark {
@@ -44,7 +48,7 @@
   position: relative;
   background-color: var(--tb-bg);
   border: 1px solid var(--tb-border);
-  border-radius: var(--tb-radius);
+  border-radius: var(--tb-radius-md);
   overflow: hidden;
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.04),

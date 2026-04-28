@@ -89,7 +89,18 @@ export const GeneralCollectionDashboard: React.FC<
   const columnsSections: Column<KPISection>[] = [
     {
       header: 'Tipo de Rubro',
-      accessor: 'typeKPI',
+      accessor: (item: KPISection) =>
+        item.typeKPI === 'EPAA'
+          ? 'Valor EPAA'
+          : item.typeKPI === 'COLLECTION TRASH RATE'
+            ? 'Valor Recolección Residuos'
+            : item.typeKPI === 'IMPROVEMENTS'
+              ? 'Valor Mejoras'
+              : item.typeKPI === 'SURCHARGE'
+                ? 'Valor Recargos'
+                : item.typeKPI === 'THIRD PARTIES'
+                  ? 'Valor Terceros'
+                  : item.typeKPI,
       sortable: true,
       id: 'typeKPI'
     },

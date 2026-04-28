@@ -539,7 +539,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
       ),
       reportDescription: t(
         'accounting.overdue.reportSubtitle',
-        'Listado de conexiones con pagos pendientes'
+        'Listado de Acometidas con pagos pendientes'
       ),
       labelsHorizontal,
       totalRows,
@@ -596,7 +596,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
             message={t('accounting.overdue.noData', 'Sin registros en mora')}
             description={t(
               'accounting.overdue.noDataDescription',
-              'No se encontraron conexiones con pagos pendientes.'
+              'No se encontraron Acometidas con pagos pendientes.'
             )}
             icon={IoInformationCircleOutline}
             variant="info"

@@ -7,6 +7,7 @@ import {
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 
 interface PropTypes {
   data: any[];
@@ -21,23 +22,12 @@ export const AllReadingsTable: React.FC<PropTypes> = ({ data, isLoading }) => {
       {
         header: t('readings.columns.state', 'Estado'),
         accessor: (row) => (
-          <span
-            style={{
-              padding: '2px 8px',
-              borderRadius: '12px',
-              fontSize: '0.8em',
-              background:
-                row._type === 'Pendiente'
-                  ? 'var(--warning-light, #FFF3E0)'
-                  : 'var(--success-light, #E8F5E9)',
-              color:
-                row._type === 'Pendiente'
-                  ? 'var(--warning-dark, #E65100)'
-                  : 'var(--success-dark, #1B5E20)'
-            }}
-          >
-            {row._type}
-          </span>
+          <ColorChip
+            label={row._type}
+            status={row._type === 'Pendiente' ? 'warning' : 'success'}
+            size="sm"
+            variant="soft"
+          />
         )
       },
       { header: t('readings.columns.cadastralKey'), accessor: 'cadastralKey' },

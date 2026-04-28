@@ -1,4 +1,4 @@
-import type { Property } from '../models/Property';
+import type { Property, PropertyByType } from '../models/Property';
 
 export interface IPropertyRepository {
   getPropertyById(propertyCadastralKey: string): Promise<Property | null>;
@@ -9,4 +9,5 @@ export interface IPropertyRepository {
     limit: number,
     offset: number
   ): Promise<Property[]>;
+  findPropertiesByType(): Promise<PropertyByType[]>;
 }

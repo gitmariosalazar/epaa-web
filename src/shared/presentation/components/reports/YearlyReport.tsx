@@ -6,7 +6,7 @@ import type {
 import { GetYearlyReadingsReportUseCase } from '@/modules/dashboard/application/usecases/get-yearly-readings-report.usecase';
 import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructure/repositories/http-report-dashboard.repository';
 import { ExportService } from '@/shared/infrastructure/services/ExportService';
-import { Search, Droplets, FileText, Calendar } from 'lucide-react';
+import { Search, Droplets, FileText, Calendar, BarChart } from 'lucide-react';
 import { Button } from '../Button/Button';
 import { EmptyState } from '../common/EmptyState';
 import { Table, type Column } from '../Table/Table';
@@ -315,49 +315,49 @@ export const YearlyReport: React.FC<YearlyReportProps> = ({
   const columns = useMemo<Column<MonthlySummary>[]>(
     () => [
       {
-        header: 'Month',
+        header: t('common.month', 'Mes'),
         accessor: 'month',
         className: 'font-medium',
         id: 'month'
       },
       {
-        header: 'Readings Count',
+        header: t('common.readingsCount', 'Lecturas'),
         accessor: 'totalReadings',
         id: 'totalReadings',
         isNumeric: true
       },
       {
-        header: 'Total Consumption',
+        header: t('common.totalConsumption', 'Consumo Total'),
         accessor: (row) => `${Number(row.totalConsumption).toFixed(2)} m³`,
         id: 'totalConsumption',
         isNumeric: true
       },
       {
-        header: 'Average Consumption',
+        header: t('common.averageConsumption', 'Consumo Promedio'),
         accessor: (row) => `${Number(row.averageConsumption).toFixed(2)} m³`,
         id: 'averageConsumption',
         isNumeric: true
       },
       {
-        header: 'Max Consumption',
+        header: t('common.maxConsumption', 'Consumo Máximo'),
         accessor: (row) => `${Number(row.maxConsumption).toFixed(2)} m³`,
         id: 'maxConsumption',
         isNumeric: true
       },
       {
-        header: 'Min Consumption',
+        header: t('common.minConsumption', 'Consumo Mínimo'),
         accessor: (row) => `${Number(row.minConsumption).toFixed(2)} m³`,
         id: 'minConsumption',
         isNumeric: true
       },
       {
-        header: 'Incident Count',
+        header: t('common.incidentCount', 'Incidentes'),
         accessor: 'incidentCount',
         id: 'incidentCount',
         isNumeric: true
       },
       {
-        header: 'Incident Rate Percentage',
+        header: t('common.incidentRatePercentage', 'Tasa de Incidentes'),
         accessor: (row) => `${Number(row.incidentRatePercentage).toFixed(2)}%`,
         id: 'incidentRatePercentage',
         isNumeric: true
@@ -371,7 +371,7 @@ export const YearlyReport: React.FC<YearlyReportProps> = ({
       {showToolbar && (
         <div className="yearly-report-toolbar">
           <div className="yearly-toolbar-side">
-            <label className="toolbar-label-compact">Year</label>
+            <label className="toolbar-label-compact">Año:</label>
             <div style={{ minWidth: '100px' }}>
               <DatePicker
                 view="year"
@@ -399,32 +399,43 @@ export const YearlyReport: React.FC<YearlyReportProps> = ({
           <div className="report-content">
             <div className="stats-grid">
               <KPICard
-                label="Total Readings"
+                label={t(
+                  'dashboard.reports.yearly.kpi.totalReadings',
+                  'Total de Lecturas'
+                )}
                 value={data.totalReadings}
                 icon={<FileText size={20} />}
                 color="blue"
                 description="Lecturas registradas"
               />
               <KPICard
-                label="Avg Consumption"
+                label={t(
+                  'dashboard.reports.yearly.kpi.averageConsumption',
+                  'Promedio de Consumo'
+                )}
                 value={`${Number(data.averageConsumption).toFixed(2)} m³`}
                 icon={<Droplets size={20} />}
                 color="green"
                 description="Promedio por mes"
               />
               <KPICard
-                label="Year"
+                label={t('dashboard.reports.yearly.kpi.year', 'Año')}
                 value={data.year}
                 icon={<Calendar size={20} />}
                 color="purple"
                 description="Periodo fiscal reportado"
               />
               <KPICard
-                label="Year"
-                value={data.year}
-                icon={<Calendar size={20} />}
-                color="purple"
-                description="Periodo fiscal reportado"
+                label="Consumo Máximo"
+                value={`${data.monthlySummaries
+                  .reduce(
+                    (acc, item) => Math.max(acc, item.totalConsumption),
+                    0
+                  )
+                  .toFixed(2)} m³`}
+                icon={<BarChart size={20} />}
+                color="yellow"
+                description="Consumo Máximo"
               />
             </div>
           </div>

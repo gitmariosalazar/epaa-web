@@ -95,7 +95,7 @@ export const AdvancedReadingsReport: React.FC<AdvancedReadingsReportProps> = ({
         id: 'totalConnections',
         label: t(
           'dashboard.reports.advanced.columns.totalConnections',
-          'Total Conexiones'
+          'Total de Acometidas'
         ),
         isDefault: true
       },
@@ -138,7 +138,7 @@ export const AdvancedReadingsReport: React.FC<AdvancedReadingsReportProps> = ({
         totalConnections: (row.totalConnections ?? 0).toString(),
         readingsCompleted: (row.readingsCompleted ?? 0).toString(),
         missingReadings: (row.missingReadings ?? 0).toString(),
-        progressPercentage: `${(row.progressPercentage ?? 0).toFixed(1)}%`
+        progressPercentage: `${Number(row.progressPercentage ?? 0).toFixed(1)}%`
       };
 
       return selectedCols.map((col) => rowData[col.id] || '-');
@@ -253,18 +253,18 @@ export const AdvancedReadingsReport: React.FC<AdvancedReadingsReportProps> = ({
   const columns = useMemo<Column<AdvancedReportReadings>[]>(
     () => [
       {
-        header: 'Sector',
+        header: t('common.sector', 'Sector'),
         accessor: 'sector'
       },
       {
-        header: 'Total Connections',
+        header: t('common.totalConnections', 'Total Acometidas'),
         accessor: 'totalConnections',
         id: 'totalConnections',
         isNumeric: true,
         style: { fontFamily: 'monospace' }
       },
       {
-        header: 'Readings Completed',
+        header: t('common.readingsCompleted', 'Lecturas Completadas'),
         id: 'readingsCompleted',
         isNumeric: true,
         accessor: (row) => (
@@ -290,7 +290,7 @@ export const AdvancedReadingsReport: React.FC<AdvancedReadingsReportProps> = ({
         )
       },
       {
-        header: 'Missing Readings',
+        header: t('common.missingReadings', 'Lecturas Faltantes'),
         id: 'missingReadings',
         isNumeric: true,
         accessor: (row) => (
@@ -316,7 +316,7 @@ export const AdvancedReadingsReport: React.FC<AdvancedReadingsReportProps> = ({
         )
       },
       {
-        header: 'Progress Percentage',
+        header: t('dashboard.reports.advanced.columns.progress', 'Progreso'),
         id: 'progressPercentage',
         isNumeric: true,
         accessor: (row) => (
@@ -337,7 +337,7 @@ export const AdvancedReadingsReport: React.FC<AdvancedReadingsReportProps> = ({
         <div className="advanced-report-toolbar">
           {/* Unified Search Row */}
           <div className="advanced-toolbar-side">
-            <label className="toolbar-label-compact">Period</label>
+            <label className="toolbar-label-compact">Periodo</label>
             <DatePicker
               view="month"
               value={month}
