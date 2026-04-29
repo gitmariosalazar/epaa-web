@@ -45,6 +45,9 @@ export const useTrashRateReport = () => {
   const [trashRateKPI, setTrashRateKPI] = useState<TrashRateKPI[]>([]);
 
   const [loadingCount, setLoadingCount] = useState(0);
+  const [loadingAudit, setLoadingAudit] = useState(false);
+  const [loadingMissing, setLoadingMissing] = useState(false);
+
   const loading = loadingCount > 0;
   const [error, setError] = useState<Error | null>(null);
 
@@ -64,12 +67,18 @@ export const useTrashRateReport = () => {
 
   const getTrashRateAuditReport = useCallback(
     async (params: DateRangeParams) => {
-      await withLoading(async () => {
+      setLoadingAudit(true);
+      setError(null);
+      try {
         const result = await context.getTrashRateAuditReport.execute(params);
         setTrashRateAuditReport(result);
-      });
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoadingAudit(false);
+      }
     },
-    [context.getTrashRateAuditReport, withLoading]
+    [context.getTrashRateAuditReport]
   );
 
   const getMonthlySummaryReport = useCallback(
@@ -84,12 +93,18 @@ export const useTrashRateReport = () => {
 
   const getMissingValorBills = useCallback(
     async (params: DateRangeParams) => {
-      await withLoading(async () => {
+      setLoadingMissing(true);
+      setError(null);
+      try {
         const result = await context.getMissingValorBills.execute(params);
         setMissingValorBills(result);
-      });
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoadingMissing(false);
+      }
     },
-    [context.getMissingValorBills, withLoading]
+    [context.getMissingValorBills]
   );
 
   const getActiveCreditNotes = useCallback(
@@ -188,6 +203,8 @@ export const useTrashRateReport = () => {
     getTrashRateKPI,
     //State
     loading,
+    loadingAudit,
+    loadingMissing,
     error,
     clearError
   };

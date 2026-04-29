@@ -11,7 +11,11 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { TrashRateKPI } from '../../../domain/models/trash-rate-report.model';
+import type {
+  MissingValorRow,
+  TrashRateAuditRow,
+  TrashRateKPI
+} from '../../../domain/models/trash-rate-report.model';
 import {
   DonutChart,
   type DonutSlice
@@ -40,10 +44,14 @@ interface DiscountAndCreditNoteItem {
 interface TrashRateDashboardKPIProps {
   data: TrashRateKPI[];
   isLoading: boolean;
+  isLoadingAudit?: boolean;
+  isLoadingMissing?: boolean;
+  onFetchAudit?: () => void;
+  onFetchMissing?: () => void;
   error: string | null;
   selectedCategoryIndex: number;
-  missingValorBills: any[];
-  trashRateAuditReport: any[];
+  missingValorBills: MissingValorRow[];
+  trashRateAuditReport: TrashRateAuditRow[];
 }
 
 const fmtMoney = (n: number) =>
@@ -106,6 +114,10 @@ const ComplianceCard: React.FC<{ pct: number }> = ({ pct }) => {
 export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
   data,
   isLoading,
+  isLoadingAudit,
+  isLoadingMissing,
+  onFetchAudit,
+  onFetchMissing,
   error,
   selectedCategoryIndex,
   missingValorBills,
@@ -123,6 +135,12 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
     setModalTitle(label);
     setIsModalOpen(true);
     setStatusFilter('ALL'); // Reset filter when opening
+
+    if (label.includes('Inconsistencia') || label.includes('Integridad')) {
+      onFetchAudit?.();
+    } else {
+      onFetchMissing?.();
+    }
   };
 
   const handleCardClickCloseModal = () => {
@@ -240,6 +258,9 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
       fmt: fmtMoney
     }
   ];
+
+  // console.log({ missingValorBills }); // Removed for performance
+  // console.log({ trashRateAuditReport }); // Removed for performance
 
   return (
     <div className="trash-dashboard" style={{ padding: '5px 0 12px 0' }}>
@@ -483,16 +504,16 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
             marginTop: '10px'
           }}
         >
-          {modalTitle === 'Diferencia de Integridad' ? (
+          {modalTitle.includes('Inconsistencia') || modalTitle.includes('Integridad') ? (
             <TrashRateAuditReportTable
               data={filteredAuditReport}
-              isLoading={isLoading}
+              isLoading={isLoadingAudit ?? false}
               error={error ? new Error(error) : null}
             />
           ) : (
             <MissingValorBillsTable
               data={filteredMissingBills}
-              isLoading={isLoading}
+              isLoading={isLoadingMissing ?? false}
               error={error ? new Error(error) : null}
             />
           )}

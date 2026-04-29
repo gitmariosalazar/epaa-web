@@ -116,6 +116,10 @@ export const TrashRateKPIPage: React.FC = () => {
           <TrashRateDashboardKPI
             data={vm.trashRateKPI}
             isLoading={vm.isLoading}
+            isLoadingAudit={vm.loadingAudit}
+            isLoadingMissing={vm.loadingMissing}
+            onFetchAudit={vm.getTrashRateAuditReport}
+            onFetchMissing={vm.getMissingValorBills}
             error={vm.error}
             selectedCategoryIndex={vm.selectedCategoryIndex}
             missingValorBills={vm.missingValorBills}

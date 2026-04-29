@@ -71,7 +71,7 @@ export const TrashRateKPIFilters: React.FC<TrashRateKPIFiltersProps> = ({
     <div className="trash-report-filters">
       {/* ── LEFT: month selection ── */}
       <div className="trash-report-filter-left">
-        <div className="trash-report-filter-group trash-report-filter-group--range">
+        <div className="trash-report-filter-group">
           <label className="trash-report-filter-label">
             {t('trashRateKPI.filters.selectMonth', 'Seleccionar Mes')}
           </label>
