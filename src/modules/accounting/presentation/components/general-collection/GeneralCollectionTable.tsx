@@ -10,6 +10,12 @@ import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import {
+  getColorIncomeStatus,
+  getLabelIncomeStatus,
+  type TypeIncomeStatus
+} from '@/shared/utils/IncomeStatus';
 
 interface GeneralCollectionTableProps {
   data: GeneralCollectionResponse[];
@@ -118,7 +124,14 @@ export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
     },
     {
       header: 'Estado',
-      accessor: 'incomeStatus',
+      accessor: (item: GeneralCollectionResponse) => (
+        <ColorChip
+          label={getLabelIncomeStatus(item.incomeStatus as TypeIncomeStatus)}
+          status={getColorIncomeStatus(item.incomeStatus as TypeIncomeStatus)}
+          variant="soft"
+          size="xs"
+        ></ColorChip>
+      ),
       sortable: true
     }
   ];

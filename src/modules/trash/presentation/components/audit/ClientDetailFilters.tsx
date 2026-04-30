@@ -49,12 +49,13 @@ export const ClientDetailFilters: React.FC<ClientDetailFiltersProps> = ({
             />
           </div>
         </div>
-        <Button onClick={onFetch} disabled={!canFetch} size="xs">
-          {isLoading ? (
-            <div className="trash-report-filter-spinner" />
-          ) : (
-            <Search size={18} />
-          )}
+        <Button
+          onClick={onFetch}
+          disabled={!canFetch}
+          size="xs"
+          isLoading={isLoading}
+          leftIcon={!isLoading ? <Search size={18} /> : undefined}
+        >
           {isLoading ? t('common.loading') : t('common.search')}
         </Button>
       </div>

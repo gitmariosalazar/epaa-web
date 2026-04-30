@@ -9,6 +9,12 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { ConvertMonth } from '@/shared/utils/datetime/Converts';
 import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import {
+  getColorIncomeStatus,
+  getLabelIncomeStatus,
+  type TypeIncomeStatus
+} from '@/shared/utils/IncomeStatus';
 
 // Hack to handle intersection of types
 export type GroupedReportItem = {
@@ -74,7 +80,18 @@ export const GeneralCollectionGroupedTable: React.FC<
     { header: 'Recaudador', accessor: 'collector', sortable: true },
     { header: 'Cód. Título', accessor: 'titleCode', sortable: true },
     { header: 'Método', accessor: 'paymentMethod', sortable: true },
-    { header: 'Estado', accessor: 'status', sortable: true },
+    {
+      header: 'Estado',
+      accessor: (item: GroupedReportItem) => (
+        <ColorChip
+          label={getLabelIncomeStatus(item.status as TypeIncomeStatus)}
+          status={getColorIncomeStatus(item.status as TypeIncomeStatus)}
+          variant="soft"
+          size="xs"
+        ></ColorChip>
+      ),
+      sortable: true
+    },
     {
       header: '# Registros',
       accessor: 'recordCount',

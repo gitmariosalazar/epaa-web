@@ -8,6 +8,12 @@ import type { DailyGroupedReport } from '../../../domain/models/EntryData';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import {
+  getColorIncomeStatus,
+  getLabelIncomeStatus,
+  type TypeIncomeStatus
+} from '@/shared/utils/IncomeStatus';
 
 interface DailyGroupedReportTableProps {
   data: DailyGroupedReport[];
@@ -47,7 +53,14 @@ export const DailyGroupedReportTable: React.FC<
     },
     {
       header: t('accounting.columns.status'),
-      accessor: 'status',
+      accessor: (item: DailyGroupedReport) => (
+        <ColorChip
+          label={getLabelIncomeStatus(item.status as TypeIncomeStatus)}
+          status={getColorIncomeStatus(item.status as TypeIncomeStatus)}
+          variant="soft"
+          size="xs"
+        ></ColorChip>
+      ),
       sortable: true
     },
     {
