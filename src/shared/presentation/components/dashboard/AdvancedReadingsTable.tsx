@@ -12,6 +12,8 @@ import { EmptyState } from '../common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 
 import { CircularProgress } from '../CircularProgress';
+import { Tooltip } from '../common/Tooltip/Tooltip';
+import { Input } from '../Input/Input';
 
 interface AdvancedReadingsTableProps {
   data: AdvancedReportReadings[];
@@ -49,8 +51,14 @@ export const AdvancedReadingsTable = ({
 
   if (loading)
     return (
-      <div style={{ padding: '3rem', display: 'flex', justifyContent: 'center' }}>
-        <CircularProgress label={t('dashboard.advancedReadings.loading')} strokeWidth={6} size={110} />
+      <div
+        style={{ padding: '3rem', display: 'flex', justifyContent: 'center' }}
+      >
+        <CircularProgress
+          label={t('dashboard.advancedReadings.loading')}
+          strokeWidth={6}
+          size={110}
+        />
       </div>
     );
   if (!data.length)
@@ -87,7 +95,7 @@ export const AdvancedReadingsTable = ({
     },
     {
       header: t('dashboard.advancedReadings.columns.readingsCompleted'),
-      accessor: (row) => (
+      accessor: (row: AdvancedReportReadings) => (
         <div
           style={{
             display: 'flex',
@@ -101,15 +109,21 @@ export const AdvancedReadingsTable = ({
             {row.readingsCompleted}
           </span>
           {row.readingsCompleted > 0 && (
-            <Button
-              variant="outline"
-              size="xs"
-              color="slate"
-              iconOnly
-              leftIcon={<List size={14} />}
-              onClick={() => openModal(row.sector, 'completed')}
-              title="Ver Completadas"
-            />
+            <Tooltip
+              content={t('Ver Completadas')}
+              position="bottom"
+              themeColor="blue"
+            >
+              <Button
+                variant="outline"
+                size="xs"
+                color="slate"
+                iconOnly
+                leftIcon={<List size={14} />}
+                onClick={() => openModal(row.sector, 'completed')}
+                circle
+              />
+            </Tooltip>
           )}
         </div>
       ),
@@ -118,7 +132,7 @@ export const AdvancedReadingsTable = ({
     },
     {
       header: t('dashboard.advancedReadings.columns.missingReadings'),
-      accessor: (row) => (
+      accessor: (row: AdvancedReportReadings) => (
         <div
           style={{
             display: 'flex',
@@ -132,15 +146,21 @@ export const AdvancedReadingsTable = ({
             {row.missingReadings}
           </span>
           {row.missingReadings > 0 && (
-            <Button
-              variant="outline"
-              size="xs"
-              color="slate"
-              iconOnly
-              leftIcon={<List size={14} />}
-              onClick={() => openModal(row.sector, 'missing')}
-              title="Ver Faltantes"
-            />
+            <Tooltip
+              content={t('Ver Faltantes')}
+              position="bottom"
+              themeColor="sky"
+            >
+              <Button
+                variant="outline"
+                size="xs"
+                color="slate"
+                iconOnly
+                leftIcon={<List size={14} />}
+                onClick={() => openModal(row.sector, 'missing')}
+                circle
+              />
+            </Tooltip>
           )}
         </div>
       ),
@@ -232,31 +252,12 @@ export const AdvancedReadingsTable = ({
         >
           <h3>{t('dashboard.advancedReadings.title')}</h3>
           <div style={{ position: 'relative', maxWidth: '200px' }}>
-            <Search
-              size={16}
-              style={{
-                position: 'absolute',
-                left: '8px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-secondary)'
-              }}
-            />
-            <input
+            <Input
               type="text"
               placeholder={t('dashboard.advancedReadings.searchPlaceholder')}
               value={searchTerm}
               onChange={handleSearchChange}
-              style={{
-                padding: '6px 8px 6px 30px',
-                border: '1px solid var(--border-color)',
-                borderRadius: '4px',
-                fontSize: '0.875rem',
-                outline: 'none',
-                width: '100%',
-                backgroundColor: 'var(--surface)',
-                color: 'var(--text-main)'
-              }}
+              leftIcon={<Search size={16} />}
             />
           </div>
         </div>

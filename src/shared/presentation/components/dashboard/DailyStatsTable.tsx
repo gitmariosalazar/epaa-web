@@ -10,6 +10,7 @@ import { useDailyStatsTable } from '@/shared/presentation/hooks/dashboard/useDai
 import { EmptyState } from '../common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { CircularProgress } from '../CircularProgress';
+import { Input } from '../Input/Input';
 
 interface DailyStatsProps {
   data: DailyStatsReport[];
@@ -40,7 +41,10 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
     return (
       <EmptyState
         message={t('common.noData', 'No se encontraron datos')}
-        description={t('dashboard.dailyStats.noData', 'No hay registros diarios para este periodo')}
+        description={t(
+          'dashboard.dailyStats.noData',
+          'No hay registros diarios para este periodo'
+        )}
         variant="info"
       />
     );
@@ -145,31 +149,13 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
       >
         <h3>{t('dashboard.dailyStats.title')}</h3>
         <div style={{ position: 'relative', maxWidth: '200px' }}>
-          <Search
-            size={16}
-            style={{
-              position: 'absolute',
-              left: '8px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: 'var(--text-secondary)'
-            }}
-          />
-          <input
+          <Input
             type="text"
-            placeholder={t('dashboard.dailyStats.searchPlaceholder')}
+            placeholder={`${t('common.search')}...`}
             value={searchTerm}
             onChange={handleSearchChange}
-            style={{
-              padding: '6px 8px 6px 30px',
-              border: '1px solid var(--border-color)',
-              borderRadius: '4px',
-              fontSize: '0.875rem',
-              outline: 'none',
-              width: '100%',
-              backgroundColor: 'var(--surface)',
-              color: 'var(--text-main)'
-            }}
+            leftIcon={<Search size={16} />}
+            size="compact"
           />
         </div>
       </div>

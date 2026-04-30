@@ -18,6 +18,7 @@ import type { ExportColumn } from './ReportPreviewModal';
 import { useCallback } from 'react';
 import './AdvancedReadingsReport.css';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { Tooltip } from '../common/Tooltip/Tooltip';
 
 interface AdvancedReadingsReportProps {
   showToolbar?: boolean;
@@ -84,45 +85,37 @@ export const AdvancedReadingsReport: React.FC<AdvancedReadingsReportProps> = ({
     handleSearch();
   }, [month]);
 
-  const availableColumns = useMemo(
-    () => [
-      {
-        id: 'sector',
-        label: t('dashboard.reports.advanced.columns.sector', 'Sector'),
-        isDefault: true
-      },
-      {
-        id: 'totalConnections',
-        label: t(
-          'dashboard.reports.advanced.columns.totalConnections',
-          'Total de Acometidas'
-        ),
-        isDefault: true
-      },
-      {
-        id: 'readingsCompleted',
-        label: t(
-          'dashboard.reports.advanced.columns.readingsCompleted',
-          'Lecturas Completadas'
-        ),
-        isDefault: true
-      },
-      {
-        id: 'missingReadings',
-        label: t(
-          'dashboard.reports.advanced.columns.missingReadings',
-          'Lecturas Faltantes'
-        ),
-        isDefault: true
-      },
-      {
-        id: 'progressPercentage',
-        label: t('dashboard.reports.advanced.columns.progress', 'Progreso %'),
-        isDefault: true
-      }
-    ],
-    [t]
-  );
+  const availableColumns: ExportColumn[] = [
+    {
+      id: 'sector',
+      label: t('dashboard.reports.advanced.columns.sector', 'Sector')
+    },
+    {
+      id: 'totalConnections',
+      label: t(
+        'dashboard.reports.advanced.columns.totalConnections',
+        'Total de Acometidas'
+      )
+    },
+    {
+      id: 'readingsCompleted',
+      label: t(
+        'dashboard.reports.advanced.columns.readingsCompleted',
+        'Lecturas Completadas'
+      )
+    },
+    {
+      id: 'missingReadings',
+      label: t(
+        'dashboard.reports.advanced.columns.missingReadings',
+        'Lecturas Faltantes'
+      )
+    },
+    {
+      id: 'progressPercentage',
+      label: t('dashboard.reports.advanced.columns.progress', 'Progreso %')
+    }
+  ];
 
   const filteredData = useMemo(() => {
     if (!resultSearchTerm) return data;
@@ -267,24 +260,35 @@ export const AdvancedReadingsReport: React.FC<AdvancedReadingsReportProps> = ({
         header: t('common.readingsCompleted', 'Lecturas Completadas'),
         id: 'readingsCompleted',
         isNumeric: true,
-        accessor: (row) => (
+        accessor: (row: AdvancedReportReadings) => (
           <div
-            className="flex items-center gap-2"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingLeft: '10px',
+              paddingRight: '10px'
+            }}
           >
-            <span className="font-bold text-rose-600 dark:text-rose-400">
+            <span className="font-bold text-emerald-600 dark:text-emerald-400">
               {row.readingsCompleted}
             </span>
             {row.readingsCompleted > 0 && (
-              <Button
-                variant="outline"
-                size="xs"
-                color="slate"
-                iconOnly
-                leftIcon={<List size={14} />}
-                onClick={() => openModal(row.sector, 'completed')}
-                title="Ver Completadas"
-              />
+              <Tooltip
+                content={t('Ver Completadas')}
+                position="bottom"
+                themeColor="blue"
+              >
+                <Button
+                  variant="outline"
+                  size="xs"
+                  color="slate"
+                  iconOnly
+                  leftIcon={<List size={14} />}
+                  onClick={() => openModal(row.sector, 'completed')}
+                  circle
+                />
+              </Tooltip>
             )}
           </div>
         )
@@ -293,24 +297,35 @@ export const AdvancedReadingsReport: React.FC<AdvancedReadingsReportProps> = ({
         header: t('common.missingReadings', 'Lecturas Faltantes'),
         id: 'missingReadings',
         isNumeric: true,
-        accessor: (row) => (
+        accessor: (row: AdvancedReportReadings) => (
           <div
-            className="flex items-center gap-2"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingLeft: '10px',
+              paddingRight: '10px'
+            }}
           >
             <span className="font-bold text-rose-600 dark:text-rose-400">
               {row.missingReadings}
             </span>
             {row.missingReadings > 0 && (
-              <Button
-                variant="outline"
-                size="xs"
-                color="slate"
-                iconOnly
-                leftIcon={<List size={14} />}
-                onClick={() => openModal(row.sector, 'missing')}
-                title="Ver Faltantes"
-              />
+              <Tooltip
+                content={t('Ver Faltantes')}
+                position="bottom"
+                themeColor="sky"
+              >
+                <Button
+                  variant="outline"
+                  size="xs"
+                  color="slate"
+                  iconOnly
+                  leftIcon={<List size={14} />}
+                  onClick={() => openModal(row.sector, 'missing')}
+                  circle
+                />
+              </Tooltip>
             )}
           </div>
         )

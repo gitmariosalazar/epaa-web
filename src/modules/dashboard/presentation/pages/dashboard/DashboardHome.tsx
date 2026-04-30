@@ -21,6 +21,7 @@ import { useDashboardController } from '@/modules/dashboard/presentation/hooks/u
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { useSimulatedProgress } from '@/shared/presentation/components/CircularProgress/useSimulatedProgress';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 export const DashboardHome = () => {
   const { t } = useTranslation();
@@ -61,19 +62,24 @@ export const DashboardHome = () => {
             </p>
           </div>
 
-          <div
-            className="dashboard-control pulse-hover"
-            onClick={() => pickerRef.current?.showPicker()}
-            title={t('dashboard.changePeriod')}
+          <Tooltip
+            content={t('dashboard.changePeriod', 'Cambiar periodo')}
+            position="bottom"
+            themeColor="sky"
           >
-            <DatePicker
-              view="month"
-              value={currentMonth}
-              onChange={handleMonthChange}
-              disabled={loading}
-              ref={pickerRef}
-            />
-          </div>
+            <div
+              className="dashboard-control pulse-hover"
+              onClick={() => pickerRef.current?.showPicker()}
+            >
+              <DatePicker
+                view="month"
+                value={currentMonth}
+                onChange={handleMonthChange}
+                disabled={loading}
+                ref={pickerRef}
+              />
+            </div>
+          </Tooltip>
         </div>
 
         {/* ── Dashboard Content Wrapper with Global Loader ── */}

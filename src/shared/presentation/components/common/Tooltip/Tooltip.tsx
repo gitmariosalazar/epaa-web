@@ -4,6 +4,45 @@ import './Tooltip.css';
 
 export type TooltipPosition = 'top' | 'bottom' | 'left' | 'right';
 
+/**
+ * Professional color palette for tooltips.
+ * Supports standard semantic colors and a full range of professional hues.
+ */
+export type TooltipThemeColor =
+  | 'primary'
+  | 'secondary'
+  | 'accent'
+  | 'info'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'danger'
+  | 'slate'
+  | 'gray'
+  | 'zinc'
+  | 'neutral'
+  | 'stone'
+  | 'red'
+  | 'orange'
+  | 'amber'
+  | 'yellow'
+  | 'lime'
+  | 'green'
+  | 'emerald'
+  | 'teal'
+  | 'cyan'
+  | 'sky'
+  | 'blue'
+  | 'indigo'
+  | 'violet'
+  | 'purple'
+  | 'fuchsia'
+  | 'pink'
+  | 'rose'
+  | (string & {}); // Pattern for string with autocomplete support
+
+export type TooltipVariant = 'soft' | 'solid' | 'transparent';
+
 interface TooltipProps {
   content: ReactNode;
   children: ReactNode;
@@ -11,15 +50,67 @@ interface TooltipProps {
   className?: string;
   disabled?: boolean;
   as?: React.ElementType;
-  themeColor?: string; // Mantained for backward compatibility
+  themeColor?: TooltipThemeColor;
   backgroundColor?: string;
   textColor?: string;
   icon?: ReactNode;
-  variant?: 'soft' | 'solid' | 'transparent';
+  variant?: TooltipVariant;
   followCursor?: boolean;
   onMouseEnter?: (e: React.MouseEvent) => void;
   onMouseLeave?: (e: React.MouseEvent) => void;
 }
+
+/**
+ * Color Resolver Strategy following SOLID principles (Single Responsibility).
+ * Decouples color logic from component structure.
+ */
+const resolveTooltipStyles = (
+  themeColor?: TooltipThemeColor,
+  variant: TooltipVariant = 'soft',
+  backgroundColor?: string,
+  textColor?: string
+): React.CSSProperties => {
+  const isTransparent = variant === 'transparent';
+  
+  // Base background resolution
+  const background = (() => {
+    if (backgroundColor) return backgroundColor;
+    if (isTransparent) return 'color-mix(in srgb, var(--surface) 40%, transparent)';
+    
+    const baseColor = themeColor 
+      ? `var(--palette-${themeColor}, var(--${themeColor}, ${themeColor}))` 
+      : 'var(--surface)';
+    
+    if (variant === 'solid' && themeColor) return baseColor;
+    if (variant === 'soft' && themeColor) return `color-mix(in srgb, ${baseColor} 15%, var(--surface))`;
+    return 'var(--surface)';
+  })();
+
+  // Arrow color usually matches background
+  const arrowColor = background;
+
+  // Border resolution
+  const border = themeColor 
+    ? `1px solid color-mix(in srgb, var(--palette-${themeColor}, var(--${themeColor}, ${themeColor})) 40%, transparent)` 
+    : isTransparent 
+      ? '1px solid color-mix(in srgb, var(--text-main) 10%, transparent)' 
+      : '1px solid var(--border-color)';
+
+  const arrowBorderColor = themeColor 
+    ? `color-mix(in srgb, var(--palette-${themeColor}, var(--${themeColor}, ${themeColor})) 40%, transparent)` 
+    : isTransparent 
+      ? 'color-mix(in srgb, var(--text-main) 10%, transparent)' 
+      : 'var(--border-color)';
+
+  return {
+    background,
+    color: textColor || 'var(--text-main)',
+    border,
+    '--tooltip-arrow-color': arrowColor,
+    '--tooltip-arrow-border-color': arrowBorderColor,
+    backdropFilter: isTransparent ? 'blur(12px)' : 'blur(8px)',
+  } as React.CSSProperties;
+};
 
 export const Tooltip: React.FC<TooltipProps> = ({
   content,
@@ -147,6 +238,9 @@ export const Tooltip: React.FC<TooltipProps> = ({
     }
   }, [disabled, isVisible]);
 
+  // Resolve dynamic styles based on theme and variants
+  const dynamicStyles = resolveTooltipStyles(themeColor, variant, backgroundColor, textColor);
+
   return (
     <Component
       ref={triggerRef}
@@ -181,49 +275,16 @@ export const Tooltip: React.FC<TooltipProps> = ({
               left: coords.left,
               opacity: 1,
               visibility: 'visible',
-              transition: 'opacity 0.2s ease',
+              transition: 'opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               zIndex: 10000,
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
               
-              background: (() => {
-                if (backgroundColor) return backgroundColor;
-                if (variant === 'transparent') return 'color-mix(in srgb, var(--surface) 40%, transparent)';
-                const baseColor = themeColor 
-                  ? `var(--palette-${themeColor}, var(--${themeColor}, ${themeColor}))` 
-                  : 'var(--surface)';
-                
-                if (variant === 'solid' && themeColor) return baseColor;
-                if (variant === 'soft' && themeColor) return `color-mix(in srgb, ${baseColor} 15%, var(--surface))`;
-                return 'var(--surface)';
-              })(),
+              ...dynamicStyles,
 
-              color: textColor || 'var(--text-main)',
-              
-              border: themeColor 
-                ? `1px solid color-mix(in srgb, var(--palette-${themeColor}, var(--${themeColor}, ${themeColor})) 40%, transparent)` 
-                : variant === 'transparent' ? '1px solid color-mix(in srgb, var(--text-main) 10%, transparent)' : '1px solid var(--border-color)',
-              
-              '--tooltip-arrow-color': (() => {
-                if (backgroundColor) return backgroundColor;
-                if (variant === 'transparent') return 'color-mix(in srgb, var(--surface) 95%, transparent)';
-                const baseColor = themeColor 
-                  ? `var(--palette-${themeColor}, var(--${themeColor}, ${themeColor}))` 
-                  : 'var(--surface)';
-                
-                if (variant === 'solid' && themeColor) return baseColor;
-                if (variant === 'soft' && themeColor) return `color-mix(in srgb, ${baseColor} 15%, var(--surface))`;
-                return 'var(--surface)';
-              })(),
-
-              '--tooltip-arrow-border-color': themeColor 
-                ? `color-mix(in srgb, var(--palette-${themeColor}, var(--${themeColor}, ${themeColor})) 40%, transparent)` 
-                : variant === 'transparent' ? 'color-mix(in srgb, var(--text-main) 10%, transparent)' : 'var(--border-color)',
-              
               '--tooltip-arrow-left': coords.arrowLeft,
               '--tooltip-arrow-top': coords.arrowTop,
-              backdropFilter: variant === 'transparent' ? 'blur(12px)' : 'blur(8px)',
             } as React.CSSProperties}
           >
             {icon && <span className="tooltip-icon">{icon}</span>}

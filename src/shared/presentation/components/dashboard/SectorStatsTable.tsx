@@ -10,6 +10,7 @@ import { EmptyState } from '../common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 
 import { CircularProgress } from '../CircularProgress';
+import { Input } from '../Input/Input';
 
 interface SectorStatsProps {
   data: SectorStatsReport[];
@@ -29,15 +30,24 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
 
   if (loading)
     return (
-      <div style={{ padding: '2.5rem', display: 'flex', justifyContent: 'center' }}>
-        <CircularProgress label={t('dashboard.sectorStats.loading')} strokeWidth={6} size={110} />
+      <div
+        style={{ padding: '2.5rem', display: 'flex', justifyContent: 'center' }}
+      >
+        <CircularProgress
+          label={t('dashboard.sectorStats.loading')}
+          strokeWidth={6}
+          size={110}
+        />
       </div>
     );
   if (!data.length)
     return (
       <EmptyState
         message={t('common.noData', 'No se encontraron datos')}
-        description={t('dashboard.sectorStats.noData', 'No hay estadísticas de sectores para este periodo')}
+        description={t(
+          'dashboard.sectorStats.noData',
+          'No hay estadísticas de sectores para este periodo'
+        )}
         variant="info"
       />
     );
@@ -127,31 +137,13 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
       >
         <h3>{t('dashboard.sectorStats.title')}</h3>
         <div style={{ position: 'relative', maxWidth: '150px' }}>
-          <Search
-            size={14}
-            style={{
-              position: 'absolute',
-              left: '8px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: 'var(--text-secondary)'
-            }}
-          />
-          <input
+          <Input
             type="text"
             placeholder={t('dashboard.sectorStats.searchPlaceholder')}
             value={searchTerm}
             onChange={handleSearchChange}
-            style={{
-              padding: '4px 8px 4px 26px',
-              border: '1px solid var(--border-color)',
-              borderRadius: '4px',
-              fontSize: '0.8rem',
-              outline: 'none',
-              width: '100%',
-              backgroundColor: 'var(--surface)',
-              color: 'var(--text-main)'
-            }}
+            leftIcon={<Search size={16} />}
+            size="compact"
           />
         </div>
       </div>
