@@ -121,7 +121,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  min-width: 640px; /* Increased width for larger calendars */
+  min-width: 560px; /* Adjusted for 36px cells */
   backdrop-filter: blur(8px);
 }
 
@@ -196,27 +196,40 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
-  font-size: 0.775rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-muted);
   margin-bottom: 0.75rem;
   opacity: 0.8;
 }
 
+.date-range-picker-weekdays span:first-child,
+.date-range-picker-weekdays span:last-child {
+  color: rgba(239, 68, 68, 0.85); /* Red for weekends */
+}
+
 .date-range-picker-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px; /* Increased gap */
+  gap: 6px;
+  padding: 4px;
+}
+
+/* Weekend Styling */
+.date-range-picker-grid .date-range-picker-cell:nth-child(7n + 1):not(.date-range-picker-cell--selected):not(.date-range-picker-cell--outside),
+.date-range-picker-grid .date-range-picker-cell:nth-child(7n):not(.date-range-picker-cell--selected):not(.date-range-picker-cell--outside) {
+  color: rgba(239, 68, 68, 0.85);
 }
 
 .date-range-picker-cell {
+  width: 100%;
   aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9375rem; /* Larger font */
+  font-size: 0.95rem; /* Larger font */
   font-weight: 500;
-  border-radius: 0.5rem;
+  border-radius: 0.6rem;
   border: none;
   background: transparent;
   color: var(--text-main);
@@ -277,6 +290,12 @@
 
 .date-range-picker-cell--range-end {
   border-radius: 0.5rem !important;
+}
+
+.date-range-picker-cell--outside {
+  opacity: 0.25;
+  color: var(--text-muted);
+  pointer-events: none;
 }
 
 .date-range-picker-footer {

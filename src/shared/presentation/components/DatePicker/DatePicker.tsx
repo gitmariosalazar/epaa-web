@@ -222,13 +222,19 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
 
     const days = [];
 
-    // Empty cells for days before the 1st of the month
-    for (let i = 0; i < firstDay; i++) {
+    // Previous month days
+    const prevMonthDate = new Date(year, month, 0);
+    const prevMonthLastDay = prevMonthDate.getDate();
+
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const dayNum = prevMonthLastDay - i;
       days.push(
         <div
-          key={`empty-${i}`}
-          className="datepicker-cell datepicker-cell--empty"
-        ></div>
+          key={`prev-${dayNum}`}
+          className="datepicker-cell datepicker-cell--outside"
+        >
+          {dayNum}
+        </div>
       );
     }
 
@@ -253,6 +259,20 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
         >
           {i}
         </button>
+      );
+    }
+
+    // Next month days to complete 6 rows (42 cells)
+    const totalCells = 42;
+    const remainingCells = totalCells - days.length;
+    for (let i = 1; i <= remainingCells; i++) {
+      days.push(
+        <div
+          key={`next-${i}`}
+          className="datepicker-cell datepicker-cell--outside"
+        >
+          {i}
+        </div>
       );
     }
 

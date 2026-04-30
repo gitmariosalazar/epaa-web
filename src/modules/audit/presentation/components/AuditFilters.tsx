@@ -6,6 +6,7 @@ import { Input } from '@/shared/presentation/components/Input/Input';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { type AuditTab } from '../context/AuditContext';
 import { useTranslation } from 'react-i18next';
+import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
 
 interface AuditFiltersProps {
   activeTab: AuditTab;
@@ -56,7 +57,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className={styles.container}>
+    <div className={styles.container + ' entry-filters'}>
       {/* -- LEFT: Consultar logic + User ID + Dates -- */}
       <div className={styles.sectionLeft}>
         <Input
@@ -79,37 +80,29 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
           leftIcon={<User size={18} />}
         />
 
-        <Input
-          className={styles.filterGroup}
-          label="Desde"
-          type="date"
-          size="compact"
-          value={startDate}
-          onChange={(e) => onStartDateChange(e.target.value)}
-        />
-
-        <Input
-          className={styles.filterGroup}
-          label="Hasta"
-          type="date"
-          size="compact"
-          value={endDate}
-          onChange={(e) => onEndDateChange(e.target.value)}
-        />
-
-        <div className={`${styles.filterGroup} ${styles.filterGroupBtn}`}>
-          <label className="input__label" style={{ visibility: 'hidden' }}>
-            .
+        <div className="filter-group">
+          <label className="input__label">
+            {t('trashRateKPI.filters.dateRange', 'Rango de Fechas')}
           </label>
-          <Button onClick={onFetch} disabled={isLoading} size="compact">
-            {isLoading ? (
-              <div className={styles.spinner} />
-            ) : (
-              <Search size={18} />
-            )}
-            {isLoading ? t('common.loading') : t('common.fetch')}
-          </Button>
+          <DateRangePicker
+            size="compact"
+            startDate={startDate}
+            endDate={endDate}
+            onChange={(start, end) => {
+              onStartDateChange(start);
+              onEndDateChange(end);
+            }}
+            disabled={isLoading}
+          />
         </div>
+        <Button onClick={onFetch} disabled={isLoading} size="md">
+          {isLoading ? (
+            <div className={styles.spinner} />
+          ) : (
+            <Search size={18} />
+          )}
+          {isLoading ? t('common.loading') : t('common.fetch')}
+        </Button>
       </div>
 
       {/* -- RIGHT: Local / Advanced filters -- */}
