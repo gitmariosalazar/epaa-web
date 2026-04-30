@@ -54,7 +54,9 @@ const COLLECTION_TABS: TabItem<GeneralCollectionTab>[] = [
 
 export const GeneralCollectionPage: React.FC = () => {
   const { state, actions } = useGeneralCollectionViewModel();
-  const loadingProgress = useSimulatedProgress(state.isLoading);
+  const loadingProgress = useSimulatedProgress(
+    state.isLoadingKPI || state.isLoadingReport || state.isLoading
+  );
 
   return (
     <PageLayout
@@ -63,7 +65,7 @@ export const GeneralCollectionPage: React.FC = () => {
         <Tabs
           tabs={COLLECTION_TABS}
           activeTab={state.activeTab}
-          onTabChange={actions.setActiveTab}
+          onTabChange={actions.handleTabChange}
         />
       }
       filters={
@@ -85,7 +87,7 @@ export const GeneralCollectionPage: React.FC = () => {
           searchQuery={state.searchQuery}
           onSearchQueryChange={actions.setSearchQuery}
           onFetch={actions.handleFetch}
-          isLoading={state.isLoading}
+          isLoading={state.isLoading || state.isLoadingKPI || state.isLoadingReport}
           selectedUser={state.selectedUser}
           onUserChange={actions.setSelectedUser}
           userList={state.userList}
@@ -106,7 +108,7 @@ export const GeneralCollectionPage: React.FC = () => {
           <div className="payments-error-dot" />
           <span className="payments-error-text">{state.error}</span>
         </div>
-      ) : state.isLoading ? (
+      ) : state.isLoadingKPI && state.activeTab === 'dashboard' ? (
         <div className="payments-loading">
           <CircularProgress
             progress={loadingProgress}
@@ -125,11 +127,13 @@ export const GeneralCollectionPage: React.FC = () => {
         <GeneralCollectionTable
           key="general-table"
           data={state.filteredReport}
-          isLoading={false}
+          isLoading={state.isLoadingReport}
           onSort={actions.handleSort}
           sortConfig={state.sortConfig}
           startDate={state.initDate}
           endDate={state.endDate}
+          onEndReached={actions.loadMore}
+          hasMore={state.hasMore}
         />
       ) : state.activeTab === 'daily' ? (
         <GeneralCollectionGroupedTable
@@ -184,7 +188,11 @@ export const GeneralCollectionPage: React.FC = () => {
           kpi={state.monthlyKpi}
           unfilteredKpi={state.rawMonthlyKpi}
           isLoading={state.isLoading}
-          jumpToYear={state.localDashboardYear ? parseInt(state.localDashboardYear) : undefined}
+          jumpToYear={
+            state.localDashboardYear
+              ? parseInt(state.localDashboardYear)
+              : undefined
+          }
         />
       ) : (
         <GeneralCollectionDashboard

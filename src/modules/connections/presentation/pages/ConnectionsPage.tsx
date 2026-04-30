@@ -68,14 +68,7 @@ export const ConnectionsPage = () => {
             progress={loadingProgress}
             size={112}
             strokeWidth={9}
-            label={
-              <CircularProgress
-                progress={loadingProgress}
-                size={112}
-                strokeWidth={9}
-                label={t('common.loading', 'Loading...')}
-              />
-            }
+            label={t('common.loading', 'Loading...')}
           />
         </div>
       );

@@ -24,6 +24,31 @@ function resolveGradient(p: number): [string, string] {
   return ['#10b981', '#34d399']; // emerald → light green
 }
 
+// ── Typing effect component ──
+const TypingLabel: React.FC<{ text: string }> = ({ text }) => {
+  const [index, setIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % text.length);
+    }, 120);
+    return () => clearInterval(timer);
+  }, [text]);
+
+  return (
+    <div className="cp-typing-wrapper">
+      {text.split('').map((char, i) => (
+        <span
+          key={i}
+          className={`cp-typing-char ${i === index ? 'cp-typing-char--active' : ''}`}
+        >
+          {char === ' ' ? '\u00A0' : char}
+        </span>
+      ))}
+    </div>
+  );
+};
+
 // ── Component ─────────────────────────────────────────────────────────────────
 export const CircularProgress: React.FC<CircularProgressProps> = ({
   progress,
@@ -125,7 +150,11 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
             <span />
           </span>
         )}
-        {label && <span className="cp-label">{label}</span>}
+        {label && (
+          <span className="cp-label">
+            {typeof label === 'string' ? <TypingLabel text={label} /> : label}
+          </span>
+        )}
       </div>
     </div>
   );

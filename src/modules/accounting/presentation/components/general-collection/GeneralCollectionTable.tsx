@@ -24,6 +24,8 @@ interface GeneralCollectionTableProps {
   } | null;
   startDate?: string;
   endDate?: string;
+  onEndReached?: () => void;
+  hasMore?: boolean;
 }
 
 export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
@@ -32,7 +34,9 @@ export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
   onSort,
   sortConfig,
   startDate,
-  endDate
+  endDate,
+  onEndReached,
+  hasMore
 }) => {
   const columns: Column<GeneralCollectionResponse>[] = [
     {
@@ -119,46 +123,65 @@ export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
     }
   ];
 
-  const totalTitleValue = data.reduce(
-    (sum, item) => sum + Number(item.titleValue),
-    0
-  );
-  const totalSurcharge = data.reduce(
-    (sum, item) => sum + Number(item.surcharge),
-    0
-  );
-  const totalThirdParty = data.reduce(
-    (sum, item) => sum + Number(item.thirdPartyValue),
-    0
-  );
-  const totalTrashRate = data.reduce(
-    (sum, item) => sum + Number(item.trashRate),
-    0
-  );
-  const totalAmount = data.reduce((sum, item) => sum + Number(item.total), 0);
+  const {
+    totalTitleValue,
+    totalSurcharge,
+    totalThirdParty,
+    totalTrashRate,
+    totalAmount
+  } = React.useMemo(() => {
+    return {
+      totalTitleValue: data.reduce(
+        (sum, item) => sum + Number(item.titleValue),
+        0
+      ),
+      totalSurcharge: data.reduce(
+        (sum, item) => sum + Number(item.surcharge),
+        0
+      ),
+      totalThirdParty: data.reduce(
+        (sum, item) => sum + Number(item.thirdPartyValue),
+        0
+      ),
+      totalTrashRate: data.reduce(
+        (sum, item) => sum + Number(item.trashRate),
+        0
+      ),
+      totalAmount: data.reduce((sum, item) => sum + Number(item.total), 0)
+    };
+  }, [data]);
 
-  const totalRows = [
-    { label: 'TOTAL EPAA', value: totalTitleValue, columnId: 'titleValue' },
-    {
-      label: 'TOTAL Recargo',
-      value: totalSurcharge,
-      highlight: false,
-      columnId: 'surcharge'
-    },
-    {
-      label: 'TOTAL 3er Val.',
-      value: totalThirdParty,
-      highlight: false,
-      columnId: 'thirdPartyValue'
-    },
-    {
-      label: 'TOTAL Basura',
-      value: totalTrashRate,
-      highlight: false,
-      columnId: 'trashRate'
-    },
-    { label: 'TOTAL', value: totalAmount, highlight: true, columnId: 'total' }
-  ];
+  const totalRows = React.useMemo(
+    () => [
+      { label: 'TOTAL EPAA', value: totalTitleValue, columnId: 'titleValue' },
+      {
+        label: 'TOTAL Recargo',
+        value: totalSurcharge,
+        highlight: false,
+        columnId: 'surcharge'
+      },
+      {
+        label: 'TOTAL 3er Val.',
+        value: totalThirdParty,
+        highlight: false,
+        columnId: 'thirdPartyValue'
+      },
+      {
+        label: 'TOTAL Basura',
+        value: totalTrashRate,
+        highlight: false,
+        columnId: 'trashRate'
+      },
+      { label: 'TOTAL', value: totalAmount, highlight: true, columnId: 'total' }
+    ],
+    [
+      totalTitleValue,
+      totalSurcharge,
+      totalThirdParty,
+      totalTrashRate,
+      totalAmount
+    ]
+  );
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('en-US', {
@@ -216,6 +239,9 @@ export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
         onSort={onSort}
         sortConfig={sortConfig}
         onExportPdf={() => setShowPdfPreview(true)}
+        onEndReached={onEndReached}
+        hasMore={hasMore}
+        showTotalRecords
         totalRows={totalRows}
         width="100"
         emptyState={

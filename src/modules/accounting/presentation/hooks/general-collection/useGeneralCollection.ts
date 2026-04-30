@@ -35,105 +35,89 @@ export const useGeneralCollection = () => {
   const [monthlyKpiBase, setMonthlyKpiBase] = useState<GeneralMonthlyKPIResponse[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingReport, setIsLoadingReport] = useState(false);
+  const [isLoadingKPI, setIsLoadingKPI] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchReport = useCallback(
-    async (params: GeneralCollectionsParams) => {
-      setIsLoading(true);
+    async (params: GeneralCollectionsParams, append = true) => {
+      setIsLoadingReport(true);
       setError(null);
       try {
-        const [reportResult, kpiResult] = await Promise.all([
-          context.getGeneralCollectionReport.execute(params),
-          context.getGeneralCollectionKPI.execute(params)
-        ]);
-        setReport(reportResult || []);
-        setKpi(kpiResult || null);
+        const result = await context.getGeneralCollectionReport.execute(params);
+        setReport((prev) => (append ? [...prev, ...(result || [])] : (result || [])));
+        return result;
       } catch (err: any) {
         setError(err.message || 'Failed to fetch general collection report');
         console.error(err);
+        return [];
       } finally {
-        setIsLoading(false);
+        setIsLoadingReport(false);
       }
     },
-    [context.getGeneralCollectionReport, context.getGeneralCollectionKPI]
+    [context.getGeneralCollectionReport]
   );
 
   const fetchDailyReport = useCallback(
     async (params: GeneralCollectionsParams) => {
-      setIsLoading(true);
+      setIsLoadingReport(true);
       setError(null);
       try {
-        const [dailyResult, kpiResult] = await Promise.all([
-          context.getGeneralDailyCollectionGroupedReport.execute(params),
-          context.getGeneralCollectionKPI.execute(params)
-        ]);
-        setDailyReport(dailyResult || []);
-        setKpi(kpiResult || null);
+        const result =
+          await context.getGeneralDailyCollectionGroupedReport.execute(params);
+        setDailyReport(result || []);
       } catch (err: any) {
         setError(
           err.message || 'Failed to fetch daily general collection report'
         );
         console.error(err);
       } finally {
-        setIsLoading(false);
+        setIsLoadingReport(false);
       }
     },
-    [
-      context.getGeneralDailyCollectionGroupedReport,
-      context.getGeneralCollectionKPI
-    ]
+    [context.getGeneralDailyCollectionGroupedReport]
   );
 
   const fetchMonthlyReport = useCallback(
     async (params: GeneralTrendCollectionsParams) => {
-      setIsLoading(true);
+      setIsLoadingReport(true);
       setError(null);
       try {
-        const [monthlyResult, monthlyKpiResult] = await Promise.all([
-          context.getGeneralMonthlyCollectionGroupedReport.execute(params),
-          context.getGeneralMonthlyCollectionKPI.execute(params)
-        ]);
-        setMonthlyReport(monthlyResult || []);
-        setMonthlyKpi(monthlyKpiResult || []);
+        const result =
+          await context.getGeneralMonthlyCollectionGroupedReport.execute(
+            params
+          );
+        setMonthlyReport(result || []);
       } catch (err: any) {
         setError(
           err.message || 'Failed to fetch monthly general collection report'
         );
         console.error(err);
       } finally {
-        setIsLoading(false);
+        setIsLoadingReport(false);
       }
     },
-    [
-      context.getGeneralMonthlyCollectionGroupedReport,
-      context.getGeneralMonthlyCollectionKPI
-    ]
+    [context.getGeneralMonthlyCollectionGroupedReport]
   );
 
   const fetchYearlyReport = useCallback(
     async (params: GeneralTrendCollectionsParams) => {
-      setIsLoading(true);
+      setIsLoadingReport(true);
       setError(null);
       try {
-        const [yearlyResult, yearlyKpiResult] = await Promise.all([
-          context.getGeneralYearlyCollectionGroupedReport.execute(params),
-          context.getGeneralYearlyCollectionKPI.execute(params)
-        ]);
-        setYearlyReport(yearlyResult || []);
-        setYearlyKpi(yearlyKpiResult || []);
+        const result =
+          await context.getGeneralYearlyCollectionGroupedReport.execute(params);
+        setYearlyReport(result || []);
       } catch (err: any) {
         setError(
           err.message || 'Failed to fetch yearly general collection report'
         );
         console.error(err);
       } finally {
-        setIsLoading(false);
+        setIsLoadingReport(false);
       }
     },
-    [
-      context.getGeneralYearlyCollectionGroupedReport,
-      context.getGeneralYearlyCollectionKPI
-    ]
+    [context.getGeneralYearlyCollectionGroupedReport]
   );
 
   const fetchYearlyKpi = useCallback(
@@ -196,7 +180,7 @@ export const useGeneralCollection = () => {
 
   const fetchKpi = useCallback(
     async (params: GeneralCollectionsParams) => {
-      setIsLoading(true);
+      setIsLoadingKPI(true);
       setError(null);
       try {
         const kpiResult = await context.getGeneralCollectionKPI.execute(params);
@@ -205,7 +189,7 @@ export const useGeneralCollection = () => {
         setError(err.message || 'Failed to fetch general collection KPI');
         console.error(err);
       } finally {
-        setIsLoading(false);
+        setIsLoadingKPI(false);
       }
     },
     [context.getGeneralCollectionKPI]
@@ -221,6 +205,8 @@ export const useGeneralCollection = () => {
     monthlyKpi,
     monthlyKpiBase,
     isLoading,
+    isLoadingReport,
+    isLoadingKPI,
     error,
     fetchReport,
     fetchDailyReport,

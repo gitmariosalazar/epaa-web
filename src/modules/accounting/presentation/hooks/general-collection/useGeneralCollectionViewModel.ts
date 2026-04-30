@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useGeneralCollection } from './useGeneralCollection';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import type { dateFilter } from '../../../domain/dto/params/DataEntryParams';
@@ -112,6 +112,8 @@ export const useGeneralCollectionViewModel = () => {
     monthlyKpi, // yearly-query data store
     monthlyKpiBase, // monthly-dashboard data store
     isLoading,
+    isLoadingKPI,
+    isLoadingReport,
     error,
     fetchReport,
     fetchDailyReport,
@@ -119,10 +121,14 @@ export const useGeneralCollectionViewModel = () => {
     fetchYearlyReport,
     fetchYearlyKpi,
     fetchMonthlyKpi, // → used exclusively by yearly-query
-    fetchMonthlyKpiBase // → used exclusively by monthly-dashboard
+    fetchMonthlyKpiBase, // → used exclusively by monthly-dashboard
+    fetchKpi
   } = useGeneralCollection();
 
   const [activeTab, setActiveTab] = useState<GeneralCollectionTab>('dashboard');
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const LIMIT_SIZE = 100;
 
   // ── Per-tab isolated filter state ─────────────────────────────────────────
   // Each tab entry is created lazily with its own defaults on first access.
@@ -248,38 +254,41 @@ export const useGeneralCollectionViewModel = () => {
   // Legacy alias — year is the same concept as startYear
   const setYear = setStartYear;
 
-  // ── First-visit auto-fetch for dashboard tabs ──────────────────────────────
-  // Triggers ONCE per tab per session (tracked via a stable ref).
-  // Re-visiting a tab preserves its last filter state and loaded data.
-  //const visitedTabs = useRef(new Set<GeneralCollectionTab>());
-  /*
-  useEffect(() => {
-    const isFirstVisit = !visitedTabs.current.has(activeTab);
-    if (!isFirstVisit) return;
-    visitedTabs.current.add(activeTab);
+  const loadMore = useCallback(() => {
+    if (!hasMore || isLoadingReport) return;
 
-    const year = new Date().getFullYear();
+    const nextOffset = offset + LIMIT_SIZE;
+    setOffset(nextOffset);
 
-    if (activeTab === 'monthly-dashboard') {
-      fetchMonthlyKpiBase({
-        dateFilter: 'paymentDate',
-        startYear: year - 9,
-        endYear: year,
-        titleCode: ''
-      });
-    }
+    const params = {
+      dateFilter: filterType,
+      startDate: initDate,
+      endDate,
+      year: startYear,
+      titleCode,
+      limit: LIMIT_SIZE,
+      offset: nextOffset
+    };
 
-    if (activeTab === 'yearly-dashboard') {
-      fetchYearlyKpi({
-        dateFilter: 'paymentDate',
-        startYear: year - 9,
-        endYear: year,
-        titleCode: ''
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
-*/
+    fetchReport(params, true).then((res) => {
+      if (res && res.length < LIMIT_SIZE) setHasMore(false);
+    });
+  }, [
+    hasMore,
+    isLoadingReport,
+    offset,
+    filterType,
+    initDate,
+    endDate,
+    startYear,
+    titleCode,
+    fetchReport
+  ]);
+
+  const handleTabChange = (tab: GeneralCollectionTab) => {
+    setActiveTab(tab);
+  };
+
   // ── handleFetch ───────────────────────────────────────────────────────────
   // Each branch uses the CURRENT tab's own filter state — no cross-tab leakage.
   const setDateRange = (startStr: string, endStr: string) => {
@@ -307,13 +316,27 @@ export const useGeneralCollectionViewModel = () => {
 
   const handleFetch = () => {
     if (activeTab === 'dashboard' || activeTab === 'general') {
-      fetchReport({
+      const params = {
         dateFilter: filterType,
         startDate: initDate,
         endDate,
         year: startYear,
-        titleCode
-      });
+        titleCode,
+        limit: LIMIT_SIZE,
+        offset: 0
+      };
+
+      if (activeTab === 'dashboard') {
+        // Dashboard only needs the summary KPI
+        fetchKpi(params);
+      } else {
+        // General Table only needs the detailed report
+        setOffset(0);
+        setHasMore(true);
+        fetchReport(params, false).then((res) => {
+          if (res && res.length < LIMIT_SIZE) setHasMore(false);
+        });
+      }
     } else if (activeTab === 'daily') {
       fetchDailyReport({
         dateFilter: filterType,
@@ -344,17 +367,14 @@ export const useGeneralCollectionViewModel = () => {
         titleCode
       });
     } else if (activeTab === 'yearly-query') {
-      // Uses fetchMonthlyKpi — writes to monthlyKpi (separate from monthlyKpiBase).
-      // This guarantees yearly-query never contaminates monthly-dashboard data.
       fetchMonthlyKpi({
         dateFilter: filterType,
         startYear,
-        endYear: startYear, // single year → start === end
+        endYear: startYear,
         titleCode
       });
       setEndYear(startYear);
     } else if (activeTab === 'monthly-dashboard') {
-      // Range of years: updates the paginator BASE so dots/years are correct
       fetchMonthlyKpiBase({
         dateFilter: filterType,
         startYear,
@@ -477,7 +497,7 @@ export const useGeneralCollectionViewModel = () => {
 
   // SRP: canFetch lives in the ViewModel — the filter component just receives a boolean.
   const canFetch = useMemo(() => {
-    if (isLoading) return false;
+    if (isLoading || isLoadingReport || isLoadingKPI) return false;
     if (
       activeTab === 'dashboard' ||
       activeTab === 'general' ||
@@ -490,12 +510,23 @@ export const useGeneralCollectionViewModel = () => {
       return Boolean(startYear && endYear);
     if (activeTab === 'yearly-query') return Boolean(startYear);
     return false;
-  }, [isLoading, activeTab, initDate, endDate, startYear, endYear]);
+  }, [
+    isLoading,
+    isLoadingReport,
+    isLoadingKPI,
+    activeTab,
+    initDate,
+    endDate,
+    startYear,
+    endYear
+  ]);
 
   // ── Public API (backwards-compatible) ─────────────────────────────────────
   return {
     state: {
       isLoading,
+      isLoadingKPI,
+      isLoadingReport,
       error,
       activeTab,
       filterType,
@@ -524,10 +555,10 @@ export const useGeneralCollectionViewModel = () => {
       localDashboardYear,
       localDashboardMonth,
       availableDashboardYears,
-      canFetch
+      canFetch,
+      hasMore
     },
     actions: {
-      setActiveTab,
       setFilterType,
       setInitDate,
       setEndDate,
@@ -540,9 +571,11 @@ export const useGeneralCollectionViewModel = () => {
       setSelectedUser,
       setSelectedPaymentMethod,
       handleFetch,
+      loadMore,
       handleSort,
       setLocalDashboardYear,
-      setLocalDashboardMonth
+      setLocalDashboardMonth,
+      handleTabChange
     }
   };
 };
