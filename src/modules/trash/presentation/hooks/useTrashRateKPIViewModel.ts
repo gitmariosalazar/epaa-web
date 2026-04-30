@@ -25,8 +25,6 @@ function applySortConfig<T>(
   });
 }
 
-
-
 export const useTrashRateKPIViewModel = () => {
   const { t } = useTranslation();
 

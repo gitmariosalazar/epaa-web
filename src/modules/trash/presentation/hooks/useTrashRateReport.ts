@@ -45,6 +45,8 @@ export const useTrashRateReport = () => {
   const [trashRateKPI, setTrashRateKPI] = useState<TrashRateKPI[]>([]);
 
   const [loadingCount, setLoadingCount] = useState(0);
+  const [loadingAudit, setLoadingAudit] = useState(false);
+  const [loadingMissing, setLoadingMissing] = useState(false);
 
   const loading = loadingCount > 0;
   const [error, setError] = useState<Error | null>(null);
@@ -65,10 +67,12 @@ export const useTrashRateReport = () => {
 
   const getTrashRateAuditReport = useCallback(
     async (params: DateRangeParams) => {
+      setLoadingAudit(true);
       await withLoading(async () => {
         const result = await context.getTrashRateAuditReport.execute(params);
         setTrashRateAuditReport(result);
       });
+      setLoadingAudit(false);
     },
     [context.getTrashRateAuditReport, withLoading]
   );
@@ -85,10 +89,12 @@ export const useTrashRateReport = () => {
 
   const getMissingValorBills = useCallback(
     async (params: DateRangeParams) => {
+      setLoadingMissing(true);
       await withLoading(async () => {
         const result = await context.getMissingValorBills.execute(params);
         setMissingValorBills(result);
       });
+      setLoadingMissing(false);
     },
     [context.getMissingValorBills, withLoading]
   );
@@ -189,6 +195,8 @@ export const useTrashRateReport = () => {
     getTrashRateKPI,
     //State
     loading,
+    loadingAudit,
+    loadingMissing,
     error,
     clearError
   };
