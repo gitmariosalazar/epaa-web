@@ -259,8 +259,6 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
       }
     });
 
-  if (isLoading) return null;
-
   return (
     <div className="trash-rate-audit-table-wrapper">
       <Table

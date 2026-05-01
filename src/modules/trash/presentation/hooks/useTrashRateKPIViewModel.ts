@@ -2,7 +2,10 @@ import type { TabItem } from '@/shared/presentation/components/Tabs';
 import React, { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutDashboard, ClipboardList, CalendarRange } from 'lucide-react';
-import { DateRangeParams } from '../../domain/dto/params/DateRangeParams';
+import {
+  DateRangeParams,
+  ParamsTrashRateAudit
+} from '../../domain/dto/params/DateRangeParams';
 import { useTrashRateReport } from './useTrashRateReport';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
@@ -127,6 +130,15 @@ export const useTrashRateKPIViewModel = () => {
       Number(offset) || 0
     );
 
+  const paramsTrashRateAudit = () =>
+    new ParamsTrashRateAudit(
+      startDate,
+      endDate,
+      'DIFFERENT_AND_NO_RECORD',
+      Number(limit) || 50,
+      Number(offset) || 0
+    );
+
   const handleFetch = async () => {
     if (activeTab === 'dashboard') {
       await Promise.all([
@@ -213,7 +225,8 @@ export const useTrashRateKPIViewModel = () => {
     selectedCategoryIndex,
     setSelectedCategoryIndex,
     getMissingValorBills: () => getMissingValorBills(dateParams()),
-    getTrashRateAuditReport: () => getTrashRateAuditReport(dateParams()),
+    getTrashRateAuditReport: () =>
+      getTrashRateAuditReport(paramsTrashRateAudit()),
     loadingAudit,
     loadingMissing
   };

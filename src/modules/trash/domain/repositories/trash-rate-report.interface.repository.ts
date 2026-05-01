@@ -10,11 +10,14 @@ import type {
   DailyCollectorDetail,
   TrashRateKPI
 } from '../models/trash-rate-report.model';
-import type { DateRangeParams } from '../dto/params/DateRangeParams';
+import type {
+  DateRangeParams,
+  ParamsTrashRateAudit
+} from '../dto/params/DateRangeParams';
 
 export interface InterfaceTrashRateReportRepository {
   getTrashRateAuditReport(
-    params: DateRangeParams
+    params: ParamsTrashRateAudit
   ): Promise<TrashRateAuditRow[]>;
 
   getMonthlySummaryReport(

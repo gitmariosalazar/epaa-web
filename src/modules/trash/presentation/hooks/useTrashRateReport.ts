@@ -1,4 +1,7 @@
-import type { DateRangeParams } from '../../domain/dto/params/DateRangeParams';
+import type {
+  DateRangeParams,
+  ParamsTrashRateAudit
+} from '../../domain/dto/params/DateRangeParams';
 import { useTrashRateReportContext } from '../context/TrashRateReportContext';
 import { useCallback, useState } from 'react';
 import type {
@@ -66,15 +69,20 @@ export const useTrashRateReport = () => {
   }, []);
 
   const getTrashRateAuditReport = useCallback(
-    async (params: DateRangeParams) => {
+    async (params: ParamsTrashRateAudit) => {
       setLoadingAudit(true);
-      await withLoading(async () => {
+      setTrashRateAuditReport([]);
+      try {
         const result = await context.getTrashRateAuditReport.execute(params);
         setTrashRateAuditReport(result);
-      });
-      setLoadingAudit(false);
+      } catch (err) {
+        console.error('Error fetching Audit Report:', err);
+        setTrashRateAuditReport([]);
+      } finally {
+        setLoadingAudit(false);
+      }
     },
-    [context.getTrashRateAuditReport, withLoading]
+    [context.getTrashRateAuditReport]
   );
 
   const getMonthlySummaryReport = useCallback(
@@ -90,13 +98,18 @@ export const useTrashRateReport = () => {
   const getMissingValorBills = useCallback(
     async (params: DateRangeParams) => {
       setLoadingMissing(true);
-      await withLoading(async () => {
+      setMissingValorBills([]);
+      try {
         const result = await context.getMissingValorBills.execute(params);
         setMissingValorBills(result);
-      });
-      setLoadingMissing(false);
+      } catch (err) {
+        console.error('Error fetching Missing Valor Bills:', err);
+        setMissingValorBills([]);
+      } finally {
+        setLoadingMissing(false);
+      }
     },
-    [context.getMissingValorBills, withLoading]
+    [context.getMissingValorBills]
   );
 
   const getActiveCreditNotes = useCallback(

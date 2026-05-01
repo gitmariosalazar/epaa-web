@@ -130,11 +130,15 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PAID' | 'PENDING'>(
     'ALL'
   );
+  const [diagnosticFilter, setDiagnosticFilter] = useState<'ALL' | 'INCONSISTENT'>(
+    'INCONSISTENT'
+  );
 
   const handleCardClickOpenModal = (label: string) => {
     setModalTitle(label);
     setIsModalOpen(true);
     setStatusFilter('ALL'); // Reset filter when opening
+    setDiagnosticFilter('INCONSISTENT'); // Default to anomalies
 
     if (label.includes('Inconsistencia') || label.includes('Integridad')) {
       onFetchAudit?.();
@@ -148,18 +152,30 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
   };
 
   const filteredMissingBills = useMemo(() => {
-    if (statusFilter === 'ALL') return missingValorBills;
-    return missingValorBills.filter(
-      (item) => item.paymentStatus === statusFilter
-    );
-  }, [missingValorBills, statusFilter]);
+    let result = missingValorBills;
+    if (statusFilter !== 'ALL') {
+      result = result.filter((item) => item.paymentStatus === statusFilter);
+    }
+    if (diagnosticFilter === 'INCONSISTENT') {
+      result = result.filter(
+        (item) => item.finalDiagnosis && !item.finalDiagnosis.includes('Correct Match')
+      );
+    }
+    return result;
+  }, [missingValorBills, statusFilter, diagnosticFilter]);
 
   const filteredAuditReport = useMemo(() => {
-    if (statusFilter === 'ALL') return trashRateAuditReport;
-    return trashRateAuditReport.filter(
-      (item) => item.paymentStatus === statusFilter
-    );
-  }, [trashRateAuditReport, statusFilter]);
+    let result = trashRateAuditReport;
+    if (statusFilter !== 'ALL') {
+      result = result.filter((item) => item.paymentStatus === statusFilter);
+    }
+    if (diagnosticFilter === 'INCONSISTENT') {
+      result = result.filter(
+        (item) => item.diagnostic && !item.diagnostic.includes('Correct Match')
+      );
+    }
+    return result;
+  }, [trashRateAuditReport, statusFilter, diagnosticFilter]);
 
   if (isLoading) return null;
 
@@ -466,34 +482,64 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
         description={`Resumen detallado de auditoría para el periodo seleccionado.`}
         size="full"
         headerActions={
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span
-              style={{
-                fontSize: '0.8rem',
-                color: 'var(--text-secondary)',
-                fontWeight: 600
-              }}
-            >
-              FILTRAR POR ESTADO:
-            </span>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-              style={{
-                padding: '4px 12px',
-                borderRadius: '6px',
-                backgroundColor: 'var(--tb-bg)',
-                color: 'var(--text-main)',
-                border: '1px solid var(--border-color)',
-                fontSize: '0.85rem',
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="ALL">TODOS</option>
-              <option value="PAID">PAGADOS</option>
-              <option value="PENDING">PENDIENTES</option>
-            </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span
+                style={{
+                  fontSize: '0.8rem',
+                  color: 'var(--text-secondary)',
+                  fontWeight: 600
+                }}
+              >
+                DIAGNÓSTICO:
+              </span>
+              <select
+                value={diagnosticFilter}
+                onChange={(e) => setDiagnosticFilter(e.target.value as any)}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '6px',
+                  backgroundColor: 'var(--tb-bg)',
+                  color: 'var(--text-main)',
+                  border: '1px solid var(--border-color)',
+                  fontSize: '0.85rem',
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="ALL">TODOS</option>
+                <option value="INCONSISTENT">SOLO ANOMALÍAS</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span
+                style={{
+                  fontSize: '0.8rem',
+                  color: 'var(--text-secondary)',
+                  fontWeight: 600
+                }}
+              >
+                FILTRAR POR ESTADO:
+              </span>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '6px',
+                  backgroundColor: 'var(--tb-bg)',
+                  color: 'var(--text-main)',
+                  border: '1px solid var(--border-color)',
+                  fontSize: '0.85rem',
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="ALL">TODOS</option>
+                <option value="PAID">PAGADOS</option>
+                <option value="PENDING">PENDIENTES</option>
+              </select>
+            </div>
           </div>
         }
       >

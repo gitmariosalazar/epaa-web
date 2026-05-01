@@ -2,7 +2,10 @@ import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTrashRateReport } from './useTrashRateReport';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
-import { DateRangeParams } from '../../domain/dto/params/DateRangeParams';
+import {
+  DateRangeParams,
+  ParamsTrashRateAudit
+} from '../../domain/dto/params/DateRangeParams';
 import type { TabItem } from '@/shared/presentation/components/Tabs';
 import {
   LayoutDashboard,
@@ -100,13 +103,21 @@ export const useTrashRateReportViewModel = () => {
     getClientDetailSearch,
     getTopDebtorReport,
     getDashboardKPITrashRate,
-    loading: isLoading,
+    loading: isGlobalLoading,
+    loadingAudit,
+    loadingMissing,
     error,
     clearError
   } = useTrashRateReport();
 
   // ── Shared state ───────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<TrashRateTab>('dashboard');
+
+  const isCurrentTabLoading = useMemo(() => {
+    if (activeTab === 'auditReport') return loadingAudit || isGlobalLoading;
+    if (activeTab === 'missingValor') return loadingMissing || isGlobalLoading;
+    return isGlobalLoading;
+  }, [activeTab, loadingAudit, loadingMissing, isGlobalLoading]);
 
   const today = dateService.getCurrentDateString();
   const [startDate, setStartDate] = useState(today);
@@ -159,10 +170,20 @@ export const useTrashRateReportViewModel = () => {
       Number(offset) || 0
     );
 
+  const paramsTrashRateAudit = () =>
+    new ParamsTrashRateAudit(
+      startDate,
+      endDate,
+      'ALL',
+      Number(limit) || 50,
+      Number(offset) || 0
+    );
+
   const handleFetch = () => {
     if (activeTab === 'dashboard')
       getDashboardKPITrashRate(new DateRangeParams(startDate, endDate));
-    else if (activeTab === 'auditReport') getTrashRateAuditReport(dateParams());
+    else if (activeTab === 'auditReport')
+      getTrashRateAuditReport(paramsTrashRateAudit());
     else if (activeTab === 'monthlySummary')
       getMonthlySummaryReport(dateParams());
     else if (activeTab === 'missingValor') getMissingValorBills(dateParams());
@@ -257,7 +278,7 @@ export const useTrashRateReportViewModel = () => {
 
   return {
     t,
-    isLoading,
+    isLoading: isCurrentTabLoading,
     error: errorMessage,
     translatedTabs: TRASH_TABS,
     activeTab,

@@ -34,7 +34,6 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
   isLoading,
   onSort,
   sortConfig,
-  error,
   startDate,
   endDate
 }) => {
@@ -286,8 +285,6 @@ export const MissingValorBillsTable: React.FC<MissingValorBillsTableProps> = ({
         });
       }
     });
-
-  if (error) return null;
 
   return (
     <div className="trash-rate-audit-table-wrapper">
