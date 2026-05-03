@@ -22,6 +22,9 @@ export interface AuditSectorHistory {
   progressPercentage: number;
   isComplete: boolean;
   closureDate: Date | null;
+  supervisorId: string | null;
+  observations: string | null;
+  createdAt: Date;
 }
 
 export interface CloseAuditSector {
@@ -30,8 +33,9 @@ export interface CloseAuditSector {
   readingMonth: Date;
   isComplete: boolean;
   closureDate: Date;
-  supervisorId: string;
+  supervisorId: string | null;
   observations: string | null;
+  createdAt: Date;
 }
 
 export interface InitializeAudit {

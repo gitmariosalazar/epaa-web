@@ -43,8 +43,7 @@
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 12px;
-  width: 100%;
+  gap: 6px;
   height: auto;
 }
 

@@ -1,0 +1,313 @@
+/**
+ * PreviousMonthWarningModal — Estilos premium
+ *
+ * Paleta de advertencia:
+ *   - Amber / naranja profundo para el riesgo de facturación
+ *   - Glassmorphism sutil en la cabecera
+ *   - Animaciones micro-interactivas
+ */
+
+/* ── Modal body ──────────────────────────────────────────────────────────── */
+.pmw-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text-main);
+}
+
+/* ── Header de advertencia ───────────────────────────────────────────────── */
+.pmw-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.18) 0%,
+    rgba(217, 119, 6, 0.12) 100%
+  );
+  border: 1.5px solid rgba(245, 158, 11, 0.4);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  backdrop-filter: blur(4px);
+  animation: pmw-slide-in 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pmw-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pmw-header-icon-ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow:
+    0 0 0 4px rgba(245, 158, 11, 0.2),
+    0 4px 12px rgba(245, 158, 11, 0.35);
+  animation: pmw-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pmw-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 4px rgba(245, 158, 11, 0.2),
+      0 4px 12px rgba(245, 158, 11, 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 0 8px rgba(245, 158, 11, 0.1),
+      0 4px 16px rgba(245, 158, 11, 0.5);
+  }
+}
+
+.pmw-header-icon {
+  color: #fff;
+  width: 26px;
+  height: 26px;
+}
+
+.pmw-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pmw-header-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #d97706;
+  letter-spacing: -0.2px;
+}
+
+.pmw-header-subtitle {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* ── Banner de advertencia de facturación ────────────────────────────────── */
+.pmw-billing-banner {
+  display: flex;
+  gap: 14px;
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.08) 0%,
+    rgba(220, 38, 38, 0.05) 100%
+  );
+  border: 1.5px solid rgba(239, 68, 68, 0.3);
+  border-left: 4px solid #dc2626;
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  animation: pmw-slide-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.05s both;
+}
+
+.pmw-billing-banner-icon {
+  display: flex;
+  align-items: flex-start;
+  color: #dc2626;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.pmw-billing-banner-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pmw-billing-banner-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.pmw-billing-banner-body {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ── Tarjeta de información del cliente ──────────────────────────────────── */
+.pmw-info-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  animation: pmw-slide-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+}
+
+.pmw-info-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-hover);
+  border-bottom: 1px solid var(--border-color);
+  padding: 8px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pmw-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+}
+
+.pmw-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  transition: background var(--transition-fast);
+}
+
+.pmw-info-item:nth-child(2n) {
+  border-right: none;
+}
+
+.pmw-info-item:nth-last-child(-n + 2) {
+  border-bottom: none;
+}
+
+.pmw-info-item:hover {
+  background: var(--surface-hover);
+}
+
+.pmw-info-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pmw-info-icon--warn {
+  color: #d97706;
+}
+
+.pmw-info-item > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pmw-info-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-weight: 600;
+}
+
+.pmw-info-value {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pmw-info-value--mono {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+}
+
+.pmw-info-value--warn {
+  color: #d97706;
+}
+
+/* ── Nota de riesgo ──────────────────────────────────────────────────────── */
+.pmw-risk-notice {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.07) 0%,
+    rgba(217, 119, 6, 0.04) 100%
+  );
+  border: 1px dashed rgba(245, 158, 11, 0.5);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  animation: pmw-slide-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
+  margin-bottom: 15px;
+}
+
+.pmw-risk-notice-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #d97706;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.pmw-risk-list {
+  margin: 0;
+  padding: 0 0 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pmw-risk-list li {
+  font-size: 0.83rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.pmw-risk-list li::marker {
+  color: #f59e0b;
+}
+
+/* ── Footer de acciones ──────────────────────────────────────────────────── */
+.pmw-footer-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 560px) {
+  .pmw-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pmw-info-item {
+    border-right: none;
+  }
+
+  .pmw-info-item:nth-last-child(-n + 2) {
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .pmw-info-item:last-child {
+    border-bottom: none;
+  }
+
+  .pmw-footer-actions {
+    flex-direction: column-reverse;
+  }
+}

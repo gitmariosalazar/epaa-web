@@ -34,7 +34,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
   return (
     <div className="cr-toolbar">
       {/* Search Area */}
-      <form 
+      <form
         className="cr-search-area"
         onSubmit={(e) => {
           e.preventDefault();
@@ -70,7 +70,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
           disabled={
             method === 'create'
               ? !readingInfo?.hasCurrentReading || isSubmitting
-              : !readingInfo || isSubmitting
+              : !readingInfo || !readingInfo?.permitReading || isSubmitting
           }
           leftIcon={<FaSave />}
           size="sm"

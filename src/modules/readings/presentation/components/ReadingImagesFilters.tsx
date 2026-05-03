@@ -85,7 +85,7 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
                 <DatePicker
                   size="compact"
                   view="month"
-                  value={month ? `${month}-01` : ''}
+                  value={month ? `${month}` : ''}
                   onChange={(val: string) => setMonth(val.substring(0, 7))}
                 />
               </div>

@@ -85,7 +85,7 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
               <DatePicker
                 size="compact"
                 view="month"
-                value={month ? `${month}-01` : ''}
+                value={month}
                 onChange={(val: string) => onMonthChange(val.substring(0, 7))}
               />
             </div>

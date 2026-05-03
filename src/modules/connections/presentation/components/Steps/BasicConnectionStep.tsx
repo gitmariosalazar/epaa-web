@@ -123,7 +123,7 @@ export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
             label={t('connections.wizard.basicDetails.activeStatus')}
             name="connectionStatus"
             value="status"
-            checked={formData.connectionStatus}
+            checked={Boolean(formData.connectionStatus)}
             onCheckedChange={(checked) =>
               handleInputChange({
                 target: { name: 'connectionStatus', checked, type: 'checkbox' }

@@ -10,6 +10,8 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { CheckCircle, Clock } from 'lucide-react';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import { ProgressBar } from '@/shared/presentation/components/ProgressBar/ProgressBar';
+import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
 
 interface PropTypes {
   data: AuditSectorHistory[];
@@ -34,9 +36,7 @@ export const AuditHistoryTable: React.FC<PropTypes> = ({ data, isLoading }) => {
       {
         header: t('readings.audit.month', 'Mes'),
         accessor: (row) =>
-          row.readingMonth
-            ? dateService.formatToLocaleString(row.readingMonth)
-            : '—'
+          row.readingMonth ? dateService.getMonthString(row.readingMonth) : '—'
       },
       {
         header: t('readings.audit.expected', 'Esperadas'),
@@ -49,42 +49,13 @@ export const AuditHistoryTable: React.FC<PropTypes> = ({ data, isLoading }) => {
       {
         header: t('readings.audit.progress', 'Avance'),
         accessor: (row) => {
-          const pct = Number(row.progressPercentage ?? 0);
-          const color =
-            pct >= 100 ? '#22c55e' : pct >= 60 ? '#f59e0b' : '#ef4444';
           return (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div
-                style={{
-                  flex: 1,
-                  height: 6,
-                  borderRadius: 999,
-                  background: 'var(--surface-hover)',
-                  overflow: 'hidden',
-                  minWidth: 80
-                }}
-              >
-                <div
-                  style={{
-                    width: `${Math.min(pct, 100)}%`,
-                    height: '100%',
-                    background: color,
-                    borderRadius: 999,
-                    transition: 'width 0.4s ease'
-                  }}
-                />
-              </div>
-              <span
-                style={{
-                  color,
-                  fontWeight: 600,
-                  fontSize: '0.85rem',
-                  minWidth: 44
-                }}
-              >
-                {pct.toFixed(1)}%
-              </span>
-            </div>
+            <ProgressBar
+              value={row.progressPercentage}
+              color={getTrafficLightColor(row.progressPercentage)}
+              height="8px"
+              widthSize="lg"
+            />
           );
         }
       },
@@ -107,10 +78,17 @@ export const AuditHistoryTable: React.FC<PropTypes> = ({ data, isLoading }) => {
         )
       },
       {
-        header: t('readings.audit.closureDate', 'Cierre'),
+        header: t('readings.audit.createdAt', 'Inicio de ciclo'),
+        accessor: (row) =>
+          row.createdAt
+            ? dateService.formatToDateTimeString(row.createdAt)
+            : '—'
+      },
+      {
+        header: t('readings.audit.closureDate', 'Fecha cierre'),
         accessor: (row) =>
           row.closureDate
-            ? dateService.formatToLocaleString(row.closureDate)
+            ? dateService.formatToDateTimeString(row.closureDate)
             : '—'
       }
     ],

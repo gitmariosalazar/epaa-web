@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { ReadingConfirmationModal } from '../components/ReadingConfirmationModal';
 import { ReadingUpdateInfoForm } from '../components/ReadingUpdateInfoForm';
+import { PreviousMonthWarningModal } from '../components/PreviousMonthWarningModal';
+import { checkReadingIsCurrentMonth } from '../../application/usecases/CheckReadingMonthUseCase';
 import { Alert } from '@/shared/presentation/components/Alert';
 import '../styles/create-reading.css';
 
@@ -55,6 +57,10 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
   // ── Estado del modal de confirmación ──────────────────────────────────────
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
+  // ── Estado del modal de advertencia de mes anterior ──────────────────────
+  const [isPreviousMonthModalOpen, setIsPreviousMonthModalOpen] =
+    useState(false);
+
   // ── Auto cargar desde navegacion o Props ──────────────────────────────────────────
   const location = useLocation();
   useEffect(() => {
@@ -65,7 +71,7 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
     }
   }, [initialCadastralKey, location.state?.cadastralKey]);
 
-  // ── Pre-cargar datos para actualización ───────────────────────────────────────────
+  // ── Pre-cargar datos y verificar mes de la lectura ───────────────────────
   useEffect(() => {
     if (readingInfo && readingInfo.length > 0) {
       const info = readingInfo[0];
@@ -73,6 +79,11 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
         setCurrentReadingInput(info.currentReading);
       } else {
         setCurrentReadingInput('');
+      }
+
+      // Si la lectura es de un mes anterior, advertir inmediatamente
+      if (!checkReadingIsCurrentMonth(info.monthReading)) {
+        setIsPreviousMonthModalOpen(true);
       }
     }
   }, [readingInfo]);
@@ -105,6 +116,11 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
     await fetchReadingData(cadastralKey);
   };
 
+  /**
+   * handleSave
+   * El modal de advertencia ya fue mostrado al buscar.
+   * Aquí siempre se abre la confirmación directamente.
+   */
   const handleSave = () => {
     if (!readingInfo) {
       alert('Primero debe buscar una conexión.');
@@ -123,7 +139,7 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
     }
     setCurrentReadingId(latestReadingId);
 
-    // Abrir modal de confirmación (igual que en CreateReadingPage)
+    // Ir directo a confirmación (la advertencia ya se mostró al buscar)
     setIsConfirmModalOpen(true);
   };
 
@@ -131,9 +147,6 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
     if (!currentReadingId) return;
 
     const requestPayload = buildRequest();
-    //console.log('--- ENVIANDO DATOS AL BACKEND ---');
-    //console.log('ID a actualizar:', currentReadingId);
-    //console.log('Payload UpdateReadingRequest:', requestPayload);
 
     const result = await submitUpdateReading(currentReadingId, requestPayload);
     setIsConfirmModalOpen(false);
@@ -144,9 +157,19 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
         onSuccess();
         return;
       }
-      await fetchReadingData(cadastralKey);
-      setCurrentReadingInput('');
-      setObservationInput('');
+
+      // Si era una lectura de mes anterior → limpiar todo al confirmar
+      const wasPreviousMonth = !checkReadingIsCurrentMonth(
+        currentReadingInfoForRequest?.monthReading ?? ''
+      );
+      if (wasPreviousMonth) {
+        handleCancel();
+      } else {
+        // Mes actual → comportamiento normal: recargar datos
+        await fetchReadingData(cadastralKey);
+        setCurrentReadingInput('');
+        setObservationInput('');
+      }
     }
   };
 
@@ -165,6 +188,8 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
     clearData();
     if (onCancel) onCancel();
   };
+
+
 
   return (
     <div className="cr-container">
@@ -204,102 +229,134 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
         )}
 
         {/* ── Estado de la conexión ─────────────────────────────────────────── */}
-        {currentReadingInfoForRequest && !currentReadingInfoForRequest.permitReading && (
-          <div className="cs-blocked-wrapper">
-            {/* ── Encabezado de alerta ── */}
-            <div className="cs-alert-header">
-              <span className="cs-alert-icon-wrap">
-                <ShieldAlert size={22} />
-              </span>
-              <div className="cs-alert-text">
-                <span className="cs-alert-title">Conexión bloqueada para lectura</span>
-                <span className="cs-alert-subtitle">
-                  Esta conexión no puede recibir nuevas lecturas en su estado actual.
+        {currentReadingInfoForRequest &&
+          !currentReadingInfoForRequest.permitReading && (
+            <div className="cs-blocked-wrapper">
+              {/* ── Encabezado de alerta ── */}
+              <div className="cs-alert-header">
+                <span className="cs-alert-icon-wrap">
+                  <ShieldAlert size={22} />
                 </span>
-              </div>
-              <span className="cs-no-permit-badge">
-                <ShieldAlert size={12} style={{ marginRight: 4 }} />
-                Lectura no permitida
-              </span>
-            </div>
-
-            {/* ── Estado actual ── */}
-            <div className="cs-state-banner">
-              <div className="cs-state-label">Estado actual de la conexión</div>
-              <div className="cs-state-name">
-                <Tag size={15} style={{ marginRight: 6, flexShrink: 0 }} />
-                {currentReadingInfoForRequest.connectionStateName
-                  .replace(/_/g, ' ')
-                  .replace(/([A-Z])/g, ' $1')
-                  .trim()}
-              </div>
-              <div className="cs-state-description">
-                <FileText size={13} style={{ marginRight: 6, flexShrink: 0, opacity: 0.7 }} />
-                {currentReadingInfoForRequest.connectionStateDescription}
-              </div>
-            </div>
-
-            {/* ── Ficha de datos ── */}
-            <div className="cs-info-grid">
-              <div className="cs-info-cell">
-                <span className="cs-info-icon"><User size={14} /></span>
-                <span className="cs-info-label">Cliente</span>
-                <span className="cs-info-value">{currentReadingInfoForRequest.clientName}</span>
-              </div>
-
-              <div className="cs-info-cell">
-                <span className="cs-info-icon"><Key size={14} /></span>
-                <span className="cs-info-label">Clave catastral</span>
-                <span className="cs-info-value">{currentReadingInfoForRequest.cadastralKey}</span>
-              </div>
-
-              <div className="cs-info-cell">
-                <span className="cs-info-icon"><MapPin size={14} /></span>
-                <span className="cs-info-label">Sector</span>
-                <span className="cs-info-value">{currentReadingInfoForRequest.sector}</span>
-              </div>
-
-              <div className="cs-info-cell">
-                <span className="cs-info-icon"><Hash size={14} /></span>
-                <span className="cs-info-label">Cuenta</span>
-                <span className="cs-info-value">{currentReadingInfoForRequest.account}</span>
-              </div>
-
-              <div className="cs-info-cell">
-                <span className="cs-info-icon"><BarChart2 size={14} /></span>
-                <span className="cs-info-label">Consumo promedio</span>
-                <span className="cs-info-value">
-                  {currentReadingInfoForRequest.averageConsumption}{' '}
-                  <small>m³</small>
+                <div className="cs-alert-text">
+                  <span className="cs-alert-title">
+                    Conexión bloqueada para lectura
+                  </span>
+                  <span className="cs-alert-subtitle">
+                    Esta conexión no puede recibir nuevas lecturas en su estado
+                    actual.
+                  </span>
+                </div>
+                <span className="cs-no-permit-badge">
+                  <ShieldAlert size={12} style={{ marginRight: 4 }} />
+                  Lectura no permitida
                 </span>
               </div>
 
-              <div className="cs-info-cell">
-                <span className="cs-info-icon"><IdCard size={14} /></span>
-                <span className="cs-info-label">Identificación</span>
-                <span className="cs-info-value">{currentReadingInfoForRequest.cardId}</span>
+              {/* ── Estado actual ── */}
+              <div className="cs-state-banner">
+                <div className="cs-state-label">
+                  Estado actual de la conexión
+                </div>
+                <div className="cs-state-name">
+                  <Tag size={15} style={{ marginRight: 6, flexShrink: 0 }} />
+                  {currentReadingInfoForRequest.connectionStateName
+                    .replace(/_/g, ' ')
+                    .replace(/([A-Z])/g, ' $1')
+                    .trim()}
+                </div>
+                <div className="cs-state-description">
+                  <FileText
+                    size={13}
+                    style={{ marginRight: 6, flexShrink: 0, opacity: 0.7 }}
+                  />
+                  {currentReadingInfoForRequest.connectionStateDescription}
+                </div>
+              </div>
+
+              {/* ── Ficha de datos ── */}
+              <div className="cs-info-grid">
+                <div className="cs-info-cell">
+                  <span className="cs-info-icon">
+                    <User size={14} />
+                  </span>
+                  <span className="cs-info-label">Cliente</span>
+                  <span className="cs-info-value">
+                    {currentReadingInfoForRequest.clientName}
+                  </span>
+                </div>
+
+                <div className="cs-info-cell">
+                  <span className="cs-info-icon">
+                    <Key size={14} />
+                  </span>
+                  <span className="cs-info-label">Clave catastral</span>
+                  <span className="cs-info-value">
+                    {currentReadingInfoForRequest.cadastralKey}
+                  </span>
+                </div>
+
+                <div className="cs-info-cell">
+                  <span className="cs-info-icon">
+                    <MapPin size={14} />
+                  </span>
+                  <span className="cs-info-label">Sector</span>
+                  <span className="cs-info-value">
+                    {currentReadingInfoForRequest.sector}
+                  </span>
+                </div>
+
+                <div className="cs-info-cell">
+                  <span className="cs-info-icon">
+                    <Hash size={14} />
+                  </span>
+                  <span className="cs-info-label">Cuenta</span>
+                  <span className="cs-info-value">
+                    {currentReadingInfoForRequest.account}
+                  </span>
+                </div>
+
+                <div className="cs-info-cell">
+                  <span className="cs-info-icon">
+                    <BarChart2 size={14} />
+                  </span>
+                  <span className="cs-info-label">Consumo promedio</span>
+                  <span className="cs-info-value">
+                    {currentReadingInfoForRequest.averageConsumption}{' '}
+                    <small>m³</small>
+                  </span>
+                </div>
+
+                <div className="cs-info-cell">
+                  <span className="cs-info-icon">
+                    <IdCard size={14} />
+                  </span>
+                  <span className="cs-info-label">Identificación</span>
+                  <span className="cs-info-value">
+                    {currentReadingInfoForRequest.cardId}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {currentReadingInfoForRequest && currentReadingInfoForRequest.permitReading && (
-          <>
-            <ReadingSummaryCards
-              info={readingInfo}
-              currentReadingInput={currentReadingInput}
-              method="update"
-            />
+        {currentReadingInfoForRequest &&
+          currentReadingInfoForRequest.permitReading && (
+            <>
+              <ReadingSummaryCards
+                info={readingInfo}
+                currentReadingInput={currentReadingInput}
+                method="update"
+              />
 
-            <ReadingUpdateInfoForm
-              info={readingInfo}
-              currentReadingInput={currentReadingInput}
-              setCurrentReadingInput={setCurrentReadingInput}
-              observationInput={observationInput}
-              setObservationInput={setObservationInput}
-            />
-          </>
-        )}
+              <ReadingUpdateInfoForm
+                info={readingInfo}
+                currentReadingInput={currentReadingInput}
+                setCurrentReadingInput={setCurrentReadingInput}
+                observationInput={observationInput}
+                setObservationInput={setObservationInput}
+              />
+            </>
+          )}
 
         {currentReadingInfoForRequest && (
           <div className="cr-history-wrapper">
@@ -314,6 +371,19 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
           <AdditionalInfoAccordion info={currentReadingInfoForRequest} />
         </>
       </div>
+
+      {/* ── Modal de advertencia: lectura de mes anterior ─────────────────── */}
+      {currentReadingInfoForRequest && (
+        <PreviousMonthWarningModal
+          isOpen={isPreviousMonthModalOpen}
+          readingInfo={currentReadingInfoForRequest}
+          onCancel={() => {
+            setIsPreviousMonthModalOpen(false);
+            handleCancel();
+          }}
+          onContinue={() => setIsPreviousMonthModalOpen(false)}
+        />
+      )}
 
       {/* ── Modal de confirmación ─────────────────────────────────────────── */}
       {currentReadingInfoForRequest && (

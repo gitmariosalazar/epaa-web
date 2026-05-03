@@ -206,9 +206,12 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
                 <ShieldAlert size={22} />
               </span>
               <div className="cs-alert-text">
-                <span className="cs-alert-title">Conexión bloqueada para lectura</span>
+                <span className="cs-alert-title">
+                  Conexión bloqueada para lectura
+                </span>
                 <span className="cs-alert-subtitle">
-                  Esta conexión no puede recibir nuevas lecturas en su estado actual.
+                  Esta conexión no puede recibir nuevas lecturas en su estado
+                  actual.
                 </span>
               </div>
               <span className="cs-no-permit-badge">
@@ -228,7 +231,10 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
                   .trim()}
               </div>
               <div className="cs-state-description">
-                <FileText size={13} style={{ marginRight: 6, flexShrink: 0, opacity: 0.7 }} />
+                <FileText
+                  size={13}
+                  style={{ marginRight: 6, flexShrink: 0, opacity: 0.7 }}
+                />
                 {readingInfoForRequest.connectionStateDescription}
               </div>
             </div>
@@ -236,42 +242,63 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
             {/* ── Ficha de datos ── */}
             <div className="cs-info-grid">
               <div className="cs-info-cell">
-                <span className="cs-info-icon"><User size={14} /></span>
+                <span className="cs-info-icon">
+                  <User size={14} />
+                </span>
                 <span className="cs-info-label">Cliente</span>
-                <span className="cs-info-value">{readingInfoForRequest.clientName}</span>
-              </div>
-
-              <div className="cs-info-cell">
-                <span className="cs-info-icon"><Key size={14} /></span>
-                <span className="cs-info-label">Clave catastral</span>
-                <span className="cs-info-value">{readingInfoForRequest.cadastralKey}</span>
-              </div>
-
-              <div className="cs-info-cell">
-                <span className="cs-info-icon"><MapPin size={14} /></span>
-                <span className="cs-info-label">Sector</span>
-                <span className="cs-info-value">{readingInfoForRequest.sector}</span>
-              </div>
-
-              <div className="cs-info-cell">
-                <span className="cs-info-icon"><Hash size={14} /></span>
-                <span className="cs-info-label">Cuenta</span>
-                <span className="cs-info-value">{readingInfoForRequest.account}</span>
-              </div>
-
-              <div className="cs-info-cell">
-                <span className="cs-info-icon"><BarChart2 size={14} /></span>
-                <span className="cs-info-label">Consumo promedio</span>
                 <span className="cs-info-value">
-                  {readingInfoForRequest.averageConsumption}{' '}
-                  <small>m³</small>
+                  {readingInfoForRequest.clientName}
                 </span>
               </div>
 
               <div className="cs-info-cell">
-                <span className="cs-info-icon"><IdCard size={14} /></span>
+                <span className="cs-info-icon">
+                  <Key size={14} />
+                </span>
+                <span className="cs-info-label">Clave catastral</span>
+                <span className="cs-info-value">
+                  {readingInfoForRequest.cadastralKey}
+                </span>
+              </div>
+
+              <div className="cs-info-cell">
+                <span className="cs-info-icon">
+                  <MapPin size={14} />
+                </span>
+                <span className="cs-info-label">Sector</span>
+                <span className="cs-info-value">
+                  {readingInfoForRequest.sector}
+                </span>
+              </div>
+
+              <div className="cs-info-cell">
+                <span className="cs-info-icon">
+                  <Hash size={14} />
+                </span>
+                <span className="cs-info-label">Cuenta</span>
+                <span className="cs-info-value">
+                  {readingInfoForRequest.account}
+                </span>
+              </div>
+
+              <div className="cs-info-cell">
+                <span className="cs-info-icon">
+                  <BarChart2 size={14} />
+                </span>
+                <span className="cs-info-label">Consumo promedio</span>
+                <span className="cs-info-value">
+                  {readingInfoForRequest.averageConsumption} <small>m³</small>
+                </span>
+              </div>
+
+              <div className="cs-info-cell">
+                <span className="cs-info-icon">
+                  <IdCard size={14} />
+                </span>
                 <span className="cs-info-label">Identificación</span>
-                <span className="cs-info-value">{readingInfoForRequest.cardId}</span>
+                <span className="cs-info-value">
+                  {readingInfoForRequest.cardId}
+                </span>
               </div>
             </div>
           </div>

@@ -23,6 +23,7 @@ export const ReadingUpdateInfoForm: React.FC<PropTypes> = ({
 }) => {
   const currentReadingInfo = info[0];
   const previousReadingInfo = info[1];
+
   return (
     <div className="cr-reading-grid">
       <div className="cr-reading-col">

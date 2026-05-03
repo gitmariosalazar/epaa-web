@@ -100,9 +100,6 @@ export const ReadingAuditPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month]);
 
-  // ── Derived: month with -01 suffix for API ─────────────────────────────────
-  const monthValidate = month + '-01';
-
   // ── Client-side filtered data ──────────────────────────────────────────────
   const filteredAuditData = useMemo(() => {
     let result = auditData;
@@ -141,7 +138,7 @@ export const ReadingAuditPage: React.FC = () => {
   }, [historyData, historyMonthFilter, statusFilter]);
 
   // ── Fetch handlers ─────────────────────────────────────────────────────────
-  const handleSummaryFetch = () => fetchAudit(monthValidate, sector);
+  const handleSummaryFetch = () => fetchAudit(month, sector);
 
   const handleHistoryFetch = () => {
     if (!sector) return;
@@ -152,12 +149,12 @@ export const ReadingAuditPage: React.FC = () => {
   };
 
   const handleInitialize = async () => {
-    await initAudit(monthValidate);
-    if (activeTab === 'summary') await fetchAudit(monthValidate, sector);
+    await initAudit(month);
+    if (activeTab === 'summary') await fetchAudit(month, sector);
   };
 
   // ── Derived flags ──────────────────────────────────────────────────────────
-  const canFetchSummary = !isLoading && Boolean(monthValidate);
+  const canFetchSummary = !isLoading && Boolean(month);
   const canFetchHistory = !isHistoryLoading && Boolean(sector);
   const activeLoading = activeTab === 'summary' ? isLoading : isHistoryLoading;
   const activeProgress =
@@ -196,7 +193,7 @@ export const ReadingAuditPage: React.FC = () => {
                   <DatePicker
                     size="compact"
                     view="month"
-                    value={month ? `${month}-01` : ''}
+                    value={month}
                     onChange={(val: string) => setMonth(val.substring(0, 7))}
                   />
                 </div>
@@ -374,15 +371,11 @@ export const ReadingAuditPage: React.FC = () => {
                     setStatusFilter(e.target.value as StatusFilter)
                   }
                 >
-                  <option value="all">
-                    {t('readings.audit.statusAll', 'Todos')}
-                  </option>
-                  <option value="complete">
-                    {t('readings.audit.statusComplete', 'Completados')}
-                  </option>
-                  <option value="pending">
-                    {t('readings.audit.statusPending', 'Pendientes')}
-                  </option>
+                  {statusOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
                 </Select>
               </div>
             </div>

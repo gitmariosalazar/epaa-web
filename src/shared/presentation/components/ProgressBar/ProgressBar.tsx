@@ -10,6 +10,13 @@ interface ProgressBarProps {
   color?: string;
   /** Height of the bar */
   height?: string;
+  /** Width preset of the entire progress bar container.
+   *  - 'sm'   → 120px
+   *  - 'md'   → 200px
+   *  - 'lg'   → 320px
+   *  - 'full' → 100% (default — backward compatible)
+   */
+  widthSize?: 'sm' | 'md' | 'lg' | 'full';
   /** Whether to show the percentage label next to the bar */
   showLabel?: boolean;
   /** Additional class name for the container */
@@ -17,19 +24,30 @@ interface ProgressBarProps {
   className?: string;
 }
 
+const WIDTH_MAP: Record<NonNullable<ProgressBarProps['widthSize']>, string> = {
+  sm:   '120px',
+  md:   '200px',
+  lg:   '320px',
+  full: '100%'
+};
+
 export const ProgressBar: React.FC<ProgressBarProps> = ({
   value,
-  color = '#3b82f6', // Default blue if no color provided
+  color = '#3b82f6',
   height = '8px',
+  widthSize = 'full',
   showLabel = true,
   showProgressBar = true,
   className = ''
 }) => {
-  // Clamp value between 0 and 100
   const normalizedValue = Math.min(100, Math.max(0, value));
+  const resolvedWidth = WIDTH_MAP[widthSize];
 
   return (
-    <div className={`progress-wrapper ${className}`}>
+    <div
+      className={`progress-wrapper ${className}`}
+      style={{ width: resolvedWidth, margin: '0 auto' }}
+    >
       {showProgressBar && (
         <div
           className="progress-bar-container"
