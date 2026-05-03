@@ -68,13 +68,15 @@ export const ReadingsListPage: React.FC = () => {
     estimatedReadings,
     isLoading,
     error,
-    fetchReadings
+    fetchReadings,
+    clearAll
   } = useReadingsList();
 
   const loadingProgress = useSimulatedProgress(isLoading);
 
   useEffect(() => {
     setSector('');
+    clearAll();
   }, [activeTab]);
 
   const filterBySector = <T extends { sector: number | string }>(list: T[]) => {

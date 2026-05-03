@@ -1,16 +1,26 @@
+import React, { useState, useEffect } from 'react';
 import { useUpdateReading } from '../hooks/useUpdateReading';
-
 import { ReadingSummaryCards } from '../components/ReadingSummaryCards';
 import { AdditionalInfoAccordion } from '../components/AdditionalInfoAccordion';
 import { ReadingHistoryTable } from '../components/ReadingHistoryTable';
 import { ReadingToolbar } from '../components/ReadingToolbar';
-import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { UpdateReadingRequest } from '../../domain/dto/request/UpdateReadingRequest';
-import { IdCard, User } from 'lucide-react';
+import {
+  IdCard,
+  User,
+  ShieldAlert,
+  MapPin,
+  Hash,
+  BarChart2,
+  Key,
+  Tag,
+  FileText
+} from 'lucide-react';
 import { ReadingConfirmationModal } from '../components/ReadingConfirmationModal';
 import { ReadingUpdateInfoForm } from '../components/ReadingUpdateInfoForm';
 import { Alert } from '@/shared/presentation/components/Alert';
+import '../styles/create-reading.css';
 
 export interface UpdateReadingPageProps {
   initialCadastralKey?: string;
@@ -193,7 +203,87 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
           <Alert type="error" title="Búsqueda sin resultados" message={error} />
         )}
 
-        {currentReadingInfoForRequest && (
+        {/* ── Estado de la conexión ─────────────────────────────────────────── */}
+        {currentReadingInfoForRequest && !currentReadingInfoForRequest.permitReading && (
+          <div className="cs-blocked-wrapper">
+            {/* ── Encabezado de alerta ── */}
+            <div className="cs-alert-header">
+              <span className="cs-alert-icon-wrap">
+                <ShieldAlert size={22} />
+              </span>
+              <div className="cs-alert-text">
+                <span className="cs-alert-title">Conexión bloqueada para lectura</span>
+                <span className="cs-alert-subtitle">
+                  Esta conexión no puede recibir nuevas lecturas en su estado actual.
+                </span>
+              </div>
+              <span className="cs-no-permit-badge">
+                <ShieldAlert size={12} style={{ marginRight: 4 }} />
+                Lectura no permitida
+              </span>
+            </div>
+
+            {/* ── Estado actual ── */}
+            <div className="cs-state-banner">
+              <div className="cs-state-label">Estado actual de la conexión</div>
+              <div className="cs-state-name">
+                <Tag size={15} style={{ marginRight: 6, flexShrink: 0 }} />
+                {currentReadingInfoForRequest.connectionStateName
+                  .replace(/_/g, ' ')
+                  .replace(/([A-Z])/g, ' $1')
+                  .trim()}
+              </div>
+              <div className="cs-state-description">
+                <FileText size={13} style={{ marginRight: 6, flexShrink: 0, opacity: 0.7 }} />
+                {currentReadingInfoForRequest.connectionStateDescription}
+              </div>
+            </div>
+
+            {/* ── Ficha de datos ── */}
+            <div className="cs-info-grid">
+              <div className="cs-info-cell">
+                <span className="cs-info-icon"><User size={14} /></span>
+                <span className="cs-info-label">Cliente</span>
+                <span className="cs-info-value">{currentReadingInfoForRequest.clientName}</span>
+              </div>
+
+              <div className="cs-info-cell">
+                <span className="cs-info-icon"><Key size={14} /></span>
+                <span className="cs-info-label">Clave catastral</span>
+                <span className="cs-info-value">{currentReadingInfoForRequest.cadastralKey}</span>
+              </div>
+
+              <div className="cs-info-cell">
+                <span className="cs-info-icon"><MapPin size={14} /></span>
+                <span className="cs-info-label">Sector</span>
+                <span className="cs-info-value">{currentReadingInfoForRequest.sector}</span>
+              </div>
+
+              <div className="cs-info-cell">
+                <span className="cs-info-icon"><Hash size={14} /></span>
+                <span className="cs-info-label">Cuenta</span>
+                <span className="cs-info-value">{currentReadingInfoForRequest.account}</span>
+              </div>
+
+              <div className="cs-info-cell">
+                <span className="cs-info-icon"><BarChart2 size={14} /></span>
+                <span className="cs-info-label">Consumo promedio</span>
+                <span className="cs-info-value">
+                  {currentReadingInfoForRequest.averageConsumption}{' '}
+                  <small>m³</small>
+                </span>
+              </div>
+
+              <div className="cs-info-cell">
+                <span className="cs-info-icon"><IdCard size={14} /></span>
+                <span className="cs-info-label">Identificación</span>
+                <span className="cs-info-value">{currentReadingInfoForRequest.cardId}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {currentReadingInfoForRequest && currentReadingInfoForRequest.permitReading && (
           <>
             <ReadingSummaryCards
               info={readingInfo}

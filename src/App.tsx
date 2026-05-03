@@ -41,6 +41,7 @@ import { PaymentsPage } from '@/modules/accounting/presentation/pages/payments/P
 import { EntryDataProvider } from '@/modules/accounting/presentation/context/entry-data/EntryDataContext';
 import { EntryDataPage } from '@/modules/accounting/presentation/pages/entry-data/EntryDataPage';
 import { ReadingsListPage } from '@/modules/readings/presentation/pages/ReadingsListPage';
+import { ReadingAuditPage } from '@/modules/readings/presentation/pages/ReadingAuditPage';
 import { ReadingImagesPage } from '@/modules/readings/presentation/pages/ReadingImagesPage';
 import { TrashRateReportProvider } from './modules/trash/presentation/context/TrashRateReportContext';
 import { TrashRateReportPage } from './modules/trash/presentation/pages/TrashRateReportPage';
@@ -230,6 +231,7 @@ function App() {
                         <Route path="list" element={<ReadingsListPage />} />
                         <Route path="images" element={<ReadingImagesPage />} />
                         <Route path="update" element={<UpdateReadingPage />} />
+                        <Route path="audit" element={<ReadingAuditPage />} />
                         {/* Other reading routes can be added here */}
                       </Routes>
                     </ReadingsProvider>

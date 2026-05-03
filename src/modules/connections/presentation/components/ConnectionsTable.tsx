@@ -17,6 +17,7 @@ import { FaEdit, FaMapMarkerAlt } from 'react-icons/fa';
 import type { Connection } from '../../domain/models/Connection';
 import type { SortConfig } from '../hooks/useConnectionsViewModel';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { getConnectionStateChip } from '../utils/connectionStateChip';
 
 // ── DetailModal (lightweight inline modal for viewing a connection) ────────────
 interface ConnectionDetailModalProps {
@@ -201,20 +202,38 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
       },
       {
         header: t('connections.table.status'),
+        accessor: (item: Connection) => {
+          const chip = getConnectionStateChip(item.connectionStatus);
+          return (
+            <ColorChip
+              label={chip.label}
+              color={chip.color}
+              icon={chip.icon}
+              variant="soft"
+              size="sm"
+            />
+          );
+        },
+        id: 'connectionStatus'
+      },
+      {
+        header: t('connections.table.connectionIsReadable', 'Lecturable'),
         accessor: (item: Connection) => (
           <ColorChip
             label={
-              item.connectionStatus
-                ? t('connections.table.active')
-                : t('connections.table.inactive')
+              item.connectionIsReadable
+                ? t('connections.table.yes')
+                : t('connections.table.no')
             }
-            color={item.connectionStatus ? '#22c55e' : '#ef4444'}
-            icon={item.connectionStatus ? <Check size={14} /> : <X size={14} />}
+            color={item.connectionIsReadable ? '#22c55e' : '#94a3b8'}
+            icon={
+              item.connectionIsReadable ? <Check size={14} /> : <X size={14} />
+            }
             variant="soft"
             size="sm"
           />
         ),
-        id: 'connectionStatus'
+        id: 'connectionIsReadable'
       },
       {
         header: t('connections.table.options'),
@@ -315,9 +334,10 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         connectionSewerage: item.connectionSewerage
           ? t('connections.table.yes')
           : t('connections.table.no'),
-        connectionStatus: item.connectionStatus
-          ? t('connections.table.active')
-          : t('connections.table.inactive')
+        connectionStatus: getConnectionStateChip(item.connectionStatus).label,
+        connectionIsReadable: item.connectionIsReadable
+          ? t('connections.table.yes')
+          : t('connections.table.no')
       };
       return selectedCols.map((col) => rowData[col.id] || '-');
     }

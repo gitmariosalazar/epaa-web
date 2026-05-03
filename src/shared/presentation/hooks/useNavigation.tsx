@@ -10,7 +10,8 @@ import {
   Building2,
   Lock,
   BarChart3,
-  List
+  List,
+  ClipboardList
 } from 'lucide-react';
 import { MdAssignmentAdd, MdOutlineCable } from 'react-icons/md';
 import { TiThList } from 'react-icons/ti';
@@ -200,6 +201,11 @@ export const useNavigation = (): NavSection[] => {
               icon: <FaEdit size={18} />,
               label: 'Actualizar Lectura',
               to: '/readings/update'
+            },
+            {
+              icon: <ClipboardList size={18} />,
+              label: 'Auditoría de Lecturas',
+              to: '/readings/audit'
             }
           ]
         }

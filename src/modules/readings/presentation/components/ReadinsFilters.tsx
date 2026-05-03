@@ -1,11 +1,10 @@
 import React from 'react';
+import type { ReactNode } from 'react';
 import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
-
 import { TbChartPieFilled } from 'react-icons/tb';
-
 import { Input } from '@/shared/presentation/components/Input/Input';
 
 // ── Tab type ──────────────────────────────────────────────────────────────────
@@ -52,6 +51,8 @@ export interface ReadingDataFiltersProps {
   // Fetch Action
   onFetch: () => void;
   isLoading: boolean;
+  /** Optional extra action rendered beside the Consultar button (e.g. Initialize Period) */
+  extraAction?: ReactNode;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -62,7 +63,8 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
   sector,
   onSectorChange,
   onFetch,
-  isLoading
+  isLoading,
+  extraAction
 }) => {
   const { t } = useTranslation();
 
@@ -123,6 +125,7 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
             {!isLoading && <Search size={18} />}
             {isLoading ? t('common.loading') : t('common.fetch')}
           </Button>
+          {extraAction}
         </div>
       </div>
     </div>

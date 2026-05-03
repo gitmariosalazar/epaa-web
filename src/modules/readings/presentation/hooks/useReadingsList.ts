@@ -98,12 +98,24 @@ export const useReadingsList = () => {
     ]
   );
 
+  /**
+   * Limpia todos los datos cargados (pendientes, tomadas, estimadas) y el error.
+   * SRP: llamar al cambiar de pestaña para garantizar un estado limpio.
+   */
+  const clearAll = useCallback(() => {
+    setPendingReadings([]);
+    setCompletedReadings([]);
+    setEstimatedReadings([]);
+    setError(null);
+  }, []);
+
   return {
     pendingReadings,
     completedReadings,
     estimatedReadings,
     isLoading,
     error,
-    fetchReadings
+    fetchReadings,
+    clearAll
   };
 };

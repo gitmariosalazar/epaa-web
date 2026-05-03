@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import type { Connection, Rate } from '../../domain/models/Connection';
+import { ACTIVE_STATES } from '../../domain/models/ConnectionState';
 
 import { useConnectionsContext } from '../context/ConnectionContext';
 import type {
@@ -102,8 +103,13 @@ function applyLocalFilters(
 
   // Filtro de Estatus
   if (selectedStatus !== '') {
-    const activeFilter = selectedStatus === 'active';
-    result = result.filter((item) => item.connectionStatus === activeFilter);
+    if (selectedStatus === 'active') {
+      // "Activo" → solo conexiones cuyo estado sea ACTIVA
+      result = result.filter((item) => ACTIVE_STATES.has(item.connectionStatus));
+    } else {
+      // "Inactivo" → todo lo que NO sea ACTIVA
+      result = result.filter((item) => !ACTIVE_STATES.has(item.connectionStatus));
+    }
   }
 
   // Filtro de Alcantarillado
@@ -184,7 +190,7 @@ export const useConnectionsViewModel = () => {
     connectionCadastralKey: '',
     connectionContractNumber: '',
     connectionSewerage: false,
-    connectionStatus: false,
+    connectionStatus: 'ACTIVA',
     connectionAddress: '',
     connectionInstallationDate: new Date(),
     connectionPeopleNumber: 0,
@@ -199,7 +205,9 @@ export const useConnectionsViewModel = () => {
     connectionGeolocationDate: new Date(),
     connectionGeometricZone: '',
     propertyCadastralKey: '',
-    zoneId: 0
+    zoneId: 0,
+    connectionStateId: 0,
+    connectionIsReadable: true
   };
 
   const [formData, setFormData] =
@@ -250,7 +258,7 @@ export const useConnectionsViewModel = () => {
                 connectionCadastralKey: detail.connectionCadastralKey || '',
                 connectionContractNumber: detail.connectionContractNumber || '',
                 connectionSewerage: detail.connectionSewerage || false,
-                connectionStatus: detail.connectionStatus === 'ACTIVO',
+                connectionStatus: detail.connectionStatus ?? '',
                 connectionAddress: detail.connectionAddress || '',
                 connectionInstallationDate: detail.connectionInstallationDate
                   ? new Date(detail.connectionInstallationDate)
@@ -269,7 +277,9 @@ export const useConnectionsViewModel = () => {
                   : new Date(),
                 connectionGeometricZone: detail.connectionGeometricZone || '',
                 propertyCadastralKey: detail.propertyCadastralKey || '',
-                zoneId: detail.zoneId || 0
+                zoneId: detail.zoneId || 0,
+                connectionStateId: 0,
+                connectionIsReadable: true
               };
               result = [conn];
             }
@@ -434,7 +444,7 @@ export const useConnectionsViewModel = () => {
         connectionCadastralKey: fullData.connectionCadastralKey ?? '',
         connectionContractNumber: fullData.connectionContractNumber ?? '',
         connectionSewerage: Boolean(fullData.connectionSewerage),
-        connectionStatus: fullData.connectionStatus === 'ACTIVO', // Common API pattern
+        connectionStatus: fullData.connectionStatus ?? '',
         connectionAddress: fullData.connectionAddress ?? '',
         connectionInstallationDate: fullData.connectionInstallationDate
           ? new Date(fullData.connectionInstallationDate)
@@ -453,7 +463,9 @@ export const useConnectionsViewModel = () => {
           : new Date(),
         connectionGeometricZone: fullData.connectionGeometricZone ?? '',
         propertyCadastralKey: fullData.propertyCadastralKey ?? '',
-        zoneId: fullData.zoneId || 0
+        zoneId: fullData.zoneId || 0,
+        connectionStateId: 0,
+        connectionIsReadable: true
       };
 
       setSelectedConnection(connection);
@@ -505,7 +517,7 @@ export const useConnectionsViewModel = () => {
         connectionCadastralKey: fullData.connectionCadastralKey || '',
         connectionContractNumber: fullData.connectionContractNumber || '',
         connectionSewerage: fullData.connectionSewerage || false,
-        connectionStatus: fullData.connectionStatus === 'ACTIVO',
+        connectionStatus: fullData.connectionStatus ?? '',
         connectionAddress: fullData.connectionAddress || '',
         connectionInstallationDate: fullData.connectionInstallationDate
           ? new Date(fullData.connectionInstallationDate)
@@ -524,7 +536,9 @@ export const useConnectionsViewModel = () => {
           : new Date(),
         connectionGeometricZone: fullData.connectionGeometricZone || '',
         propertyCadastralKey: fullData.propertyCadastralKey || '',
-        zoneId: fullData.zoneId || 0
+        zoneId: fullData.zoneId || 0,
+        connectionStateId: 0,
+        connectionIsReadable: true
       };
 
       // 2. Reuse the Edit logic by calling openEdit with the newly created conn

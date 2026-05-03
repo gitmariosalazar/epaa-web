@@ -1,6 +1,8 @@
 import React from 'react';
 import type { Connection } from '../../../domain/models/Connection';
 import { MdLocationOn, MdPerson } from 'react-icons/md';
+import { getConnectionStateChip } from '../../utils/connectionStateChip';
+import { ACTIVE_STATES } from '../../../domain/models/ConnectionState';
 
 interface ConnectionCardProps {
   connection: Connection;
@@ -13,9 +15,12 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
   isSelected,
   onSelect
 }) => {
+  const chip = getConnectionStateChip(connection.connectionStatus);
+  const isActive = ACTIVE_STATES.has(connection.connectionStatus);
+
   return (
     <div
-      className={`connection-card ${isSelected ? 'selected' : ''} ${connection.connectionStatus ? 'active-card' : 'inactive-card'}`}
+      className={`connection-card ${isSelected ? 'selected' : ''} ${isActive ? 'active-card' : 'inactive-card'}`}
       onClick={() => onSelect(connection)}
     >
       <div className="card-top">
@@ -26,9 +31,13 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
           </h4>
         </div>
         <div
-          className={`card-status-pill ${connection.connectionStatus ? 'active' : 'inactive'}`}
+          className={`card-status-pill ${isActive ? 'active' : 'inactive'}`}
+          style={{ color: chip.color, borderColor: chip.color }}
         >
-          {connection.connectionStatus ? 'Active' : 'Inactive'}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            {chip.icon}
+            {chip.label}
+          </span>
         </div>
       </div>
 

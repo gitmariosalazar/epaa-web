@@ -8,7 +8,17 @@ import { ReadingHistoryTable } from '../components/ReadingHistoryTable';
 import { ReadingToolbar } from '../components/ReadingToolbar';
 import { ReadingConfirmationModal } from '../components/ReadingConfirmationModal';
 import '../styles/create-reading.css';
-import { IdCard, User } from 'lucide-react';
+import {
+  IdCard,
+  User,
+  ShieldAlert,
+  MapPin,
+  Hash,
+  BarChart2,
+  Key,
+  Tag,
+  FileText
+} from 'lucide-react';
 import type { CreateReadingRequest } from '../../domain/dto/request/CreateReadingRequest';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 import { Alert } from '@/shared/presentation/components/Alert';
@@ -187,25 +197,113 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
           method="create"
         />
 
-        {error && !readingInfoForRequest && (
-          <Alert type="error" title="Búsqueda sin resultados" message={error} />
+        {/* ── Estado de la conexión ─────────────────────────────────────────── */}
+        {readingInfoForRequest && !readingInfoForRequest.permitReading && (
+          <div className="cs-blocked-wrapper">
+            {/* ── Encabezado de alerta ── */}
+            <div className="cs-alert-header">
+              <span className="cs-alert-icon-wrap">
+                <ShieldAlert size={22} />
+              </span>
+              <div className="cs-alert-text">
+                <span className="cs-alert-title">Conexión bloqueada para lectura</span>
+                <span className="cs-alert-subtitle">
+                  Esta conexión no puede recibir nuevas lecturas en su estado actual.
+                </span>
+              </div>
+              <span className="cs-no-permit-badge">
+                <ShieldAlert size={12} style={{ marginRight: 4 }} />
+                Lectura no permitida
+              </span>
+            </div>
+
+            {/* ── Estado actual ── */}
+            <div className="cs-state-banner">
+              <div className="cs-state-label">Estado actual de la conexión</div>
+              <div className="cs-state-name">
+                <Tag size={15} style={{ marginRight: 6, flexShrink: 0 }} />
+                {readingInfoForRequest.connectionStateName
+                  .replace(/_/g, ' ')
+                  .replace(/([A-Z])/g, ' $1')
+                  .trim()}
+              </div>
+              <div className="cs-state-description">
+                <FileText size={13} style={{ marginRight: 6, flexShrink: 0, opacity: 0.7 }} />
+                {readingInfoForRequest.connectionStateDescription}
+              </div>
+            </div>
+
+            {/* ── Ficha de datos ── */}
+            <div className="cs-info-grid">
+              <div className="cs-info-cell">
+                <span className="cs-info-icon"><User size={14} /></span>
+                <span className="cs-info-label">Cliente</span>
+                <span className="cs-info-value">{readingInfoForRequest.clientName}</span>
+              </div>
+
+              <div className="cs-info-cell">
+                <span className="cs-info-icon"><Key size={14} /></span>
+                <span className="cs-info-label">Clave catastral</span>
+                <span className="cs-info-value">{readingInfoForRequest.cadastralKey}</span>
+              </div>
+
+              <div className="cs-info-cell">
+                <span className="cs-info-icon"><MapPin size={14} /></span>
+                <span className="cs-info-label">Sector</span>
+                <span className="cs-info-value">{readingInfoForRequest.sector}</span>
+              </div>
+
+              <div className="cs-info-cell">
+                <span className="cs-info-icon"><Hash size={14} /></span>
+                <span className="cs-info-label">Cuenta</span>
+                <span className="cs-info-value">{readingInfoForRequest.account}</span>
+              </div>
+
+              <div className="cs-info-cell">
+                <span className="cs-info-icon"><BarChart2 size={14} /></span>
+                <span className="cs-info-label">Consumo promedio</span>
+                <span className="cs-info-value">
+                  {readingInfoForRequest.averageConsumption}{' '}
+                  <small>m³</small>
+                </span>
+              </div>
+
+              <div className="cs-info-cell">
+                <span className="cs-info-icon"><IdCard size={14} /></span>
+                <span className="cs-info-label">Identificación</span>
+                <span className="cs-info-value">{readingInfoForRequest.cardId}</span>
+              </div>
+            </div>
+          </div>
         )}
 
-        {readingInfoForRequest && (
+        {readingInfoForRequest?.permitReading && (
           <>
-            <ReadingSummaryCards
-              info={readingInfo}
-              currentReadingInput={currentReadingInput}
-              method="create"
-            />
+            {error && !readingInfoForRequest && (
+              <Alert
+                type="error"
+                title="Búsqueda sin resultados"
+                message={error}
+              />
+            )}
 
-            <ReadingCreateInfoForm
-              info={readingInfo}
-              currentReadingInput={currentReadingInput}
-              setCurrentReadingInput={setCurrentReadingInput}
-              observationInput={observationInput}
-              setObservationInput={setObservationInput}
-            />
+            {readingInfoForRequest && (
+              <>
+                <ReadingSummaryCards
+                  info={readingInfo}
+                  currentReadingInput={currentReadingInput}
+                  method="create"
+                />
+
+                <ReadingCreateInfoForm
+                  info={readingInfo}
+                  currentReadingInput={currentReadingInput}
+                  setCurrentReadingInput={setCurrentReadingInput}
+                  observationInput={observationInput}
+                  setObservationInput={setObservationInput}
+                />
+              </>
+            )}
           </>
         )}
 

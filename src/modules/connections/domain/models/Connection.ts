@@ -11,7 +11,9 @@ export interface Connection {
   connectionCadastralKey: string;
   connectionContractNumber: string;
   connectionSewerage: boolean;
-  connectionStatus: boolean;
+  connectionStatus: string; // nombre from cat_estados_acometida
+  connectionStateId: number; // estado_id FK
+  connectionIsReadable: boolean; // permite_lectura
   connectionAddress: string;
   connectionInstallationDate: Date;
   connectionPeopleNumber: number;
@@ -49,7 +51,9 @@ export interface ConnectionWithProperty {
   connectionCadastralKey: string | null;
   connectionContractNumber: string | null;
   connectionSewerage: boolean | null;
-  connectionStatus: string | null;
+  connectionStatus: string | null; // nombre from cat_estados_acometida
+  connectionStateId: number | null; // estado_id FK
+  connectionIsReadable: boolean | null; // permite_lectura
   connectionAddress: string | null;
   connectionInstallationDate: string | Date | null;
   connectionPeopleNumber: number | null;
