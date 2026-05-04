@@ -1,6 +1,8 @@
 import type {
   AuthSession,
-  LoginCredentials
+  LoginCredentials,
+  VerifyUserRequest,
+  VerifyUserResult,
 } from '@/modules/auth/domain/models/Auth';
 import type { AuthRepository } from '@/modules/auth/domain/repositories/AuthRepository';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
@@ -40,4 +42,17 @@ export class AuthRepositoryImpl implements AuthRepository {
     return response.data.data;
   }
 
+  /**
+   * Calls POST /auth/verify — no auth header required (public endpoint).
+   * Sends the stored username/email to assert the account still exists
+   * and is active in the backend before granting access.
+   */
+  async verifyUser(payload: VerifyUserRequest): Promise<VerifyUserResult> {
+    const response = await this.client.post<ApiResponse<VerifyUserResult>>(
+      '/auth/verify',
+      payload
+    );
+    return response.data.data;
+  }
 }
+

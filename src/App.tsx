@@ -61,10 +61,11 @@ import UnAuthorizedPage from '@/shared/presentation/components/unauthorized/UnAu
 import { CircularProgress } from './shared/presentation/components/CircularProgress';
 
 const ProtectedRoute = () => {
-  const { token, isLoading } = useAuth();
+  const { token, isLoading, isVerifying } = useAuth();
 
-  if (isLoading) {
-    return <CircularProgress />; // TODO: Replace with nice loader
+  // Wait for both: local session hydration AND backend verify call
+  if (isLoading || isVerifying) {
+    return <CircularProgress />;
   }
 
   if (!token) {
