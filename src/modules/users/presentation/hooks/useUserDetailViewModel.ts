@@ -51,7 +51,7 @@ export const useUserDetailViewModel = (username: string | undefined) => {
     async (data: ChangePasswordRequest) => {
       if (!user || !username) return;
       try {
-        await changePasswordUseCase.execute(user.username, data);
+        await changePasswordUseCase.execute(user.userId, data);
         alert('Password changed successfully');
         await fetchUser();
       } catch (err: any) {

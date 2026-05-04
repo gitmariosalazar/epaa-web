@@ -39,7 +39,8 @@ export class AxiosHttpClient implements HttpClientInterface {
         const token = localStorageService.getItem('token');
         const isPublicEndpoint =
           config.url?.includes('/auth/signin') ||
-          config.url?.includes('/auth/refresh');
+          config.url?.includes('/auth/refresh') ||
+          config.url?.includes('/auth/verify');
 
         if (token && !isPublicEndpoint) {
           config.headers['Authorization'] = `Bearer ${token}`;

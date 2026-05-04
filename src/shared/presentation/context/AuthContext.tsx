@@ -253,9 +253,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     setIsLoading(false);
 
-    // Fallback: when a request fails even after silent refresh, show the expiration dialog
+    // Fallback: when a request fails even after silent refresh, show the expiration dialog.
+    // IMPORTANT: Only trigger if there is an active session (user is logged in).
+    // This prevents the dialog from appearing on the login page when there is no token.
     apiClient.setUnauthorizedHandler(async () => {
-      setIsSessionExpired(true);
+      const storedToken = localStorageService.getItem('token');
+      if (storedToken) {
+        setIsSessionExpired(true);
+      }
     });
 
     return () => {
@@ -314,12 +319,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }}
     >
       {children}
-      <SessionExpirationDialog
-        isOpen={isSessionExpired}
-        onExtend={handleExtendSession}
-        onCancel={logout}
-        isExtending={isExtendingSession}
-      />
+      {/* Only render the expiration dialog when a session is active to
+          prevent it from appearing on the login page. */}
+      {user !== null && (
+        <SessionExpirationDialog
+          isOpen={isSessionExpired}
+          onExtend={handleExtendSession}
+          onCancel={logout}
+          isExtending={isExtendingSession}
+        />
+      )}
     </AuthContext.Provider>
   );
 };

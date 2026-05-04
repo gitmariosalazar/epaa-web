@@ -53,7 +53,7 @@ export const useProfileViewModel = () => {
     async (data: ChangePasswordRequest) => {
       if (!user) return;
       try {
-        await changePasswordUseCase.execute(user.username, data);
+        await changePasswordUseCase.execute(user.userId, data);
         alert('Password changed successfully');
         await fetchProfile();
       } catch (err: any) {
