@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { X } from 'lucide-react';
 import '@/shared/presentation/styles/Modal.css';
 import { Tooltip } from '../common/Tooltip/Tooltip';
@@ -12,7 +13,6 @@ interface ModalProps {
   children: React.ReactNode;
   headerActions?: React.ReactNode;
   footer?: React.ReactNode;
-
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'full';
 }
 
@@ -24,8 +24,7 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   headerActions,
   footer,
-  size = 'md'
-
+  size = 'md',
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +46,10 @@ export const Modal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  // Portal: renderiza el overlay directamente en document.body para escapar
+  // cualquier stacking context creado por tabs, drawers u otros ancestros con
+  // position / z-index / transform / overflow que lo atraparían.
+  return ReactDOM.createPortal(
     <div
       className="modal-overlay"
       onClick={(e) => {
@@ -58,15 +60,29 @@ export const Modal: React.FC<ModalProps> = ({
         <div className="modal-header">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <h2 className="modal-title">{title}</h2>
-            {description && <p className="modal-description" style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{description}</p>}
+            {description && (
+              <p
+                className="modal-description"
+                style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}
+              >
+                {description}
+              </p>
+            )}
           </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: 'auto', marginRight: '1rem' }}>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              marginLeft: 'auto',
+              marginRight: '1rem',
+            }}
+          >
             {headerActions}
           </div>
 
           <Tooltip content="Cerrar">
-
             <Button
               variant="outline"
               className="modal-close"
@@ -78,9 +94,11 @@ export const Modal: React.FC<ModalProps> = ({
             </Button>
           </Tooltip>
         </div>
+
         <div className="modal-body">{children}</div>
         {footer && <div className="modal-footer">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };

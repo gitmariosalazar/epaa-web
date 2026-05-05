@@ -1,7 +1,5 @@
-import type {
-  DateRangeParams,
-  ParamsTrashRateAudit
-} from '../../domain/dto/params/DateRangeParams';
+import type { DateRangeParams } from '../../domain/dto/params/DateRangeParams';
+import type { TrashRateAuditReportParams } from '../../domain/dto/params/TrashRateAuditParams';
 import { useTrashRateReportContext } from '../context/TrashRateReportContext';
 import { useCallback, useState } from 'react';
 import type {
@@ -69,7 +67,7 @@ export const useTrashRateReport = () => {
   }, []);
 
   const getTrashRateAuditReport = useCallback(
-    async (params: ParamsTrashRateAudit) => {
+    async (params: TrashRateAuditReportParams) => {
       setLoadingAudit(true);
       setTrashRateAuditReport([]);
       try {

@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
+import { DashboardInfoModal } from './DashboardInfoModal';
 
 export interface DashboardFiltersProps {
   startDate: string;
@@ -53,6 +54,11 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
         >
           {isLoading ? t('common.loading') : t('common.fetch')}
         </Button>
+      </div>
+
+      {/* OCP: botón informativo a la derecha — no altera la lógica de consulta */}
+      <div className="trash-report-filter-right">
+        <DashboardInfoModal startDate={startDate} endDate={endDate} />
       </div>
     </div>
   );

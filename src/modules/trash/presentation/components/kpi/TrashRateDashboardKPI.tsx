@@ -204,10 +204,13 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
     }
   })();
 
+  // Monto pagado (Estado 'P' del JSON de estado de ingresos)
   const paidAmount =
     revenueStatus.find((item) => item.Estado === 'P')?.Monto || 0;
+  // Pendiente = todo lo que NO es 'P' ni 'B' (Baja/Anulado)
+  // Se excluye Estado='B' porque son facturas dadas de baja, no deuda pendiente real.
   const pendingAmount = revenueStatus
-    .filter((item) => item.Estado !== 'P')
+    .filter((item) => item.Estado !== 'P' && item.Estado !== 'B')
     .reduce((acc, item) => acc + item.Monto, 0);
 
   const discountAndCreditNoteItems: DiscountAndCreditNoteItem[] = [
@@ -236,26 +239,27 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
     }
   ];
 
+  // DonutChart de facturas: solo cantidades (números enteros, mismo tipo)
   const billSlices: DonutSlice[] = [
     {
-      label: 'Emitidas',
-      value: k.totalBills ?? 0,
-      color: '#8b5cf6',
+      label: 'Pagadas',
+      value: k.paidBills ?? 0,
+      color: '#22c55e',
       fmt: fmtNum
     },
     {
-      label: 'Diferencia (Gap)',
-      value: k.integrityGap ?? 0,
-      color: '#f43f5e',
-      fmt: fmtMoney
+      label: 'Pendientes',
+      value: k.pendingBills ?? 0,
+      color: '#f59e0b',
+      fmt: fmtNum
     }
   ];
 
   const barItems: BarItem[] = [
     {
-      label: 'Total a Recaudar',
-      name: 'Total a Recaudar',
-      value: k.grossAmount ?? 0,
+      label: 'Total Neto Emitido',
+      name: 'Total Neto Emitido',
+      value: k.netAmount ?? 0,
       color: 'blue',
       fmt: fmtMoney
     },
@@ -267,8 +271,8 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
       fmt: fmtMoney
     },
     {
-      label: 'Total Recaudado',
-      name: 'Total Recaudado',
+      label: 'Total Recaudado (P)',
+      name: 'Total Recaudado (P)',
       value: paidAmount,
       color: 'green',
       fmt: fmtMoney
@@ -467,11 +471,11 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
           description="Detalle de la recaudación"
         />
         <DonutChart
-          title="Auditoría Integridad"
+          title="Estado de Facturas"
           slices={billSlices}
-          centerLabel="BILL COUNT"
+          centerLabel="TOTAL"
           centerValue={fmtNum(k.totalBills)}
-          description="Diferencia de monto entre emisión original y cálculo actual"
+          description="Facturas pagadas vs pendientes del período (en cantidad)"
         />
       </div>
 

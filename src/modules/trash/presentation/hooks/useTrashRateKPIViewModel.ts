@@ -3,9 +3,9 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutDashboard, ClipboardList, CalendarRange } from 'lucide-react';
 import {
-  DateRangeParams,
-  ParamsTrashRateAudit
+  DateRangeParams
 } from '../../domain/dto/params/DateRangeParams';
+import { TrashRateAuditReportParams } from '../../domain/dto/params/TrashRateAuditParams';
 import { useTrashRateReport } from './useTrashRateReport';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
@@ -131,10 +131,13 @@ export const useTrashRateKPIViewModel = () => {
     );
 
   const paramsTrashRateAudit = () =>
-    new ParamsTrashRateAudit(
+    new TrashRateAuditReportParams(
       startDate,
       endDate,
       'DIFFERENT_AND_NO_RECORD',
+      'Pagados (Recaudados)',
+      'incomeDate',
+      undefined,
       Number(limit) || 50,
       Number(offset) || 0
     );

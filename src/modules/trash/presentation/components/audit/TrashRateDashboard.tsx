@@ -473,9 +473,7 @@ export const TrashRateDashboard: React.FC<TrashRateDashboardProps> = ({
           title="Distribución Monetaria"
           slices={moneySlices}
           centerLabel="TOTAL"
-          centerValue={fmtMoney(
-            (k.totalCollected || 0) + (k.totalPending || 0)
-          )}
+          centerValue={fmtMoney(k.totalToCollect ?? 0)}
           description="Porcentaje en dólares recuperados vs cartera vencida"
         />
         <VerticalBarChart

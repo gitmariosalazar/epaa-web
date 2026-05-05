@@ -1,10 +1,8 @@
 import type { HttpClientInterface } from '@/shared/infrastructure/api/interfaces/HttpClientInterface';
 import type { InterfaceTrashRateReportRepository } from '../../domain/repositories/trash-rate-report.interface.repository';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
-import type {
-  DateRangeParams,
-  ParamsTrashRateAudit
-} from '../../domain/dto/params/DateRangeParams';
+import type { DateRangeParams } from '../../domain/dto/params/DateRangeParams';
+import type { TrashRateAuditReportParams } from '../../domain/dto/params/TrashRateAuditParams';
 import type {
   ClientTrashDetailRow,
   CreditNoteRow,
@@ -85,7 +83,7 @@ export class TrashRateRepositoryImpl implements InterfaceTrashRateReportReposito
   }
 
   async getTrashRateAuditReport(
-    params: ParamsTrashRateAudit
+    params: TrashRateAuditReportParams
   ): Promise<TrashRateAuditRow[]> {
     const response = await this.client.get<ApiResponse<TrashRateAuditRow[]>>(
       '/trash-rate-report/trash-rate-audit-report',

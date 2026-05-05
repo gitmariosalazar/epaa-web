@@ -86,3 +86,116 @@
     opacity: 0.5;
   }
 }
+
+/* ── Audit sub-tab switcher ──────────────────────────────────────────── */
+.audit-subtab-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.audit-subtab-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding: 0.5rem 0 0.375rem 0;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0.5rem;
+}
+
+/* ── Base: shape, typography, transitions ── */
+.audit-subtab-btn {
+  padding: 0.28rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1.5px solid transparent;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+  line-height: 1.5;
+  outline: none;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.audit-subtab-btn:focus-visible {
+  box-shadow: 0 0 0 2px currentColor;
+}
+
+/* ─────────────────────────────────────────────────────────── */
+/* Idle  = tinted bg + colored text + colored border                        */
+/* Hover = darker tint (intensified)                                        */
+/* Active = solid fill + white text                                         */
+/* ─────────────────────────────────────────────────────────── */
+
+/* ── Pagados — GREEN ── */
+.audit-subtab-btn--pagados {
+  background: rgba(34, 197, 94, 0.13);
+  border-color: rgba(34, 197, 94, 0.45);
+  color: #16a34a;
+}
+.audit-subtab-btn--pagados:hover {
+  background: rgba(34, 197, 94, 0.22);
+  border-color: rgba(34, 197, 94, 0.7);
+}
+.audit-subtab-btn--pagados.active {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(22, 163, 74, 0.4);
+}
+
+/* ── Pendientes — AMBER ── */
+.audit-subtab-btn--pendientes {
+  background: rgba(245, 158, 11, 0.13);
+  border-color: rgba(245, 158, 11, 0.45);
+  color: #b45309;
+}
+.audit-subtab-btn--pendientes:hover {
+  background: rgba(245, 158, 11, 0.22);
+  border-color: rgba(245, 158, 11, 0.7);
+}
+.audit-subtab-btn--pendientes.active {
+  background: #d97706;
+  border-color: #d97706;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(217, 119, 6, 0.4);
+}
+
+/* ── En Mora — RED ── */
+.audit-subtab-btn--en-mora {
+  background: rgba(239, 68, 68, 0.13);
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #dc2626;
+}
+.audit-subtab-btn--en-mora:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.7);
+}
+.audit-subtab-btn--en-mora.active {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(220, 38, 38, 0.4);
+}
+
+/* ── Todos — BLUE ── */
+.audit-subtab-btn--todos {
+  background: rgba(59, 130, 246, 0.13);
+  border-color: rgba(59, 130, 246, 0.45);
+  color: #2563eb;
+}
+.audit-subtab-btn--todos:hover {
+  background: rgba(59, 130, 246, 0.22);
+  border-color: rgba(59, 130, 246, 0.7);
+}
+.audit-subtab-btn--todos.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);
+}
+
