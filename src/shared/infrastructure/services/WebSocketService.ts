@@ -57,8 +57,11 @@ class SocketIOWebSocketService implements IWebSocketService {
 
     try {
       this.socket = io(`${baseUrl}/realtime`, {
-        // socket.io-client en React usa websocket directamente (más eficiente)
-        transports: ['websocket'],
+        // Socket.IO REQUIERE polling primero para el handshake HTTP,
+        // luego hace upgrade automático a websocket.
+        // Usar solo 'websocket' sin polling inicial causa rechazo en servidores
+        // HTTPS/WSS porque no hay sesión negociada previamente.
+        transports: ['polling', 'websocket'],
         // Autenticación via auth object (más seguro que query params)
         auth: token ? { token } : {},
         // Reconexión automática con backoff
