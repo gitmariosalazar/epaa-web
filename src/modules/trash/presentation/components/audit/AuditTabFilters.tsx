@@ -63,8 +63,6 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
   showDateFilter,
   dateFilter,
   onDateFilterChange,
-  diagnosticFilter,
-  onDiagnosticFilterChange,
   searchQuery,
   onSearchQueryChange,
   selectedPaymentStatus,

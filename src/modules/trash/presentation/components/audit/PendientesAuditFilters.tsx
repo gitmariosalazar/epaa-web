@@ -57,8 +57,6 @@ export const PendientesAuditFilters: React.FC<PendientesAuditFiltersProps> = ({
   isLoading,
   auditType,
   onAuditTypeChange,
-  diagnosticFilter,
-  onDiagnosticFilterChange,
   selectedPaymentStatus,
   onPaymentStatusChange,
   paymentStatusList,

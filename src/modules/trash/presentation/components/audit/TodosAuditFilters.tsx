@@ -82,8 +82,6 @@ export const TodosAuditFilters: React.FC<TodosAuditFiltersProps> = ({
   onPaymentTypeChoiceChange,
   onFetch,
   isLoading,
-  diagnosticFilter,
-  onDiagnosticFilterChange,
   searchQuery,
   onSearchQueryChange,
   selectedPaymentStatus,

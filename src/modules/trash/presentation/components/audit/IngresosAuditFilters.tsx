@@ -63,8 +63,6 @@ export const IngresosAuditFilters: React.FC<IngresosAuditFiltersProps> = ({
   onAuditTypeChange,
   dateFilter,
   onDateFilterChange,
-  diagnosticFilter,
-  onDiagnosticFilterChange,
   searchQuery,
   onSearchQueryChange,
   selectedPaymentStatus,
