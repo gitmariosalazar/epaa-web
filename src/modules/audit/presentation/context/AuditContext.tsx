@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { ApiAuditRepository } from '../../infrastructure/repositories/ApiAuditRepository';
 import { GetAuditLogsUseCase } from '../../application/useCases/GetAuditLogsUseCase';
 import { GetSessionLogsUseCase } from '../../application/useCases/GetSessionLogsUseCase';
-import { webSocketService } from '@/shared/infrastructure/services/WebSocketService';
+import { useRealtimeEvent } from '@/shared/presentation/hooks/useRealtimeEvent';
 import type { 
   GetAuditLogsParams, 
   GetSessionLogsParams, 
@@ -133,19 +133,14 @@ export const AuditProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   }, [activeTab, searchQuery, searchField, selectedOperation, selectedEvent, userIdFilter, usernameFilter, startDate, endDate, fetchAuditLogs, fetchSessionLogs]);
 
   // ── WebSocket: refresco instantáneo en eventos de auditoría ─────────────────
-  // Cuando el backend emite 'audit:updated' (cierre de sector, etc.),
-  // se refetch automáticamente sin necesidad de polling.
-  useEffect(() => {
-    const unsubscribe = webSocketService.on('audit:updated', () => {
-      // Refrescar los logs actuales en background
-      if (activeTab === 'data') {
-        fetchAuditLogs({ limit: 100, offset: 0 });
-      } else {
-        fetchSessionLogs({ limit: 100, offset: 0 });
-      }
-    });
-    return unsubscribe; // cleanup automático
-  }, [activeTab, fetchAuditLogs, fetchSessionLogs]);
+  // useRealtimeEvent encapsula la suscripción y el cleanup — DIP + SRP.
+  useRealtimeEvent('audit:updated', () => {
+    if (activeTab === 'data') {
+      fetchAuditLogs({ limit: 100, offset: 0 });
+    } else {
+      fetchSessionLogs({ limit: 100, offset: 0 });
+    }
+  });
 
   const filteredAuditLogs = useMemo(() => {
     let result = auditLogs;

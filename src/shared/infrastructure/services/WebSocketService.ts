@@ -1,54 +1,35 @@
 // src/shared/infrastructure/services/WebSocketService.ts
 //
-// Servicio WebSocket usando socket.io-client — mismo protocolo que el backend NestJS.
-// El backend usa @nestjs/platform-socket.io, por lo que REQUIERE socket.io-client
-// (no WebSocket nativo — son protocolos incompatibles).
+// Implementación de IRealtimeService usando socket.io-client.
+// El backend usa @nestjs/platform-socket.io → REQUIERE socket.io-client
+// (no WebSocket nativo — protocolos incompatibles).
 //
-// SRP : solo gestiona conexión y eventos
-// OCP : nuevos eventos se añaden sin modificar esta clase
-// DIP : los consumers dependen de IWebSocketService, no de socket.io directamente
+// SRP : solo gestiona conexión y delegación de eventos.
+// OCP : nuevos eventos se añaden en WsEventMap (dominio), sin tocar esta clase.
+// DIP : exporta el singleton como IRealtimeService — los consumidores nunca
+//       importan SocketIORealtimeService directamente.
 
 import { io, Socket } from 'socket.io-client';
+import type { IRealtimeService, WsEventMap } from '@/shared/domain/services/IRealtimeService';
 
-// ── Tipos de eventos — deben coincidir exactamente con el backend NestJS ─────
-export interface ReadingUpdatedPayload {
-  sectorId: number;
-  month: string;
-  type: 'created' | 'updated';
-}
+// Re-exportamos desde dominio para que los consumers solo necesiten un import.
+export type { IRealtimeService, WsEventMap, ReadingUpdatedPayload, AuditUpdatedPayload }
+  from '@/shared/domain/services/IRealtimeService';
 
-export interface AuditUpdatedPayload {
-  sectorId: number;
-  month: string;
-  type: 'closed' | 'progress_changed';
-}
-
-export type WsEventMap = {
-  'reading:updated': ReadingUpdatedPayload;
-  'audit:updated': AuditUpdatedPayload;
-};
-
-// ── Interfaz abstracta (DIP) ─────────────────────────────────────────────────
-export interface IWebSocketService {
-  connect(baseUrl: string, token?: string): void;
-  disconnect(): void;
-  on<K extends keyof WsEventMap>(
-    event: K,
-    handler: (payload: WsEventMap[K]) => void
-  ): () => void; // retorna función de limpieza (unsubscribe)
-  get isConnected(): boolean;
-}
-
-// ── Implementación con socket.io-client ──────────────────────────────────────
+// ── Implementación interna (no se exporta la clase, solo el singleton) ────────
 type AnyHandler = (payload: unknown) => void;
 
-class SocketIOWebSocketService implements IWebSocketService {
+class SocketIORealtimeService implements IRealtimeService {
   private socket: Socket | null = null;
   private _connected = false;
-  // Guardamos los handlers para poder limpiarlos en off()
+
+  /**
+   * Almacena los handlers activos para re-registrarlos tras una reconexión.
+   * La clave es el nombre del evento; el valor es el Set de handlers.
+   */
   private readonly listeners = new Map<string, Set<AnyHandler>>();
 
-  get isConnected() {
+  get isConnected(): boolean {
     return this._connected;
   }
 
@@ -57,40 +38,36 @@ class SocketIOWebSocketService implements IWebSocketService {
 
     try {
       this.socket = io(`${baseUrl}/realtime`, {
-        // Socket.IO REQUIERE polling primero para el handshake HTTP,
-        // luego hace upgrade automático a websocket.
-        // Usar solo 'websocket' sin polling inicial causa rechazo en servidores
-        // HTTPS/WSS porque no hay sesión negociada previamente.
+        // Socket.IO necesita polling para el handshake inicial (HTTPS/WSS).
+        // Luego hace upgrade automático a WebSocket.
         transports: ['polling', 'websocket'],
-        // Autenticación via auth object (más seguro que query params)
         auth: token ? { token } : {},
-        // Reconexión automática con backoff
         reconnection: true,
         reconnectionDelay: 2000,
-        reconnectionDelayMax: 30000,
-        reconnectionAttempts: Infinity, // reconectar indefinidamente
+        reconnectionDelayMax: 30_000,
+        reconnectionAttempts: Infinity,
       });
 
       this.socket.on('connect', () => {
         this._connected = true;
-        console.log('[WS] ✅ Conectado a', baseUrl, '/realtime');
-        // Re-registrar handlers que estaban activos antes de la reconexión
+        console.log('[Realtime] ✅ Conectado a', baseUrl, '/realtime');
+        // Re-registrar handlers activos tras reconexión automática
         this.listeners.forEach((handlers, event) => {
-          handlers.forEach((h) => this.socket?.on(event as string, h as any));
+          handlers.forEach((h) => this.socket?.on(event, h as any));
         });
       });
 
       this.socket.on('disconnect', (reason) => {
         this._connected = false;
-        console.log('[WS] ❌ Desconectado:', reason);
+        console.log('[Realtime] ❌ Desconectado:', reason);
       });
 
       this.socket.on('connect_error', (err) => {
         this._connected = false;
-        console.warn('[WS] ⚠️ Error de conexión (polling de respaldo activo):', err.message);
+        console.warn('[Realtime] ⚠️ Error de conexión:', err.message);
       });
     } catch (err) {
-      console.warn('[WS] ⚠️ No se pudo inicializar socket:', err);
+      console.warn('[Realtime] ⚠️ No se pudo inicializar socket:', err);
     }
   }
 
@@ -105,10 +82,10 @@ class SocketIOWebSocketService implements IWebSocketService {
     }
     this.listeners.get(event)!.add(h);
 
-    // Registrar en el socket si ya está conectado
+    // Registrar en el socket activo si ya está conectado
     this.socket?.on(event as string, h as any);
 
-    // Retorna función de cleanup — usada por useEffect al desmontar
+    // Cleanup — usado por useEffect al desmontar o por useRealtimeEvent
     return () => {
       this.listeners.get(event)?.delete(h);
       this.socket?.off(event as string, h as any);
@@ -116,12 +93,23 @@ class SocketIOWebSocketService implements IWebSocketService {
   }
 
   disconnect(): void {
-    this.socket?.disconnect();
-    this.socket = null;
+    if (this.socket) {
+      // Desactivar reconexión automática ANTES de desconectar.
+      // Sin esto, socket.io reconecta solo en background sin token
+      // mostrando "Client connected without authentication".
+      this.socket.io.opts.reconnection = false;
+      this.socket.disconnect();
+      this.socket = null;
+    }
     this._connected = false;
     this.listeners.clear();
   }
 }
 
-// ── Singleton global: una conexión compartida por toda la app ─────────────────
-export const webSocketService: IWebSocketService = new SocketIOWebSocketService();
+// ── Singleton global: una única conexión socket para toda la app ──────────────
+// Tipado como IRealtimeService (abstracción de dominio) — no como la clase concreta.
+export const realtimeService: IRealtimeService = new SocketIORealtimeService();
+
+// Alias de compatibilidad — preserva imports existentes sin romper nada
+/** @deprecated Usa `realtimeService` en nuevos archivos */
+export const webSocketService = realtimeService;

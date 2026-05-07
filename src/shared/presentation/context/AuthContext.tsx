@@ -28,6 +28,8 @@ import {
   isTokenExpired
 } from '@/shared/infrastructure/services/JwtService';
 import { userActivityService } from '@/shared/infrastructure/services/UserActivityService';
+import { realtimeService } from '@/shared/infrastructure/services/WebSocketService';
+import { environments } from '@/settings/environments/environments';
 
 interface AuthContextType {
   user: AuthSession['user'] | null;
@@ -147,6 +149,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorageService.setItem('user', JSON.stringify(session.user));
     // Schedule proactive refresh for the new access token
     scheduleTokenRefresh(session.accessToken);
+    // ── Reconectar WebSocket con el token del usuario autenticado ──────────────
+    // disconnect() limpia el socket anterior (sin token o con token viejo)
+    // y connect() crea uno nuevo autenticado.
+    realtimeService.disconnect();
+    realtimeService.connect(environments.API_URL, session.accessToken);
   };
 
   const clearSession = () => {
@@ -155,6 +162,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       clearTimeout(refreshTimerRef.current);
       refreshTimerRef.current = null;
     }
+    // ── Desconectar WebSocket limpiamente ANTES de limpiar la sesión ─────────
+    // disconnect() detiene la reconexion automática de socket.io.
+    // Sin esto, el socket se reconectaría sin token mostrando
+    // "Client connected without authentication".
+    realtimeService.disconnect();
     setToken(null);
     setUser(null);
     localStorageService.removeItem('token');

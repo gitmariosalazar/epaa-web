@@ -65,7 +65,11 @@ const ProtectedRoute = () => {
 
   // Wait for both: local session hydration AND backend verify call
   if (isLoading || isVerifying) {
-    return <CircularProgress />;
+    return (
+      <div className="circular-progress">
+        <CircularProgress />
+      </div>
+    );
   }
 
   if (!token) {
@@ -82,7 +86,12 @@ const ProtectedRoute = () => {
 const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
   const { user, isLoading } = useAuth();
 
-  if (isLoading) return <CircularProgress />;
+  if (isLoading)
+    return (
+      <div className="circular-progress">
+        <CircularProgress />
+      </div>
+    );
 
   // Aseguramos que sea un array de strings y filtramos valores nulos
   const rawRoles = Array.isArray(user?.roles) ? user?.roles : [user?.roles];

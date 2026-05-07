@@ -28,7 +28,9 @@ export const GeneralCustomersPage: React.FC = () => {
       accessor: (row) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Avatar
-            name={row.customerName.trim() === '' ? 'S/N' : row.customerName}
+            name={
+              (row.customerName || '').trim() === '' ? 'S/N' : row.customerName
+            }
             size="sm"
           />
           <div>
