@@ -4,21 +4,21 @@ import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructur
 import { ExportService } from '@/shared/infrastructure/services/ExportService';
 import { List, Search } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { EmptyState } from '../common/EmptyState';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
-import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
-import { ProgressBar } from '../ProgressBar/ProgressBar';
-import { Table, type Column } from '../Table/Table';
-import { Button } from '../Button/Button';
-import { SectorReadingsModal } from '../dashboard/SectorReadingsModal';
-import { DatePicker } from '../DatePicker/DatePicker';
+import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
+import { ProgressBar } from '@/shared/presentation/components/ProgressBar/ProgressBar';
+import { Table, type Column } from '@/shared/presentation/components/Table/Table';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import { SectorReadingsModal } from '@/modules/dashboard/presentation/components/SectorReadingsModal';
+import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import { useTranslation } from 'react-i18next';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import type { ExportColumn } from './ReportPreviewModal';
 import { useCallback } from 'react';
 import './AdvancedReadingsReport.css';
 import { IoInformationCircleOutline } from 'react-icons/io5';
-import { Tooltip } from '../common/Tooltip/Tooltip';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 interface AdvancedReadingsReportProps {
   showToolbar?: boolean;

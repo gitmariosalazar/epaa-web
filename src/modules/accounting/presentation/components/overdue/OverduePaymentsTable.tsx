@@ -13,7 +13,7 @@ import {
 import { ExportService } from '../../../../../shared/infrastructure/services/ExportService';
 import { Button } from '../../../../../shared/presentation/components/Button/Button';
 import { Avatar } from '../../../../../shared/presentation/components/Avatar/Avatar';
-import { type ExportColumn } from '../../../../../shared/presentation/components/reports/ReportPreviewModal';
+import { type ExportColumn } from '@/modules/dashboard/presentation/components/reports/ReportPreviewModal';
 import { useTablePdfExport } from '../../../../../shared/presentation/hooks/useTablePdfExport';
 import { useTranslation } from 'react-i18next';
 import { EyeIcon } from 'lucide-react';

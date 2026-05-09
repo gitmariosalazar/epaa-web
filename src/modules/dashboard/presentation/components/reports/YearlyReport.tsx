@@ -7,15 +7,15 @@ import { GetYearlyReadingsReportUseCase } from '@/modules/dashboard/application/
 import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructure/repositories/http-report-dashboard.repository';
 import { ExportService } from '@/shared/infrastructure/services/ExportService';
 import { Search, Droplets, FileText, Calendar, BarChart } from 'lucide-react';
-import { Button } from '../Button/Button';
-import { EmptyState } from '../common/EmptyState';
-import { Table, type Column } from '../Table/Table';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { Table, type Column } from '@/shared/presentation/components/Table/Table';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { useTranslation } from 'react-i18next';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import type { ExportColumn } from './ReportPreviewModal';
 import './YearlyReport.css';
-import { DatePicker } from '../DatePicker/DatePicker';
+import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import { KPICard } from '@/shared/presentation/components/Card/KPICard';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 

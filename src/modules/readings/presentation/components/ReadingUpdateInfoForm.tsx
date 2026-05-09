@@ -31,11 +31,7 @@ export const ReadingUpdateInfoForm: React.FC<PropTypes> = ({
           label={`Lectura Anterior ${ConverDate(currentReadingInfo?.previousReadingDate) + ' ' + previousReadingInfo.readingTime || '---'}`}
           leftIcon={<FaHistory color="var(--text-muted)" />}
           type="text"
-          value={
-            currentReadingInfo?.hasCurrentReading
-              ? '' + currentReadingInfo?.currentReading
-              : currentReadingInfo?.previousReading
-          }
+          value={currentReadingInfo?.previousReading}
           readOnly
           disabled
         />

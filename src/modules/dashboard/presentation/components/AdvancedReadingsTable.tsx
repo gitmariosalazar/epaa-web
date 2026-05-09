@@ -4,16 +4,16 @@ import { Search, List } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ProgressBar } from '@/shared/presentation/components/ProgressBar/ProgressBar';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { Table, type Column } from '../Table/Table';
-import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
+import { Table, type Column } from '@/shared/presentation/components/Table/Table';
+import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
 import { useAdvancedReadingsTable } from '@/shared/presentation/hooks/dashboard/useAdvancedReadingsTable';
 import { SectorReadingsModal } from './SectorReadingsModal';
-import { EmptyState } from '../common/EmptyState';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 
-import { CircularProgress } from '../CircularProgress';
-import { Tooltip } from '../common/Tooltip/Tooltip';
-import { Input } from '../Input/Input';
+import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { Input } from '@/shared/presentation/components/Input/Input';
 
 interface AdvancedReadingsTableProps {
   data: AdvancedReportReadings[];

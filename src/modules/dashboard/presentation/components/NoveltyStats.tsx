@@ -12,12 +12,14 @@ import type { NoveltyStatsReport } from '@/modules/dashboard/domain/models/repor
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import './NoveltyStats.css';
 import { useNoveltyStats } from '@/shared/presentation/hooks/dashboard/useNoveltyStats';
-import { CircularProgress } from '../CircularProgress';
+import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { useTranslation } from 'react-i18next';
+import { Tooltip as UITooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 interface NoveltyStatsProps {
   data: NoveltyStatsReport[];
   loading: boolean;
+  onSelectNovelty?: (novelty: string) => void;
 }
 
 const renderActiveShape = (props: any) => {
@@ -52,7 +54,8 @@ const renderActiveShape = (props: any) => {
 
 export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
   data,
-  loading
+  loading,
+  onSelectNovelty
 }) => {
   const { t } = useTranslation();
   const {
@@ -176,31 +179,48 @@ export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
           <div className="list-section">
             <div className="custom-legend-grid">
               {chartData.map((item, index) => (
-                <div
+                <UITooltip
                   key={index}
-                  className={`novelty-item ${activeIndex === index ? 'active' : ''}`}
-                  onMouseEnter={() => setActiveIndex(index)}
-                  onMouseLeave={() => setActiveIndex(-1)}
-                  style={{
-                    borderLeftColor: item.color,
-                    opacity:
-                      activeIndex !== -1 && activeIndex !== index ? 0.4 : 1
-                  }}
+                  themeColor="info"
+                  content={
+                    <div>
+                      <p>{`Click para ver el detalle de las lecturas con novedad ${item.name}`}</p>
+                    </div>
+                  }
                 >
-                  <div className="novelty-info">
-                    <span className="novelty-name">{item.name}</span>
-                    <span className="novelty-meta">Avg: {item.average} m³</span>
-                  </div>
                   <div
-                    className="novelty-badge"
+                    key={index}
+                    className={`novelty-item ${activeIndex === index ? 'active' : ''}`}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    onMouseLeave={() => setActiveIndex(-1)}
+                    onClick={() => {
+                      if (onSelectNovelty) {
+                        onSelectNovelty(item.name);
+                      }
+                    }}
                     style={{
-                      backgroundColor: `${item.color}20`,
-                      color: item.color
+                      borderLeftColor: item.color,
+                      opacity:
+                        activeIndex !== -1 && activeIndex !== index ? 0.4 : 1
                     }}
                   >
-                    {item.value}
+                    <div className="novelty-info">
+                      <span className="novelty-name">{item.name}</span>
+                      <span className="novelty-meta">
+                        Avg: {item.average} m³
+                      </span>
+                    </div>
+                    <div
+                      className="novelty-badge"
+                      style={{
+                        backgroundColor: `${item.color}20`,
+                        color: item.color
+                      }}
+                    >
+                      {item.value}
+                    </div>
                   </div>
-                </div>
+                </UITooltip>
               ))}
             </div>
           </div>

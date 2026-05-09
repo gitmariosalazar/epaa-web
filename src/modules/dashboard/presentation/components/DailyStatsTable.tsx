@@ -7,10 +7,10 @@ import {
 } from '@/shared/presentation/components/Table/Table';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { useDailyStatsTable } from '@/shared/presentation/hooks/dashboard/useDailyStatsTable';
-import { EmptyState } from '../common/EmptyState';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
-import { CircularProgress } from '../CircularProgress';
-import { Input } from '../Input/Input';
+import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
+import { Input } from '@/shared/presentation/components/Input/Input';
 
 interface DailyStatsProps {
   data: DailyStatsReport[];

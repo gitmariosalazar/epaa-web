@@ -1,7 +1,7 @@
 import React from 'react';
 import type { GlobalStatsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { useGlobalStats } from '@/shared/presentation/hooks/dashboard/useGlobalStats';
-import { CircularProgress } from '../CircularProgress';
+import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { useTranslation } from 'react-i18next';
 
 interface GlobalStatsProps {

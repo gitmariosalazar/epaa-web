@@ -66,8 +66,20 @@ export class EcuadorDateService implements IDateService {
       if (isNaN(d.getTime())) {
         return String(date || '');
       }
-      return new Intl.DateTimeFormat(this.locale, {
+      
+      const baseOptions: Intl.DateTimeFormatOptions = {
         timeZone: this.timeZone,
+        hour12: false,
+      };
+
+      if (!options || Object.keys(options).length === 0) {
+        baseOptions.day = '2-digit';
+        baseOptions.month = '2-digit';
+        baseOptions.year = 'numeric';
+      }
+
+      return new Intl.DateTimeFormat(this.locale, {
+        ...baseOptions,
         ...options
       }).format(d);
     } catch (error) {

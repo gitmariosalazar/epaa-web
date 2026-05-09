@@ -6,7 +6,7 @@ import {
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import { useCallback, useMemo } from 'react';
-import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
+import type { ExportColumn } from '@/modules/dashboard/presentation/components/reports/ReportPreviewModal';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';

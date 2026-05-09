@@ -255,7 +255,7 @@ export const DailyCollectorDetailTable: React.FC<
 
   return (
     <div className="trash-rate-audit-table-wrapper">
-      <Table
+      <Table<DailyCollectorDetail>
         data={data}
         columns={columns}
         isLoading={isLoading}

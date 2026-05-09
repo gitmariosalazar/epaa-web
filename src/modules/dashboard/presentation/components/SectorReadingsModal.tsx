@@ -5,20 +5,20 @@ import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
-import { useSectorReadings } from '../../hooks/dashboard/useSectorReadings';
+import { useSectorReadings } from '@/shared/presentation/hooks/dashboard/useSectorReadings';
 import type {
   PendingReadingConnection,
   TakenReadingConnection
 } from '@/modules/readings/domain/models/Reading';
-import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
+import type { ExportColumn } from '@/modules/dashboard/presentation/components/reports/ReportPreviewModal';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { FilterSectorReadingsUseCase } from '@/modules/readings/application/usecases/FilterSectorReadingsUseCase';
 import type { FilterCriteria } from '@/modules/readings/application/usecases/FilterSectorReadingsUseCase';
 import './SectorReadingsModal.css';
-import { ColorChip } from '../chip/ColorChip';
-import { Avatar } from '../Avatar/Avatar';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { IoInformationCircleOutline } from 'react-icons/io5';
-import { EmptyState } from '../common/EmptyState';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 interface SectorReadingsModalProps {
   isOpen: boolean;

@@ -6,11 +6,11 @@ import {
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import { useSectorStatsTable } from '@/shared/presentation/hooks/dashboard/useSectorStatsTable';
-import { EmptyState } from '../common/EmptyState';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 
-import { CircularProgress } from '../CircularProgress';
-import { Input } from '../Input/Input';
+import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
+import { Input } from '@/shared/presentation/components/Input/Input';
 
 interface SectorStatsProps {
   data: SectorStatsReport[];

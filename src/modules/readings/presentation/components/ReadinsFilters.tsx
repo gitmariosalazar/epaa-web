@@ -8,7 +8,12 @@ import { TbChartPieFilled } from 'react-icons/tb';
 import { Input } from '@/shared/presentation/components/Input/Input';
 
 // ── Tab type ──────────────────────────────────────────────────────────────────
-export type ReadingDataTab = 'pending' | 'completed' | 'estimated' | 'all';
+export type ReadingDataTab =
+  | 'pending'
+  | 'completed'
+  | 'estimated'
+  | 'all'
+  | 'novelties';
 
 // ── Filter visibility rules per tab (SRP / OCP) ──────────────────────────────
 const SHOW: Record<
@@ -31,6 +36,10 @@ const SHOW: Record<
     sector: true
   },
   all: {
+    month: true,
+    sector: true
+  },
+  novelties: {
     month: true,
     sector: true
   }

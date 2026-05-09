@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { ExportService } from '@/shared/infrastructure/services/ExportService';
-import { ReportPreviewModal } from '@/shared/presentation/components/reports/ReportPreviewModal';
-import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
+import { ReportPreviewModal } from '@/modules/dashboard/presentation/components/reports/ReportPreviewModal';
+import type { ExportColumn } from '@/modules/dashboard/presentation/components/reports/ReportPreviewModal';
 import type { Signature } from '@/shared/domain/services/IExportService';
 
 export interface UseTablePdfExportOptions<T> {

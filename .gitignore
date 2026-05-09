@@ -24,3 +24,9 @@ dist-ssr
 *.sw?
 .informe.md
 .env
+
+conv.md
+#deploy.dev.sh
+#deploy.prod.sh
+readings.sql
+datos_convenio.sql

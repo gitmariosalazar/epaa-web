@@ -1,10 +1,10 @@
 import React from 'react';
 import { X, Check, Download, Loader2 } from 'lucide-react';
 import './ReportPreviewModal.css';
-import { Button } from '../Button/Button';
+import { Button } from '@/shared/presentation/components/Button/Button';
 
 export interface ExportColumn {
-  id: string;      // Legacy/Internal ID
+  id: string; // Legacy/Internal ID
   columnId?: string; // Standardized ID (Accounting style)
   label: string;
   isDefault?: boolean;
@@ -217,9 +217,11 @@ export const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
 
         <div className="modal-footer">
           <Button
-            className="btn-secondary"
+            //className="btn-secondary"
             onClick={onClose}
             leftIcon={<X size={18} />}
+            color="error"
+            variant="outline"
           >
             Cancelar
           </Button>

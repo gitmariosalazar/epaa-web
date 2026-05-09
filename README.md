@@ -71,3 +71,26 @@ export default defineConfig([
   },
 ])
 ```
+
+## Solución de Vulnerabilidades (npm audit)
+
+Si al instalar dependencias (`npm install`) encuentras advertencias sobre vulnerabilidades de seguridad, sigue estos pasos:
+
+1. **Corrección automática (Recomendado)**
+   Ejecuta la herramienta de npm para actualizar automáticamente las versiones vulnerables que tienen parche oficial:
+   ```bash
+   npm audit fix
+   ```
+
+2. **Vulnerabilidades en paquetes sin actualización oficial en NPM (Ej: xlsx / SheetJS)**
+   Algunos paquetes (como `xlsx`) ya no publican actualizaciones de seguridad en el registro principal de NPM. Si después del paso 1 aún quedan vulnerabilidades relacionadas con `xlsx`, instala la versión directamente desde su CDN oficial:
+   ```bash
+   npm uninstall xlsx && npm install https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz
+   ```
+
+3. **Verificación final**
+   Comprueba que todo esté limpio ejecutando:
+   ```bash
+   npm audit
+   ```
+   *(Debería indicarte "found 0 vulnerabilities")*

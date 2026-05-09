@@ -1,30 +1,32 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { GlobalStats } from '@/shared/presentation/components/dashboard/GlobalStats';
-import { DailyStatsTable } from '@/shared/presentation/components/dashboard/DailyStatsTable';
-import { SectorStatsTable } from '@/shared/presentation/components/dashboard/SectorStatsTable';
-import { NoveltyStats } from '@/shared/presentation/components/dashboard/NoveltyStats';
+import { GlobalStats } from '@/modules/dashboard/presentation/components/GlobalStats';
+import { DailyStatsTable } from '@/modules/dashboard/presentation/components/DailyStatsTable';
+import { SectorStatsTable } from '@/modules/dashboard/presentation/components/SectorStatsTable';
+import { NoveltyStats } from '@/modules/dashboard/presentation/components/NoveltyStats';
 
 import '@/shared/presentation/styles/dashboard.css';
 import './DashboardHome.css';
-import { AdvancedReadingsTable } from '@/shared/presentation/components/dashboard/AdvancedReadingsTable';
-import { SectorProgressStats } from '@/shared/presentation/components/dashboard/SectorProgressStats';
+import { AdvancedReadingsTable } from '@/modules/dashboard/presentation/components/AdvancedReadingsTable';
+import { SectorProgressStats } from '@/modules/dashboard/presentation/components/SectorProgressStats';
 import { Tabs } from '@/shared/presentation/components/common/Tabs';
-import { DashboardFocusProvider } from '@/shared/presentation/components/dashboard/DashboardFocusContext';
+import { DashboardFocusProvider } from '@/modules/dashboard/presentation/components/DashboardFocusContext';
 import {
   DashboardWidgetWrapper,
   DashboardFocusOverlay
-} from '@/shared/presentation/components/dashboard/DashboardWidgetWrapper';
-import { DashboardMaximizeButton } from '@/shared/presentation/components/dashboard/DashboardMaximizeButton';
+} from '@/modules/dashboard/presentation/components/DashboardWidgetWrapper';
+import { DashboardMaximizeButton } from '@/modules/dashboard/presentation/components/DashboardMaximizeButton';
 import { useDashboardController } from '@/modules/dashboard/presentation/hooks/useDashboardController';
 
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { useSimulatedProgress } from '@/shared/presentation/components/CircularProgress/useSimulatedProgress';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { NoveltyStatsModal } from '@/modules/dashboard/presentation/components/NoveltyStatsModal';
 
 export const DashboardHome = () => {
   const { t } = useTranslation();
+  const [selectedNovelty, setSelectedNovelty] = React.useState<string | null>(null);
 
   const {
     currentMonth,
@@ -144,7 +146,11 @@ export const DashboardHome = () => {
                 )}
                 className="h-full"
               >
-                <NoveltyStats data={noveltyStats} loading={false} />
+                <NoveltyStats 
+                  data={noveltyStats} 
+                  loading={false} 
+                  onSelectNovelty={setSelectedNovelty} 
+                />
               </DashboardWidgetWrapper>
             </div>
 
@@ -199,6 +205,13 @@ export const DashboardHome = () => {
 
         <DashboardMaximizeButton visible={true} disabled={false} />
       </div>
+
+      <NoveltyStatsModal
+        isOpen={!!selectedNovelty}
+        onClose={() => setSelectedNovelty(null)}
+        month={currentMonth}
+        novelty={selectedNovelty || ''}
+      />
     </DashboardFocusProvider>
   );
 };

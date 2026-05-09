@@ -1,23 +1,23 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Search } from 'lucide-react';
-import { Table, type Column } from '../Table/Table';
+import { Table, type Column } from '@/shared/presentation/components/Table/Table';
 import type { DailyReadingsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
 import { ExportService } from '@/shared/infrastructure/services/ExportService';
 import { GetDailyReadingsReportUseCase } from '@/modules/dashboard/application/usecases/get-daily-readings-report.usecase';
 import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructure/repositories/http-report-dashboard.repository';
-import { ColorChip } from '../chip/ColorChip';
-import { EmptyState } from '../common/EmptyState';
-import { getNoveltyColor } from '../../utils/colors/novelties.colors';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
 
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
-import { Avatar } from '../Avatar/Avatar';
+import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { useTranslation } from 'react-i18next';
-import { DatePicker } from '../DatePicker/DatePicker';
+import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import './DailyReport.css';
-import { Button } from '../Button/Button';
+import { Button } from '@/shared/presentation/components/Button/Button';
 import type { ExportColumn } from './ReportPreviewModal';
-import { truncateText } from '../../../utils/text/truncate-text';
+import { truncateText } from '@/shared/utils/text/truncate-text';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface DailyReportProps {

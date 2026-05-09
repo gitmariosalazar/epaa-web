@@ -1,7 +1,7 @@
-import { DailyReport } from '@/shared/presentation/components/reports/DailyReport';
-import { YearlyReport } from '@/shared/presentation/components/reports/YearlyReport';
-import { ConnectionReport } from '@/shared/presentation/components/reports/ConnectionReport';
-import { AdvancedReadingsReport } from '@/shared/presentation/components/reports/AdvancedReadingsReport';
+import { DailyReport } from '@/modules/dashboard/presentation/components/reports/DailyReport';
+import { YearlyReport } from '@/modules/dashboard/presentation/components/reports/YearlyReport';
+import { ConnectionReport } from '@/modules/dashboard/presentation/components/reports/ConnectionReport';
+import { AdvancedReadingsReport } from '@/modules/dashboard/presentation/components/reports/AdvancedReadingsReport';
 import { Tabs } from '@/shared/presentation/components/Tabs';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { useReportsViewModel } from '../../hooks/useReportsViewModel';

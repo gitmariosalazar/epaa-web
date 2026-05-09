@@ -30,6 +30,7 @@ export interface Column<T> {
   sortKey?: keyof T;
   isNumeric?: boolean;
   id?: string;
+  isColumnVisible?: boolean;
 }
 
 export interface SummaryRow {
@@ -105,9 +106,16 @@ export const Table = <T extends { [key: string]: any }>({
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = React.useState(1);
   const [currentLimit, setCurrentLimit] = React.useState(pageSize);
-  const [hiddenColumnKeys, setHiddenColumnKeys] = React.useState<Set<string>>(
-    new Set()
-  );
+  const [hiddenColumnKeys, setHiddenColumnKeys] = React.useState<Set<string>>(() => {
+    const initialHidden = new Set<string>();
+    columns.forEach((col, index) => {
+      if (col.isColumnVisible === false) {
+        const key = col.id || (typeof col.accessor === 'string' ? col.accessor : `col-${index}`);
+        initialHidden.add(key);
+      }
+    });
+    return initialHidden;
+  });
   const [isColumnModalOpen, setIsColumnModalOpen] = React.useState(false);
 
   const [draftHiddenColumns, setDraftHiddenColumns] = React.useState<

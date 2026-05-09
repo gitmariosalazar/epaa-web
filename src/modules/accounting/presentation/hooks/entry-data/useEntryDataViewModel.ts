@@ -4,7 +4,7 @@ import { useEntryData } from './useEntryData';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import type { EntryDataTab } from '../../components/entry-data/EntryDataFilters';
 import type { TabItem } from '@/shared/presentation/components/Tabs';
-import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
+import type { ExportColumn } from '@/modules/dashboard/presentation/components/reports/ReportPreviewModal';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { BarChart3, Users, CreditCard, AlignLeft } from 'lucide-react';
 import React from 'react';

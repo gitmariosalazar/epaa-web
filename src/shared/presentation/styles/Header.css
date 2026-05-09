@@ -83,6 +83,194 @@
   transform: scale(0.95);
 }
 
+.header__nav-btn--whatsapp {
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  color: white !important;
+  border: none;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+  border-radius: 9999px !important;
+}
+
+.header__nav-btn--whatsapp:hover {
+  background: linear-gradient(135deg, #2ae06d 0%, #16a091 100%);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
+  transform: translateY(-1px);
+}
+
+.header__nav-btn--whatsapp:active {
+  transform: scale(0.95) translateY(0);
+}
+
+.header__support-container {
+  position: relative;
+}
+
+.header__support-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 260px;
+  background-color: var(--surface);
+  border-radius: 12px;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.2),
+    0 0 0 1px var(--border-color);
+  animation: slideDownFade 0.2s cubic-bezier(0, 0, 0.2, 1);
+  overflow: hidden;
+  z-index: 1100;
+  padding: 12px;
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+}
+
+/* Support Tooltip Content Styles */
+.support-tooltip {
+  padding: 4px;
+  min-width: 200px;
+}
+
+.support-tooltip__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.support-tooltip__icon-box {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: color-mix(in srgb, #25D366 20%, transparent);
+  color: #25D366;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.support-tooltip__body {
+  background: var(--background);
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 14px;
+}
+
+.support-tooltip__label {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  font-weight: 800;
+}
+
+.support-tooltip__number-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.support-tooltip__number {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.support-tooltip__copy-btn {
+  background: var(--surface-hover);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  min-width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.support-tooltip__copy-btn:hover {
+  background: var(--primary);
+  color: var(--text-inverse);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.support-tooltip__copy-btn--copied {
+  background: #25D366 !important;
+  color: white !important;
+  border-color: #25D366 !important;
+  padding: 0 10px !important;
+  width: auto !important;
+}
+
+.support-tooltip__copy-feedback {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  animation: slideInLeft 0.2s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.support-tooltip__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.support-tooltip__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  background: var(--surface-hover);
+  color: var(--text-main);
+}
+
+.support-tooltip__link:hover {
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface-hover));
+  color: var(--primary);
+}
+
+.support-tooltip__link--whatsapp {
+  background: #25D366;
+  color: white;
+}
+
+.support-tooltip__link--whatsapp:hover {
+  background: #1eb959;
+  color: white;
+  transform: translateY(-1px);
+}
+
 .header__actions {
   position: relative;
   margin-left: 4px;

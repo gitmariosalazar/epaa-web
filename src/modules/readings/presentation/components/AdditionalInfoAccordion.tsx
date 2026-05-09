@@ -1,8 +1,24 @@
 import React, { useState } from 'react';
 import type { ReadingInfo } from '../../domain/models/ReadingInfoResponse';
-import { ChevronDown, ChevronUp, IdCard, User, MapPin, Gauge, Hash, Phone, Mail, CalendarRange, Info, Layers, BookOpen } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  IdCard,
+  User,
+  MapPin,
+  Gauge,
+  Hash,
+  Phone,
+  Mail,
+  CalendarRange,
+  Info,
+  Layers,
+  BookOpen
+} from 'lucide-react';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { useTranslation } from 'react-i18next';
+import { ConnectionStateChip } from '@/shared/presentation/components/chip/ConnectionStateChip';
+import { GrStatusUnknown } from 'react-icons/gr';
 
 interface PropTypes {
   info: ReadingInfo | null;
@@ -23,6 +39,8 @@ export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
   const endDate = info.endDatePeriod
     ? dateService.toISODateStringWithOffset(info.endDatePeriod)
     : '---';
+
+  console.log(info);
 
   return (
     <div className="ai-wrapper">
@@ -47,65 +65,128 @@ export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
           {/* Info grid */}
           <div className="ai-info-grid">
             <div className="ai-info-cell">
-              <span className="ai-info-icon"><IdCard size={14} /></span>
-              <span className="ai-info-label">{t('readings.additionalInfo.cardId', 'Cédula / RUC')}</span>
+              <div className="ai-period-title">
+                <span className="ai-info-icon">
+                  <IdCard size={14} />
+                </span>
+                <span className="ai-info-label">
+                  {t('readings.additionalInfo.cardId', 'Cédula / RUC')}
+                </span>
+              </div>
               <span className="ai-info-value">{info.cardId || '—'}</span>
             </div>
 
             <div className="ai-info-cell">
-              <span className="ai-info-icon"><Gauge size={14} /></span>
-              <span className="ai-info-label">{t('readings.additionalInfo.meterNumber', 'N.° Medidor')}</span>
+              <div className="ai-period-title">
+                <span className="ai-info-icon">
+                  <Gauge size={14} />
+                </span>
+                <span className="ai-info-label">
+                  {t('readings.additionalInfo.meterNumber', 'N.° Medidor')}
+                </span>
+              </div>
               <span className="ai-info-value">{info.meterNumber || '—'}</span>
             </div>
 
             <div className="ai-info-cell">
-              <span className="ai-info-icon"><User size={14} /></span>
-              <span className="ai-info-label">{t('readings.additionalInfo.owner', 'Titular')}</span>
+              <div className="ai-period-title">
+                <span className="ai-info-icon">
+                  <User size={14} />
+                </span>
+                <span className="ai-info-label">
+                  {t('readings.additionalInfo.owner', 'Titular')}
+                </span>
+              </div>
               <span className="ai-info-value">{info.clientName || '—'}</span>
             </div>
 
             <div className="ai-info-cell">
-              <span className="ai-info-icon"><MapPin size={14} /></span>
-              <span className="ai-info-label">{t('readings.additionalInfo.address', 'Dirección')}</span>
+              <div className="ai-period-title">
+                <span className="ai-info-icon">
+                  <MapPin size={14} />
+                </span>
+                <span className="ai-info-label">
+                  {t('readings.additionalInfo.address', 'Dirección')}
+                </span>
+              </div>
               <span className="ai-info-value">{info.address || '—'}</span>
             </div>
 
             <div className="ai-info-cell">
-              <span className="ai-info-icon"><Hash size={14} /></span>
-              <span className="ai-info-label">Tarifa</span>
+              <div className="ai-period-title">
+                <span className="ai-info-icon">
+                  <Hash size={14} />
+                </span>
+                <span className="ai-info-label">Tarifa</span>
+              </div>
               <span className="ai-info-value">{info.rateName || '—'}</span>
             </div>
 
             {/* Sector + Cuenta en una sola celda */}
             <div className="ai-info-cell ai-info-cell--split">
               <div className="ai-split-col">
-                <span className="ai-info-icon"><Layers size={14} /></span>
-                <span className="ai-info-label">Sector</span>
+                <div className="ai-period-title">
+                  <span className="ai-info-icon">
+                    <Layers size={14} />
+                  </span>
+                  <span className="ai-info-label">Sector</span>
+                </div>
                 <span className="ai-info-value">{info.sector ?? '—'}</span>
               </div>
               <div className="ai-split-divider" />
               <div className="ai-split-col">
-                <span className="ai-info-icon"><BookOpen size={14} /></span>
-                <span className="ai-info-label">Cuenta</span>
+                <div className="ai-period-title">
+                  <span className="ai-info-icon">
+                    <BookOpen size={14} />
+                  </span>
+                  <span className="ai-info-label">Cuenta</span>
+                </div>
                 <span className="ai-info-value">{info.account ?? '—'}</span>
               </div>
             </div>
 
-            {phones !== '—' && (
-              <div className="ai-info-cell">
-                <span className="ai-info-icon"><Phone size={14} /></span>
+            <div className="ai-info-cell">
+              <div className="ai-period-title">
+                <span className="ai-info-icon">
+                  <Phone size={14} />
+                </span>
                 <span className="ai-info-label">Teléfonos</span>
-                <span className="ai-info-value">{phones}</span>
               </div>
-            )}
+              <span className="ai-info-value">
+                {phones.toString().trim().length > 5 && phones !== '—'
+                  ? phones
+                  : 'No registrado'}
+              </span>
+            </div>
 
-            {emails !== '—' && (
-              <div className="ai-info-cell ai-info-cell--wide">
-                <span className="ai-info-icon"><Mail size={14} /></span>
+            <div className="ai-info-cell">
+              <div className="ai-period-title">
+                <span className="ai-info-icon">
+                  <Mail size={14} />
+                </span>
                 <span className="ai-info-label">Correos</span>
-                <span className="ai-info-value">{emails}</span>
               </div>
-            )}
+              <span className="ai-info-value">
+                {emails.toString().trim().length > 5 && emails !== '—'
+                  ? emails
+                  : 'No registrado'}
+              </span>
+            </div>
+            <div className="ai-info-cell">
+              <div className="ai-period-title">
+                <span className="ai-info-icon">
+                  <GrStatusUnknown size={14} />
+                </span>
+                <span className="ai-info-label">Estado acometida</span>
+              </div>
+              <div className="ai-info-value">
+                {info.connectionStateName ? (
+                  <ConnectionStateChip statusName={info.connectionStateName} size="sm" variant="soft" />
+                ) : (
+                  '—'
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Period banner */}
@@ -120,13 +201,17 @@ export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
               <div className="ai-date-badge ai-date-start">
                 <span className="ai-date-dot ai-date-dot--start" />
                 <span className="ai-date-val">{startDate}</span>
-                <span className="ai-date-lbl">{t('readings.additionalInfo.start', 'Inicio')}</span>
+                <span className="ai-date-lbl">
+                  {t('readings.additionalInfo.start', 'Inicio')}
+                </span>
               </div>
               <div className="ai-period-line" />
               <div className="ai-date-badge ai-date-end">
                 <span className="ai-date-dot ai-date-dot--end" />
                 <span className="ai-date-val">{endDate}</span>
-                <span className="ai-date-lbl">{t('readings.additionalInfo.end', 'Fin')}</span>
+                <span className="ai-date-lbl">
+                  {t('readings.additionalInfo.end', 'Fin')}
+                </span>
               </div>
             </div>
           </div>

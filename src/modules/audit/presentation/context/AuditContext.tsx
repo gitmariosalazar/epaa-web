@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { createContext, useState, useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { ApiAuditRepository } from '../../infrastructure/repositories/ApiAuditRepository';
 import { GetAuditLogsUseCase } from '../../application/useCases/GetAuditLogsUseCase';

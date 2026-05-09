@@ -765,13 +765,21 @@ h2 {
   border: 1.5px solid #e53e3e55;
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(229, 62, 62, 0.08), var(--shadow-sm);
+  box-shadow:
+    0 4px 20px rgba(229, 62, 62, 0.08),
+    var(--shadow-sm);
   animation: cs-fade-in 0.35s ease;
 }
 
 @keyframes cs-fade-in {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Alert header strip ── */
@@ -943,10 +951,12 @@ h2 {
 
 .ai-wrapper {
   background: var(--surface);
-  border: 1.5px solid var(--info, #3b82f6)33;
+  border: 1.5px solid var(--info, #3b82f6) 33;
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 4px 18px rgba(59, 130, 246, 0.07), var(--shadow-sm);
+  box-shadow:
+    0 4px 18px rgba(59, 130, 246, 0.07),
+    var(--shadow-sm);
   animation: cs-fade-in 0.3s ease;
   margin-top: 2px;
 }
@@ -1099,7 +1109,7 @@ h2 {
 
 /* ── Period banner ── */
 .ai-period-banner {
-  background: var(--surface-hover);
+  background: var(--surface);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -1200,4 +1210,3 @@ h2 {
   border-radius: 999px;
   opacity: 0.7;
 }
-

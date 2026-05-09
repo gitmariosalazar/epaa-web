@@ -11,8 +11,8 @@ import {
   ArrowUpDown
 } from 'lucide-react';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { getTrafficLightColor } from '../../utils/colors/traffic-lights.colors';
-import { CircularProgress } from '../CircularProgress';
+import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
+import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { useSectorProgressStats } from '@/shared/presentation/hooks/dashboard/useSectorProgressStats';
 interface SectorProgressStatsProps {
   data: AdvancedReportReadings[];

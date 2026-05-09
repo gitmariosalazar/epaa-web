@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { IoInformationCircleOutline } from 'react-icons/io5';
+import { IoInformationCircleOutline, IoTimeOutline } from 'react-icons/io5';
 
 interface PropTypes {
   history: ReadingHistory[];
@@ -30,7 +30,7 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
       },
       {
         header: t('readings.historyTable.monthYear'),
-        accessor: (row) => `${row.readingMonth} / ${row.readingYear}`
+        accessor: (row) => `${row.readingYear} - ${row.readingMonth}`
       },
       {
         header: t('readings.historyTable.readingDate'),
@@ -38,10 +38,18 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
       },
       {
         header: t('readings.historyTable.readingTime'),
-        accessor: (row) =>
-          dateService.formatToLocaleString(row.readingDate, {
-            timeStyle: 'medium'
-          })
+        accessor: (row) => (
+          <ColorChip
+            label={dateService.formatToLocaleString(row.readingDate, {
+              timeStyle: 'medium'
+            })}
+            color="var(--secondary)"
+            size="xs"
+            variant="outline"
+            borderRadius="5px"
+            icon={<IoTimeOutline />}
+          />
+        )
       },
       {
         header: t('readings.historyTable.prevReading'),

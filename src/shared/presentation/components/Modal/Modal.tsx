@@ -24,7 +24,7 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   headerActions,
   footer,
-  size = 'md',
+  size = 'md'
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -58,12 +58,19 @@ export const Modal: React.FC<ModalProps> = ({
     >
       <div className={`modal-content modal--${size}`} ref={modalRef}>
         <div className="modal-header">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
+            className="modal-header-content"
+          >
             <h2 className="modal-title">{title}</h2>
             {description && (
               <p
                 className="modal-description"
-                style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}
+                style={{
+                  margin: 0,
+                  fontSize: '0.85rem',
+                  color: 'var(--text-secondary)'
+                }}
               >
                 {description}
               </p>
@@ -76,29 +83,38 @@ export const Modal: React.FC<ModalProps> = ({
               alignItems: 'center',
               gap: '1rem',
               marginLeft: 'auto',
-              marginRight: '1rem',
+              marginRight: '4rem'
             }}
           >
             {headerActions}
           </div>
 
-          <Tooltip content="Cerrar">
-            <Button
-              variant="outline"
-              className="modal-close"
-              onClick={onClose}
-              circle
-              color="error"
-            >
-              <X size={24} />
-            </Button>
-          </Tooltip>
+          <div
+            style={{
+              position: 'absolute',
+              top: '1rem',
+              right: '1.25rem',
+              zIndex: 50
+            }}
+          >
+            <Tooltip content="Cerrar" position="bottom">
+              <Button
+                variant="outline"
+                className="modal-close"
+                onClick={onClose}
+                circle
+                color="error"
+              >
+                <X size={24} />
+              </Button>
+            </Tooltip>
+          </div>
         </div>
 
         <div className="modal-body">{children}</div>
         {footer && <div className="modal-footer">{footer}</div>}
       </div>
     </div>,
-    document.body,
+    document.body
   );
 };

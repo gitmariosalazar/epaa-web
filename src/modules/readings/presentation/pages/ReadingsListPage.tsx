@@ -24,6 +24,8 @@ import { EstimatedReadingConnectionTable } from '../components/EstimatedReadingC
 import { AllReadingsTable } from '../components/AllReadingsTable';
 import { CreateReadingPage } from './CreateReadingPage';
 import { UpdateReadingPage } from './UpdateReadingPage';
+import { BsPatchQuestionFill } from 'react-icons/bs';
+import { ReadingsNoveltyTabView } from '../components/novelties/ReadingsNoveltyTabView';
 
 interface ModalState {
   isOpen: boolean;
@@ -51,7 +53,12 @@ export const ReadingsListPage: React.FC = () => {
         label: t('readings.tabs.estimated'),
         icon: <Calculator size={16} />
       },
-      { id: 'all', label: t('readings.tabs.all'), icon: <List size={16} /> }
+      { id: 'all', label: t('readings.tabs.all'), icon: <List size={16} /> },
+      {
+        id: 'novelties',
+        label: t('readings.tabs.novelties', 'Novedades'),
+        icon: <BsPatchQuestionFill size={16} />
+      }
     ],
     [t]
   );
@@ -117,8 +124,22 @@ export const ReadingsListPage: React.FC = () => {
 
   const handleModalSuccess = () => {
     closeModal();
-    fetchReadings(activeTab, month, sector);
+    fetchReadings(activeTab as any, month, sector);
   };
+
+  if (activeTab === 'novelties') {
+    return (
+      <ReadingsNoveltyTabView
+        header={
+          <Tabs
+            tabs={READINGS_TABS}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+        }
+      />
+    );
+  }
 
   return (
     <PageLayout
@@ -132,12 +153,12 @@ export const ReadingsListPage: React.FC = () => {
       }
       filters={
         <ReadingDataFilters
-          activeTab={activeTab}
+          activeTab={activeTab as any}
           month={month}
           onMonthChange={setMonth}
           sector={sector}
           onSectorChange={setSector}
-          onFetch={() => fetchReadings(activeTab, month, sector)}
+          onFetch={() => fetchReadings(activeTab as any, month, sector)}
           isLoading={isLoading}
         />
       }

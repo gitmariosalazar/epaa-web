@@ -287,7 +287,7 @@ export const en = {
         currentConsumption: 'Current Consumption'
       },
       historyTable: {
-        monthYear: 'Month/Year',
+        monthYear: 'Year - Month',
         readingDate: 'Reading Date',
         readingTime: 'Reading Time',
         prevReading: 'Prev. Reading',
@@ -315,7 +315,8 @@ export const en = {
       switchTheme: 'Switch Theme',
       switchLang: 'Language',
       english: 'English',
-      spanish: 'Spanish'
+      spanish: 'Spanish',
+      support: 'Technical Support'
     },
     pages: {
       roles: {
