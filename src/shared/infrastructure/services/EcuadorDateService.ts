@@ -141,11 +141,16 @@ export class EcuadorDateService implements IDateService {
   // Accepts a Date, a timestamp number, or a "YYYY-MM" / "YYYY-MM-DD" string.
   // Examples: "2026-05" → "2026-MAYO"  |  new Date() → "2026-MAYO"
   getMonthString(date: Date | string | number): string {
-    // If input is a "YYYY-MM" string, append "-01" so Date can parse it correctly
-    const normalized =
-      typeof date === 'string' && /^\d{4}-\d{2}$/.test(date)
-        ? `${date}-01`
-        : date;
+    // If input is a "YYYY-MM" string, append "-01T12:00:00" so Date can parse it correctly
+    // If input is a "YYYY-MM-DD" string, append "T12:00:00" to avoid timezone shift to previous day
+    let normalized = date;
+    if (typeof date === 'string') {
+      if (/^\d{4}-\d{2}$/.test(date)) {
+        normalized = `${date}-01T12:00:00`;
+      } else if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        normalized = `${date}T12:00:00`;
+      }
+    }
 
     const d = new Date(normalized);
 
