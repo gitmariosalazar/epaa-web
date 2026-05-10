@@ -27,11 +27,13 @@ export const NaturalPersonsPage: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Avatar name={row.firstName || 'S/N'} size="sm" />
             <div>
-              <div style={{ fontWeight: 300 }}>{row.firstName}</div>
+              <div style={{ fontWeight: 300 }}>
+                {row.firstName + ' ' + row.lastName}
+              </div>
               <div
                 style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}
               >
-                {row.lastName}
+                {row.customerId}
               </div>
             </div>
           </div>

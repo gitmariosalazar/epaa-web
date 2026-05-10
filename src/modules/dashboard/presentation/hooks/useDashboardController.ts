@@ -1,4 +1,11 @@
-import { useState, useMemo, useEffect, useCallback, useRef, type ChangeEvent } from 'react';
+import {
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+  useRef,
+  type ChangeEvent
+} from 'react';
 import { HttpReportDashboardRepository } from '@/modules/dashboard/infrastructure/repositories/http-report-dashboard.repository';
 import { GetGlobalStatsUseCase } from '@/modules/dashboard/application/usecases/get-global-stats.usecase';
 import { GetDailyStatsUseCase } from '@/modules/dashboard/application/usecases/get-daily-stats.usecase';
@@ -14,6 +21,9 @@ import type {
   NoveltyStatsReport,
   AdvancedReportReadings
 } from '@/modules/dashboard/domain/models/report-dashboard.model';
+import type { AuditSector } from '@/modules/readings/domain/models/ReadingAudit';
+import { GetAuditByMonthUseCase } from '@/modules/readings/application/usecases/audit/GetAuditByMonthUseCase';
+import { ReadingAuditRepositoryImpl } from '@/modules/readings/infrastructure/repositories/ReadingAuditRepositoryImpl';
 
 export const useDashboardController = () => {
   const [currentMonth, setCurrentMonth] = useState<string>(
@@ -21,58 +31,109 @@ export const useDashboardController = () => {
   ); // YYYY-MM
   const [loading, setLoading] = useState(true);
 
-  const [globalStats, setGlobalStats] = useState<GlobalStatsReport | null>(null);
+  const [globalStats, setGlobalStats] = useState<GlobalStatsReport | null>(
+    null
+  );
   const [dailyStats, setDailyStats] = useState<DailyStatsReport[]>([]);
   const [sectorStats, setSectorStats] = useState<SectorStatsReport[]>([]);
   const [noveltyStats, setNoveltyStats] = useState<NoveltyStatsReport[]>([]);
-  const [advancedReportReadings, setAdvancedReportReadings] = useState<AdvancedReportReadings[]>([]);
+  const [advancedReportReadings, setAdvancedReportReadings] = useState<
+    AdvancedReportReadings[]
+  >([]);
+  const [advancedReportSectors, setAdvancedReportSectors] = useState<
+    AuditSector[]
+  >([]);
 
   const [activeTab, setActiveTab] = useState<'visual' | 'table'>('table');
 
   // Dependency Injection
   const repository = useMemo(() => new HttpReportDashboardRepository(), []);
-  const getGlobalStatsUseCase = useMemo(() => new GetGlobalStatsUseCase(repository), [repository]);
-  const getDailyStatsUseCase = useMemo(() => new GetDailyStatsUseCase(repository), [repository]);
-  const getSectorStatsUseCase = useMemo(() => new GetSectorStatsUseCase(repository), [repository]);
-  const getNoveltyStatsUseCase = useMemo(() => new GetNoveltyStatsUseCase(repository), [repository]);
-  const getAdvancedReportReadingsUseCase = useMemo(() => new GetAdvancedReportReadingsUseCase(repository), [repository]);
+  const repositoryAudit = useMemo(() => new ReadingAuditRepositoryImpl(), []);
+  const getGlobalStatsUseCase = useMemo(
+    () => new GetGlobalStatsUseCase(repository),
+    [repository]
+  );
+  const getDailyStatsUseCase = useMemo(
+    () => new GetDailyStatsUseCase(repository),
+    [repository]
+  );
+  const getSectorStatsUseCase = useMemo(
+    () => new GetSectorStatsUseCase(repository),
+    [repository]
+  );
+  const getNoveltyStatsUseCase = useMemo(
+    () => new GetNoveltyStatsUseCase(repository),
+    [repository]
+  );
+  const getAdvancedReportReadingsUseCase = useMemo(
+    () => new GetAdvancedReportReadingsUseCase(repository),
+    [repository]
+  );
 
+  const getAdvancedReportSectorsUseCase = useMemo(
+    () => new GetAuditByMonthUseCase(repositoryAudit),
+    [repositoryAudit]
+  );
   // ── fetchData estable con useCallback para no recrear efectos ─────────────
-  const fetchData = useCallback(async (month: string, isBackground = false) => {
-    if (!isBackground) setLoading(true);
-    try {
-      // Parallel fetching pero tolerante a fallos individuales (SRP)
-      const results = await Promise.allSettled([
-        getGlobalStatsUseCase.execute(month),
-        getDailyStatsUseCase.execute(month),
-        getSectorStatsUseCase.execute(month),
-        getNoveltyStatsUseCase.execute(month),
-        getAdvancedReportReadingsUseCase.execute(month)
-      ]);
+  const fetchData = useCallback(
+    async (month: string, isBackground = false) => {
+      if (!isBackground) setLoading(true);
+      try {
+        // Parallel fetching pero tolerante a fallos individuales (SRP)
+        const results = await Promise.allSettled([
+          getGlobalStatsUseCase.execute(month),
+          getDailyStatsUseCase.execute(month),
+          getSectorStatsUseCase.execute(month),
+          getNoveltyStatsUseCase.execute(month),
+          getAdvancedReportReadingsUseCase.execute(month),
+          getAdvancedReportSectorsUseCase.execute(month)
+        ]);
 
-      setGlobalStats(results[0].status === 'fulfilled' ? results[0].value || null : null);
-      setDailyStats(results[1].status === 'fulfilled' ? results[1].value || [] : []);
-      setSectorStats(results[2].status === 'fulfilled' ? results[2].value || [] : []);
-      setNoveltyStats(results[3].status === 'fulfilled' ? results[3].value || [] : []);
-      setAdvancedReportReadings(results[4].status === 'fulfilled' ? results[4].value || [] : []);
+        setGlobalStats(
+          results[0].status === 'fulfilled' ? results[0].value || null : null
+        );
+        setDailyStats(
+          results[1].status === 'fulfilled' ? results[1].value || [] : []
+        );
+        setSectorStats(
+          results[2].status === 'fulfilled' ? results[2].value || [] : []
+        );
+        setNoveltyStats(
+          results[3].status === 'fulfilled' ? results[3].value || [] : []
+        );
+        setAdvancedReportReadings(
+          results[4].status === 'fulfilled' ? results[4].value || [] : []
+        );
+        setAdvancedReportSectors(
+          results[5].status === 'fulfilled' ? results[5].value || [] : []
+        );
 
-      results.forEach((res, index) => {
-        if (res.status === 'rejected') {
-          console.error(`Dashboard fetch failed for index ${index}:`, res.reason);
-        }
-      });
-    } catch (error) {
-      console.error('Failed to execute dashboard data fetching process', error);
-    } finally {
-      if (!isBackground) setLoading(false);
-    }
-  }, [
-    getGlobalStatsUseCase,
-    getDailyStatsUseCase,
-    getSectorStatsUseCase,
-    getNoveltyStatsUseCase,
-    getAdvancedReportReadingsUseCase
-  ]);
+        results.forEach((res, index) => {
+          if (res.status === 'rejected') {
+            console.error(
+              `Dashboard fetch failed for index ${index}:`,
+              res.reason
+            );
+          }
+        });
+      } catch (error) {
+        console.error(
+          'Failed to execute dashboard data fetching process',
+          error
+        );
+      } finally {
+        if (!isBackground) setLoading(false);
+      }
+    },
+    [
+      getGlobalStatsUseCase,
+      getDailyStatsUseCase,
+      getSectorStatsUseCase,
+      getNoveltyStatsUseCase,
+      getAdvancedReportReadingsUseCase,
+      getAdvancedReportSectorsUseCase
+    ]
+  );
 
   // ── Carga inicial INMEDIATA — sin debounce al montar el componente ───────────
   const isFirstMount = useRef(true);
@@ -100,7 +161,6 @@ export const useDashboardController = () => {
     return () => clearInterval(interval);
   }, [currentMonth, fetchData]);
 
-
   const handleMonthChange = (e: ChangeEvent<HTMLInputElement> | string) => {
     const value = typeof e === 'string' ? e : e.target.value;
     setCurrentMonth(value);
@@ -114,6 +174,7 @@ export const useDashboardController = () => {
     sectorStats,
     noveltyStats,
     advancedReportReadings,
+    advancedReportSectors,
     activeTab,
     setActiveTab,
     handleMonthChange

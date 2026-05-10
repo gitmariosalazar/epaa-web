@@ -100,7 +100,10 @@ export const useTrashRateReportViewModel = () => {
       },
       {
         id: 'auditReport',
-        label: t('trashRateReport.tabs.auditReport', 'Auditoría de Tasas'),
+        label: t(
+          'trashRateReport.tabs.auditReport',
+          'Auditoría Tasas de Residuos'
+        ),
         icon: React.createElement(ClipboardList, { size: 16 })
       },
       {
@@ -225,8 +228,9 @@ export const useTrashRateReportViewModel = () => {
 
   // ISP: filtro exclusivo de Vista General — qué tipo de registros mostrar.
   // Estado independiente: resetea al cambiar de sub-tab o tab principal.
-  const [todosPaymentTypeChoice, setTodosPaymentTypeChoice] =
-    useState<'all' | 'pagados' | 'pendientes'>('all');
+  const [todosPaymentTypeChoice, setTodosPaymentTypeChoice] = useState<
+    'all' | 'pagados' | 'pendientes'
+  >('all');
 
   // ── NÚCLEO: un useTabDataState<T> por tab (SRP + ISP) ────────────────────
   // Cada hook posee SU PROPIO estado: data, isLoading, error, hasFetched.
@@ -490,7 +494,13 @@ export const useTrashRateReportViewModel = () => {
         r = r.filter((i) => i.paymentDate === null);
     }
     return applySortConfig(r, sortConfig);
-  }, [auditTab.data, activeSubTabFilters, sortConfig, auditSubTab, todosPaymentTypeChoice]);
+  }, [
+    auditTab.data,
+    activeSubTabFilters,
+    sortConfig,
+    auditSubTab,
+    todosPaymentTypeChoice
+  ]);
 
   const filteredMonthlySummary = useMemo(
     () => applySortConfig(monthlyTab.data, sortConfig),

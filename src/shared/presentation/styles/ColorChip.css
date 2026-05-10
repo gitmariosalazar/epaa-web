@@ -8,7 +8,6 @@
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  border-radius: 6px; /* Slightly more squared for modern look, or keep rounded */
   border-radius: 9999px; /* Pill shape is standard for chips */
 
   font-family: inherit;

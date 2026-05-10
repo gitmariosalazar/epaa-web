@@ -10,6 +10,10 @@ import '../../styles/PaymentsTable.css';
 
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
+import { CheckCircle } from 'lucide-react';
+import { IoIosCloseCircle } from 'react-icons/io';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 
 interface DailyCollectorDetailTableProps {
   data: DailyCollectorDetail[];
@@ -43,7 +47,28 @@ export const DailyCollectorDetailTable: React.FC<
     },
     {
       header: t('trashRateReport.clientDetail.incomeStatus', 'Estado Ingreso'),
-      accessor: 'incomeStatus'
+      accessor: (item: DailyCollectorDetail) => {
+        const color = getTrafficLightColor(
+          item.incomeStatus === 'P' ? 100 : 25
+        );
+        const icon =
+          item.incomeStatus === 'P' ? <CheckCircle /> : <IoIosCloseCircle />;
+        return (
+          <ColorChip
+            color={color}
+            label={
+              item.incomeStatus === 'P'
+                ? 'Pagado'
+                : ['B', 'A', '0'].includes(item.incomeStatus)
+                  ? 'Anulado/Baja'
+                  : ''
+            }
+            icon={icon}
+            size="sm"
+            variant="soft"
+          />
+        );
+      }
     },
     {
       header: t(

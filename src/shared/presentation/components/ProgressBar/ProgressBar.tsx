@@ -1,6 +1,5 @@
 import React from 'react';
 import './ProgressBar.css';
-import { ColorChip } from '../chip/ColorChip';
 import { PercentageFormatter } from '@/shared/utils/formatters/PercentageFormatter';
 
 interface ProgressBarProps {
@@ -25,9 +24,9 @@ interface ProgressBarProps {
 }
 
 const WIDTH_MAP: Record<NonNullable<ProgressBarProps['widthSize']>, string> = {
-  sm:   '120px',
-  md:   '200px',
-  lg:   '320px',
+  sm: '120px',
+  md: '200px',
+  lg: '320px',
   full: '100%'
 };
 
@@ -67,13 +66,15 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
         </div>
       )}
       {showLabel && (
-        <div className="progress-label">
-          <ColorChip
-            color={color}
-            label={`${PercentageFormatter.formatWithDecimals(value / 100)}`}
-            size="sm"
-            variant="soft"
-          />
+        <div
+          className="progress-custom-badge"
+          style={
+            {
+              '--badge-color': color
+            } as React.CSSProperties
+          }
+        >
+          <span>{`${PercentageFormatter.formatWithDecimals(value / 100)}`}</span>
         </div>
       )}
     </div>

@@ -39,7 +39,6 @@ export const LoginPage: React.FC = () => {
     setError(null);
     try {
       await login({ username_or_email: username, password });
-      navigate('/');
     } catch (err) {
       setError(
         t('Invalid username or password') || 'Invalid username or password'

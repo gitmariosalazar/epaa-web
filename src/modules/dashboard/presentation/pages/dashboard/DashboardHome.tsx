@@ -23,10 +23,13 @@ import { CircularProgress } from '@/shared/presentation/components/CircularProgr
 import { useSimulatedProgress } from '@/shared/presentation/components/CircularProgress/useSimulatedProgress';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { NoveltyStatsModal } from '@/modules/dashboard/presentation/components/NoveltyStatsModal';
+import { DashBoardProgressReadings } from '../../components/DashBoardProgressReadings';
 
 export const DashboardHome = () => {
   const { t } = useTranslation();
-  const [selectedNovelty, setSelectedNovelty] = React.useState<string | null>(null);
+  const [selectedNovelty, setSelectedNovelty] = React.useState<string | null>(
+    null
+  );
 
   const {
     currentMonth,
@@ -36,6 +39,7 @@ export const DashboardHome = () => {
     sectorStats,
     noveltyStats,
     advancedReportReadings,
+    advancedReportSectors,
     activeTab,
     setActiveTab,
     handleMonthChange
@@ -138,6 +142,13 @@ export const DashboardHome = () => {
             </div>
 
             <div className="dashboard-novelties-row">
+              <DashBoardProgressReadings
+                data={advancedReportSectors}
+                loading={false}
+              />
+            </div>
+
+            <div className="dashboard-novelties-row">
               <DashboardWidgetWrapper
                 id="novelty-stats"
                 title={t(
@@ -146,10 +157,10 @@ export const DashboardHome = () => {
                 )}
                 className="h-full"
               >
-                <NoveltyStats 
-                  data={noveltyStats} 
-                  loading={false} 
-                  onSelectNovelty={setSelectedNovelty} 
+                <NoveltyStats
+                  data={noveltyStats}
+                  loading={false}
+                  onSelectNovelty={setSelectedNovelty}
                 />
               </DashboardWidgetWrapper>
             </div>

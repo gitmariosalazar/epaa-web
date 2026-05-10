@@ -82,7 +82,13 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
         return (
           <ColorChip
             color={color}
-            label={r.paymentStatus}
+            label={
+              r.paymentStatus === 'PAID'
+                ? 'Pagado'
+                : r.paymentStatus === 'PENDING'
+                  ? 'Pendiente'
+                  : 'Pagado'
+            }
             icon={icon}
             size="sm"
             variant="soft"
