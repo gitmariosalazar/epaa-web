@@ -164,8 +164,10 @@ export class ExportService implements IExportService {
     // 4. Data Table
     currentY = this.renderDataTable(doc, options, currentY);
 
-    // 5. Signatures (Always at the bottom)
-    this.renderSignatureSection(doc, options.signatures);
+    // 5. Signatures (only when showSign is explicitly true)
+    if (options.showSign === true) {
+      this.renderSignatureSection(doc, options.signatures);
+    }
 
     return doc;
   }

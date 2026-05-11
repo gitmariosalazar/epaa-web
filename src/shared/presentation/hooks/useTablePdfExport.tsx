@@ -13,6 +13,7 @@ export interface UseTablePdfExportOptions<T> {
   labelsVertical?: Record<string, string>;
   clientInfo?: Record<string, string>;
   signatures?: Signature[];
+  showSign?: boolean;
   totalRows?: {
     label: string;
     value: string | number;
@@ -31,6 +32,7 @@ export const useTablePdfExport = <T,>({
   labelsVertical,
   clientInfo,
   signatures,
+  showSign,
   totalRows,
   mapRowData
 }: UseTablePdfExportOptions<T>) => {
@@ -150,6 +152,7 @@ export const useTablePdfExport = <T,>({
             labelsVertical,
             clientInfo,
             signatures,
+            showSign,
             totals
           });
 
@@ -181,7 +184,8 @@ export const useTablePdfExport = <T,>({
       labelsHorizontal,
       labelsVertical,
       clientInfo,
-      signatures
+      signatures,
+      showSign
     ]
   );
 
@@ -264,6 +268,7 @@ export const useTablePdfExport = <T,>({
         labelsVertical,
         clientInfo,
         signatures,
+        showSign,
         totals
       });
       setShowPdfPreview(false);
@@ -279,7 +284,8 @@ export const useTablePdfExport = <T,>({
       labelsHorizontal,
       labelsVertical,
       clientInfo,
-      signatures
+      signatures,
+      showSign
     ]
   );
 

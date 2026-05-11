@@ -235,6 +235,7 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
           ' ' +
           new Date().toLocaleTimeString()
       },
+      showSign: false,
       totalRows,
       mapRowData: (item, selectedCols) => {
         const rowData: Record<string, string> = {
