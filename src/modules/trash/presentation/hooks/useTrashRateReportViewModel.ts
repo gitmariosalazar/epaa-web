@@ -44,6 +44,8 @@ export interface AuditSubTabFilters {
   dateFilter: AuditDateFilter;
   paymentStatus: string;
   diagnostic: string;
+  collector: string;
+  paymentMethod: string;
   searchQuery: string;
 }
 
@@ -53,6 +55,8 @@ const makeInitialSubTabFilters = (): AuditSubTabFilters => ({
   dateFilter: 'incomeDate',
   paymentStatus: '',
   diagnostic: '',
+  collector: '',
+  paymentMethod: '',
   searchQuery: ''
 });
 
@@ -213,8 +217,12 @@ export const useTrashRateReportViewModel = () => {
     setActiveSubTabFilters({ paymentStatus: v });
   const setDiagnosticLocal = (v: string) =>
     setActiveSubTabFilters({ diagnostic: v });
+  const setCollectorLocal = (v: string) =>
+    setActiveSubTabFilters({ collector: v });
   const setSearchQuery = (v: string) =>
     setActiveSubTabFilters({ searchQuery: v });
+  const setPaymentMethod = (v: string) =>
+    setActiveSubTabFilters({ paymentMethod: v });
 
   // Filtros específicos por tab
   const [missingPaymentStatus, setMissingPaymentStatus] = useState('');
@@ -455,6 +463,13 @@ export const useTrashRateReportViewModel = () => {
       ) as string[],
     [auditTab.data]
   );
+  const auditCollectorList = useMemo(
+    () =>
+      Array.from(new Set(auditTab.data.map((r) => r.collector || ''))).filter(
+        Boolean
+      ) as string[],
+    [auditTab.data]
+  );
   const missingPaymentStatusList = useMemo(
     () =>
       Array.from(
@@ -470,12 +485,23 @@ export const useTrashRateReportViewModel = () => {
     [creditTab.data]
   );
 
+  const auditPaymentMethodList = useMemo(
+    () =>
+      Array.from(
+        new Set(auditTab.data.map((r) => r.paymentMethod || ''))
+      ).filter(Boolean) as string[],
+    [auditTab.data]
+  );
+
   // ── Datos filtrados por tab (filtros locales post-carga) ──────────────────
   const filteredAuditReport = useMemo(() => {
     let r = auditTab.data;
-    const { paymentStatus, diagnostic, searchQuery } = activeSubTabFilters;
+    const { paymentStatus, diagnostic, collector, searchQuery, paymentMethod } =
+      activeSubTabFilters;
     if (paymentStatus) r = r.filter((i) => i.paymentStatus === paymentStatus);
     if (diagnostic) r = r.filter((i) => i.diagnostic === diagnostic);
+    if (collector) r = r.filter((i) => i.collector === collector);
+    if (paymentMethod) r = r.filter((i) => i.paymentMethod === paymentMethod);
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       r = r.filter(
@@ -485,8 +511,6 @@ export const useTrashRateReportViewModel = () => {
           i.cadastralKey?.toLowerCase().includes(q)
       );
     }
-    // ISP: todosPaymentTypeChoice solo aplica cuando el sub-tab activo es "Todos".
-    // Un registro es "pagado" si tiene fecha de pago; "pendiente" si no la tiene.
     if (auditSubTab === 'Todos (Pagados y Pendientes)') {
       if (todosPaymentTypeChoice === 'pagados')
         r = r.filter((i) => i.paymentDate !== null);
@@ -561,6 +585,7 @@ export const useTrashRateReportViewModel = () => {
     setDateFilter,
     setPaymentStatus,
     setDiagnosticLocal,
+    setCollectorLocal,
     setSearchQuery,
     // Filtro exclusivo de Vista General (Todos)
     todosPaymentTypeChoice,
@@ -568,10 +593,14 @@ export const useTrashRateReportViewModel = () => {
     // Listas de dropdown derivadas
     auditPaymentStatusList,
     auditDiagnosticList,
+    auditCollectorList,
     // Filtros missingValor
     missingPaymentStatus,
     setMissingPaymentStatus,
     missingPaymentStatusList,
+    // Filtros paymentType
+    setPaymentMethod,
+    auditPaymentMethodList,
     // Filtros creditNotes
     creditCoverage,
     setCreditCoverage,

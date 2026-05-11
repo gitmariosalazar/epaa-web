@@ -14,8 +14,10 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { Select } from '@/shared/presentation/components/Input/Select';
-import { FaCalendarAlt, FaListUl } from 'react-icons/fa';
+import { FaCalendarAlt, FaUsers } from 'react-icons/fa';
 import type { AuditDateFilter } from '../../../domain/dto/params/TrashRateAuditParams';
+import { FaListCheck } from 'react-icons/fa6';
+import { TbZoomMoneyFilled } from 'react-icons/tb';
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 export interface AuditTabFiltersProps {
@@ -50,6 +52,14 @@ export interface AuditTabFiltersProps {
   selectedDiagnostic: string;
   onDiagnosticChange: (val: string) => void;
   diagnosticList: string[];
+
+  selectedCollector: string;
+  onCollectorChange: (val: string) => void;
+  collectorList: string[];
+
+  selectedPaymentMethod: string;
+  onPaymentMethodChange: (val: string) => void;
+  paymentMethodList: string[];
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -70,7 +80,13 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
   paymentStatusList,
   selectedDiagnostic,
   onDiagnosticChange,
-  diagnosticList
+  diagnosticList,
+  selectedCollector,
+  onCollectorChange,
+  collectorList,
+  selectedPaymentMethod,
+  onPaymentMethodChange,
+  paymentMethodList
 }) => {
   const { t } = useTranslation();
   const canFetch = !isLoading && Boolean(startDate && endDate);
@@ -80,7 +96,7 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
       {/* ── LEFT: fecha + [dateFilter opcional] + fetch ── */}
       <div className="trash-report-filter-left">
         {/* Rango de fechas */}
-        <div className="trash-report-filter-group">
+        <div className="trash-report-filter-group-left">
           <label className="trash-report-filter-label">
             {t('trashRateReport.filters.dateRange', 'Rango de Fechas')}
           </label>
@@ -99,7 +115,7 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
 
         {/* Columna de fecha — solo para Pagados y Todos (ISP) */}
         {showDateFilter && (
-          <div className="trash-report-filter-group">
+          <div className="trash-report-filter-group-left">
             <label className="trash-report-filter-label">
               {t('trashRateReport.filters.dateFilter', 'Fecha por')}
             </label>
@@ -130,35 +146,10 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
         </Button>
       </div>
 
-      {/* ── RIGHT: filtro diagnóstico + búsqueda local + post-load ── */}
+      {/* ── RIGHT: búsqueda local + post-load — siempre agrupados a la derecha ── */}
       <div className="trash-report-filter-right">
-        {/* Filtro diagnóstico (server-side) 
-        <div className="trash-report-filter-group">
-          <label className="trash-report-filter-label">
-            {t('trashRateReport.filters.diagnosticFilter', 'Filtro Servidor')}
-          </label>
-          <div className="trash-report-filter-input-wrapper">
-            <Select
-              size="small"
-              value={diagnosticFilter}
-              onChange={(e) =>
-                onDiagnosticFilterChange(
-                  e.target.value as 'DIFFERENT_AND_NO_RECORD' | 'ALL'
-                )
-              }
-            >
-              <option value="ALL">
-                {t('trashRateReport.filters.all', 'Todos')}
-              </option>
-              <option value="DIFFERENT_AND_NO_RECORD">
-                {t('trashRateReport.filters.differentAndNoRecord', 'Discrepancias')}
-              </option>
-            </Select>
-          </div>
-        </div>
-        */}
         {/* Búsqueda local */}
-        <div className="trash-report-filter-group">
+        <div className="trash-report-filter-group-right">
           <label className="trash-report-filter-label">
             {t('common.search')}
           </label>
@@ -174,9 +165,63 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
           </div>
         </div>
 
+        {/* Collector  */}
+        {collectorList.length > 0 && (
+          <div className="trash-report-filter-group-right">
+            <label className="trash-report-filter-label">
+              {t('trashRateReport.filters.collector', 'Recolector')}
+            </label>
+            <div className="trash-report-filter-input-wrapper">
+              <Select
+                size="small"
+                value={selectedCollector}
+                onChange={(e) => onCollectorChange(e.target.value)}
+                leftIcon={<FaUsers size={16} />}
+                width={120}
+              >
+                <option value="">
+                  {t('trashRateReport.filters.all', 'Todos')}
+                </option>
+                {collectorList.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
+        )}
+
+        {/* Payment Method  */}
+        {paymentMethodList.length > 0 && (
+          <div className="trash-report-filter-group-right">
+            <label className="trash-report-filter-label">
+              {t('trashRateReport.filters.paymentMethod', 'Método Pago')}
+            </label>
+            <div className="trash-report-filter-input-wrapper">
+              <Select
+                size="small"
+                value={selectedPaymentMethod}
+                onChange={(e) => onPaymentMethodChange(e.target.value)}
+                leftIcon={<FaUsers size={16} />}
+                width={120}
+              >
+                <option value="">
+                  {t('trashRateReport.filters.all', 'Todos')}
+                </option>
+                {paymentMethodList.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
+        )}
+
         {/* Estado de pago (post-load) */}
         {paymentStatusList.length > 0 && (
-          <div className="trash-report-filter-group">
+          <div className="trash-report-filter-group-right">
             <label className="trash-report-filter-label">
               {t('trashRateReport.filters.paymentStatus', 'Estado Pago')}
             </label>
@@ -185,7 +230,8 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
                 size="small"
                 value={selectedPaymentStatus}
                 onChange={(e) => onPaymentStatusChange(e.target.value)}
-                leftIcon={<FaListUl size={16} />}
+                leftIcon={<TbZoomMoneyFilled size={16} />}
+                width={120}
               >
                 <option value="">
                   {t('trashRateReport.filters.all', 'Todos')}
@@ -202,7 +248,7 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
 
         {/* Diagnóstico (post-load) */}
         {diagnosticList.length > 0 && (
-          <div className="trash-report-filter-group">
+          <div className="trash-report-filter-group-right">
             <label className="trash-report-filter-label">
               {t('trashRateReport.filters.diagnostic', 'Diagnóstico')}
             </label>
@@ -211,6 +257,8 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
                 size="small"
                 value={selectedDiagnostic}
                 onChange={(e) => onDiagnosticChange(e.target.value)}
+                leftIcon={<FaListCheck size={16} />}
+                width={120}
               >
                 <option value="">
                   {t('trashRateReport.filters.all', 'Todos')}

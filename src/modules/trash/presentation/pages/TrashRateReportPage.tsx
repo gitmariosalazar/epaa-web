@@ -22,7 +22,7 @@ import { ClientTrashDetailTable } from '../components/audit/ClientTrashDetailTab
 import { TrashRateDashboard } from '../components/audit/TrashRateDashboard';
 // Filters
 import { AuditTabFilters } from '../components/audit/AuditTabFilters';
-import { TodosAuditFilters } from '../components/audit/TodosAuditFilters';
+import { TodosAuditFilters } from '../components/audit/AllAuditFilters';
 import { DashboardFilters } from '../components/audit/DashboardFilters';
 import { MonthlySummaryFilters } from '../components/audit/MonthlySummaryFilters';
 import { MissingValorFilters } from '../components/audit/MissingValorFilters';
@@ -133,6 +133,12 @@ export const TrashRateReportPage: React.FC = () => {
                 selectedDiagnostic={vm.activeSubTabFilters.diagnostic}
                 onDiagnosticChange={vm.setDiagnosticLocal}
                 diagnosticList={vm.auditDiagnosticList}
+                selectedCollector={vm.activeSubTabFilters.collector}
+                onCollectorChange={vm.setCollectorLocal}
+                collectorList={vm.auditCollectorList}
+                selectedPaymentMethod={vm.activeSubTabFilters.paymentMethod}
+                onPaymentMethodChange={vm.setPaymentMethod}
+                paymentMethodList={vm.auditPaymentMethodList}
                 onFetch={vm.handleFetch}
                 isLoading={vm.isLoading}
               />

@@ -12,10 +12,14 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'siz
   options?: { value: string | number; label: string }[];
   size?: 'small' | 'compact' | 'medium' | 'large';
   focused?: boolean;
+  /** Sets the width of the select container. Accepts any valid CSS value, e.g. '120px', '8rem'. */
+  width?: string | number;
+  /** Aligns the entire component within its parent flex/grid container. */
+  align?: 'left' | 'center' | 'right';
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, leftIcon, rightIcon = <ChevronDown size={14} />, className = '', children, size = 'medium', options, focused, ...props }, ref) => {
+  ({ label, error, leftIcon, rightIcon = <ChevronDown size={14} />, className = '', children, size = 'medium', options, focused, width, align, ...props }, ref) => {
     
     const localRef = useRef<HTMLSelectElement>(null);
 
@@ -34,8 +38,16 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       }
     };
 
+    const alignSelfMap = { left: 'flex-start', center: 'center', right: 'flex-end' } as const;
+
     return (
-      <div className={`input-component input--${size} ${className}`}>
+      <div
+        className={`input-component input--${size} ${className}`}
+        style={{
+          ...(width !== undefined ? { width: typeof width === 'number' ? `${width}px` : width } : {}),
+          ...(align !== undefined ? { alignSelf: alignSelfMap[align] } : {}),
+        }}
+      >
         {label && <label className="input__label">{label}</label>}
         <div className="input__container">
           {leftIcon && <span className="input__icon-left">{leftIcon}</span>}

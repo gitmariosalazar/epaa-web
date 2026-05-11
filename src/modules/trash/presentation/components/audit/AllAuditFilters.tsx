@@ -20,6 +20,7 @@ import { Input } from '@/shared/presentation/components/Input/Input';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { FaCalendarAlt, FaFilter, FaListUl } from 'react-icons/fa';
 import type { AuditDateFilter } from '../../../domain/dto/params/TrashRateAuditParams';
+import { FaListCheck } from 'react-icons/fa6';
 
 /** Opciones de tipo de pago exclusivas de Vista General */
 export type TodosPaymentTypeChoice = 'all' | 'pagados' | 'pendientes';
@@ -115,7 +116,7 @@ export const TodosAuditFilters: React.FC<TodosAuditFiltersProps> = ({
       {/* ── LEFT: fecha + dateFilter + tipo de pago + Consultar ── */}
       <div className="trash-report-filter-left">
         {/* Rango de fechas */}
-        <div className="trash-report-filter-group">
+        <div className="trash-report-filter-group-left">
           <label className="trash-report-filter-label">
             {t('trashRateReport.filters.dateRange', 'Rango de Fechas')}
           </label>
@@ -133,7 +134,7 @@ export const TodosAuditFilters: React.FC<TodosAuditFiltersProps> = ({
         </div>
 
         {/* Columna de fecha (Fecha Emisión o Fecha Pago) */}
-        <div className="trash-report-filter-group">
+        <div className="trash-report-filter-group-left">
           <label className="trash-report-filter-label">
             {t('trashRateReport.filters.dateFilter', 'Fecha por')}
           </label>
@@ -153,7 +154,7 @@ export const TodosAuditFilters: React.FC<TodosAuditFiltersProps> = ({
         </div>
 
         {/* Tipo de pago — exclusivo de "Vista General" (ISP) */}
-        <div className="trash-report-filter-group">
+        <div className="trash-report-filter-group-left">
           <label className="trash-report-filter-label">
             {t('trashRateReport.filters.paymentTypeChoice', 'Mostrar')}
           </label>
@@ -228,7 +229,7 @@ export const TodosAuditFilters: React.FC<TodosAuditFiltersProps> = ({
         </div>
         */}
         {/* Búsqueda local (cédula / nombre / clave catastral) */}
-        <div className="trash-report-filter-group">
+        <div className="trash-report-filter-group-right">
           <label className="trash-report-filter-label">
             {t('common.search')}
           </label>
@@ -246,7 +247,7 @@ export const TodosAuditFilters: React.FC<TodosAuditFiltersProps> = ({
 
         {/* Estado de pago post-carga (derivado de los datos ya cargados) */}
         {paymentStatusList.length > 0 && (
-          <div className="trash-report-filter-group">
+          <div className="trash-report-filter-group-right">
             <label className="trash-report-filter-label">
               {t('trashRateReport.filters.paymentStatus', 'Estado Pago')}
             </label>
@@ -272,7 +273,7 @@ export const TodosAuditFilters: React.FC<TodosAuditFiltersProps> = ({
 
         {/* Diagnóstico post-carga (derivado de los datos ya cargados) */}
         {diagnosticList.length > 0 && (
-          <div className="trash-report-filter-group">
+          <div className="trash-report-filter-group-right">
             <label className="trash-report-filter-label">
               {t('trashRateReport.filters.diagnostic', 'Diagnóstico')}
             </label>
@@ -281,6 +282,7 @@ export const TodosAuditFilters: React.FC<TodosAuditFiltersProps> = ({
                 size="small"
                 value={selectedDiagnostic}
                 onChange={(e) => onDiagnosticChange(e.target.value)}
+                leftIcon={<FaListCheck size={16} />}
               >
                 <option value="">
                   {t('trashRateReport.filters.all', 'Todos')}

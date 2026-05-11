@@ -136,6 +136,14 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
         formatCurrency(r.rateInIncome - (r.discountApplied ?? 0)),
       isNumeric: true,
       id: 'effectiveTrashToPay'
+    },
+    {
+      header: t('Método de Pago'),
+      accessor: (r) => r.paymentMethod || '-'
+    },
+    {
+      header: t('Recolector'),
+      accessor: (r) => r.collector || '-'
     }
   ];
 
