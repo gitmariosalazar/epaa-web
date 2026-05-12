@@ -110,7 +110,38 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
     },
     {
       header: t('Diagnóstico'),
-      accessor: 'diagnostic'
+      accessor: (r) => {
+        const label =
+          r.diagnostic === 'Correct Match'
+            ? 'Coincidencia Correcta'
+            : r.diagnostic === 'No record in Valor (Ord 10)'
+              ? 'No existe Registro en Tabla de Valor'
+              : 'Diferente Valor - Revisar';
+        const color =
+          r.diagnostic === 'Correct Match'
+            ? 'green'
+            : r.diagnostic === 'No record in Valor (Ord 10)'
+              ? 'red'
+              : 'yellow';
+        const icon =
+          r.diagnostic === 'Correct Match' ? (
+            <CheckCircle />
+          ) : r.diagnostic === 'No record in Valor (Ord 10)' ? (
+            <IoIosCloseCircle />
+          ) : (
+            <IoIosCloseCircle />
+          );
+        return (
+          <ColorChip
+            color={color}
+            label={label}
+            size="sm"
+            variant="soft"
+            icon={icon}
+          />
+        );
+      },
+      id: 'diagnostic'
     },
     {
       header: t('Diferencia'),
@@ -139,11 +170,13 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
     },
     {
       header: t('Método de Pago'),
-      accessor: (r) => r.paymentMethod || '-'
+      accessor: (r) => r.paymentMethod || '-',
+      id: 'paymentMethod'
     },
     {
-      header: t('Recolector'),
-      accessor: (r) => r.collector || '-'
+      header: t('Usuario'),
+      accessor: (r) => r.collector || '-',
+      id: 'collector'
     }
   ];
 
@@ -264,7 +297,9 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
           ),
           Recolectado: formatCurrency(
             item.rateInIncome - (item.discountApplied ?? 0)
-          )
+          ),
+          'Método de Pago': item.paymentMethod || '-',
+          Usuario: item.collector || '-'
         };
 
         return selectedCols.map((col) => {

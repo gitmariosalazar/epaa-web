@@ -14,10 +14,10 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { Select } from '@/shared/presentation/components/Input/Select';
-import { FaCalendarAlt, FaUsers } from 'react-icons/fa';
+import { FaCalendarAlt, FaFunnelDollar } from 'react-icons/fa';
 import type { AuditDateFilter } from '../../../domain/dto/params/TrashRateAuditParams';
 import { FaListCheck } from 'react-icons/fa6';
-import { TbZoomMoneyFilled } from 'react-icons/tb';
+import { TbUserDollar, TbZoomMoneyFilled } from 'react-icons/tb';
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 export interface AuditTabFiltersProps {
@@ -169,14 +169,14 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
         {collectorList.length > 0 && (
           <div className="trash-report-filter-group-right">
             <label className="trash-report-filter-label">
-              {t('trashRateReport.filters.collector', 'Recolector')}
+              {t('trashRateReport.filters.collector', 'Usuario')}
             </label>
             <div className="trash-report-filter-input-wrapper">
               <Select
                 size="small"
                 value={selectedCollector}
                 onChange={(e) => onCollectorChange(e.target.value)}
-                leftIcon={<FaUsers size={16} />}
+                leftIcon={<TbUserDollar size={16} />}
                 width={120}
               >
                 <option value="">
@@ -203,7 +203,7 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
                 size="small"
                 value={selectedPaymentMethod}
                 onChange={(e) => onPaymentMethodChange(e.target.value)}
-                leftIcon={<FaUsers size={16} />}
+                leftIcon={<FaFunnelDollar size={16} />}
                 width={120}
               >
                 <option value="">
