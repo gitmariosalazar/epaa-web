@@ -18,18 +18,19 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { Select } from '@/shared/presentation/components/Input/Select';
-import { FaCalendarAlt, FaFilter, FaListUl } from 'react-icons/fa';
+import { FaCalendarAlt, FaFilter, FaFunnelDollar } from 'react-icons/fa';
 import type { AuditDateFilter } from '../../../domain/dto/params/TrashRateAuditParams';
 import { FaListCheck } from 'react-icons/fa6';
+import { TbUserDollar, TbZoomMoneyFilled } from 'react-icons/tb';
 
 /** Opciones de tipo de pago exclusivas de Vista General */
 export type TodosPaymentTypeChoice = 'all' | 'pagados' | 'pendientes';
 
 const PAYMENT_TYPE_OPTIONS: { value: TodosPaymentTypeChoice; label: string }[] =
   [
-    { value: 'all', label: 'Todos (Pagados y Pendientes)' },
-    { value: 'pagados', label: 'Solo Pagados' },
-    { value: 'pendientes', label: 'Solo Pendientes' }
+    { value: 'all', label: 'Todos' },
+    { value: 'pagados', label: 'Pagados' },
+    { value: 'pendientes', label: 'Pendientes' }
   ];
 
 // ── Props (ISP: solo los props que Vista General necesita) ────────────────────
@@ -69,6 +70,15 @@ export interface TodosAuditFiltersProps {
   selectedDiagnostic: string;
   onDiagnosticChange: (val: string) => void;
   diagnosticList: string[];
+
+  /** Collector + PaymentMethod — siempre visibles en Vista General */
+  selectedCollector: string;
+  onCollectorChange: (val: string) => void;
+  collectorList: string[];
+
+  selectedPaymentMethod: string;
+  onPaymentMethodChange: (val: string) => void;
+  paymentMethodList: string[];
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -90,7 +100,13 @@ export const TodosAuditFilters: React.FC<TodosAuditFiltersProps> = ({
   paymentStatusList,
   selectedDiagnostic,
   onDiagnosticChange,
-  diagnosticList
+  diagnosticList,
+  selectedCollector,
+  onCollectorChange,
+  collectorList,
+  selectedPaymentMethod,
+  onPaymentMethodChange,
+  paymentMethodList
 }) => {
   const { t } = useTranslation();
   const canFetch = !isLoading && Boolean(startDate && endDate);
@@ -106,8 +122,11 @@ export const TodosAuditFilters: React.FC<TodosAuditFiltersProps> = ({
   const handleDateFilterChange = (val: AuditDateFilter) => {
     onDateFilterChange(val);
     if (val === 'paymentDate') {
-      // Aplicar la regla: Fecha Pago → solo pagados
+      // Regla de negocio: Fecha Pago → solo existen registros pagados en el backend
       onPaymentTypeChoiceChange('pagados');
+    } else {
+      // Fecha Emisión → puede haber pagados Y pendientes, resetear el filtro
+      onPaymentTypeChoiceChange('all');
     }
   };
 
@@ -245,7 +264,61 @@ export const TodosAuditFilters: React.FC<TodosAuditFiltersProps> = ({
           </div>
         </div>
 
-        {/* Estado de pago post-carga (derivado de los datos ya cargados) */}
+        {/* Collector */}
+        {collectorList.length > 0 && (
+          <div className="trash-report-filter-group-right">
+            <label className="trash-report-filter-label">
+              {t('trashRateReport.filters.collector', 'Usuario')}
+            </label>
+            <div className="trash-report-filter-input-wrapper">
+              <Select
+                size="small"
+                value={selectedCollector}
+                onChange={(e) => onCollectorChange(e.target.value)}
+                leftIcon={<TbUserDollar size={16} />}
+                width={120}
+              >
+                <option value="">
+                  {t('trashRateReport.filters.all', 'Todos')}
+                </option>
+                {collectorList.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
+        )}
+
+        {/* Método Pago */}
+        {paymentMethodList.length > 0 && (
+          <div className="trash-report-filter-group-right">
+            <label className="trash-report-filter-label">
+              {t('trashRateReport.filters.paymentMethod', 'Método Pago')}
+            </label>
+            <div className="trash-report-filter-input-wrapper">
+              <Select
+                size="small"
+                value={selectedPaymentMethod}
+                onChange={(e) => onPaymentMethodChange(e.target.value)}
+                leftIcon={<FaFunnelDollar size={16} />}
+                width={120}
+              >
+                <option value="">
+                  {t('trashRateReport.filters.all', 'Todos')}
+                </option>
+                {paymentMethodList.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
+        )}
+
+        {/* Estado de pago post-carga */}
         {paymentStatusList.length > 0 && (
           <div className="trash-report-filter-group-right">
             <label className="trash-report-filter-label">
@@ -256,14 +329,19 @@ export const TodosAuditFilters: React.FC<TodosAuditFiltersProps> = ({
                 size="small"
                 value={selectedPaymentStatus}
                 onChange={(e) => onPaymentStatusChange(e.target.value)}
-                leftIcon={<FaListUl size={16} />}
+                leftIcon={<TbZoomMoneyFilled size={16} />}
+                width={120}
               >
                 <option value="">
                   {t('trashRateReport.filters.all', 'Todos')}
                 </option>
                 {paymentStatusList.map((s) => (
                   <option key={s} value={s}>
-                    {s}
+                    {s === 'PAID'
+                      ? t('common.paid')
+                      : s === 'PENDING'
+                        ? t('common.pending')
+                        : t('common.inDebt')}
                   </option>
                 ))}
               </Select>

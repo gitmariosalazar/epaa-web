@@ -113,6 +113,12 @@ export const TrashRateReportPage: React.FC = () => {
                 selectedDiagnostic={vm.activeSubTabFilters.diagnostic}
                 onDiagnosticChange={vm.setDiagnosticLocal}
                 diagnosticList={vm.auditDiagnosticList}
+                selectedCollector={vm.activeSubTabFilters.collector}
+                onCollectorChange={vm.setCollectorLocal}
+                collectorList={vm.auditCollectorList}
+                selectedPaymentMethod={vm.activeSubTabFilters.paymentMethod}
+                onPaymentMethodChange={vm.setPaymentMethod}
+                paymentMethodList={vm.auditPaymentMethodList}
               />
             ) : (
               <AuditTabFilters
@@ -127,12 +133,12 @@ export const TrashRateReportPage: React.FC = () => {
                 onDiagnosticFilterChange={vm.setDiagnosticFilter}
                 searchQuery={vm.activeSubTabFilters.searchQuery}
                 onSearchQueryChange={vm.setSearchQuery}
-                selectedPaymentStatus={vm.activeSubTabFilters.paymentStatus}
-                onPaymentStatusChange={vm.setPaymentStatus}
-                paymentStatusList={vm.auditPaymentStatusList}
                 selectedDiagnostic={vm.activeSubTabFilters.diagnostic}
                 onDiagnosticChange={vm.setDiagnosticLocal}
                 diagnosticList={vm.auditDiagnosticList}
+                showCollectorAndPaymentMethod={
+                  vm.auditSubTab === 'Pagados (Recaudados)'
+                }
                 selectedCollector={vm.activeSubTabFilters.collector}
                 onCollectorChange={vm.setCollectorLocal}
                 collectorList={vm.auditCollectorList}

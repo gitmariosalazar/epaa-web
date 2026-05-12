@@ -53,7 +53,7 @@
 .trash-report-filter-group-left {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;   /* label + input anchored to the LEFT */
+  align-items: flex-start; /* label + input anchored to the LEFT */
   gap: 4px;
   flex: 0 0 auto;
   width: fit-content;
@@ -61,18 +61,28 @@
 }
 
 /* Width rules for left groups */
-.trash-report-filter-group-left:has(input[type='text'])          { width: 200px; }
-.trash-report-filter-group-left:has(.date-range-picker-container){ width: 260px; }
-.trash-report-filter-group-left:has(.datepicker-container)       { width: 160px; }
-.trash-report-filter-group-left:has(input[type='number'])        { width: 85px;  }
+.trash-report-filter-group-left:has(input[type='text']) {
+  width: 200px;
+}
+.trash-report-filter-group-left:has(.date-range-picker-container) {
+  width: 260px;
+}
+.trash-report-filter-group-left:has(.datepicker-container) {
+  width: 160px;
+}
+.trash-report-filter-group-left:has(input[type='number']) {
+  width: 85px;
+}
 .trash-report-filter-group-left:has(.trash-category-select),
-.trash-report-filter-group-left:has(.trash-report-filter-select) { width: 160px; }
+.trash-report-filter-group-left:has(.trash-report-filter-select) {
+  width: 160px;
+}
 
 /* ── Right group: items start from right (flex-end) ──────────────────── */
 .trash-report-filter-group-right {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;   /* label starts normally (left-to-right) */
+  align-items: flex-start; /* label starts normally (left-to-right) */
   gap: 4px;
   flex: 0 0 auto;
   width: fit-content;
@@ -80,19 +90,36 @@
 }
 
 /* Width rules for right groups */
-.trash-report-filter-group-right:has(select)           { width: 120px; }
-.trash-report-filter-group-right:has(input[type='text']){ width: 200px; }
+.trash-report-filter-group-right:has(select) {
+  width: 120px;
+}
+.trash-report-filter-group-right:has(input[type='text']) {
+  width: 200px;
+}
 
 /* ── Width rules for legacy base group (other filter components) ─────── */
-.trash-report-filter-group:has(input[type='text'])           { width: 200px; }
-.trash-report-filter-group:has(.date-range-picker-container) { width: 260px; }
-.trash-report-filter-group:has(.datepicker-container)        { width: 160px; }
-.trash-report-filter-group:has(input[type='number'])         { flex-grow: 0; width: 85px; }
+.trash-report-filter-group:has(input[type='text']) {
+  width: 200px;
+}
+.trash-report-filter-group:has(.date-range-picker-container) {
+  width: 260px;
+}
+.trash-report-filter-group:has(.datepicker-container) {
+  width: 160px;
+}
+.trash-report-filter-group:has(input[type='number']) {
+  flex-grow: 0;
+  width: 85px;
+}
 .trash-report-filter-group:has(.trash-category-select),
-.trash-report-filter-group:has(.trash-report-filter-select)  { width: 160px; }
+.trash-report-filter-group:has(.trash-report-filter-select) {
+  width: 160px;
+}
 
 /* Fallback for components not using :has */
-.trash-report-filter-group--range { width: 260px; }
+.trash-report-filter-group--range {
+  width: 260px;
+}
 
 /* ── Label ───────────────────────────────────────────────────────────── */
 .trash-report-filter-label {

@@ -17,7 +17,7 @@ import { Select } from '@/shared/presentation/components/Input/Select';
 import { FaCalendarAlt, FaFunnelDollar } from 'react-icons/fa';
 import type { AuditDateFilter } from '../../../domain/dto/params/TrashRateAuditParams';
 import { FaListCheck } from 'react-icons/fa6';
-import { TbUserDollar, TbZoomMoneyFilled } from 'react-icons/tb';
+import { TbUserDollar } from 'react-icons/tb';
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 export interface AuditTabFiltersProps {
@@ -45,14 +45,12 @@ export interface AuditTabFiltersProps {
   onSearchQueryChange: (val: string) => void;
 
   // Local post-load filters (derived from loaded data)
-  selectedPaymentStatus: string;
-  onPaymentStatusChange: (val: string) => void;
-  paymentStatusList: string[];
-
   selectedDiagnostic: string;
   onDiagnosticChange: (val: string) => void;
   diagnosticList: string[];
 
+  // Collector + PaymentMethod: only for "Cobros Efectuados" subtab
+  showCollectorAndPaymentMethod?: boolean;
   selectedCollector: string;
   onCollectorChange: (val: string) => void;
   collectorList: string[];
@@ -75,12 +73,10 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
   onDateFilterChange,
   searchQuery,
   onSearchQueryChange,
-  selectedPaymentStatus,
-  onPaymentStatusChange,
-  paymentStatusList,
   selectedDiagnostic,
   onDiagnosticChange,
   diagnosticList,
+  showCollectorAndPaymentMethod = false,
   selectedCollector,
   onCollectorChange,
   collectorList,
@@ -165,8 +161,8 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
           </div>
         </div>
 
-        {/* Collector  */}
-        {collectorList.length > 0 && (
+        {/* Collector + Método Pago — solo en "Cobros Efectuados" */}
+        {showCollectorAndPaymentMethod && collectorList.length > 0 && (
           <div className="trash-report-filter-group-right">
             <label className="trash-report-filter-label">
               {t('trashRateReport.filters.collector', 'Usuario')}
@@ -192,8 +188,7 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
           </div>
         )}
 
-        {/* Payment Method  */}
-        {paymentMethodList.length > 0 && (
+        {showCollectorAndPaymentMethod && paymentMethodList.length > 0 && (
           <div className="trash-report-filter-group-right">
             <label className="trash-report-filter-label">
               {t('trashRateReport.filters.paymentMethod', 'Método Pago')}
@@ -210,33 +205,6 @@ export const AuditTabFilters: React.FC<AuditTabFiltersProps> = ({
                   {t('trashRateReport.filters.all', 'Todos')}
                 </option>
                 {paymentMethodList.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </Select>
-            </div>
-          </div>
-        )}
-
-        {/* Estado de pago (post-load) */}
-        {paymentStatusList.length > 0 && (
-          <div className="trash-report-filter-group-right">
-            <label className="trash-report-filter-label">
-              {t('trashRateReport.filters.paymentStatus', 'Estado Pago')}
-            </label>
-            <div className="trash-report-filter-input-wrapper">
-              <Select
-                size="small"
-                value={selectedPaymentStatus}
-                onChange={(e) => onPaymentStatusChange(e.target.value)}
-                leftIcon={<TbZoomMoneyFilled size={16} />}
-                width={120}
-              >
-                <option value="">
-                  {t('trashRateReport.filters.all', 'Todos')}
-                </option>
-                {paymentStatusList.map((s) => (
                   <option key={s} value={s}>
                     {s}
                   </option>
