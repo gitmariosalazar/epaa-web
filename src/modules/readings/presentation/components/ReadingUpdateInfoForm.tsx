@@ -28,7 +28,11 @@ export const ReadingUpdateInfoForm: React.FC<PropTypes> = ({
     <div className="cr-reading-grid">
       <div className="cr-reading-col">
         <Input
-          label={`Lectura Anterior ${ConverDate(currentReadingInfo?.previousReadingDate) + ' ' + previousReadingInfo.readingTime || '---'}`}
+          label={
+            previousReadingInfo
+              ? `Lectura Anterior ${ConverDate(currentReadingInfo?.previousReadingDate)} - ${previousReadingInfo.readingTime || ''}`
+              : 'Lectura Anterior ---'
+          }
           leftIcon={<FaHistory color="var(--text-muted)" />}
           type="text"
           value={currentReadingInfo?.previousReading}

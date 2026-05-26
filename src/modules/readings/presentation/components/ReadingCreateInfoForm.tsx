@@ -27,7 +27,11 @@ export const ReadingCreateInfoForm: React.FC<PropTypes> = ({
     <div className="cr-reading-grid">
       <div className="cr-reading-col">
         <Input
-          label={`Lectura Anterior ${ConverDate(previousReadingInfoSelected?.previousReadingDate) + ' - ' + previousReadingInfoSelected.readingTime || ''}`}
+          label={
+            previousReadingInfoSelected
+              ? `Lectura Anterior ${ConverDate(previousReadingInfoSelected.previousReadingDate)} - ${previousReadingInfoSelected.readingTime || ''}`
+              : 'Lectura Anterior ---'
+          }
           leftIcon={<FaHistory color="var(--text-muted)" />}
           type="text"
           value={
@@ -42,7 +46,9 @@ export const ReadingCreateInfoForm: React.FC<PropTypes> = ({
           label={
             readingInfoSelected?.hasCurrentReading
               ? `Lectura Actual (Obligatorio)`
-              : `Lectura Actual ${ConverDate(readingInfoSelected?.previousReadingDate) + ' - ' + readingInfoSelected?.readingTime || ''}`
+              : readingInfoSelected
+                ? `Lectura Actual ${ConverDate(readingInfoSelected.previousReadingDate)} - ${readingInfoSelected.readingTime || ''}`
+                : 'Lectura Actual ---'
           }
           leftIcon={<FaTachometerAlt color="var(--text-muted)" />}
           type="number"

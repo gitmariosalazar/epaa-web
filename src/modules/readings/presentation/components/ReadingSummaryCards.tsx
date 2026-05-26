@@ -134,7 +134,7 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
                       `${previousReadingInfoSelected.previousReadingDate}`
                     ) +
                     ' ' +
-                    previousReadingInfoSelected.readingTime
+                    (previousReadingInfoSelected?.readingTime || '')
                   : '---'}
               </div>
             </div>
@@ -166,7 +166,7 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
                       `${currentReadingInfoSelected.previousReadingDate}`
                     ) +
                     ' ' +
-                    currentReadingInfoSelected.readingTime
+                    (currentReadingInfoSelected?.readingTime || '')
                   : '---'}
               </div>
             </div>
@@ -209,7 +209,7 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
               <Alert
                 key={`info-${currentReadingInfoSelected?.cadastralKey}-${alertKey}`}
                 type="info"
-                message={`La lectura para este mes ya se ha registrado (Fecha: ${ConverDate(currentReadingInfoSelected.previousReadingDate)} - ${currentReadingInfoSelected.readingTime}). No se puede registrar otra lectura dentro del mismo mes.`}
+                message={`La lectura para este mes ya se ha registrado (Fecha: ${ConverDate(currentReadingInfoSelected?.previousReadingDate)} - ${currentReadingInfoSelected?.readingTime || ''}). No se puede registrar otra lectura dentro del mismo mes.`}
               />
             ) : (
               <Alert

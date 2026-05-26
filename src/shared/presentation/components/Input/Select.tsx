@@ -10,6 +10,7 @@ import React, {
 import { createPortal } from 'react-dom';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import '@/shared/presentation/styles/Input.css';
+import '@/shared/presentation/styles/Select.css';
 
 interface SelectProps extends Omit<
   SelectHTMLAttributes<HTMLSelectElement>,
@@ -222,7 +223,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         {/* ── Trigger ─────────────────────────────────────────────────── */}
         <div
           ref={triggerRef}
-          className={`input__container${isOpen ? ' input__container--focused' : ''}${disabled ? ' input__container--disabled' : ''}${error ? ' input__container--error' : ''}`}
+          className={`input__container select__trigger${isOpen ? ' input__container--focused' : ''}${disabled ? ' input__container--disabled select__trigger--disabled' : ''}${error ? ' input__container--error' : ''}`}
           tabIndex={disabled ? -1 : 0}
           role="combobox"
           aria-expanded={isOpen}
@@ -237,22 +238,10 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             if (e.key === 'Escape') close();
             if (e.key === 'ArrowDown' && !isOpen) open();
           }}
-          style={{
-            cursor: disabled ? 'not-allowed' : 'pointer',
-            userSelect: 'none'
-          }}
         >
           {leftIcon && <span className="input__icon-left">{leftIcon}</span>}
           <span
-            className={`input__field input__field--select${leftIcon ? ' input__field--with-icon' : ''}${displayIcon !== null ? ' input__field--with-right-icon' : ''}`}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              pointerEvents: 'none'
-            }}
+            className={`input__field input__field--select select__value${leftIcon ? ' input__field--with-icon' : ''}${displayIcon !== null ? ' input__field--with-right-icon' : ''}`}
           >
             {selectedLabel || '\u00A0'}
           </span>
@@ -290,53 +279,18 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             <div
               ref={dropRef}
               role="listbox"
-              style={{
-                ...dropStyle,
-                background: 'var(--bg-surface, #1e2130)',
-                border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
-                borderRadius: '8px',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
-                overflow: 'auto',
-                maxHeight: '260px',
-                padding: '4px'
-              }}
+              className="select__dropdown"
+              style={dropStyle}
             >
               {opts.map((opt) => (
                 <div
                   key={opt.value}
                   role="option"
                   aria-selected={opt.value === currentValue}
+                  className={`select__option${opt.value === currentValue ? ' select__option--selected' : ''}`}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     handleSelect(opt.value);
-                  }}
-                  style={{
-                    padding: '4px 6px',
-                    cursor: 'pointer',
-                    fontSize: '0.72rem',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    color:
-                      opt.value === currentValue
-                        ? 'var(--color-primary, #6c63ff)'
-                        : 'var(--text-primary, #e2e8f0)',
-                    background:
-                      opt.value === currentValue
-                        ? 'var(--color-primary-alpha, rgba(108,99,255,0.15))'
-                        : 'transparent',
-                    fontWeight: opt.value === currentValue ? 600 : 400,
-                    transition: 'background 0.15s'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (opt.value !== currentValue)
-                      (e.currentTarget as HTMLElement).style.background =
-                        'var(--bg-hover, rgba(255,255,255,0.06))';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (opt.value !== currentValue)
-                      (e.currentTarget as HTMLElement).style.background =
-                        'transparent';
                   }}
                 >
                   {opt.label}

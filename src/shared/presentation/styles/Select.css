@@ -1,0 +1,93 @@
+/* ─────────────────────────────────────────────────────────────
+   Select.css — Custom portal dropdown styles
+   Adapts automatically to the .dark class (see variables.css)
+   ───────────────────────────────────────────────────────────── */
+
+/* ── Trigger wrapper ─────────────────────────────────────────── */
+.select__trigger {
+  cursor: pointer;
+  user-select: none;
+}
+
+.select__trigger--disabled {
+  cursor: not-allowed;
+}
+
+/* ── Selected-value span ─────────────────────────────────────── */
+.select__value {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ── Portal dropdown container ───────────────────────────────── */
+.select__dropdown {
+  position: fixed;
+  z-index: 999999;
+  overflow: auto;
+  max-height: 260px;
+  padding: 4px;
+  border-radius: 8px;
+
+  /* Light theme */
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.08),
+    0 8px 24px -4px rgb(0 0 0 / 0.12);
+}
+
+/* Dark theme override */
+.dark .select__dropdown {
+  background: var(--surface, #0f172a);
+  border-color: var(--border-color, #1e293b);
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.5),
+    0 8px 32px -4px rgb(0 0 0 / 0.45);
+}
+
+/* ── Individual option ───────────────────────────────────────── */
+.select__option {
+  padding: 4px 6px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+
+  /* Light theme defaults */
+  color: var(--text-main, #0f172a);
+  background: transparent;
+  font-weight: 400;
+}
+
+/* Dark theme option text */
+.dark .select__option {
+  color: var(--text-main, #f8fafc);
+}
+
+/* Hover state — light */
+.select__option:hover {
+  background: var(--surface-hover, #f1f5f9);
+}
+
+/* Hover state — dark */
+.dark .select__option:hover {
+  background: var(--surface-hover, #1e293b);
+}
+
+/* Selected / active state — shared */
+.select__option--selected {
+  color: var(--accent, #3b82f6);
+  background: color-mix(in srgb, var(--accent, #3b82f6) 12%, transparent);
+  font-weight: 600;
+}
+
+.select__option--selected:hover {
+  background: color-mix(in srgb, var(--accent, #3b82f6) 18%, transparent);
+}
