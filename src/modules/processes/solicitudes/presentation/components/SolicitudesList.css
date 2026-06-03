@@ -1240,3 +1240,124 @@
   to { transform: rotate(360deg); }
 }
 
+/* ═══════════════════════════════════════════════════
+   PAYMENT RECEIPT PREVIEW MODAL
+   ═══════════════════════════════════════════════════ */
+
+.receipt-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(6px);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: sol-fadeIn 0.2s ease;
+}
+
+.receipt-modal__panel {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 860px;
+  height: min(90vh, 820px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(59, 130, 246, 0.12),
+    0 25px 60px rgba(0, 0, 0, 0.55);
+}
+
+.receipt-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  gap: 1rem;
+  background: var(--background);
+}
+
+.receipt-modal__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.receipt-modal__title {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.receipt-modal__subtitle {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.receipt-modal__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.receipt-modal__viewer {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: #14181f;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.receipt-modal__iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  flex: 1;
+}
+
+.receipt-modal__image-wrap {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.receipt-modal__image {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+.receipt-modal__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 2rem;
+  font-size: 0.875rem;
+}
+

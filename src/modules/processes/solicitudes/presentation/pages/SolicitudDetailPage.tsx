@@ -44,13 +44,8 @@ import './SolicitudDetailPage.css';
 import { ConfirmPaymentUseCase } from '../../application/usecases/ConfirmPaymentUseCase';
 import { useAuth } from '@/shared/presentation/context/AuthContext';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
-import { environments } from '@/settings/environments/environments';
+import { PaymentReceiptPreviewModal } from '../components/PaymentReceiptPreviewModal';
 
-/** Strips the trailing /api segment from the API URL so that
- *  relative paths like /uploads/... resolve against the gateway host. */
-const API_BASE = (environments.API_URL || '')
-  .replace(/\/api$/, '')
-  .replace(/\/$/, '');
 
 const DOC_ESTADO_COLOR: Record<string, { color: string; bg: string }> = {
   PENDIENTE: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
@@ -83,6 +78,7 @@ export const SolicitudDetailPage: React.FC = () => {
   const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('TRANSFERENCIA');
   const [paymentReference, setPaymentReference] = useState('');
+  const [receiptModalOpen, setReceiptModalOpen] = useState(false);
 
   const requestDetailUseCase = React.useMemo(
     () => new GetRequestDetailByRequestIdOrNumberUseCase(new SolicitudRepositoryImpl()),
@@ -408,20 +404,16 @@ export const SolicitudDetailPage: React.FC = () => {
                       </div>
                       {solicitud.urlComprobante ? (
                         <div className="sol-detail-payment-confirm-item sol-detail-payment-confirm-item--full" style={{ marginTop: '0.5rem' }}>
-                          <a
-                            href={
-                              solicitud.urlComprobante.startsWith('http')
-                                ? solicitud.urlComprobante
-                                : `${API_BASE}${solicitud.urlComprobante}`
-                            }
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <button
+                            type="button"
+                            onClick={() => setReceiptModalOpen(true)}
                             className="sol-detail-view-receipt-link"
+                            style={{ cursor: 'pointer', background: 'none', border: '1px solid var(--accent)', width: '100%', justifyContent: 'center', padding: '0.5rem 1rem', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent)', fontWeight: 600, fontSize: '0.85rem', transition: 'all 0.18s' }}
                           >
                             <FileText size={16} />
                             Ver Comprobante de Pago
                             <ExternalLink size={12} />
-                          </a>
+                          </button>
                         </div>
                       ) : (
                         <div className="sol-detail-payment-confirm-item sol-detail-payment-confirm-item--full" style={{ marginTop: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -870,6 +862,18 @@ export const SolicitudDetailPage: React.FC = () => {
           onSuccess={() => setReloadTrigger((prev) => prev + 1)}
         />
       )}
+
+      {/* ── Payment Receipt Preview Modal ── */}
+      <PaymentReceiptPreviewModal
+        isOpen={receiptModalOpen}
+        onClose={() => setReceiptModalOpen(false)}
+        receiptUrl={solicitud.urlComprobante}
+        facturaLabel={
+          solicitud.numeroFactura
+            ? `Factura ${solicitud.numeroFactura}`
+            : solicitud.solicitudNumero
+        }
+      />
     </PageLayout>
   );
 };
