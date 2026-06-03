@@ -232,7 +232,16 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
     if (!dto.scheduledDate) throw new Error('La fecha programada es requerida');
     if (!dto.emitterId)     throw new Error('El ID del emisor es requerido');
 
-    await this.client.post<void>('/inspection-order/ordenes/emitir', dto);
+    // Backend DTO: IssueInspectionOrderGatewayRequest
+    // POST /inspection-order/solicitudes/emitir
+    await this.client.post<void>('/inspection-order/solicitudes/emitir', {
+      solicitudId:   dto.solicitudId,
+      technicianId:  dto.technicianId,
+      description:   dto.notes ?? 'Orden de inspección técnica',
+      priorityId:    dto.priorityId ?? 1,
+      scheduledDate: dto.scheduledDate,
+      creatorId:     dto.emitterId,
+    });
   }
 
   // ── Fase 7 — Iniciar inspección ───────────────────────────────────────────
@@ -241,7 +250,13 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
     if (!dto.workOrderId)  throw new Error('El ID de la OT es requerido');
     if (!dto.technicianId) throw new Error('El ID del técnico es requerido');
 
-    await this.client.patch<void>('/inspection-order/ordenes/iniciar', dto);
+    // Backend DTO: StartInspectionGatewayRequest
+    // PATCH /inspection-order/ordenes/iniciar
+    await this.client.patch<void>('/inspection-order/ordenes/iniciar', {
+      workOrderId:    dto.workOrderId,
+      technicianId:   dto.technicianId,
+      startStatusId:  dto.startStatusId ?? 2,
+    });
   }
 
   // ── Fase 8 — Subir informe técnico ────────────────────────────────────────
@@ -293,7 +308,16 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
     if (!dto.scheduledDate) throw new Error('La fecha programada es requerida');
     if (!dto.emitterId)     throw new Error('El ID del emisor es requerido');
 
-    await this.client.post<void>('/installation-order/ordenes/emitir', dto);
+    // Backend DTO: IssueInstallationOrderGatewayRequest
+    // POST /installation-order/solicitudes/emitir-ot
+    await this.client.post<void>('/installation-order/solicitudes/emitir-ot', {
+      solicitudId:   dto.solicitudId,
+      technicianId:  dto.technicianId,
+      description:   dto.notes ?? 'Orden de instalación de acometida',
+      priorityId:    dto.priorityId ?? 1,
+      scheduledDate: dto.scheduledDate,
+      creatorId:     dto.emitterId,
+    });
   }
 
   // ── Fase 13 — Iniciar instalación ────────────────────────────────────────

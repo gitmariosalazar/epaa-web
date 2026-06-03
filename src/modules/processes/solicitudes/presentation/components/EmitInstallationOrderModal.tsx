@@ -43,12 +43,22 @@ export const EmitInstallationOrderModal: React.FC<EmitInstallationOrderModalProp
       .get<any>('/user-employee-gateway/find-technicians?type=INSTALADOR')
       .then((res) => {
         if (!mounted) return;
-        const list: any[] = res.data?.data ?? res.data ?? [];
-        const opts: SearchableSelectOption[] = list.map((emp: any) => ({
-          value: emp.userId ?? emp.employeeId ?? emp.id,
-          label: `${emp.firstName ?? emp.nombres ?? ''} ${emp.lastName ?? emp.apellidos ?? ''}`.trim() ||
-                 emp.username || emp.userId
-        }));
+        const raw = res.data?.data ?? res.data ?? [];
+        const list: any[] = Array.isArray(raw) ? raw : [];
+        console.debug('[EmitInstallationOrderModal] empleados recibidos:', list);
+        const opts: SearchableSelectOption[] = list
+          .filter((emp: any) => emp != null)
+          .map((emp: any) => {
+            const firstName = emp.firstName ?? emp.first_name ?? emp.nombres ?? '';
+            const lastName  = emp.lastName  ?? emp.last_name  ?? emp.apellidos ?? '';
+            const fullName  = emp.fullName  ?? emp.full_name  ?? `${firstName} ${lastName}`.trim();
+            const id        = emp.userId    ?? emp.user_id    ?? emp.employeeId ?? emp.employee_id ?? emp.id;
+            return {
+              value: String(id ?? ''),
+              label: fullName || id || '(sin nombre)'
+            } as SearchableSelectOption;
+          })
+          .filter(opt => opt.value !== '');
         setEmployees(opts);
       })
       .catch(() => { if (mounted) setEmployees([]); })
@@ -117,7 +127,7 @@ export const EmitInstallationOrderModal: React.FC<EmitInstallationOrderModalProp
             <DatePicker
               value={scheduledDate}
               onChange={setScheduledDate}
-              size="medium"
+              size="xs"
             />
           </div>
 

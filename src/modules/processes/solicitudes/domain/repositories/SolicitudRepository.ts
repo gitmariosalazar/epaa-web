@@ -76,13 +76,15 @@ export interface EmitInspectionOrderDto {
   solicitudId: string;
   technicianId: string;
   scheduledDate: string;
-  notes?: string;
-  emitterId: string;
+  notes?: string;         // maps to backend 'description'
+  priorityId?: number;   // optional, default 1
+  emitterId: string;     // maps to backend 'creatorId'
 }
 
 export interface StartInspectionDto {
   workOrderId: string;
   technicianId: string;
+  startStatusId?: number; // optional, default 2 (EN_PROCESO)
 }
 
 export interface SubmitInspectionReportDto {
@@ -129,13 +131,15 @@ export interface EmitInstallationOrderDto {
   solicitudId: string;
   technicianId: string;
   scheduledDate: string;
-  notes?: string;
-  emitterId: string;
+  notes?: string;         // maps to backend 'description'
+  priorityId?: number;   // optional, default 1
+  emitterId: string;     // maps to backend 'creatorId'
 }
 
 export interface StartInstallationDto {
   workOrderId: string;
   technicianId: string;
+  startStatusId?: number; // optional, default 2 (EN_PROCESO)
 }
 
 export interface RegisterCadastralDto {
