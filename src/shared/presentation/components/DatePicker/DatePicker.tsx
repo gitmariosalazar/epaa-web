@@ -25,10 +25,7 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
   ({ value, onChange, disabled = false, view = 'date', size = 'medium' }, ref) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const [alignment, setAlignment] = useState<{
-    horizontal: 'left' | 'right';
-    vertical: 'bottom' | 'top';
-  }>({ horizontal: 'left', vertical: 'bottom' });
+  const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
 
@@ -82,7 +79,7 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
   const toggleCalendar = () => {
     if (!disabled) {
       if (!isOpen) {
-        // Calculate alignment before opening
+        // Calculate alignment and fixed position before opening
         if (containerRef.current) {
           const rect = containerRef.current.getBoundingClientRect();
           const spaceRight = window.innerWidth - rect.left;
@@ -91,7 +88,22 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
           const horizontal = spaceRight < 300 ? 'right' : 'left';
           const vertical = spaceBottom < 350 ? 'top' : 'bottom';
 
-          setAlignment({ horizontal, vertical });
+          // Position: fixed so the popover escapes any overflow:hidden container
+          const style: React.CSSProperties = {
+            position: 'fixed',
+            zIndex: 99999,
+          };
+          if (vertical === 'bottom') {
+            style.top = rect.bottom + 4;
+          } else {
+            style.bottom = window.innerHeight - rect.top + 4;
+          }
+          if (horizontal === 'left') {
+            style.left = rect.left;
+          } else {
+            style.right = window.innerWidth - rect.right;
+          }
+          setPopoverStyle(style);
         }
       }
       setIsOpen(!isOpen);
@@ -355,7 +367,8 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
       {isOpen && (
         <div
           ref={popoverRef}
-          className={`datepicker-popover ${alignment.horizontal === 'right' ? 'datepicker-popover--right-aligned' : ''} ${alignment.vertical === 'top' ? 'datepicker-popover--top-aligned' : ''}`}
+          className={`datepicker-popover`}
+          style={popoverStyle}
         >
           <div className="datepicker-header">
             <button

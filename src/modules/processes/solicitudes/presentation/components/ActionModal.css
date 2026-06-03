@@ -27,15 +27,18 @@
   border: 1px solid var(--border-light, rgba(255,255,255,0.08));
   border-radius: 18px;
   width: 100%;
-  max-width: 520px;
+  max-width: 600px;
   max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  /* overflow visible so DatePicker popover is never clipped */
+  overflow: visible;
   box-shadow: 0 24px 80px rgba(0,0,0,0.5);
   animation: modalIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .action-modal--wide {
-  max-width: 680px;
+  max-width: 720px;
 }
 
 @keyframes modalIn {
@@ -123,6 +126,11 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  /* allow body to scroll if content is tall, while keeping overflow visible
+     for the DatePicker popover — using overflow: visible here lets the
+     popover calendar float outside the modal box without being clipped */
+  overflow: visible;
+  flex: 1;
 }
 
 .action-modal__description {
