@@ -127,7 +127,7 @@ export const EmitInstallationOrderModal: React.FC<EmitInstallationOrderModalProp
             <DatePicker
               value={scheduledDate}
               onChange={setScheduledDate}
-              size="xs"
+              size="medium"
             />
           </div>
 

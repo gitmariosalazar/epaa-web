@@ -215,6 +215,49 @@
   bottom: calc(100% + 0.25rem);
 }
 
+/* ── Medium size: popover compacto (trigger 40px, calendario razonable) ── */
+.datepicker--medium .datepicker-popover {
+  width: 252px;
+  min-width: 0;
+  padding: 0.5rem 0.55rem;
+}
+
+.datepicker--medium .datepicker-header {
+  margin-bottom: 0.4rem;
+}
+
+.datepicker--medium .datepicker-month-title {
+  font-size: 0.8rem;
+}
+
+.datepicker--medium .datepicker-weekdays {
+  font-size: 0.68rem;
+  margin-bottom: 0.3rem;
+}
+
+.datepicker--medium .datepicker-grid {
+  gap: 2px;
+  padding: 1px;
+}
+
+.datepicker--medium .datepicker-cell {
+  width: 32px;
+  height: 28px;
+  aspect-ratio: unset;
+  font-size: 0.75rem;
+  border-radius: 4px;
+}
+
+.datepicker--medium .datepicker-footer {
+  padding-top: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.datepicker--medium .datepicker-manual-input {
+  padding: 0.3rem 0.55rem;
+  font-size: 0.75rem;
+}
+
 .datepicker-header {
   display: flex;
   align-items: center;

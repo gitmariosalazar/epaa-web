@@ -177,7 +177,7 @@ export const RegisterCadastralModal: React.FC<RegisterCadastralModalProps> = ({
               <DatePicker
                 value={installationDate}
                 onChange={setInstallationDate}
-                size="xs"
+                size="medium"
               />
             </div>
           </div>

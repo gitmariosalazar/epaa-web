@@ -135,7 +135,7 @@ export const EmitInspectionOrderModal: React.FC<EmitInspectionOrderModalProps> =
             <DatePicker
               value={scheduledDate}
               onChange={setScheduledDate}
-              size="xs"
+              size="medium"
             />
           </div>
 
