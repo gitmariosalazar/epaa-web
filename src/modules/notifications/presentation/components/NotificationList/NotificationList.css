@@ -1,0 +1,95 @@
+/* ============================================================
+   NotificationList — scrollable container for items
+   ============================================================ */
+
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--surface);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+.notif-list::-webkit-scrollbar { width: 4px; }
+.notif-list::-webkit-scrollbar-track { background: transparent; }
+.notif-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+/* Empty state */
+.notif-list__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.notif-list__empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--surface-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.notif-list__empty-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.notif-list__empty-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Skeleton loader */
+.notif-skeleton {
+  padding: 1rem 1.25rem;
+  display: flex;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.notif-skeleton__circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--surface-hover);
+  flex-shrink: 0;
+  animation: notifPulse 1.4s ease infinite;
+}
+
+.notif-skeleton__lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.notif-skeleton__line {
+  height: 10px;
+  border-radius: 6px;
+  background: var(--surface-hover);
+  animation: notifPulse 1.4s ease infinite;
+}
+
+.notif-skeleton__line--short { width: 55%; }
+.notif-skeleton__line--long  { width: 85%; }
+
+@keyframes notifPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}

@@ -1,0 +1,65 @@
+/* Layout Filters - Global styles for filter bars matching the provided design */
+
+.layout-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-xl);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  width: 100%;
+}
+
+.layout-filter-section-left,
+.layout-filter-section-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--spacing-md);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.filter-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  padding-left: 2px;
+}
+
+.filter-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Ensure the wrapper inputs conform to uniform sizes */
+.filter-input-wrapper > * {
+  min-width: 160px;
+}
+
+/* Adjust button inside filters so it aligns perfectly with inputs */
+.layout-filters button {
+  height: 38px; /* compact size typical height */
+}
+
+@media (max-width: 1024px) {
+  .layout-filters {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .layout-filter-section-left,
+  .layout-filter-section-right {
+    width: 100%;
+  }
+}

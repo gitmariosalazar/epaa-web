@@ -262,6 +262,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
         if (followCursor) setMouseCoords(null);
         onMouseLeave?.(e);
       }}
+      onClick={() => {
+        setIsVisible(false);
+        if (followCursor) setMouseCoords(null);
+      }}
     >
       {children}
       {isVisible &&

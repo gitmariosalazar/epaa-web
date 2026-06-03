@@ -1,0 +1,1055 @@
+/* ════════════════════════════════════════════════════════
+   Tramites Module Styles
+   ════════════════════════════════════════════════════════ */
+
+/* ── Catalog Grid ── */
+.tramites-catalog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.tramites-category {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.tramites-category__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.tramites-category__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.tramites-category__divider {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, var(--border-color), transparent);
+}
+
+.tramites-category__badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--surface-hover);
+  color: var(--text-muted);
+}
+
+.tramites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-md);
+}
+
+/* ── Tramite Card ── */
+.tramite-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.tramite-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--tramite-color, var(--accent));
+  opacity: 0;
+  transition: opacity 0.22s;
+}
+
+.tramite-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: color-mix(
+    in srgb,
+    var(--tramite-color, var(--accent)),
+    transparent 60%
+  );
+}
+
+.tramite-card:hover::before {
+  opacity: 1;
+}
+
+.tramite-card__top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+}
+
+.tramite-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: color-mix(
+    in srgb,
+    var(--tramite-color, var(--accent)),
+    transparent 85%
+  );
+  color: var(--tramite-color, var(--accent));
+}
+
+.tramite-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tramite-card__nombre {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tramite-card__tipo {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tramite-color, var(--accent));
+}
+
+.tramite-card__descripcion {
+  font-size: 0.825rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tramite-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+}
+
+.tramite-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.tramite-card__meta-item strong {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.tramite-card__arrow {
+  color: var(--tramite-color, var(--accent));
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: all 0.2s;
+}
+
+.tramite-card:hover .tramite-card__arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Detail Page Layout ── */
+.tramite-detail {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xl);
+  padding-bottom: var(--spacing-2xl);
+}
+
+/* Left column: main content, scrolls with the page */
+.tramite-detail__main {
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .tramite-detail {
+    grid-template-columns: 1fr;
+  }
+  .tramite-detail__sidebar {
+    position: static;
+    max-height: none;
+  }
+}
+
+.tramite-detail__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl);
+  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--tramite-color, var(--accent)), transparent 90%) 0%,
+    var(--surface) 100%
+  );
+}
+
+.tramite-detail__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-lg);
+  background: color-mix(
+    in srgb,
+    var(--tramite-color, var(--accent)),
+    transparent 80%
+  );
+  color: var(--tramite-color, var(--accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tramite-detail__title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0 0 4px;
+}
+
+.tramite-detail__subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Requisitos list */
+.requisitos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.requisito-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.15s;
+}
+
+.requisito-item:last-child {
+  border-bottom: none;
+}
+
+.requisito-item:hover {
+  background: var(--surface-hover);
+}
+
+.requisito-item--has-file {
+  background: rgba(16, 185, 129, 0.025);
+}
+
+.requisito-item--has-file:hover {
+  background: rgba(16, 185, 129, 0.045);
+}
+
+/* Step number bubble */
+.requisito-item__number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface-hover);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+  border: 1px solid var(--border-color);
+}
+
+.requisito-item--has-file .requisito-item__number {
+  background: var(--success);
+  color: white;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.requisito-item__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.requisito-item__icon--documento {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.requisito-item__icon--pago {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.requisito-item__icon--formulario {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.requisito-item__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.requisito-item__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.requisito-item__descripcion {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-main);
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+}
+
+.requisito-item__optional-badge {
+  margin-left: 6px;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  background: var(--surface-hover);
+  padding: 1px 6px;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+.requisito-item__badges {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.requisito-item__nota {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.requisito-item__costo {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.08);
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.requisito-item__tipo-badge {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+/* The uploader area below each requisito */
+.requisito-item__uploader {
+  margin-top: 4px;
+}
+
+/* ── Cost Summary Card ── */
+.tramite-cost-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.tramite-cost-card__header {
+  background: linear-gradient(
+    135deg,
+    var(--tramite-color, var(--accent)),
+    color-mix(in srgb, var(--tramite-color, var(--accent)), black 15%)
+  );
+  color: white;
+  padding: var(--spacing-lg);
+}
+
+.tramite-cost-card__total-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+
+.tramite-cost-card__total-value {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tramite-cost-card__tiempo {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  margin-top: 4px;
+}
+/* ── Tramite Detail Page ─────────────────────────────── */
+
+.tramite-detail-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.tramite-detail__left-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  min-width: 0;
+}
+
+.tramite-detail__right-col {
+  width: 340px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  position: sticky;
+  top: var(--spacing-sm);
+  align-self: flex-start;
+}
+
+@media (max-width: 900px) {
+  .tramite-detail {
+    flex-direction: column;
+  }
+  .tramite-detail__right-col {
+    width: 100%;
+    position: static;
+  }
+}
+
+.tramite-detail__main {
+  overflow: hidden;
+}
+
+.tramite-detail__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl) var(--spacing-lg);
+  background: color-mix(
+    in srgb,
+    var(--tramite-color, var(--accent)) 8%,
+    transparent
+  );
+  border-bottom: 2px solid
+    color-mix(in srgb, var(--tramite-color, var(--accent)) 20%, transparent);
+}
+
+.tramite-detail__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  color: var(--tramite-color, var(--accent));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.tramite-detail__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.tramite-detail__subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.tramite-detail__req-header {
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tramite-detail__req-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tramite-detail__req-icon {
+  color: var(--accent);
+}
+
+.tramite-detail__req-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.tramite-detail__req-legend {
+  margin-left: auto;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.tramite-detail__req-legend-item {
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tramite-detail__req-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.tramite-detail__notice {
+  margin: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.tramite-detail__notice-icon {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tramite-detail__steps-card {
+  padding: var(--spacing-xl);
+}
+
+.tramite-detail__steps-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: var(--spacing-xl);
+}
+
+.tramite-detail__steps-icon {
+  color: var(--accent);
+}
+
+.tramite-detail__steps-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.tramite-detail__summary {
+  padding: var(--spacing-lg);
+}
+
+.tramite-detail__summary-title {
+  margin: 0 0 var(--spacing-lg);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tramite-detail__summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.tramite-detail__summary-item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.tramite-detail__summary-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--surface-hover);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tramite-detail__summary-label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.tramite-detail__summary-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.3;
+}
+
+.tramite-detail__summary-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  margin-bottom: calc(-1 * var(--spacing-md));
+}
+
+.tramite-detail__summary-btn {
+  margin-top: var(--spacing-xl);
+  width: 100%;
+}
+
+.tramite-detail__summary-help {
+  margin: var(--spacing-md) 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.tramite-detail__summary-help a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.tramite-detail__summary-help a:hover {
+  text-decoration: underline;
+}
+
+/* Process Timeline */
+.process-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.process-step {
+  display: flex;
+  gap: 1.5rem;
+  position: relative;
+  padding-bottom: var(--spacing-xl);
+}
+
+.process-step:last-child {
+  padding-bottom: 0;
+}
+
+.process-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 40px;
+  bottom: 0;
+  width: 2px;
+  background: var(--border-color);
+  z-index: 0;
+}
+
+.process-step__number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  z-index: 1;
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 4px var(--surface);
+  flex-shrink: 0;
+}
+
+.process-step__content {
+  padding-top: 0.5rem;
+}
+
+.process-step__title {
+  margin: 0 0 0.25rem;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+.process-step__desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.tramite-cost-card__breakdown {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.tramite-cost-card__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.825rem;
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+.tramite-cost-card__row:last-child {
+  border-bottom: none;
+}
+
+.tramite-cost-card__row span {
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.tramite-cost-card__row strong {
+  color: var(--text-main);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tramite-cost-card__actions {
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* ── Submit Form ── */
+.tramite-submit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl);
+}
+
+.tramite-submit-form__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tramite-submit-form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+@media (max-width: 600px) {
+  .tramite-submit-form__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Type Selector ── */
+.tipo-persona-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.tipo-persona-card {
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.tipo-persona-card:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent), transparent 94%);
+}
+
+.tipo-persona-card--selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent), transparent 92%);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+.tipo-persona-card__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--accent), transparent 85%);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tipo-persona-card--selected .tipo-persona-card__icon {
+  background: var(--accent);
+  color: white;
+}
+
+.tipo-persona-card__label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.tipo-persona-card__desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ── States ── */
+.tramites-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-2xl);
+  color: var(--text-muted);
+  gap: var(--spacing-md);
+  min-height: 200px;
+}
+
+.tramites-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  color: var(--text-muted);
+  gap: var(--spacing-sm);
+}
+
+/* ── Tramites Catalog Page ─────────────────────────────── */
+
+.tramites-catalog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.tramites-catalog-header__text {
+  /* text wrapper */
+}
+
+.tramites-catalog-header__title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-main);
+}
+
+.tramites-catalog-header__subtitle {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.tramites-catalog-header__stats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tramites-catalog-stat {
+  text-align: center;
+  padding: 0.4rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.tramites-catalog-stat__value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--stat-color, var(--accent));
+}
+
+.tramites-catalog-stat__label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tramites-catalog-search-wrapper {
+  position: relative;
+  max-width: 380px;
+}
+
+.tramites-catalog-search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+.tramites-catalog-search-input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  font-size: 0.9rem;
+  outline: none;
+  color: var(--text-main);
+  transition: border-color 0.2s;
+}
+
+.tramites-catalog-search-input:focus {
+  border-color: var(--accent);
+}
+
+.tramites-catalog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.tramites-catalog-section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.75rem;
+}
+
+.tramites-catalog-section-icon {
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  background: color-mix(
+    in srgb,
+    var(--section-color, var(--accent)) 15%,
+    transparent
+  );
+  color: var(--section-color, var(--accent));
+  display: flex;
+}
+
+.tramites-catalog-section-text {
+  /* wrapper */
+}
+
+.tramites-catalog-section-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.tramites-catalog-section-desc {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.tramites-catalog-section-count {
+  margin-left: auto;
+  background: var(--surface-hover);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.tramites-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+

@@ -1,0 +1,173 @@
+/* ============================================================
+   SolicitudesTrackingPage — layout + toolbar styles
+   ============================================================ */
+
+/* ── Page body ── */
+.trk-page-body {
+  padding: 0.75rem;
+  background: var(--background);
+  border-radius: 0.875rem;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Cards list ── */
+.trk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+/* ── Empty state ── */
+.trk-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.trk-empty__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-hover);
+  color: var(--text-muted);
+}
+
+.trk-empty h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.trk-empty p {
+  margin: 0;
+  font-size: 0.85rem;
+  max-width: 340px;
+}
+
+/* ── Toolbar ── */
+.trk-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.875rem;
+  flex-wrap: wrap;
+}
+
+.trk-toolbar__search {
+  flex: 1;
+  min-width: 220px;
+  position: relative;
+}
+
+.trk-toolbar__search input {
+  width: 100%;
+  padding: 0.5rem 0.875rem 0.5rem 2.5rem;
+  background: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-main);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.trk-toolbar__search input::placeholder {
+  color: var(--text-muted);
+}
+
+.trk-toolbar__search input:focus {
+  border-color: var(--accent);
+}
+
+.trk-toolbar__search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.trk-toolbar__select {
+  padding: 0.5rem 0.875rem;
+  background: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-main);
+  font-size: 0.8rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  min-width: 150px;
+}
+
+.trk-toolbar__select:focus {
+  border-color: var(--accent);
+}
+
+.trk-toolbar__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+
+.trk-toolbar__btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-main);
+}
+
+.trk-toolbar__divider {
+  width: 1px;
+  height: 28px;
+  background: var(--border-color);
+  flex-shrink: 0;
+}
+
+.trk-toolbar__count {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Legacy (keep for backward compat if needed) ── */
+.tracking-page-container,
+.tracking-list,
+.tracking-card,
+.tracking-card__header,
+.tracking-card__info,
+.tracking-card__title-row,
+.tracking-card__codigo,
+.tracking-card__pill,
+.tracking-card__direccion,
+.tracking-card__fecha,
+.tracking-card__timeline-wrapper,
+.tracking-card__footer,
+.tracking-list__empty {
+  /* intentionally empty — replaced by trk-* classes */
+}

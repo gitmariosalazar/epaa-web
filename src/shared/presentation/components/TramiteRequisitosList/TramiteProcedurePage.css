@@ -1,0 +1,346 @@
+/* ============================================================
+   TramiteProcedurePage — shared layout for all procedure pages
+   ============================================================ */
+
+/* ── Scroll layout ─────────────────────────────────────────── */
+/*
+  Two-column layout where ONLY the requisitos (center) scrolls.
+  Left section (title + hero + tabs) and right sidebar (resumen + soporte) are sticky.
+*/
+.tp-scroll-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1rem;
+  /* PageLayout body is flex:1 with height 100% — we just fill it */
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tp-scroll-layout__left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Static (non-scrolling) section inside left col */
+.tp-scroll-layout__sticky {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Scrollable requisitos section */
+.tp-scroll-layout__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+  padding-right: 2px;
+}
+
+.tp-scroll-layout__body::-webkit-scrollbar { width: 4px; }
+.tp-scroll-layout__body::-webkit-scrollbar-track { background: transparent; }
+.tp-scroll-layout__body::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+/* Sticky right column — no visible scrollbar */
+.tp-scroll-layout__right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: hidden;   /* right col never scrolls */
+}
+
+/* ── Compact SupportContactCard wrapper ─────────────────────── */
+.tp-support-compact {
+  font-size: 0.8em;
+}
+.tp-support-compact .support-contact__title {
+  font-size: 0.82rem !important;
+  line-height: 1.35 !important;
+}
+.tp-support-compact .support-contact__description {
+  font-size: 0.73rem !important;
+  line-height: 1.4 !important;
+}
+.tp-support-compact .support-contact__item {
+  padding: 0.45rem 0.75rem !important;
+  gap: 0.5rem !important;
+}
+.tp-support-compact .support-contact__item-icon {
+  width: 28px !important;
+  height: 28px !important;
+  flex-shrink: 0;
+}
+.tp-support-compact .support-contact__item-icon svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+.tp-support-compact .support-contact__item-label {
+  font-size: 0.65rem !important;
+}
+.tp-support-compact .support-contact__item-value {
+  font-size: 0.73rem !important;
+}
+.tp-support-compact .support-contact__badge span {
+  font-size: 0.65rem !important;
+}
+.tp-support-compact .support-contact__footer {
+  padding: 0.5rem 0.875rem !important;
+}
+
+/* Responsive — stack on smaller screens */
+@media (max-width: 960px) {
+  .tp-scroll-layout {
+    grid-template-columns: 1fr 260px;
+  }
+}
+@media (max-width: 720px) {
+  .tp-scroll-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+  .tp-scroll-layout__left { overflow: visible; min-height: unset; }
+  .tp-scroll-layout__body { overflow-y: visible; flex: unset; min-height: unset; }
+  .tp-scroll-layout__right { overflow: visible; }
+}
+
+
+.tp-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 1.75rem;
+  border-radius: 0.875rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.tp-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--tp-accent-bg, rgba(59,130,246,0.08));
+  border-radius: inherit;
+  z-index: 0;
+}
+
+.tp-hero__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.tp-hero__text {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.tp-hero__title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 0 0 0.25rem;
+  color: var(--text-main);
+}
+
+.tp-hero__desc {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.tp-hero__badges {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+.tp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.tp-badge--accent {
+  color: var(--tp-color, #3b82f6);
+  background: var(--tp-accent-bg, rgba(59,130,246,0.1));
+  border-color: var(--tp-color, #3b82f6);
+}
+
+/* Content grid */
+.tp-grid {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .tp-grid { grid-template-columns: 1fr; }
+}
+
+/* Section card */
+.tp-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.875rem;
+  overflow: hidden;
+}
+
+.tp-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--surface-hover);
+}
+
+.tp-card__header-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tp-card__title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.tp-card__body {
+  padding: 1rem 1.25rem;
+}
+
+/* Info list in sidebar */
+.tp-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.tp-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.tp-info-item__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 0.4rem;
+  background: var(--surface-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.tp-info-item__body {
+  flex: 1;
+}
+
+.tp-info-item__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 0.15rem;
+}
+
+.tp-info-item__value {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* CTA button */
+.tp-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  border-radius: 0.625rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  margin-top: 1rem;
+}
+
+.tp-cta:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Tabs (for acometidas variants) */
+.tp-tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 0 1rem;
+  flex-wrap: wrap;
+}
+
+.tp-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.18s;
+}
+
+.tp-tab--active {
+  background: var(--tp-color, var(--accent));
+  color: #fff;
+  border-color: transparent;
+}
+
+.tp-tab:not(.tp-tab--active):hover {
+  background: var(--surface-hover);
+  color: var(--text-main);
+}

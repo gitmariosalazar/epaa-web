@@ -17,6 +17,11 @@ export interface PageLayoutProps {
    * The primary scrollable content of the page (e.g. Tables, Dashboards, Charts).
    */
   children: React.ReactNode;
+    /**
+   * Optional sticky footer row. Displays permanently at the very bottom — never
+   * scrolls away. Ideal for pagination controls.
+   */
+  footer?: React.ReactNode;
   
   /**
    * Custom CSS classes appended to the root layout container.
@@ -33,6 +38,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   header,
   filters,
   children,
+  footer,
   className = ''
 }) => {
   return (
@@ -52,6 +58,12 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
       <main className="epaa-page-layout__body">
         {children}
       </main>
+
+      {footer && (
+        <footer className="epaa-page-layout__footer">
+          {footer}
+        </footer>
+      )}
     </div>
   );
 };

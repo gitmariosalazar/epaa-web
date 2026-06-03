@@ -1,0 +1,44 @@
+/* ============================================================
+   NotificationToolbar — uses shared Tabs, Select, Button, Modal
+   ============================================================ */
+
+.notif-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem 0 0;          /* tabs have their own left padding */
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-color);
+  gap: 1rem;
+  flex-shrink: 0;
+  min-height: 50px;
+}
+
+/* Override shared Tabs inside toolbar so they sit flush */
+.notif-toolbar__shared-tabs .tabs__list {
+  border-bottom: none !important;  /* toolbar already has border-bottom */
+  gap: 0;
+}
+
+.notif-toolbar__shared-tabs .tabs__tab {
+  padding: 0.85rem 1.1rem;
+  font-size: 0.84rem;
+  border-bottom-width: 2px;
+}
+
+/* Right actions row */
+.notif-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Make the Select fit the toolbar height nicely */
+.notif-toolbar__select {
+  margin: 0 !important;
+}
+
+.notif-toolbar__select .input-component {
+  margin: 0;
+}

@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import '@/shared/presentation/styles/Header.css';
 import { Tooltip } from '../common/Tooltip/Tooltip';
 import { FaWhatsapp } from 'react-icons/fa';
+import { NotificationBellWrapper } from '@/modules/notifications/presentation/components/NotificationBell/NotificationBellWrapper';
 
 interface SupportTooltipContentProps {
   onSupportClick: () => void;
@@ -198,6 +199,8 @@ export const Header: React.FC = () => {
               </div>
             )}
           </div>
+
+          <NotificationBellWrapper />
 
           <Tooltip content={t('header.switchLang')} themeColor="info">
             <button

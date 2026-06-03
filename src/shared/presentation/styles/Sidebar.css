@@ -9,12 +9,13 @@
   z-index: 500;
   transition: width var(--transition-normal);
   flex-shrink: 0; /* Don't shrink */
-  overflow-x: hidden;
+  overflow: hidden;
   white-space: nowrap;
 }
 
 .sidebar--collapsed {
   width: 80px;
+  overflow: visible !important; /* Critical to show flyouts when collapsed */
 }
 
 .sidebar__header {
@@ -69,6 +70,7 @@
   gap: 2px;
   overflow-y: auto;
   overflow-x: hidden;
+  min-height: 0;
 }
 
 /* Custom Scrollbar for Sidebar */
@@ -204,6 +206,7 @@
 }
 
 /* Collapsible Sub-menu Styles */
+/* Collapsible Sub-menu Styles */
 .sidebar__item-wrapper {
   display: flex;
   flex-direction: column;
@@ -224,28 +227,26 @@
   color: var(--text-tertiary);
 }
 
-.sidebar__sub-menu {
+/* Sub-menu base styles (Vertical Tree for Expanded Sidebar) */
+.sidebar:not(.sidebar--collapsed) .sidebar__sub-menu {
   display: flex;
   flex-direction: column;
   max-height: 0;
   overflow: hidden;
-  transition:
-    max-height 0.3s ease-in-out,
-    opacity 0.3s ease-in-out;
+  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
   opacity: 0;
-  background-color: rgba(0, 0, 0, 0.02); /* Slight contrast background */
-  border-radius: var(--radius-md);
   margin-top: 2px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  margin-left: 1.25rem;
 }
 
-.sidebar__sub-menu--open {
-  max-height: 500px;
+.sidebar:not(.sidebar--collapsed) .sidebar__sub-menu--open {
+  max-height: 2000px;
   opacity: 1;
   padding-bottom: var(--spacing-xs);
 }
 
 .sidebar__sub-link {
-  padding-left: 3rem !important; /* Indent sub-items */
   font-size: 0.9rem;
 }
 
@@ -258,66 +259,91 @@
   display: none;
 }
 
+/* Re-enable chevrons inside flyouts */
+.sidebar--collapsed .sidebar__sub-menu .sidebar__chevron {
+  display: flex;
+}
+
 /* Collapsed State Flyout & Tooltip Styles */
-.sidebar--collapsed,
+/* ── Collapsed Sidebar: Horizontal Cascading Flyouts ── */
 .sidebar--collapsed .sidebar__nav {
-  overflow: visible !important; /* Critical to show flyouts */
+  overflow: visible !important;
 }
 
 .sidebar--collapsed .sidebar__sub-menu,
 .sidebar--collapsed .sidebar__floating-label {
   position: absolute;
   left: 100%;
-  top: 50%;
-  transform: translateY(-50%) translateX(10px);
-  background-color: var(--surface);
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border-color);
+  top: 0;
+  min-width: 240px;
+  background-color: #111827; /* Darker slate for premium feel */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-md);
   opacity: 0;
   visibility: hidden;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translateX(10px);
   z-index: 1000;
   pointer-events: none;
-}
-
-.sidebar--collapsed .sidebar__sub-menu {
-  width: 220px;
-  max-height: none;
-  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  max-height: none !important;
+  overflow: visible !important;
   padding: var(--spacing-xs) 0;
-  pointer-events: auto; /* Sub-items need interaction */
 }
 
-.sidebar--collapsed .sidebar__floating-label {
-  padding: 0.5rem 1rem;
-  white-space: nowrap;
-  color: var(--text-main);
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-.sidebar--collapsed .sidebar__item-wrapper:hover .sidebar__sub-menu,
-.sidebar--collapsed .sidebar__item-wrapper:hover .sidebar__floating-label {
+/* Hover triggers cascade */
+.sidebar--collapsed .sidebar__item-wrapper:hover > .sidebar__sub-menu,
+.sidebar--collapsed .sidebar__item-wrapper:hover > .sidebar__floating-label {
   opacity: 1;
   visibility: visible;
-  transform: translateY(-50%) translateX(0);
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+/* Ensure no gaps for mouse transition */
+.sidebar--collapsed .sidebar__sub-menu::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 0;
+  width: 20px;
+  height: 100%;
+}
+
+/* Level 2+ Cascade (Nested Flyouts) */
+.sidebar--collapsed .sidebar__sub-menu .sidebar__sub-menu {
+  left: 100%;
+  top: -5px; /* Slight offset for alignment */
+  margin-left: 2px;
 }
 
 .sidebar--collapsed .sidebar__sub-link {
-  padding-left: var(--spacing-md) !important;
+  padding: var(--spacing-sm) var(--spacing-md) !important;
   justify-content: flex-start;
+  margin: 0 var(--spacing-xs);
+  border-radius: var(--radius-sm);
 }
 
 .sidebar__flyout-header {
   padding: var(--spacing-sm) var(--spacing-md);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border-color);
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   margin-bottom: var(--spacing-xs);
+}
+
+.sidebar--collapsed .sidebar__link--active-parent {
+  background-color: rgba(59, 130, 246, 0.1);
 }
 
 .sidebar--collapsed .sidebar__sub-menu .sidebar__label {

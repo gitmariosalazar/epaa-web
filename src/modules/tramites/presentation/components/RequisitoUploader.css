@@ -1,0 +1,182 @@
+/* ── RequisitoUploader Styles ── */
+
+/* Empty / dropzone state */
+.req-uploader--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 14px;
+  border: 1.5px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  background: var(--surface);
+  min-height: 62px;
+  text-align: center;
+  user-select: none;
+}
+
+.req-uploader--empty:hover,
+.req-uploader--dragging {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent), transparent 93%);
+}
+
+.req-uploader--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.req-uploader__cloud-icon {
+  color: var(--text-muted);
+  transition: color 0.18s;
+}
+
+.req-uploader--empty:hover .req-uploader__cloud-icon,
+.req-uploader--dragging .req-uploader__cloud-icon {
+  color: var(--accent);
+}
+
+.req-uploader__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: color 0.18s;
+}
+
+.req-uploader--empty:hover .req-uploader__label,
+.req-uploader--dragging .req-uploader__label {
+  color: var(--accent);
+}
+
+.req-uploader__hint {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+/* Attached file state */
+.req-uploader--attached {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--surface-hover);
+}
+
+.req-uploader--done {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.req-uploader--error {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.req-uploader__file-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.req-uploader__file-icon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.req-uploader__file-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.req-uploader__file-name {
+  display: block;
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.req-uploader__file-size {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+/* Status badges */
+.req-uploader__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.req-uploader__badge--pending {
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--text-muted);
+}
+
+.req-uploader__badge--uploading {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  animation: pulse 1s infinite;
+}
+
+.req-uploader__badge--done {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--success);
+}
+
+.req-uploader__badge--error {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+}
+
+/* Remove button */
+.req-uploader__remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.req-uploader__remove:hover {
+  color: var(--error);
+}
+
+/* Error message */
+.req-uploader__error-msg {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  color: var(--error);
+  margin: 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}

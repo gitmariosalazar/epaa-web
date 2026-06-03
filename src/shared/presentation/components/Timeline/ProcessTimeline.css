@@ -1,0 +1,146 @@
+/* ── ProcessTimeline ── */
+.process-timeline-horizontal {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-width: 800px; /* Thicker and wider timeline */
+  position: relative;
+  padding: 0 var(--spacing-md);
+}
+
+.process-timeline-horizontal__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 2;
+  width: 80px;
+}
+
+.process-timeline-horizontal__circle {
+  width: 46px; /* Heavier weight */
+  height: 46px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 3px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+}
+
+.process-timeline-horizontal__circle--completed {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+  color: #10b981;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+}
+
+.process-timeline-horizontal__circle--current {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: #f59e0b;
+  color: #f59e0b;
+  box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.2);
+}
+
+.process-timeline-horizontal__circle--current::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  border-radius: 50%;
+  border: 2px solid #f59e0b;
+  opacity: 0;
+  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+.process-timeline-horizontal__circle--pending {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: rgba(239, 68, 68, 0.6);
+}
+
+.process-timeline-horizontal__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text-muted) 50%, transparent);
+}
+
+.process-timeline-horizontal__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.process-timeline-horizontal__label--active {
+  color: var(--accent);
+}
+
+.process-timeline-horizontal__line {
+  flex: 1;
+  height: 4px; /* More weight */
+  background: var(--border-color);
+  margin-top: 21px; /* half of 46px circle height minus 2px */
+  min-width: 30px;
+  border-radius: 2px;
+  transition: background 0.4s ease;
+}
+
+.process-timeline-horizontal__line--active {
+  background: linear-gradient(90deg, #10b981, rgba(16, 185, 129, 0.5));
+}
+
+/* ── Status Badges ── */
+.process-timeline-horizontal__badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  color: white;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  border: 2px solid var(--surface);
+}
+
+.process-timeline-horizontal__badge--completed {
+  background: var(--success, #10b981); /* Green check */
+}
+
+.process-timeline-horizontal__badge--pending {
+  background: var(--error, #ef4444); /* Red X */
+}
+
+.process-timeline-horizontal__badge--current {
+  background: var(--warning, #f59e0b); /* Yellow/Orange clock/warning */
+}
+
+.process-timeline-horizontal__main-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

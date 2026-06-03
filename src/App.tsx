@@ -57,6 +57,27 @@ import { AgreementsPage } from '@/modules/accounting/presentation/pages/agreemen
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+// Notifications Module
+import { NotificationsPage } from '@/modules/notifications/presentation/pages/NotificationsPage';
+
+// Tramites Module
+import { TramitesProvider } from '@/modules/tramites/presentation/context/TramitesContext';
+import { TramitesCatalogPage } from '@/modules/tramites/presentation/pages/TramitesCatalogPage';
+import { TramiteDetailPage } from '@/modules/tramites/presentation/pages/TramiteDetailPage';
+
+// Procedures Requirements Pages
+import { CambioTitularPage } from '@/modules/processes/cambio-titular/presentation/pages/CambioTitularPage';
+import { SuspensionPage } from '@/modules/processes/suspension/presentation/pages/SuspensionPage';
+import { BeneficioTerceraEdadPage } from '@/modules/processes/beneficio-tercera-edad/presentation/pages/BeneficioTerceraEdadPage';
+import { BeneficioDiscapacidadPage } from '@/modules/processes/beneficio-discapacidad/presentation/pages/BeneficioDiscapacidadPage';
+
+// Solicitudes Module
+import { SolicitudesProvider } from '@/modules/processes/solicitudes/presentation/context/SolicitudesContext';
+import { SolicitudNuevaPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudNuevaPage';
+import { SolicitudesTrackingPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudesTrackingPage';
+import { SolicitudesListPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudesListPage';
+import { SolicitudDetailPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudDetailPage';
+
 import UnAuthorizedPage from '@/shared/presentation/components/unauthorized/UnAuthorizedPage';
 import { CircularProgress } from './shared/presentation/components/CircularProgress';
 
@@ -110,7 +131,14 @@ function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <ToastContainer />
+        <ToastContainer 
+          position="top-right"
+          autoClose={4500}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnHover
+          theme="colored" />
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
@@ -275,7 +303,65 @@ function App() {
                     </GetPropertyContextProvider>
                   }
                 />
-                {/* Add other protected routes here */}
+
+                {/* Módulo de Notificaciones */}
+                <Route path="/notifications" element={<NotificationsPage />} />
+
+                {/* Módulo de Trámites */}
+                <Route
+                  path="/tramites/*"
+                  element={
+                    <TramitesProvider>
+                      <Routes>
+                        <Route index element={<TramitesCatalogPage />} />
+                        <Route path=":id" element={<TramiteDetailPage />} />
+                      </Routes>
+                    </TramitesProvider>
+                  }
+                />
+
+                {/* Módulo de Requisitos por Trámite (Procedures) */}
+                <Route path="/procedures/cambio-titular" element={<CambioTitularPage />} />
+                <Route path="/procedures/suspension" element={<SuspensionPage />} />
+                <Route path="/procedures/tercera-edad" element={<BeneficioTerceraEdadPage />} />
+                <Route path="/procedures/discapacidad" element={<BeneficioDiscapacidadPage />} />
+                <Route path="/procedures/acometidas" element={<Navigate to="/tramites" replace />} />
+
+                {/* Módulo de Solicitudes (Requests) */}
+                <Route
+                  path="/requests/*"
+                  element={
+                    <SolicitudesProvider>
+                      <TramitesProvider>
+                        <Routes>
+                          <Route path=":categoria/new" element={<SolicitudNuevaPage />} />
+                          <Route path=":categoria/tracking" element={<SolicitudesTrackingPage />} />
+                          <Route path=":categoria/list" element={<SolicitudesListPage />} />
+                          <Route path=":categoria/pending" element={<SolicitudesListPage filter="en_proceso" />} />
+                          <Route path=":categoria/approved" element={<SolicitudesListPage filter="aprobada" />} />
+                          <Route path=":categoria/rejected" element={<SolicitudesListPage filter="rechazada" />} />
+                        </Routes>
+                      </TramitesProvider>
+                    </SolicitudesProvider>
+                  }
+                />
+
+                {/* Rutas adicionales de Solicitudes (Detalles y compatibilidad) */}
+                <Route
+                  path="/solicitudes/*"
+                  element={
+                    <SolicitudesProvider>
+                      <TramitesProvider>
+                        <Routes>
+                          <Route index element={<Navigate to="/tramites" replace />} />
+                          <Route path="nueva" element={<SolicitudNuevaPage />} />
+                          <Route path="nueva/:tramiteId" element={<SolicitudNuevaPage />} />
+                          <Route path=":id" element={<SolicitudDetailPage />} />
+                        </Routes>
+                      </TramitesProvider>
+                    </SolicitudesProvider>
+                  }
+                />
               </Route>
             </Route>
           </Routes>

@@ -1,0 +1,390 @@
+/* ============================================================
+   SolicitudTrackingCard — styles
+   ============================================================ */
+
+/* ── Card root ── */
+.trk-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--trk-accent, var(--accent));
+  border-radius: 0.875rem;
+  overflow: hidden;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  animation: trk-fadeIn 0.3s ease both;
+}
+
+.trk-card:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+}
+
+.trk-card--terminal-neg {
+  border-left-color: #ef4444;
+}
+
+@keyframes trk-fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Header ── */
+.trk-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem 0.75rem;
+  flex-wrap: wrap;
+}
+
+.trk-card__header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.trk-card__icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.5rem;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.trk-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.trk-card__codigo {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.01em;
+}
+
+.trk-card__status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid transparent;
+}
+
+.trk-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.3rem;
+}
+
+.trk-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.trk-card__meta-item strong {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.trk-card__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.trk-card__action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.875rem;
+  border-radius: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+
+.trk-card__action-btn:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ── Timeline zone ── */
+.trk-card__timeline {
+  padding: 0.75rem 1.25rem 0.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* ── Terminal negative banner ── */
+.trk-card__terminal-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.5rem 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* ── Detail sections grid ── */
+.trk-card__sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* ── Section block ── */
+.trk-section {
+  background: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 0.625rem;
+  overflow: hidden;
+}
+
+.trk-section__header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface-hover);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.trk-section__body {
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+/* ── Info row ── */
+.trk-info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+}
+
+.trk-info-row__icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  display: flex;
+}
+
+.trk-info-row__label {
+  color: var(--text-muted);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.trk-info-row__value {
+  color: var(--text-secondary);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Docs progress bar ── */
+.trk-docs-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.trk-docs-bar__track {
+  height: 6px;
+  background: var(--surface-hover);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.trk-docs-bar__fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+  min-width: 4px;
+}
+
+.trk-docs-bar__label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.trk-docs-bar__rechazados {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* ── Comentario ── */
+.trk-comentario {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.trk-comentario__fecha {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* ── Historial ── */
+.trk-card__historial {
+  border-top: 1px solid var(--border-color);
+  padding: 0 1.25rem;
+}
+
+.trk-card__historial-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+  text-align: left;
+}
+
+.trk-card__historial-toggle:hover {
+  color: var(--accent);
+}
+
+.trk-historial {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition:
+    max-height 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.25s ease;
+}
+
+.trk-historial--open {
+  max-height: 800px;
+  opacity: 1;
+}
+
+.trk-historial__inner {
+  padding-bottom: 1rem;
+}
+
+/* ── Historial row ── */
+.trk-historial-row {
+  display: flex;
+  gap: 0.75rem;
+  position: relative;
+  padding-left: 1.25rem;
+  padding-bottom: 0.875rem;
+}
+
+.trk-historial-row:not(.trk-historial-row--last)::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 14px;
+  bottom: 0;
+  width: 2px;
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.trk-historial-row__dot {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  flex-shrink: 0;
+}
+
+.trk-historial-row__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.trk-historial-row__estado {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.trk-historial-row__prev {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.trk-historial-row__fecha {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.trk-historial-row__comentario {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0.15rem 0 0;
+  line-height: 1.4;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .trk-card__header {
+    flex-direction: column;
+  }
+  .trk-card__sections {
+    grid-template-columns: 1fr;
+  }
+}

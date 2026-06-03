@@ -1,4 +1,4 @@
-import React, { type ButtonHTMLAttributes } from 'react';
+import React, { forwardRef, type ButtonHTMLAttributes } from 'react';
 import '@/shared/presentation/styles/Button.css';
 
 export type ButtonVariant =
@@ -48,7 +48,7 @@ export type ButtonColor =
 
 export type ButtonRounded = 'none' | 'sm' | 'md' | 'lg' | 'full';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   color?: ButtonColor;
   size?: 'xs' | 'sm' | 'compact' | 'md' | 'lg' | 'xl';
@@ -61,22 +61,25 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   iconOnly?: boolean;
 }
 
-export const Button: React.FC<ButtonProps> = ({
-  children,
-  variant = 'primary',
-  color,
-  size = 'md',
-  rounded = 'md',
-  fullWidth = false,
-  isLoading = false,
-  leftIcon,
-  rightIcon,
-  className = '',
-  disabled,
-  circle = false,
-  iconOnly = false,
-  ...props
-}) => {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>((
+  {
+    children,
+    variant = 'primary',
+    color,
+    size = 'md',
+    rounded = 'md',
+    fullWidth = false,
+    isLoading = false,
+    leftIcon,
+    rightIcon,
+    className = '',
+    disabled,
+    circle = false,
+    iconOnly = false,
+    ...props
+  },
+  ref
+) => {
   const baseClass = 'btn-pro';
   const roundedClass = `${baseClass}--rounded-${rounded}`;
 
@@ -106,7 +109,7 @@ export const Button: React.FC<ButtonProps> = ({
     .join(' ');
 
   return (
-    <button className={classes} disabled={disabled || isLoading} {...props}>
+    <button ref={ref} className={classes} disabled={disabled || isLoading} {...props}>
       <span className={`${baseClass}__content`}>
         {/* Left Slot: Icon or Loading */}
         {(isLoading || leftIcon) && (
@@ -138,4 +141,4 @@ export const Button: React.FC<ButtonProps> = ({
       </span>
     </button>
   );
-};
+});

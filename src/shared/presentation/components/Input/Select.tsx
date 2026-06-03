@@ -258,10 +258,10 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           value={currentValue}
           onChange={onChange}
           disabled={disabled}
-          style={{ display: 'none' }}
           aria-hidden="true"
           tabIndex={-1}
           {...props}
+          style={{ display: 'none' }}
         >
           {children ??
             options?.map((o) => (
