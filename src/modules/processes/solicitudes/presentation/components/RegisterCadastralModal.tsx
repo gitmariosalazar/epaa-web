@@ -7,6 +7,7 @@ import { RegisterCadastralUseCase } from '../../application/usecases/RegisterCad
 import { SolicitudRepositoryImpl } from '../../infrastructure/repositories/SolicitudRepositoryImpl';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import { ShieldCheck, X, Clock, Zap, Hash, MapPin } from 'lucide-react';
 import './ActionModal.css';
 
@@ -173,9 +174,11 @@ export const RegisterCadastralModal: React.FC<RegisterCadastralModalProps> = ({
             </div>
             <div className="action-modal__field">
               <label className="action-modal__label">Fecha de Instalación *</label>
-              <input type="date" className="action-modal__input"
+              <DatePicker
                 value={installationDate}
-                onChange={e => setInstallationDate(e.target.value)} />
+                onChange={setInstallationDate}
+                size="medium"
+              />
             </div>
           </div>
 

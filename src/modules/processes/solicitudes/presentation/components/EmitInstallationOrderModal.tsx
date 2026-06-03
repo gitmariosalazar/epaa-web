@@ -1,13 +1,17 @@
 /**
  * EmitInstallationOrderModal — Fase 12
- * SRP: gestiona la emisión de la OT de instalación.
+ * Usa DatePicker + SearchableSelect con lista de empleados activos.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EmitInstallationOrderUseCase } from '../../application/usecases/EmitInstallationOrderUseCase';
 import { SolicitudRepositoryImpl } from '../../infrastructure/repositories/SolicitudRepositoryImpl';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { Wrench, X, Calendar, User, FileText, Clock } from 'lucide-react';
+import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
+import { SearchableSelect } from '@/shared/presentation/components/Input/SearchableSelect';
+import type { SearchableSelectOption } from '@/shared/presentation/components/Input/SearchableSelect';
+import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
+import { Wrench, X, FileText, Clock } from 'lucide-react';
 import './ActionModal.css';
 
 interface EmitInstallationOrderModalProps {
@@ -28,13 +32,36 @@ export const EmitInstallationOrderModal: React.FC<EmitInstallationOrderModalProp
   const [scheduledDate, setScheduledDate] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [employees, setEmployees] = useState<SearchableSelectOption[]>([]);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let mounted = true;
+    setLoadingEmployees(true);
+    apiClient
+      .get<any>('/user-employee-gateway/find-all-active')
+      .then((res) => {
+        if (!mounted) return;
+        const list: any[] = res.data?.data ?? res.data ?? [];
+        const opts: SearchableSelectOption[] = list.map((emp: any) => ({
+          value: emp.userId ?? emp.employeeId ?? emp.id,
+          label: `${emp.firstName ?? emp.nombres ?? ''} ${emp.lastName ?? emp.apellidos ?? ''}`.trim() ||
+                 emp.username || emp.userId
+        }));
+        setEmployees(opts);
+      })
+      .catch(() => { if (mounted) setEmployees([]); })
+      .finally(() => { if (mounted) setLoadingEmployees(false); });
+    return () => { mounted = false; };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!technicianId.trim()) {
-      MessageToastCustom('error', 'Campo requerido', 'Ingrese el ID del técnico de instalación.');
+    if (!technicianId) {
+      MessageToastCustom('error', 'Campo requerido', 'Seleccione el técnico de instalación.');
       return;
     }
     if (!scheduledDate) {
@@ -45,7 +72,7 @@ export const EmitInstallationOrderModal: React.FC<EmitInstallationOrderModalProp
     try {
       await useCase.execute({
         solicitudId,
-        technicianId: technicianId.trim(),
+        technicianId: String(technicianId),
         scheduledDate,
         notes: notes.trim() || undefined,
         emitterId
@@ -74,25 +101,23 @@ export const EmitInstallationOrderModal: React.FC<EmitInstallationOrderModalProp
 
         <form className="action-modal__body" onSubmit={handleSubmit}>
           <div className="action-modal__field">
-            <label className="action-modal__label"><User size={13} /> ID del Técnico de Instalación *</label>
-            <input
-              type="text"
-              className="action-modal__input"
-              placeholder="Ej: TEC-INS-003"
+            <label className="action-modal__label">Técnico de Instalación *</label>
+            <SearchableSelect
               value={technicianId}
-              onChange={e => setTechnicianId(e.target.value)}
-              autoFocus
+              onChange={v => setTechnicianId(String(v))}
+              options={employees}
+              placeholder={loadingEmployees ? 'Cargando técnicos...' : 'Buscar técnico...'}
+              disabled={loadingEmployees}
+              size="medium"
             />
           </div>
 
           <div className="action-modal__field">
-            <label className="action-modal__label"><Calendar size={13} /> Fecha Programada de Instalación *</label>
-            <input
-              type="datetime-local"
-              className="action-modal__input"
+            <label className="action-modal__label">Fecha Programada de Instalación *</label>
+            <DatePicker
               value={scheduledDate}
-              onChange={e => setScheduledDate(e.target.value)}
-              min={new Date().toISOString().slice(0, 16)}
+              onChange={setScheduledDate}
+              size="medium"
             />
           </div>
 

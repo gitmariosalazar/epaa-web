@@ -74,7 +74,7 @@ import {
   Mail, Phone, Clock, CheckCircle, XCircle, FileCheck, CreditCard, Gauge,
   ClipboardList, MessageSquare, AlertTriangle, FolderOpen, Activity,
   ExternalLink, Search, Wrench, FileSignature, ShieldCheck, Zap, Play,
-  BarChart2, Hash, DollarSign
+  BarChart2, DollarSign
 } from 'lucide-react';
 import './SolicitudDetailPage.css';
 
@@ -554,12 +554,13 @@ export const SolicitudDetailPage: React.FC = () => {
               <div className="sol-detail-card__title-row">
                 <BarChart2 size={16} className="sol-detail-card__title-icon" style={{ color: '#a855f7' }} />
                 <h3 className="sol-detail-card__title">Informe Técnico de Inspección</h3>
-                <ColorChip
-                  color={solicitud.informeAprobado ? '#10b981' : solicitud.informeAprobado === false ? '#ef4444' : '#f59e0b'}
-                  label={solicitud.informeAprobado ? 'APROBADO' : solicitud.informeAprobado === false ? 'RECHAZADO' : 'EN REVISIÓN'}
-                  variant="soft" size="xs"
-                  style={{ marginLeft: 'auto' }}
-                />
+                <div style={{ marginLeft: 'auto' }}>
+                  <ColorChip
+                    color={solicitud.informeAprobado ? '#10b981' : solicitud.informeAprobado === false ? '#ef4444' : '#f59e0b'}
+                    label={solicitud.informeAprobado ? 'APROBADO' : solicitud.informeAprobado === false ? 'RECHAZADO' : 'EN REVISIÓN'}
+                    variant="soft" size="xs"
+                  />
+                </div>
               </div>
               <div className="sol-detail-grid">
                 {solicitud.resultadoInforme && (
