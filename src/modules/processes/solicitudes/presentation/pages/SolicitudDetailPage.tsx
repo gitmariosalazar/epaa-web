@@ -37,9 +37,13 @@ import {
   MessageSquare,
   AlertTriangle,
   FolderOpen,
-  Activity
+  Activity,
+  ExternalLink
 } from 'lucide-react';
 import './SolicitudDetailPage.css';
+import { ConfirmPaymentUseCase } from '../../application/usecases/ConfirmPaymentUseCase';
+import { useAuth } from '@/shared/presentation/context/AuthContext';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
 const DOC_ESTADO_COLOR: Record<string, { color: string; bg: string }> = {
   PENDIENTE: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
@@ -66,8 +70,12 @@ export const SolicitudDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [docsOpen, setDocsOpen] = useState(false);
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
-
   const [reloadTrigger, setReloadTrigger] = useState(0);
+
+  const { user } = useAuth();
+  const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('TRANSFERENCIA');
+  const [paymentReference, setPaymentReference] = useState('');
 
   const requestDetailUseCase = React.useMemo(
     () => new GetRequestDetailByRequestIdOrNumberUseCase(new SolicitudRepositoryImpl()),
@@ -77,6 +85,66 @@ export const SolicitudDetailPage: React.FC = () => {
     () => new GetTrackingBySolicitudIdUseCase(new SolicitudRepositoryImpl()),
     []
   );
+  const confirmPaymentUseCase = React.useMemo(
+    () => new ConfirmPaymentUseCase(new SolicitudRepositoryImpl()),
+    []
+  );
+
+  const handleConfirmPayment = async () => {
+    if (!solicitud?.facturaId) {
+      MessageToastCustom(
+        'error',
+        'Error de Pago',
+        'No se pudo determinar el ID de la factura de inspección.'
+      );
+      return;
+    }
+    if (!paymentReference.trim()) {
+      MessageToastCustom(
+        'error',
+        'Campo Requerido',
+        'Debe ingresar el número de referencia del depósito o transferencia.'
+      );
+      return;
+    }
+    if (!user?.userId) {
+      MessageToastCustom(
+        'error',
+        'Error de Sesión',
+        'No se pudo determinar el usuario actual. Inicie sesión nuevamente.'
+      );
+      return;
+    }
+
+    setIsConfirmingPayment(true);
+    try {
+      await confirmPaymentUseCase.execute({
+        invoiceId: solicitud.facturaId,
+        paymentMethod,
+        paymentReference: paymentReference.trim(),
+        proofOfPaymentUrl: solicitud.urlComprobante || undefined,
+        collectorId: user.userId
+      });
+
+      MessageToastCustom(
+        'success',
+        'Pago Confirmado',
+        'El pago ha sido registrado y validado exitosamente. El trámite avanza.'
+      );
+      setPaymentReference('');
+      setReloadTrigger((prev) => prev + 1);
+    } catch (err: any) {
+      console.error('Error al confirmar pago:', err);
+      MessageToastCustom(
+        'error',
+        'Error al Confirmar',
+        err.message || 'Ocurrió un error inesperado al confirmar el pago.'
+      );
+    } finally {
+      setIsConfirmingPayment(false);
+    }
+  };
+
 
   React.useEffect(() => {
     if (!id) return;
@@ -304,6 +372,95 @@ export const SolicitudDetailPage: React.FC = () => {
               )}
             </div>
           </Card>
+
+          {solicitud.estado === 'PAGO_PENDIENTE' && (
+            <div className="sol-detail-payment-confirm-card">
+              <div className="sol-detail-payment-confirm-card__header">
+                <CreditCard size={20} className="sol-detail-payment-confirm-card__header-icon" />
+                <div>
+                  <h3 className="sol-detail-payment-confirm-card__title">Validación de Pago de Inspección</h3>
+                  <p className="sol-detail-payment-confirm-card__subtitle">
+                    Revise el comprobante y confirme los detalles del depósito o transferencia del cliente.
+                  </p>
+                </div>
+              </div>
+              <div className="sol-detail-payment-confirm-card__body">
+                <div className="sol-detail-payment-confirm-grid">
+                  <div className="sol-detail-payment-confirm-info">
+                    <h4 className="sol-detail-payment-confirm-section-title">Detalles de Facturación</h4>
+                    <div className="sol-detail-payment-confirm-details">
+                      <div className="sol-detail-payment-confirm-item">
+                        <span className="sol-detail-payment-confirm-item__label">N° Factura</span>
+                        <span className="sol-detail-payment-confirm-item__value">{solicitud.numeroFactura || '—'}</span>
+                      </div>
+                      <div className="sol-detail-payment-confirm-item">
+                        <span className="sol-detail-payment-confirm-item__label">Monto a Validar</span>
+                        <span className="sol-detail-payment-confirm-item__value">
+                          ${solicitud.montofactura ? solicitud.montofactura.toFixed(2) : '0.00'}
+                        </span>
+                      </div>
+                      {solicitud.urlComprobante ? (
+                        <div className="sol-detail-payment-confirm-item sol-detail-payment-confirm-item--full" style={{ marginTop: '0.5rem' }}>
+                          <a
+                            href={solicitud.urlComprobante}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="sol-detail-view-receipt-link"
+                          >
+                            <FileText size={16} />
+                            Ver Comprobante de Pago
+                            <ExternalLink size={12} />
+                          </a>
+                        </div>
+                      ) : (
+                        <div className="sol-detail-payment-confirm-item sol-detail-payment-confirm-item--full" style={{ marginTop: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <AlertTriangle size={14} style={{ color: '#f59e0b' }} />
+                          <span>El cliente aún no ha subido una captura del comprobante.</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="sol-detail-payment-confirm-form">
+                    <h4 className="sol-detail-payment-confirm-section-title">Registro de Confirmación</h4>
+                    <div className="sol-detail-payment-confirm-fields">
+                      <div className="sol-detail-payment-confirm-field">
+                        <label className="sol-detail-payment-confirm-field__label">Método de Pago</label>
+                        <select
+                          className="sol-detail-payment-confirm-field__select"
+                          value={paymentMethod}
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                        >
+                          <option value="TRANSFERENCIA">Transferencia Bancaria</option>
+                          <option value="VENTANILLA">Depósito en Ventanilla</option>
+                          <option value="ONLINE">Pago en Línea</option>
+                        </select>
+                      </div>
+                      <div className="sol-detail-payment-confirm-field">
+                        <label className="sol-detail-payment-confirm-field__label">Referencia / N° Transacción</label>
+                        <input
+                          type="text"
+                          className="sol-detail-payment-confirm-field__input"
+                          placeholder="Ej: DEP-109283"
+                          value={paymentReference}
+                          onChange={(e) => setPaymentReference(e.target.value)}
+                        />
+                      </div>
+                      <Button
+                        variant="primary"
+                        style={{ marginTop: '0.5rem', justifyContent: 'center' }}
+                        disabled={isConfirmingPayment}
+                        onClick={handleConfirmPayment}
+                        leftIcon={isConfirmingPayment ? <Clock size={16} className="sol-detail-loading__spinner" /> : <CheckCircle size={16} />}
+                      >
+                        {isConfirmingPayment ? 'Registrando...' : 'Confirmar y Registrar Pago'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Card 2: Datos del Titular y Predio */}
           <Card className="sol-detail-card">

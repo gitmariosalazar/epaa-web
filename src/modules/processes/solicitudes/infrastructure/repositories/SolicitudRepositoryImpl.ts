@@ -3,7 +3,7 @@ import type {
   Solicitud,
   TrackingSolicitudResponse
 } from '../../domain/models/Solicitud';
-import type { SolicitudRepository, CreateInspectionInvoiceDto } from '../../domain/repositories/SolicitudRepository';
+import type { SolicitudRepository, CreateInspectionInvoiceDto, ConfirmPaymentDto } from '../../domain/repositories/SolicitudRepository';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 import type { HttpClientInterface } from '@/shared/infrastructure/api/interfaces/HttpClientInterface';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
@@ -40,6 +40,7 @@ export interface ExpedienteResponse {
   fechaVencimiento: Date | string | null;
   fechaPago: Date | string | null;
   metodoPago: string | null;
+  urlComprobante: string | null;
   informeId: string | null;
   resultadoInforme: string | null;
   costoMateriales: number | null;
@@ -245,5 +246,14 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
     if (!dto.expirationDate) throw new Error('La fecha de vencimiento es requerida');
 
     await this.client.post<void>('/inspection-invoice/create_inspection_invoice', dto);
+  }
+
+  async confirmPayment(dto: ConfirmPaymentDto): Promise<void> {
+    if (!dto.invoiceId) throw new Error('El ID de la factura es requerido');
+    if (!dto.paymentMethod) throw new Error('El método de pago es requerido');
+    if (!dto.paymentReference) throw new Error('La referencia de pago es requerida');
+    if (!dto.collectorId) throw new Error('El ID del recaudador es requerido');
+
+    await this.client.patch<void>('/payment-confirmation/facturas/pagar', dto);
   }
 }

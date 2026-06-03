@@ -36,6 +36,7 @@ export interface SolicitudRepository {
   ): Promise<void>;
 
   createInspectionInvoice(dto: CreateInspectionInvoiceDto): Promise<void>;
+  confirmPayment(dto: ConfirmPaymentDto): Promise<void>;
 }
 
 export interface CreateInspectionInvoiceDto {
@@ -46,4 +47,13 @@ export interface CreateInspectionInvoiceDto {
   expirationDate: Date | string;
   collectorId?: string;
 }
+
+export interface ConfirmPaymentDto {
+  invoiceId: string;
+  paymentMethod: string;
+  paymentReference: string;
+  proofOfPaymentUrl?: string;
+  collectorId: string;
+}
+
 

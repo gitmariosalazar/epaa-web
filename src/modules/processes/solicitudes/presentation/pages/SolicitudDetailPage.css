@@ -422,3 +422,165 @@
   margin: 0;
   line-height: 1.35;
 }
+
+/* ============================================================
+   Payment Confirmation Card Styles (Analyst View)
+   ============================================================ */
+
+.sol-detail-payment-confirm-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.sol-detail-payment-confirm-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.04) 0%, rgba(59, 130, 246, 0.04) 100%);
+}
+
+.sol-detail-payment-confirm-card__header-icon {
+  color: #10b981;
+}
+
+.sol-detail-payment-confirm-card__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.sol-detail-payment-confirm-card__subtitle {
+  margin: 0.15rem 0 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.sol-detail-payment-confirm-card__body {
+  padding: 1.25rem;
+}
+
+.sol-detail-payment-confirm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .sol-detail-payment-confirm-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+.sol-detail-payment-confirm-section-title {
+  margin: 0 0 0.88rem 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sol-detail-payment-confirm-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.sol-detail-payment-confirm-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sol-detail-payment-confirm-item--full {
+  width: 100%;
+}
+
+.sol-detail-payment-confirm-item__label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.sol-detail-payment-confirm-item__value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.sol-detail-view-receipt-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  padding: 0.5rem 0.88rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.sol-detail-view-receipt-link:hover {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
+.sol-detail-payment-confirm-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.sol-detail-payment-confirm-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.88rem;
+}
+
+.sol-detail-payment-confirm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sol-detail-payment-confirm-field__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.sol-detail-payment-confirm-field__select,
+.sol-detail-payment-confirm-field__input {
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sol-detail-payment-confirm-field__select:focus,
+.sol-detail-payment-confirm-field__input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
