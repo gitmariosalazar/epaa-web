@@ -22,6 +22,71 @@
   to { transform: rotate(360deg); }
 }
 
+/* ── Phase Actions Container ── */
+.sol-detail-phase-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+/* ── Phase Action Button ── */
+.sol-phase-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid;
+  border-color: color-mix(in srgb, var(--phase-color) 35%, transparent);
+  background: var(--phase-bg);
+  color: var(--phase-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  font-family: inherit;
+  animation: phaseActionIn 0.3s ease;
+}
+
+.sol-phase-action-btn:hover:not(:disabled) {
+  filter: brightness(1.15);
+  border-color: var(--phase-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--phase-color) 25%, transparent);
+}
+
+.sol-phase-action-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.sol-phase-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sol-phase-action-btn__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--phase-color) 15%, transparent);
+  flex-shrink: 0;
+}
+
+.sol-phase-action-btn__label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+@keyframes phaseActionIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+
 .sol-detail-header-nav {
   display: flex;
   align-items: center;

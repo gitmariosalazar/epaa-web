@@ -3,7 +3,20 @@ import type {
   Solicitud,
   TrackingSolicitudResponse
 } from '../../domain/models/Solicitud';
-import type { SolicitudRepository, CreateInspectionInvoiceDto, ConfirmPaymentDto } from '../../domain/repositories/SolicitudRepository';
+import type {
+  SolicitudRepository,
+  CreateInspectionInvoiceDto,
+  ConfirmPaymentDto,
+  EmitInspectionOrderDto,
+  StartInspectionDto,
+  SubmitInspectionReportDto,
+  ApproveInspectionReportDto,
+  GenerateContractDto,
+  SignContractDto,
+  EmitInstallationOrderDto,
+  StartInstallationDto,
+  RegisterCadastralDto
+} from '../../domain/repositories/SolicitudRepository';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 import type { HttpClientInterface } from '@/shared/infrastructure/api/interfaces/HttpClientInterface';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
@@ -57,7 +70,7 @@ export interface ExpedienteResponse {
   numeroMedidor: string | null;
   servicioActivo: boolean | null;
   fechaActivacion: Date | string | null;
-  solicitudNumero: string | null; // optional at API level — may be null until backend adds it
+  solicitudNumero: string | null;
 }
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
@@ -77,9 +90,10 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
     this.client = client;
   }
 
+  // ── Getters ────────────────────────────────────────────────────────────────
+
   async getExpedientesByCliente(clienteId: string): Promise<Solicitud[]> {
     if (!clienteId) throw new Error('Cliente ID is required');
-
     let rawList: ExpedienteResponse[];
     try {
       const response = await this.client.get<ApiResponse<ExpedienteResponse[]>>(
@@ -87,34 +101,18 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
       );
       rawList = response.data?.data || [];
     } catch (err: any) {
-      // Business rule: 404 = no expedientes yet — return empty list.
       if (isNotFoundError(err)) return [];
       throw err;
     }
-
-    return rawList.map((exp): Solicitud => {
-      const dbEstado = (exp.estado || '').toUpperCase();
-      let estado = 'en_proceso';
-
-      if (dbEstado === 'REJECTED') {
-        estado = 'rechazada';
-      } else if (dbEstado === 'APPROVED' || dbEstado === 'ACTIVE') {
-        estado = 'aprobada';
-      } else if (dbEstado === 'COMPLETED') {
-        estado = 'completada';
-      }
-
-      return {
-        ...exp,
-        estado,
-        solicitudNumero: exp.solicitudNumero ?? exp.solicitudId
-      };
-    });
+    return rawList.map((exp): Solicitud => ({
+      ...exp,
+      estado: mapEstado(exp.estado),
+      solicitudNumero: exp.solicitudNumero ?? exp.solicitudId
+    }));
   }
 
   async getExpedientesByAnalista(analistaId: string): Promise<Solicitud[]> {
     if (!analistaId) throw new Error('Analista ID is required');
-
     let rawList: ExpedienteResponse[];
     try {
       const response = await this.client.get<ApiResponse<ExpedienteResponse[]>>(
@@ -122,58 +120,35 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
       );
       rawList = response.data?.data || [];
     } catch (err: any) {
-      // Business rule: 404 = no expedientes yet — return empty list.
       if (isNotFoundError(err)) return [];
       throw err;
     }
-
-    return rawList.map((exp): Solicitud => {
-      const dbEstado = (exp.estado || '').toUpperCase();
-      let estado = 'en_proceso';
-
-      if (dbEstado === 'REJECTED') {
-        estado = 'rechazada';
-      } else if (dbEstado === 'APPROVED' || dbEstado === 'ACTIVE') {
-        estado = 'aprobada';
-      } else if (dbEstado === 'COMPLETED') {
-        estado = 'completada';
-      }
-
-      return {
-        ...exp,
-        estado,
-        solicitudNumero: exp.solicitudNumero ?? exp.solicitudId
-      };
-    });
+    return rawList.map((exp): Solicitud => ({
+      ...exp,
+      estado: mapEstado(exp.estado),
+      solicitudNumero: exp.solicitudNumero ?? exp.solicitudId
+    }));
   }
 
-  // ── DIP: satisfies the contract declared in SolicitudRepository ───────────────
-  async getTrackingByClienteId(
-    clienteId: string
-  ): Promise<TrackingSolicitudResponse[]> {
+  async getTrackingByClienteId(clienteId: string): Promise<TrackingSolicitudResponse[]> {
     if (!clienteId) throw new Error('Cliente ID is required');
-
     try {
-      const response = await this.client.get<
-        ApiResponse<TrackingSolicitudResponse[]>
-      >(`/requests/${clienteId}/tracking`);
+      const response = await this.client.get<ApiResponse<TrackingSolicitudResponse[]>>(
+        `/requests/${clienteId}/tracking`
+      );
       return response.data?.data || [];
     } catch (err: any) {
-      // Business rule: 404 = no tracking data yet — return empty list.
       if (isNotFoundError(err)) return [];
       throw err;
     }
   }
 
-  async getTrackingBySolicitudId(
-    solicitudId: string
-  ): Promise<TrackingSolicitudResponse | null> {
+  async getTrackingBySolicitudId(solicitudId: string): Promise<TrackingSolicitudResponse | null> {
     if (!solicitudId) throw new Error('Solicitud ID is required');
-
     try {
-      const response = await this.client.get<
-        ApiResponse<TrackingSolicitudResponse>
-      >(`/requests/${solicitudId}/tracking-by-solicitud-id`);
+      const response = await this.client.get<ApiResponse<TrackingSolicitudResponse>>(
+        `/requests/${solicitudId}/tracking-by-solicitud-id`
+      );
       return response.data?.data || null;
     } catch (err: any) {
       if (isNotFoundError(err)) return null;
@@ -181,15 +156,12 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
     }
   }
 
-  async getTrackingByAnalistaId(
-    analistaId: string
-  ): Promise<TrackingSolicitudResponse[]> {
+  async getTrackingByAnalistaId(analistaId: string): Promise<TrackingSolicitudResponse[]> {
     if (!analistaId) throw new Error('Analista ID is required');
-
     try {
-      const response = await this.client.get<
-        ApiResponse<TrackingSolicitudResponse[]>
-      >(`/requests/${analistaId}/tracking-internal-user`);
+      const response = await this.client.get<ApiResponse<TrackingSolicitudResponse[]>>(
+        `/requests/${analistaId}/tracking-internal-user`
+      );
       return response.data?.data || [];
     } catch (err: any) {
       if (isNotFoundError(err)) return [];
@@ -200,13 +172,11 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
   async getRequestDetailByRequestIdOrNumber(
     requestNumberOrId: string
   ): Promise<RequestDetailByClientResponse | null> {
-    if (!requestNumberOrId) {
-      throw new Error('El número o ID de la solicitud es requerido');
-    }
+    if (!requestNumberOrId) throw new Error('El número o ID de la solicitud es requerido');
     try {
-      const response = await this.client.get<
-        ApiResponse<RequestDetailByClientResponse>
-      >(`/requests/${requestNumberOrId}/detail-by-id-or-number`);
+      const response = await this.client.get<ApiResponse<RequestDetailByClientResponse>>(
+        `/requests/${requestNumberOrId}/detail-by-id-or-number`
+      );
       return response.data?.data || null;
     } catch (err: any) {
       if (isNotFoundError(err)) return null;
@@ -214,46 +184,148 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
     }
   }
 
+  // ── Fase 3 — Validación documental ────────────────────────────────────────
+
   async validateDocuments(
     solicitudId: string,
-    decisions: {
-      documentId: string;
-      validationStatus: 'APROBADO' | 'RECHAZADO';
-      observation?: string;
-    }[],
+    decisions: { documentId: string; validationStatus: 'APROBADO' | 'RECHAZADO'; observation?: string }[],
     validatorId: string
   ): Promise<void> {
     if (!solicitudId) throw new Error('Solicitud ID is required');
     if (!validatorId) throw new Error('Validator ID is required');
-    if (!decisions || decisions.length === 0) {
-      throw new Error('At least one decision is required');
-    }
+    if (!decisions?.length) throw new Error('At least one decision is required');
 
     await this.client.patch<void>('/document-validation/solicitudes/validar', {
       solicitudId,
-      dto: {
-        decisions,
-        validatorId
-      }
+      dto: { decisions, validatorId }
     });
   }
 
+  // ── Fase 4 — Factura de inspección ────────────────────────────────────────
+
   async createInspectionInvoice(dto: CreateInspectionInvoiceDto): Promise<void> {
-    if (!dto.requestId) throw new Error('El ID de la solicitud es requerido');
-    if (!dto.invoiceNumber) throw new Error('El número de factura es requerido');
-    if (dto.conceptId === undefined) throw new Error('El ID del concepto es requerido');
-    if (dto.amount === undefined) throw new Error('El monto es requerido');
+    if (!dto.requestId)      throw new Error('El ID de la solicitud es requerido');
+    if (!dto.invoiceNumber)  throw new Error('El número de factura es requerido');
+    if (dto.conceptId == null) throw new Error('El ID del concepto es requerido');
+    if (dto.amount == null)  throw new Error('El monto es requerido');
     if (!dto.expirationDate) throw new Error('La fecha de vencimiento es requerida');
 
     await this.client.post<void>('/inspection-invoice/create_inspection_invoice', dto);
   }
 
+  // ── Fase 5 — Confirmar pago ────────────────────────────────────────────────
+
   async confirmPayment(dto: ConfirmPaymentDto): Promise<void> {
-    if (!dto.invoiceId) throw new Error('El ID de la factura es requerido');
-    if (!dto.paymentMethod) throw new Error('El método de pago es requerido');
+    if (!dto.invoiceId)        throw new Error('El ID de la factura es requerido');
+    if (!dto.paymentMethod)    throw new Error('El método de pago es requerido');
     if (!dto.paymentReference) throw new Error('La referencia de pago es requerida');
-    if (!dto.collectorId) throw new Error('El ID del recaudador es requerido');
+    if (!dto.collectorId)      throw new Error('El ID del recaudador es requerido');
 
     await this.client.patch<void>('/payment-confirmation/facturas/pagar', dto);
   }
+
+  // ── Fase 6 — Emitir OT de inspección ─────────────────────────────────────
+
+  async emitInspectionOrder(dto: EmitInspectionOrderDto): Promise<void> {
+    if (!dto.solicitudId)   throw new Error('El ID de la solicitud es requerido');
+    if (!dto.technicianId)  throw new Error('El ID del técnico es requerido');
+    if (!dto.scheduledDate) throw new Error('La fecha programada es requerida');
+    if (!dto.emitterId)     throw new Error('El ID del emisor es requerido');
+
+    await this.client.post<void>('/inspection-order/ordenes/emitir', dto);
+  }
+
+  // ── Fase 7 — Iniciar inspección ───────────────────────────────────────────
+
+  async startInspection(dto: StartInspectionDto): Promise<void> {
+    if (!dto.workOrderId)  throw new Error('El ID de la OT es requerido');
+    if (!dto.technicianId) throw new Error('El ID del técnico es requerido');
+
+    await this.client.patch<void>('/inspection-order/ordenes/iniciar', dto);
+  }
+
+  // ── Fase 8 — Subir informe técnico ────────────────────────────────────────
+
+  async submitInspectionReport(dto: SubmitInspectionReportDto): Promise<void> {
+    if (!dto.workOrderId)  throw new Error('El ID de la OT es requerido');
+    if (!dto.solicitudId)  throw new Error('El ID de la solicitud es requerido');
+    if (!dto.result)       throw new Error('El resultado de la inspección es requerido');
+    if (!dto.technicianId) throw new Error('El ID del técnico es requerido');
+
+    await this.client.post<void>('/inspection-report/ordenes/informe', dto);
+  }
+
+  // ── Fase 9 — Aprobar / rechazar informe ──────────────────────────────────
+
+  async approveInspectionReport(dto: ApproveInspectionReportDto): Promise<void> {
+    if (!dto.reportId)   throw new Error('El ID del informe es requerido');
+    if (!dto.approverId) throw new Error('El ID del aprobador es requerido');
+
+    await this.client.patch<void>('/inspection-report/informes/aprobar', dto);
+  }
+
+  // ── Fase 10 — Generar contrato ────────────────────────────────────────────
+
+  async generateContract(dto: GenerateContractDto): Promise<void> {
+    if (!dto.solicitudId)    throw new Error('El ID de la solicitud es requerido');
+    if (!dto.contractNumber) throw new Error('El número de contrato es requerido');
+    if (!dto.generatorId)    throw new Error('El ID del generador es requerido');
+
+    await this.client.post<void>('/contracts/solicitudes/generar', dto);
+  }
+
+  // ── Fase 11 — Firmar contrato ─────────────────────────────────────────────
+
+  async signContract(dto: SignContractDto): Promise<void> {
+    if (!dto.contractId)       throw new Error('El ID del contrato es requerido');
+    if (!dto.signatureStatus)  throw new Error('El estado de firma es requerido');
+    if (!dto.signedContractUrl) throw new Error('La URL del contrato firmado es requerida');
+    if (!dto.userId)           throw new Error('El ID del usuario es requerido');
+
+    await this.client.patch<void>('/contracts/firmar', dto);
+  }
+
+  // ── Fase 12 — Emitir OT de instalación ───────────────────────────────────
+
+  async emitInstallationOrder(dto: EmitInstallationOrderDto): Promise<void> {
+    if (!dto.solicitudId)   throw new Error('El ID de la solicitud es requerido');
+    if (!dto.technicianId)  throw new Error('El ID del técnico es requerido');
+    if (!dto.scheduledDate) throw new Error('La fecha programada es requerida');
+    if (!dto.emitterId)     throw new Error('El ID del emisor es requerido');
+
+    await this.client.post<void>('/installation-order/ordenes/emitir', dto);
+  }
+
+  // ── Fase 13 — Iniciar instalación ────────────────────────────────────────
+
+  async startInstallation(dto: StartInstallationDto): Promise<void> {
+    if (!dto.workOrderId)  throw new Error('El ID de la OT es requerido');
+    if (!dto.technicianId) throw new Error('El ID del técnico es requerido');
+
+    await this.client.patch<void>('/installation-order/ordenes/iniciar', dto);
+  }
+
+  // ── Fase 14 — Registro catastral y activación ────────────────────────────
+
+  async registerCadastral(dto: RegisterCadastralDto): Promise<void> {
+    if (!dto.solicitudId)      throw new Error('El ID de la solicitud es requerido');
+    if (!dto.cadastralKey)     throw new Error('La clave catastral es requerida');
+    if (!dto.meterNumber)      throw new Error('El número de medidor es requerido');
+    if (!dto.exactAddress)     throw new Error('La dirección exacta es requerida');
+    if (!dto.accountNumber)    throw new Error('El número de cuenta es requerido');
+    if (!dto.installationDate) throw new Error('La fecha de instalación es requerida');
+    if (!dto.registratorId)    throw new Error('El ID del registrador es requerido');
+
+    await this.client.post<void>('/cadastral/solicitudes/registro-catastral', dto);
+  }
+}
+
+// ─── Helper interno ───────────────────────────────────────────────────────────
+function mapEstado(raw: string): string {
+  const upper = (raw || '').toUpperCase();
+  if (upper === 'REJECTED') return 'rechazada';
+  if (upper === 'APPROVED' || upper === 'ACTIVE') return 'aprobada';
+  if (upper === 'COMPLETED') return 'completada';
+  // BPMN states are returned as-is so SolicitudConfig can display them
+  return raw;
 }
