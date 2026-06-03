@@ -53,6 +53,44 @@ const ALL_STEPS: TrackingStep[] = [
 // Terminal-negative steps don't appear on the linear timeline
 const TERMINAL_NEGATIVE = new Set(['anulada', 'rechazada']);
 
+const mapEstadoToStep = (estadoCodigo: string): string => {
+  switch (estadoCodigo) {
+    case 'DRAFT':
+      return 'solicitud';
+    case 'DOCS_SUBMITTED':
+    case 'DOCS_REJECTED':
+      return 'documentos';
+    case 'DOCS_APPROVED':
+    case 'FACTURA_INSPECCION_EMITIDA':
+    case 'PAGO_PENDIENTE':
+      return 'pago';
+    case 'PAGO_CONFIRMADO':
+    case 'ORDEN_INSPECCION_EMITIDA':
+    case 'INSPECCION_EN_PROCESO':
+    case 'INFORME_EN_REVISION':
+      return 'inspeccion';
+    case 'INFORME_APROBADO':
+    case 'CONTRATO_GENERADO':
+      return 'contrato';
+    case 'CONTRATO_FIRMADO':
+    case 'OT_INSTALACION_EMITIDA':
+    case 'INSTALACION_EN_PROCESO':
+    case 'INSTALACION_FALLIDA':
+      return 'instalacion';
+    case 'INSTALACION_COMPLETADA':
+    case 'REGISTRO_CATASTRAL_PENDIENTE':
+      return 'catastro';
+    case 'SUMINISTRO_ACTIVO':
+      return 'completado';
+    case 'ANULADA':
+      return 'anulada';
+    case 'RECHAZADA_TECNICA':
+      return 'rechazada';
+    default:
+      return 'solicitud';
+  }
+};
+
 // ─── Status helpers ───────────────────────────────────────────────────────────
 interface StatusConfig {
   label: string;
@@ -132,8 +170,9 @@ export const SolicitudTrackingCard: React.FC<SolicitudTrackingCardProps> = ({
 }) => {
   const [historialOpen, setHistorialOpen] = useState(false);
 
-  const statusConfig  = getStepStatusConfig(tracking.currentStep);
-  const isTerminalNeg = TERMINAL_NEGATIVE.has(tracking.currentStep);
+  const resolvedCurrentStep = mapEstadoToStep(tracking.estadoCodigo || '');
+  const statusConfig  = getStepStatusConfig(resolvedCurrentStep);
+  const isTerminalNeg = TERMINAL_NEGATIVE.has(resolvedCurrentStep);
   const timelineSteps = isTerminalNeg ? [] : ALL_STEPS;
 
   // Docs progress percent
@@ -213,7 +252,7 @@ export const SolicitudTrackingCard: React.FC<SolicitudTrackingCardProps> = ({
         <div className="trk-card__timeline">
           <ProcessTimeline
             steps={timelineSteps}
-            currentStep={tracking.currentStep}
+            currentStep={resolvedCurrentStep}
           />
         </div>
       )}
@@ -223,7 +262,7 @@ export const SolicitudTrackingCard: React.FC<SolicitudTrackingCardProps> = ({
         <div className="trk-card__terminal-banner" style={{ borderColor: statusConfig.border, background: statusConfig.bg }}>
           <XCircle size={18} style={{ color: statusConfig.color }} />
           <span style={{ color: statusConfig.color, fontWeight: 700 }}>
-            Esta solicitud fue {tracking.currentStep === 'rechazada' ? 'rechazada' : 'anulada'}
+            Esta solicitud fue {resolvedCurrentStep === 'rechazada' ? 'rechazada' : 'anulada'}
           </span>
           {tracking.ultimoComentario && (
             <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
