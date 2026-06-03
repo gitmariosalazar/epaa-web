@@ -79,16 +79,17 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
   const toggleCalendar = () => {
     if (!disabled) {
       if (!isOpen) {
-        // Calculate alignment and fixed position before opening
         if (containerRef.current) {
           const rect = containerRef.current.getBoundingClientRect();
-          const spaceRight = window.innerWidth - rect.left;
+          const spaceRight  = window.innerWidth  - rect.left;
           const spaceBottom = window.innerHeight - rect.bottom;
 
-          const horizontal = spaceRight < 300 ? 'right' : 'left';
-          const vertical = spaceBottom < 350 ? 'top' : 'bottom';
+          // xs calendar is ~280px tall; standard is ~360px
+          const calendarHeight = size === 'xs' ? 290 : 360;
+          const horizontal = spaceRight < 250 ? 'right' : 'left';
+          const vertical   = spaceBottom < calendarHeight ? 'top' : 'bottom';
 
-          // Position: fixed so the popover escapes any overflow:hidden container
+          // position: fixed escapes any overflow:hidden container
           const style: React.CSSProperties = {
             position: 'fixed',
             zIndex: 99999,
