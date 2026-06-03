@@ -44,6 +44,13 @@ import './SolicitudDetailPage.css';
 import { ConfirmPaymentUseCase } from '../../application/usecases/ConfirmPaymentUseCase';
 import { useAuth } from '@/shared/presentation/context/AuthContext';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
+import { environments } from '@/settings/environments/environments';
+
+/** Strips the trailing /api segment from the API URL so that
+ *  relative paths like /uploads/... resolve against the gateway host. */
+const API_BASE = (environments.API_URL || '')
+  .replace(/\/api$/, '')
+  .replace(/\/$/, '');
 
 const DOC_ESTADO_COLOR: Record<string, { color: string; bg: string }> = {
   PENDIENTE: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
@@ -402,7 +409,11 @@ export const SolicitudDetailPage: React.FC = () => {
                       {solicitud.urlComprobante ? (
                         <div className="sol-detail-payment-confirm-item sol-detail-payment-confirm-item--full" style={{ marginTop: '0.5rem' }}>
                           <a
-                            href={solicitud.urlComprobante}
+                            href={
+                              solicitud.urlComprobante.startsWith('http')
+                                ? solicitud.urlComprobante
+                                : `${API_BASE}${solicitud.urlComprobante}`
+                            }
                             target="_blank"
                             rel="noopener noreferrer"
                             className="sol-detail-view-receipt-link"
