@@ -40,7 +40,7 @@ export const EmitInstallationOrderModal: React.FC<EmitInstallationOrderModalProp
     let mounted = true;
     setLoadingEmployees(true);
     apiClient
-      .get<any>('/user-employee-gateway/find-all-active')
+      .get<any>('/user-employee-gateway/find-technicians?type=INSTALADOR')
       .then((res) => {
         if (!mounted) return;
         const list: any[] = res.data?.data ?? res.data ?? [];
