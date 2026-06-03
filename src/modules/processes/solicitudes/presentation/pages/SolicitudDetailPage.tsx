@@ -9,6 +9,7 @@ import { GetTrackingBySolicitudIdUseCase } from '../../application/usecases/GetT
 import { SolicitudRepositoryImpl } from '../../infrastructure/repositories/SolicitudRepositoryImpl';
 import type { RequestDetailByClientResponse, TrackingSolicitudResponse } from '../../domain/models/Solicitud';
 import { SolicitudDocumentPreviewModal } from '../components/SolicitudDocumentPreviewModal';
+import { CreateInspectionInvoiceModal } from '../components/CreateInspectionInvoiceModal';
 import {
   getEstadoConfig,
   TIPO_ACOMETIDA_LABELS,
@@ -64,6 +65,7 @@ export const SolicitudDetailPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [docsOpen, setDocsOpen] = useState(false);
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
 
   const [reloadTrigger, setReloadTrigger] = useState(0);
 
@@ -287,6 +289,19 @@ export const SolicitudDetailPage: React.FC = () => {
                   </span>
                 </div>
               </div>
+
+              {solicitud.estado === 'DOCS_APPROVED' && (
+                <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(148, 163, 184, 0.08)', paddingTop: '1.25rem' }}>
+                  <Button
+                    variant="primary"
+                    onClick={() => setInvoiceModalOpen(true)}
+                    leftIcon={<CreditCard size={16} />}
+                    style={{ width: '100%', justifyContent: 'center', height: '42px', fontSize: '0.9rem' }}
+                  >
+                    Generar Factura de Inspección
+                  </Button>
+                </div>
+              )}
             </div>
           </Card>
 
@@ -674,6 +689,17 @@ export const SolicitudDetailPage: React.FC = () => {
           solicitudNumero={solicitud.solicitudNumero}
           solicitudId={solicitud.solicitudId}
           onValidationSuccess={() => setReloadTrigger((prev) => prev + 1)}
+        />
+      )}
+
+      {/* ── Create Inspection Invoice Modal ── */}
+      {invoiceModalOpen && (
+        <CreateInspectionInvoiceModal
+          isOpen={invoiceModalOpen}
+          onClose={() => setInvoiceModalOpen(false)}
+          solicitudId={solicitud.solicitudId}
+          solicitudNumero={solicitud.solicitudNumero}
+          onSuccess={() => setReloadTrigger((prev) => prev + 1)}
         />
       )}
     </PageLayout>

@@ -3,7 +3,7 @@ import type {
   Solicitud,
   TrackingSolicitudResponse
 } from '../../domain/models/Solicitud';
-import type { SolicitudRepository } from '../../domain/repositories/SolicitudRepository';
+import type { SolicitudRepository, CreateInspectionInvoiceDto } from '../../domain/repositories/SolicitudRepository';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 import type { HttpClientInterface } from '@/shared/infrastructure/api/interfaces/HttpClientInterface';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
@@ -235,5 +235,15 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
         validatorId
       }
     });
+  }
+
+  async createInspectionInvoice(dto: CreateInspectionInvoiceDto): Promise<void> {
+    if (!dto.requestId) throw new Error('El ID de la solicitud es requerido');
+    if (!dto.invoiceNumber) throw new Error('El número de factura es requerido');
+    if (dto.conceptId === undefined) throw new Error('El ID del concepto es requerido');
+    if (dto.amount === undefined) throw new Error('El monto es requerido');
+    if (!dto.expirationDate) throw new Error('La fecha de vencimiento es requerida');
+
+    await this.client.post<void>('/inspection-invoice/create_inspection_invoice', dto);
   }
 }

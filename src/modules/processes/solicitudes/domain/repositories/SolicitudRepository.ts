@@ -34,4 +34,16 @@ export interface SolicitudRepository {
     }[],
     validatorId: string
   ): Promise<void>;
+
+  createInspectionInvoice(dto: CreateInspectionInvoiceDto): Promise<void>;
 }
+
+export interface CreateInspectionInvoiceDto {
+  requestId: string;
+  invoiceNumber: string;
+  conceptId: number;
+  amount: number;
+  expirationDate: Date | string;
+  collectorId?: string;
+}
+
