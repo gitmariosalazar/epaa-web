@@ -19,7 +19,6 @@ import React, { useCallback, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { Card } from '@/shared/presentation/components/Card/Card';
 import {
   Droplets,
   ChevronRight,
@@ -220,82 +219,86 @@ export const SolicitudNuevaPage: React.FC = () => {
         </div>
       }
     >
-      <StepIndicator step={step} steps={STEPS} />
-
-      <Card className="solicitud-card">
-        {step === 1 && (
-             <PersonalDataStep
-            form={form}
-            tramite={tramite}
-            onDetallesChange={(newDetalles) => {
-              setForm((prev) => ({ ...prev, detalles: newDetalles }));
-              setErrors({});
-              setIsModalOpen(false);
-            }}
-            onFormChange={(updatedFields) => {
-              setForm((prev) => ({ ...prev, ...updatedFields }));
-              setErrors({});
-              setIsModalOpen(false);
-            }}
-            errors={errors}
-          />
-        )}
-
-        {step === 2 && tramite && (
-          <DocumentsStep
-            tramite={tramite}
-            documentos={documentos}
-            onAttach={handleAttach}
-            onRemove={handleRemove}
-          />
-        )}
-
-        {step === 3 && (
-          <SummaryStep
-            form={form}
-            tramite={tramite ?? undefined}
-            documentos={documentos}
-            allDocsReady={allDocsReady}
-            docsSubidos={docsSubidos}
-            docsTotal={docsTotal}
-          />
-        )}
-
-        {/* ── Navigation ── */}
-        <div className="solicitud-nav">
-          {step > 1 && (
-            <Button
-              id="btn-prev-step"
-              variant="ghost"
-              onClick={handlePrevStep}
-              leftIcon={<ChevronLeft size={18} />}
-            >
-              Anterior
-            </Button>
-          )}
-          <div style={{ flex: 1 }} />
-          {step < 3 ? (
-            <Button
-              id="btn-next-step"
-              variant="primary"
-              onClick={handleNextStep}
-              rightIcon={<ChevronRight size={18} />}
-            >
-              Continuar
-            </Button>
-          ) : (
-            <Button
-              id="btn-submit-solicitud"
-              variant="success"
-              isLoading={isSubmitting}
-              onClick={handleSubmit}
-              leftIcon={!isSubmitting ? <Check size={18} /> : undefined}
-            >
-              Enviar Solicitud
-            </Button>
-          )}
+      <div className="solicitud-wizard-container">
+        <div className="solicitud-steps-sticky-container">
+          <StepIndicator step={step} steps={STEPS} />
         </div>
-      </Card>
+
+        <div className="request-container">
+          {step === 1 && (
+            <PersonalDataStep
+              form={form}
+              tramite={tramite}
+              onDetallesChange={(newDetalles) => {
+                setForm((prev) => ({ ...prev, detalles: newDetalles }));
+                setErrors({});
+                setIsModalOpen(false);
+              }}
+              onFormChange={(updatedFields) => {
+                setForm((prev) => ({ ...prev, ...updatedFields }));
+                setErrors({});
+                setIsModalOpen(false);
+              }}
+              errors={errors}
+            />
+          )}
+
+          {step === 2 && tramite && (
+            <DocumentsStep
+              tramite={tramite}
+              documentos={documentos}
+              onAttach={handleAttach}
+              onRemove={handleRemove}
+            />
+          )}
+
+          {step === 3 && (
+            <SummaryStep
+              form={form}
+              tramite={tramite ?? undefined}
+              documentos={documentos}
+              allDocsReady={allDocsReady}
+              docsSubidos={docsSubidos}
+              docsTotal={docsTotal}
+            />
+          )}
+
+          {/* ── Navigation ── */}
+          <div className="solicitud-nav">
+            {step > 1 && (
+              <Button
+                id="btn-prev-step"
+                variant="ghost"
+                onClick={handlePrevStep}
+                leftIcon={<ChevronLeft size={18} />}
+              >
+                Anterior
+              </Button>
+            )}
+            <div style={{ flex: 1 }} />
+            {step < 3 ? (
+              <Button
+                id="btn-next-step"
+                variant="primary"
+                onClick={handleNextStep}
+                rightIcon={<ChevronRight size={18} />}
+              >
+                Continuar
+              </Button>
+            ) : (
+              <Button
+                id="btn-submit-solicitud"
+                variant="success"
+                isLoading={isSubmitting}
+                onClick={handleSubmit}
+                leftIcon={!isSubmitting ? <Check size={18} /> : undefined}
+              >
+                Enviar Solicitud
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
 
       <Modal
         isOpen={isModalOpen}

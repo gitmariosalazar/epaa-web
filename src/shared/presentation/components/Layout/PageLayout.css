@@ -39,3 +39,11 @@
   background: transparent;
   width: 100%;
 }
+
+/* Prevent outer dashboard-main from scrolling when PageLayout is used */
+.dashboard-main:has(.epaa-page-layout) {
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+

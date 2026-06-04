@@ -6,10 +6,12 @@
  */
 import React, { useState, useMemo, useEffect } from 'react';
 import type { DocumentoAdjuntoResponse } from '../../domain/models/Solicitud';
-import { environments } from '@/settings/environments/environments';
 import { useAuth } from '@/shared/presentation/context/AuthContext';
 import { ValidateDocumentsUseCase } from '../../application/usecases/ValidateDocumentsUseCase';
 import { SolicitudRepositoryImpl } from '../../infrastructure/repositories/SolicitudRepositoryImpl';
+import { PreviewDocumentUseCase } from '@/modules/documents/application/usecases/PreviewDocumentUseCase';
+import { DownloadDocumentUseCase } from '@/modules/documents/application/usecases/DownloadDocumentUseCase';
+import { DocumentRepositoryImpl } from '@/modules/documents/infrastructure/repositories/DocumentRepositoryImpl';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 import {
   X,
@@ -25,9 +27,10 @@ import {
   Loader2
 } from 'lucide-react';
 
-const API_BASE = (environments.API_URL || '')
-  .replace(/\/api$/, '')
-  .replace(/\/$/, '');
+const previewUseCase = new PreviewDocumentUseCase(new DocumentRepositoryImpl());
+const downloadUseCase = new DownloadDocumentUseCase(
+  new DocumentRepositoryImpl()
+);
 
 const TIPO_DOC_LABELS: Record<number | string, string> = {
   1: 'Cédula de Identidad',
@@ -95,6 +98,90 @@ export const SolicitudDocumentPreviewModal: React.FC<
   const { user } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
 
+  // States and hooks for document preview & download Use Cases
+  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+  const [previewMimeType, setPreviewMimeType] = useState<string | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  // Load preview Blob whenever the active document changes
+  useEffect(() => {
+    let active = true;
+    const doc = documentos[activeIdx];
+    if (!doc?.id && !doc?.url) return;
+
+    setLoadingPreview(true);
+    setPreviewError(null);
+    setPreviewBlobUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setPreviewMimeType(null);
+
+    previewUseCase
+      .execute(doc.id, doc.url)
+      .then((blob) => {
+        if (!active) return;
+        const blobUrl = URL.createObjectURL(blob);
+        setPreviewBlobUrl(blobUrl);
+        setPreviewMimeType(blob.type || null);
+      })
+      .catch((err) => {
+        if (!active) return;
+        console.error('Error loading document preview:', err);
+        setPreviewError(
+          err?.message || 'No se pudo cargar la vista previa del documento.'
+        );
+      })
+      .finally(() => {
+        if (active) setLoadingPreview(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [activeIdx, documentos]);
+
+  // Clean up blob URL on unmount
+  useEffect(() => {
+    return () => {
+      setPreviewBlobUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
+      setPreviewMimeType(null);
+    };
+  }, []);
+
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isDownloading) return;
+    const doc = documentos[activeIdx];
+    if (!doc) return;
+
+    setIsDownloading(true);
+    try {
+      const blob = await downloadUseCase.execute(doc.id, doc.url);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const label =
+        TIPO_DOC_LABELS[Number(doc.tipodocumento)] ?? `Documento-${doc.id}`;
+      const ext = getExtensionFromMimeType(blob.type);
+      a.download = `${label}${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error downloading document:', err);
+      MessageToastCustom('error', 'Error', 'No se pudo descargar el archivo.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   // Debug: Imprime el usuario en consola para ver sus roles
   useEffect(() => {
     console.log('DEBUG [User Auth Session]:', user);
@@ -130,11 +217,13 @@ export const SolicitudDocumentPreviewModal: React.FC<
   // Debug: Imprime el DTO en consola cada vez que cambien las decisiones locales
   useEffect(() => {
     if (!user?.userId) return;
-    const payloadDecisions = Object.entries(localDecisions).map(([id, dec]) => ({
-      documentId: id,
-      validationStatus: dec.status as 'APROBADO' | 'RECHAZADO',
-      observation: dec.observation.trim() || undefined
-    }));
+    const payloadDecisions = Object.entries(localDecisions).map(
+      ([id, dec]) => ({
+        documentId: id,
+        validationStatus: dec.status as 'APROBADO' | 'RECHAZADO',
+        observation: dec.observation.trim() || undefined
+      })
+    );
     console.log('DEBUG [Live Document Validation DTO]:', {
       solicitudId,
       dto: {
@@ -168,8 +257,7 @@ export const SolicitudDocumentPreviewModal: React.FC<
         mappedStatus = 'RECHAZADO';
       }
       return (
-        dec.status !== mappedStatus ||
-        dec.observation !== (d.observacion || '')
+        dec.status !== mappedStatus || dec.observation !== (d.observacion || '')
       );
     });
   }, [documentos, localDecisions]);
@@ -198,12 +286,30 @@ export const SolicitudDocumentPreviewModal: React.FC<
   const doc = documentos[activeIdx];
   if (!doc) return null;
 
-  const docUrl = doc.url.startsWith('http') ? doc.url : `${API_BASE}${doc.url}`;
   const tipoLabel =
     TIPO_DOC_LABELS[Number(doc.tipodocumento)] ??
     `Documento tipo ${doc.tipodocumento}`;
-  const isPdf =
-    docUrl.toLowerCase().endsWith('.pdf') || docUrl.includes('.pdf');
+  const isPdf = previewMimeType === 'application/pdf';
+  const isImage = previewMimeType?.startsWith('image/') ?? false;
+
+  const getExtensionFromMimeType = (mimeType?: string | null): string => {
+    const normalizedMimeType = (mimeType || '').toLowerCase();
+
+    switch (normalizedMimeType) {
+      case 'application/pdf':
+        return '.pdf';
+      case 'image/png':
+        return '.png';
+      case 'image/jpeg':
+        return '.jpg';
+      case 'image/webp':
+        return '.webp';
+      case 'text/plain':
+        return '.txt';
+      default:
+        return '';
+    }
+  };
 
   // Selected document state
   const activeDecision = localDecisions[doc.id] || {
@@ -242,15 +348,18 @@ export const SolicitudDocumentPreviewModal: React.FC<
   };
 
   const handleSaveValidation = async () => {
-    if (!hasChanges || hasErrors || hasPending || isSaving || !user?.userId) return;
+    if (!hasChanges || hasErrors || hasPending || isSaving || !user?.userId)
+      return;
     setIsSaving(true);
 
     try {
-      const payloadDecisions = Object.entries(localDecisions).map(([id, dec]) => ({
-        documentId: id,
-        validationStatus: dec.status as 'APROBADO' | 'RECHAZADO',
-        observation: dec.observation.trim() || undefined
-      }));
+      const payloadDecisions = Object.entries(localDecisions).map(
+        ([id, dec]) => ({
+          documentId: id,
+          validationStatus: dec.status as 'APROBADO' | 'RECHAZADO',
+          observation: dec.observation.trim() || undefined
+        })
+      );
 
       console.log('DEBUG [Validate Documents DTO Payload]:', {
         solicitudId,
@@ -421,47 +530,131 @@ export const SolicitudDocumentPreviewModal: React.FC<
               <div
                 style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}
               >
-                <a
-                  href={docUrl}
-                  download
+                <button
+                  onClick={handleDownload}
                   className="doc-modal__action-btn"
                   title="Descargar"
+                  disabled={isDownloading}
+                  style={{
+                    background: 'none',
+                    border: '1px solid var(--border-color)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.25rem'
+                  }}
                 >
-                  <Download size={14} /> Descargar
-                </a>
-                <a
-                  href={docUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="doc-modal__action-btn"
-                  title="Abrir en nueva pestaña"
-                >
-                  <ExternalLink size={14} /> Abrir
-                </a>
-              </div>
-            </div>
-
-            {/* PDF / fallback */}
-            <div className="doc-modal__viewer">
-              {isPdf ? (
-                <iframe
-                  key={docUrl}
-                  src={`${docUrl}#toolbar=1&navpanes=0`}
-                  title={tipoLabel}
-                  className="doc-modal__iframe"
-                />
-              ) : (
-                <div className="doc-modal__no-preview">
-                  <FileText size={48} style={{ color: 'var(--text-muted)' }} />
-                  <p>Vista previa no disponible para este tipo de archivo.</p>
+                  {isDownloading ? (
+                    <Loader2
+                      size={14}
+                      style={{ animation: 'btn-spin 0.8s linear infinite' }}
+                    />
+                  ) : (
+                    <Download size={14} />
+                  )}
+                  Descargar
+                </button>
+                {previewBlobUrl && (
                   <a
-                    href={docUrl}
+                    href={previewBlobUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="doc-modal__action-btn"
+                    title="Abrir en nueva pestaña"
                   >
-                    <ExternalLink size={14} /> Ver archivo
+                    <ExternalLink size={14} /> Abrir
                   </a>
+                )}
+              </div>
+            </div>
+
+            {/* PDF / Image / fallback */}
+            <div className="doc-modal__viewer">
+              {loadingPreview ? (
+                <div
+                  className="doc-modal__no-preview"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100%',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <Loader2
+                    size={28}
+                    style={{
+                      color: 'var(--accent)',
+                      animation: 'btn-spin 0.8s linear infinite'
+                    }}
+                  />
+                  <p
+                    style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}
+                  >
+                    Cargando vista previa...
+                  </p>
+                </div>
+              ) : previewBlobUrl ? (
+                isPdf ? (
+                  <iframe
+                    key={previewBlobUrl}
+                    src={`${previewBlobUrl}#toolbar=1&navpanes=0`}
+                    title={tipoLabel}
+                    className="doc-modal__iframe"
+                  />
+                ) : isImage ? (
+                  <div
+                    className="doc-modal__no-preview"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%',
+                      padding: '1rem',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <img
+                      src={previewBlobUrl}
+                      alt={tipoLabel}
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        objectFit: 'contain',
+                        borderRadius: '4px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="doc-modal__no-preview">
+                    <FileText
+                      size={48}
+                      style={{ color: 'var(--text-muted)' }}
+                    />
+                    <p>Vista previa no disponible para este tipo de archivo.</p>
+                    <small
+                      style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}
+                    >
+                      Descarga el archivo para visualizarlo.
+                    </small>
+                  </div>
+                )
+              ) : previewError ? (
+                <div className="doc-modal__no-preview">
+                  <FileText size={48} style={{ color: 'var(--text-muted)' }} />
+                  <p>No se pudo cargar la vista previa.</p>
+                  <small
+                    style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}
+                  >
+                    {previewError}
+                  </small>
+                </div>
+              ) : (
+                <div className="doc-modal__no-preview">
+                  <FileText size={48} style={{ color: 'var(--text-muted)' }} />
+                  <p>Vista previa no disponible para este documento.</p>
                 </div>
               )}
             </div>
