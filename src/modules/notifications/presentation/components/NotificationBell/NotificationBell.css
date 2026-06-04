@@ -53,7 +53,7 @@
   justify-content: center;
   line-height: 15px;
   text-align: center;
-  border: 2px solid var(--background);
+  border: 1px solid var(--background);
   pointer-events: none;
   z-index: 1;
   transition: transform 0.18s, filter 0.18s;

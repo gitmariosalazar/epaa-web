@@ -102,23 +102,15 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
     const today = dateService.getCurrentDateString();
 
-    // Previous month days
-    const prevMonthDate = new Date(year, month, 0);
-    const prevMonthLastDay = prevMonthDate.getDate();
-
-    for (let i = firstDay - 1; i >= 0; i--) {
-      const dayNum = prevMonthLastDay - i;
+    for (let i = 0; i < firstDay; i++) {
       days.push(
         <div
-          key={`prev-${dayNum}`}
-          className="date-range-picker-cell date-range-picker-cell--outside"
-        >
-          {dayNum}
-        </div>
+          key={`empty-${i}`}
+          className="date-range-picker-cell date-range-picker-cell--empty"
+        />
       );
     }
 
-    // Current month days
     for (let i = 1; i <= daysInMonth; i++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
       const isStart = tempStart === dateStr;
@@ -143,21 +135,6 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         </button>
       );
     }
-
-    // Next month days to complete 6 rows (42 cells)
-    const totalCells = 42;
-    const remainingCells = totalCells - days.length;
-    for (let i = 1; i <= remainingCells; i++) {
-      days.push(
-        <div
-          key={`next-${i}`}
-          className="date-range-picker-cell date-range-picker-cell--outside"
-        >
-          {i}
-        </div>
-      );
-    }
-
     return days;
   };
 
@@ -200,12 +177,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   };
 
   const handleApply = () => {
-    if (
-      tempStart &&
-      tempEnd &&
-      isValidDate(tempStart) &&
-      isValidDate(tempEnd)
-    ) {
+    if (tempStart && tempEnd && isValidDate(tempStart) && isValidDate(tempEnd)) {
       onChange(tempStart, tempEnd);
       setIsOpen(false);
     }
@@ -225,15 +197,9 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
       >
-        <CalendarIcon
-          className="date-range-picker-icon"
-          size={size === 'xs' || size === 'small' ? 14 : 18}
-        />
+        <CalendarIcon className="date-range-picker-icon" size={size === 'xs' || size === 'small' ? 14 : 18} />
         <span>{startDate || t('common.dateRange.start', 'Desde')}</span>
-        <ArrowRight
-          size={size === 'xs' || size === 'small' ? 12 : 14}
-          className="date-separator"
-        />
+        <ArrowRight size={size === 'xs' || size === 'small' ? 12 : 14} className="date-separator" />
         <span>{endDate || t('common.dateRange.end', 'Hasta')}</span>
       </button>
 
@@ -296,16 +262,9 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
               <div className="date-range-picker-labels">
                 <span className="date-range-picker-label">
                   <CalendarIcon size={14} />
-                  {t('common.dateRange.selected', 'Rango')}:
+                  {t('common.dateRange.selected', 'Rango seleccionado')}:
                 </span>
-                <div
-                  className="date-range-picker-input-boxes"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}
-                >
+                <div className="date-range-picker-input-boxes" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <input
                     type="text"
                     className="date-range-picker-manual-input"

@@ -32,27 +32,27 @@ import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 const CHANNEL_COLORS: Record<string, string> = {
-  IN_APP:   '#3b82f6',
-  EMAIL:    '#ea4335',
-  SMS:      '#10b981',
-  PUSH:     '#8b5cf6',
+  IN_APP: '#3b82f6',
+  EMAIL: '#ea4335',
+  SMS: '#10b981',
+  PUSH: '#8b5cf6',
   WHATSAPP: '#25D366',
 };
 
 const PRIORITY_COLORS: Record<NotificationPriority, string> = {
-  LOW:    '#94a3b8',
+  LOW: '#94a3b8',
   NORMAL: '#3b82f6',
-  HIGH:   '#f59e0b',
+  HIGH: '#f59e0b',
   URGENT: '#ef4444',
 };
 
 const ChannelIcon: React.FC<{ channel: string; color: string }> = ({ channel, color }) => {
   const p = { size: 17, color: '#fff' };
   const map: Record<string, React.ReactNode> = {
-    IN_APP:   <BellIcon {...p} />,
-    EMAIL:    <Mail {...p} />,
-    SMS:      <MessageCircle {...p} />,
-    PUSH:     <Smartphone {...p} />,
+    IN_APP: <BellIcon {...p} />,
+    EMAIL: <Mail {...p} />,
+    SMS: <MessageCircle {...p} />,
+    PUSH: <Smartphone {...p} />,
     WHATSAPP: <Wifi {...p} />,
   };
   return (
@@ -118,11 +118,11 @@ const PanelItem: React.FC<{
 
 // ── Main component ────────────────────────────────────────────────────────────
 export const NotificationBell: React.FC = () => {
-  const { user }  = useAuth();
-  const ctx       = useNotificationsContext();
-  const bell      = useNotificationBell();
-  const navigate  = useNavigate();
-  const userId    = user?.userId ?? '';
+  const { user } = useAuth();
+  const ctx = useNotificationsContext();
+  const bell = useNotificationBell();
+  const navigate = useNavigate();
+  const userId = user?.userId ?? '';
 
 
   const displayed = bell.tab === 'unread'
@@ -131,25 +131,25 @@ export const NotificationBell: React.FC = () => {
 
   const groups = useMemo(() => groupByDate(displayed), [displayed]);
 
-  const handleRead    = (id: string) => ctx.markAsRead(id, userId);
+  const handleRead = (id: string) => ctx.markAsRead(id, userId);
   const handleReadAll = () => ctx.markAllAsRead(userId);
 
-  const handleExpand  = () => { bell.close(); navigate('/notifications'); };
+  const handleExpand = () => { bell.close(); navigate('/notifications'); };
 
   return (
     <div className="notif-bell">
       {/* ── Bell trigger ── */}
       <Tooltip content="Notificaciones" themeColor="info">
         <Button
-        ref={bell.triggerRef}
-        className={`notif-bell__btn ${bell.isOpen ? 'notif-bell__btn--active' : ''}`}
-        onClick={bell.toggle}
-        aria-label={`Notificaciones${ctx.unreadCount > 0 ? ` (${ctx.unreadCount} no leídas)` : ''}`}
-        aria-expanded={bell.isOpen}
-        aria-haspopup="true"
-      >
-        <Bell size={20} />
-      </Button>
+          ref={bell.triggerRef}
+          className={`notif-bell__btn ${bell.isOpen ? 'notif-bell__btn--active' : ''}`}
+          onClick={bell.toggle}
+          aria-label={`Notificaciones${ctx.unreadCount > 0 ? ` (${ctx.unreadCount} no leídas)` : ''}`}
+          aria-expanded={bell.isOpen}
+          aria-haspopup="true"
+        >
+          <Bell size={20} />
+        </Button>
       </Tooltip>
       {ctx.unreadCount > 0 && (
         <span className="notif-bell__badge">
