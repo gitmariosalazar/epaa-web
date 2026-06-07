@@ -338,6 +338,7 @@ export const useUsersViewModel = () => {
     handleUpdate,
     handleView,
     handleDelete,
-    openEdit
+    openEdit,
+    refresh: loadUsers
   };
 };

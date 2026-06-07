@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/shared/presentation/context/ThemeContext';
 // import { useAuth } from '@/shared/presentation/context/AuthContext';
-import { Moon, Sun, Globe, Bell, Shield, Smartphone } from 'lucide-react';
+import { Moon, Sun, Globe, Bell, Smartphone } from 'lucide-react';
 import '@/shared/presentation/styles/settings.css';
+import { MdOutlineSecurity } from 'react-icons/md';
 
 export const SettingsPage = () => {
   const { t, i18n } = useTranslation();
@@ -147,7 +148,7 @@ export const SettingsPage = () => {
       <section className="settings-section">
         <div className="settings-section-header">
           <h2>
-            <Shield size={20} />
+            <MdOutlineSecurity size={20} />
             Security (Read Only)
           </h2>
         </div>

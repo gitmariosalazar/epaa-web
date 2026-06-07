@@ -24,8 +24,10 @@ import {
   ChevronLeft,
   ChevronRight,
   XCircle,
-  Loader2
+  Loader2,
+  Save
 } from 'lucide-react';
+import { Button } from '@/shared/presentation/components/Button/Button';
 
 const previewUseCase = new PreviewDocumentUseCase(new DocumentRepositoryImpl());
 const downloadUseCase = new DownloadDocumentUseCase(
@@ -82,6 +84,7 @@ interface SolicitudDocumentPreviewModalProps {
   solicitudNumero: string;
   solicitudId: string;
   onValidationSuccess?: () => void;
+  initialActiveId?: string;
 }
 
 export const SolicitudDocumentPreviewModal: React.FC<
@@ -92,267 +95,148 @@ export const SolicitudDocumentPreviewModal: React.FC<
   documentos,
   solicitudNumero,
   solicitudId,
-  onValidationSuccess
+  onValidationSuccess,
+  initialActiveId
 }) => {
-  const [activeIdx, setActiveIdx] = useState(0);
-  const { user } = useAuth();
-  const [isSaving, setIsSaving] = useState(false);
+    const [activeIdx, setActiveIdx] = useState(0);
+    const { user } = useAuth();
+    const [isSaving, setIsSaving] = useState(false);
 
-  // States and hooks for document preview & download Use Cases
-  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
-  const [previewMimeType, setPreviewMimeType] = useState<string | null>(null);
-  const [loadingPreview, setLoadingPreview] = useState(false);
-  const [previewError, setPreviewError] = useState<string | null>(null);
-  const [isDownloading, setIsDownloading] = useState(false);
-
-  // Load preview Blob whenever the active document changes
-  useEffect(() => {
-    let active = true;
-    const doc = documentos[activeIdx];
-    if (!doc?.id && !doc?.url) return;
-
-    setLoadingPreview(true);
-    setPreviewError(null);
-    setPreviewBlobUrl((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return null;
-    });
-    setPreviewMimeType(null);
-
-    previewUseCase
-      .execute(doc.id, doc.url)
-      .then((blob) => {
-        if (!active) return;
-        const blobUrl = URL.createObjectURL(blob);
-        setPreviewBlobUrl(blobUrl);
-        setPreviewMimeType(blob.type || null);
-      })
-      .catch((err) => {
-        if (!active) return;
-        console.error('Error loading document preview:', err);
-        setPreviewError(
-          err?.message || 'No se pudo cargar la vista previa del documento.'
-        );
-      })
-      .finally(() => {
-        if (active) setLoadingPreview(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [activeIdx, documentos]);
-
-  // Clean up blob URL on unmount
-  useEffect(() => {
-    return () => {
-      setPreviewBlobUrl((prev) => {
-        if (prev) URL.revokeObjectURL(prev);
-        return null;
-      });
-      setPreviewMimeType(null);
-    };
-  }, []);
-
-  const handleDownload = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isDownloading) return;
-    const doc = documentos[activeIdx];
-    if (!doc) return;
-
-    setIsDownloading(true);
-    try {
-      const blob = await downloadUseCase.execute(doc.id, doc.url);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const label =
-        TIPO_DOC_LABELS[Number(doc.tipodocumento)] ?? `Documento-${doc.id}`;
-      const ext = getExtensionFromMimeType(blob.type);
-      a.download = `${label}${ext}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Error downloading document:', err);
-      MessageToastCustom('error', 'Error', 'No se pudo descargar el archivo.');
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
-  // Debug: Imprime el usuario en consola para ver sus roles
-  useEffect(() => {
-    console.log('DEBUG [User Auth Session]:', user);
-  }, [user]);
-
-  // Local state for decisions initialized directly from props
-  const [localDecisions, setLocalDecisions] = useState<
-    Record<
-      string,
-      { status: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO'; observation: string }
-    >
-  >(() => {
-    const initial: Record<
-      string,
-      { status: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO'; observation: string }
-    > = {};
-    documentos.forEach((d) => {
-      let mappedStatus: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO' = 'PENDIENTE';
-      const dbStatus = (d.estadoValidacion || '').toUpperCase();
-      if (dbStatus === 'VALIDO' || dbStatus === 'APROBADO') {
-        mappedStatus = 'APROBADO';
-      } else if (dbStatus === 'INVALIDO' || dbStatus === 'RECHAZADO') {
-        mappedStatus = 'RECHAZADO';
+    // Sync active document when modal opens with a specific document selection
+    useEffect(() => {
+      if (isOpen && initialActiveId) {
+        const idx = documentos.findIndex((d) => d.id === initialActiveId);
+        if (idx !== -1) {
+          Promise.resolve().then(() => {
+            setActiveIdx(idx);
+          });
+        }
       }
-      initial[d.id] = {
-        status: mappedStatus,
-        observation: d.observacion || ''
+    }, [isOpen, initialActiveId, documentos]);
+
+    // States and hooks for document preview & download Use Cases
+    const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+    const [previewMimeType, setPreviewMimeType] = useState<string | null>(null);
+    const [loadingPreview, setLoadingPreview] = useState(false);
+    const [previewError, setPreviewError] = useState<string | null>(null);
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    // Load preview Blob whenever the active document changes
+    useEffect(() => {
+      let active = true;
+      const doc = documentos[activeIdx];
+      if (!doc?.id && !doc?.url) return;
+
+      // Defer state updates to microtask queue to avoid react-hooks/set-state-in-effect
+      Promise.resolve().then(() => {
+        if (!active) return;
+        setLoadingPreview(true);
+        setPreviewError(null);
+        setPreviewBlobUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return null;
+        });
+        setPreviewMimeType(null);
+      });
+
+      previewUseCase
+        .execute(doc.id, doc.url)
+        .then((blob) => {
+          if (!active) return;
+          const blobUrl = URL.createObjectURL(blob);
+          setPreviewBlobUrl(blobUrl);
+          setPreviewMimeType(blob.type || null);
+        })
+        .catch((err) => {
+          if (!active) return;
+          console.error('Error loading document preview:', err);
+          setPreviewError(
+            err?.message || 'No se pudo cargar la vista previa del documento.'
+          );
+        })
+        .finally(() => {
+          if (active) setLoadingPreview(false);
+        });
+
+      return () => {
+        active = false;
       };
-    });
-    return initial;
-  });
+    }, [activeIdx, documentos]);
 
-  // Debug: Imprime el DTO en consola cada vez que cambien las decisiones locales
-  useEffect(() => {
-    if (!user?.userId) return;
-    const payloadDecisions = Object.entries(localDecisions).map(
-      ([id, dec]) => ({
-        documentId: id,
-        validationStatus: dec.status as 'APROBADO' | 'RECHAZADO',
-        observation: dec.observation.trim() || undefined
-      })
-    );
-    console.log('DEBUG [Live Document Validation DTO]:', {
-      solicitudId,
-      dto: {
-        decisions: payloadDecisions,
-        validatorId: user.userId
+    // Clean up blob URL on unmount
+    useEffect(() => {
+      return () => {
+        setPreviewBlobUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return null;
+        });
+        setPreviewMimeType(null);
+      };
+    }, []);
+
+    const handleDownload = async (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (isDownloading) return;
+      const doc = documentos[activeIdx];
+      if (!doc) return;
+
+      setIsDownloading(true);
+      try {
+        const blob = await downloadUseCase.execute(doc.id, doc.url);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const label =
+          TIPO_DOC_LABELS[Number(doc.tipodocumento)] ?? `Documento-${doc.id}`;
+        const ext = getExtensionFromMimeType(blob.type);
+        a.download = `${label}${ext}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error('Error downloading document:', err);
+        MessageToastCustom('error', 'Error', 'No se pudo descargar el archivo.');
+      } finally {
+        setIsDownloading(false);
       }
+    };
+
+    // Debug: Imprime el usuario en consola para ver sus roles
+    useEffect(() => {
+      console.log('DEBUG [User Auth Session]:', user);
+    }, [user]);
+
+    // Local state for decisions initialized directly from props
+    const [localDecisions, setLocalDecisions] = useState<
+      Record<
+        string,
+        { status: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO'; observation: string }
+      >
+    >(() => {
+      const initial: Record<
+        string,
+        { status: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO'; observation: string }
+      > = {};
+      documentos.forEach((d) => {
+        let mappedStatus: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO' = 'PENDIENTE';
+        const dbStatus = (d.estadoValidacion || '').toUpperCase();
+        if (dbStatus === 'VALIDO' || dbStatus === 'APROBADO') {
+          mappedStatus = 'APROBADO';
+        } else if (dbStatus === 'INVALIDO' || dbStatus === 'RECHAZADO') {
+          mappedStatus = 'RECHAZADO';
+        }
+        initial[d.id] = {
+          status: mappedStatus,
+          observation: d.observacion || ''
+        };
+      });
+      return initial;
     });
-  }, [localDecisions, solicitudId, user]);
 
-  // Determine if logged-in user is an analyst
-  const isAnalyst = useMemo(() => {
-    return (
-      user?.roles?.some((role) => {
-        const roleName = typeof role === 'string' ? role : role.name;
-        const upper = roleName.toUpperCase();
-        return upper === 'ANALISTA' || upper === 'ADMINISTRADOR';
-      }) ?? false
-    );
-  }, [user]);
-
-  // Compare local choices to original document values to check for changes
-  const hasChanges = useMemo(() => {
-    return documentos.some((d) => {
-      const dec = localDecisions[d.id];
-      if (!dec) return false;
-      let mappedStatus: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO' = 'PENDIENTE';
-      const dbStatus = (d.estadoValidacion || '').toUpperCase();
-      if (dbStatus === 'VALIDO' || dbStatus === 'APROBADO') {
-        mappedStatus = 'APROBADO';
-      } else if (dbStatus === 'INVALIDO' || dbStatus === 'RECHAZADO') {
-        mappedStatus = 'RECHAZADO';
-      }
-      return (
-        dec.status !== mappedStatus || dec.observation !== (d.observacion || '')
-      );
-    });
-  }, [documentos, localDecisions]);
-
-  // Check if a rejected document lacks an observation
-  const hasErrors = useMemo(() => {
-    return Object.values(localDecisions).some((dec) => {
-      return dec.status === 'RECHAZADO' && !dec.observation.trim();
-    });
-  }, [localDecisions]);
-
-  // Check if any document is still pending validation
-  const hasPending = useMemo(() => {
-    return Object.values(localDecisions).some((dec) => {
-      return dec.status === 'PENDIENTE';
-    });
-  }, [localDecisions]);
-
-  const validateUseCase = useMemo(
-    () => new ValidateDocumentsUseCase(new SolicitudRepositoryImpl()),
-    []
-  );
-
-  if (!isOpen || documentos.length === 0) return null;
-
-  const doc = documentos[activeIdx];
-  if (!doc) return null;
-
-  const tipoLabel =
-    TIPO_DOC_LABELS[Number(doc.tipodocumento)] ??
-    `Documento tipo ${doc.tipodocumento}`;
-  const isPdf = previewMimeType === 'application/pdf';
-  const isImage = previewMimeType?.startsWith('image/') ?? false;
-
-  const getExtensionFromMimeType = (mimeType?: string | null): string => {
-    const normalizedMimeType = (mimeType || '').toLowerCase();
-
-    switch (normalizedMimeType) {
-      case 'application/pdf':
-        return '.pdf';
-      case 'image/png':
-        return '.png';
-      case 'image/jpeg':
-        return '.jpg';
-      case 'image/webp':
-        return '.webp';
-      case 'text/plain':
-        return '.txt';
-      default:
-        return '';
-    }
-  };
-
-  // Selected document state
-  const activeDecision = localDecisions[doc.id] || {
-    status: 'PENDIENTE',
-    observation: ''
-  };
-
-  const handleStatusChange = (status: 'APROBADO' | 'RECHAZADO') => {
-    setLocalDecisions((prev) => ({
-      ...prev,
-      [doc.id]: {
-        ...prev[doc.id],
-        status
-      }
-    }));
-  };
-
-  const handleObservationChange = (observation: string) => {
-    setLocalDecisions((prev) => ({
-      ...prev,
-      [doc.id]: {
-        ...prev[doc.id],
-        observation
-      }
-    }));
-  };
-
-  const handleQuickObs = (text: string) => {
-    setLocalDecisions((prev) => ({
-      ...prev,
-      [doc.id]: {
-        ...prev[doc.id],
-        observation: text
-      }
-    }));
-  };
-
-  const handleSaveValidation = async () => {
-    if (!hasChanges || hasErrors || hasPending || isSaving || !user?.userId)
-      return;
-    setIsSaving(true);
-
-    try {
+    // Debug: Imprime el DTO en consola cada vez que cambien las decisiones locales
+    useEffect(() => {
+      if (!user?.userId) return;
       const payloadDecisions = Object.entries(localDecisions).map(
         ([id, dec]) => ({
           documentId: id,
@@ -360,467 +244,599 @@ export const SolicitudDocumentPreviewModal: React.FC<
           observation: dec.observation.trim() || undefined
         })
       );
-
-      console.log('DEBUG [Validate Documents DTO Payload]:', {
+      console.log('DEBUG [Live Document Validation DTO]:', {
         solicitudId,
         dto: {
           decisions: payloadDecisions,
           validatorId: user.userId
         }
       });
+    }, [localDecisions, solicitudId, user]);
 
-      await validateUseCase.execute(solicitudId, payloadDecisions, user.userId);
-
-      MessageToastCustom(
-        'success',
-        'Éxito',
-        'La validación de documentos ha sido guardada correctamente.'
+    // Determine if logged-in user is an analyst
+    const isAnalyst = useMemo(() => {
+      return (
+        user?.roles?.some((role) => {
+          const roleName = typeof role === 'string' ? role : role.name;
+          const upper = roleName.toUpperCase();
+          return upper === 'ANALISTA' || upper === 'ADMINISTRADOR';
+        }) ?? false
       );
+    }, [user]);
 
-      if (onValidationSuccess) {
-        onValidationSuccess();
+    // Compare local choices to original document values to check for changes
+    const hasChanges = useMemo(() => {
+      return documentos.some((d) => {
+        const dec = localDecisions[d.id];
+        if (!dec) return false;
+        let mappedStatus: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO' = 'PENDIENTE';
+        const dbStatus = (d.estadoValidacion || '').toUpperCase();
+        if (dbStatus === 'VALIDO' || dbStatus === 'APROBADO') {
+          mappedStatus = 'APROBADO';
+        } else if (dbStatus === 'INVALIDO' || dbStatus === 'RECHAZADO') {
+          mappedStatus = 'RECHAZADO';
+        }
+        return (
+          dec.status !== mappedStatus || dec.observation !== (d.observacion || '')
+        );
+      });
+    }, [documentos, localDecisions]);
+
+    // Check if a rejected document lacks an observation
+    const hasErrors = useMemo(() => {
+      return Object.values(localDecisions).some((dec) => {
+        return dec.status === 'RECHAZADO' && !dec.observation.trim();
+      });
+    }, [localDecisions]);
+
+    // Check if any document is still pending validation
+    const hasPending = useMemo(() => {
+      return Object.values(localDecisions).some((dec) => {
+        return dec.status === 'PENDIENTE';
+      });
+    }, [localDecisions]);
+
+    const validateUseCase = useMemo(
+      () => new ValidateDocumentsUseCase(new SolicitudRepositoryImpl()),
+      []
+    );
+
+    if (!isOpen || documentos.length === 0) return null;
+
+    const doc = documentos[activeIdx];
+    if (!doc) return null;
+
+    const tipoLabel =
+      TIPO_DOC_LABELS[Number(doc.tipodocumento)] ??
+      `Documento tipo ${doc.tipodocumento}`;
+    const isPdf = previewMimeType === 'application/pdf';
+    const isImage = previewMimeType?.startsWith('image/') ?? false;
+
+    const getExtensionFromMimeType = (mimeType?: string | null): string => {
+      const normalizedMimeType = (mimeType || '').toLowerCase();
+
+      switch (normalizedMimeType) {
+        case 'application/pdf':
+          return '.pdf';
+        case 'image/png':
+          return '.png';
+        case 'image/jpeg':
+          return '.jpg';
+        case 'image/webp':
+          return '.webp';
+        case 'text/plain':
+          return '.txt';
+        default:
+          return '';
       }
-      onClose();
-    } catch (err) {
-      const error = err as Error;
-      console.error('Error saving validation:', error);
-      MessageToastCustom(
-        'error',
-        'Error',
-        error.message || 'No se pudo guardar la validación de los documentos.'
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  };
+    };
 
-  return (
-    <div
-      className="doc-modal__overlay"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Documentos de ${solicitudNumero}`}
-    >
-      <div className="doc-modal__panel">
-        {/* ── Header ── */}
-        <div className="doc-modal__header">
-          <div className="doc-modal__header-left">
-            <FileText size={18} style={{ color: 'var(--accent)' }} />
-            <div>
-              <span className="doc-modal__title">Documentos adjuntos</span>
-              <span className="doc-modal__subtitle">{solicitudNumero}</span>
+    // Selected document state
+    const activeDecision = localDecisions[doc.id] || {
+      status: 'PENDIENTE',
+      observation: ''
+    };
+
+    const handleStatusChange = (status: 'APROBADO' | 'RECHAZADO') => {
+      setLocalDecisions((prev) => ({
+        ...prev,
+        [doc.id]: {
+          ...prev[doc.id],
+          status
+        }
+      }));
+    };
+
+    const handleObservationChange = (observation: string) => {
+      setLocalDecisions((prev) => ({
+        ...prev,
+        [doc.id]: {
+          ...prev[doc.id],
+          observation
+        }
+      }));
+    };
+
+    const handleQuickObs = (text: string) => {
+      setLocalDecisions((prev) => ({
+        ...prev,
+        [doc.id]: {
+          ...prev[doc.id],
+          observation: text
+        }
+      }));
+    };
+
+    const handleSaveValidation = async () => {
+      if (!hasChanges || hasErrors || hasPending || isSaving || !user?.userId)
+        return;
+      setIsSaving(true);
+
+      try {
+        const payloadDecisions = Object.entries(localDecisions).map(
+          ([id, dec]) => ({
+            documentId: id,
+            validationStatus: dec.status as 'APROBADO' | 'RECHAZADO',
+            observation: dec.observation.trim() || undefined
+          })
+        );
+
+        console.log('DEBUG [Validate Documents DTO Payload]:', {
+          solicitudId,
+          dto: {
+            decisions: payloadDecisions,
+            validatorId: user.userId
+          }
+        });
+
+        await validateUseCase.execute(solicitudId, payloadDecisions, user.userId);
+
+        MessageToastCustom(
+          'success',
+          'Éxito',
+          'La validación de documentos ha sido guardada correctamente.'
+        );
+
+        if (onValidationSuccess) {
+          onValidationSuccess();
+        }
+        onClose();
+      } catch (err) {
+        const error = err as Error;
+        console.error('Error saving validation:', error);
+        MessageToastCustom(
+          'error',
+          'Error',
+          error.message || 'No se pudo guardar la validación de los documentos.'
+        );
+      } finally {
+        setIsSaving(false);
+      }
+    };
+
+    return (
+      <div
+        className="doc-modal__overlay"
+        onClick={(e) => e.target === e.currentTarget && onClose()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Documentos de ${solicitudNumero}`}
+      >
+        <div className="doc-modal__panel">
+          {/* ── Header ── */}
+          <div className="doc-modal__header">
+            <div className="doc-modal__header-left">
+              <FileText size={18} style={{ color: 'var(--accent)' }} />
+              <div>
+                <span className="doc-modal__title">Documentos adjuntos</span>
+                <span className="doc-modal__subtitle">{solicitudNumero}</span>
+              </div>
             </div>
+            <button
+              className="doc-modal__close"
+              onClick={onClose}
+              aria-label="Cerrar"
+            >
+              <X size={18} />
+            </button>
           </div>
-          <button
-            className="doc-modal__close"
-            onClick={onClose}
-            aria-label="Cerrar"
-          >
-            <X size={18} />
-          </button>
-        </div>
 
-        <div className="doc-modal__body">
-          {/* ── Sidebar: document list ── */}
-          <div className="doc-modal__sidebar">
-            <p className="doc-modal__sidebar-title">
-              {documentos.length} documento{documentos.length !== 1 ? 's' : ''}
-            </p>
-            {documentos.map((d, idx) => {
-              const label =
-                TIPO_DOC_LABELS[Number(d.tipodocumento)] ?? `Doc. ${idx + 1}`;
-              const localDec = localDecisions[d.id] || {
-                status: d.estadoValidacion,
-                observation: d.observacion || ''
-              };
-              const ev =
-                ESTADO_VALIDACION_CONFIG[localDec.status] ??
-                ESTADO_VALIDACION_CONFIG['PENDIENTE'];
-              const isEdited =
-                localDec.status !== d.estadoValidacion ||
-                localDec.observation !== (d.observacion || '');
+          <div className="doc-modal__body">
+            {/* ── Sidebar: document list ── */}
+            <div className="doc-modal__sidebar">
+              <p className="doc-modal__sidebar-title">
+                {documentos.length} documento{documentos.length !== 1 ? 's' : ''}
+              </p>
+              {documentos.map((d, idx) => {
+                const label =
+                  TIPO_DOC_LABELS[Number(d.tipodocumento)] ?? `Doc. ${idx + 1}`;
+                const localDec = localDecisions[d.id] || {
+                  status: d.estadoValidacion,
+                  observation: d.observacion || ''
+                };
+                const ev =
+                  ESTADO_VALIDACION_CONFIG[localDec.status] ??
+                  ESTADO_VALIDACION_CONFIG['PENDIENTE'];
+                const isEdited =
+                  localDec.status !== d.estadoValidacion ||
+                  localDec.observation !== (d.observacion || '');
 
-              return (
-                <button
-                  key={d.id}
-                  className={`doc-modal__doc-item${idx === activeIdx ? ' doc-modal__doc-item--active' : ''}`}
-                  onClick={() => setActiveIdx(idx)}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      width: '100%',
-                      gap: '0.4rem',
-                      justifyContent: 'space-between'
-                    }}
+                return (
+                  <button
+                    key={d.id}
+                    className={`doc-modal__doc-item${idx === activeIdx ? ' doc-modal__doc-item--active' : ''}`}
+                    onClick={() => setActiveIdx(idx)}
                   >
                     <div
                       style={{
                         display: 'flex',
                         alignItems: 'center',
+                        width: '100%',
                         gap: '0.4rem',
-                        minWidth: 0,
-                        flex: 1
+                        justifyContent: 'space-between'
                       }}
                     >
-                      <FileText size={15} style={{ flexShrink: 0 }} />
-                      <span className="doc-modal__doc-name">{label}</span>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          minWidth: 0,
+                          flex: 1
+                        }}
+                      >
+                        <FileText size={15} style={{ flexShrink: 0 }} />
+                        <span className="doc-modal__doc-name">{label}</span>
+                      </div>
+                      {isEdited && (
+                        <span
+                          className="doc-modal__edited-dot"
+                          title="Cambios sin guardar"
+                        />
+                      )}
                     </div>
-                    {isEdited && (
-                      <span
-                        className="doc-modal__edited-dot"
-                        title="Cambios sin guardar"
-                      />
-                    )}
-                  </div>
-                  <span
-                    className="doc-modal__doc-estado"
-                    style={{ color: ev.color, background: ev.bg }}
-                  >
-                    {ev.icon} {ev.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* ── Preview area ── */}
-          <div className="doc-modal__preview">
-            {/* Metadata bar */}
-            <div className="doc-modal__meta-bar">
-              <span className="doc-modal__meta-tipo">{tipoLabel}</span>
-
-              {/* If user is not analyst or we want to show current status */}
-              <span
-                className="doc-modal__meta-estado"
-                style={{
-                  color: (
-                    ESTADO_VALIDACION_CONFIG[activeDecision.status] ||
-                    ESTADO_VALIDACION_CONFIG.PENDIENTE
-                  ).color,
-                  background: (
-                    ESTADO_VALIDACION_CONFIG[activeDecision.status] ||
-                    ESTADO_VALIDACION_CONFIG.PENDIENTE
-                  ).bg,
-                  border: `1px solid ${(ESTADO_VALIDACION_CONFIG[activeDecision.status] || ESTADO_VALIDACION_CONFIG.PENDIENTE).color}40`
-                }}
-              >
-                {
-                  (
-                    ESTADO_VALIDACION_CONFIG[activeDecision.status] ||
-                    ESTADO_VALIDACION_CONFIG.PENDIENTE
-                  ).icon
-                }{' '}
-                {
-                  (
-                    ESTADO_VALIDACION_CONFIG[activeDecision.status] ||
-                    ESTADO_VALIDACION_CONFIG.PENDIENTE
-                  ).label
-                }
-              </span>
-
-              {activeDecision.observation && (
-                <span className="doc-modal__meta-obs">
-                  <AlertCircle size={12} /> {activeDecision.observation}
-                </span>
-              )}
-
-              <div
-                style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}
-              >
-                <button
-                  onClick={handleDownload}
-                  className="doc-modal__action-btn"
-                  title="Descargar"
-                  disabled={isDownloading}
-                  style={{
-                    background: 'none',
-                    border: '1px solid var(--border-color)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.25rem'
-                  }}
-                >
-                  {isDownloading ? (
-                    <Loader2
-                      size={14}
-                      style={{ animation: 'btn-spin 0.8s linear infinite' }}
-                    />
-                  ) : (
-                    <Download size={14} />
-                  )}
-                  Descargar
-                </button>
-                {previewBlobUrl && (
-                  <a
-                    href={previewBlobUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="doc-modal__action-btn"
-                    title="Abrir en nueva pestaña"
-                  >
-                    <ExternalLink size={14} /> Abrir
-                  </a>
-                )}
-              </div>
+                    <span
+                      className="doc-modal__doc-estado"
+                      style={{ color: ev.color, background: ev.bg }}
+                    >
+                      {ev.icon} {ev.label}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
-            {/* PDF / Image / fallback */}
-            <div className="doc-modal__viewer">
-              {loadingPreview ? (
-                <div
-                  className="doc-modal__no-preview"
+            {/* ── Preview area ── */}
+            <div className="doc-modal__preview">
+              {/* Metadata bar */}
+              <div className="doc-modal__meta-bar">
+                <span className="doc-modal__meta-tipo">{tipoLabel}</span>
+
+                {/* If user is not analyst or we want to show current status */}
+                <span
+                  className="doc-modal__meta-estado"
                   style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '100%',
-                    gap: '0.5rem'
+                    color: (
+                      ESTADO_VALIDACION_CONFIG[activeDecision.status] ||
+                      ESTADO_VALIDACION_CONFIG.PENDIENTE
+                    ).color,
+                    background: (
+                      ESTADO_VALIDACION_CONFIG[activeDecision.status] ||
+                      ESTADO_VALIDACION_CONFIG.PENDIENTE
+                    ).bg,
+                    border: `1px solid ${(ESTADO_VALIDACION_CONFIG[activeDecision.status] || ESTADO_VALIDACION_CONFIG.PENDIENTE).color}40`
                   }}
                 >
-                  <Loader2
-                    size={28}
-                    style={{
-                      color: 'var(--accent)',
-                      animation: 'btn-spin 0.8s linear infinite'
-                    }}
-                  />
-                  <p
-                    style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}
+                  {
+                    (
+                      ESTADO_VALIDACION_CONFIG[activeDecision.status] ||
+                      ESTADO_VALIDACION_CONFIG.PENDIENTE
+                    ).icon
+                  }{' '}
+                  {
+                    (
+                      ESTADO_VALIDACION_CONFIG[activeDecision.status] ||
+                      ESTADO_VALIDACION_CONFIG.PENDIENTE
+                    ).label
+                  }
+                </span>
+
+                <div
+                  style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}
+                >
+                  <Button
+                    onClick={handleDownload}
+
+                    title="Descargar"
+                    disabled={isDownloading}
+                    size='xs'
                   >
-                    Cargando vista previa...
-                  </p>
+                    {isDownloading ? (
+                      <Loader2
+                        size={14}
+                        style={{ animation: 'btn-spin 0.8s linear infinite' }}
+                      />
+                    ) : (
+                      <Download size={14} />
+                    )}
+                    Descargar
+                  </Button>
+                  {previewBlobUrl && (
+                    <Button
+                      variant='ghost'
+                      color='info'
+                      size='xs'
+                      title="Abrir en nueva pestaña"
+                      onClick={() => window.open(previewBlobUrl, '_blank')}
+                    >
+                      <ExternalLink size={14} /> Abrir
+                    </Button>
+                  )}
                 </div>
-              ) : previewBlobUrl ? (
-                isPdf ? (
-                  <iframe
-                    key={previewBlobUrl}
-                    src={`${previewBlobUrl}#toolbar=1&navpanes=0`}
-                    title={tipoLabel}
-                    className="doc-modal__iframe"
-                  />
-                ) : isImage ? (
+                {activeDecision.observation && (
+                  <span className="doc-modal__meta-obs">
+                    <AlertCircle size={12} /> {activeDecision.observation}
+                  </span>
+                )}
+              </div>
+
+              {/* PDF / Image / fallback */}
+              <div className="doc-modal__viewer">
+                {loadingPreview ? (
                   <div
                     className="doc-modal__no-preview"
                     style={{
                       display: 'flex',
+                      flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
                       height: '100%',
-                      padding: '1rem',
-                      boxSizing: 'border-box'
+                      gap: '0.5rem'
                     }}
                   >
-                    <img
-                      src={previewBlobUrl}
-                      alt={tipoLabel}
+                    <Loader2
+                      size={28}
                       style={{
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                        objectFit: 'contain',
-                        borderRadius: '4px',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                        color: 'var(--accent)',
+                        animation: 'btn-spin 0.8s linear infinite'
                       }}
                     />
-                  </div>
-                ) : (
-                  <div className="doc-modal__no-preview">
-                    <FileText
-                      size={48}
-                      style={{ color: 'var(--text-muted)' }}
-                    />
-                    <p>Vista previa no disponible para este tipo de archivo.</p>
-                    <small
-                      style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}
+                    <p
+                      style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}
                     >
-                      Descarga el archivo para visualizarlo.
-                    </small>
+                      Cargando vista previa...
+                    </p>
                   </div>
-                )
-              ) : previewError ? (
-                <div className="doc-modal__no-preview">
-                  <FileText size={48} style={{ color: 'var(--text-muted)' }} />
-                  <p>No se pudo cargar la vista previa.</p>
-                  <small
-                    style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}
-                  >
-                    {previewError}
-                  </small>
-                </div>
-              ) : (
-                <div className="doc-modal__no-preview">
-                  <FileText size={48} style={{ color: 'var(--text-muted)' }} />
-                  <p>Vista previa no disponible para este documento.</p>
-                </div>
-              )}
-            </div>
-
-            {/* Navigation arrows if multiple docs */}
-            {documentos.length > 1 && (
-              <div className="doc-modal__nav">
-                <button
-                  className="doc-modal__nav-btn"
-                  disabled={activeIdx === 0}
-                  onClick={() => setActiveIdx((i) => i - 1)}
-                  aria-label="Anterior"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <span className="doc-modal__nav-info">
-                  {activeIdx + 1} / {documentos.length}
-                </span>
-                <button
-                  className="doc-modal__nav-btn"
-                  disabled={activeIdx === documentos.length - 1}
-                  onClick={() => setActiveIdx((i) => i + 1)}
-                  aria-label="Siguiente"
-                >
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* ── Validation Panel (Analysts only) ── */}
-          {isAnalyst && (
-            <div className="doc-modal__validation-panel">
-              <div className="doc-validation__header">
-                <h4 className="doc-validation__title">
-                  Validación de Documento
-                </h4>
-                <p className="doc-validation__subtitle">{tipoLabel}</p>
-              </div>
-
-              <div className="doc-validation__form">
-                <label className="doc-validation__label">
-                  Decisión de Validación
-                </label>
-                <div className="doc-validation__buttons">
-                  <button
-                    type="button"
-                    className={`doc-validation__btn doc-validation__btn--approve${activeDecision.status === 'APROBADO' ? ' active' : ''}`}
-                    onClick={() => handleStatusChange('APROBADO')}
-                  >
-                    <CheckCircle size={15} />
-                    <span>Aprobar</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`doc-validation__btn doc-validation__btn--reject${activeDecision.status === 'RECHAZADO' ? ' active' : ''}`}
-                    onClick={() => handleStatusChange('RECHAZADO')}
-                  >
-                    <XCircle size={15} />
-                    <span>Rechazar</span>
-                  </button>
-                </div>
-
-                <div className="doc-validation__observation-section">
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '0.4rem'
-                    }}
-                  >
-                    <label className="doc-validation__label">
-                      Observación{' '}
-                      {activeDecision.status === 'RECHAZADO' && (
-                        <span className="doc-validation__required-star">*</span>
-                      )}
-                    </label>
-                    <span className="doc-validation__char-count">
-                      {activeDecision.observation.length} / 300
-                    </span>
-                  </div>
-                  <textarea
-                    className="doc-validation__textarea"
-                    value={activeDecision.observation}
-                    onChange={(e) => handleObservationChange(e.target.value)}
-                    placeholder={
-                      activeDecision.status === 'RECHAZADO'
-                        ? 'Explique claramente el motivo del rechazo (obligatorio)...'
-                        : 'Añada una observación opcional...'
-                    }
-                    maxLength={300}
-                  />
-
-                  {/* Quick observation templates */}
-                  <div className="doc-validation__quick-obs">
-                    <span className="doc-validation__quick-obs-title">
-                      Plantillas rápidas:
-                    </span>
-                    <div className="doc-validation__quick-obs-tags">
-                      {QUICK_OBSERVATIONS.map((obsText) => (
-                        <button
-                          key={obsText}
-                          type="button"
-                          className="doc-validation__quick-tag"
-                          onClick={() => handleQuickObs(obsText)}
-                        >
-                          {obsText}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Panel Footer: Save and summary */}
-              <div className="doc-validation__footer">
-                <div className="doc-validation__summary">
-                  {hasChanges ? (
-                    <span className="doc-validation__summary-text">
-                      Tiene cambios pendientes por guardar.
-                    </span>
-                  ) : (
-                    <span className="doc-validation__summary-text doc-validation__summary-text--empty">
-                      No hay cambios sin guardar.
-                    </span>
-                  )}
-                  {hasErrors && (
-                    <span className="doc-validation__error-text">
-                      * Ingrese observación para los documentos rechazados.
-                    </span>
-                  )}
-                  {hasPending && (
-                    <span className="doc-validation__error-text">
-                      * Debe validar todos los documentos.
-                    </span>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  className="doc-validation__submit-btn"
-                  disabled={!hasChanges || hasErrors || hasPending || isSaving}
-                  onClick={handleSaveValidation}
-                >
-                  {isSaving ? (
+                ) : previewBlobUrl ? (
+                  isPdf ? (
+                    <iframe
+                      key={previewBlobUrl}
+                      src={`${previewBlobUrl}#toolbar=1&navpanes=0`}
+                      title={tipoLabel}
+                      className="doc-modal__iframe"
+                    />
+                  ) : isImage ? (
                     <div
+                      className="doc-modal__no-preview"
                       style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '0.4rem'
+                        height: '100%',
+                        padding: '1rem',
+                        boxSizing: 'border-box'
                       }}
                     >
-                      <Loader2 className="doc-validation__spinner" size={15} />
-                      <span>Guardando...</span>
+                      <img
+                        src={previewBlobUrl}
+                        alt={tipoLabel}
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '100%',
+                          objectFit: 'contain',
+                          borderRadius: '4px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                        }}
+                      />
                     </div>
                   ) : (
-                    <span>Guardar Validación</span>
-                  )}
-                </button>
+                    <div className="doc-modal__no-preview">
+                      <FileText
+                        size={48}
+                        style={{ color: 'var(--text-muted)' }}
+                      />
+                      <p>Vista previa no disponible para este tipo de archivo.</p>
+                      <small
+                        style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}
+                      >
+                        Descarga el archivo para visualizarlo.
+                      </small>
+                    </div>
+                  )
+                ) : previewError ? (
+                  <div className="doc-modal__no-preview">
+                    <FileText size={48} style={{ color: 'var(--text-muted)' }} />
+                    <p>No se pudo cargar la vista previa.</p>
+                    <small
+                      style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}
+                    >
+                      {previewError}
+                    </small>
+                  </div>
+                ) : (
+                  <div className="doc-modal__no-preview">
+                    <FileText size={48} style={{ color: 'var(--text-muted)' }} />
+                    <p>Vista previa no disponible para este documento.</p>
+                  </div>
+                )}
               </div>
+
+              {/* Navigation arrows if multiple docs */}
+              {documentos.length > 1 && (
+                <div className="doc-modal__nav">
+                  <button
+                    className="doc-modal__nav-btn"
+                    disabled={activeIdx === 0}
+                    onClick={() => setActiveIdx((i) => i - 1)}
+                    aria-label="Anterior"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span className="doc-modal__nav-info">
+                    {activeIdx + 1} / {documentos.length}
+                  </span>
+                  <button
+                    className="doc-modal__nav-btn"
+                    disabled={activeIdx === documentos.length - 1}
+                    onClick={() => setActiveIdx((i) => i + 1)}
+                    aria-label="Siguiente"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+
+            {/* ── Validation Panel (Analysts only) ── */}
+            {isAnalyst && (
+              <div className="doc-modal__validation-panel">
+                <div className="doc-validation__header">
+                  <h4 className="doc-validation__title">
+                    Validación de Documento
+                  </h4>
+                  <p className="doc-validation__subtitle">{tipoLabel}</p>
+                </div>
+
+                <div className="doc-validation__form">
+                  <label className="doc-validation__label">
+                    Decisión de Validación
+                  </label>
+                  <div className="doc-validation__buttons">
+                    <button
+                      type="button"
+                      className={`doc-validation__btn doc-validation__btn--approve${activeDecision.status === 'APROBADO' ? ' active' : ''}`}
+                      onClick={() => handleStatusChange('APROBADO')}
+                    >
+                      <CheckCircle size={15} />
+                      <span>Aprobar</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`doc-validation__btn doc-validation__btn--reject${activeDecision.status === 'RECHAZADO' ? ' active' : ''}`}
+                      onClick={() => handleStatusChange('RECHAZADO')}
+                    >
+                      <XCircle size={15} />
+                      <span>Rechazar</span>
+                    </button>
+                  </div>
+
+                  <div className="doc-validation__observation-section">
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '0.4rem'
+                      }}
+                    >
+                      <label className="doc-validation__label">
+                        Observación{' '}
+                        {activeDecision.status === 'RECHAZADO' && (
+                          <span className="doc-validation__required-star">*</span>
+                        )}
+                      </label>
+                      <span className="doc-validation__char-count">
+                        {activeDecision.observation.length} / 300
+                      </span>
+                    </div>
+                    <textarea
+                      className="doc-validation__textarea"
+                      value={activeDecision.observation}
+                      onChange={(e) => handleObservationChange(e.target.value)}
+                      placeholder={
+                        activeDecision.status === 'RECHAZADO'
+                          ? 'Explique claramente el motivo del rechazo (obligatorio)...'
+                          : 'Añada una observación opcional...'
+                      }
+                      maxLength={300}
+                    />
+
+                    {/* Quick observation templates */}
+                    <div className="doc-validation__quick-obs">
+                      <span className="doc-validation__quick-obs-title">
+                        Plantillas rápidas:
+                      </span>
+                      <div className="doc-validation__quick-obs-tags">
+                        {QUICK_OBSERVATIONS.map((obsText) => (
+                          <button
+                            key={obsText}
+                            type="button"
+                            className="doc-validation__quick-tag"
+                            onClick={() => handleQuickObs(obsText)}
+                          >
+                            {obsText}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Panel Footer: Save and summary */}
+                <div className="doc-validation__footer">
+                  <div className="doc-validation__summary">
+                    {hasChanges ? (
+                      <span className="doc-validation__summary-text">
+                        Tiene cambios pendientes por guardar.
+                      </span>
+                    ) : (
+                      <span className="doc-validation__summary-text doc-validation__summary-text--empty">
+                        No hay cambios sin guardar.
+                      </span>
+                    )}
+                    {hasErrors && (
+                      <span className="doc-validation__error-text">
+                        * Ingrese observación para los documentos rechazados.
+                      </span>
+                    )}
+                    {hasPending && (
+                      <span className="doc-validation__error-text">
+                        * Debe validar todos los documentos.
+                      </span>
+                    )}
+                  </div>
+
+                  <Button
+                    type="button"
+                    disabled={!hasChanges || hasErrors || hasPending || isSaving}
+                    onClick={handleSaveValidation}
+                    leftIcon={<Save size={15} />}
+                    variant='dashed'
+                    isLoading={isSaving}
+                    color='primary'
+                    size='sm'
+                  >
+                    {isSaving ? (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.4rem'
+                        }}
+                      >
+                        <Loader2 className="doc-validation__spinner" size={15} />
+                        <span>Guardando...</span>
+                      </div>
+                    ) : (
+                      <span>Guardar Validación</span>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };

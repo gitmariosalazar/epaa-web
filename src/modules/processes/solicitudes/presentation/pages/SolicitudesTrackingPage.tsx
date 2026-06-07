@@ -21,7 +21,7 @@ import {
   X
 } from 'lucide-react';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
-import './SolicitudesTrackingPage.css';
+import '../styles/SolicitudesTrackingPage.css';
 
 // ── Toolbar ───────────────────────────────────────────────────────────────────
 interface ToolbarProps {
@@ -177,9 +177,9 @@ export const SolicitudesTrackingPage: React.FC = () => {
           </div>
         ) : (
           <div className="trk-list">
-            {tracking.map((t: TrackingSolicitudResponse) => (
+            {tracking.map((t: TrackingSolicitudResponse, index: number) => (
               <SolicitudTrackingCard
-                key={t.id}
+                key={`${t.id}-${index}`}
                 tracking={t}
                 onVerDetalle={(id) => navigate(`/solicitudes/${id}`)}
               />

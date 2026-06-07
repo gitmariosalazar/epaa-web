@@ -23,6 +23,7 @@ export interface ExpedienteResponse {
   // Cliente y analista
   clienteId: string;
   analistaUsername: string | null;
+  analistaNombre: string | null;
   // Documentos
   documentos: DocumentoAdjuntoResponse[];
   // Factura
@@ -118,6 +119,7 @@ export interface TrackingSolicitudResponse {
 
   // ── Analista asignado
   analista: string | null;
+  analistaNombre: string | null;
 
   // ── Timeline completo (ordenado cronológicamente)
   historial: HistorialTrackingEntry[];
@@ -185,4 +187,16 @@ export interface CompanyResponse {
 export interface RequestDetailByClientResponse extends ExpedienteResponse {
   company: CompanyResponse | null;
   person: ClientResponse | null;
+}
+
+export interface SolicitudOrdenTrabajoResponse {
+  tipoOrden: string;
+  codigoOrden: string;
+  descripcion: string;
+  estadoOt: string;
+  prioridad: string;
+  fechaCreacion: Date;
+  fechaAsignacion: Date | null;
+  fechaCompletada: Date | null;
+  tecnicoAsignado: string | null;
 }

@@ -12,7 +12,7 @@ import {
 import { ValidateDocumentoUseCase } from '@/modules/tramites/application/usecases/ValidateDocumentoUseCase';
 import type { Requisito } from '@/modules/tramites/domain/models/Tramite';
 import type { DocumentoAdjunto } from '@/modules/tramites/domain/models/DocumentoAdjunto';
-import './DocumentUploadCard.css';
+import '../styles/DocumentUploadCard.css';
 
 const validateUC = new ValidateDocumentoUseCase();
 

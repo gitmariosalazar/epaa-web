@@ -114,11 +114,21 @@ const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
       </div>
     );
 
-  // Aseguramos que sea un array de strings y filtramos valores nulos
+  // Aseguramos que sea un array de strings o de objetos y extraemos el nombre del rol normalizado
   const rawRoles = Array.isArray(user?.roles) ? user?.roles : [user?.roles];
-  const userRoles = rawRoles.filter(Boolean) as string[];
+  const userRoles = rawRoles
+    .filter(Boolean)
+    .flatMap((r: any) => {
+      const name = typeof r === 'object' && r.name ? r.name : String(r);
+      const upper = name.toUpperCase();
+      // Mapeamos 'ADMINISTRADOR' a 'ADMIN' para compatibilidad con allowedRoles={['ADMIN']}
+      if (upper === 'ADMINISTRADOR' || upper === 'ADMIN') {
+        return ['ADMIN', 'ADMINISTRADOR'];
+      }
+      return [upper];
+    });
 
-  const hasAccess = allowedRoles.some((role) => userRoles.includes(role));
+  const hasAccess = allowedRoles.some((role) => userRoles.includes(role.toUpperCase()));
 
   if (!hasAccess) {
     return <Navigate to="/unauthorized" replace />;
@@ -131,7 +141,7 @@ function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <ToastContainer 
+        <ToastContainer
           position="top-right"
           autoClose={4500}
           hideProgressBar={false}

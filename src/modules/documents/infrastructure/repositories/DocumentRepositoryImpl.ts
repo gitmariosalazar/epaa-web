@@ -26,25 +26,19 @@ export class DocumentRepositoryImpl implements DocumentRepository {
    * GET /connection-documents/:documentId/preview
    */
   async preview(documentId?: string, documentUrl?: string): Promise<Blob> {
+    if (documentId?.trim()) {
+      const response = await this.client.get<Blob>(
+        `/connection-documents/${documentId}/preview`,
+        { responseType: 'blob' }
+      );
+      return response.data;
+    }
+
     if (documentUrl?.trim()) {
-      try {
-        return await this.fetchBlobFromUrl(documentUrl);
-      } catch (error) {
-        if (!documentId?.trim()) {
-          throw error;
-        }
-      }
+      return this.fetchBlobFromUrl(documentUrl);
     }
 
-    if (!documentId?.trim()) {
-      throw new Error('Document ID or document URL is required');
-    }
-
-    const response = await this.client.get<Blob>(
-      `/connection-documents/${documentId}/preview`,
-      { responseType: 'blob' }
-    );
-    return response.data;
+    throw new Error('Document ID or document URL is required');
   }
 
   /**
@@ -52,25 +46,19 @@ export class DocumentRepositoryImpl implements DocumentRepository {
    * GET /connection-documents/:documentId/download-file
    */
   async download(documentId?: string, documentUrl?: string): Promise<Blob> {
+    if (documentId?.trim()) {
+      const response = await this.client.get<Blob>(
+        `/connection-documents/${documentId}/download-file`,
+        { responseType: 'blob' }
+      );
+      return response.data;
+    }
+
     if (documentUrl?.trim()) {
-      try {
-        return await this.fetchBlobFromUrl(documentUrl);
-      } catch (error) {
-        if (!documentId?.trim()) {
-          throw error;
-        }
-      }
+      return this.fetchBlobFromUrl(documentUrl);
     }
 
-    if (!documentId?.trim()) {
-      throw new Error('Document ID or document URL is required');
-    }
-
-    const response = await this.client.get<Blob>(
-      `/connection-documents/${documentId}/download-file`,
-      { responseType: 'blob' }
-    );
-    return response.data;
+    throw new Error('Document ID or document URL is required');
   }
 
   private resolveDocumentUrl(documentUrl: string): string {

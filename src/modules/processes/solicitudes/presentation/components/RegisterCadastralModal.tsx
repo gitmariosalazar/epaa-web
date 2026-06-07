@@ -9,7 +9,7 @@ import { MessageToastCustom } from '@/shared/presentation/components/toast/Custo
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import { ShieldCheck, X, Clock, Zap, Hash, MapPin } from 'lucide-react';
-import './ActionModal.css';
+import '../styles/ActionModal.css';
 
 interface RegisterCadastralModalProps {
   isOpen: boolean;

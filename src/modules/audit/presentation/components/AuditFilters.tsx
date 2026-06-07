@@ -95,12 +95,19 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
             disabled={isLoading}
           />
         </div>
-        <Button onClick={onFetch} disabled={isLoading} size="md">
-          {isLoading ? (
+        <Button
+          onClick={onFetch}
+          disabled={isLoading}
+          size="xs"
+          variant='dashed'
+          style={{ height: '26px !important' }}
+
+          leftIcon={isLoading ? (
             <div className={styles.spinner} />
           ) : (
             <Search size={18} />
           )}
+        >
           {isLoading ? t('common.loading') : t('common.fetch')}
         </Button>
       </div>

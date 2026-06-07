@@ -9,7 +9,9 @@
   border-left: 4px solid var(--trk-accent, var(--accent));
   border-radius: 0.875rem;
   overflow: hidden;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
   animation: trk-fadeIn 0.3s ease both;
 }
 
@@ -22,8 +24,14 @@
 }
 
 @keyframes trk-fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Header ── */
@@ -278,6 +286,38 @@
   padding: 0 1.25rem;
 }
 
+.trk-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: nowrap;
+}
+
+.trk-card-right-percentage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+  text-align: left;
+  justify-content: end;
+  text-align: right;
+}
+
+.trk-card-right-percentage-text {
+  white-space: nowrap;
+}
+
+.trk-card-right-percentage-progress {
+  width: 100%;
+}
+
 .trk-card__historial-toggle {
   display: flex;
   align-items: center;
@@ -308,75 +348,204 @@
 }
 
 .trk-historial--open {
-  max-height: 800px;
+  max-height: 380px;
+  overflow-y: auto !important;
   opacity: 1;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+/* Custom scrollbar for history container */
+.trk-historial--open::-webkit-scrollbar {
+  width: 6px;
+}
+.trk-historial--open::-webkit-scrollbar-track {
+  background: transparent;
+}
+.trk-historial--open::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+.trk-historial--open::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 .trk-historial__inner {
+  padding-top: 0.75rem;
   padding-bottom: 1rem;
+  padding-right: 0.5rem;
 }
 
-/* ── Historial row ── */
-.trk-historial-row {
-  display: flex;
-  gap: 0.75rem;
+/* ── Historial Node (Timeline replica) ── */
+.trk-historial-node {
   position: relative;
-  padding-left: 1.25rem;
-  padding-bottom: 0.875rem;
+  display: flex;
+  gap: 0.875rem;
+  padding-bottom: 0.75rem;
+  transition: all 0.2s ease;
 }
 
-.trk-historial-row:not(.trk-historial-row--last)::before {
-  content: '';
+.trk-historial-node--last {
+  padding-bottom: 0;
+}
+
+.trk-historial-node__line {
   position: absolute;
-  left: 5px;
-  top: 14px;
-  bottom: 0;
+  top: 28px;
+  left: 14px;
+  bottom: -6px;
   width: 2px;
-  background: var(--border-color);
-  border-radius: 2px;
+  background: color-mix(in srgb, var(--border-color) 80%, transparent);
+  z-index: 1;
+  border-radius: 9999px;
+  transition: background 0.3s ease;
 }
 
-.trk-historial-row__dot {
-  position: absolute;
-  left: 0;
-  top: 4px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: 2px solid var(--surface);
+.trk-historial-node--last .trk-historial-node__line {
+  display: none;
+}
+
+.trk-historial-node:hover .trk-historial-node__line {
+  background: color-mix(
+    in srgb,
+    var(--node-color, var(--accent)) 35%,
+    var(--border-color)
+  );
+}
+
+.trk-historial-node__icon-container {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  z-index: 2;
+  margin-top: 2px;
 }
 
-.trk-historial-row__content {
+.trk-historial-node__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 2px solid var(--node-color, var(--accent));
+  color: var(--node-color, var(--accent));
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.trk-historial-node__icon-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--node-color, var(--accent));
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: blur(4px);
+  z-index: -1;
+}
+
+.trk-historial-node:hover .trk-historial-node__icon {
+  transform: scale(1.08);
+  background: var(--node-color, var(--accent));
+  color: #ffffff;
+  box-shadow: 0 6px 14px
+    color-mix(in srgb, var(--node-color, var(--accent)) 35%, transparent);
+}
+
+.trk-historial-node:hover .trk-historial-node__icon-glow {
+  opacity: 0.35;
+  transform: scale(1.2);
+}
+
+.trk-historial-node__content {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 0;
 }
 
-.trk-historial-row__estado {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--text-main);
+.trk-historial-node:hover .trk-historial-node__content {
+  border-color: color-mix(
+    in srgb,
+    var(--node-color, var(--accent)) 30%,
+    var(--border-color)
+  );
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+  transform: translateY(-1px);
 }
 
-.trk-historial-row__prev {
-  font-size: 0.72rem;
+.trk-historial-node__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.trk-historial-node__flow-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.flow-arrow {
   color: var(--text-muted);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  margin: 0;
 }
 
-.trk-historial-row__fecha {
+.trk-historial-node__date {
   font-size: 0.7rem;
+  font-weight: 500;
   color: var(--text-muted);
+  white-space: nowrap;
 }
 
-.trk-historial-row__comentario {
-  font-size: 0.75rem;
+.trk-historial-node__comment {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+  background: color-mix(
+    in srgb,
+    var(--node-color, var(--accent)) 4%,
+    var(--background)
+  );
+  border-left: 3px solid var(--node-color, var(--accent));
+  border-radius: 4px 8px 8px 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.72rem;
   color: var(--text-secondary);
-  font-style: italic;
-  margin: 0.15rem 0 0;
-  line-height: 1.4;
+  line-height: 1.35;
+}
+
+.trk-historial-node__comment-icon {
+  color: var(--node-color, var(--accent));
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.trk-historial-node__comment p {
+  margin: 0;
 }
 
 /* ── Responsive ── */

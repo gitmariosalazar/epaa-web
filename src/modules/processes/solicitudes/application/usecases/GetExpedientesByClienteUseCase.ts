@@ -12,7 +12,8 @@ export class GetExpedientesByClienteUseCase {
     if (!clienteId) {
       throw new Error('Cliente ID is required');
     }
-    const expedientes = await this.solicitudRepository.getExpedientesByCliente(clienteId);
+    const expedientes =
+      await this.solicitudRepository.getExpedientesByCliente(clienteId);
     return expedientes;
   }
 }

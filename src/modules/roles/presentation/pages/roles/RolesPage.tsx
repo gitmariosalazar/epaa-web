@@ -8,7 +8,8 @@ import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { Edit2, Plus, Search } from 'lucide-react';
+import { Edit2 } from 'lucide-react';
+import { RolesFilters } from '../../components/RolesFilters';
 import '@/shared/presentation/styles/Table.css';
 import '@/modules/accounting/presentation/styles/entry-data/EntryDataFilters.css';
 import '@/shared/presentation/styles/Roles.css';
@@ -34,7 +35,8 @@ export const RolesPage: React.FC = () => {
     handleDelete,
     openEdit,
     openPermissions,
-    resetForm
+    resetForm,
+    refresh
   } = useRolesViewModel();
 
   const { t } = useTranslation();
@@ -118,54 +120,16 @@ export const RolesPage: React.FC = () => {
   return (
     <PageLayout
       className="roles-page"
-      header={
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '100%'
-          }}
-        >
-          <div className="roles-header" style={{ marginBottom: 0 }}>
-            <h1 style={{ margin: 0 }}>Roles</h1>
-            <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
-              Manage role access and details
-            </p>
-          </div>
-          <Button
-            leftIcon={<Plus size={18} />}
-            onClick={() => {
-              resetForm();
-              setIsCreateOpen(true);
-            }}
-          >
-            Create Role
-          </Button>
-        </div>
-      }
       filters={
-        <div className="entry-filters">
-          <div className="entry-filter-group entry-filter-group--search">
-            <label
-              className="entry-filter-label"
-              style={{ visibility: 'hidden' }}
-            >
-              Search
-            </label>
-            <div className="entry-filter-input-wrapper">
-              <Input
-                type="text"
-                className="entry-filter-input"
-                style={{ paddingLeft: '2.25rem' }}
-                placeholder="Search roles..."
-                value={searchTerm}
-                leftIcon={<Search size={18} />}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
+        <RolesFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          onRefresh={refresh}
+          onCreateClick={() => {
+            resetForm();
+            setIsCreateOpen(true);
+          }}
+        />
       }
     >
       <div

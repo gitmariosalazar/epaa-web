@@ -7,3 +7,5 @@ export const ColoredIcons = {
   Pdf: <FaFilePdf size={20} color="#ef4444" />,
   Cable: <MdOutlineCable size={20} color="#ef4444" />
 };
+
+export * from './DocumentIcon';

@@ -29,20 +29,22 @@ import {
 } from 'lucide-react';
 import { useTramiteById } from '@/modules/tramites/presentation/context/TramitesContext';
 import type { DocumentosMap } from '@/modules/tramites/domain/models/DocumentoAdjunto';
-import './SolicitudNuevaPage.css';
+import '../styles/SolicitudNuevaPage.css';
 import { useAuth } from '@/shared/presentation/context/AuthContext';
-import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 import { DocumentsStep } from './solicitud-nueva/DocumentsStep';
 import { PersonalDataStep } from './solicitud-nueva/PersonalDataStep';
 import { SolicitudSuccess } from './solicitud-nueva/SolicitudSuccess';
 import { StepIndicator } from './solicitud-nueva/StepIndicator';
 import { SummaryStep } from './solicitud-nueva/SummaryStep';
 import { DEFAULT_TRAMITE_ID, INITIAL_FORM, STEPS } from './solicitud-nueva/constants';
-import { buildSolicitudFormData } from './solicitud-nueva/helpers';
+import { mapRequisitoIdToDbId } from './solicitud-nueva/helpers';
 import type { SolicitudForm } from './solicitud-nueva/types';
 import { useSolicitudFormSetup } from './solicitud-nueva/useSolicitudFormSetup';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { ValidateSolicitudStepUseCase } from '../../application/usecases/ValidateSolicitudStepUseCase';
+import { SubmitWithDocumentsUseCase } from '../../application/usecases/SubmitWithDocumentsUseCase';
+import { SolicitudRepositoryImpl } from '../../infrastructure/repositories/SolicitudRepositoryImpl';
+import type { SubmitWithDocumentsRequest, SubmitDocumentItem } from '../../domain/dto/submit-with-documents.request';
 
 // ── Main page ────────────────────────────────────────────────
 export const SolicitudNuevaPage: React.FC = () => {
@@ -61,6 +63,7 @@ export const SolicitudNuevaPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [requestNumber, setRequestNumber] = useState<string | null>(null);
   const [createdSolicitudId, setCreatedSolicitudId] = useState<string | null>(
     null
   );
@@ -111,39 +114,78 @@ export const SolicitudNuevaPage: React.FC = () => {
     setIsModalOpen(false);
   }, []);
 
+  const handleViewRequest = useCallback(() => {
+    if (createdSolicitudId) navigate(`/solicitudes/${createdSolicitudId}`);
+  }, [createdSolicitudId, navigate]);
+
   const handleSubmit = async () => {
     if (!tramite) return;
     setIsSubmitting(true);
     try {
-      const formData = buildSolicitudFormData({
-        form,
-        tramite,
-        userId: authUser?.userId,
-        documentos
+      const documentsPayload: SubmitDocumentItem[] = Object.values(documentos).map((doc) => {
+        const dbId = mapRequisitoIdToDbId(doc.requisitoId, tramite);
+        return {
+          documentTypeId: dbId,
+          fileUrl: '',
+          originalName: doc.file.name,
+          mimeType: doc.file.type,
+          sizeInBytes: doc.file.size,
+          file: doc.file
+        };
       });
 
-      // Send the request using apiClient
-      const response = await apiClient.post<any>(
-        '/requests/submit-with-documents',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      );
+      const connectionTypeVal = tramite.categoria === 'alcantarillado' ? 'ALCANTARILLADO' : 'AGUA_POTABLE';
 
-      // response.data contains the ApiResponse structure from client-gateway
-      const apiResponse = response.data as any;
-      if (apiResponse && apiResponse.data) {
-        const solicitudId = apiResponse.data.solicitudId;
-        setCreatedSolicitudId(solicitudId);
+      const useType = (form.detalles?.tipo_uso || '').toLowerCase();
+      let propertyUseVal = 'RESIDENCIAL';
+      if (useType.includes('comercial')) propertyUseVal = 'COMERCIAL';
+      else if (useType.includes('industrial')) propertyUseVal = 'INDUSTRIAL';
+
+      const callePrincipal = form.detalles?.calle_principal || '';
+      const calleSecundaria = form.detalles?.calle_secundaria || '';
+      const barrio = form.detalles?.barrio || '';
+      const parroquia = form.detalles?.parroquia || '';
+      const fullAddress = `${callePrincipal}${calleSecundaria ? ` y ${calleSecundaria}` : ''}, Sector: ${barrio}, Parroquia: ${parroquia}`;
+
+      const additionalInfo = {
+        nombres: form.nombres,
+        apellidos: form.apellidos,
+        email: form.email,
+        telefono: form.telefono,
+        referencia: form.detalles?.referencia || '',
+        diametro_solicitado: form.detalles?.diametro_solicitado || '',
+        observaciones: form.detalles?.observaciones || ''
+      };
+
+      const requestDto: SubmitWithDocumentsRequest = {
+        clientId: form.cedula,
+        userId: authUser?.userId || '',
+        personType: form.tipo_persona === 'JURIDICA' ? 'JURIDICA' : 'NATURAL',
+        connectionType: connectionTypeVal,
+        propertyUse: propertyUseVal,
+        address: fullAddress,
+        cadastralKey: form.detalles?.clave_catastral || '',
+        longitude: null,
+        latitude: null,
+        additionalInfo,
+        documents: documentsPayload
+      };
+
+      const useCase = new SubmitWithDocumentsUseCase(new SolicitudRepositoryImpl());
+      const response = await useCase.execute(requestDto);
+
+      console.log('DEBUG [Create Solicitud Response]:', response);
+
+      if (response && response.solicitudId) {
+        setCreatedSolicitudId(response.solicitudId);
+        setRequestNumber(response.numeroSolicitud);
       }
 
       setSubmitted(true);
-    } catch (error: any) {
-      console.error('Error al enviar la solicitud:', error);
-      alert(error.message || 'Error al enviar la solicitud. Intente de nuevo.');
+    } catch (error) {
+      const err = error as Error;
+      console.error('Error al enviar la solicitud:', err);
+      alert(err.message || 'Error al enviar la solicitud. Intente de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
@@ -175,18 +217,23 @@ export const SolicitudNuevaPage: React.FC = () => {
     );
   }
 
+
+
   if (submitted) {
     return (
       <SolicitudSuccess
         tramite={tramite}
         docsSubidos={docsSubidos}
+        requestNumber={requestNumber}
         createdSolicitudId={createdSolicitudId}
+        onGoDetail={handleViewRequest}
         onGoToTramites={() => navigate('/tramites')}
         onCreateAnother={() => {
           setSubmitted(false);
           setStep(1);
           setForm(INITIAL_FORM);
           setDocumentos({});
+          setRequestNumber(null);
           setCreatedSolicitudId(null);
         }}
       />
@@ -218,53 +265,9 @@ export const SolicitudNuevaPage: React.FC = () => {
           </h2>
         </div>
       }
-    >
-      <div className="solicitud-wizard-container">
-        <div className="solicitud-steps-sticky-container">
-          <StepIndicator step={step} steps={STEPS} />
-        </div>
-
-        <div className="request-container">
-          {step === 1 && (
-            <PersonalDataStep
-              form={form}
-              tramite={tramite}
-              onDetallesChange={(newDetalles) => {
-                setForm((prev) => ({ ...prev, detalles: newDetalles }));
-                setErrors({});
-                setIsModalOpen(false);
-              }}
-              onFormChange={(updatedFields) => {
-                setForm((prev) => ({ ...prev, ...updatedFields }));
-                setErrors({});
-                setIsModalOpen(false);
-              }}
-              errors={errors}
-            />
-          )}
-
-          {step === 2 && tramite && (
-            <DocumentsStep
-              tramite={tramite}
-              documentos={documentos}
-              onAttach={handleAttach}
-              onRemove={handleRemove}
-            />
-          )}
-
-          {step === 3 && (
-            <SummaryStep
-              form={form}
-              tramite={tramite ?? undefined}
-              documentos={documentos}
-              allDocsReady={allDocsReady}
-              docsSubidos={docsSubidos}
-              docsTotal={docsTotal}
-            />
-          )}
-
-          {/* ── Navigation ── */}
-          <div className="solicitud-nav">
+      footer={
+        <div className="solicitud-nav-footer">
+          <div className="solicitud-nav-footer-inner">
             {step > 1 && (
               <Button
                 id="btn-prev-step"
@@ -295,6 +298,54 @@ export const SolicitudNuevaPage: React.FC = () => {
               >
                 Enviar Solicitud
               </Button>
+            )}
+          </div>
+        </div>
+      }
+    >
+      <div className="solicitud-wizard-container">
+        <div className="solicitud-steps-sticky-container">
+          <StepIndicator step={step} steps={STEPS} />
+        </div>
+
+        <div className="request-container">
+          <div className="solicitud-step-content-wrapper">
+            {step === 1 && (
+              <PersonalDataStep
+                form={form}
+                tramite={tramite}
+                onDetallesChange={(newDetalles) => {
+                  setForm((prev) => ({ ...prev, detalles: newDetalles }));
+                  setErrors({});
+                  setIsModalOpen(false);
+                }}
+                onFormChange={(updatedFields) => {
+                  setForm((prev) => ({ ...prev, ...updatedFields }));
+                  setErrors({});
+                  setIsModalOpen(false);
+                }}
+                errors={errors}
+              />
+            )}
+
+            {step === 2 && tramite && (
+              <DocumentsStep
+                tramite={tramite}
+                documentos={documentos}
+                onAttach={handleAttach}
+                onRemove={handleRemove}
+              />
+            )}
+
+            {step === 3 && (
+              <SummaryStep
+                form={form}
+                tramite={tramite ?? undefined}
+                documentos={documentos}
+                allDocsReady={allDocsReady}
+                docsSubidos={docsSubidos}
+                docsTotal={docsTotal}
+              />
             )}
           </div>
         </div>

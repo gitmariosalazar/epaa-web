@@ -71,16 +71,16 @@ const resolveTooltipStyles = (
   textColor?: string
 ): React.CSSProperties => {
   const isTransparent = variant === 'transparent';
-  
+
   // Base background resolution
   const background = (() => {
     if (backgroundColor) return backgroundColor;
     if (isTransparent) return 'color-mix(in srgb, var(--surface) 40%, transparent)';
-    
-    const baseColor = themeColor 
-      ? `var(--palette-${themeColor}, var(--${themeColor}, ${themeColor}))` 
+
+    const baseColor = themeColor
+      ? `var(--palette-${themeColor}, var(--${themeColor}, ${themeColor}))`
       : 'var(--surface)';
-    
+
     if (variant === 'solid' && themeColor) return baseColor;
     if (variant === 'soft' && themeColor) return `color-mix(in srgb, ${baseColor} 15%, var(--surface))`;
     return 'var(--surface)';
@@ -90,16 +90,16 @@ const resolveTooltipStyles = (
   const arrowColor = background;
 
   // Border resolution
-  const border = themeColor 
-    ? `1px solid color-mix(in srgb, var(--palette-${themeColor}, var(--${themeColor}, ${themeColor})) 40%, transparent)` 
-    : isTransparent 
-      ? '1px solid color-mix(in srgb, var(--text-main) 10%, transparent)' 
+  const border = themeColor
+    ? `1px solid color-mix(in srgb, var(--palette-${themeColor}, var(--${themeColor}, ${themeColor})) 40%, transparent)`
+    : isTransparent
+      ? '1px solid color-mix(in srgb, var(--text-main) 10%, transparent)'
       : '1px solid var(--border-color)';
 
-  const arrowBorderColor = themeColor 
-    ? `color-mix(in srgb, var(--palette-${themeColor}, var(--${themeColor}, ${themeColor})) 40%, transparent)` 
-    : isTransparent 
-      ? 'color-mix(in srgb, var(--text-main) 10%, transparent)' 
+  const arrowBorderColor = themeColor
+    ? `color-mix(in srgb, var(--palette-${themeColor}, var(--${themeColor}, ${themeColor})) 40%, transparent)`
+    : isTransparent
+      ? 'color-mix(in srgb, var(--text-main) 10%, transparent)'
       : 'var(--border-color)';
 
   return {
@@ -124,7 +124,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   textColor,
   icon,
   variant = 'soft',
-  followCursor = false,
+  followCursor = true,
   onMouseEnter,
   onMouseLeave
 }) => {
@@ -284,7 +284,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              
+
               ...dynamicStyles,
 
               '--tooltip-arrow-left': coords.arrowLeft,

@@ -4,7 +4,7 @@ import { CreateInspectionInvoiceUseCase } from '../../application/usecases/Creat
 import { SolicitudRepositoryImpl } from '../../infrastructure/repositories/SolicitudRepositoryImpl';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 import { X, FileText, Calendar, CreditCard, DollarSign, Loader2 } from 'lucide-react';
-import './CreateInspectionInvoiceModal.css';
+import '../styles/CreateInspectionInvoiceModal.css';
 
 interface CreateInspectionInvoiceModalProps {
   isOpen: boolean;

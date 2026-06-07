@@ -15,6 +15,7 @@ import {
 } from './SolicitudConfig';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { SolicitudDocumentPreviewModal } from './SolicitudDocumentPreviewModal';
+import { SolicitudDocRow } from './detail/SolicitudDocRow';
 import {
   Droplets,
   Clock,
@@ -25,7 +26,6 @@ import {
   User,
   FileText,
   Eye,
-  ArrowRight,
   Timer,
   ChevronDown,
   ChevronUp,
@@ -41,6 +41,9 @@ import {
   Phone,
   ListIcon
 } from 'lucide-react';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { RiKey2Fill } from 'react-icons/ri';
+import { Button } from '@/shared/presentation/components/Button/Button';
 
 // ── Icon per tipo acometida ────────────────────────────────────────────────
 const TIPO_ICON: Record<string, React.ReactNode> = {
@@ -62,19 +65,7 @@ const ESTADO_ICON: Record<string, React.ReactNode> = {
   pendiente: <Timer size={11} />
 };
 
-const DOC_ESTADO_COLOR: Record<string, { color: string; bg: string }> = {
-  PENDIENTE: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
-  APROBADO: { color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
-  RECHAZADO: { color: '#ef4444', bg: 'rgba(239,68,68,0.12)' }
-};
 
-const TIPO_DOC_SHORT: Record<number | string, string> = {
-  1: 'Cédula',
-  2: 'Plano',
-  3: 'Escritura',
-  4: 'Formulario',
-  5: 'Permiso'
-};
 
 interface SolicitudCardProps {
   solicitud: Solicitud;
@@ -89,6 +80,7 @@ export const SolicitudCard: React.FC<SolicitudCardProps> = ({
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
+  const [selectedDocId, setSelectedDocId] = useState<string | undefined>(undefined);
 
   const estado = getEstadoConfig(solicitud.estado);
   const tipoLabel =
@@ -102,20 +94,20 @@ export const SolicitudCard: React.FC<SolicitudCardProps> = ({
 
   const fechaStr = solicitud.fechaSolicitud
     ? new Date(solicitud.fechaSolicitud).toLocaleDateString('es-EC', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      })
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    })
     : '—';
 
   const updatedStr = solicitud.updatedAt
     ? new Date(solicitud.updatedAt).toLocaleDateString('es-EC', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
     : '—';
 
   const titular =
@@ -169,91 +161,149 @@ export const SolicitudCard: React.FC<SolicitudCardProps> = ({
             <div className="sol-card__top">
               <span className="sol-card__num">{solicitud.solicitudNumero}</span>
 
-              <ColorChip
-                color={estado.color}
-                label={estado.label}
-                icon={estadoIcon}
-                variant="soft"
-                size="xs"
-                borderRadius={5}
-              />
-
-              <ColorChip
-                label={tipoLabel}
-                variant="soft"
-                size="xs"
-                color="var(--text-secondary)"
-                borderRadius={5}
-                icon={<LucideClipboardType size={12} color="#0893b2ff" />}
-              />
-
-              <ColorChip
-                label={personaLabel}
-                variant="soft"
-                size="xs"
-                color="var(--text-muted)"
-                borderRadius={5}
-                icon={<User size={10} />}
-              />
-
-              {solicitud.diasEnProceso != null && (
+              <Tooltip
+                content='Estado de la Solicitud'
+                position='bottom'
+                themeColor='info'
+              >
                 <ColorChip
-                  label={`${solicitud.diasEnProceso} ${solicitud.diasEnProceso === 1 ? 'día' : 'días'}`}
-                  icon={<Timer size={10} color="#0893b2ff" />}
+                  color={estado.color}
+                  label={estado.label}
+                  icon={estadoIcon}
+                  variant="soft"
+                  size="xs"
+                  borderRadius={5}
+                />
+              </Tooltip>
+
+              <Tooltip
+                content='Tipo de Solicitud'
+                position='bottom'
+                themeColor='info'
+              >
+                <ColorChip
+                  label={tipoLabel}
+                  variant="soft"
+                  size="xs"
+                  color="var(--text-secondary)"
+                  borderRadius={5}
+                  icon={<LucideClipboardType size={12} color="#0893b2ff" />}
+                />
+              </Tooltip>
+
+              <Tooltip
+                content='Tipo de Cliente'
+                position='bottom'
+                themeColor='info'
+              >
+                <ColorChip
+                  label={personaLabel}
                   variant="soft"
                   size="xs"
                   color="var(--text-muted)"
                   borderRadius={5}
+                  icon={<User size={10} />}
                 />
+              </Tooltip>
+
+              {solicitud.diasEnProceso != null && (
+                <Tooltip
+                  content='Días en Proceso'
+                  position='bottom'
+                  themeColor='info'
+                >
+                  <ColorChip
+                    label={(solicitud.diasEnProceso ?? 0) > 1 ? `${solicitud.diasEnProceso} días` : '1 día'}
+                    icon={<Timer size={10} color="#0893b2ff" />}
+                    variant="soft"
+                    size="xs"
+                    color="var(--text-muted)"
+                    borderRadius={5}
+                  />
+                </Tooltip>
               )}
             </div>
 
             {/* Row 2: meta */}
             <div className="sol-card__meta">
-              <ColorChip
-                label={<strong>{titular}</strong>}
-                icon={<User size={12} color="#65a30d" />}
-                variant="ghost"
-                size="xs"
-                color="var(--text-main)"
-                borderRadius={5}
-              />
-              {solicitud.direccion && (
+              <Tooltip
+                content='Titular de la Solicitud'
+                position='bottom'
+                themeColor='info'
+              >
                 <ColorChip
-                  label={solicitud.direccion}
-                  icon={<MapPin size={12} color="#b23808ff" />}
+                  label={<strong>{titular}</strong>}
+                  icon={<User size={12} color="#65a30d" />}
                   variant="ghost"
                   size="xs"
-                  color="var(--text-secondary)"
+                  color="var(--text-main)"
                   borderRadius={5}
                 />
+              </Tooltip>
+              {solicitud.direccion && (
+                <Tooltip
+                  content='Dirección'
+                  position='bottom'
+                  themeColor='info'
+                  followCursor
+                >
+                  <ColorChip
+                    label={solicitud.direccion === 'null' || solicitud.direccion === null || solicitud.direccion.trim() === '' ? 'Sin Asignar' : solicitud.direccion}
+                    icon={<MapPin size={12} color="#b23808ff" />}
+                    variant="soft"
+                    size="xs"
+                    color="var(--text-secondary)"
+                    borderRadius={5}
+                  />
+                </Tooltip>
               )}
               {solicitud.claveCatastral && (
+                <Tooltip
+                  content='Clave Catastral'
+                  position='bottom'
+                  themeColor='info'
+                >
+                  <ColorChip
+                    label={solicitud.claveCatastral === 'null' || solicitud.claveCatastral === null || solicitud.claveCatastral.trim() === '' ? 'Sin Asignar' : solicitud.claveCatastral}
+                    icon={<RiKey2Fill size={12} color="#0860b2ff" />}
+                    variant="soft"
+                    size="xs"
+                    color="var(--text-secondary)"
+                    borderRadius={5}
+
+                  />
+                </Tooltip>
+              )}
+
+              <Tooltip
+                content='Fecha de Solicitud'
+                position='bottom'
+                themeColor='info'
+              >
                 <ColorChip
-                  label={solicitud.claveCatastral}
-                  icon={<FileText size={12} color="#0860b2ff" />}
+                  label={fechaStr}
+                  icon={<Calendar size={12} color="#0891b2" />}
                   variant="ghost"
                   size="xs"
                   color="var(--text-secondary)"
                   borderRadius={5}
                 />
-              )}
-              <ColorChip
-                label={fechaStr}
-                icon={<Calendar size={12} color="#0891b2" />}
-                variant="ghost"
-                size="xs"
-                color="var(--text-secondary)"
-                borderRadius={5}
-              />
-              <ColorChip
-                label={usoLabel}
-                variant="soft"
-                size="xs"
-                color="var(--text-muted)"
-                borderRadius={5}
-                icon={<Hash size={12} color="#0891b2" />}
-              />
+              </Tooltip>
+
+              <Tooltip
+                content='Tarifa (Uso)'
+                position='bottom'
+                themeColor='info'
+              >
+                <ColorChip
+                  label={usoLabel}
+                  variant="soft"
+                  size="xs"
+                  color="var(--text-muted)"
+                  borderRadius={5}
+                  icon={<Hash size={12} color="#0891b2" />}
+                />
+              </Tooltip>
             </div>
           </div>
 
@@ -263,48 +313,35 @@ export const SolicitudCard: React.FC<SolicitudCardProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             {hasDocuments && (
-              <button
-                className="sol-card__action-btn"
-                style={{
-                  color: '#3b82f6',
-                  borderColor: 'rgba(59,130,246,0.35)',
-                  background: 'rgba(59,130,246,0.08)'
-                }}
+              <Button
+                variant="outline"
+                color='green'
                 onClick={() => setDocsOpen(true)}
-                title={`Ver ${solicitud.documentos.length} documento(s)`}
-                id={`btn-docs-${solicitud.solicitudId}`}
+                leftIcon={<FolderOpen size={14} />}
+                size='xs'
               >
-                <FolderOpen size={14} />
                 Documentos ({solicitud.documentos.length})
-              </button>
+              </Button>
             )}
 
-            <button
-              className="sol-card__action-btn"
+            <Button
               onClick={() => onView(solicitud.solicitudId)}
               id={`btn-ver-sol-${solicitud.solicitudId}`}
-              title="Ver detalle completo"
-            >
-              <Eye size={14} /> Ver detalle
-            </button>
-
-            <button
-              className="sol-card__action-btn sol-card__action-btn--icon"
-              onClick={() => onView(solicitud.solicitudId)}
-              title="Abrir expediente"
-            >
-              <ArrowRight size={14} />
-            </button>
+              variant="dashed"
+              leftIcon={<Eye size={14} />}
+              size='xs'
+            > Ver Expediente
+            </Button>
 
             {/* Expand toggle */}
-            <button
+            <Button
               className={`sol-card__expand-btn${expanded ? ' sol-card__expand-btn--open' : ''}`}
               onClick={toggleExpand}
               title={expanded ? 'Colapsar' : 'Expandir información'}
               aria-expanded={expanded}
             >
               {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -372,7 +409,7 @@ export const SolicitudCard: React.FC<SolicitudCardProps> = ({
                     size={10}
                     style={{ display: 'inline', marginRight: 3 }}
                   />
-                  Analista: <strong>{solicitud.analistaUsername}</strong>
+                  Analista: <strong>{solicitud.analistaNombre?.toUpperCase()}</strong>
                 </span>
               )}
             </div>
@@ -452,45 +489,23 @@ export const SolicitudCard: React.FC<SolicitudCardProps> = ({
                   Documentos adjuntos ({solicitud.documentos.length})
                 </span>
                 <div className="sol-expand__docs">
-                  {solicitud.documentos.map((doc) => {
-                    const docEstado =
-                      DOC_ESTADO_COLOR[doc.estadoValidacion] ??
-                      DOC_ESTADO_COLOR['PENDIENTE'];
-                    const docLabel =
-                      TIPO_DOC_SHORT[Number(doc.tipodocumento)] ??
-                      `Doc. ${doc.tipodocumento}`;
-                    return (
-                      <div key={doc.id} className="sol-expand__doc-row">
-                        <FileText
-                          size={13}
-                          style={{ color: 'var(--text-muted)', flexShrink: 0 }}
-                        />
-                        <span style={{ fontWeight: 600 }}>{docLabel}</span>
-                        <span
-                          style={{
-                            color: 'var(--text-muted)',
-                            fontSize: '0.7rem',
-                            flex: 1,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          {doc.url.split('/').pop()}
-                        </span>
-                        <ColorChip
-                          color={docEstado.color}
-                          label={doc.estadoValidacion}
-                          variant="soft"
-                          size="xs"
-                        />
-                      </div>
-                    );
-                  })}
+                  {solicitud.documentos.map((doc) => (
+                    <SolicitudDocRow
+                      key={doc.id}
+                      doc={doc}
+                      onClick={() => {
+                        setSelectedDocId(doc.id);
+                        setDocsOpen(true);
+                      }}
+                    />
+                  ))}
                 </div>
                 <button
                   className="sol-expand__docs-btn"
-                  onClick={() => setDocsOpen(true)}
+                  onClick={() => {
+                    setSelectedDocId(undefined);
+                    setDocsOpen(true);
+                  }}
                 >
                   <FolderOpen size={14} /> Ver documentos en pantalla completa
                 </button>
@@ -504,10 +519,14 @@ export const SolicitudCard: React.FC<SolicitudCardProps> = ({
       {docsOpen && (
         <SolicitudDocumentPreviewModal
           isOpen={docsOpen}
-          onClose={() => setDocsOpen(false)}
+          onClose={() => {
+            setDocsOpen(false);
+            setSelectedDocId(undefined);
+          }}
           documentos={solicitud.documentos}
           solicitudNumero={solicitud.solicitudNumero}
           solicitudId={solicitud.solicitudId}
+          initialActiveId={selectedDocId}
         />
       )}
     </>

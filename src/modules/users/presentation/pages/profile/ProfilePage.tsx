@@ -83,8 +83,8 @@ export const ProfilePage = () => {
         </div>
         <div className="profile-page__info">
           <h1>
-            {profile.username === 'root' ? 'Root' : profile.firstName}{' '}
-            {profile.username === 'root' ? 'User' : profile.lastName}
+            {profile.username === 'root' ? 'Root' : profile.firstName?.toUpperCase()}{' '}
+            {profile.username === 'root' ? 'User' : profile.lastName?.toUpperCase()}
           </h1>
           <div className="profile-page__role-badge">
             <div className="user-detail__tags">

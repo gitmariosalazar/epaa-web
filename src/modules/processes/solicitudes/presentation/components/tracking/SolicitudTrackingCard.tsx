@@ -6,7 +6,7 @@
  * OCP: add new step sections by extending the render, no parent changes needed.
  */
 import React, { useState } from 'react';
-import './SolicitudTrackingCard.css';
+import '../../styles/SolicitudTrackingCard.css';
 import type { TrackingSolicitudResponse, HistorialTrackingEntry } from '../../../domain/models/Solicitud';
 import { ProcessTimeline } from '@/shared/presentation/components/Timeline/ProcessTimeline';
 import type { TimelineStep } from '@/shared/presentation/components/Timeline/ProcessTimeline';
@@ -31,8 +31,16 @@ import {
   BarChart2,
   Eye,
   ArrowRight,
-  Hash
+  Hash,
+  Activity,
+  Plus,
+  CheckCircle2,
+  MessageSquare
 } from 'lucide-react';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { getEstadoConfig } from '../SolicitudConfig';
+import { ProgressBar } from '@/shared/presentation/components/ProgressBar/ProgressBar';
+import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
 
 // ─── Step definitions ─────────────────────────────────────────────────────────
 interface TrackingStep extends TimelineStep<string> {
@@ -40,14 +48,14 @@ interface TrackingStep extends TimelineStep<string> {
 }
 
 const ALL_STEPS: TrackingStep[] = [
-  { id: 'solicitud',   label: 'Solicitud',   icon: <FileText size={16} /> },
-  { id: 'documentos',  label: 'Documentos',  icon: <Files size={16} /> },
-  { id: 'pago',        label: 'Pago',        icon: <CreditCard size={16} /> },
-  { id: 'inspeccion',  label: 'Inspección',  icon: <Search size={16} /> },
-  { id: 'contrato',    label: 'Contrato',    icon: <FileSignature size={16} /> },
+  { id: 'solicitud', label: 'Solicitud', icon: <FileText size={16} /> },
+  { id: 'documentos', label: 'Documentos', icon: <Files size={16} /> },
+  { id: 'pago', label: 'Pago', icon: <CreditCard size={16} /> },
+  { id: 'inspeccion', label: 'Inspección', icon: <Search size={16} /> },
+  { id: 'contrato', label: 'Contrato', icon: <FileSignature size={16} /> },
   { id: 'instalacion', label: 'Instalación', icon: <Wrench size={16} /> },
-  { id: 'catastro',    label: 'Catastro',    icon: <ShieldCheck size={16} /> },
-  { id: 'completado',  label: 'Activo',      icon: <Zap size={16} /> }
+  { id: 'catastro', label: 'Catastro', icon: <ShieldCheck size={16} /> },
+  { id: 'completado', label: 'Activo', icon: <Zap size={16} /> }
 ];
 
 // Terminal-negative steps don't appear on the linear timeline
@@ -102,18 +110,65 @@ interface StatusConfig {
 
 const getStepStatusConfig = (currentStep: string): StatusConfig => {
   const MAP: Record<string, StatusConfig> = {
-    solicitud:   { label: 'Solicitud ingresada',    color: '#94a3b8', bg: 'rgba(148,163,184,0.1)', border: 'rgba(148,163,184,0.25)', icon: <FileText size={12} /> },
-    documentos:  { label: 'Documentos requeridos',  color: '#f59e0b', bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.25)',  icon: <Files size={12} /> },
-    pago:        { label: 'Pago de inspección',     color: '#3b82f6', bg: 'rgba(59,130,246,0.1)',  border: 'rgba(59,130,246,0.25)',  icon: <CreditCard size={12} /> },
-    inspeccion:  { label: 'Inspección técnica',     color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)',  border: 'rgba(139,92,246,0.25)',  icon: <Search size={12} /> },
-    contrato:    { label: 'Firma de contrato',       color: '#ec4899', bg: 'rgba(236,72,153,0.1)',  border: 'rgba(236,72,153,0.25)',  icon: <FileSignature size={12} /> },
-    instalacion: { label: 'Instalación en proceso', color: '#f97316', bg: 'rgba(249,115,22,0.1)',  border: 'rgba(249,115,22,0.25)',  icon: <Wrench size={12} /> },
-    catastro:    { label: 'Registro catastral',      color: '#06b6d4', bg: 'rgba(6,182,212,0.1)',   border: 'rgba(6,182,212,0.25)',   icon: <ShieldCheck size={12} /> },
-    completado:  { label: 'Servicio activo',         color: '#10b981', bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.25)',  icon: <Zap size={12} /> },
-    anulada:     { label: 'Anulada',                 color: '#ef4444', bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.25)',   icon: <XCircle size={12} /> },
-    rechazada:   { label: 'Rechazada',               color: '#ef4444', bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.25)',   icon: <XCircle size={12} /> }
+    solicitud: { label: 'Solicitud ingresada', color: '#94a3b8', bg: 'rgba(148,163,184,0.1)', border: 'rgba(148,163,184,0.25)', icon: <FileText size={12} /> },
+    documentos: { label: 'Documentos requeridos', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.25)', icon: <Files size={12} /> },
+    pago: { label: 'Pago de inspección', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.25)', icon: <CreditCard size={12} /> },
+    inspeccion: { label: 'Inspección técnica', color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)', border: 'rgba(139,92,246,0.25)', icon: <Search size={12} /> },
+    contrato: { label: 'Firma de contrato', color: '#ec4899', bg: 'rgba(236,72,153,0.1)', border: 'rgba(236,72,153,0.25)', icon: <FileSignature size={12} /> },
+    instalacion: { label: 'Instalación en proceso', color: '#f97316', bg: 'rgba(249,115,22,0.1)', border: 'rgba(249,115,22,0.25)', icon: <Wrench size={12} /> },
+    catastro: { label: 'Registro catastral', color: '#06b6d4', bg: 'rgba(6,182,212,0.1)', border: 'rgba(6,182,212,0.25)', icon: <ShieldCheck size={12} /> },
+    completado: { label: 'Servicio activo', color: '#10b981', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.25)', icon: <Zap size={12} /> },
+    anulada: { label: 'Anulada', color: '#ef4444', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.25)', icon: <XCircle size={12} /> },
+    rechazada: { label: 'Rechazada', color: '#ef4444', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.25)', icon: <XCircle size={12} /> }
   };
   return MAP[currentStep] ?? MAP['solicitud'];
+};
+
+interface StateConfig {
+  icon: React.ReactNode;
+  color: string;
+  label: string;
+}
+
+const getStateConfig = (estado: string): StateConfig => {
+  const config = getEstadoConfig(estado);
+  const code = estado.toUpperCase();
+
+  let icon = <Activity size={12} />;
+
+  if (code.includes('CREAD') || code.includes('NUEV') || code === 'DRAFT') {
+    icon = <Plus size={12} />;
+  } else if (code.includes('SUBMIT') || code.includes('ENVIAD') || code.includes('RECEPC')) {
+    icon = <FileText size={12} />;
+  } else if (code.includes('REJECT') || code.includes('RECHAZ') || code.includes('FALLID')) {
+    icon = <XCircle size={12} />;
+  } else if (code.includes('APPROV') || code.includes('APROB') || code.includes('COMPLET') || code.includes('FINALIZ')) {
+    icon = <CheckCircle2 size={12} />;
+  } else if (code.includes('PAGO') || code.includes('FACTUR') || code.includes('COBRO')) {
+    if (code.includes('PENDIENT')) {
+      icon = <Clock size={12} />;
+    } else {
+      icon = <CreditCard size={12} />;
+    }
+  } else if (code.includes('INSPECCION') || code.includes('ORDEN') || code.includes('OT_') || code.includes('PROGRAM')) {
+    if (code.includes('PROGR') || code.includes('ASIGN') || code.includes('EMIT')) {
+      icon = <Calendar size={12} />;
+    } else {
+      icon = <Search size={12} />;
+    }
+  } else if (code.includes('CONTRATO') || code.includes('FIRMA')) {
+    icon = <FileSignature size={12} />;
+  } else if (code.includes('INSTALAC') || code.includes('MEDIDOR') || code.includes('OBRA') || code.includes('TRABAJO')) {
+    icon = <Wrench size={12} />;
+  } else if (code.includes('CATASTR') || code.includes('REGISTR') || code.includes('CUENTA') || code.includes('ACTIV')) {
+    icon = <FileText size={12} />;
+  }
+
+  return {
+    icon,
+    color: config.color,
+    label: config.label
+  };
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -137,20 +192,89 @@ const Section: React.FC<{ title: string; icon: React.ReactNode; children: React.
 );
 
 const HistorialRow: React.FC<{ entry: HistorialTrackingEntry; isLast: boolean }> = ({ entry, isLast }) => {
-  const fecha = entry.fecha ? new Date(entry.fecha).toLocaleString('es-EC', {
-    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-  }) : '—';
+  const config = getStateConfig(entry.estado);
+
+  const formatStateLabel = (stateStr: string) => {
+    if (!stateStr) return '';
+    return stateStr
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
   return (
-    <div className={`trk-historial-row${isLast ? ' trk-historial-row--last' : ''}`}>
-      <div className="trk-historial-row__dot" />
-      <div className="trk-historial-row__content">
-        <span className="trk-historial-row__estado">{entry.estadoLabel}</span>
-        {entry.estadoAnterior && (
-          <span className="trk-historial-row__prev">← {entry.estadoAnterior}</span>
-        )}
-        <span className="trk-historial-row__fecha">{fecha}</span>
+    <div
+      className={`trk-historial-node${isLast ? ' trk-historial-node--last' : ''}`}
+      style={{ '--node-color': config.color } as React.CSSProperties}
+    >
+      <div className="trk-historial-node__line" />
+
+      <div className="trk-historial-node__icon-container">
+        <div className="trk-historial-node__icon-glow" />
+        <div className="trk-historial-node__icon">
+          {config.icon}
+        </div>
+      </div>
+
+      <div className="trk-historial-node__content">
+        <div className="trk-historial-node__header">
+          <div className="trk-historial-node__flow-row">
+            {entry.estadoAnterior ? (
+              <>
+                <ColorChip
+                  label={formatStateLabel(entry.estadoAnterior)}
+                  variant="soft"
+                  size="xs"
+                  color="var(--text-secondary)"
+                  borderRadius={6}
+                />
+                <ArrowRight size={12} className="flow-arrow" />
+                <ColorChip
+                  label={entry.estadoLabel}
+                  variant="soft"
+                  size="xs"
+                  color={config.color}
+                  borderRadius={6}
+                  withDot
+                />
+              </>
+            ) : (
+              <ColorChip
+                label={entry.estadoLabel}
+                variant="soft"
+                size="xs"
+                color={config.color}
+                borderRadius={6}
+                icon={config.icon}
+              />
+            )}
+          </div>
+          <span className="trk-historial-node__date">
+            <ColorChip
+              label={entry.fecha ? `${new Date(entry.fecha).toLocaleDateString('es-EC', {
+                day: '2-digit',
+                month: 'short',
+              })} ${new Date(entry.fecha).toLocaleTimeString('es-EC', {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}` : '—'}
+              variant="soft"
+              size="xs"
+              color="info"
+              borderRadius={6}
+              icon={<Clock size={12} />}
+            />
+          </span>
+        </div>
+
         {entry.comentario && (
-          <p className="trk-historial-row__comentario">{entry.comentario}</p>
+          <div className="trk-historial-node__comment">
+            <MessageSquare
+              size={12}
+              className="trk-historial-node__comment-icon"
+            />
+            <p>{entry.comentario}</p>
+          </div>
         )}
       </div>
     </div>
@@ -171,7 +295,7 @@ export const SolicitudTrackingCard: React.FC<SolicitudTrackingCardProps> = ({
   const [historialOpen, setHistorialOpen] = useState(false);
 
   const resolvedCurrentStep = mapEstadoToStep(tracking.estadoCodigo || '');
-  const statusConfig  = getStepStatusConfig(resolvedCurrentStep);
+  const statusConfig = getStepStatusConfig(resolvedCurrentStep);
   const isTerminalNeg = TERMINAL_NEGATIVE.has(resolvedCurrentStep);
   const timelineSteps = isTerminalNeg ? [] : ALL_STEPS;
 
@@ -180,10 +304,18 @@ export const SolicitudTrackingCard: React.FC<SolicitudTrackingCardProps> = ({
     ? Math.round((tracking.docsAprobados / tracking.docsTotal) * 100)
     : 0;
 
+  // Process progress percent based on the 8 stages
+  const progressPercent = isTerminalNeg
+    ? 100
+    : (() => {
+      const idx = ALL_STEPS.findIndex(s => s.id === resolvedCurrentStep);
+      return idx >= 0 ? Math.round(((idx) / ALL_STEPS.length) * 100) : 0;
+    })();
+
   const ultimoMov = tracking.ultimoMovimiento
     ? new Date(tracking.ultimoMovimiento).toLocaleDateString('es-EC', {
-        day: '2-digit', month: 'short', year: 'numeric'
-      })
+      day: '2-digit', month: 'short', year: 'numeric'
+    })
     : null;
 
   return (
@@ -228,7 +360,7 @@ export const SolicitudTrackingCard: React.FC<SolicitudTrackingCardProps> = ({
               )}
               {tracking.analista && (
                 <span className="trk-card__meta-item">
-                  <User size={11} /> Analista: <strong>{tracking.analista}</strong>
+                  <User size={11} /> Analista: <strong>{tracking.analistaNombre?.toUpperCase()}</strong>
                 </span>
               )}
             </div>
@@ -253,6 +385,7 @@ export const SolicitudTrackingCard: React.FC<SolicitudTrackingCardProps> = ({
           <ProcessTimeline
             steps={timelineSteps}
             currentStep={resolvedCurrentStep}
+
           />
         </div>
       )}
@@ -412,15 +545,31 @@ export const SolicitudTrackingCard: React.FC<SolicitudTrackingCardProps> = ({
       {/* ══ HISTORIAL ══ */}
       {tracking.historial?.length > 0 && (
         <div className="trk-card__historial">
-          <button
-            className="trk-card__historial-toggle"
-            onClick={() => setHistorialOpen(p => !p)}
-            aria-expanded={historialOpen}
-          >
-            <BarChart2 size={14} />
-            Historial de estados ({tracking.historial.length})
-            {historialOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          </button>
+          <div className="trk-card-header">
+            <button
+              className="trk-card__historial-toggle"
+              onClick={() => setHistorialOpen(p => !p)}
+              aria-expanded={historialOpen}
+            >
+              <BarChart2 size={14} />
+              Historial de estados ({tracking.historial.length})
+              {historialOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </button>
+
+            <div className='trk-card-right-percentage'
+              onClick={() => setHistorialOpen(p => !p)}
+              aria-expanded={historialOpen}>
+              <span className='trk-card-right-percentage-text'>
+                Avance del proceso
+              </span>
+
+              <ProgressBar
+                className='trk-card-right-percentage-progress'
+                value={progressPercent}
+                color={getTrafficLightColor(progressPercent)}
+              />
+            </div>
+          </div>
 
           <div className={`trk-historial${historialOpen ? ' trk-historial--open' : ''}`}>
             <div className="trk-historial__inner">

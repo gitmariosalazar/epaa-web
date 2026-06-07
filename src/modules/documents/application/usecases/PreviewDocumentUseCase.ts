@@ -17,10 +17,10 @@ export class PreviewDocumentUseCase {
   }
 
   /**
-   * Executes the usecase to preview a document by its unique ID.
+    * Executes the usecase to preview a document.
    *
-   * @param documentId Unique identifier of the document to preview.
-   * @param documentUrl Public/relative document URL when available.
+    * @param documentId Unique identifier of the document to preview (preferred).
+    * @param documentUrl Public/relative document URL (legacy fallback).
    * @returns Resolves with the Blob representing the file inline.
    */
   async execute(documentId?: string, documentUrl?: string): Promise<Blob> {

@@ -7,7 +7,7 @@
 import React from 'react';
 import { Search, RefreshCw, SlidersHorizontal, X } from 'lucide-react';
 import { MdAssignmentAdd } from 'react-icons/md';
-import { ESTADO_CONFIG } from './SolicitudConfig';
+import { Select } from '@/shared/presentation/components/Input/Select';
 
 interface ToolbarProps {
   search: string;
@@ -22,6 +22,7 @@ interface ToolbarProps {
   filteredCount: number;
   onRefresh: () => void;
   onNuevaSolicitud: () => void;
+  activeFilter?: string;
 }
 
 export const SolicitudesToolbar: React.FC<ToolbarProps> = ({
@@ -36,7 +37,8 @@ export const SolicitudesToolbar: React.FC<ToolbarProps> = ({
   totalCount,
   filteredCount,
   onRefresh,
-  onNuevaSolicitud
+  onNuevaSolicitud,
+  activeFilter
 }) => {
   const hasFilters = search || event || filterBy;
 
@@ -51,52 +53,58 @@ export const SolicitudesToolbar: React.FC<ToolbarProps> = ({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           id="sol-search-input"
+          width={10}
         />
       </div>
 
       <div className="sol-toolbar__divider" />
 
       {/* Filter by field */}
-      <select
-        className="sol-toolbar__select"
+      <Select
+        size="compact"
         value={filterBy}
         onChange={(e) => onFilterByChange(e.target.value)}
         title="Filtrar por campo"
         aria-label="Filtrar por"
+        width={150}
       >
         <option value="">Todos los campos</option>
         <option value="codigo">Código</option>
         <option value="direccion">Dirección</option>
-      </select>
+      </Select>
 
       {/* Status filter */}
-      <select
-        className="sol-toolbar__select"
-        value={event}
-        onChange={(e) => onEventChange(e.target.value)}
-        title="Filtrar por estado"
-        aria-label="Estado"
-      >
-        <option value="">Todos los estados</option>
-        {Object.entries(ESTADO_CONFIG).map(([k, v]) => (
-          <option key={k} value={k}>{v.label}</option>
-        ))}
-      </select>
+      {!activeFilter && (
+        <Select
+          size="compact"
+          value={event}
+          onChange={(e) => onEventChange(e.target.value)}
+          title="Filtrar por estado"
+          aria-label="Estado"
+          width={160}
+        >
+          <option value="">Todos los estados</option>
+          <option value="en_proceso">En Proceso</option>
+          <option value="aprobada">Aprobadas</option>
+          <option value="rechazada">Rechazadas</option>
+          <option value="completada">Completadas</option>
+        </Select>
+      )}
 
       {/* Sort by */}
-      <select
-        className="sol-toolbar__select"
+      <Select
+        size="compact"
         value={sortBy}
         onChange={(e) => onSortByChange(e.target.value)}
         title="Ordenar por"
         aria-label="Ordenar"
-        style={{ minWidth: 120 }}
+        width={140}
       >
         <option value="fecha_desc">Más recientes</option>
         <option value="fecha_asc">Más antiguos</option>
         <option value="estado">Estado</option>
         <option value="numero">N° Solicitud</option>
-      </select>
+      </Select>
 
       {/* Clear filters */}
       {hasFilters && (

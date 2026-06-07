@@ -5,10 +5,11 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--spacing-xl) 0 var(--spacing-xl);
+  padding: 0 var(--spacing-xl) var(--spacing-xl) var(--spacing-xl);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 /* Step Sticky Container */
@@ -113,6 +114,14 @@
   padding: var(--spacing-lg);
   border: 1px solid var(--border-color);
   background-color: var(--surface);
+  flex: 1;
+  min-height: 350px;
+}
+
+.solicitud-step-content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Form Section */
@@ -162,24 +171,25 @@
 }
 
 /* Navigation — sticky at bottom of scrollable viewport */
-.solicitud-nav {
+/* Navigation Footer — fixed at bottom of viewport */
+.solicitud-nav-footer {
+  width: 100%;
+  background: var(--surface);
+  border-top: 1px solid var(--border-color);
+  padding: var(--spacing-md) 0;
+  box-sizing: border-box;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 20;
+}
+
+.solicitud-nav-footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-xl);
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-xl);
-  padding: var(--spacing-md) var(--spacing-lg);
-  margin-left: calc(-1 * var(--spacing-lg));
-  margin-right: calc(-1 * var(--spacing-lg));
-  margin-bottom: calc(-1 * var(--spacing-lg));
-  border-top: 1px solid var(--border-color);
-  flex-shrink: 0;
-  position: sticky;
-  bottom: 0;
-  background: var(--surface-hover);
-  border-bottom-left-radius: var(--radius-md);
-  border-bottom-right-radius: var(--radius-md);
-  z-index: 10;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+  justify-content: space-between;
+  box-sizing: border-box;
 }
 
 /* Summary */
@@ -225,54 +235,6 @@
   text-align: right;
   max-width: 60%;
   word-break: break-word;
-}
-
-/* Success State */
-.solicitud-success {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: var(--spacing-2xl);
-  gap: var(--spacing-lg);
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.solicitud-success__icon {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  background: rgba(16, 185, 129, 0.12);
-  color: var(--success);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: successPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.solicitud-success h2 {
-  color: var(--text-main);
-  font-size: 1.5rem;
-  margin: 0;
-}
-
-.solicitud-success p {
-  color: var(--text-secondary);
-  margin: 0;
-  line-height: 1.6;
-}
-
-.solicitud-success__info {
-  background: var(--surface-hover);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
 }
 
 /* Documents step specifics */

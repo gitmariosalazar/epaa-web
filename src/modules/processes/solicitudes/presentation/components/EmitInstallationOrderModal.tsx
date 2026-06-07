@@ -12,7 +12,7 @@ import { SearchableSelect } from '@/shared/presentation/components/Input/Searcha
 import type { SearchableSelectOption } from '@/shared/presentation/components/Input/SearchableSelect';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 import { Wrench, X, FileText, Clock } from 'lucide-react';
-import './ActionModal.css';
+import '../styles/ActionModal.css';
 
 interface EmitInstallationOrderModalProps {
   isOpen: boolean;

@@ -7,15 +7,15 @@
 export interface DocumentRepository {
   /**
    * Fetches the document as a Blob to be previewed inline.
-   * Prefer direct document URL when available.
-   * Fallback: GET /connection-documents/:documentId/preview
+    * Prefer secure endpoint by document ID.
+    * Fallback: direct document URL (legacy).
    */
   preview(documentId?: string, documentUrl?: string): Promise<Blob>;
 
   /**
    * Downloads the document as a Blob (attachment content disposition).
-   * Prefer direct document URL when available.
-   * Fallback: GET /connection-documents/:documentId/download-file
+   * Prefer secure endpoint by document ID.
+   * Fallback: direct document URL (legacy).
    */
   download(documentId?: string, documentUrl?: string): Promise<Blob>;
 }

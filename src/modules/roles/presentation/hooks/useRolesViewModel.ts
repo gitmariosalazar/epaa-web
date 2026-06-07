@@ -121,6 +121,7 @@ export const useRolesViewModel = () => {
     handleDelete,
     openEdit,
     openPermissions,
-    resetForm
+    resetForm,
+    refresh: loadRoles
   };
 };

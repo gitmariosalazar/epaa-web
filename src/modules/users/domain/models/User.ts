@@ -22,8 +22,8 @@ export interface User {
   internalEmail?: string;
   photoUrl?: string;
   createdBy?: string;
-  roles: (string | { id: number; name: string })[];
-  permissions: (string | { id: number; name: string })[];
+  roles: { id: number; name: string }[];
+  permissions: { id: number; name: string }[];
   isActive: boolean;
   registeredAt: Date;
   lastLogin?: Date | null;

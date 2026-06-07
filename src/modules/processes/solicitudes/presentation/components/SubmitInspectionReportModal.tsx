@@ -8,7 +8,7 @@ import { SolicitudRepositoryImpl } from '../../infrastructure/repositories/Solic
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { FileText, X, DollarSign, MapPin, Clock, CheckCircle } from 'lucide-react';
-import './ActionModal.css';
+import '../styles/ActionModal.css';
 
 interface SubmitInspectionReportModalProps {
   isOpen: boolean;

@@ -78,12 +78,12 @@ const SupportTooltipContent: React.FC<SupportTooltipContentProps> = ({ onSupport
           <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Mario Salazar</p>
         </div>
       </div>
-      
+
       <div className="support-tooltip__body">
         <span className="support-tooltip__label">WhatsApp Directo</span>
         <div className="support-tooltip__number-row">
           <span className="support-tooltip__number">{phoneNumber}</span>
-          <button 
+          <button
             className={`support-tooltip__copy-btn ${copied ? 'support-tooltip__copy-btn--copied' : ''}`}
             onClick={handleCopy}
             type="button"
@@ -94,17 +94,17 @@ const SupportTooltipContent: React.FC<SupportTooltipContentProps> = ({ onSupport
                 <span style={{ color: 'white' }}>¡Copiado!</span>
               </div>
             ) : (
-             <Tooltip content="Copiar número" themeColor="info">
-               <Copy size={14} />
-             </Tooltip>
+              <Tooltip content="Copiar número" themeColor="info">
+                <Copy size={14} />
+              </Tooltip>
             )}
           </button>
         </div>
       </div>
 
       <div className="support-tooltip__footer">
-        <a 
-          href="#" 
+        <a
+          href="#"
           onClick={(e) => { e.preventDefault(); onSupportClick(); }}
           className="support-tooltip__link support-tooltip__link--whatsapp"
         >
@@ -162,17 +162,19 @@ export const Header: React.FC = () => {
   const currentPath = location.pathname.split('/').pop() || '';
   const pageTitle = currentPath
     ? t(
-        `menu.${currentPath}`,
-        currentPath.charAt(0).toUpperCase() + currentPath.slice(1)
-      )
+      `menu.${currentPath}`,
+      currentPath.charAt(0).toUpperCase() + currentPath.slice(1)
+    )
     : '';
-  
+
   const handleSupportClick = () => {
     const phoneNumber = "593994532438";
     const message = `Hola Mario, necesito ayuda con el sistema SIGEPAA. Mi usuario es: ${user?.username || 'Invitado'}`;
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
   };
+
+  console.log(user);
 
 
 
@@ -230,9 +232,9 @@ export const Header: React.FC = () => {
             >
               <Avatar name={displayName} size="md" />
               <div className="header__user-info">
-                <span className="header__username">{displayName}</span>
+                <span className="header__username">{displayName.toUpperCase()}</span>
                 <span className="header__user-role">
-                  {user?.firstName ? 'Administrador' : 'Usuario'}
+                  {user?.roles && user.roles.length > 0 ? user.roles[0].name.toUpperCase().replace(/_/g, ' ') : 'Usuario'}
                 </span>
               </div>
               <div className="header__chevron-wrapper">
@@ -246,7 +248,7 @@ export const Header: React.FC = () => {
             {isMenuOpen && (
               <div className="header__dropdown">
                 <div className="header__dropdown-header">
-                  <div className="header__dropdown-name">{displayName}</div>
+                  <div className="header__dropdown-name">{displayName.toUpperCase()}</div>
                   <div className="header__dropdown-email">{user?.email}</div>
                 </div>
                 <ul className="header__dropdown-list">

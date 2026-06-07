@@ -85,44 +85,27 @@ export const PermissionsPage: React.FC = () => {
   return (
     <PageLayout
       className="permissions-page"
-      header={
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '100%'
-          }}
-        >
-          <div className="permissions-header" style={{ marginBottom: 0 }}>
-            <h1 style={{ margin: 0 }}>Permissions</h1>
-            <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
-              Manage permission access and details
-            </p>
-          </div>
-          <Button leftIcon={<Plus size={18} />} onClick={openCreate}>
-            Create Permission
-          </Button>
-        </div>
-      }
       filters={
         <div className="entry-filters">
           <div className="entry-filter-group entry-filter-group--search">
-            <label
-              className="entry-filter-label"
-              style={{ visibility: 'hidden' }}
-            >
-              Search
-            </label>
             <div className="entry-filter-input-wrapper">
               <Input
                 type="text"
-                placeholder="Search permissions..."
+                placeholder="Buscar permisos..."
                 value={searchTerm}
                 leftIcon={<Search size={18} />}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                size='small'
               />
             </div>
+          </div>
+          <div className="trash-report-filter-right">
+            <Button leftIcon={<Plus size={18} />} onClick={openCreate}
+              variant='dashed'
+              size='xs'
+            >
+              Agregar permiso
+            </Button>
           </div>
         </div>
       }

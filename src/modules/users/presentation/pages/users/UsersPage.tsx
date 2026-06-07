@@ -69,7 +69,8 @@ const UsersLayout: React.FC = () => {
     handleUpdate,
     handleView,
     handleDelete,
-    openEdit
+    openEdit,
+    refresh
   } = useUsersViewModel();
 
   // Columns Configuration
@@ -220,64 +221,48 @@ const UsersLayout: React.FC = () => {
   return (
     <PageLayout
       className="users-page"
-      header={
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '100%'
-          }}
-        >
-          <h1 style={{ margin: 0 }}>Users Management</h1>
-          <Button
-            onClick={() => {
-              resetForm();
-              setIsCreateOpen(true);
-            }}
-            leftIcon={<Plus size={20} />}
-          >
-            New User
-          </Button>
-        </div>
-      }
+
       filters={
         <div className="entry-filters">
           <div className="entry-filter-group entry-filter-group--search">
-            <label
-              className="entry-filter-label"
-              style={{ visibility: 'hidden' }}
-            >
-              Search
-            </label>
+
             <div className="entry-filter-input-wrapper">
               <Input
                 type="text"
-                className="entry-filter-input"
-                style={{ paddingLeft: '2.25rem' }}
                 placeholder="Search users..."
                 value={searchTerm}
                 leftIcon={<Search size={18} />}
+                size='small'
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
           <div
-            className="entry-filter-group"
+            className="entry-filter-group trash-report-filter-right"
             style={{ flex: '0 1 auto', width: 'auto' }}
           >
-            <label
-              className="entry-filter-label"
-              style={{ visibility: 'hidden' }}
-            >
-              &nbsp;
-            </label>
+
             <Button
               variant="outline"
-              onClick={() => window.location.reload()}
+              onClick={refresh}
               leftIcon={<RefreshCw size={16} />}
+              size='compact'
+              style={{ height: '30px' }}
             >
               Refresh
+            </Button>
+            <Button
+              onClick={() => {
+                resetForm();
+                setIsCreateOpen(true);
+              }}
+              leftIcon={<Plus size={14} />}
+              size='compact'
+              style={{ height: '30px' }}
+              variant='dashed'
+              color='green'
+            >
+              New User
             </Button>
           </div>
         </div>
@@ -344,11 +329,10 @@ const UsersLayout: React.FC = () => {
             {steps.map((step, idx) => (
               <div
                 key={step}
-                className={`users-wizard__step-indicator ${
-                  idx === currentStep
-                    ? 'users-wizard__step-indicator--active'
-                    : ''
-                }`}
+                className={`users-wizard__step-indicator ${idx === currentStep
+                  ? 'users-wizard__step-indicator--active'
+                  : ''
+                  }`}
               >
                 {step}
               </div>

@@ -1,8 +1,11 @@
 import React from 'react';
-import { Check } from 'lucide-react';
+import { Check, Hash, FileKey, List } from 'lucide-react';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import type { Tramite } from '@/modules/tramites/domain/models/Tramite';
+import { CopyableField } from '@/shared/presentation/components/CopyableField/CopyableField';
+import '../../styles/SolicitudSuccess.css';
+import { VscGitPullRequestNewChanges } from 'react-icons/vsc';
 
 interface SolicitudSuccessProps {
   tramite?: Tramite | null;
@@ -10,6 +13,8 @@ interface SolicitudSuccessProps {
   createdSolicitudId: string | null;
   onGoToTramites: () => void;
   onCreateAnother: () => void;
+  onGoDetail: () => void;
+  requestNumber: string | null;
 }
 
 export const SolicitudSuccess: React.FC<SolicitudSuccessProps> = ({
@@ -17,62 +22,56 @@ export const SolicitudSuccess: React.FC<SolicitudSuccessProps> = ({
   docsSubidos,
   createdSolicitudId,
   onGoToTramites,
-  onCreateAnother
+  onCreateAnother,
+  onGoDetail,
+  requestNumber
 }) => {
-  const solNum = createdSolicitudId
-    ? `SOL-${createdSolicitudId.slice(0, 8).toUpperCase()}`
-    : `SOL-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
+
 
   return (
-    <PageLayout
-      header={
-        <h2 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-main)' }}>
-          Nueva Solicitud
-        </h2>
-      }
-    >
+    <PageLayout className="request-new-page-success">
       <div className="solicitud-success">
         <div className="solicitud-success__icon">
           <Check size={48} />
         </div>
         <h2>¡Solicitud Enviada!</h2>
         <p>
-          Tu solicitud de <strong>{tramite?.nombre}</strong> ha sido registrada con&nbsp;
+          Tu solicitud para el trámite de una <strong>{tramite?.nombre}</strong> ha sido registrada con&nbsp;
           <strong>
             {docsSubidos} documento{docsSubidos !== 1 ? 's' : ''}
           </strong>{' '}
           adjuntos.
         </p>
-        <div className="solicitud-success__info">
-          <strong>Número de Solicitud:</strong> {solNum}
+
+        <div className="solicitud-success__codes-container">
+          <CopyableField
+            value={`${requestNumber}`}
+            label="Número de Solicitud"
+            labelIcon={<Hash size={14} />}
+          />
+
+          {createdSolicitudId && (
+            <CopyableField
+              value={createdSolicitudId}
+              label="ID de Seguimiento (UUID)"
+              labelIcon={<FileKey size={14} />}
+            />
+          )}
         </div>
-        {createdSolicitudId && (
-          <div
-            style={{
-              fontSize: '0.85rem',
-              color: 'var(--text-muted)',
-              marginBottom: '1.5rem'
-            }}
-          >
-            ID de Seguimiento: <code style={{ color: 'var(--accent)' }}>{createdSolicitudId}</code>
-          </div>
-        )}
-        <div
-          style={{
-            display: 'flex',
-            gap: '0.75rem',
-            flexWrap: 'wrap',
-            justifyContent: 'center'
-          }}
-        >
-          <Button variant="outline" onClick={onGoToTramites}>
-            Ver Trámites
+
+        <div className="solicitud-success__actions">
+          <Button variant="primary" onClick={onGoDetail} leftIcon={<List size={14} />}>
+            Ver Detalle
           </Button>
-          <Button variant="primary" onClick={onCreateAnother}>
+          <Button variant="secondary" onClick={onCreateAnother} leftIcon={<VscGitPullRequestNewChanges size={14} />}>
             Nueva Solicitud
+          </Button>
+          <Button variant="outline" onClick={onGoToTramites} leftIcon={<List size={14} />}>
+            Ir aTrámites
           </Button>
         </div>
       </div>
     </PageLayout>
   );
 };
+export default SolicitudSuccess;

@@ -17,10 +17,10 @@ export class DownloadDocumentUseCase {
   }
 
   /**
-   * Executes the usecase to download a document as a file attachment by its unique ID.
+    * Executes the usecase to download a document as a file attachment.
    *
-   * @param documentId Unique identifier of the document to download.
-   * @param documentUrl Public/relative document URL when available.
+    * @param documentId Unique identifier of the document to download (preferred).
+    * @param documentUrl Public/relative document URL (legacy fallback).
    * @returns Resolves with the Blob representing the downloaded file.
    */
   async execute(documentId?: string, documentUrl?: string): Promise<Blob> {

@@ -6,12 +6,15 @@ import type { AuditRegistroResponse } from '../../domain/models/AuditModels';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
-import { Eye } from 'lucide-react';
+import { Calendar, Eye } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solarizedDarkAtom } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import styles from '../styles/DataLogsTable.module.css';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { BiTable, BiUser } from 'react-icons/bi';
+import { MdOutlineDeleteForever, MdOutlineUpdate, MdPhoneIphone } from 'react-icons/md';
+import { FaSquarePlus } from 'react-icons/fa6';
 
 export const DataLogsTable: React.FC = () => {
   const { state, actions } = useAuditViewModel();
@@ -35,7 +38,14 @@ export const DataLogsTable: React.FC = () => {
     {
       header: 'Tabla',
       accessor: (row) => (
-        <span className={styles.tableName}>{row.tableName}</span>
+        <ColorChip
+          color="var(--primary, #3b82f6)"
+          label={row.tableName}
+          variant="ghost"
+          size="sm"
+          borderRadius={4}
+          icon={<BiTable size={16} />}
+        />
       )
     },
     {
@@ -45,27 +55,60 @@ export const DataLogsTable: React.FC = () => {
         if (row.operation === 'INSERT') color = 'var(--success, #10b981)';
         if (row.operation === 'UPDATE') color = 'var(--warning, #f59e0b)';
         if (row.operation === 'DELETE') color = 'var(--danger, #ef4444)';
+        let icon: React.ReactNode;
+        if (row.operation === 'INSERT') icon = <FaSquarePlus size={16} />;
+        if (row.operation === 'UPDATE') icon = <MdOutlineUpdate size={16} />;
+        if (row.operation === 'DELETE') icon = <MdOutlineDeleteForever size={16} />;
         return (
           <ColorChip
             color={color}
             label={row.operation}
             variant="soft"
-            size="sm"
+            size="xs"
+            borderRadius={4}
+            icon={icon}
           />
         );
       }
     },
     {
       header: 'Usuario',
-      accessor: (row) => row.username || row.userId || 'Sistema'
+      accessor: (row) => (
+        <ColorChip
+          color="var(--primary, #3b82f6)"
+          label={row.username || row.userId || 'Sistema'}
+          variant="ghost"
+          size="sm"
+          borderRadius={4}
+          icon={<BiUser size={16} />}
+        />
+      )
     },
     {
       header: 'IP Modificador',
-      accessor: 'ipAddress'
+      accessor: (row) => (
+        <ColorChip
+          color="var(--primary, #3b82f6)"
+          label={row.ipAddress || 'N/A'}
+          variant="ghost"
+          size="sm"
+          borderRadius={4}
+          icon={<MdPhoneIphone size={16} />}
+        />
+      )
     },
     {
       header: 'Fecha',
-      accessor: (row) => new Date(row.auditTimestamp).toLocaleString()
+      accessor: (row) => (
+        <ColorChip
+          color="var(--primary, #3b82f6)"
+          label={new Date(row.auditTimestamp).toLocaleString()}
+          variant="ghost"
+          size="sm"
+          borderRadius={4}
+          icon={<Calendar size={16} />}
+        />
+      )
     },
     {
       header: 'Auditoría',

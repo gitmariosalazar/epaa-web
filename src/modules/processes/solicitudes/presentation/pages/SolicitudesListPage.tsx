@@ -29,7 +29,7 @@ import {
 import { SolicitudesToolbar } from '../components/SolicitudesToolbar';
 import { SolicitudCard } from '../components/SolicitudCard';
 import { SolicitudesPagination } from '../components/SolicitudesPagination';
-import '../components/SolicitudesList.css';
+import '../styles/SolicitudesList.css';
 
 import { AlertTriangle, Inbox, RefreshCw } from 'lucide-react';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
@@ -246,6 +246,7 @@ export const SolicitudesListPage: React.FC<SolicitudesListPageProps> = ({
             filteredCount={solicitudes.length}
             onRefresh={refresh}
             onNuevaSolicitud={() => navigate('/solicitudes/nueva')}
+            activeFilter={filter}
           />
         }
         footer={

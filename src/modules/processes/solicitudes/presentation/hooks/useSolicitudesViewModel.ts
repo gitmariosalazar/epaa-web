@@ -28,6 +28,19 @@ const sortFn = (a: Solicitud, b: Solicitud, key: SortKey): number => {
   }
 };
 
+const matchEstadoGroup = (estado: string, target: 'en_proceso' | 'aprobada' | 'rechazada' | 'completada'): boolean => {
+  const norm = (estado || '').toUpperCase();
+  const isRejected = norm === 'REJECTED' || norm === 'RECHAZADA' || norm === 'RECHAZADA_TECNICA' || norm === 'ANULADA' || norm === 'INSTALACION_FALLIDA';
+  const isCompleted = norm === 'COMPLETED' || norm === 'COMPLETADA' || norm === 'SUMINISTRO_ACTIVO' || norm === 'INSTALACION_COMPLETADA';
+  const isApproved = norm === 'APPROVED' || norm === 'APROBADA' || norm === 'ACTIVE' || isCompleted;
+
+  if (target === 'rechazada') return isRejected;
+  if (target === 'aprobada') return isApproved;
+  if (target === 'completada') return isCompleted;
+  if (target === 'en_proceso') return !isApproved && !isRejected;
+  return false;
+};
+
 export const useSolicitudesViewModel = (
   filter?: 'en_proceso' | 'aprobada' | 'rechazada' | 'completada',
   categoria?: string
@@ -80,7 +93,9 @@ export const useSolicitudesViewModel = (
     }
 
     // 2. Prop-level status filter
-    if (filter) list = list.filter((s) => s.estado === filter);
+    if (filter) {
+      list = list.filter((s) => matchEstadoGroup(s.estado, filter));
+    }
 
     // 3. Filter-by + search
     if (filters.search) {
@@ -117,7 +132,9 @@ export const useSolicitudesViewModel = (
     }
 
     // 5. Status filter from dropdown
-    if (filters.event) list = list.filter((s) => s.estado === filters.event);
+    if (filters.event) {
+      list = list.filter((s) => matchEstadoGroup(s.estado, filters.event as any));
+    }
 
     // 6. Date range
     if (filters.initDate) {

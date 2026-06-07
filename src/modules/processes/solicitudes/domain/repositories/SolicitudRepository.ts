@@ -1,21 +1,52 @@
 import type {
+  SubmitWithDocumentsRequest,
+  SubmitWithDocumentsResponse
+} from '../dto/submit-with-documents.request';
+import type {
   RequestDetailByClientResponse,
   Solicitud,
+  SolicitudOrdenTrabajoResponse,
   TrackingSolicitudResponse
 } from '../models/Solicitud';
 
 export interface SolicitudRepository {
   getExpedientesByCliente(clienteId: string): Promise<Solicitud[]>;
   getExpedientesByAnalista(analistaId: string): Promise<Solicitud[]>;
-  getTrackingByClienteId(clienteId: string): Promise<TrackingSolicitudResponse[]>;
-  getTrackingBySolicitudId(solicitudId: string): Promise<TrackingSolicitudResponse | null>;
-  getTrackingByAnalistaId(analistaId: string): Promise<TrackingSolicitudResponse[]>;
-  getRequestDetailByRequestIdOrNumber(requestNumberOrId: string): Promise<RequestDetailByClientResponse | null>;
+  getTrackingByClienteId(
+    clienteId: string
+  ): Promise<TrackingSolicitudResponse[]>;
+  getTrackingBySolicitudId(
+    solicitudId: string
+  ): Promise<TrackingSolicitudResponse | null>;
+  getTrackingByAnalistaId(
+    analistaId: string
+  ): Promise<TrackingSolicitudResponse[]>;
+  getRequestDetailByRequestIdOrNumber(
+    requestNumberOrId: string
+  ): Promise<RequestDetailByClientResponse | null>;
+
+  /** Órdenes de trabajo (inspección e instalación) ligadas a una solicitud */
+  getOrdenesTrabajoBysSolicitudId(
+    solicitudId: string
+  ): Promise<SolicitudOrdenTrabajoResponse[]>;
+
+  // Fase 1 y 2: Enviar solicitud con documentos
+  /**
+   * OPERACIÓN ATÓMICA: Crea la solicitud, inserta documentos y transiciona
+   * a DOCS_SUBMITTED en una única transacción PostgreSQL.
+   */
+  submitWithDocuments(
+    dto: SubmitWithDocumentsRequest
+  ): Promise<SubmitWithDocumentsResponse>;
 
   // Fase 3 — Validación documental
   validateDocuments(
     solicitudId: string,
-    decisions: { documentId: string; validationStatus: 'APROBADO' | 'RECHAZADO'; observation?: string }[],
+    decisions: {
+      documentId: string;
+      validationStatus: 'APROBADO' | 'RECHAZADO';
+      observation?: string;
+    }[],
     validatorId: string
   ): Promise<void>;
 
@@ -76,9 +107,9 @@ export interface EmitInspectionOrderDto {
   solicitudId: string;
   technicianId: string;
   scheduledDate: string;
-  notes?: string;         // maps to backend 'description'
-  priorityId?: number;   // optional, default 1
-  emitterId: string;     // maps to backend 'creatorId'
+  notes?: string; // maps to backend 'description'
+  priorityId?: number; // optional, default 1
+  emitterId: string; // maps to backend 'creatorId'
 }
 
 export interface StartInspectionDto {
@@ -131,9 +162,9 @@ export interface EmitInstallationOrderDto {
   solicitudId: string;
   technicianId: string;
   scheduledDate: string;
-  notes?: string;         // maps to backend 'description'
-  priorityId?: number;   // optional, default 1
-  emitterId: string;     // maps to backend 'creatorId'
+  notes?: string; // maps to backend 'description'
+  priorityId?: number; // optional, default 1
+  emitterId: string; // maps to backend 'creatorId'
 }
 
 export interface StartInstallationDto {

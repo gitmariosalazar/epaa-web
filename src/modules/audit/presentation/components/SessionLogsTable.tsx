@@ -13,13 +13,15 @@ import {
   Clock,
   Globe,
   MonitorSmartphone,
-  AlertTriangle
+  AlertTriangle,
+  LogOut
 } from 'lucide-react';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { solarizedDarkAtom } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import styles from '../styles/SessionLogsTable.module.css';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { MdPhoneIphone } from 'react-icons/md';
 
 export const SessionLogsTable: React.FC = () => {
   const { state, actions } = useAuditViewModel();
@@ -42,7 +44,15 @@ export const SessionLogsTable: React.FC = () => {
   const columns: Column<AuditSessionResponse>[] = [
     {
       header: 'Usuario',
-      accessor: (row) => row.username || row.userId || 'Sistema'
+      accessor: (row) => (
+        <ColorChip
+          color="var(--primary, #3b82f6)"
+          label={row.username!.length > 12 ? row.username?.substring(0, 12) + '...' : (row.username || row.userId || 'Sistema')}
+          variant="ghost"
+          size="sm"
+          icon={<User size={16} />}
+        />
+      )
     },
     {
       header: 'Evento',
@@ -50,14 +60,26 @@ export const SessionLogsTable: React.FC = () => {
         let color = 'var(--success, #10b981)';
         if (row.event === 'LOGOUT') color = 'var(--warning, #f59e0b)';
         if (row.event === 'LOGIN_FAILED') color = 'var(--danger, #ef4444)';
+        let icon = <Activity size={12} />;
+        if (row.event === 'LOGOUT') icon = <LogOut size={12} />;
+        if (row.event === 'LOGIN_FAILED') icon = <AlertTriangle size={12} />;
         return (
-          <ColorChip color={color} label={row.event} variant="soft" size="sm" />
+          <ColorChip color={color} label={row.event} variant="soft" size="xs" icon={icon} borderRadius={4} />
         );
       }
     },
     {
       header: 'IP',
-      accessor: 'ipAddress'
+      accessor: (row) => (
+        <ColorChip
+          color="gray"
+          label={row.ipAddress || 'N/A'}
+          variant="ghost"
+          size="sm"
+          borderRadius={4}
+          icon={<MdPhoneIphone size={16} />}
+        />
+      )
     },
     {
       header: 'Navegador/Agente',

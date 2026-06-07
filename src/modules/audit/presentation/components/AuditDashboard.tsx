@@ -65,7 +65,7 @@ export const AuditDashboard: React.FC = () => {
         />
         <div className={styles.viewingMeta}>
           <ListFilter size={16} />
-          <span>Viendo {activeTab === 'sessions' ? 'Sesiones' : 'Datos'}</span>
+          <span style={{ fontSize: '10px' }}>Viendo {activeTab === 'sessions' ? 'Sesiones' : 'Datos'}</span>
         </div>
       </div>
     </div>
