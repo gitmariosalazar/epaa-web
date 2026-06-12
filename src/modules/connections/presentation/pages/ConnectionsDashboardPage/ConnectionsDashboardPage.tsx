@@ -6,6 +6,7 @@ import {
   type DonutSlice
 } from '@/shared/presentation/components/Charts/DonutChart';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
+import { Table, type Column } from '@/shared/presentation/components/Table/Table';
 import {
   Activity,
   Target,
@@ -21,6 +22,133 @@ import styles from './ConnectionsDashboardPage.module.css';
 export const ConnectionsDashboardPage: React.FC = () => {
   const { data, isLoading, error, fetchStats } = useConnectionDashboard();
   const [activeTab, setActiveTab] = useState<'update' | 'general'>('update');
+
+  interface ZonaRow {
+    zona_id: number;
+    total: number;
+    completados: number;
+    pendientes: number;
+  }
+
+  interface SectorRow {
+    sector: number;
+    total: number;
+    totalActualizadas: number;
+    pendientes: number;
+    porcentaje: number;
+    sinGeolocalizacion: number;
+    sinPredio: number;
+    sinCliente: number;
+  }
+
+  const zonasColumns = useMemo<Column<ZonaRow>[]>(() => [
+    {
+      header: 'ID Zona',
+      accessor: (item) => <strong>Zona {item.zona_id}</strong>
+    },
+    {
+      header: 'Total Acometidas',
+      accessor: (item) => item.total.toLocaleString()
+    },
+    {
+      header: 'Completados (100%)',
+      accessor: (item) => (
+        <span className={`${styles.badge} ${styles.success}`}>
+          {item.completados.toLocaleString()}
+        </span>
+      )
+    },
+    {
+      header: 'Pendientes (Faltan datos)',
+      accessor: (item) => (
+        <span className={`${styles.badge} ${styles.warning}`}>
+          {item.pendientes.toLocaleString()}
+        </span>
+      )
+    },
+    {
+      header: 'Progreso',
+      accessor: (item) => {
+        const total = Number(item.total);
+        const completados = Number(item.completados);
+        const pct = total > 0 ? ((completados / total) * 100).toFixed(1) : '0';
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '120px' }}>
+            <span>{pct}%</span>
+            <div style={{ flex: 1, height: '6px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+              <div style={{ width: `${pct}%`, height: '100%', backgroundColor: '#00aeff' }} />
+            </div>
+          </div>
+        );
+      }
+    }
+  ], []);
+
+  const sectoresColumns = useMemo<Column<SectorRow>[]>(() => [
+    {
+      header: 'Sector',
+      accessor: (item) => <strong>Sector {item.sector}</strong>
+    },
+    {
+      header: 'Total Acometidas',
+      accessor: (item) => item.total.toLocaleString()
+    },
+    {
+      header: 'Actualizadas',
+      accessor: (item) => (
+        <span className={`${styles.badge} ${styles.success}`}>
+          {item.totalActualizadas.toLocaleString()}
+        </span>
+      )
+    },
+    {
+      header: 'Pendientes',
+      accessor: (item) => (
+        <span className={`${styles.badge} ${styles.warning}`}>
+          {item.pendientes.toLocaleString()}
+        </span>
+      )
+    },
+    {
+      header: 'Faltantes por Dimensión',
+      accessor: (item) => (
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+          {item.sinGeolocalizacion > 0 && (
+            <span className={styles.missingBadge} title="Falta Geolocalización">
+              📍 GPS: {item.sinGeolocalizacion}
+            </span>
+          )}
+          {item.sinPredio > 0 && (
+            <span className={styles.missingBadge} title="Falta Ficha Predial">
+              🏢 Predio: {item.sinPredio}
+            </span>
+          )}
+          {item.sinCliente > 0 && (
+            <span className={styles.missingBadge} title="Falta Contacto Cliente">
+              👤 Cliente: {item.sinCliente}
+            </span>
+          )}
+          {item.sinGeolocalizacion === 0 && item.sinPredio === 0 && item.sinCliente === 0 && (
+            <span className={styles.allCorrectBadge}>✓ Todo al día</span>
+          )}
+        </div>
+      )
+    },
+    {
+      header: 'Progreso',
+      accessor: (item) => {
+        const pct = Number(item.porcentaje).toFixed(1);
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '120px' }}>
+            <span>{pct}%</span>
+            <div style={{ flex: 1, height: '6px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+              <div style={{ width: `${pct}%`, height: '100%', backgroundColor: '#10b981' }} />
+            </div>
+          </div>
+        );
+      }
+    }
+  ], []);
 
   useEffect(() => {
     fetchStats();
@@ -213,81 +341,87 @@ export const ConnectionsDashboardPage: React.FC = () => {
             />
           </section>
 
+          {/* Embudo de Calidad (Funnel Chart) */}
+          {data.embudo && data.embudo.length > 0 && (
+            <section className={styles.funnelSection}>
+              <div className={styles.chartCard} style={{ minHeight: 'auto' }}>
+                <h3 className={styles.chartTitle}>Embudo de Calidad y Completitud</h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9e9e9e)', margin: '-0.5rem 0 1.5rem 0' }}>
+                  Flujo de decantación catastral y validación física de las conexiones.
+                </p>
+                <div className={styles.funnelContainer}>
+                  {data.embudo.map((step, idx) => {
+                    const firstStepTotal = data.embudo[0].total || 1;
+                    const percentOfTotal = ((step.total / firstStepTotal) * 100).toFixed(1);
+                    
+                    const widths = ['100%', '85%', '70%', '55%'];
+                    const colors = ['#3b82f6', '#00aeff', '#8b5cf6', '#10b981'];
+                    
+                    return (
+                      <div key={idx} className={styles.funnelStepRow}>
+                        <div className={styles.funnelStepLabel}>
+                          <strong>{step.paso}</strong>
+                          <span>{step.total.toLocaleString()} acometidas</span>
+                        </div>
+                        <div className={styles.funnelStepBarWrapper}>
+                          <div 
+                            className={styles.funnelStepBar} 
+                            style={{ 
+                              width: widths[idx % widths.length],
+                              backgroundColor: colors[idx % colors.length],
+                              height: '28px',
+                              borderRadius: '6px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              paddingLeft: '0.75rem',
+                              color: '#fff',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                              transition: 'all 0.4s ease'
+                            }}
+                          >
+                            {percentOfTotal}%
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
+          )}
+
           {/* Table: Zones */}
           <section className={styles.tableSection}>
             <h3 className={styles.chartTitle}>Rendimiento por Zona</h3>
-            <div className={styles.tableWrapper}>
-              <table className={styles.zonesTable}>
-                <thead>
-                  <tr>
-                    <th>ID Zona</th>
-                    <th>Total Acometidas</th>
-                    <th>Completados (100%)</th>
-                    <th>Pendientes (Faltan datos)</th>
-                    <th>Progreso</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(data.porZonas || []).map((zona) => {
-                    const total = Number(zona.total);
-                    const completados = Number(zona.completados);
-                    const pendientes = Number(zona.pendientes);
-                    const pct =
-                      total > 0
-                        ? ((completados / total) * 100).toFixed(1)
-                        : '0';
-
-                    return (
-                      <tr key={zona.zona_id}>
-                        <td>
-                          <strong>Zona {zona.zona_id}</strong>
-                        </td>
-                        <td>{total.toLocaleString()}</td>
-                        <td>
-                          <span className={`${styles.badge} ${styles.success}`}>
-                            {completados.toLocaleString()}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={`${styles.badge} ${styles.warning}`}>
-                            {pendientes.toLocaleString()}
-                          </span>
-                        </td>
-                        <td>
-                          <div
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem'
-                            }}
-                          >
-                            <span>{pct}%</span>
-                            <div
-                              style={{
-                                flex: 1,
-                                height: '6px',
-                                backgroundColor: 'rgba(255,255,255,0.1)',
-                                borderRadius: '3px',
-                                overflow: 'hidden'
-                              }}
-                            >
-                              <div
-                                style={{
-                                  width: `${pct}%`,
-                                  height: '100%',
-                                  backgroundColor: '#00aeff'
-                                }}
-                              />
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <Table
+              data={data.porZonas || []}
+              columns={zonasColumns}
+              showColumnModal={false}
+              showTotalRecords={false}
+              showRowsPerPage={false}
+              fullHeight={false}
+            />
           </section>
+
+          {/* Table: Sectores */}
+          {data.porSectores && data.porSectores.length > 0 && (
+            <section className={styles.tableSection}>
+              <h3 className={styles.chartTitle}>Auditoría y Avance por Sector</h3>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9e9e9e)', margin: '-0.5rem 0 1rem 0' }}>
+                Detalle del avance de actualización catastral por sectores geográficos y desglose de datos faltantes.
+              </p>
+              <Table
+                data={data.porSectores}
+                columns={sectoresColumns}
+                showColumnModal={false}
+                showTotalRecords={false}
+                showRowsPerPage={false}
+                fullHeight={false}
+              />
+            </section>
+          )}
         </div>
       )}
 

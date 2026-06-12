@@ -77,6 +77,7 @@ import { SolicitudNuevaPage } from '@/modules/processes/solicitudes/presentation
 import { SolicitudesTrackingPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudesTrackingPage';
 import { SolicitudesListPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudesListPage';
 import { SolicitudDetailPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudDetailPage';
+import { WorkOrdersProcessPage, WorkOrderCreatePage, AllWorkOrdersListPage, WorkOrderDetailPage } from '@/modules/work-orders/presentation/pages';
 
 import UnAuthorizedPage from '@/shared/presentation/components/unauthorized/UnAuthorizedPage';
 import { CircularProgress } from './shared/presentation/components/CircularProgress';
@@ -116,19 +117,19 @@ const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
 
   // Aseguramos que sea un array de strings o de objetos y extraemos el nombre del rol normalizado
   const rawRoles = Array.isArray(user?.roles) ? user?.roles : [user?.roles];
-  const userRoles = rawRoles
-    .filter(Boolean)
-    .flatMap((r: any) => {
-      const name = typeof r === 'object' && r.name ? r.name : String(r);
-      const upper = name.toUpperCase();
-      // Mapeamos 'ADMINISTRADOR' a 'ADMIN' para compatibilidad con allowedRoles={['ADMIN']}
-      if (upper === 'ADMINISTRADOR' || upper === 'ADMIN') {
-        return ['ADMIN', 'ADMINISTRADOR'];
-      }
-      return [upper];
-    });
+  const userRoles = rawRoles.filter(Boolean).flatMap((r: any) => {
+    const name = typeof r === 'object' && r.name ? r.name : String(r);
+    const upper = name.toUpperCase();
+    // Mapeamos 'ADMINISTRADOR' a 'ADMIN' para compatibilidad con allowedRoles={['ADMIN']}
+    if (upper === 'ADMINISTRADOR' || upper === 'ADMIN') {
+      return ['ADMIN', 'ADMINISTRADOR'];
+    }
+    return [upper];
+  });
 
-  const hasAccess = allowedRoles.some((role) => userRoles.includes(role.toUpperCase()));
+  const hasAccess = allowedRoles.some((role) =>
+    userRoles.includes(role.toUpperCase())
+  );
 
   if (!hasAccess) {
     return <Navigate to="/unauthorized" replace />;
@@ -148,7 +149,8 @@ function App() {
           newestOnTop
           closeOnClick
           pauseOnHover
-          theme="colored" />
+          theme="colored"
+        />
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
@@ -317,6 +319,29 @@ function App() {
                 {/* Módulo de Notificaciones */}
                 <Route path="/notifications" element={<NotificationsPage />} />
 
+                {/* Módulo de Órdenes de Trabajo */}
+                <Route
+                  path="/work-orders/list"
+                  element={<AllWorkOrdersListPage />}
+                />
+                <Route
+                  path="/work-orders/process"
+                  element={<WorkOrdersProcessPage />}
+                />
+                <Route
+                  path="/work-orders/new"
+                  element={<WorkOrderCreatePage />}
+                />
+                <Route
+                  path="/work-orders/create"
+                  element={<WorkOrderCreatePage />}
+                />
+                {/* Detalle de OT — ruta dinámica SIEMPRE después de las estáticas */}
+                <Route
+                  path="/work-orders/:codigoOrden"
+                  element={<WorkOrderDetailPage />}
+                />
+
                 {/* Módulo de Trámites */}
                 <Route
                   path="/tramites/*"
@@ -331,11 +356,26 @@ function App() {
                 />
 
                 {/* Módulo de Requisitos por Trámite (Procedures) */}
-                <Route path="/procedures/cambio-titular" element={<CambioTitularPage />} />
-                <Route path="/procedures/suspension" element={<SuspensionPage />} />
-                <Route path="/procedures/tercera-edad" element={<BeneficioTerceraEdadPage />} />
-                <Route path="/procedures/discapacidad" element={<BeneficioDiscapacidadPage />} />
-                <Route path="/procedures/acometidas" element={<Navigate to="/tramites" replace />} />
+                <Route
+                  path="/procedures/cambio-titular"
+                  element={<CambioTitularPage />}
+                />
+                <Route
+                  path="/procedures/suspension"
+                  element={<SuspensionPage />}
+                />
+                <Route
+                  path="/procedures/tercera-edad"
+                  element={<BeneficioTerceraEdadPage />}
+                />
+                <Route
+                  path="/procedures/discapacidad"
+                  element={<BeneficioDiscapacidadPage />}
+                />
+                <Route
+                  path="/procedures/acometidas"
+                  element={<Navigate to="/tramites" replace />}
+                />
 
                 {/* Módulo de Solicitudes (Requests) */}
                 <Route
@@ -344,12 +384,32 @@ function App() {
                     <SolicitudesProvider>
                       <TramitesProvider>
                         <Routes>
-                          <Route path=":categoria/new" element={<SolicitudNuevaPage />} />
-                          <Route path=":categoria/tracking" element={<SolicitudesTrackingPage />} />
-                          <Route path=":categoria/list" element={<SolicitudesListPage />} />
-                          <Route path=":categoria/pending" element={<SolicitudesListPage filter="en_proceso" />} />
-                          <Route path=":categoria/approved" element={<SolicitudesListPage filter="aprobada" />} />
-                          <Route path=":categoria/rejected" element={<SolicitudesListPage filter="rechazada" />} />
+                          <Route
+                            path=":categoria/new"
+                            element={<SolicitudNuevaPage />}
+                          />
+                          <Route
+                            path=":categoria/tracking"
+                            element={<SolicitudesTrackingPage />}
+                          />
+                          <Route
+                            path=":categoria/list"
+                            element={<SolicitudesListPage />}
+                          />
+                          <Route
+                            path=":categoria/pending"
+                            element={
+                              <SolicitudesListPage filter="en_proceso" />
+                            }
+                          />
+                          <Route
+                            path=":categoria/approved"
+                            element={<SolicitudesListPage filter="aprobada" />}
+                          />
+                          <Route
+                            path=":categoria/rejected"
+                            element={<SolicitudesListPage filter="rechazada" />}
+                          />
                         </Routes>
                       </TramitesProvider>
                     </SolicitudesProvider>
@@ -363,9 +423,18 @@ function App() {
                     <SolicitudesProvider>
                       <TramitesProvider>
                         <Routes>
-                          <Route index element={<Navigate to="/tramites" replace />} />
-                          <Route path="nueva" element={<SolicitudNuevaPage />} />
-                          <Route path="nueva/:tramiteId" element={<SolicitudNuevaPage />} />
+                          <Route
+                            index
+                            element={<Navigate to="/tramites" replace />}
+                          />
+                          <Route
+                            path="nueva"
+                            element={<SolicitudNuevaPage />}
+                          />
+                          <Route
+                            path="nueva/:tramiteId"
+                            element={<SolicitudNuevaPage />}
+                          />
                           <Route path=":id" element={<SolicitudDetailPage />} />
                         </Routes>
                       </TramitesProvider>

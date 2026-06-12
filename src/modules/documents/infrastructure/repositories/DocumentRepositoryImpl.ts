@@ -61,6 +61,7 @@ export class DocumentRepositoryImpl implements DocumentRepository {
     throw new Error('Document ID or document URL is required');
   }
 
+
   private resolveDocumentUrl(documentUrl: string): string {
     if (/^https?:\/\//i.test(documentUrl)) {
       return documentUrl;
@@ -93,3 +94,4 @@ export class DocumentRepositoryImpl implements DocumentRepository {
     return response.blob();
   }
 }
+

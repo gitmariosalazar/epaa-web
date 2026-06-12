@@ -1,0 +1,244 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+   WorkOrderCreatePage — Wizard de creación de OT
+   100% adaptado a light / dark usando variables del sistema de temas.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Grid de clasificación (3 columnas) ──────────────────────────────────── */
+.wo-create-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+/* ── Textarea de descripción ──────────────────────────────────────────────── */
+.wo-create-textarea-wrapper {
+  position: relative;
+}
+
+.wo-create-textarea-icon {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.wo-create-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.85rem 0.65rem 2.2rem;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-size: 0.875rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.wo-create-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.wo-create-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Dark: textarea fondo más profundo */
+.dark .wo-create-textarea {
+  background: var(--surface-hover);
+  border-color: var(--border-color);
+}
+
+/* ── Confirmación: card de resumen ───────────────────────────────────────── */
+.wo-confirm-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.85rem;
+  padding: 1.25rem;
+  background: var(--surface-hover);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin-top: 0.5rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.wo-confirm-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.wo-confirm-row__icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 6px;
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  transition: background 0.2s;
+}
+
+.dark .wo-confirm-row__icon {
+  background: rgba(99, 102, 241, 0.18);
+}
+
+.wo-confirm-row__label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.15rem;
+}
+
+.wo-confirm-row__value {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.wo-confirm-footer-note {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* ── Badge de estado ─────────────────────────────────────────────────────── */
+.wo-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.wo-badge--notificada {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.dark .wo-badge--notificada {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+/* ── Pantalla de éxito ───────────────────────────────────────────────────── */
+.wo-success {
+  max-width: 520px;
+  margin: 3rem auto;
+  text-align: center;
+  padding: 2.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+/* Toque verde de éxito en ambos temas */
+.wo-success {
+  border-color: rgba(16, 185, 129, 0.22);
+}
+
+.dark .wo-success {
+  background: var(--surface);
+  border-color: rgba(16, 185, 129, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.wo-success__icon-wrapper {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.dark .wo-success__icon-wrapper {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.wo-success__icon {
+  color: #10b981;
+}
+
+.wo-success__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 1.25rem;
+}
+
+.wo-success__code-box {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 12px;
+  padding: 0.75rem 2rem;
+  margin-bottom: 1.25rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.dark .wo-success__code-box {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.wo-success__code-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.wo-success__code {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+
+.dark .wo-success__code {
+  color: #818cf8;
+}
+
+.wo-success__hint {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0 0 2rem;
+}
+
+.wo-success__actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}

@@ -1,10 +1,10 @@
-export interface CuadrillaMiembro {
-  idMiembro: string; // UUID
-  idEmpleado: string; // UUID
-  nombreEmpleado: string; // CONCAT nombres y apellidos
-  rol: string;
-  activo: boolean;
-  fechaAsignacion: string; // ISO Timestamp
+export interface TrabajadorAsignado {
+  idAsignacion: string;
+  idTrabajador: string;
+  nombreTrabajador: string;
+  rol: string | null;
+  esResponsable: boolean;
+  fechaAsignacion: string;
 }
 
 export interface MaterialUtilizado {
@@ -67,6 +67,8 @@ export interface OrdenTrabajoDetalle {
   estadoLabel: string;
   origen: string;
   origenLabel: string;
+  /** UUID de la entidad origen (solicitud, reclamo, etc.) */
+  idEntidadOrigen: string | null;
 
   // ── Clasificación ──
   tipoTrabajo: string;
@@ -108,10 +110,7 @@ export interface OrdenTrabajoDetalle {
   horasRestantesSla: number;
 
   // ── Asignación Operativa ──
-  tipoAsignacion: 'CUADRILLA' | 'INDIVIDUAL' | 'SIN_ASIGNAR';
-  idCuadrilla: string | null; // UUID
-  codigoCuadrilla: string | null;
-  nombreCuadrilla: string | null;
+  tipoAsignacion: 'INDIVIDUAL' | 'SIN_ASIGNAR';
   inspectorUsername: string | null;
   inspectorNombre: string | null;
   idUsuarioAsignacion: string | null;
@@ -125,8 +124,8 @@ export interface OrdenTrabajoDetalle {
   // ── Cliente Vinculado ──
   idCliente: string | null;
 
-  // ── Bloques Agregados (Arreglos JSONB garantizados por COALESCE) ──
-  cuadrillaMiembros: CuadrillaMiembro[];
+  // ── Bloques Agregados ──
+  personalAsignado: TrabajadorAsignado[];
   materiales: MaterialUtilizado[];
   adjuntos: AdjuntoEvidencia[];
   observaciones: ObservacionBitacora[];
@@ -137,7 +136,7 @@ export interface OrdenTrabajoDetalle {
   costoTotalAdicionales: number;
   costoTotalOrden: number;
 
-  // ── Checklist / Inspección de Cuadrilla ──
+  // ── Checklist / Inspección de Preparación ──
   idInspeccion: string | null; // UUID
   checklistAprobado: boolean | null;
   observacionesChecklist: string | null;
@@ -220,9 +219,7 @@ export interface OrdenTrabajoTracking {
   rechazosChecklist: number;
 
   // ── Asignación ──
-  tipoAsignacion: 'CUADRILLA' | 'INDIVIDUAL' | 'SIN_ASIGNAR';
-  codigoCuadrilla: string | null;
-  nombreCuadrilla: string | null;
+  tipoAsignacion: 'INDIVIDUAL' | 'SIN_ASIGNAR';
   asignadoUsername: string | null;
   asignadoNombre: string | null;
 
@@ -272,9 +269,7 @@ export interface OrdenTrabajoVistaCliente {
   longitud: number | null; // ST_X(geom_punto)
 
   // ── Datos del Ejecutor Técnico ──
-  tipoAsignacion: 'CUADRILLA' | 'TECNICO_INDIVIDUAL' | 'PENDIENTE_ASIGNACION';
-  codigoCuadrilla: string | null;
-  nombreCuadrilla: string | null;
+  tipoAsignacion: 'TECNICO_INDIVIDUAL' | 'PENDIENTE_ASIGNACION';
   tecnicoUsername: string | null;
   tecnicoNombre: string | null;
 
@@ -287,7 +282,7 @@ export interface OrdenTrabajoVistaCliente {
   fotosEvidencia: FotoEvidenciaCliente[]; // COALESCE → nunca null, puede ser []
 
   // ── Validaciones y Filtros Internos de Calidad / Seguridad ──
-  checklistAprobado: boolean | null; // inspeccion_cuadrilla.pasa_revision
+  checklistAprobado: boolean | null; // inspeccion_preparacion.pasa_revision
   trabajoAprobadoCalidad: boolean | null; // control_calidad.trabajo_aprobado
   comentariosCalidad: string | null; // control_calidad.comentarios
 
@@ -309,4 +304,29 @@ export interface OrdenTrabajoVistaCliente {
 
   // ── Stepper / Timeline Completo para el Portal del Cliente ──
   historialEstados: HitoHistorialTimeline[] | null; // null si aún no hay historial
+}
+
+export interface WorkOrderListItem {
+  workOrderId: string;
+  orderCode: string;
+  origin: string;
+  workTypeId: number;
+  workTypeName: string;
+  priorityId: number;
+  clientId: string;
+  clientName: string;
+  personType: string;
+  status: string;
+  creationDate: string;
+  assignationDate: string | null;
+  completionDate: string | null;
+  description: string | null;
+  location: string;
+  cadastralKey: string | null;
+  coordinates: string | null;
+  createdUserId: string;
+  assignedUserId: string | null;
+  completedUserId: string | null;
+  metadata: string | null;
+  isDeleted: boolean;
 }

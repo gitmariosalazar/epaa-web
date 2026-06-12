@@ -186,37 +186,7 @@
   overflow: hidden;
 }
 
-.tableWrapper {
-  overflow-x: auto;
-  margin-top: 1rem;
-}
 
-.zonesTable {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.zonesTable th {
-  padding: 1rem;
-  background-color: rgba(0, 0, 0, 0.2);
-  color: var(--text-secondary, #9e9e9e);
-  font-weight: 600;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  border-bottom: 2px solid var(--border-color, rgba(255, 255, 255, 0.1));
-}
-
-.zonesTable td {
-  padding: 1rem;
-  color: var(--text-main, #fff);
-  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.05));
-  font-size: 0.95rem;
-}
-
-.zonesTable tr:hover td {
-  background-color: rgba(255, 255, 255, 0.02);
-}
 
 .badge {
   display: inline-flex;
@@ -272,3 +242,80 @@
     transform: translateY(0);
   }
 }
+
+/* ── Funnel Chart ── */
+.funnelSection {
+  margin-top: 1rem;
+}
+
+.funnelContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding: 0.5rem 0;
+}
+
+.funnelStepRow {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .funnelStepRow {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
+.funnelStepLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.funnelStepLabel strong {
+  font-size: 0.88rem;
+  color: var(--text-main, #fff);
+}
+
+.funnelStepLabel span {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #9e9e9e);
+}
+
+.funnelStepBarWrapper {
+  flex: 1;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 0.2rem;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.05));
+}
+
+/* ── Audit Badges ── */
+.missingBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.allCorrectBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background-color: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+

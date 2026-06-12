@@ -22,13 +22,13 @@ export interface ProcessWorkOrderResponse {
 // SUB-INTERFACES PARA ARREGLOS JSONB
 // ==========================================
 
-export interface CuadrillaMiembro {
-  id_miembro: string; // UUID
-  id_empleado: string; // UUID
-  nombre_empleado: string;
-  rol: string;
-  activo: boolean;
-  fecha_asignacion: string; // ISO Date String
+export interface TrabajadorAsignado {
+  id_asignacion: string;
+  id_trabajador: string;
+  nombre_trabajador: string;
+  rol: string | null;
+  es_responsable: boolean;
+  fecha_asignacion: string;
 }
 
 export interface MaterialUtilizado {
@@ -119,10 +119,7 @@ export interface DetalleOrdenTrabajo {
   horas_restantes_sla: number;
 
   // ── Asignación operativa ──
-  tipo_asignacion: 'CUADRILLA' | 'INDIVIDUAL' | 'SIN_ASIGNAR';
-  id_cuadrilla: string | null; // UUID
-  codigo_cuadrilla: string | null;
-  nombre_cuadrilla: string | null;
+  tipo_asignacion: 'INDIVIDUAL' | 'SIN_ASIGNAR';
   inspector_username: string | null;
   inspector_nombre: string | null; // Concatenación de nombres y apellidos
   id_usuario_asignacion: string | null;
@@ -137,7 +134,7 @@ export interface DetalleOrdenTrabajo {
   id_cliente: string | null; // UUID o ID del cliente
 
   // ── Bloques Agregados (JSON Arrays) ──
-  cuadrilla_miembros: CuadrillaMiembro[];
+  personal_asignado: TrabajadorAsignado[];
   materiales: MaterialUtilizado[];
   adjuntos: AdjuntoEvidencia[];
   observaciones: ObservacionBitacora[];
@@ -148,7 +145,7 @@ export interface DetalleOrdenTrabajo {
   costo_total_adicionales: number;
   costo_total_orden: number;
 
-  // ── Checklist / Inspección de cuadrilla ──
+  // ── Checklist / Inspección de Preparación ──
   id_inspeccion: string | null; // UUID
   checklist_aprobado: boolean | null;
   observaciones_checklist: string | null;

@@ -1,0 +1,655 @@
+/* ═══════════════════════════════════════════════════════════════
+   WorkOrdersListPage CSS
+   Espejo de SolicitudesList.css adaptado para el módulo de OTs
+═══════════════════════════════════════════════════════════════ */
+
+/* ── List container ───────────────────────────────────────────── */
+.wo-list-container {
+  padding: 0 0 1.5rem;
+}
+
+.wo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+/* ── Empty state ──────────────────────────────────────────────── */
+.wo-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  text-align: center;
+  gap: 0.75rem;
+  color: var(--text-muted);
+}
+
+.wo-empty__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: rgba(100,116,139,0.08);
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.wo-empty h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.wo-empty p {
+  font-size: 0.82rem;
+  max-width: 380px;
+  margin: 0;
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────── */
+.wo-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0;
+  width: 100%;
+}
+
+.wo-toolbar__search {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 220px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 0.45rem 0.75rem;
+  color: var(--text-muted);
+  transition: border-color 0.2s;
+}
+
+.wo-toolbar__search:focus-within {
+  border-color: var(--accent);
+}
+
+.wo-toolbar__search-icon { flex-shrink: 0; }
+
+.wo-toolbar__input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.82rem;
+  color: var(--text-main);
+  font-family: inherit;
+}
+
+.wo-toolbar__input::placeholder { color: var(--text-muted); }
+
+.wo-toolbar__filters {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.wo-toolbar__select {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 0.42rem 0.65rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.wo-toolbar__select:focus { border-color: var(--accent); }
+.wo-toolbar__select--sm { font-size: 0.75rem; padding: 0.3rem 0.5rem; }
+
+.wo-toolbar__right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.wo-toolbar__count {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.wo-toolbar__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.42rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.wo-toolbar__btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+
+/* ── Card base (expandable) ───────────────────────────────────── */
+.wo-card {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  border-left: 3.5px solid var(--wo-accent, var(--accent));
+  animation: woCardIn 0.3s ease both;
+}
+
+@keyframes woCardIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.wo-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  border-color: color-mix(in srgb, var(--wo-accent, var(--accent)) 40%, var(--border-color));
+}
+
+.wo-card--open {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+}
+
+/* ── Main row ─────────────────────────────────────────────────── */
+.wo-card__main-row {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.wo-card__main-row:focus { outline: none; }
+
+.wo-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--wo-icon-bg, rgba(100,116,139,0.1));
+  color: var(--wo-icon-color, #64748b);
+  flex-shrink: 0;
+}
+
+.wo-card__body { flex: 1; min-width: 0; }
+
+.wo-card__top {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
+.wo-card__num {
+  font-family: monospace;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: 0.02em;
+}
+
+.wo-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.wo-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.wo-card__expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--background);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.wo-card__expand-btn:hover,
+.wo-card__expand-btn--open {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--background));
+}
+
+/* ── Expand panel ─────────────────────────────────────────────── */
+.wo-card__expand-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  border-top: 0px solid transparent;
+}
+
+.wo-card__expand-panel--open {
+  grid-template-rows: 1fr;
+  border-top: 1px solid var(--border-color);
+}
+
+.wo-card__expand-inner {
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem 1rem;
+  padding: 0.875rem 1.25rem;
+  background: color-mix(in srgb, var(--background) 60%, var(--surface));
+}
+
+@media (max-width: 768px) {
+  .wo-card__expand-inner { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .wo-card__expand-inner { grid-template-columns: 1fr; }
+}
+
+/* ── Expand groups ────────────────────────────────────────────── */
+.wo-expand__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.wo-expand__label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.wo-expand__value {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+/* ── Pagination ───────────────────────────────────────────────── */
+.wo-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+}
+
+.wo-pagination__info {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.wo-pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wo-pagination__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border-color);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.wo-pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.wo-pagination__btn:not(:disabled):hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.wo-pagination__current {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  min-width: 50px;
+  text-align: center;
+}
+
+.wo-pagination__size {
+  border: 1px solid var(--border-color);
+  border-radius: 7px;
+  background: var(--surface);
+  padding: 0.3rem 0.55rem;
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+}
+
+.wo-pagination__size:focus { border-color: var(--accent); }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   Dark mode overrides — WorkOrdersListPage
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Cards de lista en dark */
+.dark .wo-list-card {
+  box-shadow: var(--shadow-md);
+}
+
+.dark .wo-list-card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Icon color usa variable dinámica */
+.wo-list-card__icon {
+  color: var(--wo-icon-color, var(--text-muted));
+}
+
+/* Secciones con color-mix sobre background correcto */
+.dark .wo-list-card__selected,
+.dark .wo-list-card--selected {
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
+/* Toolbar search en dark */
+.dark .wo-toolbar__search {
+  background: var(--surface);
+  border-color: var(--border-color);
+}
+
+/* Filter chips */
+.dark .wo-filter-chip {
+  background: var(--surface-hover);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+.dark .wo-filter-chip--active {
+  background: color-mix(in srgb, var(--accent) 15%, var(--surface));
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   AllWorkOrderCard — Card expandible de la lista global
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.wo-list-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--wo-card-accent, var(--accent));
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  transition: box-shadow 0.2s, transform 0.15s, border-color 0.2s;
+  animation: wo-card-in 0.3s ease both;
+}
+
+@keyframes wo-card-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.wo-list-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--wo-card-accent, var(--accent)) 50%, var(--border-color));
+}
+
+/* ── Main row ─────────────────────────────────────────────────────────────── */
+.wo-list-card__main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+
+.wo-list-card__type-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.wo-list-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+/* Top row: code + badges */
+.wo-list-card__top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.wo-list-card__code {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-main);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+/* Meta row */
+.wo-list-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.wo-list-card__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--text-secondary);
+}
+
+.wo-list-card__meta-item strong {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.wo-list-card__meta-sep {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+/* Footer row */
+.wo-list-card__footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.1rem;
+}
+
+.wo-list-card__footer-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Actions */
+.wo-list-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.wo-list-card__expand-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.3rem 0.4rem;
+  display: flex;
+  align-items: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.wo-list-card__expand-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+  border-color: var(--text-muted);
+}
+
+/* ── Expanded section ─────────────────────────────────────────────────────── */
+.wo-list-card__expanded {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-color);
+  animation: wo-expand-in 0.18s ease;
+}
+
+@keyframes wo-expand-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.wo-list-card__expanded-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.65rem;
+}
+
+.wo-list-card__exp-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.wo-list-card__exp-item--full {
+  grid-column: 1 / -1;
+}
+
+.wo-list-card__exp-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.wo-list-card__exp-value {
+  font-size: 0.82rem;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+/* ── Toolbar extras ───────────────────────────────────────────────────────── */
+.wo-toolbar__btn--primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: filter 0.15s, transform 0.1s;
+}
+
+.wo-toolbar__btn--primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.wo-toolbar__btn--ghost {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 0.4rem 0.5rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.wo-toolbar__btn--ghost:hover {
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+}
+
+.wo-toolbar__count {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.wo-toolbar__search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}

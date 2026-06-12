@@ -1,12 +1,19 @@
 export class ProcessWorkOrderModel {
-  private constructor(
-    private readonly props: {
-      workOrderId: string;
-      newStatus: string;
-      userId: string;
-      comment?: string;
-    },
-  ) {}
+  private readonly props: {
+    workOrderId: string;
+    newStatus: string;
+    userId: string;
+    comment?: string;
+  };
+
+  private constructor(props: {
+    workOrderId: string;
+    newStatus: string;
+    userId: string;
+    comment?: string;
+  }) {
+    this.props = props;
+  }
 
   public static create(props: {
     workOrderId: string;

@@ -89,3 +89,19 @@ export interface RegisterSatisfactionSurveyCommand {
   createdByUserId: string;
   comments?: string;
 }
+
+// ─── Personal en campo () ───────────────────────────────────
+
+export interface AddWorkerToWorkOrderCommand {
+  workOrderId: string;
+  workerId: string;
+  roleId?: number | null;
+  isResponsible?: boolean;
+  assignedByUserId: string;
+}
+
+export interface RemoveWorkerFromWorkOrderCommand {
+  workOrderId: string;
+  workerId: string;
+  removedByUserId: string;
+}

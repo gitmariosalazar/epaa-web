@@ -4,21 +4,25 @@ import type {
   AddQualityControlDetailCommand,
   AddWorkOrderAttachmentCommand,
   AddWorkOrderMaterialCommand,
+  AddWorkerToWorkOrderCommand,
   AssignWorkOrderToCrewCommand,
   AssignWorkOrderToWorkerCommand,
   CreatePreparationInspectionCommand,
   CreateQualityControlCommand,
   CreateWorkOrderCommand,
-  RegisterSatisfactionSurveyCommand
+  RegisterSatisfactionSurveyCommand,
+  RemoveWorkerFromWorkOrderCommand
 } from '../schemas/dto/process-work-order.commands';
 import type { ProcessWorkOrderRequest } from '../schemas/dto/request/process-work-order.request';
 import type { ProcessWorkOrderResponse } from '../schemas/dto/response/process-work-order.response';
 import type {
   OrdenTrabajoDetalle,
   OrdenTrabajoTracking,
-  OrdenTrabajoVistaCliente
+  OrdenTrabajoVistaCliente,
+  WorkOrderListItem
 } from '../schemas/dto/response/work-orders.get.response';
 import type { ProcessWorkOrderModel } from '../schemas/models/process-work-order.model';
+import type { SubmitInspectionReportCommand } from '../schemas/dto/commands/submit-inspection-report.command';
 
 export interface ProcessWorkOrderRepository {
   createWorkOrder(
@@ -51,6 +55,9 @@ export interface ProcessWorkOrderRepository {
   markWorkOrderExecutionStarted(
     markWorkOrderExecutionStarted: ProcessWorkOrderRequest
   ): Promise<ProcessWorkOrderResponse | null>;
+  finishExecution(
+    finishExecution: ProcessWorkOrderRequest
+  ): Promise<ProcessWorkOrderResponse | null>;
   addWorkOrderMaterial(
     addWorkOrderMaterial: AddWorkOrderMaterialCommand
   ): Promise<ProcessWorkOrderResponse | null>;
@@ -76,6 +83,16 @@ export interface ProcessWorkOrderRepository {
     registerSatisfactionSurvey: RegisterSatisfactionSurveyCommand
   ): Promise<ProcessWorkOrderResponse | null>;
 
+  /** Agrega un trabajador directamente a la OT () */
+  addWorkerToWorkOrder(
+    cmd: AddWorkerToWorkOrderCommand
+  ): Promise<ProcessWorkOrderResponse | null>;
+
+  /** Remueve un trabajador de la OT (borrado lógico) */
+  removeWorkerFromWorkOrder(
+    cmd: RemoveWorkerFromWorkOrderCommand
+  ): Promise<ProcessWorkOrderResponse | null>;
+
   /** Detalle completo de una OT — panel administrativo */
   getOrdenTrabajoDetalleByNumeroOrden(
     numeroOrden: string
@@ -90,4 +107,17 @@ export interface ProcessWorkOrderRepository {
   getOrdenesTrabajoBySolicitudId(
     solicitudId: string
   ): Promise<OrdenTrabajoVistaCliente[]>;
+
+  getAllWorkOrders(
+    limit?: number,
+    offset?: number
+  ): Promise<WorkOrderListItem[]>;
+
+  /**
+   * Fase 8 Acometidas — Subir informe técnico de inspección de factibilidad.
+   * Cierra la OT y hace avanzar la solicitud a INFORME_EN_REVISION.
+   */
+  submitInspectionReport(
+    cmd: SubmitInspectionReportCommand
+  ): Promise<void>;
 }

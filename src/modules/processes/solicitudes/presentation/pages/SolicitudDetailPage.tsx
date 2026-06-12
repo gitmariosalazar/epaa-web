@@ -38,7 +38,7 @@ import { StartInstallationUseCase } from '../../application/usecases/StartInstal
 import { SolicitudRepositoryImpl } from '../../infrastructure/repositories/SolicitudRepositoryImpl';
 
 // ── Domain Models ─────────────────────────────────────────────────────────────
-import type { RequestDetailByClientResponse, SolicitudOrdenTrabajoResponse, TrackingSolicitudResponse } from '../../domain/models/Solicitud';
+import type { DocumentoAdjuntoResponse, RequestDetailByClientResponse, SolicitudOrdenTrabajoResponse, TrackingSolicitudResponse } from '../../domain/models/Solicitud';
 
 // ── Existing Modals ───────────────────────────────────────────────────────────
 import { SolicitudDocumentPreviewModal } from '../components/SolicitudDocumentPreviewModal';
@@ -68,7 +68,7 @@ import { useAuth } from '@/shared/presentation/context/AuthContext';
 
 // ── Subcomponents ─────────────────────────────────────────────────────────────
 import { SolicitudHeroCard } from '../components/detail/SolicitudHeroCard';
-import { PaymentConfirmationCard } from '../components/detail/PaymentConfirmationCard';
+// PaymentConfirmationCard removed — form now lives inside PaymentReceiptPreviewModal
 import { SolicitudInfoCard } from '../components/detail/SolicitudInfoCard';
 import { SolicitudDocsCard } from '../components/detail/SolicitudDocsCard';
 import { SolicitudMetricsCard } from '../components/detail/SolicitudMetricsCard';
@@ -79,7 +79,7 @@ import { SolicitudWorkOrderCard } from '../components/detail/SolicitudWorkOrderC
 // ── Icons ─────────────────────────────────────────────────────────────────────
 import {
   ArrowLeft, FileText, Clock, FileCheck, CreditCard,
-  AlertTriangle, Search, Wrench, FileSignature, ShieldCheck, Zap, Play
+  AlertTriangle, Search, Wrench, FileSignature, ShieldCheck, Zap, Play, ChevronRight
 } from 'lucide-react';
 import '../styles/SolicitudDetailPage.css';
 import { GetOrdenesTrabajoBysSolicitudIdUseCase } from '../../application/usecases/GetOrdenesTrabajoBysSolicitudIdUseCase';
@@ -91,21 +91,34 @@ interface ActionBtnProps {
   icon: React.ReactNode;
   label: string;
   onClick: () => void;
+  description?: string;
   disabled?: boolean;
   loading?: boolean;
 }
 
-const PhaseActionBtn: React.FC<ActionBtnProps> = ({ color, bg, icon, label, onClick, disabled, loading }) => (
+const PhaseActionBtn: React.FC<ActionBtnProps> = ({ color, bg, icon, label, description, onClick, disabled, loading }) => (
   <button
     onClick={onClick}
     disabled={disabled || loading}
     className="sol-phase-action-btn"
     style={{ '--phase-color': color, '--phase-bg': bg } as React.CSSProperties}
   >
-    <span className="sol-phase-action-btn__icon">
-      {loading ? <Clock size={18} className="sol-detail-loading__spinner" /> : icon}
-    </span>
-    <span className="sol-phase-action-btn__label">{loading ? 'Procesando...' : label}</span>
+    <div className="sol-phase-action-btn__content">
+      <div className="sol-phase-action-btn__icon">
+        {loading ? <Clock size={18} className="sol-detail-loading__spinner" /> : icon}
+      </div>
+      <div className="sol-phase-action-btn__main">
+        <div className="sol-phase-action-btn__info">
+          <span className="sol-phase-action-btn__label">{loading ? 'Procesando...' : label}</span>
+          {description && (
+            <span className="sol-phase-action-btn__description">{description}</span>
+          )}
+        </div>
+      </div>
+      <div className="sol-phase-action-btn__arrow">
+        <ChevronRight size={18} />
+      </div>
+    </div>
   </button>
 );
 
@@ -206,11 +219,15 @@ export const SolicitudDetailPage: React.FC = () => {
     }
   };
 
-  // ── Start inspection (Fase 7) ─────────────────────────────────────────────
+  // ── Start inspection (Fase 7) ──────────────────────────────────────────────
   const handleStartInspection = async () => {
-    const workOrderId = (solicitud as any)?.workOrderId || '';
+    // Buscar la OT de INSPECCION en el array cargado de work orders
+    const otInspeccion = workOrders.find(
+      (wo) => wo.tipoOrden === 'INSPECCION'
+    );
+    const workOrderId = otInspeccion?.workOrderId ?? '';
     if (!workOrderId) {
-      MessageToastCustom('error', 'Error', 'No se encontró el ID de la orden de trabajo en este expediente.');
+      MessageToastCustom('error', 'Error', 'No se encontró el ID de la OT de inspección. Recarga la página.');
       return;
     }
     if (!user?.userId) { MessageToastCustom('error', 'Sesión', 'Inicie sesión nuevamente.'); return; }
@@ -228,9 +245,13 @@ export const SolicitudDetailPage: React.FC = () => {
 
   // ── Start installation (Fase 13) ──────────────────────────────────────────
   const handleStartInstallation = async () => {
-    const workOrderId = (solicitud as any)?.workOrderId || '';
+    // Buscar la OT de INSTALACION en el array cargado de work orders
+    const otInstalacion = workOrders.find(
+      (wo) => wo.tipoOrden === 'INSTALACION'
+    );
+    const workOrderId = otInstalacion?.workOrderId ?? '';
     if (!workOrderId) {
-      MessageToastCustom('error', 'Error', 'No se encontró el ID de la OT de instalación.');
+      MessageToastCustom('error', 'Error', 'No se encontró el ID de la OT de instalación. Recarga la página.');
       return;
     }
     if (!user?.userId) { MessageToastCustom('error', 'Sesión', 'Inicie sesión nuevamente.'); return; }
@@ -295,7 +316,12 @@ export const SolicitudDetailPage: React.FC = () => {
     ? (solicitud.company?.phones?.[0]?.numero || solicitud.datosAdicionales?.telefono || '')
     : (solicitud.person?.phones?.[0]?.numero || solicitud.datosAdicionales?.telefono || '');
 
-  console.log("solicitud.claveCatastral: ", solicitud.claveCatastral);
+  const paymentDocument: DocumentoAdjuntoResponse | null =
+    solicitud.documentos?.find(
+      (doc) => String(doc.tipodocumento) === '5'
+    ) ?? null;
+
+
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -327,28 +353,87 @@ export const SolicitudDetailPage: React.FC = () => {
           {/* ══ ACCIONES POR FASE ══ */}
           <div className="sol-detail-phase-actions">
 
+            {/* Fase 3: Validar documentos */}
+            {solicitud.estado === 'DOCS_SUBMITTED' && (
+              <PhaseActionBtn
+                color="#f59e0b" bg="rgba(245,158,11,0.1)"
+                icon={<FileCheck size={18} />}
+                label="Validar Documentos"
+                description="Validar los documentos presentados por el cliente"
+                onClick={() => setDocsOpen(true)}
+              />
+            )}
+
             {/* Fase 4: Generar factura de inspección */}
             {solicitud.estado === 'DOCS_APPROVED' && (
               <PhaseActionBtn
                 color="#3b82f6" bg="rgba(59,130,246,0.1)"
                 icon={<CreditCard size={18} />}
                 label="Generar Factura de Inspección"
+                description="Emitir la factura de cobro por el servicio de inspección técnica"
                 onClick={() => setInvoiceModalOpen(true)}
               />
             )}
 
-            {/* Fase 5: Confirmar pago */}
+            {/* Fase 5: Confirmar pago — abre el modal con preview + formulario */}
             {solicitud.estado === 'PAGO_PENDIENTE' && (
-              <PaymentConfirmationCard
-                solicitud={solicitud}
-                paymentMethod={paymentMethod}
-                setPaymentMethod={setPaymentMethod}
-                paymentReference={paymentReference}
-                setPaymentReference={setPaymentReference}
-                isConfirmingPayment={isConfirmingPayment}
-                handleConfirmPayment={handleConfirmPayment}
-                setReceiptModalOpen={setReceiptModalOpen}
-              />
+              <>
+                <PhaseActionBtn
+                  color="#10b981" bg="rgba(16,185,129,0.1)"
+                  icon={<CreditCard size={18} />}
+                  label="Validar y Confirmar Pago"
+                  description="Revise el comprobante del cliente y registre la confirmación del pago"
+                  onClick={() => setReceiptModalOpen(true)}
+                />
+                {/* Info básica de la factura debajo del botón */}
+                <div className="sol-detail-payment-info-card">
+                  <div className="sol-detail-payment-info-card__grid">
+                    {solicitud.numeroFactura && (
+                      <div className="sol-detail-payment-info-card__item">
+                        <span className="sol-detail-payment-info-card__label">N° Factura</span>
+                        <span className="sol-detail-payment-info-card__value">{solicitud.numeroFactura}</span>
+                      </div>
+                    )}
+                    <div className="sol-detail-payment-info-card__item">
+                      <span className="sol-detail-payment-info-card__label">Concepto</span>
+                      <span className="sol-detail-payment-info-card__value">Inspección Técnica de Acometida</span>
+                    </div>
+                    {solicitud.montofactura != null && (
+                      <div className="sol-detail-payment-info-card__item">
+                        <span className="sol-detail-payment-info-card__label">Monto</span>
+                        <span className="sol-detail-payment-info-card__value sol-detail-payment-info-card__value--accent">
+                          ${solicitud.montofactura.toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                    {solicitud.fechaVencimiento && (
+                      <div className="sol-detail-payment-info-card__item">
+                        <span className="sol-detail-payment-info-card__label">Vence</span>
+                        <span className="sol-detail-payment-info-card__value">
+                          {new Date(solicitud.fechaVencimiento).toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </span>
+                      </div>
+                    )}
+                    {solicitud.estadoPago && (
+                      <div className="sol-detail-payment-info-card__item">
+                        <span className="sol-detail-payment-info-card__label">Estado</span>
+                        <span className="sol-detail-payment-info-card__value">{solicitud.estadoPago}</span>
+                      </div>
+                    )}
+                    {solicitud.urlComprobante ? (
+                      <div className="sol-detail-payment-info-card__item sol-detail-payment-info-card__item--full">
+                        <span className="sol-detail-payment-info-card__label">Comprobante</span>
+                        <span className="sol-detail-payment-info-card__value" style={{ color: '#10b981' }}>✓ Subido por el cliente</span>
+                      </div>
+                    ) : (
+                      <div className="sol-detail-payment-info-card__item sol-detail-payment-info-card__item--full">
+                        <span className="sol-detail-payment-info-card__label">Comprobante</span>
+                        <span className="sol-detail-payment-info-card__value" style={{ color: '#f59e0b' }}>⚠ Pendiente de subir</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
 
             {/* Fase 6: Emitir OT de inspección */}
@@ -357,6 +442,7 @@ export const SolicitudDetailPage: React.FC = () => {
                 color="#6366f1" bg="rgba(99,102,241,0.1)"
                 icon={<Search size={18} />}
                 label="Emitir Orden de Inspección Técnica"
+                description="Crear y asignar la orden de trabajo para la visita de inspección en campo"
                 onClick={() => setEmitInspectionOpen(true)}
               />
             )}
@@ -367,27 +453,31 @@ export const SolicitudDetailPage: React.FC = () => {
                 color="#8b5cf6" bg="rgba(139,92,246,0.1)"
                 icon={<Play size={18} />}
                 label="Iniciar Inspección Técnica"
+                description="Marcar el inicio de la inspección técnica en el predio del solicitante"
                 onClick={handleStartInspection}
                 loading={isStartingInspection}
               />
             )}
 
             {/* Fase 8: Subir informe técnico */}
-            {solicitud.estado === 'INSPECCION_EN_PROCESO' && (
+            {solicitud.estado === 'INSPECCION_EN_PROCESO' && !solicitud.informeId && (
               <PhaseActionBtn
                 color="#a855f7" bg="rgba(168,85,247,0.1)"
                 icon={<FileText size={18} />}
-                label="Enviar Informe Técnico de Campo"
+                label={`Enviar Informe Técnico de Campo (${workOrders.find(o => o.codigoOrden === solicitud.solicitudNumero)?.estadoOt === 'INSPECCION_COMPLETADA' ? 'INSPECCION REALIZADA' : 'INSPECCION NO REALIZADA'})`}
+                disabled={workOrders.find(o => o.codigoOrden === solicitud.solicitudNumero)?.estadoOt !== 'INSPECCION_COMPLETADA'}
+                description="Cargar el informe con los resultados y observaciones de la inspección realizada"
                 onClick={() => setSubmitReportOpen(true)}
               />
             )}
 
             {/* Fase 9: Aprobar / rechazar informe */}
-            {solicitud.estado === 'INFORME_EN_REVISION' && (
+            {(solicitud.estado === 'INFORME_EN_REVISION' || (solicitud.estado === 'INSPECCION_EN_PROCESO' && solicitud.informeId)) && (
               <PhaseActionBtn
                 color="#06b6d4" bg="rgba(6,182,212,0.1)"
                 icon={<ShieldCheck size={18} />}
                 label="Emitir Dictamen — Aprobar o Rechazar Informe"
+                description="Revisar el informe técnico y emitir la resolución de aprobación o rechazo"
                 onClick={() => setApproveReportOpen(true)}
               />
             )}
@@ -398,6 +488,7 @@ export const SolicitudDetailPage: React.FC = () => {
                 color="#ec4899" bg="rgba(236,72,153,0.1)"
                 icon={<FileSignature size={18} />}
                 label="Generar Contrato de Servicio"
+                description="Crear el contrato oficial de suministro de agua potable para el solicitante"
                 onClick={() => setGenerateContractOpen(true)}
               />
             )}
@@ -408,6 +499,7 @@ export const SolicitudDetailPage: React.FC = () => {
                 color="#10b981" bg="rgba(16,185,129,0.1)"
                 icon={<FileCheck size={18} />}
                 label="Registrar Firma del Contrato"
+                description="Registrar la firma del cliente y formalizar el contrato de servicio"
                 onClick={() => setSignContractOpen(true)}
               />
             )}
@@ -418,6 +510,7 @@ export const SolicitudDetailPage: React.FC = () => {
                 color="#f97316" bg="rgba(249,115,22,0.1)"
                 icon={<Wrench size={18} />}
                 label="Emitir Orden de Trabajo — Instalación"
+                description="Generar la orden de trabajo para la instalación de la acometida de agua"
                 onClick={() => setEmitInstallationOpen(true)}
               />
             )}
@@ -428,6 +521,7 @@ export const SolicitudDetailPage: React.FC = () => {
                 color="#f97316" bg="rgba(249,115,22,0.1)"
                 icon={<Play size={18} />}
                 label="Iniciar Proceso de Instalación"
+                description="Iniciar la ejecución de la instalación física de la acometida en el predio"
                 onClick={handleStartInstallation}
                 loading={isStartingInstallation}
               />
@@ -439,6 +533,7 @@ export const SolicitudDetailPage: React.FC = () => {
                 color="#10b981" bg="rgba(16,185,129,0.1)"
                 icon={<Zap size={18} />}
                 label="Registro Catastral y Activación del Suministro"
+                description="Registrar la clave catastral y activar el suministro de agua en el sistema"
                 onClick={() => setRegisterCadastralOpen(true)}
               />
             )}
@@ -508,12 +603,20 @@ export const SolicitudDetailPage: React.FC = () => {
         />
       )}
 
-      {/* Ver comprobante */}
+      {/* Ver / confirmar comprobante */}
       <PaymentReceiptPreviewModal
         isOpen={receiptModalOpen}
         onClose={() => setReceiptModalOpen(false)}
-        receiptUrl={solicitud.urlComprobante}
+        documento={paymentDocument}
         facturaLabel={solicitud.numeroFactura ? `Factura ${solicitud.numeroFactura}` : solicitud.solicitudNumero}
+        numeroFactura={solicitud.numeroFactura}
+        montofactura={solicitud.montofactura}
+        paymentMethod={paymentMethod}
+        setPaymentMethod={setPaymentMethod}
+        paymentReference={paymentReference}
+        setPaymentReference={setPaymentReference}
+        isConfirmingPayment={isConfirmingPayment}
+        handleConfirmPayment={async () => { await handleConfirmPayment(); setReceiptModalOpen(false); }}
       />
 
       {/* Fase 6: Emitir OT Inspección */}
@@ -535,7 +638,7 @@ export const SolicitudDetailPage: React.FC = () => {
           onClose={() => setSubmitReportOpen(false)}
           solicitudId={solicitud.solicitudId}
           solicitudNumero={solicitud.solicitudNumero}
-          workOrderId={(solicitud as any)?.workOrderId ?? ''}
+          workOrderId={workOrders.find(wo => wo.tipoOrden === 'INSPECCION')?.workOrderId ?? ''}
           technicianId={user?.userId ?? ''}
           onSuccess={reload}
         />

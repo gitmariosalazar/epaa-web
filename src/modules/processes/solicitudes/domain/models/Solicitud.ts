@@ -190,7 +190,9 @@ export interface RequestDetailByClientResponse extends ExpedienteResponse {
 }
 
 export interface SolicitudOrdenTrabajoResponse {
-  tipoOrden: string;
+  /** UUID de la orden de trabajo (requerido para acciones como iniciar OT) */
+  workOrderId: string;
+  tipoOrden: string;  // 'INSPECCION' | 'INSTALACION'
   codigoOrden: string;
   descripcion: string;
   estadoOt: string;
