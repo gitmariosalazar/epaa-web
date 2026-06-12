@@ -16,6 +16,7 @@ import { GetCustomerByIdentificationUseCase } from '@/modules/customers/applicat
 import { CustomerRepositoryImpl } from '@/modules/customers/infrastructure/repositories/CustomerRepositoryImpl';
 import { UpdateCustomerUseCase } from '@/modules/customers/application/usecases/UpdateCustomerUseCase';
 import { UpdateCompanyUseCase } from '@/modules/customers/application/usecases/UpdateCompanyUseCase';
+import { GetLiveUpdateMapConnectionsUseCase } from '../../application/usecases/GetLiveUpdateMapConnectionsUseCase';
 
 interface ConnectionContextType {
   getConnectionsUseCase: GetConnectionsUseCase;
@@ -32,6 +33,7 @@ interface ConnectionContextType {
   createCompanyUseCase: CreateCompanyUseCase;
   updateCustomerUseCase: UpdateCustomerUseCase;
   updateCompanyUseCase: UpdateCompanyUseCase;
+  getLiveUpdateMapConnectionsUseCase: GetLiveUpdateMapConnectionsUseCase;
 }
 
 const ConnectionContext = createContext<ConnectionContextType | null>(null);
@@ -57,6 +59,7 @@ export const ConnectionProvider: React.FC<{ children: ReactNode }> = ({
   const createCompanyUseCase = new CreateCompanyUseCase(companyRepository);
   const updateCustomerUseCase = new UpdateCustomerUseCase(customerRepository);
   const updateCompanyUseCase = new UpdateCompanyUseCase(companyRepository);
+  const getLiveUpdateMapConnectionsUseCase = new GetLiveUpdateMapConnectionsUseCase(connectionRepository);
 
   const value = {
     getConnectionsUseCase,
@@ -72,7 +75,8 @@ export const ConnectionProvider: React.FC<{ children: ReactNode }> = ({
     createCustomerUseCase,
     createCompanyUseCase,
     updateCustomerUseCase,
-    updateCompanyUseCase
+    updateCompanyUseCase,
+    getLiveUpdateMapConnectionsUseCase
   };
 
   return (

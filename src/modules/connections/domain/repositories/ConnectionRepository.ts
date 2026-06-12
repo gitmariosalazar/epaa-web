@@ -3,11 +3,20 @@ import type {
   ConnectionWithProperty,
   Rate
 } from '../models/Connection';
-import type { DashboardAdvanceResponse } from '../models/DashboardStats';
+import type {
+  DashboardAdvanceResponse,
+  LiveMapConnectionResponse
+} from '../models/DashboardStats';
 
 export interface ConnectionRepository {
   getAdvanceDashboardStats(): Promise<DashboardAdvanceResponse>;
-  getConnections(limit: number, offset: number): Promise<Connection[]>;
+
+  getLiveUpdateMapConnections(): Promise<LiveMapConnectionResponse[]>;
+  getConnections(
+    limit: number,
+    offset: number,
+    query?: string
+  ): Promise<Connection[]>;
   createConnection(connection: CreateConnectionRequest): Promise<Connection>;
   updateConnection(
     id: string,

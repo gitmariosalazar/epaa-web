@@ -7,7 +7,11 @@ export class GetConnectionsUseCase {
     this.connectionRepository = connectionRepository;
   }
 
-  async execute(limit: number, offset: number): Promise<Connection[]> {
-    return this.connectionRepository.getConnections(limit, offset);
+  async execute(
+    limit: number,
+    offset: number,
+    query?: string
+  ): Promise<Connection[]> {
+    return this.connectionRepository.getConnections(limit, offset, query);
   }
 }

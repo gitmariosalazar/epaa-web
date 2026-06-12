@@ -64,8 +64,7 @@ function applyLocalFilters(
 
     if (searchField === 'all') {
       result = result.filter((item) => {
-        // Campos de búsqueda parcial (includes)
-        const partialMatches =
+        return (
           (item.connectionId ?? '').toLowerCase().includes(q) ||
           (item.connectionMeterNumber ?? '').toLowerCase().includes(q) ||
           (item.connectionCadastralKey ?? '').toLowerCase().includes(q) ||
@@ -73,29 +72,15 @@ function applyLocalFilters(
           (item.connectionContractNumber ?? '').toLowerCase().includes(q) ||
           (item.clientId ?? '').toLowerCase().includes(q) ||
           (item.connectionRateName ?? '').toLowerCase().includes(q) ||
-          (item.connectionReference ?? '').toLowerCase().includes(q);
-
-        // Campos de búsqueda exacta (===)
-        const exactMatches =
-          (item.connectionSector?.toString() ?? '').toLowerCase().trim() ===
-            q ||
-          (item.connectionAccount?.toString() ?? '').toLowerCase().trim() === q;
-
-        return partialMatches || exactMatches;
+          (item.connectionReference ?? '').toLowerCase().includes(q) ||
+          (item.connectionSector?.toString() ?? '').toLowerCase().includes(q) ||
+          (item.connectionAccount?.toString() ?? '').toLowerCase().includes(q)
+        );
       });
     } else {
       result = result.filter((item) => {
         const key = searchField as keyof Connection;
         const value = item[key]?.toString().toLowerCase().trim() ?? '';
-
-        // Si el usuario eligió específicamente el campo 'connectionSector', forzamos igualdad exacta
-        if (
-          searchField === 'connectionSector' ||
-          searchField === 'connectionAccount'
-        ) {
-          return value === q;
-        }
-
         return value.includes(q);
       });
     }
@@ -219,74 +204,89 @@ export const useConnectionsViewModel = () => {
       setIsLoading(true);
       setError(null);
       try {
-        let result: Connection[] = [];
+        let allResults: Connection[] = [];
+        let offsetToFetch = currentOffset;
+        let fetchMore = true;
 
-        if (activeTab === 'all') {
-          result = await getConnectionsUseCase.execute(
-            LIMIT_SIZE,
-            currentOffset
-          );
-        } else if (activeTab === 'sector') {
-          result = await findConnectionsBySectorUseCase.execute(
-            sectorInput.trim(),
-            LIMIT_SIZE,
-            currentOffset
-          );
-        } else if (activeTab === 'client') {
-          result = await findAllConnectionsByClientIdUseCase.execute(
-            clientIdInput.trim(),
-            LIMIT_SIZE,
-            currentOffset
-          );
-        } else if (activeTab === 'cadastral') {
-          const key = cadastralKeyInput.trim();
-          if (key) {
-            const detail =
-              await findConnectionWithPropertyByCadastralKeyUseCase.execute(
-                key
-              );
-            if (detail) {
-              // Convert ConnectionWithProperty to Connection for the list
-              const conn: Connection = {
-                connectionId: detail.connectionId,
-                clientId: detail.clientId,
-                connectionRateId: Number(detail.connectionRateId),
-                connectionRateName: detail.connectionRateName,
-                connectionMeterNumber: detail.connectionMeterNumber || '',
-                connectionSector: Number(detail.connectionSector || 0),
-                connectionAccount: Number(detail.connectionAccount || 0),
-                connectionCadastralKey: detail.connectionCadastralKey || '',
-                connectionContractNumber: detail.connectionContractNumber || '',
-                connectionSewerage: detail.connectionSewerage || false,
-                connectionStatus: detail.connectionStatus ?? '',
-                connectionAddress: detail.connectionAddress || '',
-                connectionInstallationDate: detail.connectionInstallationDate
-                  ? new Date(detail.connectionInstallationDate)
-                  : new Date(),
-                connectionPeopleNumber: detail.connectionPeopleNumber || 0,
-                connectionZone: Number(detail.connectionZone || 0),
-                longitude: detail.longitude || 0,
-                latitude: detail.latitude || 0,
-                connectionCoordinates: detail.connectionCoordinates || '',
-                connectionReference: detail.connectionReference || '',
-                ConnectionMetaData: detail.connectionMetadata || {},
-                connectionAltitude: detail.connectionAltitude || 0,
-                connectionPrecision: detail.connectionPrecision || 0,
-                connectionGeolocationDate: detail.connectionGeolocationDate
-                  ? new Date(detail.connectionGeolocationDate)
-                  : new Date(),
-                connectionGeometricZone: detail.connectionGeometricZone || '',
-                propertyCadastralKey: detail.propertyCadastralKey || '',
-                zoneId: detail.zoneId || 0,
-                connectionStateId: 0,
-                connectionIsReadable: true
-              };
-              result = [conn];
+        while (fetchMore) {
+          let chunk: Connection[] = [];
+          if (activeTab === 'all') {
+            chunk = await getConnectionsUseCase.execute(
+              LIMIT_SIZE,
+              offsetToFetch,
+              searchQuery
+            );
+          } else if (activeTab === 'sector') {
+            chunk = await findConnectionsBySectorUseCase.execute(
+              sectorInput.trim(),
+              LIMIT_SIZE,
+              offsetToFetch
+            );
+          } else if (activeTab === 'client') {
+            chunk = await findAllConnectionsByClientIdUseCase.execute(
+              clientIdInput.trim(),
+              LIMIT_SIZE,
+              offsetToFetch
+            );
+          } else if (activeTab === 'cadastral') {
+            const key = cadastralKeyInput.trim();
+            if (key) {
+              const detail =
+                await findConnectionWithPropertyByCadastralKeyUseCase.execute(
+                  key
+                );
+              if (detail) {
+                // Convert ConnectionWithProperty to Connection for the list
+                const conn: Connection = {
+                  connectionId: detail.connectionId,
+                  clientId: detail.clientId,
+                  connectionRateId: Number(detail.connectionRateId),
+                  connectionRateName: detail.connectionRateName,
+                  connectionMeterNumber: detail.connectionMeterNumber || '',
+                  connectionSector: Number(detail.connectionSector || 0),
+                  connectionAccount: Number(detail.connectionAccount || 0),
+                  connectionCadastralKey: detail.connectionCadastralKey || '',
+                  connectionContractNumber: detail.connectionContractNumber || '',
+                  connectionSewerage: detail.connectionSewerage || false,
+                  connectionStatus: detail.connectionStatus ?? '',
+                  connectionAddress: detail.connectionAddress || '',
+                  connectionInstallationDate: detail.connectionInstallationDate
+                    ? new Date(detail.connectionInstallationDate)
+                    : new Date(),
+                  connectionPeopleNumber: detail.connectionPeopleNumber || 0,
+                  connectionZone: Number(detail.connectionZone || 0),
+                  longitude: detail.longitude || 0,
+                  latitude: detail.latitude || 0,
+                  connectionCoordinates: detail.connectionCoordinates || '',
+                  connectionReference: detail.connectionReference || '',
+                  ConnectionMetaData: detail.connectionMetadata || {},
+                  connectionAltitude: detail.connectionAltitude || 0,
+                  connectionPrecision: detail.connectionPrecision || 0,
+                  connectionGeolocationDate: detail.connectionGeolocationDate
+                    ? new Date(detail.connectionGeolocationDate)
+                    : new Date(),
+                  connectionGeometricZone: detail.connectionGeometricZone || '',
+                  propertyCadastralKey: detail.propertyCadastralKey || '',
+                  zoneId: detail.zoneId || 0,
+                  connectionStateId: 0,
+                  connectionIsReadable: true
+                };
+                chunk = [conn];
+              }
             }
+          }
+
+          allResults = [...allResults, ...chunk];
+
+          // If in map mode and we got a full page, load more pages recursively
+          if (viewMode === 'map' && chunk.length >= LIMIT_SIZE && activeTab !== 'cadastral') {
+            offsetToFetch += LIMIT_SIZE;
+          } else {
+            fetchMore = false;
           }
         }
 
-        const enhancedResults = result.map((conn) => {
+        const enhancedResults = allResults.map((conn) => {
           if (!conn.latitude || !conn.longitude) {
             const decoded = decodeEWKBPoint(conn.connectionCoordinates);
             if (decoded) {
@@ -299,8 +299,8 @@ export const useConnectionsViewModel = () => {
         setConnections((prev) =>
           append ? [...prev, ...enhancedResults] : enhancedResults
         );
-        setHasMore(result.length >= LIMIT_SIZE);
-        return result;
+        setHasMore(viewMode === 'map' ? false : allResults.length >= LIMIT_SIZE);
+        return allResults;
       } catch (err: unknown) {
         const message =
           err instanceof Error ? err.message : 'Error al cargar las Acometidas';
@@ -314,9 +314,13 @@ export const useConnectionsViewModel = () => {
       activeTab,
       sectorInput,
       clientIdInput,
+      cadastralKeyInput,
+      searchQuery,
+      viewMode,
       getConnectionsUseCase,
       findConnectionsBySectorUseCase,
-      findAllConnectionsByClientIdUseCase
+      findAllConnectionsByClientIdUseCase,
+      findConnectionWithPropertyByCadastralKeyUseCase
     ]
   );
 

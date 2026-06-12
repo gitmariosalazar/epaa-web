@@ -9,7 +9,10 @@ import type {
   CreateConnectionRequest,
   UpdateConnectionRequest
 } from '../../domain/repositories/ConnectionRepository';
-import type { DashboardAdvanceResponse } from '../../domain/models/DashboardStats';
+import type {
+  DashboardAdvanceResponse,
+  LiveMapConnectionResponse
+} from '../../domain/models/DashboardStats';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 
@@ -20,19 +23,31 @@ export class ConnectionRepositoryImpl implements ConnectionRepository {
   }
 
   async getAdvanceDashboardStats(): Promise<DashboardAdvanceResponse> {
-    const response = await this.client.get<ApiResponse<DashboardAdvanceResponse>>(
-      '/connections/dashboard/advancement-stats'
-    );
+    const response = await this.client.get<
+      ApiResponse<DashboardAdvanceResponse>
+    >('/connections/dashboard/advancement-stats');
     return response.data.data;
   }
 
-  async getConnections(limit: number, offset: number): Promise<Connection[]> {
+  async getLiveUpdateMapConnections(): Promise<LiveMapConnectionResponse[]> {
+    const response = await this.client.get<
+      ApiResponse<LiveMapConnectionResponse[]>
+    >('/connections/live-update-map-connections');
+    return response.data.data;
+  }
+
+  async getConnections(
+    limit: number,
+    offset: number,
+    query?: string
+  ): Promise<Connection[]> {
     const response = await this.client.get<ApiResponse<Connection[]>>(
-      `/connections/get-all-connections`,
+      `/connections/get-connections-paginated`,
       {
         params: {
           limit,
-          offset
+          offset,
+          ...(query ? { query } : {})
         }
       }
     );

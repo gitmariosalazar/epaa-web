@@ -15,16 +15,68 @@ import {
   Users,
   Zap,
   CheckCircle2,
-  Clock
+  Clock,
+  Search
 } from 'lucide-react';
 import styles from './ConnectionsDashboardPage.module.css';
 import { ProgressBar } from '@/shared/presentation/components/ProgressBar/ProgressBar';
 import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { APIProvider, Map, Marker, InfoWindow, useMap } from '@vis.gl/react-google-maps';
+import { useTheme } from '@/shared/presentation/context/ThemeContext';
+import { DARK_MAP_STYLE, SILVER_MAP_STYLE } from '../../components/Map/MapStyles';
+import type { LiveMapConnectionResponse } from '../../../domain/models/DashboardStats';
+
+const MapController: React.FC<{
+  theme: string;
+  selectedPin: LiveMapConnectionResponse | null;
+}> = ({ theme, selectedPin }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map) return;
+    map.setOptions({
+      styles: theme === 'dark' ? DARK_MAP_STYLE : SILVER_MAP_STYLE
+    });
+  }, [map, theme]);
+
+  useEffect(() => {
+    if (!map || !selectedPin) return;
+    map.panTo({ lat: Number(selectedPin.latitude), lng: Number(selectedPin.longitude) });
+    if (map.getZoom() < 16) {
+      map.setZoom(16);
+    }
+  }, [map, selectedPin]);
+
+  return null;
+};
 
 export const ConnectionsDashboardPage: React.FC = () => {
-  const { data, isLoading, error, fetchStats } = useConnectionDashboard();
-  const [activeTab, setActiveTab] = useState<'update' | 'general'>('update');
+  const {
+    data,
+    liveData,
+    isLoading,
+    error,
+    fetchStats,
+    fetchLiveData
+  } = useConnectionDashboard();
+  const { theme } = useTheme();
+  const [activeTab, setActiveTab] = useState<'update' | 'general' | 'map'>('update');
+  const [selectedPin, setSelectedPin] = useState<LiveMapConnectionResponse | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredLiveData = useMemo(() => {
+    if (!searchQuery.trim()) return liveData;
+    const q = searchQuery.toLowerCase().trim();
+    return liveData.filter((conn) => {
+      return (
+        (conn.clientName || '').toLowerCase().includes(q) ||
+        (conn.cadastralKey || '').toLowerCase().includes(q) ||
+        (conn.sector?.toString() || '').toLowerCase().includes(q) ||
+        (conn.address || '').toLowerCase().includes(q)
+      );
+    });
+  }, [liveData, searchQuery]);
 
   interface ZonaRow {
     zona_id: number;
@@ -170,6 +222,7 @@ export const ConnectionsDashboardPage: React.FC = () => {
         return (
           <ProgressBar
             value={Number(pct)}
+            widthSize='md'
             color={getTrafficLightColor(Number(pct))}
           />
         );
@@ -182,6 +235,12 @@ export const ConnectionsDashboardPage: React.FC = () => {
   useEffect(() => {
     fetchStats();
   }, [fetchStats]);
+
+  useEffect(() => {
+    if (activeTab === 'map') {
+      fetchLiveData();
+    }
+  }, [activeTab, fetchLiveData]);
 
   const donutSlices: DonutSlice[] = useMemo(() => {
     if (!data?.distribucion) return [];
@@ -244,7 +303,7 @@ export const ConnectionsDashboardPage: React.FC = () => {
     return [...data.porSectores].sort((a, b) => Number(b.porcentaje) - Number(a.porcentaje));
   }, [data?.porSectores]);
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return (
       <div className={styles.loadingWrapper}>
         <div
@@ -293,6 +352,12 @@ export const ConnectionsDashboardPage: React.FC = () => {
           onClick={() => setActiveTab('general')}
         >
           <Layers size={16} /> Infraestructura General
+        </button>
+        <button
+          className={`${styles.tabButton} ${activeTab === 'map' ? styles.active : ''}`}
+          onClick={() => setActiveTab('map')}
+        >
+          <MapPin size={16} /> Mapa de Avance en Vivo
         </button>
       </div>
     </header>
@@ -674,6 +739,278 @@ export const ConnectionsDashboardPage: React.FC = () => {
           </section>
         </div>
       )}
-    </PageLayout>
+
+      {activeTab === 'map' && (
+        <div className={styles.tabContent}>
+          <section className={styles.mapSection}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 className={styles.chartTitle} style={{ margin: 0 }}>Mapa de Avance Catastral</h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9e9e9e)', margin: '0.25rem 0 0 0' }}>
+                  Visualización geoespacial en vivo de las acometidas registradas y su estado de completitud.
+                </p>
+              </div>
+              <span style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-secondary)' }}>
+                <Clock size={14} /> Total georreferenciadas: {liveData.length.toLocaleString()}
+              </span>
+            </div>
+
+            {/* Control Bar: Search + Legend */}
+            <div className={styles.mapControlsRow}>
+              {/* Legend */}
+              <div className={styles.mapLegend}>
+                <div className={styles.legendItem}>
+                  <span className={styles.legendColor} style={{ backgroundColor: '#10b981' }} />
+                  <span>Completado (100%)</span>
+                </div>
+                <div className={styles.legendItem}>
+                  <span className={styles.legendColor} style={{ backgroundColor: '#f59e0b' }} />
+                  <span>Pendiente Datos Cliente</span>
+                </div>
+                <div className={styles.legendItem}>
+                  <span className={styles.legendColor} style={{ backgroundColor: '#3b82f6' }} />
+                  <span>Pendiente Ficha Predial</span>
+                </div>
+                <div className={styles.legendItem}>
+                  <span className={styles.legendColor} style={{ backgroundColor: '#ef4444' }} />
+                  <span>Pendiente Geolocalización</span>
+                </div>
+              </div>
+
+              {/* Search input */}
+              <div className={styles.mapSearchWrapper}>
+                <Search size={16} className={styles.mapSearchIcon} />
+                <input
+                  type="text"
+                  placeholder="Buscar por cliente, sector o clave..."
+                  className={styles.mapSearchInput}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <button
+                    className={styles.mapSearchClearButton}
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSelectedPin(null);
+                    }}
+                    title="Limpiar búsqueda"
+                  >
+                    &times;
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Google Map & Side Panel Body */}
+            <div className={styles.mapSectionBody}>
+              {searchQuery.trim() !== '' && (
+                <div className={styles.mapSidePanel}>
+                  <div className={styles.mapSidePanelHeader}>
+                    Resultados de búsqueda ({filteredLiveData.length})
+                  </div>
+                  <div className={styles.mapSidePanelList}>
+                    {filteredLiveData.length === 0 ? (
+                      <div style={{ padding: '1rem', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        Sin resultados
+                      </div>
+                    ) : (
+                      filteredLiveData.map((conn) => (
+                        <div
+                          key={conn.connectionId}
+                          className={`${styles.mapSidePanelItem} ${selectedPin?.connectionId === conn.connectionId ? styles.activeItem : ''}`}
+                          onClick={() => setSelectedPin(conn)}
+                        >
+                          <div className={styles.itemHeader}>
+                            <span className={styles.itemTitle}>Acometida {conn.cadastralKey}</span>
+                            <span
+                              className={styles.itemDot}
+                              style={{ backgroundColor: conn.markerColor || '#ef4444' }}
+                            />
+                          </div>
+                          <div className={styles.itemBody}>
+                            <div className={styles.itemRow}>
+                              <span className={styles.itemLabel}>Cliente:</span>
+                              <span className={styles.itemVal}>{conn.clientName}</span>
+                            </div>
+                            <div className={styles.itemRow}>
+                              <span className={styles.itemLabel}>Sector:</span>
+                              <span className={styles.itemVal}>{conn.sector}</span>
+                            </div>
+                            {conn.address && (
+                              <div className={styles.itemRow}>
+                                <span className={styles.itemLabel}>Dirección:</span>
+                                <span className={styles.itemVal} title={conn.address}>{conn.address}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Google Map */}
+              <div className={styles.mapContainer}>
+                {liveData.length === 0 && isLoading ? (
+                  <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.1)' }}>
+                    <Activity size={24} className="animate-spin" style={{ marginRight: '0.5rem' }} />
+                    <span>Cargando mapa de avance...</span>
+                  </div>
+                ) : (
+                  <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}>
+                    <Map
+                      defaultCenter={
+                        liveData.length > 0
+                          ? { lat: Number(liveData[0].latitude), lng: Number(liveData[0].longitude) }
+                          : { lat: 0.33, lng: -78.17 }
+                      }
+                      defaultZoom={13}
+                      gestureHandling="greedy"
+                      disableDefaultUI={false}
+                      onClick={() => setSelectedPin(null)}
+                      style={{ width: '100%', height: '100%' }}
+                    >
+                      <MapController theme={theme} selectedPin={selectedPin} />
+                      {filteredLiveData.map((conn) => {
+                        const isSelected = selectedPin?.connectionId === conn.connectionId;
+                        const svgPin = isSelected
+                          ? `
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="36" height="36">
+                            <style>
+                              @keyframes heartbeat {
+                                0% { transform: scale(1); }
+                                14% { transform: scale(1.15); }
+                                28% { transform: scale(1); }
+                                42% { transform: scale(1.15); }
+                                70% { transform: scale(1); }
+                              }
+                              @keyframes activeHeartbeat {
+                                0% {
+                                  r: 2;
+                                  opacity: 0.9;
+                                  stroke-width: 2.5;
+                                }
+                                70% {
+                                  r: 10;
+                                  opacity: 0;
+                                  stroke-width: 0.5;
+                                }
+                                100% {
+                                  r: 10;
+                                  opacity: 0;
+                                  stroke-width: 0;
+                                }
+                              }
+                              .pulsating-pin {
+                                animation: heartbeat 1.2s infinite ease-in-out;
+                                transform-origin: 20px 28px;
+                              }
+                              .heartbeat-ring {
+                                animation: activeHeartbeat 1.2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+                                transform-origin: 20px 28px;
+                              }
+                            </style>
+                            <circle class="heartbeat-ring" cx="20" cy="28" r="2" fill="none" stroke="${conn.markerColor || '#ef4444'}" />
+                            <g class="pulsating-pin" transform="translate(8, 6)">
+                              <path fill="${conn.markerColor || '#ef4444'}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </g>
+                          </svg>
+                          `
+                          : `
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${conn.markerColor || '#ef4444'}" width="30" height="30">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                          </svg>
+                          `;
+                        const iconUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgPin)}`;
+                        const google = (window as any).google;
+
+                        return (
+                          <Marker
+                            key={conn.connectionId}
+                            position={{ lat: Number(conn.latitude), lng: Number(conn.longitude) }}
+                            title={`Clave Catastral: ${conn.cadastralKey}`}
+                            icon={google ? {
+                              url: iconUrl,
+                              scaledSize: isSelected ? new google.maps.Size(36, 36) : new google.maps.Size(30, 30),
+                              anchor: isSelected ? new google.maps.Point(18, 25) : new google.maps.Point(15, 27)
+                            } : iconUrl}
+                            zIndex={isSelected ? 1000 : 1}
+                            onClick={() => setSelectedPin(conn)}
+                          />
+                        );
+                      })}
+
+                      {selectedPin && (
+                        <InfoWindow
+                          position={{ lat: Number(selectedPin.latitude), lng: Number(selectedPin.longitude) }}
+                          pixelOffset={[0, -30]}
+                          onCloseClick={() => setSelectedPin(null)}
+                        >
+                          <div className={styles.infoWindowContent}>
+                            <div className={styles.infoWindowHeader}>
+                              <MapPin size={16} color={selectedPin.markerColor || '#ef4444'} />
+                              <h4 className={styles.infoWindowTitle}>
+                                Acometida {selectedPin.cadastralKey}
+                              </h4>
+                            </div>
+
+                            <div className={styles.infoWindowDivider} />
+
+                            <div className={styles.infoWindowBody}>
+                              <div className={styles.infoWindowRow}>
+                                <span className={styles.infoWindowLabel}>ID:</span>
+                                <span className={styles.infoWindowVal}>{selectedPin.connectionId}</span>
+                              </div>
+
+                              <div className={styles.infoWindowRow}>
+                                <span className={styles.infoWindowLabel}>Cliente:</span>
+                                <span className={styles.infoWindowVal}>{selectedPin.clientName}</span>
+                              </div>
+
+                              <div className={styles.infoWindowRow}>
+                                <span className={styles.infoWindowLabel}>Dirección:</span>
+                                <span className={styles.infoWindowVal}>
+                                  {selectedPin.address || 'Sin dirección registrada'}
+                                </span>
+                              </div>
+
+                              <div className={styles.infoWindowRow}>
+                                <span className={styles.infoWindowLabel}>Ubicación:</span>
+                                <span className={styles.infoWindowVal}>
+                                  Sector {selectedPin.sector} | Zona {selectedPin.zoneId}
+                                </span>
+                              </div>
+
+                              <div className={styles.infoWindowRow}>
+                                <span className={styles.infoWindowLabel}>Actualizado:</span>
+                                <span className={styles.infoWindowVal}>
+                                  {new Date(selectedPin.lastUpdated).toLocaleString()}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div
+                              className={styles.infoWindowBadge}
+                              style={{
+                                backgroundColor: selectedPin.markerColor,
+                                marginTop: '0.25rem'
+                              }}
+                            >
+                              {selectedPin.statusCategory}
+                            </div>
+                          </div>
+                        </InfoWindow>
+                      )}
+                    </Map>
+                  </APIProvider>
+                )}
+              </div>
+            </div>
+          </section>
+        </div >
+      )}
+    </PageLayout >
   );
 };
