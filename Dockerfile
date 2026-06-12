@@ -27,6 +27,7 @@ ENV NODE_ENV=production
 
 ARG VITE_API_URL
 ARG VITE_HTTP_CLIENT
+ARG VITE_GOOGLE_MAPS_API_KEY
 
 # Copia el resto del código
 COPY . .

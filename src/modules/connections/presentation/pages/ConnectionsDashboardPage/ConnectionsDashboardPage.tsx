@@ -18,6 +18,9 @@ import {
   Clock
 } from 'lucide-react';
 import styles from './ConnectionsDashboardPage.module.css';
+import { ProgressBar } from '@/shared/presentation/components/ProgressBar/ProgressBar';
+import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 export const ConnectionsDashboardPage: React.FC = () => {
   const { data, isLoading, error, fetchStats } = useConnectionDashboard();
@@ -73,12 +76,10 @@ export const ConnectionsDashboardPage: React.FC = () => {
         const completados = Number(item.completados);
         const pct = total > 0 ? ((completados / total) * 100).toFixed(1) : '0';
         return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '120px' }}>
-            <span>{pct}%</span>
-            <div style={{ flex: 1, height: '6px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
-              <div style={{ width: `${pct}%`, height: '100%', backgroundColor: '#00aeff' }} />
-            </div>
-          </div>
+          <ProgressBar
+            value={Number(pct)}
+            color={getTrafficLightColor(Number(pct))}
+          />
         );
       }
     }
@@ -114,22 +115,50 @@ export const ConnectionsDashboardPage: React.FC = () => {
       accessor: (item) => (
         <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
           {item.sinGeolocalizacion > 0 && (
-            <span className={styles.missingBadge} title="Falta Geolocalización">
-              📍 GPS: {item.sinGeolocalizacion}
-            </span>
+            <Tooltip
+              content={`Falta Geolocalización. No esta geolocalizada.`}
+              themeColor='info'
+              followCursor={false}
+              position="top"
+            >
+              <span className={styles.missingBadge}>
+                📍 GPS: {item.sinGeolocalizacion}
+              </span>
+            </Tooltip>
           )}
           {item.sinPredio > 0 && (
-            <span className={styles.missingBadge} title="Falta Ficha Predial">
-              🏢 Predio: {item.sinPredio}
-            </span>
+            <Tooltip
+              content={`Falta información del predio. No esta vinculado a un predio.`}
+              themeColor='info'
+              followCursor={false}
+              position="top"
+            >
+              <span className={styles.missingBadge}>
+                🏢 Predio: {item.sinPredio}
+              </span>
+            </Tooltip>
           )}
           {item.sinCliente > 0 && (
-            <span className={styles.missingBadge} title="Falta Contacto Cliente">
-              👤 Cliente: {item.sinCliente}
-            </span>
+            <Tooltip
+              content={`Falta Contacto Cliente (correo electrónico, teléfono o celular...)`}
+              themeColor='info'
+              followCursor={false}
+              position="top"
+            >
+              <span className={styles.missingBadge}>
+                👤 Cliente: {item.sinCliente}
+              </span>
+            </Tooltip>
           )}
           {item.sinGeolocalizacion === 0 && item.sinPredio === 0 && item.sinCliente === 0 && (
-            <span className={styles.allCorrectBadge}>✓ Todo al día</span>
+            <Tooltip
+              content={`Todo al día`}
+              themeColor='success'
+              followCursor={false}
+              position="top"
+            >
+              <span className={styles.allCorrectBadge}>✓ Todo al día</span>
+            </Tooltip>
           )}
         </div>
       )
@@ -139,14 +168,14 @@ export const ConnectionsDashboardPage: React.FC = () => {
       accessor: (item) => {
         const pct = Number(item.porcentaje).toFixed(1);
         return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '120px' }}>
-            <span>{pct}%</span>
-            <div style={{ flex: 1, height: '6px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
-              <div style={{ width: `${pct}%`, height: '100%', backgroundColor: '#10b981' }} />
-            </div>
-          </div>
+          <ProgressBar
+            value={Number(pct)}
+            color={getTrafficLightColor(Number(pct))}
+          />
         );
-      }
+      },
+      isNumeric: true,
+      sortKey: 'porcentaje'
     }
   ], []);
 
@@ -200,6 +229,20 @@ export const ConnectionsDashboardPage: React.FC = () => {
       Number(data.coberturaAlcantarillado.sin_alcantarillado)
     );
   }, [data]);
+
+  const sortedZonas = useMemo(() => {
+    if (!data?.porZonas) return [];
+    return [...data.porZonas].sort((a, b) => {
+      const pctA = Number(a.total) > 0 ? (Number(a.completados) / Number(a.total)) * 100 : 0;
+      const pctB = Number(b.total) > 0 ? (Number(b.completados) / Number(b.total)) * 100 : 0;
+      return pctB - pctA;
+    });
+  }, [data?.porZonas]);
+
+  const sortedSectores = useMemo(() => {
+    if (!data?.porSectores) return [];
+    return [...data.porSectores].sort((a, b) => Number(b.porcentaje) - Number(a.porcentaje));
+  }, [data?.porSectores]);
 
   if (isLoading) {
     return (
@@ -345,7 +388,7 @@ export const ConnectionsDashboardPage: React.FC = () => {
           {data.embudo && data.embudo.length > 0 && (
             <section className={styles.funnelSection}>
               <div className={styles.chartCard} style={{ minHeight: 'auto' }}>
-                <h3 className={styles.chartTitle}>Embudo de Calidad y Completitud</h3>
+                <h3 className={styles.chartTitle}>Calidad y Completitud de Datos</h3>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9e9e9e)', margin: '-0.5rem 0 1.5rem 0' }}>
                   Flujo de decantación catastral y validación física de las conexiones.
                 </p>
@@ -353,10 +396,6 @@ export const ConnectionsDashboardPage: React.FC = () => {
                   {data.embudo.map((step, idx) => {
                     const firstStepTotal = data.embudo[0].total || 1;
                     const percentOfTotal = ((step.total / firstStepTotal) * 100).toFixed(1);
-                    
-                    const widths = ['100%', '85%', '70%', '55%'];
-                    const colors = ['#3b82f6', '#00aeff', '#8b5cf6', '#10b981'];
-                    
                     return (
                       <div key={idx} className={styles.funnelStepRow}>
                         <div className={styles.funnelStepLabel}>
@@ -364,25 +403,9 @@ export const ConnectionsDashboardPage: React.FC = () => {
                           <span>{step.total.toLocaleString()} acometidas</span>
                         </div>
                         <div className={styles.funnelStepBarWrapper}>
-                          <div 
-                            className={styles.funnelStepBar} 
-                            style={{ 
-                              width: widths[idx % widths.length],
-                              backgroundColor: colors[idx % colors.length],
-                              height: '28px',
-                              borderRadius: '6px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              paddingLeft: '0.75rem',
-                              color: '#fff',
-                              fontSize: '0.75rem',
-                              fontWeight: 700,
-                              boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-                              transition: 'all 0.4s ease'
-                            }}
-                          >
-                            {percentOfTotal}%
-                          </div>
+                          <ProgressBar value={Number(percentOfTotal)}
+                            height='15px'
+                            color={getTrafficLightColor(Number(percentOfTotal))} />
                         </div>
                       </div>
                     );
@@ -394,9 +417,9 @@ export const ConnectionsDashboardPage: React.FC = () => {
 
           {/* Table: Zones */}
           <section className={styles.tableSection}>
-            <h3 className={styles.chartTitle}>Rendimiento por Zona</h3>
+            <h3 className={styles.chartTitle}>Actualización por Zona</h3>
             <Table
-              data={data.porZonas || []}
+              data={sortedZonas}
               columns={zonasColumns}
               showColumnModal={false}
               showTotalRecords={false}
@@ -413,7 +436,7 @@ export const ConnectionsDashboardPage: React.FC = () => {
                 Detalle del avance de actualización catastral por sectores geográficos y desglose de datos faltantes.
               </p>
               <Table
-                data={data.porSectores}
+                data={sortedSectores}
                 columns={sectoresColumns}
                 showColumnModal={false}
                 showTotalRecords={false}

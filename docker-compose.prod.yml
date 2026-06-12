@@ -6,6 +6,7 @@ services:
       args:
         - VITE_API_URL=${VITE_API_URL}
         - VITE_HTTP_CLIENT=${VITE_HTTP_CLIENT}
+        - VITE_GOOGLE_MAPS_API_KEY=${VITE_GOOGLE_MAPS_API_KEY}
     container_name: epaa-web-prod
     restart: unless-stopped # mejor que always en algunos casos
     ports:
