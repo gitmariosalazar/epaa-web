@@ -357,7 +357,7 @@ export const ConnectionsDashboardPage: React.FC = () => {
           className={`${styles.tabButton} ${activeTab === 'map' ? styles.active : ''}`}
           onClick={() => setActiveTab('map')}
         >
-          <MapPin size={16} /> Mapa de Avance en Vivo
+          <MapPin size={16} /> Mapa de Avance
         </button>
       </div>
     </header>
