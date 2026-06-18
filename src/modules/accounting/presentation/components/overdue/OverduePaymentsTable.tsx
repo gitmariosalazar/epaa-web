@@ -156,13 +156,12 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
         header: t('accounting.overdue.monthsPastDue', 'Meses de mora'),
         accessor: (item: OverduePayment) => (
           <span
-            className={`months-past-due-badge ${
-              item.monthsPastDue >= 6
-                ? 'past-due-critical'
-                : item.monthsPastDue >= 3
-                  ? 'past-due-warning'
-                  : ''
-            }`}
+            className={`months-past-due-badge ${item.monthsPastDue >= 6
+              ? 'past-due-critical'
+              : item.monthsPastDue >= 3
+                ? 'past-due-warning'
+                : ''
+              }`}
           >
             {item.monthsPastDue}
           </span>
@@ -200,14 +199,25 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
         style: { width: '100px' }
       },
       {
-        header: t('accounting.overdue.totalDue', 'Total'),
-        accessor: (item: OverduePayment) => {
-          const total = item.totalDue ?? 0;
-          return <span className="total-due-text">${total.toFixed(2)}</span>;
-        },
-        id: 'totalDue',
+        header: t('accounting.overdue.interest', 'Interés'),
+        accessor: (item: OverduePayment) => (
+          <span className="total-interest-text">{fmt(item.totalInterestCalculated)}</span>
+        ),
         sortable: true,
-        sortKey: 'totalDue',
+        id: 'totalInterestCalculated',
+        sortKey: 'totalInterestCalculated',
+        isNumeric: true,
+        style: { width: '100px' }
+      },
+      {
+        header: t('accounting.overdue.totalDebtAmount', 'Total'),
+        accessor: (item: OverduePayment) => {
+          const total = item.totalDebtAmount ?? 0;
+          return <span className="total-debt-amount-text">${total.toFixed(2)}</span>;
+        },
+        id: 'totalDebtAmount',
+        sortable: true,
+        sortKey: 'totalDebtAmount',
         isNumeric: true,
         style: { width: '110px' }
       },
@@ -356,20 +366,18 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
       totalEpaaValue: 0,
       totalSurcharge: 0,
       totalOldSurcharge: 0,
+      totalInterestCalculated: 0,
       totalOldImprovementsInterest: 0
     };
 
     return data.reduce((acc: typeof defaultTotals, item: OverduePayment) => {
       acc.totalValue +=
-        (Number(item.totalTrashRate) || 0) +
-        (Number(item.totalEpaaValue) || 0) +
-        (Number(item.totalSurcharge) || 0) +
-        (Number(item.totalOldSurcharge) || 0) +
-        (Number(item.totalOldImprovementsInterest) || 0);
+        (Number(item.totalDebtAmount) || 0);
       acc.totalTrashRate += Number(item.totalTrashRate) || 0;
       acc.totalEpaaValue += Number(item.totalEpaaValue) || 0;
       acc.totalSurcharge += Number(item.totalSurcharge) || 0;
       acc.totalOldSurcharge += Number(item.totalOldSurcharge) || 0;
+      acc.totalInterestCalculated += Number(item.totalInterestCalculated) || 0;
       acc.totalOldImprovementsInterest +=
         Number(item.totalOldImprovementsInterest) || 0;
       return acc;
@@ -382,17 +390,14 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
     totalEpaaValue,
     totalSurcharge,
     totalOldSurcharge,
+    totalInterestCalculated,
     totalOldImprovementsInterest
   } = totals;
 
   const handleMapRowData = useCallback(
     (item: OverduePayment, selectedCols: ExportColumn[]) => {
       const total =
-        (Number(item.totalTrashRate) || 0) +
-        (Number(item.totalEpaaValue) || 0) +
-        (Number(item.totalSurcharge) || 0) +
-        (Number(item.totalOldSurcharge) || 0) +
-        (Number(item.totalOldImprovementsInterest) || 0);
+        (Number(item.totalDebtAmount) || 0);
 
       const rowData: Record<string, string> = {
         clientId: item.clientId ?? '-',
@@ -402,7 +407,9 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
         totalTrashRate: fmt(item.totalTrashRate),
         totalEpaaValue: fmt(item.totalEpaaValue),
         totalSurcharge: fmt(item.totalSurcharge),
-        totalDue: `$${total.toFixed(2)}`
+        totalInterestCalculated: fmt(item.totalInterestCalculated),
+        totalOldImprovementsInterest: fmt(item.totalOldImprovementsInterest),
+        totalDebtAmount: `$${total.toFixed(2)}`
       };
 
       return selectedCols.map(
@@ -450,8 +457,13 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
         isDefault: true
       },
       {
-        id: 'totalDue',
-        label: t('accounting.overdue.totalDue', 'Total'),
+        id: 'totalInterestCalculated',
+        label: t('accounting.overdue.totalInterestCalculated', 'Interes'),
+        isDefault: true
+      },
+      {
+        id: 'totalDebtAmount',
+        label: t('accounting.overdue.totalDebtAmount', 'Total'),
         isDefault: true
       }
     ],
@@ -470,7 +482,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
         label: t('accounting.overdue.totalValue', 'Total'),
         value: totalValue,
         highlight: true,
-        columnId: 'totalDue'
+        columnId: 'totalDebtAmount'
       },
       {
         label: t('accounting.overdue.totalTrashRate', 'Total Tasa Basura'),
@@ -500,6 +512,12 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
         columnId: 'totalOldSurcharge'
       },
       {
+        label: t('accounting.overdue.totalInterestCalculated', 'Total Interes'),
+        value: totalInterestCalculated,
+        highlight: false,
+        columnId: 'totalInterestCalculated'
+      },
+      {
         label: t(
           'accounting.overdue.totalOldImprovementsInterest',
           'Total Intereses Antiguos'
@@ -517,6 +535,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
       totalEpaaValue,
       totalSurcharge,
       totalOldSurcharge,
+      totalInterestCalculated,
       totalOldImprovementsInterest
     ]
   );
@@ -535,7 +554,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
       availableColumns,
       reportTitle: t(
         'accounting.overdue.reportTitle',
-        'Reporte de Pagos en Mora'
+        'Reporte de Facturas en Mora'
       ),
       reportDescription: t(
         'accounting.overdue.reportSubtitle',
@@ -554,9 +573,11 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
       rows,
       columns: colLabels,
       fileName: `reporte_mora_${Date.now()}`,
-      title: t('accounting.overdue.reportTitle', 'Reporte de Pagos en Mora')
+      title: t('accounting.overdue.reportTitle', 'Reporte de Facturas en Mora')
     });
   }, [availableColumns, data, handleMapRowData]);
+
+  console.log('data', data);
 
   return (
     <div className={`payments-table-wrapper ${isLoading ? 'is-loading' : ''}`}>
@@ -579,7 +600,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
         onSort={
           onSort
             ? (key, direction) =>
-                onSort(String(key), direction as 'asc' | 'desc')
+              onSort(String(key), direction as 'asc' | 'desc')
             : undefined
         }
         sortConfig={sortConfig}

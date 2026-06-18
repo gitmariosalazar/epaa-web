@@ -9,7 +9,8 @@ import {
   Info,
   AlertTriangle,
   MapPin,
-  User
+  User,
+  CheckCheckIcon
 } from 'lucide-react';
 import {
   Table,
@@ -26,6 +27,7 @@ import {
   CircularProgress,
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 
 interface PendingReadingsModalProps {
   isOpen: boolean;
@@ -60,6 +62,26 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
     () =>
       safeData.reduce(
         (acc: number, item: PendingReading) => acc + (Number(item?.total) || 0),
+        0
+      ),
+    [safeData]
+  );
+
+  const totalOverdue = useMemo(
+    () =>
+      safeData.reduce(
+        (acc: number, item: PendingReading) =>
+          acc + (Number(item?.dueDateStatus === 'Vencido' ? item?.total : 0) || 0),
+        0
+      ),
+    [safeData]
+  );
+
+  const totalNotOverdue = useMemo(
+    () =>
+      safeData.reduce(
+        (acc: number, item: PendingReading) =>
+          acc + (Number(item?.dueDateStatus !== 'Vencido' ? item?.total : 0) || 0),
         0
       ),
     [safeData]
@@ -250,6 +272,27 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
           </div>
         ),
         id: 'total'
+      },
+      {
+        header: t('accounting.pending.dueDateStatus', 'Estado Deuda'),
+        accessor: (item: PendingReading) => (
+          <div className="total-cell">
+            <ColorChip
+              variant="soft"
+              label={item.dueDateStatus}
+              size="xs"
+              icon={
+                item.dueDateStatus === 'Vencido' ? (
+                  <X size={12} />
+                ) : (
+                  <CheckCheckIcon size={12} />
+                )
+              }
+              color={item.dueDateStatus === 'Vencido' ? 'red' : 'green'}
+            />
+          </div>
+        ),
+        id: 'dueDateStatus'
       }
     ],
     [t]
@@ -265,6 +308,8 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
   }, [isOpen, safeData.length, isLoading]);
 
   if (!isOpen) return null;
+
+
 
   return createPortal(
     <div className="pending-readings-overlay" onClick={onClose}>
@@ -373,13 +418,51 @@ export const PendingReadingsModal: React.FC<PendingReadingsModalProps> = ({
 
         {/* Footer info */}
         <div className="pending-readings-footer">
-          <Info size={14} />
-          <span>
-            {t(
-              'accounting.pending.footerNote',
-              'Los valores incluyen recargo por mora acumulado hasta la fecha.'
-            )}
-          </span>
+          <div className='footer-left'>
+            <Info size={14} />
+            <span className='footer-info'>
+              {t(
+                'accounting.pending.footerNote',
+                'Los valores incluyen recargo por mora acumulado hasta la fecha.'
+              )}
+            </span>
+          </div>
+          <div className="footer-right">
+            <ColorChip
+              label={
+                t(
+                  'accounting.pending.totalNotOverdue',
+                  'Total No Vencido'
+                ) + ': ' + totalNotOverdue.toFixed(2)
+              }
+              variant="ghost"
+              color="green"
+              size='sm'
+            />
+            <ColorChip
+              label={
+                t(
+                  'accounting.pending.totalOverdue',
+                  'Total Vencido'
+                ) + ': ' + totalOverdue.toFixed(2)
+              }
+              variant="ghost"
+              color="orange"
+              size='sm'
+            />
+            <ColorChip
+              label={
+                t(
+                  'accounting.pending.totalDue',
+                  'Total'
+                ) + ': ' + totalDue.toFixed(2)
+              }
+              variant="ghost"
+              color="red"
+              size='sm'
+            />
+          </div>
+
         </div>
       </div>
     </div>,

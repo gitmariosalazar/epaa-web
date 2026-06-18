@@ -65,13 +65,12 @@ export const YearlyOverdueSumaryTable: React.FC<
         header: t('accounting.overdue.totalMonthsPastDue', 'Meses con mora'),
         accessor: (item: YearlyOverdueSummary) => (
           <span
-            className={`months-past-due-badge ${
-              item.totalMonthsPastDue >= 6000
+            className={`months-past-due-badge ${item.totalMonthsPastDue >= 6000
                 ? 'past-due-critical'
                 : item.totalMonthsPastDue >= 3000
                   ? 'past-due-warning'
                   : 'past-due-normal'
-            }`}
+              }`}
           >
             {item.totalMonthsPastDue}
           </span>
@@ -155,6 +154,20 @@ export const YearlyOverdueSumaryTable: React.FC<
         style: { width: '120px', textAlign: 'right' }
       },
       {
+        header: t('accounting.overdue.totalInterestCalculated', 'Total Interes'),
+        accessor: (item: YearlyOverdueSummary) => (
+          <span>
+            {item.totalInterestCalculated !== undefined
+              ? CurrencyFormatter.format(item.totalInterestCalculated)
+              : '-'}
+          </span>
+        ),
+        id: 'totalInterestCalculated',
+        sortable: true,
+        sortKey: 'totalInterestCalculated',
+        style: { width: '120px', textAlign: 'right' }
+      },
+      {
         header: t('accounting.overdue.avgDebtPerClient', 'Promedio p/ Cliente'),
         accessor: (item: YearlyOverdueSummary) => (
           <span>
@@ -198,6 +211,7 @@ export const YearlyOverdueSumaryTable: React.FC<
       totalOldSurcharge: 0,
       totalImprovementsInterest: 0,
       totalDebtAmount: 0,
+      totalInterestCalculated: 0,
       avgDebtPerClient: 0
     };
 
@@ -217,6 +231,8 @@ export const YearlyOverdueSumaryTable: React.FC<
           acc.totalOldSurcharge + (item.totalOldSurcharge || 0),
         totalImprovementsInterest:
           acc.totalImprovementsInterest + (item.totalImprovementsInterest || 0),
+        totalInterestCalculated:
+          acc.totalInterestCalculated + (item.totalInterestCalculated || 0),
         totalDebtAmount: acc.totalDebtAmount + (item.totalDebtAmount || 0)
       };
     }, defaultTotals);
@@ -246,6 +262,9 @@ export const YearlyOverdueSumaryTable: React.FC<
         totalOldSurcharge: CurrencyFormatter.format(item.totalOldSurcharge),
         totalImprovementsInterest: CurrencyFormatter.format(
           item.totalImprovementsInterest
+        ),
+        totalInterestCalculated: CurrencyFormatter.format(
+          item.totalInterestCalculated
         ),
         avgDebtPerClient: CurrencyFormatter.format(item.avgDebtPerClient),
         totalDebtAmount: CurrencyFormatter.format(item.totalDebtAmount)
@@ -316,6 +335,11 @@ export const YearlyOverdueSumaryTable: React.FC<
         isDefault: true
       },
       {
+        id: 'totalInterestCalculated',
+        label: t('accounting.overdue.totalInterestCalculated', 'Total Interes'),
+        isDefault: true
+      },
+      {
         id: 'totalDebtAmount',
         label: t('accounting.overdue.totalDebtAmount', 'Total deuda'),
         isDefault: true
@@ -370,6 +394,12 @@ export const YearlyOverdueSumaryTable: React.FC<
         value: CurrencyFormatter.format(totals.avgDebtPerClient),
         highlight: false,
         columnId: 'avgDebtPerClient'
+      },
+      {
+        label: t('accounting.overdue.totalInterestCalculated', 'Total Interes'),
+        value: CurrencyFormatter.format(totals.totalInterestCalculated),
+        highlight: true,
+        columnId: 'totalInterestCalculated'
       },
       {
         label: t('accounting.overdue.totalDebtAmount', 'Total deuda'),

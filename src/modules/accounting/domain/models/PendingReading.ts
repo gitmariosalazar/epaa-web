@@ -46,4 +46,7 @@ export interface PendingReading {
   // ── Totales de la Planilla ─────────────────────────────────────────────────
   total: number; // Sumatoria base asumiendo tarifa plena de basura
   adjustedTotal: number; // TOTAL REAL A PAGAR (Total Epaa + Basura Efectiva Pagada)
+
+  // ── Estado de Vencimiento de la Deuda ────────────────────────────────────
+  dueDateStatus: 'Vencido' | 'No Vencido';
 }

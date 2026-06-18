@@ -91,7 +91,7 @@ export const OverduePaymentsPage: React.FC = () => {
     },
     {
       id: 'payments',
-      label: t('accounting.overdue.paymentsTab', 'Pagos en Mora'),
+      label: t('accounting.overdue.paymentsTab', 'Facturas en Mora'),
       icon: <FileText size={16} />
     },
     {
@@ -140,7 +140,7 @@ export const OverduePaymentsPage: React.FC = () => {
         return (
           <YearlyOverdueDashboardFilters
             selectedYear="all"
-            onYearChange={() => {}}
+            onYearChange={() => { }}
             isLoading={isYearlySummaryLoading || isLoading}
             onRefresh={() => {
               fetchYearlyOverdueSummary(true);
@@ -166,7 +166,7 @@ export const OverduePaymentsPage: React.FC = () => {
             selectedYear={dashboardYear}
             selectedMonth=""
             onYearChange={setDashboardYear}
-            onMonthChange={() => {}}
+            onMonthChange={() => { }}
             availableYears={(yearlyOverdueSummary || []).map((y) => y.year)}
             isLoading={isYearlySummaryLoading}
             showAllOption={false}
@@ -265,11 +265,10 @@ export const OverduePaymentsPage: React.FC = () => {
       filters={renderFilters()}
     >
       <div
-        className={`overdue-payments-content ${
-          activeTab === 'dashboard_global' || activeTab === 'dashboard_anual'
+        className={`overdue-payments-content ${activeTab === 'dashboard_global' || activeTab === 'dashboard_anual'
             ? 'overdue-payments-content--dashboard'
             : 'overdue-payments-content--table'
-        }`}
+          }`}
       >
         {renderContent()}
       </div>

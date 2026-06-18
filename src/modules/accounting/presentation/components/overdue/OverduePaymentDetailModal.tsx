@@ -65,11 +65,7 @@ export const OverduePaymentDetailModal: React.FC<OverduePaymentDetailModalProps>
   ];
 
   const totalDue =
-    (item.totalTrashRate ?? 0) +
-    (item.totalEpaaValue ?? 0) +
-    (item.totalSurcharge ?? 0) +
-    (item.totalOldSurcharge ?? 0) +
-    (item.totalOldImprovementsInterest ?? 0);
+    (item.totalDebtAmount ?? 0);
 
   return (
     <div className="conn-detail-overlay" onClick={onClose}>
@@ -87,7 +83,7 @@ export const OverduePaymentDetailModal: React.FC<OverduePaymentDetailModalProps>
               <span className="conn-detail-value">{value || '-'}</span>
             </div>
           ))}
-          
+
           <div className="conn-detail-row conn-detail-total-row">
             <span className="conn-detail-label conn-detail-total-label">
               {t('accounting.overdue.totalDue', 'TOTAL A PAGAR')}

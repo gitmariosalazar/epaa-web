@@ -78,13 +78,12 @@ export const MonthlyDebtSummaryTable: React.FC<
         ),
         accessor: (item: MonthlyDebtSummary) => (
           <span
-            className={`months-past-due-badge ${
-              item.totalMonthsPastDue >= 6000
-                ? 'past-due-critical'
-                : item.totalMonthsPastDue >= 3000
-                  ? 'past-due-warning'
-                  : 'past-due-normal'
-            }`}
+            className={`months-past-due-badge ${item.totalMonthsPastDue >= 6000
+              ? 'past-due-critical'
+              : item.totalMonthsPastDue >= 3000
+                ? 'past-due-warning'
+                : 'past-due-normal'
+              }`}
           >
             {item.totalMonthsPastDue}
           </span>
@@ -175,6 +174,23 @@ export const MonthlyDebtSummaryTable: React.FC<
       },
       {
         header: t(
+          'accounting.monthlyDebtSummary.totalInterestCalculated',
+          'Intereses'
+        ),
+        accessor: (item: MonthlyDebtSummary) => (
+          <span>
+            {item.totalInterestCalculated !== undefined
+              ? CurrencyFormatter.format(item.totalInterestCalculated)
+              : '-'}
+          </span>
+        ),
+        id: 'totalInterestCalculated',
+        sortable: true,
+        sortKey: 'totalInterestCalculated',
+        style: { width: '120px', textAlign: 'right' }
+      },
+      {
+        header: t(
           'accounting.monthlyDebtSummary.avgDebtPerClient',
           'Promedio p/ Cliente'
         ),
@@ -188,6 +204,23 @@ export const MonthlyDebtSummaryTable: React.FC<
         id: 'avgDebtPerClient',
         sortable: true,
         sortKey: 'avgDebtPerClient',
+        style: { width: '120px', textAlign: 'right' }
+      },
+      {
+        header: t(
+          'accounting.monthlyDebtSummary.totalDebtAmount',
+          'Total deuda'
+        ),
+        accessor: (item: MonthlyDebtSummary) => (
+          <span>
+            {item.totalDebtAmount !== undefined
+              ? CurrencyFormatter.format(item.totalDebtAmount)
+              : '-'}
+          </span>
+        ),
+        id: 'totalDebtAmount',
+        sortable: true,
+        sortKey: 'totalDebtAmount',
         style: { width: '120px', textAlign: 'right' }
       }
     ],
@@ -206,7 +239,9 @@ export const MonthlyDebtSummaryTable: React.FC<
       totalSurcharge: 0,
       totalOldSurcharge: 0,
       totalImprovementsInterest: 0,
-      avgDebtPerClient: 0
+      totalInterestCalculated: 0,
+      avgDebtPerClient: 0,
+      totalDebtAmount: 0
     };
     const aggregatedData = data.reduce((acc, item) => {
       acc.clientsWithDebtThisMonth += item.clientsWithDebtThisMonth;
@@ -217,7 +252,9 @@ export const MonthlyDebtSummaryTable: React.FC<
       acc.totalSurcharge += item.totalSurcharge;
       acc.totalOldSurcharge += item.totalOldSurcharge;
       acc.totalImprovementsInterest += item.totalImprovementsInterest;
+      acc.totalInterestCalculated += item.totalInterestCalculated;
       acc.avgDebtPerClient += item.avgDebtPerClient;
+      acc.totalDebtAmount += item.totalDebtAmount;
       return acc;
     }, defaultTotals);
     // TODO: Fix this avgDebtPerClient calculation
@@ -249,7 +286,11 @@ export const MonthlyDebtSummaryTable: React.FC<
         totalImprovementsInterest: CurrencyFormatter.format(
           item.totalImprovementsInterest
         ),
-        avgDebtPerClient: CurrencyFormatter.format(item.avgDebtPerClient)
+        totalInterestCalculated: CurrencyFormatter.format(
+          item.totalInterestCalculated
+        ),
+        avgDebtPerClient: CurrencyFormatter.format(item.avgDebtPerClient),
+        totalDebtAmount: CurrencyFormatter.format(item.totalDebtAmount)
       };
       return selectedColumns.map(
         (column) => rowData[column.id as keyof typeof rowData] || '-'
@@ -282,11 +323,30 @@ export const MonthlyDebtSummaryTable: React.FC<
         isDefault: true
       },
       {
+        id: 'totalInterestCalculated',
+        label: 'Intereses',
+        isDefault: true
+      },
+      {
         id: 'totalImprovementsInterest',
         label: 'Intereses de mejoras',
         isDefault: true
       },
-      { id: 'avgDebtPerClient', label: 'Promedio p/ Cliente', isDefault: true }
+      {
+        id: 'totalInterestCalculated',
+        label: 'Intereses',
+        isDefault: true
+      },
+      {
+        id: 'totalDebtAmount',
+        label: 'Total deuda',
+        isDefault: true
+      },
+      {
+        id: 'avgDebtPerClient',
+        label: 'Promedio p/ Cliente',
+        isDefault: true
+      }
     ];
   }, []);
 
@@ -353,10 +413,22 @@ export const MonthlyDebtSummaryTable: React.FC<
         columnId: 'totalImprovementsInterest'
       },
       {
+        label: 'Total Interes',
+        value: CurrencyFormatter.format(totals.totalInterestCalculated),
+        highlight: false,
+        columnId: 'totalInterestCalculated'
+      },
+      {
         label: 'Total',
         value: CurrencyFormatter.format(totals.avgDebtPerClient),
         highlight: false,
         columnId: 'avgDebtPerClient'
+      },
+      {
+        label: 'Total',
+        value: CurrencyFormatter.format(totals.totalDebtAmount),
+        highlight: true,
+        columnId: 'totalDebtAmount'
       }
     ],
     [totals]

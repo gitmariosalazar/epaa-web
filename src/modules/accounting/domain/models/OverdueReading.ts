@@ -8,7 +8,15 @@ export interface OverduePayment {
   totalSurcharge: number;
   totalOldSurcharge: number;
   monthsPastDue: number;
-  totalDue?: number;
+
+  totalInterestCalculated: number;
+  totalDebtAmount: number;
+  emisionDateMoreOld: string;
+  emisionDateMoreRecent: string;
+  dueDateMoreOld: string;
+  dueDateMoreRecent: string;
+  daysSinceDue: number;
+  daysSinceEmission: number;
 }
 
 export interface OverdueSummary {
@@ -21,6 +29,7 @@ export interface OverdueSummary {
   totalSurcharge: number;
   totalOldSurcharge: number;
   totalImprovementsInterest: number;
+  totalInterestCalculated: number;
   avgMonthsPastDue: number;
   maxMonthsInDebt: number;
   minMonthsInDebt: number;
@@ -43,6 +52,7 @@ export interface YearlyOverdueSummary {
   totalSurcharge: number;
   totalOldSurcharge: number;
   totalImprovementsInterest: number;
+  totalInterestCalculated: number;
   avgMonthsPastDue: number;
   maxMonthsInDebt: number;
   minMonthsInDebt: number;
@@ -71,6 +81,7 @@ export interface MonthlyDebtSummary {
   totalSurcharge: number;
   totalOldSurcharge: number;
   totalImprovementsInterest: number;
+  totalInterestCalculated: number;
 
   avgMonthsPastDue: number | null;
   maxMonthsInDebt: number;

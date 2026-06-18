@@ -22,7 +22,7 @@ export interface SortConfig {
   direction: SortDirection;
 }
 
-const LIMIT_SIZE = 50;
+const LIMIT_SIZE = 50000;
 
 function applySortConfig<T>(data: T[], sortConfig: SortConfig | null): T[] {
   if (!sortConfig) return data;
@@ -255,14 +255,7 @@ export const useOverduePaymentsViewModel = () => {
             LIMIT_SIZE,
             currentOffset
           );
-          const data: OverduePayment[] = (result || []).map((item) => ({
-            ...item,
-            totalDue:
-              (Number(item.totalTrashRate) || 0) +
-              (Number(item.totalEpaaValue) || 0) +
-              (Number(item.totalSurcharge) || 0) +
-              (Number(item.totalOldImprovementsInterest) || 0)
-          }));
+          const data: OverduePayment[] = result;
           if (data.length < LIMIT_SIZE) setHasMore(false);
           setOverduePayments((prev) => (append ? [...prev, ...data] : data));
         } else if (
@@ -341,13 +334,7 @@ export const useOverduePaymentsViewModel = () => {
       ),
       sortConfig
     );
-  }, [
-    overduePayments,
-    searchQuery,
-    searchField,
-    searchOperator,
-    sortConfig
-  ]);
+  }, [overduePayments, searchQuery, searchField, searchOperator, sortConfig]);
 
   // Filtered/Sorted Yearly Summary
   const displayedYearlySummary = useMemo(() => {
@@ -431,9 +418,11 @@ export const useOverduePaymentsViewModel = () => {
 
   /** Data for the specific year selected in the dashboard */
   const selectedYearData = useMemo(() => {
-    return (yearlyOverdueSummary || []).find(
-      (item) => item.year.toString() === resolvedDashboardYear
-    ) || null;
+    return (
+      (yearlyOverdueSummary || []).find(
+        (item) => item.year.toString() === resolvedDashboardYear
+      ) || null
+    );
   }, [yearlyOverdueSummary, resolvedDashboardYear]);
 
   /** Filtered yearly data for charts/tables */
@@ -551,5 +540,3 @@ export const useOverduePaymentsViewModel = () => {
     findOverdueSummary
   };
 };
-
-

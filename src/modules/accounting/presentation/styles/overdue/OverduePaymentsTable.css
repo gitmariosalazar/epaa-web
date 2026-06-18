@@ -338,9 +338,14 @@
   color: var(--warning);
 }
 
-.total-due-text {
+.total-debt-amount-text {
   font-weight: 700;
   color: var(--error);
+}
+
+.total-interest-text {
+  font-weight: 600;
+  color: var(--warning);
 }
 
 .btn-view-details {
