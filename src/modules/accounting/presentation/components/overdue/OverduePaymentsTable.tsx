@@ -30,6 +30,7 @@ import {
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface OverduePaymentsTableProps {
@@ -480,25 +481,25 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
       },
       {
         label: t('accounting.overdue.totalValue', 'Total'),
-        value: totalValue,
+        value: CurrencyFormatter.format(totalValue),
         highlight: true,
         columnId: 'totalDebtAmount'
       },
       {
         label: t('accounting.overdue.totalTrashRate', 'Total Tasa Basura'),
-        value: totalTrashRate,
+        value: CurrencyFormatter.format(totalTrashRate),
         highlight: false,
         columnId: 'totalTrashRate'
       },
       {
         label: t('accounting.overdue.totalEpaaValue', 'Total Valor EPAA'),
-        value: totalEpaaValue,
+        value: CurrencyFormatter.format(totalEpaaValue),
         highlight: false,
         columnId: 'totalEpaaValue'
       },
       {
         label: t('accounting.overdue.totalSurcharge', 'Total Recargo'),
-        value: totalSurcharge,
+        value: CurrencyFormatter.format(totalSurcharge),
         highlight: false,
         columnId: 'totalSurcharge'
       },
@@ -507,13 +508,13 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
           'accounting.overdue.totalOldSurcharge',
           'Total Recargo Antiguo'
         ),
-        value: totalOldSurcharge,
+        value: CurrencyFormatter.format(totalOldSurcharge),
         highlight: false,
         columnId: 'totalOldSurcharge'
       },
       {
         label: t('accounting.overdue.totalInterestCalculated', 'Total Interes'),
-        value: totalInterestCalculated,
+        value: CurrencyFormatter.format(totalInterestCalculated),
         highlight: false,
         columnId: 'totalInterestCalculated'
       },
@@ -522,7 +523,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
           'accounting.overdue.totalOldImprovementsInterest',
           'Total Intereses Antiguos'
         ),
-        value: totalOldImprovementsInterest,
+        value: CurrencyFormatter.format(totalOldImprovementsInterest),
         highlight: false,
         columnId: 'totalOldImprovementsInterest'
       }

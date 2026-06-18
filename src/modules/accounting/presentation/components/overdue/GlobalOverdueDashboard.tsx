@@ -10,7 +10,8 @@ import {
   History,
   AlertOctagon,
   Percent,
-  Clock
+  Clock,
+  Trash2
 } from 'lucide-react';
 import type {
   YearlyOverdueSummary,
@@ -108,7 +109,9 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
       clientsOver12: globalSummary.clientsOver1Year,
       maxMonths: globalSummary.maxMonthsInDebt,
       avgMonths: globalSummary.avgMonthsPastDue,
-      avgDebt: globalSummary.avgDebtPerClient
+      avgDebt: globalSummary.avgDebtPerClient,
+      totalImprovementsInterest: globalSummary.totalImprovementsInterest,
+      totalInterestCalculated: globalSummary.totalInterestCalculated
     };
   }, [globalSummary]);
 
@@ -130,9 +133,76 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
           name: t('accounting.overdue.surcharge', 'Recargos'),
           value: metrics.totalSurcharge,
           color: '#f59e0b'
+        },
+        {
+          name: t('accounting.overdue.improvementsInterest', 'Int. Mejoras'),
+          value: metrics.totalImprovementsInterest || 0,
+          color: '#8b5cf6'
+        },
+        {
+          name: t('accounting.overdue.totalInterestCalculated', 'Int. Calculado'),
+          value: metrics.totalInterestCalculated || 0,
+          color: '#ec4899'
         }
       ]
     : [];
+
+  const tableData = useMemo(() => {
+    if (!metrics) return [];
+    const total = metrics.totalDebt || 1;
+    return [
+      {
+        id: 'epaa',
+        concept: t('accounting.overdue.epaaValue', 'Monto EPAA'),
+        value: metrics.totalEpaa,
+        percentage: (metrics.totalEpaa / total) * 100,
+        color: '#3b82f6',
+        icon: <DollarSign size={16} />,
+        impact: t('accounting.overdue.impactPrincipal', 'Principal'),
+        impactClass: 'blue'
+      },
+      {
+        id: 'trash',
+        concept: t('accounting.overdue.trashRate', 'Tasa Desecho'),
+        value: metrics.totalTrash,
+        percentage: (metrics.totalTrash / total) * 100,
+        color: '#10b981',
+        icon: <Trash2 size={16} />,
+        impact: t('accounting.overdue.impactMedium', 'Medio'),
+        impactClass: 'green'
+      },
+      {
+        id: 'surcharge',
+        concept: t('accounting.overdue.surcharge', 'Recargos'),
+        value: metrics.totalSurcharge,
+        percentage: (metrics.totalSurcharge / total) * 100,
+        color: '#f59e0b',
+        icon: <AlertOctagon size={16} />,
+        impact: t('accounting.overdue.impactMedium', 'Medio'),
+        impactClass: 'amber'
+      },
+      {
+        id: 'improvements',
+        concept: t('accounting.overdue.improvementsInterest', 'Int. Mejoras'),
+        value: metrics.totalImprovementsInterest || 0,
+        percentage: ((metrics.totalImprovementsInterest || 0) / total) * 100,
+        color: '#8b5cf6',
+        icon: <TrendingUp size={16} />,
+        impact: t('accounting.overdue.impactLow', 'Bajo'),
+        impactClass: 'purple'
+      },
+      {
+        id: 'calculated',
+        concept: t('accounting.overdue.totalInterestCalculated', 'Int. Calculado'),
+        value: metrics.totalInterestCalculated || 0,
+        percentage: ((metrics.totalInterestCalculated || 0) / total) * 100,
+        color: '#ec4899',
+        icon: <Clock size={16} />,
+        impact: t('accounting.overdue.impactLow', 'Bajo'),
+        impactClass: 'rose'
+      }
+    ];
+  }, [metrics, t]);
 
   if (isLoading || !metrics) {
     return (
@@ -336,6 +406,18 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                       <p>{CurrencyFormatter.format(payload.totalEpaaValue)}</p>
                     </span>
                     <span>
+                      {t('accounting.overdue.totalSurcharge', 'T. Recargos')}
+                      <p>{CurrencyFormatter.format(payload.totalSurcharge)}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.improvementsInterest', 'T. Int. Mejoras')}
+                      <p>{CurrencyFormatter.format(payload.totalImprovementsInterest)}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.totalInterestCalculated', 'T. Int. Calculado')}
+                      <p>{CurrencyFormatter.format(payload.totalInterestCalculated)}</p>
+                    </span>
+                    <span>
                       {t(
                         'accounting.overdue.totalUniqueClients',
                         'N° Clientes'
@@ -503,6 +585,18 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                       <p>{CurrencyFormatter.format(payload.totalEpaaValue)}</p>
                     </span>
                     <span>
+                      {t('accounting.overdue.totalSurcharge', 'T. Recargos')}
+                      <p>{CurrencyFormatter.format(payload.totalSurcharge)}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.improvementsInterest', 'T. Int. Mejoras')}
+                      <p>{CurrencyFormatter.format(payload.totalImprovementsInterest)}</p>
+                    </span>
+                    <span>
+                      {t('accounting.overdue.totalInterestCalculated', 'T. Int. Calculado')}
+                      <p>{CurrencyFormatter.format(payload.totalInterestCalculated)}</p>
+                    </span>
+                    <span>
                       {t(
                         'accounting.overdue.totalUniqueClients',
                         'N° Clientes'
@@ -586,6 +680,101 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                 );
               }}
             />
+          </div>
+        </div>
+
+        <div className="overdue-table-card">
+          <div className="overdue-chart-header">
+            <h3 className="overdue-chart-title">
+              {t('accounting.dashboard.executiveSummaryTitle', 'Resumen Ejecutivo de la Cartera')}
+            </h3>
+            <p className="overdue-chart-subtitle">
+              {t('accounting.dashboard.executiveSummarySubtitle', 'Desglose financiero detallado y distribución de la cartera vencida')}
+            </p>
+          </div>
+          <div className="overdue-table-wrapper">
+            <table className="overdue-summary-table">
+              <thead>
+                <tr>
+                  <th>{t('accounting.overdue.tableConcept', 'Componente de Deuda')}</th>
+                  <th>{t('accounting.overdue.tableAmount', 'Monto Total')}</th>
+                  <th>{t('accounting.overdue.tableParticipation', 'Participación %')}</th>
+                  <th>{t('accounting.overdue.tableImpact', 'Nivel de Impacto')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tableData.map((row) => (
+                  <tr key={row.id}>
+                    <td>
+                      <div className="overdue-table-concept-cell">
+                        <div 
+                          className="overdue-table-icon-container" 
+                          style={{ backgroundColor: `${row.color}15`, color: row.color }}
+                        >
+                          {row.icon}
+                        </div>
+                        <span style={{ fontWeight: 600 }}>{row.concept}</span>
+                      </div>
+                    </td>
+                    <td style={{ fontWeight: 700, fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums' }}>
+                      {CurrencyFormatter.format(row.value)}
+                    </td>
+                    <td>
+                      <div className="overdue-table-progress-container">
+                        <div className="overdue-table-progress-bar">
+                          <div 
+                            className="overdue-table-progress-fill" 
+                            style={{ width: `${row.percentage}%`, backgroundColor: row.color }}
+                          />
+                        </div>
+                        <span className="overdue-table-percentage-text">
+                          {row.percentage.toFixed(1)}%
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`overdue-table-badge overdue-table-badge--${row.impactClass}`}>
+                        {row.impact}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                <tr className="table-row-total">
+                  <td>
+                    <div className="overdue-table-concept-cell">
+                      <div 
+                        className="overdue-table-icon-container" 
+                        style={{ backgroundColor: 'var(--border-color)', color: 'var(--text-main)' }}
+                      >
+                        <DollarSign size={16} />
+                      </div>
+                      <span style={{ fontWeight: 800 }}>{t('common.total', 'Total General')}</span>
+                    </div>
+                  </td>
+                  <td style={{ fontSize: '0.85rem', fontVariantNumeric: 'tabular-nums', color: 'var(--primary)' }}>
+                    {CurrencyFormatter.format(metrics.totalDebt)}
+                  </td>
+                  <td>
+                    <div className="overdue-table-progress-container">
+                      <div className="overdue-table-progress-bar">
+                        <div 
+                          className="overdue-table-progress-fill" 
+                          style={{ width: '100%', backgroundColor: 'var(--primary)' }}
+                        />
+                      </div>
+                      <span className="overdue-table-percentage-text" style={{ fontWeight: 850 }}>
+                        100.0%
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="overdue-table-badge overdue-table-badge--total">
+                      {t('accounting.overdue.portfolioTotal', 'Cartera')}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

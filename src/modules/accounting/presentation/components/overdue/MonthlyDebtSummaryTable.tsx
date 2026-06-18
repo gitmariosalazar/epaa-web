@@ -260,7 +260,7 @@ export const MonthlyDebtSummaryTable: React.FC<
     // TODO: Fix this avgDebtPerClient calculation
     if (aggregatedData.clientsWithDebtThisMonth > 0) {
       aggregatedData.avgDebtPerClient =
-        aggregatedData.totalEpaaValue / aggregatedData.clientsWithDebtThisMonth;
+        aggregatedData.totalDebtAmount / aggregatedData.clientsWithDebtThisMonth;
     }
     return aggregatedData;
   }, [data]);
