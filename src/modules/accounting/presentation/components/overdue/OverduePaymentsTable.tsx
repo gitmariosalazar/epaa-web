@@ -578,7 +578,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
     });
   }, [availableColumns, data, handleMapRowData]);
 
-  console.log('data', data);
+  //console.log('data', data);
 
   return (
     <div className={`payments-table-wrapper ${isLoading ? 'is-loading' : ''}`}>

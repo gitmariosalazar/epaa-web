@@ -90,10 +90,14 @@ function applyLocalFilters(
   if (selectedStatus !== '') {
     if (selectedStatus === 'active') {
       // "Activo" → solo conexiones cuyo estado sea ACTIVA
-      result = result.filter((item) => ACTIVE_STATES.has(item.connectionStatus));
+      result = result.filter((item) =>
+        ACTIVE_STATES.has(item.connectionStatus)
+      );
     } else {
       // "Inactivo" → todo lo que NO sea ACTIVA
-      result = result.filter((item) => !ACTIVE_STATES.has(item.connectionStatus));
+      result = result.filter(
+        (item) => !ACTIVE_STATES.has(item.connectionStatus)
+      );
     }
   }
 
@@ -246,7 +250,8 @@ export const useConnectionsViewModel = () => {
                   connectionSector: Number(detail.connectionSector || 0),
                   connectionAccount: Number(detail.connectionAccount || 0),
                   connectionCadastralKey: detail.connectionCadastralKey || '',
-                  connectionContractNumber: detail.connectionContractNumber || '',
+                  connectionContractNumber:
+                    detail.connectionContractNumber || '',
                   connectionSewerage: detail.connectionSewerage || false,
                   connectionStatus: detail.connectionStatus ?? '',
                   connectionAddress: detail.connectionAddress || '',
@@ -279,7 +284,11 @@ export const useConnectionsViewModel = () => {
           allResults = [...allResults, ...chunk];
 
           // If in map mode and we got a full page, load more pages recursively
-          if (viewMode === 'map' && chunk.length >= LIMIT_SIZE && activeTab !== 'cadastral') {
+          if (
+            viewMode === 'map' &&
+            chunk.length >= LIMIT_SIZE &&
+            activeTab !== 'cadastral'
+          ) {
             offsetToFetch += LIMIT_SIZE;
           } else {
             fetchMore = false;
@@ -299,7 +308,9 @@ export const useConnectionsViewModel = () => {
         setConnections((prev) =>
           append ? [...prev, ...enhancedResults] : enhancedResults
         );
-        setHasMore(viewMode === 'map' ? false : allResults.length >= LIMIT_SIZE);
+        setHasMore(
+          viewMode === 'map' ? false : allResults.length >= LIMIT_SIZE
+        );
         return allResults;
       } catch (err: unknown) {
         const message =
@@ -794,7 +805,7 @@ export const useConnectionsViewModel = () => {
         ConnectionMetaData: formData.ConnectionMetaData || {}
       };
 
-      console.log('Final Wizard Payload:', finalData);
+      //console.log('Final Wizard Payload:', finalData);
 
       if (selectedConnection) {
         await updateConnectionUseCase.execute(

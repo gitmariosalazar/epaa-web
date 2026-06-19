@@ -280,7 +280,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
               opacity: 1,
               visibility: 'visible',
               transition: 'opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              zIndex: 10000,
+              zIndex: 30000,
               display: 'flex',
               alignItems: 'center',
               gap: '8px',

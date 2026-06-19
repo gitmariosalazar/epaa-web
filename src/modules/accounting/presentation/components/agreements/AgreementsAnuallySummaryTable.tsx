@@ -29,23 +29,23 @@ export const AgreementsAnuallySummaryTable: React.FC<
     { header: 'Año', accessor: 'year', sortable: true, id: 'year' },
     ...(searchType === 'MONTH' || searchType === 'DAY'
       ? [
-          {
-            header: 'Mes',
-            accessor: (item: any) => ConvertMonth(item.month) || '-',
-            sortable: true,
-            id: 'month'
-          }
-        ]
+        {
+          header: 'Mes',
+          accessor: (item: any) => ConvertMonth(item.month) || '-',
+          sortable: true,
+          id: 'month'
+        }
+      ]
       : []),
     ...(searchType === 'DAY'
       ? [
-          {
-            header: 'Día',
-            accessor: (item: any) => item.day || '-',
-            sortable: true,
-            id: 'day'
-          }
-        ]
+        {
+          header: 'Día',
+          accessor: (item: any) => item.day || '-',
+          sortable: true,
+          id: 'day'
+        }
+      ]
       : []),
     {
       header: 'Ciudadanos',
@@ -109,9 +109,9 @@ export const AgreementsAnuallySummaryTable: React.FC<
   const avgEfficiency =
     (data || []).length > 0
       ? (data || []).reduce(
-          (acc, curr) => acc + curr.collectionEfficiencyPct,
-          0
-        ) / (data || []).length
+        (acc, curr) => acc + curr.collectionEfficiencyPct,
+        0
+      ) / (data || []).length
       : 0;
 
   const totalRows = [
@@ -143,10 +143,11 @@ export const AgreementsAnuallySummaryTable: React.FC<
       highlight: true
     }
   ];
-
-  console.log('searchType', searchType);
-  console.log('data', data);
-  console.log('totalRows', totalRows);
+  /*
+    console.log('searchType', searchType);
+    console.log('data', data);
+    console.log('totalRows', totalRows);\
+    */
 
   const { setShowPdfPreview, PdfPreviewModal } =
     useTablePdfExport<AgreementKPIsResponse>({
@@ -173,13 +174,12 @@ export const AgreementsAnuallySummaryTable: React.FC<
         },
         { id: 'overdueAmount', label: 'En Mora', isDefault: true }
       ],
-      reportTitle: `Resumen de Convenios (${
-        searchType === 'YEAR'
+      reportTitle: `Resumen de Convenios (${searchType === 'YEAR'
           ? 'Anual'
           : searchType === 'MONTH'
             ? 'Mensual'
             : 'Diario'
-      })`,
+        })`,
       reportDescription: 'Análisis de evolución histórica SIGEPAA',
       totalRows: totalRows,
       mapRowData: (row) => [
