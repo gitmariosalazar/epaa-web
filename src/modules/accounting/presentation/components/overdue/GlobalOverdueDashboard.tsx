@@ -41,16 +41,16 @@ interface KpiCardProps {
   value: string | number;
   icon: React.ReactNode;
   color:
-    | 'blue'
-    | 'green'
-    | 'red'
-    | 'purple'
-    | 'amber'
-    | 'rose'
-    | 'indigo'
-    | 'teal'
-    | 'cyan'
-    | 'orange';
+  | 'blue'
+  | 'green'
+  | 'red'
+  | 'purple'
+  | 'amber'
+  | 'rose'
+  | 'indigo'
+  | 'teal'
+  | 'cyan'
+  | 'orange';
   description?: string;
 }
 
@@ -119,32 +119,32 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
 
   const compositionData = metrics
     ? [
-        {
-          name: t('accounting.overdue.epaaValue', 'Monto EPAA'),
-          value: metrics.totalEpaa,
-          color: '#3b82f6'
-        },
-        {
-          name: t('accounting.overdue.trashRate', 'Tasa Desecho'),
-          value: metrics.totalTrash,
-          color: '#10b981'
-        },
-        {
-          name: t('accounting.overdue.surcharge', 'Recargos'),
-          value: metrics.totalSurcharge,
-          color: '#f59e0b'
-        },
-        {
-          name: t('accounting.overdue.improvementsInterest', 'Int. Mejoras'),
-          value: metrics.totalImprovementsInterest || 0,
-          color: '#8b5cf6'
-        },
-        {
-          name: t('accounting.overdue.totalInterestCalculated', 'Int. Calculado'),
-          value: metrics.totalInterestCalculated || 0,
-          color: '#ec4899'
-        }
-      ]
+      {
+        name: t('accounting.overdue.epaaValue', 'Monto EPAA'),
+        value: metrics.totalEpaa,
+        color: '#3b82f6'
+      },
+      {
+        name: t('accounting.overdue.trashRate', 'Tasa Desecho'),
+        value: metrics.totalTrash,
+        color: '#10b981'
+      },
+      {
+        name: t('accounting.overdue.surcharge', 'Recargos'),
+        value: metrics.totalSurcharge,
+        color: '#f59e0b'
+      },
+      {
+        name: t('accounting.overdue.improvementsInterest', 'Int. Mejoras'),
+        value: metrics.totalImprovementsInterest || 0,
+        color: '#8b5cf6'
+      },
+      {
+        name: t('accounting.overdue.totalInterestCalculated', 'Int. Calculado'),
+        value: metrics.totalInterestCalculated || 0,
+        color: '#ec4899'
+      }
+    ]
     : [];
 
   const tableData = useMemo(() => {
@@ -707,8 +707,8 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                   <tr key={row.id}>
                     <td>
                       <div className="overdue-table-concept-cell">
-                        <div 
-                          className="overdue-table-icon-container" 
+                        <div
+                          className="overdue-table-icon-container"
                           style={{ backgroundColor: `${row.color}15`, color: row.color }}
                         >
                           {row.icon}
@@ -716,14 +716,14 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                         <span style={{ fontWeight: 600 }}>{row.concept}</span>
                       </div>
                     </td>
-                    <td style={{ fontWeight: 700, fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums' }}>
+                    <td style={{ fontWeight: 700, fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums', color: row.color }}>
                       {CurrencyFormatter.format(row.value)}
                     </td>
                     <td>
                       <div className="overdue-table-progress-container">
                         <div className="overdue-table-progress-bar">
-                          <div 
-                            className="overdue-table-progress-fill" 
+                          <div
+                            className="overdue-table-progress-fill"
                             style={{ width: `${row.percentage}%`, backgroundColor: row.color }}
                           />
                         </div>
@@ -742,8 +742,8 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                 <tr className="table-row-total">
                   <td>
                     <div className="overdue-table-concept-cell">
-                      <div 
-                        className="overdue-table-icon-container" 
+                      <div
+                        className="overdue-table-icon-container"
                         style={{ backgroundColor: 'var(--border-color)', color: 'var(--text-main)' }}
                       >
                         <DollarSign size={16} />
@@ -757,8 +757,8 @@ export const GlobalOverdueDashboard: React.FC<GlobalOverdueDashboardProps> = ({
                   <td>
                     <div className="overdue-table-progress-container">
                       <div className="overdue-table-progress-bar">
-                        <div 
-                          className="overdue-table-progress-fill" 
+                        <div
+                          className="overdue-table-progress-fill"
                           style={{ width: '100%', backgroundColor: 'var(--primary)' }}
                         />
                       </div>

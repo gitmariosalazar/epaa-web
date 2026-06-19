@@ -46,16 +46,16 @@ interface KpiCardProps {
   value: string | number;
   icon: React.ReactNode;
   color:
-    | 'blue'
-    | 'green'
-    | 'red'
-    | 'purple'
-    | 'amber'
-    | 'rose'
-    | 'indigo'
-    | 'teal'
-    | 'cyan'
-    | 'orange';
+  | 'blue'
+  | 'green'
+  | 'red'
+  | 'purple'
+  | 'amber'
+  | 'rose'
+  | 'indigo'
+  | 'teal'
+  | 'cyan'
+  | 'orange';
   description?: string;
 }
 
@@ -644,8 +644,8 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
       </div>
 
       {/* ── Charts Grid - Only Evolution and Trend as requested ── */}
-      <div className="overdue-charts-grid">
-        <div className="overdue-chart-card">
+      <div className="overdue-charts-grid-y">
+        <div className="overdue-chart-card-y">
           <div className="overdue-chart-header">
             <h3 className="overdue-chart-title">
               {t('accounting.dashboard.evolutionTitle', 'Evolución')}
@@ -744,7 +744,7 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
           </div>
         </div>
 
-        <div className="overdue-chart-card">
+        <div className="overdue-chart-card-y">
           <div className="overdue-chart-header">
             <h3 className="overdue-chart-title">
               {t('accounting.dashboard.trendTitle', 'Tendencia Meses Mora')}
@@ -930,7 +930,7 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                 <tr>
                   <th>{t('accounting.overdue.tableConcept', 'Componente de Deuda')}</th>
                   <th>{t('accounting.overdue.tableAmount', 'Monto Total')}</th>
-                  <th>{t('accounting.overdue.tableParticipation', 'Participación %')}</th>
+                  <th>{t('accounting.overdue.tableParticipation', 'Porcentaje %')}</th>
                   <th>{t('accounting.overdue.tableImpact', 'Nivel de Impacto')}</th>
                 </tr>
               </thead>
@@ -939,8 +939,8 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                   <tr key={row.id}>
                     <td>
                       <div className="overdue-table-concept-cell">
-                        <div 
-                          className="overdue-table-icon-container" 
+                        <div
+                          className="overdue-table-icon-container"
                           style={{ backgroundColor: `${row.color}15`, color: row.color }}
                         >
                           {row.icon}
@@ -948,19 +948,19 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                         <span style={{ fontWeight: 600 }}>{row.concept}</span>
                       </div>
                     </td>
-                    <td style={{ fontWeight: 700, fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums' }}>
+                    <td style={{ fontWeight: 700, fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums', color: row.color }}>
                       {CurrencyFormatter.format(row.value)}
                     </td>
                     <td>
                       <div className="overdue-table-progress-container">
                         <div className="overdue-table-progress-bar">
-                          <div 
-                            className="overdue-table-progress-fill" 
+                          <div
+                            className="overdue-table-progress-fill"
                             style={{ width: `${row.percentage}%`, backgroundColor: row.color }}
                           />
                         </div>
                         <span className="overdue-table-percentage-text">
-                          {row.percentage.toFixed(1)}%
+                          {row.percentage.toFixed(2)}%
                         </span>
                       </div>
                     </td>
@@ -974,8 +974,8 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                 <tr className="table-row-total">
                   <td>
                     <div className="overdue-table-concept-cell">
-                      <div 
-                        className="overdue-table-icon-container" 
+                      <div
+                        className="overdue-table-icon-container"
                         style={{ backgroundColor: 'var(--border-color)', color: 'var(--text-main)' }}
                       >
                         <DollarSign size={16} />
@@ -989,8 +989,8 @@ export const YearlyOverdueDashboard: React.FC<YearlyOverdueDashboardProps> = ({
                   <td>
                     <div className="overdue-table-progress-container">
                       <div className="overdue-table-progress-bar">
-                        <div 
-                          className="overdue-table-progress-fill" 
+                        <div
+                          className="overdue-table-progress-fill"
                           style={{ width: '100%', backgroundColor: 'var(--primary)' }}
                         />
                       </div>
