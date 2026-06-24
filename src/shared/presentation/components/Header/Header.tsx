@@ -208,6 +208,7 @@ export const Header: React.FC = () => {
             <button
               onClick={toggleLanguage}
               className="header__nav-btn"
+              translate="no"
             >
               <span style={{ fontSize: '1rem', lineHeight: 1 }}>
                 {i18n.language === 'en' ? 'EC' : 'US'}
