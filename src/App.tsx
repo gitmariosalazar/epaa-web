@@ -79,6 +79,11 @@ import { SolicitudesListPage } from '@/modules/processes/solicitudes/presentatio
 import { SolicitudDetailPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudDetailPage';
 import { WorkOrdersProcessPage, WorkOrderCreatePage, AllWorkOrdersListPage, WorkOrderDetailPage } from '@/modules/work-orders/presentation/pages';
 
+// Incidents Module
+import { IncidentProvider } from '@/modules/incidents/presentation/context/IncidentContext';
+import { IncidentsListPage } from '@/modules/incidents/presentation/pages/IncidentsListPage';
+import { CreateIncidentPage } from '@/modules/incidents/presentation/pages/CreateIncidentPage';
+
 import UnAuthorizedPage from '@/shared/presentation/components/unauthorized/UnAuthorizedPage';
 import { CircularProgress } from './shared/presentation/components/CircularProgress';
 
@@ -285,6 +290,25 @@ function App() {
                         {/* Other reading routes can be added here */}
                       </Routes>
                     </ReadingsProvider>
+                  }
+                />
+                <Route
+                  path="/incidents/*"
+                  element={
+                    <IncidentProvider>
+                      <Routes>
+                        <Route index element={<IncidentsListPage />} />
+                        <Route path="list" element={<IncidentsListPage />} />
+                        <Route
+                          path="create"
+                          element={
+                            <ReadingsProvider>
+                              <CreateIncidentPage />
+                            </ReadingsProvider>
+                          }
+                        />
+                      </Routes>
+                    </IncidentProvider>
                   }
                 />
                 <Route

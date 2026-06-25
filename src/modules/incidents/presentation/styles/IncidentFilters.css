@@ -1,0 +1,92 @@
+/* src/modules/incidents/presentation/styles/IncidentFilters.css */
+
+.incident-filters-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding-bottom: 8px;
+}
+
+.incident-filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.incident-filters-header .title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.incident-filters-header .title-group h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.title-icon-incidents {
+  color: var(--accent);
+}
+
+.incident-filters-header .toolbar-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ── Container — single flat flex row ────────────────────────────────── */
+.incident-filters-body {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 0.75rem 1rem;
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+  width: 100%;
+}
+
+/* ── Individual group ────────────────────────────────────────────────── */
+.incident-filters-body .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+  flex: 1 1 0%;
+}
+
+.incident-filters-body .filter-group--search {
+  flex: 2 1 0%;
+  min-width: 250px;
+}
+
+/* ── Label ───────────────────────────────────────────────────────────── */
+.incident-filters-body .filter-label {
+  font-size: 0.675rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── Input wrapper ───────────────────────────────────────────────────── */
+.incident-filters-body .filter-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.incident-filters-body .filter-input-wrapper .input,
+.incident-filters-body .filter-input-wrapper select {
+  width: 100%;
+}

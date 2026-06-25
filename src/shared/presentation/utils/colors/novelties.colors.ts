@@ -1,13 +1,18 @@
 export const NOVELTY_COLORS: Record<string, string> = {
-  NORMAL: '#059669',
-  CONSUMO_BAJO: '#d97706',
-  CONSUMO_ALTO: '#c2410c',
-  CONSUMO_MUY_BAJO: '#1d4ed8',
-  CONSUMO_EXCESIVO: '#b91c1c',
-  LECTURA_INVALIDA: '#6d28d9',
-  SIN_LECTURA: '#4b5563',
-  LECTURA_INICIAL: '#5b21b6',
-  DEFAULT: '#6b7280'
+  NORMAL: '#059669', // Verde Esmeralda (Éxito / Todo OK)
+
+  CONSUMO_BAJO: '#f59e0b', // Ámbar/Amarillo (Precaución leve)
+  ALERTA_CONSUMO_BAJO: '#d97706', // Naranja Oscuro (Atención, sub-consumo crítico)
+
+  CONSUMO_ALTO: '#ca8a04', // Amarillo Oscuro / Mostaza
+  ALERTA_CONSUMO_ALTO: '#dc2626', // Rojo Vivo (Alerta fuerte)
+  CONSUMO_EXCESIVO: '#7f1d1d', // Rojo Oscuro / Vino (Emergencia por fuga)
+
+  LECTURA_INVALIDA: '#7c3aed', // Morado Intenso (Error de lógica/sistema)
+  LECTURA_INICIAL: '#db2777', // Rosado Fucsia (Estado administrativo nuevo)
+
+  SIN_LECTURA: '#4b5563', // Gris Oscuro (Neutro, no se pudo medir)
+  DEFAULT: '#6b7280' // Gris Medio
 };
 
 export const getNoveltyColor = (noveltyName: string): string => {

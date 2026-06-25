@@ -247,7 +247,7 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
 
   return (
     <div className="payments-table-wrapper">
-      <Table
+      <Table<Payment>
         data={data}
         columns={columns}
         isLoading={isLoading}

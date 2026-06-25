@@ -1,3 +1,5 @@
+import '@/shared/presentation/styles/CheckBox.css';
+
 interface CheckBoxProps {
   checked: boolean;
   label?: string;

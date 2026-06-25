@@ -48,6 +48,7 @@ interface TooltipProps {
   children: ReactNode;
   position?: TooltipPosition;
   className?: string;
+  style?: React.CSSProperties;
   disabled?: boolean;
   as?: React.ElementType;
   themeColor?: TooltipThemeColor;
@@ -117,6 +118,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   children,
   position = 'top',
   className = '',
+  style,
   disabled = false,
   as: Component = 'div',
   themeColor,
@@ -245,6 +247,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
     <Component
       ref={triggerRef}
       className={`tooltip-container ${className}`}
+      style={style}
       onMouseEnter={(e: React.MouseEvent) => {
         if (!disabled) {
           if (followCursor) setMouseCoords({ x: e.clientX, y: e.clientY });

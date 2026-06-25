@@ -1,17 +1,18 @@
 import React, { type TextareaHTMLAttributes, forwardRef } from 'react';
 import '@/shared/presentation/styles/Input.css';
 
-interface TextAreaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface TextAreaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'> {
   label?: string;
   error?: string;
   info?: string;
   leftIcon?: React.ReactNode;
+  size?: 'small' | 'compact' | 'medium' | 'large';
 }
 
 export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
-  ({ label, error, info, leftIcon, className = '', ...props }, ref) => {
+  ({ label, error, info, leftIcon, className = '', size = 'medium', ...props }, ref) => {
     return (
-      <div className={`input-component input--medium ${className}`} style={{ height: '100%' }}>
+      <div className={`input-component input--${size} ${className}`} style={{ height: '100%' }}>
         {label && <label className="input__label">{label}</label>}
         <div className="input__container" style={{ height: '100%', alignItems: 'flex-start' }}>
           {leftIcon && (
@@ -56,3 +57,4 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
 );
 
 TextArea.displayName = 'TextArea';
+

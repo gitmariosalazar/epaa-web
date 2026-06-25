@@ -3,6 +3,10 @@
   --chip-bg: var(--chip-color);
   --chip-text: #fff;
   --chip-border: transparent;
+  --chip-mix-color: black;
+  --chip-soft-bg-mix: transparent 92%;
+  --chip-text-mix-ratio: 60%;
+  --chip-hover-brightness: 0.95;
 
   display: inline-flex;
   align-items: center;
@@ -27,13 +31,20 @@
   opacity: 1;
 }
 
+.dark .color-chip {
+  --chip-mix-color: white;
+  --chip-soft-bg-mix: transparent 85%;
+  --chip-text-mix-ratio: 15%;
+  --chip-hover-brightness: 1.1;
+}
+
 /* Interactive state */
 .color-chip--interactive {
   cursor: pointer;
 }
 
 .color-chip--interactive:hover {
-  filter: brightness(0.95);
+  filter: brightness(var(--chip-hover-brightness));
   transform: translateY(-1px);
 }
 
@@ -74,17 +85,13 @@
 .color-chip--filled {
   /* Inherits base vars */
   --chip-bg: var(--chip-color);
-  --chip-text: #ffffff;
-  /* Ensure text contrast relative to the color? 
-     For now assuming white text on solid colors matches design system.
-     If color is light, might need dark text.
-  */
+  --chip-text: var(--chip-solid-text, #ffffff);
 }
 
 /* Outline */
 .color-chip--outline {
   --chip-bg: transparent;
-  --chip-text: var(--chip-color);
+  --chip-text: color-mix(in srgb, var(--chip-color), var(--chip-mix-color) var(--chip-text-mix-ratio));
   --chip-border: var(--chip-color);
 }
 .color-chip--outline.color-chip--interactive:hover {
@@ -93,11 +100,11 @@
 
 /* Soft */
 .color-chip--soft {
-  /* Fondo: 92% transparente lo hace mucho más sutil */
-  --chip-bg: color-mix(in srgb, var(--chip-color), transparent 92%);
+  /* Fondo: adaptado según tema */
+  --chip-bg: color-mix(in srgb, var(--chip-color), var(--chip-soft-bg-mix));
 
-  /* Texto: Lo mezclamos con un 20% de negro para que no sea tan brillante y sea más legible */
-  --chip-text: color-mix(in srgb, var(--chip-color), black 20%);
+  /* Texto: Lo mezclamos con negro/blanco según el tema para legibilidad óptima */
+  --chip-text: color-mix(in srgb, var(--chip-color), var(--chip-mix-color) var(--chip-text-mix-ratio));
 
   /* Borde: Un término medio entre el fondo y el texto */
   --chip-border: color-mix(in srgb, var(--chip-color), transparent 80%);
@@ -114,7 +121,7 @@
 /* Ghost */
 .color-chip--ghost {
   --chip-bg: transparent;
-  --chip-text: var(--chip-color);
+  --chip-text: color-mix(in srgb, var(--chip-color), var(--chip-mix-color) var(--chip-text-mix-ratio));
 }
 .color-chip--ghost.color-chip--interactive:hover {
   --chip-bg: color-mix(in srgb, var(--chip-color), transparent 90%);
