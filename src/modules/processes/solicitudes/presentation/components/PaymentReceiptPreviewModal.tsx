@@ -2,22 +2,23 @@
  * PaymentReceiptPreviewModal
  *
  * Layout: left = document preview, right = payment confirmation form.
- * Exact same blob pattern as SolicitudDocumentPreviewModal:
- *   previewUseCase.execute(doc.id, doc.url)
+ *
+ * SRP: handles receipt preview display and payment confirmation UI only.
+ *      Blob/preview/download concerns are delegated to dedicated hooks.
+ * DIP: consumes useDocumentPreview and useDocumentDownload (hook abstractions),
+ *      never depends on concrete repositories directly.
  */
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   X, FileText, Download, ExternalLink, AlertTriangle,
   Loader2, CheckCircle, Clock, CreditCard
 } from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import type { DocumentoAdjuntoResponse } from '../../domain/models/Solicitud';
-import { PreviewDocumentUseCase } from '@/modules/documents/application/usecases/PreviewDocumentUseCase';
-import { DownloadDocumentUseCase } from '@/modules/documents/application/usecases/DownloadDocumentUseCase';
-import { DocumentRepositoryImpl } from '@/modules/documents/infrastructure/repositories/DocumentRepositoryImpl';
+import { useDocumentPreview } from '@/modules/documents/presentation/hooks/useDocumentPreview';
+import { useDocumentDownload } from '@/modules/documents/presentation/hooks/useDocumentDownload';
 
-const previewUseCase = new PreviewDocumentUseCase(new DocumentRepositoryImpl());
-const downloadUseCase = new DownloadDocumentUseCase(new DocumentRepositoryImpl());
+// ─── Types ─────────────────────────────────────────────────────────────────────
 
 interface PaymentReceiptPreviewModalProps {
   isOpen: boolean;
@@ -42,6 +43,8 @@ interface PaymentReceiptPreviewModalProps {
   handleConfirmPayment: () => void;
 }
 
+// ─── Component ─────────────────────────────────────────────────────────────────
+
 export const PaymentReceiptPreviewModal: React.FC<PaymentReceiptPreviewModalProps> = ({
   isOpen,
   onClose,
@@ -56,89 +59,32 @@ export const PaymentReceiptPreviewModal: React.FC<PaymentReceiptPreviewModalProp
   isConfirmingPayment,
   handleConfirmPayment,
 }) => {
-  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
-  const [previewMimeType, setPreviewMimeType] = useState<string | null>(null);
-  const [loadingPreview, setLoadingPreview] = useState(false);
-  const [previewError, setPreviewError] = useState<string | null>(null);
-  const [isDownloading, setIsDownloading] = useState(false);
+  // ── Document preview & download (delegated to dedicated hooks) ───────────────
 
-  // ── Exactly the same as SolicitudDocumentPreviewModal ──────────────────────
-  useEffect(() => {
-    let active = true;
-    const doc = documento;
-    if (!doc?.id && !doc?.url) return;
+  const {
+    blobUrl: previewBlobUrl,
+    mimeType: previewMimeType,
+    loading: loadingPreview,
+    error: previewError
+  } = useDocumentPreview(documento?.id, documento?.url);
 
-    Promise.resolve().then(() => {
-      if (!active) return;
-      setLoadingPreview(true);
-      setPreviewError(null);
-      setPreviewBlobUrl((prev) => {
-        if (prev) URL.revokeObjectURL(prev);
-        return null;
-      });
-      setPreviewMimeType(null);
-    });
+  const { download, isDownloading } = useDocumentDownload();
 
-    previewUseCase
-      .execute(doc.id, doc.url)
-      .then((blob) => {
-        if (!active) return;
-        const blobUrl = URL.createObjectURL(blob);
-        setPreviewBlobUrl(blobUrl);
-        setPreviewMimeType(blob.type || null);
-      })
-      .catch((err) => {
-        if (!active) return;
-        console.error('Error loading receipt preview:', err);
-        setPreviewError(err?.message || 'No se pudo cargar la vista previa del comprobante.');
-      })
-      .finally(() => {
-        if (active) setLoadingPreview(false);
-      });
+  const isPdf   = previewMimeType === 'application/pdf';
+  const isImage = previewMimeType?.startsWith('image/') ?? false;
 
-    return () => { active = false; };
-  }, [documento]);
+  const handleDownload = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!documento) return;
+    const filename = documento.url?.split('/').pop()?.split('.')[0] || 'comprobante';
+    download(documento.id, documento.url, filename);
+  };
 
-  // ── Clean up blob on unmount ───────────────────────────────────────────────
-  useEffect(() => {
-    return () => {
-      setPreviewBlobUrl((prev) => {
-        if (prev) URL.revokeObjectURL(prev);
-        return null;
-      });
-      setPreviewMimeType(null);
-    };
-  }, []);
+  // ── Early exit ────────────────────────────────────────────────────────────────
 
   if (!isOpen) return null;
 
-  const handleDownload = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isDownloading || !documento) return;
-    setIsDownloading(true);
-    try {
-      const blob = await downloadUseCase.execute(documento.id, documento.url);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = documento.url?.split('/').pop() || 'comprobante';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Error downloading receipt:', err);
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
-  const isPdf =
-    previewMimeType === 'application/pdf' ||
-    !!(documento?.url && documento.url.toLowerCase().includes('.pdf'));
-  const isImage =
-    previewMimeType?.startsWith('image/') ||
-    !!(documento?.url && /\.(jpg|jpeg|png|webp|gif)$/i.test(documento.url));
+  // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
     <div

@@ -22,6 +22,8 @@ type AnyHandler = (payload: unknown) => void;
 class SocketIORealtimeService implements IRealtimeService {
   private socket: Socket | null = null;
   private _connected = false;
+  /** Evita repetir el mismo warn en cada reintento de reconexión. */
+  private _connectErrorLogged = false;
 
   /**
    * Almacena los handlers activos para re-registrarlos tras una reconexión.
@@ -34,7 +36,20 @@ class SocketIORealtimeService implements IRealtimeService {
   }
 
   connect(baseUrl: string, token?: string): void {
-    if (this.socket?.connected) return; // idempotente
+    // ── Guard: ya hay un socket activo y conectado ─────────────────────────────
+    if (this.socket?.connected) {
+      console.log('[Realtime] ℹ️ Ya conectado — omitiendo connect()');
+      return;
+    }
+
+    console.log(
+      '[Realtime] 🔌 Iniciando conexión...',
+      '\n  URL:', `${baseUrl}/realtime`,
+      '\n  Token:', token ? '✅ presente' : '❌ ausente'
+    );
+
+    // Resetear flag de error para que el primer error de este intento siempre aparezca
+    this._connectErrorLogged = false;
 
     try {
       this.socket = io(`${baseUrl}/realtime`, {
@@ -50,7 +65,8 @@ class SocketIORealtimeService implements IRealtimeService {
 
       this.socket.on('connect', () => {
         this._connected = true;
-        console.log('[Realtime] ✅ Conectado a', baseUrl, '/realtime');
+        this._connectErrorLogged = false; // reset para futuros errores tras reconexión
+        console.log('[Realtime] ✅ Conectado a', `${baseUrl}/realtime`);
         // Re-registrar handlers activos tras reconexión automática
         this.listeners.forEach((handlers, event) => {
           handlers.forEach((h) => this.socket?.on(event, h as any));
@@ -59,17 +75,28 @@ class SocketIORealtimeService implements IRealtimeService {
 
       this.socket.on('disconnect', (reason) => {
         this._connected = false;
-        console.log('[Realtime] ❌ Desconectado:', reason);
+        console.log('[Realtime] ❌ Desconectado. Motivo:', reason);
       });
 
       this.socket.on('connect_error', (err) => {
         this._connected = false;
-        console.warn('[Realtime] ⚠️ Error de conexión:', err.message);
+        // Solo loguear el primer error — socket.io reintenta automáticamente
+        // y repetir el mismo warning en cada reintento no aporta información.
+        if (!this._connectErrorLogged) {
+          this._connectErrorLogged = true;
+          console.warn(
+            '[Realtime] ⚠️ Error de conexión (reintentando automáticamente):',
+            err.message,
+            '\n  → Verifica que el backend esté corriendo y que nginx proxee /socket.io/'
+          );
+        }
       });
     } catch (err) {
       console.warn('[Realtime] ⚠️ No se pudo inicializar socket:', err);
     }
   }
+
+
 
   on<K extends keyof WsEventMap>(
     event: K,

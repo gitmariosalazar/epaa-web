@@ -1,0 +1,359 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   GeoLocationDisplay.css
+   Premium GPS + reverse geocoding display component.
+   Light / dark mode via CSS custom properties.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Spin animation ─────────────────────────────────────────────────────────── */
+@keyframes geoSpin {
+  to { transform: rotate(360deg); }
+}
+.geo-spin {
+  animation: geoSpin 1s linear infinite;
+  display: inline-block;
+}
+
+/* ── Fade-in animation ───────────────────────────────────────────────────────── */
+@keyframes geoFadeSlide {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* ── Root wrapper ────────────────────────────────────────────────────────────── */
+.geo-display {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Capture button
+   ───────────────────────────────────────────────────────────────────────────── */
+.geo-capture-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  border: 1.5px dashed var(--accent, #3b82f6);
+  background: color-mix(in srgb, var(--accent, #3b82f6) 6%, var(--surface));
+  color: var(--accent, #3b82f6);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.01em;
+}
+
+.geo-capture-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent, #3b82f6) 14%, var(--surface));
+  border-color: var(--accent, #3b82f6);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--accent, #3b82f6) 18%, transparent);
+}
+
+.geo-capture-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.geo-capture-btn--loading {
+  border-style: solid;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.geo-capture-btn:disabled {
+  cursor: not-allowed;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Error banner
+   ───────────────────────────────────────────────────────────────────────────── */
+.geo-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.65rem 0.875rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, #ef4444 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, #ef4444 30%, transparent);
+  color: #ef4444;
+  font-size: 0.8rem;
+  font-weight: 500;
+  animation: geoFadeSlide 0.2s ease-out;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   GPS status bar
+   ───────────────────────────────────────────────────────────────────────────── */
+.geo-status-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 0.5rem 0.875rem;
+  border-radius: 8px;
+  background: var(--background, rgba(0,0,0,0.15));
+  border: 1px solid var(--border-color);
+  font-size: 0.72rem;
+  animation: geoFadeSlide 0.25s ease-out;
+}
+
+.geo-status-bar__item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.geo-status-bar__divider {
+  width: 1px;
+  height: 14px;
+  background: var(--border-color);
+  flex-shrink: 0;
+}
+
+.geo-status-bar__icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.geo-status-bar__icon--precision { color: #10b981; }
+.geo-status-bar__icon--lat       { color: #f97316; }
+.geo-status-bar__icon--lng       { color: #6366f1; }
+
+.geo-status-bar__label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.geo-status-bar__value {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.geo-status-bar__value--precision { color: #10b981; }
+.geo-status-bar__value--coord     {
+  color: var(--text-main);
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.7rem;
+}
+
+/* Action buttons (refresh, clear) */
+.geo-status-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.geo-status-bar__action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.6rem;
+  transition: all 0.18s ease;
+}
+
+.geo-status-bar__action-btn:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text-main);
+  border-color: var(--text-muted);
+}
+
+.geo-status-bar__action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.geo-status-bar__action-btn--clear:hover {
+  background: color-mix(in srgb, #ef4444 12%, var(--surface)) !important;
+  color: #ef4444 !important;
+  border-color: #ef4444 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Geocoded address card
+   ───────────────────────────────────────────────────────────────────────────── */
+.geo-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  animation: geoFadeSlide 0.28s ease-out;
+}
+
+/* Loading state card */
+.geo-card--geocoding {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 1.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  border-style: dashed;
+}
+
+/* Card header */
+.geo-card__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--accent, #3b82f6) 5%, var(--surface));
+}
+
+.geo-card__header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--accent, #3b82f6) 15%, var(--surface));
+  color: var(--accent, #3b82f6);
+  flex-shrink: 0;
+}
+
+.geo-card__header-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent, #3b82f6);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.geo-card__header-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--accent, #3b82f6) 15%, var(--surface));
+  color: var(--accent, #3b82f6);
+  border: 1px solid color-mix(in srgb, var(--accent, #3b82f6) 30%, transparent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* 2-column address grid */
+.geo-card__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 0;
+}
+
+@media (max-width: 480px) {
+  .geo-card__grid { grid-template-columns: 1fr; }
+}
+
+/* Address field */
+.geo-address-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  transition: background 0.18s ease;
+}
+
+.geo-address-field:hover {
+  background: color-mix(in srgb, var(--accent, #3b82f6) 3%, var(--surface));
+}
+
+/* Remove right border from even columns */
+.geo-address-field:nth-child(even) {
+  border-right: none;
+}
+
+.geo-address-field--highlight {
+  background: color-mix(in srgb, var(--accent, #3b82f6) 4%, var(--surface));
+}
+
+.geo-address-field__label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.geo-address-field__icon {
+  color: var(--accent, #3b82f6);
+  display: flex;
+  align-items: center;
+  opacity: 0.8;
+}
+
+.geo-address-field__value {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.35;
+}
+
+/* Full address block */
+.geo-card__full-address {
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.geo-card__full-address-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.geo-card__full-address-text {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+/* Google Maps link */
+.geo-card__maps-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0.6rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent, #3b82f6);
+  text-decoration: none;
+  transition: opacity 0.18s ease;
+  align-self: flex-start;
+}
+
+.geo-card__maps-link:hover {
+  opacity: 0.75;
+  text-decoration: underline;
+}

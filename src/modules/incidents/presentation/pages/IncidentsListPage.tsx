@@ -150,6 +150,9 @@ export const IncidentsListPage: React.FC = () => {
     }
   ];
 
+  console.log("incidents", incidents);
+  console.log("selectedIncident", selectedIncident);
+
   return (
     <>
       <PageLayout className='payments-page'

@@ -379,6 +379,51 @@
   transform: scale(1.05);
 }
 
+/*
+ * The Tooltip wraps the button in a <div class="tooltip-container">.
+ * Without these rules, the div keeps its intrinsic height (auto) instead of
+ * filling the .gallery-item, so the image overflows and ruins the aspect-ratio.
+ */
+.gallery-item .tooltip-container {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The clickable button must also fill the tooltip-container */
+.gallery-item .gallery-img--clickable {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.gallery-img--clickable:hover img {
+  transform: scale(1.04);
+  transition: transform 0.25s ease;
+}
+
+/* Zoom hint overlay shown on thumbnail hover */
+.gallery-zoom-hint {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  border-radius: 0;
+}
+
+.gallery-img--clickable:hover .gallery-zoom-hint {
+  opacity: 1;
+}
+
 .gallery-tag {
   position: absolute;
   bottom: 6px;
@@ -389,6 +434,248 @@
   font-size: 0.625rem;
   color: white;
 }
+
+/* ─── Photo Lightbox ─────────────────────────────────────────────────────────── */
+
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(6px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.18s ease-out;
+}
+
+.lightbox-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 960px;
+  /* Fixed height — never shrinks/grows when loading vs image loaded */
+  height: 90vh;
+  max-height: 90vh;
+  margin: 1rem;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(16, 18, 27, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.6);
+  animation: slideUp 0.22s ease-out;
+}
+
+/* Top bar */
+.lightbox-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  gap: 1rem;
+}
+
+.lightbox-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.lightbox-type {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent, #60a5fa);
+}
+
+.lightbox-counter {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.lightbox-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lightbox-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.lightbox-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.lightbox-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.lightbox-btn--download {
+  color: var(--accent, #60a5fa);
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+.lightbox-btn--download:hover:not(:disabled) {
+  background: rgba(96, 165, 250, 0.1);
+  border-color: rgba(96, 165, 250, 0.5);
+}
+
+.lightbox-btn--close {
+  padding: 6px;
+}
+
+/* Main viewer area — flex: 1 fills all remaining height after topbar and strip */
+.lightbox-viewer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;       /* required for flex children to shrink correctly */
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.lightbox-image-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Fill the full viewer — never depends on image natural size */
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.lightbox-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  animation: fadeIn 0.2s ease-out;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Loading / error states in viewer */
+.lightbox-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.85rem;
+}
+
+.lightbox-state--error {
+  color: rgba(239, 68, 68, 0.6);
+}
+
+/* Prev / Next navigation buttons */
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  backdrop-filter: blur(4px);
+}
+
+.lightbox-nav--prev { left: 12px; }
+.lightbox-nav--next { right: 12px; }
+
+.lightbox-nav:hover:not(.lightbox-nav--disabled) {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.lightbox-nav--disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+/* Thumbnail strip */
+.lightbox-strip {
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+.lightbox-thumb {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  overflow: hidden;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.06);
+  transition: border-color 0.18s ease, transform 0.18s ease;
+  padding: 0;
+}
+
+.lightbox-thumb:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.06);
+}
+
+.lightbox-thumb--active {
+  border-color: var(--accent, #60a5fa);
+  transform: scale(1.08);
+}
+
+.lightbox-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lightbox-thumb-loading {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+
 
 /* Timeline Audit Trail */
 .audit-timeline {

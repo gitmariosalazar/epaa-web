@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Calendar, MapPin, User, CheckCircle } from 'lucide-react';
+import { X, Calendar, MapPin, User, CheckCircle, Loader2, ImageOff } from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import type { IncidentResponse } from '../../domain/schemas/dtos/response/incident.response';
 import { ConverDate } from '@/shared/utils/datetime/ConverDate';
+import { useFilePreview } from '@/shared/files';
+import { PhotoLightbox } from './PhotoLightbox';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { StatusTimeline } from '@/shared/presentation/components/Timeline';
+import { GeoSection } from '@/shared/presentation/components/GeoLocation';
+
+// ─── Types ─────────────────────────────────────────────────────────────────────
 
 interface IncidentDetailModalProps {
   isOpen: boolean;
@@ -12,218 +19,362 @@ interface IncidentDetailModalProps {
   incident: IncidentResponse | null;
 }
 
+
+// ─── Pure helpers (module-level — no closures, no re-creation on render) ───────
+
+function getStatusColor(status: string): string {
+  switch (status.toUpperCase()) {
+    case 'RESUELTO': return 'green';
+    case 'EN_INSPECCION': return 'orange';
+    case 'REPORTADO': return 'blue';
+    case 'FALSO_REPORTE': return 'red';
+    default: return 'neutral';
+  }
+}
+
+function getPriorityColor(priority: string): string {
+  switch (priority.toUpperCase()) {
+    case 'CRITICA': return 'red';
+    case 'ALTA': return 'orange';
+    case 'MEDIA': return 'amber';
+    case 'BAJA': return 'green';
+    default: return 'neutral';
+  }
+}
+
+function extractFilename(filePath: string): string {
+  return filePath.split('/').pop() ?? filePath;
+}
+
+// ─── EvidencePhoto sub-component ───────────────────────────────────────────────
+
+interface EvidencePhotoProps {
+  photoId: number;
+  filePath: string;
+  type: string;
+  /** Opens the lightbox at this thumbnail's position. */
+  onClick: () => void;
+}
+
+/**
+ * EvidencePhoto
+ *
+ * Renders a single clickable thumbnail that opens the lightbox on click.
+ *
+ * SRP: load and display one authenticated thumbnail.
+ * DIP: depends on useFilePreview (hook abstraction).
+ *
+ * Sub-component pattern: required because hooks cannot be called inside loops.
+ * Each instance owns its blob URL lifecycle, preventing memory leaks.
+ */
+const EvidencePhoto: React.FC<EvidencePhotoProps> = ({ photoId, filePath, type, onClick }) => {
+  const filename = extractFilename(filePath);
+  const { blobUrl, loading, error } = useFilePreview('incidents', filename);
+
+  return (
+    <div className="gallery-item">
+      <Tooltip content={blobUrl ? 'Clic para ampliar' : ''} position='bottom'>
+        <button
+          className="gallery-img gallery-img--clickable"
+          onClick={blobUrl ? onClick : undefined}
+          disabled={!blobUrl}
+          aria-label={`Ver evidencia ${type} #${photoId} en pantalla completa`}
+          style={{
+            position: 'relative', overflow: 'hidden',
+            padding: 0, border: 'none',
+            cursor: blobUrl ? 'zoom-in' : 'default',
+            background: 'none', width: '100%'
+          }}
+        >
+          {loading && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'var(--surface-2, rgba(0,0,0,0.06))'
+            }}>
+              <Loader2 size={22} style={{ color: 'var(--accent)', animation: 'spin 1s linear infinite' }} />
+            </div>
+          )}
+          {!loading && blobUrl && (
+            <>
+              <img
+                src={blobUrl}
+                alt={`Evidencia #${photoId}`}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+              <div className="gallery-zoom-hint">
+                <span>🔍 Ampliar</span>
+              </div>
+            </>
+          )}
+          {!loading && (error || !blobUrl) && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: '4px',
+              background: 'var(--surface-2, rgba(0,0,0,0.06))',
+              color: 'var(--text-muted)', fontSize: '0.72rem'
+            }}>
+              <ImageOff size={20} style={{ opacity: 0.5 }} />
+              <span>Sin imagen</span>
+            </div>
+          )}
+        </button>
+      </Tooltip>
+      <span className="gallery-tag">{type}</span>
+    </div>
+  );
+};
+
+// ─── IncidentDetailModal ────────────────────────────────────────────────────────
+
+/**
+ * IncidentDetailModal
+ *
+ * Displays the full detail of an incident in a portal modal.
+ *
+ * SRP: responsible only for layout and presentation of incident data.
+ *      Image loading → EvidencePhoto. Lightbox → PhotoLightbox.
+ * DIP: depends on hook abstractions from @/shared/files, not on HTTP directly.
+ * Clean Architecture: Presentation layer — no business logic, no HTTP calls.
+ *
+ * Lightbox state lives here (lifted state) because this component owns the
+ * list of photos and decides which one the user clicked.
+ */
 export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
   isOpen,
   onClose,
   incident
 }) => {
+  // Lightbox state: null = closed, number = index of the open photo
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  // All hooks must be called before any conditional return (Rules of Hooks)
+  const photos = incident?.evidencePhotos ?? [];
+
   if (!isOpen || !incident) return null;
 
-  const getStatusColor = (status: string) => {
-    switch (status.toUpperCase()) {
-      case 'RESUELTO':
-        return 'green';
-      case 'EN_INSPECCION':
-        return 'orange';
-      case 'REPORTADO':
-        return 'blue';
-      case 'FALSO_REPORTE':
-        return 'red';
-      default:
-        return 'neutral';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority.toUpperCase()) {
-      case 'CRITICA':
-        return 'red';
-      case 'ALTA':
-        return 'orange';
-      case 'MEDIA':
-        return 'amber';
-      case 'BAJA':
-        return 'green';
-      default:
-        return 'neutral';
-    }
-  };
-
-  return createPortal(
-    <div className="incident-modal-overlay" onClick={onClose}>
-      <div className="incident-modal incident-detail-modal premium-theme" onClick={(e) => e.stopPropagation()}>
-        <div className="incident-modal-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <h3>Detalle de Incidente {incident.incidentId}</h3>
-            <ColorChip
-              label={incident.status.replace(/_/g, ' ')}
-              color={getStatusColor(incident.status)}
-              variant="soft"
-              size="xs"
-            />
-            <ColorChip
-              label={`Prioridad: ${incident.priority}`}
-              color={getPriorityColor(incident.priority)}
-              variant="soft"
-              size="xs"
-            />
-          </div>
-          <Button variant="ghost" size="sm" circle onClick={onClose} className="close-btn-p">
-            <X size={20} />
-          </Button>
-        </div>
-
-        <div className="incident-modal-body">
-          <div className="detail-section">
-            <h4 className="detail-section-title">Información Básica</h4>
-            <div className="detail-grid">
-              <div className="detail-item">
-                <span className="detail-label">Tipo de Incidente</span>
-                <span className="detail-value">{incident.incidentTypeName || 'Sin registrar'}</span>
+  return (
+    <>
+      {createPortal(
+        <div className="incident-modal-overlay" onClick={onClose}>
+          <div
+            className="incident-modal incident-detail-modal premium-theme"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* ── Header ── */}
+            <div className="incident-modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <h3>Detalle de Incidente {incident.incidentId}</h3>
+                <ColorChip
+                  label={incident.status.replace(/_/g, ' ')}
+                  color={getStatusColor(incident.status)}
+                  variant="soft"
+                  size="xs"
+                />
+                <ColorChip
+                  label={`Prioridad: ${incident.priority}`}
+                  color={getPriorityColor(incident.priority)}
+                  variant="soft"
+                  size="xs"
+                />
               </div>
-              <div className="detail-item">
-                <span className="detail-label">Categoría</span>
-                <span className="detail-value">{incident.categoryName || 'Sin registrar'}</span>
-              </div>
-              <div className="detail-item">
-                <span className="detail-label">Conexión / Acometida</span>
-                <span className="detail-value">{incident.connectionId || 'No asociado'}</span>
-              </div>
-              <div className="detail-item">
-                <span className="detail-label">ID de Lectura</span>
-                <span className="detail-value">{incident.readingId || 'No asociado'}</span>
-              </div>
+              <Tooltip content='Cerrar' position='bottom' followCursor={false}>
+                <Button variant="ghost" size="sm" circle onClick={onClose} className="close-btn-p" color='red'>
+                  <X size={20} />
+                </Button>
+              </Tooltip>
             </div>
-          </div>
 
-          <div className="detail-section">
-            <h4 className="detail-section-title">Reporte</h4>
-            <div className="detail-description-box">
-              <p className="description-text">{incident.reportDescription}</p>
-            </div>
-            <div className="detail-grid mt-2">
-              <div className="detail-item">
-                <span className="detail-label">
-                  <Calendar size={12} style={{ marginRight: 4 }} />
-                  Fecha de Reporte
-                </span>
-                <span className="detail-value">{ConverDate(incident.reportDate)}</span>
-              </div>
-              <div className="detail-item">
-                <span className="detail-label">
-                  <User size={12} style={{ marginRight: 4 }} />
-                  Reportado Por (Usuario / Cliente)
-                </span>
-                <span className="detail-value">
-                  {incident.reportedBy || incident.reporterUserId || incident.clienteUsuarioReportaId || 'Desconocido'}
-                  {incident.reportOrigin ? ` (${incident.reportOrigin})` : ''}
-                </span>
-              </div>
-            </div>
-          </div>
+            <div className="incident-modal-body">
 
-          {(incident.referenceAddress || (incident.latitude && incident.longitude)) && (
-            <div className="detail-section">
-              <h4 className="detail-section-title">Ubicación</h4>
-              {incident.referenceAddress && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                  <MapPin size={16} className="text-secondary" />
-                  <span className="detail-value">{incident.referenceAddress}</span>
-                </div>
-              )}
-              {incident.latitude && incident.longitude && (
-                <div className="geolocation-box">
-                  <span className="detail-value">Coordenadas: {incident.latitude}, {incident.longitude}</span>
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${incident.latitude},${incident.longitude}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="maps-link"
-                  >
-                    Ver en Google Maps
-                  </a>
-                </div>
-              )}
-            </div>
-          )}
-
-          {incident.status === 'RESUELTO' && (
-            <div className="detail-section highlight-resolved">
-              <h4 className="detail-section-title" style={{ color: 'var(--success-color)' }}>
-                <CheckCircle size={14} style={{ marginRight: 4 }} />
-                Resolución
-              </h4>
-              <div className="detail-description-box">
-                <p className="description-text">{incident.resolutionDescription || 'Sin comentarios de resolución.'}</p>
-              </div>
-              <div className="detail-grid mt-2">
-                <div className="detail-item">
-                  <span className="detail-label">Fecha de Resolución</span>
-                  <span className="detail-value">{incident.resolutionDate ? ConverDate(incident.resolutionDate) : 'N/A'}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Resuelto Por</span>
-                  <span className="detail-value">{incident.resolverUserId || 'Desconocido'}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Costo de Reparación</span>
-                  <span className="detail-value" style={{ fontWeight: 'bold' }}>
-                    ${Number(incident.repairCost || 0).toFixed(2)}
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Cobrado al Usuario</span>
-                  <span className="detail-value">{incident.chargeToUser ? 'Sí' : 'No'}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {incident.evidencePhotos && incident.evidencePhotos.length > 0 && (
-            <div className="detail-section">
-              <h4 className="detail-section-title">Evidencia Fotográfica ({incident.evidencePhotos.length})</h4>
-              <div className="photos-gallery">
-                {incident.evidencePhotos.map((photo) => (
-                  <div key={photo.photoId} className="gallery-item">
-                    <img src={photo.filePath} alt={`Evidencia ID: ${photo.photoId}`} className="gallery-img" />
-                    <span className="gallery-tag">{photo.type}</span>
+              {/* ── Basic info ── */}
+              <div className="detail-section">
+                <h4 className="detail-section-title">Información Básica</h4>
+                <div className="detail-grid">
+                  <div className="detail-item">
+                    <span className="detail-label">Tipo de Incidente</span>
+                    <span className="detail-value">{incident.incidentTypeName || 'Sin registrar'}</span>
                   </div>
-                ))}
+                  <div className="detail-item">
+                    <span className="detail-label">Categoría</span>
+                    <span className="detail-value">{incident.categoryName || 'Sin registrar'}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">Conexión / Acometida</span>
+                    <span className="detail-value">{incident.connectionId || 'No asociado'}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">ID de Lectura</span>
+                    <span className="detail-value">{incident.readingId || 'No asociado'}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
 
-          {incident.statusHistory && incident.statusHistory.length > 0 && (
-            <div className="detail-section">
-              <h4 className="detail-section-title">Historial de Estados</h4>
-              <div className="audit-timeline">
-                {incident.statusHistory.map((hist, idx) => (
-                  <div key={idx} className="timeline-event">
-                    <div className="timeline-badge"></div>
-                    <div className="timeline-content">
-                      <div className="timeline-header">
-                        <span className="timeline-status-change">
-                          {hist.previousStatus ? `${hist.previousStatus} ➜ ` : ''} <b>{hist.newStatus}</b>
-                        </span>
-                        <span className="timeline-date">{ConverDate(hist.changeDate)}</span>
-                      </div>
-                      {hist.observation && <p className="timeline-obs">{hist.observation}</p>}
-                      {hist.managedBy && <span className="timeline-user">Por: {hist.managedBy}</span>}
+              {/* ── Report ── */}
+              <div className="detail-section">
+                <h4 className="detail-section-title">Reporte</h4>
+                <div className="detail-description-box">
+                  <p className="description-text">{incident.reportDescription}</p>
+                </div>
+                <div className="detail-grid mt-2">
+                  <div className="detail-item">
+                    <span className="detail-label">
+                      <Calendar size={12} style={{ marginRight: 4 }} />
+                      Fecha de Reporte
+                    </span>
+                    <span className="detail-value">{ConverDate(incident.reportDate)}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">
+                      <User size={12} style={{ marginRight: 4 }} />
+                      Reportado Por (Usuario / Cliente)
+                    </span>
+                    <span className="detail-value">
+                      {incident.reportedBy || incident.reporterUserId || incident.clienteUsuarioReportaId || 'Desconocido'}
+                      {incident.reportOrigin ? ` (${incident.reportOrigin})` : ''}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Location ── */}
+              {(incident.referenceAddress || (incident.latitude && incident.longitude)) && (
+                <div className="detail-section">
+                  <h4 className="detail-section-title">Ubicación</h4>
+                  {incident.referenceAddress && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                      <MapPin size={16} className="text-secondary" />
+                      <span className="detail-value">{incident.referenceAddress}</span>
+                    </div>
+                  )}
+                  {/* Original coordinates box — kept intact */}
+                  {incident.latitude && incident.longitude && (
+                    <div className="geolocation-box">
+                      <span className="detail-value">
+                        Coordenadas: {incident.latitude}, {incident.longitude}
+                      </span>
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${incident.latitude},${incident.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="maps-link"
+                      >
+                        Ver en Google Maps
+                      </a>
+                    </div>
+                  )}
+                  {/* Geocoded address card — reverse geocodes the saved coordinates */}
+                  {incident.latitude && incident.longitude && (
+                    <div style={{ marginTop: '10px' }}>
+                      <GeoSection lat={Number(incident.latitude)} lng={Number(incident.longitude)} />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── Resolution ── */}
+              {incident.status === 'RESUELTO' && (
+                <div className="detail-section highlight-resolved">
+                  <h4 className="detail-section-title" style={{ color: 'var(--success-color)' }}>
+                    <CheckCircle size={14} style={{ marginRight: 4 }} />
+                    Resolución
+                  </h4>
+                  <div className="detail-description-box">
+                    <p className="description-text">
+                      {incident.resolutionDescription || 'Sin comentarios de resolución.'}
+                    </p>
+                  </div>
+                  <div className="detail-grid mt-2">
+                    <div className="detail-item">
+                      <span className="detail-label">Fecha de Resolución</span>
+                      <span className="detail-value">
+                        {incident.resolutionDate ? ConverDate(incident.resolutionDate) : 'N/A'}
+                      </span>
+                    </div>
+                    <div className="detail-item">
+                      <span className="detail-label">Resuelto Por</span>
+                      <span className="detail-value">{incident.resolverUserId || 'Desconocido'}</span>
+                    </div>
+                    <div className="detail-item">
+                      <span className="detail-label">Costo de Reparación</span>
+                      <span className="detail-value" style={{ fontWeight: 'bold' }}>
+                        ${Number(incident.repairCost || 0).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="detail-item">
+                      <span className="detail-label">Cobrado al Usuario</span>
+                      <span className="detail-value">{incident.chargeToUser ? 'Sí' : 'No'}</span>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+                </div>
+              )}
 
-        <div className="incident-modal-footer">
-          <Button variant="outline" onClick={onClose}>
-            Cerrar
-          </Button>
-        </div>
-      </div>
-    </div>,
-    document.body
+              {/* ── Evidence photos ── */}
+              {photos.length > 0 && (
+                <div className="detail-section">
+                  <h4 className="detail-section-title">
+                    Evidencia Fotográfica ({photos.length})
+                  </h4>
+                  <div className="photos-gallery">
+                    {photos.map((photo, idx) => (
+                      <EvidencePhoto
+                        key={photo.photoId}
+                        photoId={photo.photoId}
+                        filePath={photo.filePath}
+                        type={photo.type}
+                        onClick={() => setLightboxIndex(idx)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Status history — uses shared StatusTimeline ── */}
+              {incident.statusHistory && incident.statusHistory.length > 0 && (
+                <div className="detail-section">
+                  <StatusTimeline
+                    title="Historial de Estados"
+                    items={incident.statusHistory.map((h) => ({
+                      status:              h.newStatus,
+                      statusLabel:         h.newStatus.replace(/_/g, ' '),
+                      previousStatus:      h.previousStatus ?? undefined,
+                      previousStatusLabel: h.previousStatus?.replace(/_/g, ' '),
+                      date:                h.changeDate,
+                      comment:             h.observation ?? undefined,
+                      actor:               h.managedBy ?? undefined,
+                    }))}
+                    emptyMessage="Sin historial de estados."
+                  />
+                </div>
+              )}
+
+            </div>
+
+            {/* ── Footer ── */}
+            <div className="incident-modal-footer">
+              <Tooltip content='Cerrar' position='bottom' followCursor={false}>
+                <Button variant="outline" onClick={onClose} className="close-btn-p" color='red' value='Cerrar'>
+                  <X size={20} />
+                  Cerrar
+                </Button>
+              </Tooltip>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Lightbox — rendered in its own portal above the modal ── */}
+      {lightboxIndex !== null && photos.length > 0 && (
+        <PhotoLightbox
+          photos={photos}
+          activeIndex={lightboxIndex}
+          category="incidents"
+          onClose={() => setLightboxIndex(null)}
+          onIndexChange={setLightboxIndex}
+        />
+      )}
+    </>
   );
 };

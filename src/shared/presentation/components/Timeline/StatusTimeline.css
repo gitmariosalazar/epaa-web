@@ -1,0 +1,260 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   StatusTimeline.css
+   Generic timeline component styles — used across all modules.
+   Mirrors the premium design from SolicitudDetailPage.css (sol-detail-timeline-*).
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Wrapper ──────────────────────────────────────────────────────────────────── */
+.status-timeline-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────────── */
+.status-timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 0 0.875rem 0;
+}
+
+.status-timeline-header__left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-timeline-header__icon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.status-timeline-header__title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────────── */
+.status-timeline-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.status-timeline-empty__icon {
+  color: var(--text-muted);
+  opacity: 0.6;
+  margin-bottom: 0.5rem;
+  animation: statusTimelinePulse 2s infinite ease-in-out;
+}
+
+.status-timeline-empty__text {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 0.25rem 0;
+}
+
+.status-timeline-empty__sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+@keyframes statusTimelinePulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%       { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* ── Body (scrollable list of nodes) ────────────────────────────────────────── */
+.status-timeline-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem 0;
+}
+
+/* ── Node ────────────────────────────────────────────────────────────────────── */
+.status-timeline-node {
+  position: relative;
+  display: flex;
+  gap: 1.25rem;
+  padding-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.status-timeline-node--last {
+  padding-bottom: 0;
+}
+
+/* Vertical connector */
+.status-timeline-node__line {
+  position: absolute;
+  top: 36px;
+  left: 17.5px;
+  bottom: -6px;
+  width: 3px;
+  background: color-mix(in srgb, var(--border-color) 80%, transparent);
+  z-index: 1;
+  border-radius: 9999px;
+  transition: background 0.3s ease;
+}
+
+.status-timeline-node:hover .status-timeline-node__line {
+  background: color-mix(
+    in srgb,
+    var(--node-color, var(--accent)) 35%,
+    var(--border-color)
+  );
+}
+
+/* Icon container */
+.status-timeline-node__icon-container {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 2;
+  margin-top: 2px;
+}
+
+.status-timeline-node__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 2.5px solid var(--node-color, var(--accent));
+  color: var(--node-color, var(--accent));
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.status-timeline-node__icon-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--node-color, var(--accent));
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: blur(4px);
+  z-index: -1;
+}
+
+.status-timeline-node:hover .status-timeline-node__icon {
+  transform: scale(1.1);
+  background: var(--node-color, var(--accent));
+  color: #ffffff;
+  box-shadow: 0 6px 14px
+    color-mix(in srgb, var(--node-color, var(--accent)) 35%, transparent);
+}
+
+.status-timeline-node:hover .status-timeline-node__icon-glow {
+  opacity: 0.35;
+  transform: scale(1.3);
+}
+
+/* Content card */
+.status-timeline-node__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0.6rem 0.85rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.status-timeline-node:hover .status-timeline-node__content {
+  border-color: color-mix(
+    in srgb,
+    var(--node-color, var(--accent)) 30%,
+    var(--border-color)
+  );
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+  transform: translateY(-2px);
+}
+
+/* Header row inside content card */
+.status-timeline-node__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.status-timeline-node__flow-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.flow-arrow {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  margin: 0;
+}
+
+.status-timeline-node__date {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Comment block */
+.status-timeline-node__comment {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+  background: color-mix(
+    in srgb,
+    var(--node-color, var(--accent)) 4%,
+    var(--background)
+  );
+  border-left: 3px solid var(--node-color, var(--accent));
+  border-radius: 4px 8px 8px 4px;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+.status-timeline-node__comment-icon {
+  color: var(--node-color, var(--accent));
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.status-timeline-node__comment p {
+  margin: 0;
+}
+
+/* Actor label */
+.status-timeline-node__actor {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}

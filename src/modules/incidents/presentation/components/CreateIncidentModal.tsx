@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, AlertCircle, MapPin, UploadCloud } from 'lucide-react';
+import { X, AlertCircle, UploadCloud } from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { useIncidentContext } from '../context/IncidentContext';
 import { Input } from '@/shared/presentation/components/Input/Input';
@@ -8,6 +8,7 @@ import { Select } from '@/shared/presentation/components/Input/Select';
 import { TextArea } from '@/shared/presentation/components/TextArea/TextArea';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress/CircularProgress';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { GeoLocationDisplay, GeoSection, useGeolocation } from '@/shared/presentation/components/GeoLocation';
 
 interface CreateIncidentModalProps {
   isOpen: boolean;
@@ -32,42 +33,19 @@ export const CreateIncidentModal: React.FC<CreateIncidentModalProps> = ({ isOpen
   const [images, setImages] = useState<string[]>([]);
 
   // Geolocation and uploader state & refs
-  const [isLocating, setIsLocating] = useState(false);
+  const geo = useGeolocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleGetLocation = () => {
-    if (!navigator.geolocation) {
-      setFormError('La geolocalización no es soportada por este navegador.');
-      return;
+  // Sync lat/lng form state from geocoded address
+  useEffect(() => {
+    if (geo.address) {
+      setLatitude(String(geo.address.latitude));
+      setLongitude(String(geo.address.longitude));
+    } else {
+      setLatitude('');
+      setLongitude('');
     }
-
-    setIsLocating(true);
-    setFormError(null);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLatitude(String(position.coords.latitude));
-        setLongitude(String(position.coords.longitude));
-        setIsLocating(false);
-      },
-      (error) => {
-        setIsLocating(false);
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            setFormError('Permiso de geolocalización denegado.');
-            break;
-          case error.POSITION_UNAVAILABLE:
-            setFormError('La ubicación actual no está disponible.');
-            break;
-          case error.TIMEOUT:
-            setFormError('Tiempo de espera agotado al obtener ubicación.');
-            break;
-          default:
-            setFormError('Error al obtener la ubicación real.');
-        }
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
+  }, [geo.address]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -252,42 +230,25 @@ export const CreateIncidentModal: React.FC<CreateIncidentModalProps> = ({ isOpen
             />
           </div>
 
-          <div className="form-grid">
-            <div className="form-group">
-              <Input
-                label="Latitud *"
-                type="number"
-                step="any"
-                value={latitude}
-                onChange={(e) => setLatitude(e.target.value)}
-                placeholder="Ej. -0.18065"
-              />
-            </div>
-
-            <div className="form-group">
-              <Input
-                label="Longitud *"
-                type="number"
-                step="any"
-                value={longitude}
-                onChange={(e) => setLongitude(e.target.value)}
-                placeholder="Ej. -78.4678"
-              />
-            </div>
-          </div>
-
-          <div className="form-group" style={{ marginTop: '-0.5rem' }}>
-            <Button
-              type="button"
-              variant="outline"
-              size="compact"
-              onClick={handleGetLocation}
-              isLoading={isLocating}
-              leftIcon={<MapPin size={16} />}
-              style={{ width: '100%', justifyContent: 'center' }}
-            >
-              Obtener Ubicación GPS Actual
-            </Button>
+          {/* GPS capture button + geocoded address display */}
+          <div className="form-group">
+            <label className="input__label">Ubicación GPS *</label>
+            {/* Capture button + GPS status bar only (card hidden to avoid duplicate) */}
+            <GeoLocationDisplay
+              address={geo.address}
+              isLocating={geo.isLocating}
+              isGeocoding={geo.isGeocoding}
+              error={geo.error}
+              onGetLocation={geo.getLocation}
+              onClear={geo.clear}
+              hideAddressCard
+            />
+            {/* GeoSection renders the geocoded address card — same as IncidentDetailModal */}
+            {latitude && longitude && (
+              <div style={{ marginTop: '8px' }}>
+                <GeoSection lat={Number(latitude)} lng={Number(longitude)} />
+              </div>
+            )}
           </div>
 
           <div className="form-group">
