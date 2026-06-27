@@ -62,7 +62,7 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
 
   return (
     <APIProvider apiKey={apiKey}>
-      <div className="incident-map-feature-container" style={{ height: 'calc(100vh - 130px)', minHeight: '600px' }}>
+      <div className="incident-map-feature-container">
         {/* Side panel */}
         <IncidentMapSidePanel
           incidents={incidents}

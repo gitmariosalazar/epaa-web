@@ -40,7 +40,7 @@
 /* Main layout */
 .incident-map-feature-container {
   display: flex;
-  height: calc(100vh - 130px); /* Usamos la misma altura base pero restando 130px ya que incidentes no tiene pestañas */
+  height: calc(100vh - 180px);
   min-height: 600px;
   width: 100%;
   gap: 0;
@@ -58,6 +58,14 @@
   position: relative;
   height: 100%;
   overflow: hidden;
+}
+
+.incident-fullscreen-map-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
 }
 
 /* ── Side Panel ─────────────────────────────────────────────────────────────── */

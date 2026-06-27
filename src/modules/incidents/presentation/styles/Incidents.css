@@ -1095,11 +1095,21 @@
   height: 32px;
   transform: translate(-50%, -50%);
   transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: auto !important;
 }
 
 .incident-marker-container.is-selected {
-  transform: translate(-50%, -50%) scale(1.35);
+  transform: translate(-50%, -50%) scale(1.6);
   z-index: 10000;
+  --marker-color: #a855f7 !important;
+  --marker-glow: rgba(168, 85, 247, 0.75) !important;
+}
+
+.incident-marker-container.is-selected .incident-marker-core {
+  box-shadow:
+    0 0 0 3px #ffffff,
+    0 0 16px 8px var(--marker-glow),
+    0 8px 24px rgba(0, 0, 0, 0.75);
 }
 
 .incident-marker-container.is-hovered {
@@ -1419,3 +1429,67 @@
   filter: brightness(0.95);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   IncidentsPage — tab-based layout (mirrors ConnectionsPage pattern)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.incidents-page {
+  padding: 0.5rem;
+  max-width: 100%;
+  gap: 0.5rem;
+  animation: incidents-fade-in 0.3s ease-out;
+  color: var(--text-main);
+}
+
+@media (min-width: 1024px) {
+  .incidents-page {
+    padding: 0.75rem;
+  }
+}
+
+/* ── Tabs row (header) ──────────────────────────────────────────────────── */
+.incidents-tabs-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 2px;
+}
+
+.incidents-tabs-row > div:first-child {
+  flex: 1;
+}
+
+/* ── Content area (table/map fills remaining space) ─────────────────────── */
+.incidents-page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+/* ── Loading / Empty state centered card ────────────────────────────────── */
+.incidents-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 260px;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+  background: linear-gradient(
+    135deg,
+    var(--surface) 0%,
+    var(--background) 100%
+  );
+  animation: incidents-fade-in 0.25s ease-out;
+}
+
+/* ── Animation ──────────────────────────────────────────────────────────── */
+@keyframes incidents-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

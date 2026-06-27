@@ -83,6 +83,7 @@ import { WorkOrdersProcessPage, WorkOrderCreatePage, AllWorkOrdersListPage, Work
 import { IncidentProvider } from '@/modules/incidents/presentation/context/IncidentContext';
 import { IncidentsListPage } from '@/modules/incidents/presentation/pages/IncidentsListPage';
 import { IncidentsMapPage } from '@/modules/incidents/presentation/pages/IncidentsMapPage';
+import { IncidentsPage } from '@/modules/incidents/presentation/pages/IncidentsPage';
 import { CreateIncidentPage } from '@/modules/incidents/presentation/pages/CreateIncidentPage';
 
 import UnAuthorizedPage from '@/shared/presentation/components/unauthorized/UnAuthorizedPage';
@@ -298,9 +299,12 @@ function App() {
                   element={
                     <IncidentProvider>
                       <Routes>
-                        <Route index element={<IncidentsListPage />} />
-                        <Route path="list" element={<IncidentsListPage />} />
-                        <Route path="map" element={<IncidentsMapPage />} />
+                        {/* Ruta raíz → lista */}
+                        <Route index element={<IncidentsPage />} />
+                        {/* Tab: Lista e Incidentes (comparten IncidentsPage, el tab se sincroniza por pathname) */}
+                        <Route path="list" element={<IncidentsPage />} />
+                        <Route path="map"  element={<IncidentsPage />} />
+                        {/* Crear incidente (flujo separado) */}
                         <Route
                           path="create"
                           element={

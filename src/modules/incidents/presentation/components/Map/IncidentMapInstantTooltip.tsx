@@ -33,7 +33,8 @@ interface IncidentMapInstantTooltipProps {
 export const IncidentMapInstantTooltip: React.FC<IncidentMapInstantTooltipProps> = ({
   incident,
 }) => {
-  const cfg = PRIORITY_CONFIG[incident.currentPriority] ?? DEFAULT_CONFIG;
+  const priority = incident.currentPriority ?? incident.suggestedPriority ?? 'BAJA';
+  const cfg = PRIORITY_CONFIG[priority] ?? DEFAULT_CONFIG;
   return (
     <div className="incident-map-tooltip" style={{ '--tooltip-color': cfg.color } as React.CSSProperties}>
       <span className="incident-map-tooltip-dot" style={{ background: cfg.color }} />

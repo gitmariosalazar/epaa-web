@@ -112,10 +112,28 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
 
   const mapStyles = theme === 'dark' ? DARK_MAP_STYLE : SILVER_MAP_STYLE;
 
+  const map = useMap();
+
   // Hide hover tooltip when zoomed out (prevents visual clutter)
   useEffect(() => {
     if (currentZoom < 17 && hoveredIncident) setHoveredIncident(null);
   }, [currentZoom, hoveredIncident]);
+
+  // Programmatic pan/zoom when selectedIncident changes (SOLID / SRP)
+  useEffect(() => {
+    if (!map || !selectedIncident) return;
+    if (selectedIncident.latitude && selectedIncident.longitude) {
+      const targetCenter = {
+        lat: Number(selectedIncident.latitude),
+        lng: Number(selectedIncident.longitude)
+      };
+      map.panTo(targetCenter);
+      setInfoWindowShown(true);
+      if (map.getZoom() < 17) {
+        map.setZoom(17);
+      }
+    }
+  }, [map, selectedIncident]);
 
   // Determine map center: prop → first incident with coords → fallback (Ecuador)
   const firstWithCoords = incidents.find((i) => i.latitude && i.longitude);
@@ -137,7 +155,7 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
   const handleInfoWindowClose = () => setInfoWindowShown(false);
 
   return (
-    <div className="incident-map-container">
+    <div className="incident-fullscreen-map-container">
       <Map
         center={finalCenter}
         zoom={zoom}
@@ -180,9 +198,6 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
                   isSelected={selectedIncident?.incidentId === incident.incidentId}
                   onClick={() => handleMarkerClick(incident)}
                   onMouseOver={() => {
-                    // Only show hover tooltip at street level (zoom ≥ 17) to
-                    // avoid clutter when many markers overlap at lower zooms
-                    if (infoWindowShown || currentZoom < 17) return;
                     setHoveredIncident(incident);
                   }}
                   onMouseOut={() => setHoveredIncident(null)}

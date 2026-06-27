@@ -10,6 +10,9 @@ export type IncidentSortKey =
   | 'priority'
   | 'connection';
 
+// ── Tab type (Open/Closed: add tabs here without touching logic) ─────────────
+export type IncidentTab = 'list' | 'map';
+
 export interface IncidentsFilterState {
   search: string;
   status: string;
@@ -66,6 +69,9 @@ export const useIncidentsViewModel = () => {
   // ── Leer connectionId desde query-string (?connectionId=14-293) ──────────
   const [searchParams, setSearchParams] = useSearchParams();
   const connectionIdFromUrl = searchParams.get('connectionId');
+
+  // ── Tab activo (Open/Closed: similar a ConnectionsViewModel) ─────────────
+  const [activeTab, setActiveTab] = useState<IncidentTab>('list');
 
   // ── Estado de filtros ────────────────────────────────────────────────────
   const [filters, setFilters] = useState<IncidentsFilterState>({
@@ -163,6 +169,14 @@ export const useIncidentsViewModel = () => {
     setPage(1);
   }, []);
 
+  /**
+   * handleTabChange — cambia el tab activo (lista ↔ mapa).
+   * SRP: solo cambia el tab; la navegación la controla la Page.
+   */
+  const handleTabChange = useCallback((tab: IncidentTab) => {
+    setActiveTab(tab);
+  }, []);
+
   // ── Estado derivado ───────────────────────────────────────────────────────
   const filteredSorted = useMemo(() => {
     let list = [...incidents];
@@ -189,6 +203,7 @@ export const useIncidentsViewModel = () => {
   }, [filteredSorted, page, pageSize]);
 
   return {
+    // ── List state ─────────────────────────────────────────────────────────
     incidents: filteredSorted,
     totalCount: filteredSorted.length,
     categories,
@@ -204,9 +219,13 @@ export const useIncidentsViewModel = () => {
     /** true cuando se llegó desde ConnectionsPage con una acometida específica */
     connectionMode,
     connectionIdFromUrl,
+    // ── Tab state (patrón ConnectionsViewModel) ────────────────────────────
+    activeTab,
+    // ── Handlers ──────────────────────────────────────────────────────────
     handleFilterChange,
     handleSortChange,
     handleConsultar,
+    handleTabChange,
     createIncident,
     resolveIncident,
     refresh
