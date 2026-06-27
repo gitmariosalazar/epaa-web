@@ -29,6 +29,9 @@ export interface Connection {
   connectionGeometricZone: string;
   propertyCadastralKey: string;
   zoneId: number;
+  zoneCode: string;
+  zoneName: string;
+  incidents: number;
 }
 
 export interface Rate {

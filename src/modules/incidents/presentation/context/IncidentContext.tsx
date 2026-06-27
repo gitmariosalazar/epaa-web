@@ -9,11 +9,13 @@ import { CreateIncidentUseCase } from '../../application/usecases/commands/Creat
 import { ResolveIncidentUseCase } from '../../application/usecases/commands/ResolveIncidentUseCase';
 import { FindIncidentCategoriesUseCase } from '../../application/usecases/queries/FindIncidentCategoriesUseCase';
 import { FindIncidentsByConnectionUseCase } from '../../application/usecases/queries/FindIncidentsByConnectionUseCase';
+import { FindActiveIncidentsByConnectionUseCase } from '../../application/usecases/queries/FindActiveIncidentsByConnectionUseCase';
 import { SearchIncidentsUseCase } from '../../application/usecases/queries/SearchIncidentsUseCase';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
+import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
 
 interface IncidentContextType {
-  incidents: IncidentResponse[];
+  incidents: IncidentDetailRowResponse[];
   categories: IncidentCategoryResponse[];
   isLoading: boolean;
   error: string | null;
@@ -27,23 +29,25 @@ interface IncidentContextType {
   createIncident: (request: CreateIncidentRequest) => Promise<ApiResponse<IncidentResponse> | null>;
   resolveIncident: (request: ResolveIncidentRequest) => Promise<ApiResponse<IncidentResponse> | null>;
   loadByConnection: (connectionId: string) => Promise<void>;
+  loadActiveByConnection: (connectionId: string) => Promise<void>;
   refresh: () => Promise<void>;
 }
 
 const IncidentContext = createContext<IncidentContextType | undefined>(undefined);
 
 export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [incidents, setIncidents] = useState<IncidentResponse[]>([]);
+  const [incidents, setIncidents] = useState<IncidentDetailRowResponse[]>([]);
   const [categories, setCategories] = useState<IncidentCategoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const repository = useMemo(() => new IncidentRepositoryImpl(), []);
-  
+
   const createIncidentUseCase = useMemo(() => new CreateIncidentUseCase(repository), [repository]);
   const resolveIncidentUseCase = useMemo(() => new ResolveIncidentUseCase(repository), [repository]);
   const findIncidentCategoriesUseCase = useMemo(() => new FindIncidentCategoriesUseCase(repository), [repository]);
   const findIncidentsByConnectionUseCase = useMemo(() => new FindIncidentsByConnectionUseCase(repository), [repository]);
+  const findActiveIncidentsByConnectionUseCase = useMemo(() => new FindActiveIncidentsByConnectionUseCase(repository), [repository]);
   const searchIncidentsUseCase = useMemo(() => new SearchIncidentsUseCase(repository), [repository]);
 
   const loadIncidents = useCallback(
@@ -92,6 +96,28 @@ export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }
       }
     },
     [findIncidentsByConnectionUseCase]
+  );
+
+  /**
+   * loadActiveByConnection — expone FindActiveIncidentsByConnectionUseCase.
+   * Carga solo los incidentes activos (estado ≠ RESUELTO) de una acometida.
+   */
+  const loadActiveByConnection = useCallback(
+    async (connectionId: string) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const activeIncidents =
+          await findActiveIncidentsByConnectionUseCase.execute(connectionId);
+        setIncidents(activeIncidents);
+      } catch (err: any) {
+        console.error('Error loading active incidents by connection:', err);
+        setError(err.message || 'Error al cargar los incidentes activos.');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [findActiveIncidentsByConnectionUseCase]
   );
 
   const createIncident = useCallback(
@@ -153,9 +179,10 @@ export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }
       createIncident,
       resolveIncident,
       loadByConnection,
+      loadActiveByConnection,
       refresh,
     }),
-    [incidents, categories, isLoading, error, loadIncidents, loadCategories, createIncident, resolveIncident, loadByConnection, refresh]
+    [incidents, categories, isLoading, error, loadIncidents, loadCategories, createIncident, resolveIncident, loadByConnection, loadActiveByConnection, refresh]
   );
 
   return (

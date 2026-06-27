@@ -151,9 +151,11 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
             <div className="incident-resolve-info-card">
               <div className="info-card-header">
                 <span className="info-card-title">Información del Incidente</span>
-                {incident.priority && (
-                  <span className={`priority-badge priority-${incident.priority.toLowerCase()}`}>
-                    {incident.priority}
+                {incident.suggestedPriority && (
+                  <span
+                    className={`priority-badge priority-${incident.suggestedPriority.toLowerCase()}`}
+                  >
+                    {incident.suggestedPriority}
                   </span>
                 )}
               </div>

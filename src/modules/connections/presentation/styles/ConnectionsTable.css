@@ -19,6 +19,15 @@
   justify-content: flex-end;
 }
 
+.table-column-center {
+  text-align: center !important;
+  vertical-align: middle !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
 /* ── Detail Modal ──────────────────────────────────────────────────────────── */
 .conn-detail-overlay {
   position: fixed;

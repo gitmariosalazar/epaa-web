@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { useIncidentsViewModel } from '../hooks/useIncidentsViewModel';
-import type { IncidentResponse } from '../../domain/schemas/dtos/response/incident.response';
 import { ResolveIncidentModal } from '../components/ResolveIncidentModal';
 import { IncidentDetailModal } from '../components/IncidentDetailModal';
 import { IncidentFilters } from '../components/IncidentFilters';
@@ -10,11 +9,18 @@ import { Table, type Column } from '@/shared/presentation/components/Table/Table
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { ConverDate } from '@/shared/utils/datetime/ConverDate';
-import { AlertCircle, Eye, Wrench, ShieldAlert } from 'lucide-react';
+import { AlertCircle, Eye, Wrench, ShieldAlert, Network, X } from 'lucide-react';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress/CircularProgress';
 import { useSimulatedProgress } from '@/shared/presentation/components/CircularProgress/useSimulatedProgress';
 import '../styles/Incidents.css';
+import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
 
+/**
+ * IncidentsListPage
+ *
+ * Presentation layer (MVVM View) — solo tabla.
+ * El mapa de incidencias vive en IncidentsMapPage (/incidents/map).
+ */
 export const IncidentsListPage: React.FC = () => {
   const {
     incidents,
@@ -23,63 +29,56 @@ export const IncidentsListPage: React.FC = () => {
     isLoading,
     error,
     filters,
+    connectionMode,
+    connectionIdFromUrl,
     handleFilterChange,
+    handleConsultar,
     refresh
   } = useIncidentsViewModel();
 
   const progress = useSimulatedProgress(isLoading);
-
   const navigate = useNavigate();
 
-  // Modals state
   const [resolveIncidentId, setResolveIncidentId] = useState<number | null>(null);
-  const [selectedIncident, setSelectedIncident] = useState<IncidentResponse | null>(null);
+  const [selectedIncident, setSelectedIncident] = useState<IncidentDetailRowResponse | null>(null);
 
   const getStatusColor = (status: string) => {
     switch (status.toUpperCase()) {
-      case 'RESUELTO':
-        return 'green';
-      case 'EN_INSPECCION':
-        return 'orange';
-      case 'REPORTADO':
-        return 'yellow';
-      case 'FALSO_REPORTE':
-        return 'red';
-      default:
-        return 'neutral';
+      case 'RESUELTO':       return 'green';
+      case 'EN_INSPECCION':  return 'orange';
+      case 'REPORTADO':      return 'yellow';
+      case 'FALSO_REPORTE':  return 'red';
+      default:               return 'neutral';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority.toUpperCase()) {
-      case 'CRITICA':
-        return 'red';
-      case 'ALTA':
-        return 'orange';
-      case 'MEDIA':
-        return 'yellow';
-      case 'BAJA':
-        return 'cyan';
-      default:
-        return 'neutral';
+      case 'CRITICA': return 'red';
+      case 'ALTA':    return 'orange';
+      case 'MEDIA':   return 'yellow';
+      case 'BAJA':    return 'cyan';
+      default:        return 'neutral';
     }
   };
 
-  const columns: Column<IncidentResponse>[] = [
+  const columns: Column<IncidentDetailRowResponse>[] = [
     {
       header: 'ID',
-      accessor: (item) => <span className="text-secondary" style={{ fontWeight: 600 }}>{item.incidentId}</span>,
+      accessor: (item) => (
+        <span className="text-secondary" style={{ fontWeight: 600 }}>{item.incidentId}</span>
+      ),
       id: 'incidentId',
       style: { width: '80px' }
     },
     {
-      header: 'CONEXIÓN',
-      accessor: (item) => <span>{item.connectionId || '—'}</span>,
+      header: 'CONEXION',
+      accessor: (item) => <span>{item.connectionId || '-'}</span>,
       id: 'connectionId',
       style: { width: '110px' }
     },
     {
-      header: 'CATEGORÍA / TIPO',
+      header: 'CATEGORIA / TIPO',
       accessor: (item) => (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span className="incident-category-text">{item.categoryName}</span>
@@ -92,8 +91,8 @@ export const IncidentsListPage: React.FC = () => {
       header: 'PRIORIDAD',
       accessor: (item) => (
         <ColorChip
-          label={item.priority}
-          color={getPriorityColor(item.priority)}
+          label={item.suggestedPriority}
+          color={getPriorityColor(item.suggestedPriority)}
           variant="soft"
           size="xs"
         />
@@ -116,7 +115,9 @@ export const IncidentsListPage: React.FC = () => {
     },
     {
       header: 'F. REPORTE',
-      accessor: (item) => <span style={{ fontSize: '0.8125rem' }}>{ConverDate(item.reportDate)}</span>,
+      accessor: (item) => (
+        <span style={{ fontSize: '0.8125rem' }}>{ConverDate(item.reportDate)}</span>
+      ),
       id: 'reportDate',
       style: { width: '110px' }
     },
@@ -150,12 +151,10 @@ export const IncidentsListPage: React.FC = () => {
     }
   ];
 
-  console.log("incidents", incidents);
-  console.log("selectedIncident", selectedIncident);
-
   return (
     <>
-      <PageLayout className='payments-page'
+      <PageLayout
+        className="payments-page"
         filters={
           <IncidentFilters
             searchQuery={filters.search}
@@ -167,12 +166,31 @@ export const IncidentsListPage: React.FC = () => {
             selectedIncidentTypeId={filters.incidentTypeId}
             onIncidentTypeIdChange={(val) => handleFilterChange({ incidentTypeId: val })}
             categories={categories}
-            onRefresh={refresh}
+            onConsultar={handleConsultar}
             onReportIncident={() => navigate('/incidents/create')}
             isLoading={isLoading}
           />
         }
       >
+        {connectionMode && connectionIdFromUrl && (
+          <div className="incidents-connection-banner">
+            <Network size={16} />
+            <span>
+              Incidentes activos de la acometida
+              <strong> {connectionIdFromUrl}</strong>
+              {' '}— solo estados distintos de RESUELTO
+            </span>
+            <button
+              className="incidents-banner-clear"
+              onClick={handleConsultar}
+              title="Ver todos los incidentes"
+            >
+              <X size={14} />
+              Limpiar filtro
+            </button>
+          </div>
+        )}
+
         {error ? (
           <div className="incidents-error-state">
             <AlertCircle size={28} />
@@ -183,17 +201,13 @@ export const IncidentsListPage: React.FC = () => {
             </Button>
           </div>
         ) : (
-          <Table<IncidentResponse>
+          <Table<IncidentDetailRowResponse>
             data={incidents}
             columns={columns}
             isLoading={isLoading}
             loadingState={
               <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '3rem', gap: '1rem' }}>
-                <CircularProgress
-                  progress={progress}
-                  size={80}
-                  label="Cargando incidentes..."
-                />
+                <CircularProgress progress={progress} size={80} label="Cargando incidentes..." />
               </div>
             }
             pagination={true}
@@ -203,11 +217,13 @@ export const IncidentsListPage: React.FC = () => {
             emptyState={
               <div className="incidents-empty-state">
                 <ShieldAlert size={48} className="empty-icon" />
-                <h3>Sin Incidentes</h3>
+                <h3>Sin Incidentes{connectionMode ? ' Activos' : ''}</h3>
                 <p>
-                  {incidents.length === 0
-                    ? 'No hay incidentes reportados en el sistema.'
-                    : 'No se encontraron resultados con los filtros actuales.'}
+                  {connectionMode
+                    ? `La acometida ${connectionIdFromUrl} no tiene incidentes activos.`
+                    : incidents.length === 0
+                      ? 'No hay incidentes reportados en el sistema.'
+                      : 'No se encontraron resultados con los filtros actuales.'}
                 </p>
               </div>
             }
@@ -215,19 +231,17 @@ export const IncidentsListPage: React.FC = () => {
         )}
       </PageLayout>
 
-      {/* Resolve Modal */}
       {resolveIncidentId !== null && (
         <ResolveIncidentModal
-          isOpen={resolveIncidentId !== null}
+          isOpen={true}
           onClose={() => setResolveIncidentId(null)}
           incidentId={resolveIncidentId}
         />
       )}
 
-      {/* Detail Modal */}
       {selectedIncident !== null && (
         <IncidentDetailModal
-          isOpen={selectedIncident !== null}
+          isOpen={true}
           onClose={() => setSelectedIncident(null)}
           incident={selectedIncident}
         />

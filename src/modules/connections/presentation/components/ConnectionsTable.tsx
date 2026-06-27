@@ -11,7 +11,7 @@ import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { useTranslation } from 'react-i18next';
-import { Check, EyeIcon, X } from 'lucide-react';
+import { AlertTriangle, Check, CheckCircle, EyeIcon, X } from 'lucide-react';
 import { FaTrashCan } from 'react-icons/fa6';
 import { FaEdit, FaMapMarkerAlt } from 'react-icons/fa';
 import type { Connection } from '../../domain/models/Connection';
@@ -116,6 +116,8 @@ interface ConnectionsTableProps {
   onEndReached?: () => void;
   hasMore?: boolean;
   onViewOnMap: (connection: Connection) => void;
+  /** Navega a la lista de incidentes filtrando por esta acometida (delegado al padre) */
+  onViewIncidents?: (connectionId: string) => void;
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -128,11 +130,14 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
   sortConfig,
   onEndReached,
   hasMore,
-  onViewOnMap
+  onViewOnMap,
+  onViewIncidents
 }) => {
   const { t } = useTranslation();
   const [selectedConnection, setSelectedConnection] =
     useState<Connection | null>(null);
+
+  console.log(data[0]);
 
   // ── Columns ──────────────────────────────────────────────────────────────
   const columns: Column<Connection>[] = useMemo(
@@ -234,6 +239,70 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
           />
         ),
         id: 'connectionIsReadable'
+      },
+      {
+        header: t('connections.table.incidents', 'Incidentes'),
+        accessor: (item: Connection) => {
+          // PostgreSQL COUNT devuelve bigint → llega como string. Castear a Number.
+          const count = Number(item.incidents ?? 0);
+
+          return count > 0 ? (
+            <div className="table-column-center">
+              <Tooltip
+                content={t(
+                  'connections.table.incidentsCount',
+                  `La acometida tiene ${count} incidente(s).`
+                )}
+                position="bottom"
+                followCursor={false}
+              >
+                <ColorChip
+                  label={count.toString()}
+                  color="#ef4444" // Rojo = problema
+                  icon={<AlertTriangle size={14} />} // Triángulo de alerta
+                  variant="soft"
+                  size="sm"
+                />
+              </Tooltip>
+              <Tooltip
+                content={t('connections.table.viewDetails', 'Ver incidentes activos')}
+                position="bottom"
+              >
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  circle
+                  style={{ color: '#ef4444' }}
+                  onClick={() => onViewIncidents?.(item.connectionId)}
+                >
+                  <EyeIcon size={14} />
+                </Button>
+              </Tooltip>
+            </div>
+          ) : (
+            <div className="table-column-center">
+              <Tooltip
+                content={t(
+                  'connections.table.incidentsCount',
+                  'La acometida no tiene incidentes.'
+                )}
+                position="bottom"
+                followCursor={false}
+              >
+                <ColorChip
+                  label="0"
+                  color="#22c55e" // Verde = bueno
+                  icon={<CheckCircle size={14} />} // Check = sin problemas
+                  variant="soft"
+                  size="sm"
+                />
+              </Tooltip>
+            </div>
+          );
+        },
+        sortable: true,
+        sortKey: 'incidents',
+        id: 'incidents'
       },
       {
         header: t('connections.table.options'),
@@ -344,7 +413,7 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
   });
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, height: '100%' }}>
       <Table
         data={data}
         columns={columns}
@@ -384,3 +453,4 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
     </div>
   );
 };
+

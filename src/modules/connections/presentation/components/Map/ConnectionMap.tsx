@@ -87,6 +87,8 @@ export const ConnectionMap: React.FC<ConnectionMapProps> = ({
   onEdit,
   onCameraChange
 }) => {
+  const map = useMap();
+
   const [infoWindowShown, setInfoWindowShown] = useState(false);
   const [hoveredConnection, setHoveredConnection] = useState<Connection | null>(
     null
@@ -96,6 +98,22 @@ export const ConnectionMap: React.FC<ConnectionMapProps> = ({
   const { theme } = useTheme();
 
   const mapStyles = theme === 'dark' ? DARK_MAP_STYLE : SILVER_MAP_STYLE;
+
+  // Programmatic pan/zoom when selectedConnection changes (SOLID / SRP)
+  useEffect(() => {
+    if (!map || !selectedConnection) return;
+    if (selectedConnection.latitude && selectedConnection.longitude) {
+      const targetCenter = {
+        lat: Number(selectedConnection.latitude),
+        lng: Number(selectedConnection.longitude)
+      };
+      map.setCenter(targetCenter);
+      setInfoWindowShown(true);
+      if (map.getZoom() < 17) {
+        map.setZoom(17);
+      }
+    }
+  }, [map, selectedConnection]);
 
   // Clear hover if user zooms out below threshold
   useEffect(() => {
@@ -120,8 +138,8 @@ export const ConnectionMap: React.FC<ConnectionMapProps> = ({
   return (
     <div className="map-view-container">
       <Map
-        center={finalCenter}
-        zoom={zoom}
+        defaultCenter={finalCenter}
+        defaultZoom={zoom}
         gestureHandling="greedy"
         disableDefaultUI={false}
         mapTypeControl={true}

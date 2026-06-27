@@ -1,6 +1,6 @@
 import React from 'react';
 import '../styles/ConnectionsFilters.css';
-import { Search } from 'lucide-react';
+import { AlertTriangle, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Input } from '@/shared/presentation/components/Input/Input';
@@ -35,6 +35,8 @@ interface ConnectionsFiltersProps {
   onStatusChange: (val: string) => void;
   selectedSewerage: string;
   onSewerageChange: (val: string) => void;
+  selectedIncidents: string;
+  onIncidentsChange: (val: string) => void;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -54,7 +56,9 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
   selectedStatus,
   onStatusChange,
   selectedSewerage,
-  onSewerageChange
+  onSewerageChange,
+  selectedIncidents,
+  onIncidentsChange
 }) => {
   const { t } = useTranslation();
 
@@ -195,6 +199,26 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
           </option>
           <option value="no">
             {t('connections.filters.sewerageNo', 'Sin alcantarillado')}
+          </option>
+        </Select>
+
+        {/* Incidents filter */}
+        <Select
+          className="conn-filter-group"
+          label={t('connections.filters.incidents', 'Incidentes')}
+          size="compact"
+          value={selectedIncidents}
+          onChange={(e) => onIncidentsChange(e.target.value)}
+          leftIcon={<AlertTriangle size={18} />}
+        >
+          <option value="">
+            {t('connections.filters.allIncidents', 'Todos')}
+          </option>
+          <option value="with">
+            {t('connections.filters.withIncidents', 'Con incidentes')}
+          </option>
+          <option value="without">
+            {t('connections.filters.withoutIncidents', 'Sin incidentes')}
           </option>
         </Select>
       </div>

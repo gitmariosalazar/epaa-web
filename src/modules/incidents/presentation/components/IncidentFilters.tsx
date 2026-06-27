@@ -17,7 +17,7 @@ interface IncidentFiltersProps {
   selectedIncidentTypeId: string;
   onIncidentTypeIdChange: (val: string) => void;
   categories: IncidentCategoryResponse[];
-  onRefresh: () => void;
+  onConsultar: () => void;
   onReportIncident: () => void;
   isLoading: boolean;
 }
@@ -32,7 +32,7 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
   selectedIncidentTypeId,
   onIncidentTypeIdChange,
   categories,
-  onRefresh,
+  onConsultar,
   onReportIncident,
   isLoading
 }) => {
@@ -47,14 +47,15 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
           <h2>{t('incidents.title', 'Gestión de Incidentes Técnicos')}</h2>
         </div>
         <div className="toolbar-actions">
+          {/* Consultar = refresh + apply current filters */}
           <Button
             variant="outline"
             size="compact"
-            onClick={onRefresh}
+            onClick={onConsultar}
             isLoading={isLoading}
             leftIcon={<RefreshCw size={16} />}
           >
-            {t('common.refresh', 'Refrescar')}
+            {t('common.consult', 'Consultar')}
           </Button>
           <Button
             variant="primary"
@@ -122,7 +123,7 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
           </div>
         </div>
 
-        {/* Type */}
+        {/* Incident Type */}
         <div className="filter-group">
           <label className="filter-label">{t('incidents.filters.incidentType', 'Tipo de Incidente')}</label>
           <div className="filter-input-wrapper">

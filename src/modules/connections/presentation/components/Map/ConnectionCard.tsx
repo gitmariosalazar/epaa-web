@@ -1,8 +1,16 @@
 import React from 'react';
 import type { Connection } from '../../../domain/models/Connection';
-import { MdLocationOn, MdPerson } from 'react-icons/md';
+import { MdInfo, MdList, MdLocationOn, MdPerson } from 'react-icons/md';
 import { getConnectionStateChip } from '../../utils/connectionStateChip';
 import { ACTIVE_STATES } from '../../../domain/models/ConnectionState';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { t } from 'i18next';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import './ConnectionCard.css';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import { IoMdEye } from 'react-icons/io';
+import { TbAlertTriangle } from 'react-icons/tb';
 
 interface ConnectionCardProps {
   connection: Connection;
@@ -40,6 +48,97 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
           </span>
         </div>
       </div>
+      {Number(connection.incidents) > 0 && (
+        <div className="card-body-incidents-wrapper">
+          <div className="card-body-incidents">
+            <div className="card-info-row">
+              <TbAlertTriangle className="card-icon-incident" size={25} />
+              <span className="card-text-incidents">
+                La acometida tiene {connection.incidents} incidente(s) reportados.
+              </span>
+            </div>
+            <div className="card-info-row">
+              {Number(connection.incidents) > 0 ? (
+                <div className="table-column-center">
+                  <Tooltip themeColor='warning'
+                    content={t(
+                      'connections.table.incidentsCount',
+                      `La acometida tiene ${connection.incidents} incidente(s).`
+                    )}
+                    position="bottom"
+                    followCursor={false}
+                  >
+                    <ColorChip
+                      label={connection.incidents.toString()}
+                      color="#ef4444" // Rojo = problema
+                      icon={<AlertTriangle size={14} />} // Triángulo de alerta
+                      variant="soft"
+                      size="sm"
+                    />
+                  </Tooltip>
+                </div>
+              ) : (
+                <div className="table-column-center">
+                  <Tooltip
+                    content={t(
+                      'connections.table.incidentsCount',
+                      'La acometida no tiene incidentes.'
+                    )}
+                    position="bottom"
+                    followCursor={false}
+                  >
+                    <ColorChip
+                      label="0"
+                      color="#22c55e" // Verde = bueno
+                      icon={<CheckCircle size={14} />} // Check = sin problemas
+                      variant="soft"
+                      size="sm"
+                    />
+                  </Tooltip>
+                </div>
+              )}
+
+            </div>
+          </div>
+          <div className="card-incidents-actions">
+            <Tooltip themeColor='warning'
+              content={t(
+                'connections.table.incidentsCount',
+                `Ver detalles de la acometida`
+              )}
+              position="bottom"
+              followCursor={false}
+            >
+              <Button
+                variant="dashed"
+                size="xs"
+                leftIcon={<IoMdEye seed={20} />}
+                onClick={() => console.log('Ver detalles de la acometida')}
+              >
+                Ver Detalles
+              </Button>
+            </Tooltip>
+            <Tooltip themeColor='warning'
+              content={t(
+                'connections.incidents.viewLocation',
+                `Ver ubicación del incidente en el mapa`
+              )}
+              position="bottom"
+              followCursor={false}
+            >
+              <Button
+                variant="dashed"
+                color="green"
+                size="xs"
+                leftIcon={<MdLocationOn />}
+                onClick={() => console.log('Ver ubicación de la acometida')}
+              >
+                Ver Ubicación
+              </Button>
+            </Tooltip>
+          </div>
+        </div>
+      )}
 
       <div className="card-body">
         <div className="card-info-row">
@@ -51,7 +150,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
         <div className="card-info-row">
           <MdLocationOn className="card-icon" />
           <span className="card-text address-text">
-            {connection.connectionAddress || 'AVD. JULIO M. AGUINAGA...'}
+            {connection.connectionAddress ? connection.connectionAddress : 'SIN DIRECCIÓN CATASTRAL'}
           </span>
         </div>
       </div>

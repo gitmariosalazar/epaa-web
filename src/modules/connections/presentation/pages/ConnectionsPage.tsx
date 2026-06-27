@@ -3,7 +3,7 @@ import {
   useConnectionsViewModel,
   type ConnectionTab
 } from '../hooks/useConnectionsViewModel';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
@@ -46,15 +46,17 @@ export const ConnectionsPage = () => {
 
   // ── Unified ViewModel (Handles both List and CRUD/Wizard) ────────────────
   const { state, actions } = useConnectionsViewModel();
+  const { setViewMode } = actions;
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (pathname.endsWith('/map')) {
-      actions.setViewMode('map');
+      setViewMode('map');
     } else {
-      actions.setViewMode('table');
+      setViewMode('table');
     }
-  }, [pathname, actions]);
+  }, [pathname, setViewMode]);
 
   const loadingProgress = useSimulatedProgress(state.isLoading);
 
@@ -89,13 +91,30 @@ export const ConnectionsPage = () => {
     }
 
     if (!state.isLoading && state.filteredConnections.length === 0) {
+      // No data fetched yet
+      if (state.connections.length === 0) {
+        return (
+          <div className="connections-loading">
+            <EmptyState
+              message={t('common.noResults', 'Sin resultados')}
+              description={t(
+                'connections.noDataDescription',
+                'No se encontraron Acometidas con los filtros actuales. Usa Consultar para cargar datos.'
+              )}
+              variant="info"
+              minHeight="300px"
+            />
+          </div>
+        );
+      }
+      // Data was loaded but the active filters return 0 results
       return (
         <div className="connections-loading">
           <EmptyState
-            message={t('common.noResults', 'Sin resultados')}
+            message={t('connections.noFilterResults', 'Sin resultados para este filtro')}
             description={t(
-              'connections.noDataDescription',
-              'No se encontraron Acometidas con los filtros actuales. Usa Consultar para cargar datos.'
+              'connections.noFilterResultsDescription',
+              'Ninguna acometida coincide con los filtros aplicados. Prueba cambiando o limpiando los filtros.'
             )}
             variant="info"
             minHeight="300px"
@@ -122,6 +141,9 @@ export const ConnectionsPage = () => {
           actions.setSelectedConnection(conn);
           actions.setViewMode('map');
         }}
+        onViewIncidents={(connectionId) =>
+          navigate(`/incidents?connectionId=${encodeURIComponent(connectionId)}`)
+        }
       />
     );
   };
@@ -168,6 +190,8 @@ export const ConnectionsPage = () => {
           onStatusChange={actions.setSelectedStatus}
           selectedSewerage={state.selectedSewerage}
           onSewerageChange={actions.setSelectedSewerage}
+          selectedIncidents={state.selectedIncidents}
+          onIncidentsChange={actions.setSelectedIncidents}
         />
       }
     >

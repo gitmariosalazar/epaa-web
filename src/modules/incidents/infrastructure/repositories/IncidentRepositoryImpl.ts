@@ -6,6 +6,7 @@ import type { CreateIncidentRequest } from '../../domain/schemas/dtos/request/cr
 import type { ResolveIncidentRequest } from '../../domain/schemas/dtos/request/resolve-incident.request';
 import type { IncidentResponse } from '../../domain/schemas/dtos/response/incident.response';
 import type { IncidentCategoryResponse } from '../../domain/schemas/dtos/response/incident-category-type.response';
+import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
 
 function dataURLtoFile(dataurl: string, filename: string): File {
   const arr = dataurl.split(',');
@@ -44,7 +45,10 @@ export class IncidentRepositoryImpl implements InterfaceIncidentRepository {
     }
     formData.append('incidentTypeId', String(incident.incidentTypeId));
     formData.append('reportDescription', incident.reportDescription);
-    if (incident.referenceAddress !== undefined && incident.referenceAddress !== null) {
+    if (
+      incident.referenceAddress !== undefined &&
+      incident.referenceAddress !== null
+    ) {
       formData.append('referenceAddress', incident.referenceAddress);
     }
     formData.append('reportOrigin', incident.reportOrigin);
@@ -78,8 +82,8 @@ export class IncidentRepositoryImpl implements InterfaceIncidentRepository {
       formData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+          'Content-Type': 'multipart/form-data'
+        }
       }
     );
     return response.data;
@@ -115,8 +119,8 @@ export class IncidentRepositoryImpl implements InterfaceIncidentRepository {
       formData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+          'Content-Type': 'multipart/form-data'
+        }
       }
     );
     return response.data;
@@ -124,17 +128,19 @@ export class IncidentRepositoryImpl implements InterfaceIncidentRepository {
 
   async findIncidentsByConnection(
     connectionId: string
-  ): Promise<ApiResponse<IncidentResponse[]>> {
-    const response = await this.client.get<ApiResponse<IncidentResponse[]>>(
-      `/incidents/find-by-connection/${connectionId}`
-    );
+  ): Promise<ApiResponse<IncidentDetailRowResponse[]>> {
+    const response = await this.client.get<
+      ApiResponse<IncidentDetailRowResponse[]>
+    >(`/incidents/find-by-connection/${connectionId}`);
     return response.data;
   }
 
   async findById(
     _incidentId: number
-  ): Promise<ApiResponse<IncidentResponse> | null> {
-    throw new Error('Method not implemented because the backend gateway does not expose a find-by-id endpoint.');
+  ): Promise<ApiResponse<IncidentDetailRowResponse> | null> {
+    throw new Error(
+      'Method not implemented because the backend gateway does not expose a find-by-id endpoint.'
+    );
   }
 
   async findIncidents(filters: {
@@ -142,18 +148,19 @@ export class IncidentRepositoryImpl implements InterfaceIncidentRepository {
     status?: string | null;
     priority?: string | null;
     incidentTypeId?: number | null;
-  }): Promise<ApiResponse<IncidentResponse[]>> {
-    const response = await this.client.get<ApiResponse<IncidentResponse[]>>(
-      '/incidents/search',
-      { params: filters }
-    );
+  }): Promise<ApiResponse<IncidentDetailRowResponse[]>> {
+    const response = await this.client.get<
+      ApiResponse<IncidentDetailRowResponse[]>
+    >('/incidents/search', { params: filters });
     return response.data;
   }
 
-  async findIncidentCategories(): Promise<ApiResponse<IncidentCategoryResponse[]>> {
-    const response = await this.client.get<ApiResponse<IncidentCategoryResponse[]>>(
-      '/incidents/categories'
-    );
+  async findIncidentCategories(): Promise<
+    ApiResponse<IncidentCategoryResponse[]>
+  > {
+    const response = await this.client.get<
+      ApiResponse<IncidentCategoryResponse[]>
+    >('/incidents/categories');
     return response.data;
   }
 }

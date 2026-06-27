@@ -39,7 +39,10 @@ export class ConnectionRepositoryImpl implements ConnectionRepository {
   async getConnections(
     limit: number,
     offset: number,
-    query?: string
+    query?: string,
+    hasIncidents?: 'yes' | 'no',
+    status?: string,
+    sewerage?: 'yes' | 'no'
   ): Promise<Connection[]> {
     const response = await this.client.get<ApiResponse<Connection[]>>(
       `/connections/get-connections-paginated`,
@@ -47,7 +50,10 @@ export class ConnectionRepositoryImpl implements ConnectionRepository {
         params: {
           limit,
           offset,
-          ...(query ? { query } : {})
+          ...(query        ? { query }        : {}),
+          ...(hasIncidents ? { hasIncidents } : {}),
+          ...(status       ? { status }       : {}),
+          ...(sewerage     ? { sewerage }     : {}),
         }
       }
     );

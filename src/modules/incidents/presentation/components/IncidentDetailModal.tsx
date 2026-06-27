@@ -3,20 +3,20 @@ import { createPortal } from 'react-dom';
 import { X, Calendar, MapPin, User, CheckCircle, Loader2, ImageOff } from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
-import type { IncidentResponse } from '../../domain/schemas/dtos/response/incident.response';
 import { ConverDate } from '@/shared/utils/datetime/ConverDate';
 import { useFilePreview } from '@/shared/files';
 import { PhotoLightbox } from './PhotoLightbox';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { StatusTimeline } from '@/shared/presentation/components/Timeline';
 import { GeoSection } from '@/shared/presentation/components/GeoLocation';
+import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
 interface IncidentDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  incident: IncidentResponse | null;
+  incident: IncidentDetailRowResponse | null;
 }
 
 
@@ -148,9 +148,11 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
 }) => {
   // Lightbox state: null = closed, number = index of the open photo
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [lightboxResolutionIndex, setLightboxResolutionIndex] = useState<number | null>(null);
 
   // All hooks must be called before any conditional return (Rules of Hooks)
-  const photos = incident?.evidencePhotos ?? [];
+  const photosReport = incident?.photosReport ?? [];
+  const photosResolution = incident?.photosResolution ?? [];
 
   if (!isOpen || !incident) return null;
 
@@ -173,8 +175,8 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                   size="xs"
                 />
                 <ColorChip
-                  label={`Prioridad: ${incident.priority}`}
-                  color={getPriorityColor(incident.priority)}
+                  label={`Prioridad: ${incident.suggestedPriority}`}
+                  color={getPriorityColor(incident.suggestedPriority)}
                   variant="soft"
                   size="xs"
                 />
@@ -231,7 +233,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                       Reportado Por (Usuario / Cliente)
                     </span>
                     <span className="detail-value">
-                      {incident.reportedBy || incident.reporterUserId || incident.clienteUsuarioReportaId || 'Desconocido'}
+                      {incident.reportedBy.name || 'Desconocido'}
                       {incident.reportOrigin ? ` (${incident.reportOrigin})` : ''}
                     </span>
                   </div>
@@ -294,7 +296,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                     </div>
                     <div className="detail-item">
                       <span className="detail-label">Resuelto Por</span>
-                      <span className="detail-value">{incident.resolverUserId || 'Desconocido'}</span>
+                      <span className="detail-value">{incident.resolvedBy?.name || 'Desconocido'}</span>
                     </div>
                     <div className="detail-item">
                       <span className="detail-label">Costo de Reparación</span>
@@ -311,16 +313,16 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
               )}
 
               {/* ── Evidence photos ── */}
-              {photos.length > 0 && (
+              {photosReport.length > 0 && (
                 <div className="detail-section">
                   <h4 className="detail-section-title">
-                    Evidencia Fotográfica ({photos.length})
+                    Evidencia Fotográfica ({photosReport.length})
                   </h4>
                   <div className="photos-gallery">
-                    {photos.map((photo, idx) => (
+                    {photosReport.map((photo, idx) => (
                       <EvidencePhoto
-                        key={photo.photoId}
-                        photoId={photo.photoId}
+                        key={photo.id}
+                        photoId={photo.id}
                         filePath={photo.filePath}
                         type={photo.type}
                         onClick={() => setLightboxIndex(idx)}
@@ -330,19 +332,39 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                 </div>
               )}
 
+              {/* ── Resolution photo evidence ── */}
+              {photosResolution.length > 0 && (
+                <div className="detail-section">
+                  <h4 className="detail-section-title">
+                    Evidencia Fotográfica de Resolución ({photosResolution.length})
+                  </h4>
+                  <div className="photos-gallery">
+                    {photosResolution.map((photo, idx) => (
+                      <EvidencePhoto
+                        key={photo.id}
+                        photoId={photo.id}
+                        filePath={photo.filePath}
+                        type={photo.type}
+                        onClick={() => setLightboxResolutionIndex(idx)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* ── Status history — uses shared StatusTimeline ── */}
-              {incident.statusHistory && incident.statusHistory.length > 0 && (
+              {incident.historyRecent && incident.historyRecent.length > 0 && (
                 <div className="detail-section">
                   <StatusTimeline
                     title="Historial de Estados"
-                    items={incident.statusHistory.map((h) => ({
-                      status:              h.newStatus,
-                      statusLabel:         h.newStatus.replace(/_/g, ' '),
-                      previousStatus:      h.previousStatus ?? undefined,
+                    items={incident.historyRecent.map((h) => ({
+                      status: h.newStatus,
+                      statusLabel: h.newStatus.replace(/_/g, ' '),
+                      previousStatus: h.previousStatus ?? undefined,
                       previousStatusLabel: h.previousStatus?.replace(/_/g, ' '),
-                      date:                h.changeDate,
-                      comment:             h.observation ?? undefined,
-                      actor:               h.managedBy ?? undefined,
+                      date: h.dateChange,
+                      comment: h.observation ?? undefined,
+                      actor: h.managedBy ?? undefined,
                     }))}
                     emptyMessage="Sin historial de estados."
                   />
@@ -366,13 +388,24 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
       )}
 
       {/* ── Lightbox — rendered in its own portal above the modal ── */}
-      {lightboxIndex !== null && photos.length > 0 && (
+      {lightboxIndex !== null && photosReport.length > 0 && (
         <PhotoLightbox
-          photos={photos}
+          photos={photosReport.map((p) => ({ photoId: p.id, filePath: p.filePath, type: p.type }))}
           activeIndex={lightboxIndex}
           category="incidents"
           onClose={() => setLightboxIndex(null)}
           onIndexChange={setLightboxIndex}
+        />
+      )}
+
+      {/* ── Resolution photo lightbox ── */}
+      {lightboxResolutionIndex !== null && photosResolution.length > 0 && (
+        <PhotoLightbox
+          photos={photosResolution.map((p) => ({ photoId: p.id, filePath: p.filePath, type: p.type }))}
+          activeIndex={lightboxResolutionIndex}
+          category="incidents"
+          onClose={() => setLightboxResolutionIndex(null)}
+          onIndexChange={setLightboxResolutionIndex}
         />
       )}
     </>

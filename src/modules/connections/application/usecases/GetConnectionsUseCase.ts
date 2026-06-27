@@ -10,8 +10,13 @@ export class GetConnectionsUseCase {
   async execute(
     limit: number,
     offset: number,
-    query?: string
+    query?: string,
+    hasIncidents?: 'yes' | 'no',
+    status?: string,
+    sewerage?: 'yes' | 'no'
   ): Promise<Connection[]> {
-    return this.connectionRepository.getConnections(limit, offset, query);
+    return this.connectionRepository.getConnections(
+      limit, offset, query, hasIncidents, status, sewerage
+    );
   }
 }

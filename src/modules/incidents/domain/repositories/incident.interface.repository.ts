@@ -3,6 +3,7 @@ import type { CreateIncidentRequest } from '../schemas/dtos/request/create-incid
 import type { ResolveIncidentRequest } from '../schemas/dtos/request/resolve-incident.request';
 import type { IncidentCategoryResponse } from '../schemas/dtos/response/incident-category-type.response';
 import type { IncidentResponse } from '../schemas/dtos/response/incident.response';
+import type { IncidentDetailRowResponse } from '../schemas/dtos/response/view_incident.response';
 
 /**
  * Repository interface for Incident operations.
@@ -18,13 +19,15 @@ export interface InterfaceIncidentRepository {
 
   findIncidentsByConnection(
     connectionId: string
-  ): Promise<ApiResponse<IncidentResponse[]>>;
-  findById(incidentId: number): Promise<ApiResponse<IncidentResponse> | null>;
+  ): Promise<ApiResponse<IncidentDetailRowResponse[]>>;
+  findById(
+    incidentId: number
+  ): Promise<ApiResponse<IncidentDetailRowResponse> | null>;
   findIncidents(filters: {
     connectionId?: string | null;
     status?: string | null;
     priority?: string | null;
     incidentTypeId?: number | null;
-  }): Promise<ApiResponse<IncidentResponse[]>>;
+  }): Promise<ApiResponse<IncidentDetailRowResponse[]>>;
   findIncidentCategories(): Promise<ApiResponse<IncidentCategoryResponse[]>>;
 }

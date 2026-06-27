@@ -29,33 +29,31 @@ export const ConnectionMapFeature: React.FC<ConnectionMapFeatureProps> = ({
     handleFetch
   } = actions;
 
+  const fallbackCenter = { lat: 0.33, lng: -78.17 };
+  const latestCameraRef = React.useRef<{
+    center: { lat: number; lng: number };
+    zoom: number;
+  }>({
+    center: mapCenter || fallbackCenter,
+    zoom: mapZoom
+  });
+
   // Auto-fetch if empty and map is opened
   useEffect(() => {
     if (filteredConnections.length === 0 && !isLoading) {
       handleFetch();
     }
-  }, []);
+  }, [filteredConnections.length, isLoading, handleFetch]);
 
-  const prevSelectedIdRef = React.useRef<number | string | null>(null);
-
-  // Sync map center with selected connection
+  // Persist final camera position on unmount
   useEffect(() => {
-    if (selectedConnection && selectedConnection.connectionId !== prevSelectedIdRef.current) {
-      prevSelectedIdRef.current = selectedConnection.connectionId;
-
-      if (selectedConnection.latitude && selectedConnection.longitude) {
-        setMapCenter({ lat: selectedConnection.latitude, lng: selectedConnection.longitude });
-        
-        // Only zoom in if the map is currently zoomed out too far to see details.
-        // Prevents the "zoom reset" issue when clicking a marker closely.
-        if (mapZoom < 17) {
-          setMapZoom(17);
-        }
+    return () => {
+      if (latestCameraRef.current) {
+        setMapCenter(latestCameraRef.current.center);
+        setMapZoom(latestCameraRef.current.zoom);
       }
-    } else if (!selectedConnection) {
-      prevSelectedIdRef.current = null;
-    }
-  }, [selectedConnection, setMapCenter, setMapZoom, mapZoom]);
+    };
+  }, [setMapCenter, setMapZoom]);
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
@@ -83,12 +81,7 @@ export const ConnectionMapFeature: React.FC<ConnectionMapFeatureProps> = ({
             zoom={mapZoom}
             onEdit={openEdit}
             onCameraChange={(center, zoom) => {
-              if (center.lat !== mapCenter?.lat || center.lng !== mapCenter?.lng) {
-                setMapCenter(center);
-              }
-              if (zoom !== mapZoom) {
-                setMapZoom(zoom);
-              }
+              latestCameraRef.current = { center, zoom };
             }}
           />
         </div>

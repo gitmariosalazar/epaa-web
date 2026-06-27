@@ -41,14 +41,14 @@ export const ConnectionSidePanel: React.FC<ConnectionSidePanelProps> = ({
       <div className="side-panel-inner">
         <header className="map-side-panel-header">
           <div className="panel-header-top">
-            <h2 className="panel-title">Connections</h2>
+            <h2 className="panel-title">Acometidas</h2>
             <span className="panel-count">
-              {filteredConnections.length} RECORDS
+              {filteredConnections.length} REGISTROS
             </span>
           </div>
           <Input
             type="text"
-            placeholder="Search by key, address..."
+            placeholder="Buscar por clave,dirección..."
             className="premium-search-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

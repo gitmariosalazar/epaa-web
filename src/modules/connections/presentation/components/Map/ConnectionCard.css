@@ -1,0 +1,53 @@
+.card-body-incidents {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border-radius: 5px;
+}
+
+.card-text-incidents {
+  font-size: 0.8rem;
+  margin: 0;
+  color: #ff7300;
+  font-weight: 500;
+}
+
+.card-text {
+  font-size: 0.7rem;
+}
+
+.card-body-incidents-wrapper {
+  border-color: #ff7300;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+}
+
+.card-incidents-actions {
+  display: flex;
+  gap: 10px;
+  padding-inline: 10px;
+  padding-block: 5px;
+  width: fit-content;
+  margin-left: auto;
+}
+
+.card-incidents-actions .footer-icon-btn {
+  border-color: #ef4444;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+}
+
+.card-incidents-actions .footer-icon-btn {
+  border-color: #ef4444;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+}
+
+.card-icon-incident {
+  color: #ff7300;
+}

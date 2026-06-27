@@ -15,7 +15,10 @@ export interface ConnectionRepository {
   getConnections(
     limit: number,
     offset: number,
-    query?: string
+    query?: string,
+    hasIncidents?: 'yes' | 'no',
+    status?: string,
+    sewerage?: 'yes' | 'no'
   ): Promise<Connection[]>;
   createConnection(connection: CreateConnectionRequest): Promise<Connection>;
   updateConnection(

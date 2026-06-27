@@ -1,5 +1,5 @@
 import type { InterfaceIncidentRepository } from '@/modules/incidents/domain/repositories/incident.interface.repository';
-import type { IncidentResponse } from '@/modules/incidents/domain/schemas/dtos/response/incident.response';
+import type { IncidentDetailRowResponse } from '@/modules/incidents/domain/schemas/dtos/response/view_incident.response';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 
 export class FindIncidentsByConnectionUseCase {
@@ -11,7 +11,7 @@ export class FindIncidentsByConnectionUseCase {
 
   async execute(
     connectionId: string
-  ): Promise<ApiResponse<IncidentResponse[]>> {
+  ): Promise<ApiResponse<IncidentDetailRowResponse[]>> {
     try {
       const incidents =
         await this.incidentRepository.findIncidentsByConnection(connectionId);

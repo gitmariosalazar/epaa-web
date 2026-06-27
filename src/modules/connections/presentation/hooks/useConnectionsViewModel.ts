@@ -41,8 +41,13 @@ function applySortConfig<T>(data: T[], sortConfig: SortConfig | null): T[] {
   if (!sortConfig) return data;
   const key = sortConfig.key as keyof T;
   return [...data].sort((a: T, b: T) => {
-    const aVal = a[key];
-    const bVal = b[key];
+    let aVal: any = a[key];
+    let bVal: any = b[key];
+    // Si ambos son numéricos (o strings que representan números), comparar como número
+    if (!isNaN(Number(aVal)) && !isNaN(Number(bVal))) {
+      aVal = Number(aVal);
+      bVal = Number(bVal);
+    }
     if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
     if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
     return 0;
@@ -55,6 +60,7 @@ function applyLocalFilters(
   searchField: string,
   selectedStatus: string,
   selectedSewerage: string,
+  selectedIncidents: string,
   sortConfig: SortConfig | null
 ): Connection[] {
   let result = data;
@@ -109,6 +115,15 @@ function applyLocalFilters(
     );
   }
 
+  // Filtro de Incidentes
+  // NOTA: PostgreSQL COUNT retorna bigint → el driver lo serializa como string.
+  // Usamos Number() para evitar que "0" === 0 sea false (strict equality).
+  if (selectedIncidents === 'with') {
+    result = result.filter((item) => Number(item.incidents ?? 0) > 0);
+  } else if (selectedIncidents === 'without') {
+    result = result.filter((item) => Number(item.incidents ?? 0) === 0);
+  }
+
   return applySortConfig(result, sortConfig);
 }
 
@@ -148,6 +163,7 @@ export const useConnectionsViewModel = () => {
   const [searchField, setSearchField] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedSewerage, setSelectedSewerage] = useState('');
+  const [selectedIncidents, setSelectedIncidents] = useState('');
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'map'>('table');
   const [mapCenter, setMapCenter] = useState<Coordinate | null>(null);
@@ -195,6 +211,9 @@ export const useConnectionsViewModel = () => {
     connectionGeometricZone: '',
     propertyCadastralKey: '',
     zoneId: 0,
+    zoneCode: '',
+    zoneName: '',
+    incidents: 0,
     connectionStateId: 0,
     connectionIsReadable: true
   };
@@ -208,94 +227,96 @@ export const useConnectionsViewModel = () => {
       setIsLoading(true);
       setError(null);
       try {
-        let allResults: Connection[] = [];
-        let offsetToFetch = currentOffset;
-        let fetchMore = true;
-
-        while (fetchMore) {
-          let chunk: Connection[] = [];
-          if (activeTab === 'all') {
-            chunk = await getConnectionsUseCase.execute(
-              LIMIT_SIZE,
-              offsetToFetch,
-              searchQuery
-            );
-          } else if (activeTab === 'sector') {
-            chunk = await findConnectionsBySectorUseCase.execute(
-              sectorInput.trim(),
-              LIMIT_SIZE,
-              offsetToFetch
-            );
-          } else if (activeTab === 'client') {
-            chunk = await findAllConnectionsByClientIdUseCase.execute(
-              clientIdInput.trim(),
-              LIMIT_SIZE,
-              offsetToFetch
-            );
-          } else if (activeTab === 'cadastral') {
-            const key = cadastralKeyInput.trim();
-            if (key) {
-              const detail =
-                await findConnectionWithPropertyByCadastralKeyUseCase.execute(
-                  key
-                );
-              if (detail) {
-                // Convert ConnectionWithProperty to Connection for the list
-                const conn: Connection = {
-                  connectionId: detail.connectionId,
-                  clientId: detail.clientId,
-                  connectionRateId: Number(detail.connectionRateId),
-                  connectionRateName: detail.connectionRateName,
-                  connectionMeterNumber: detail.connectionMeterNumber || '',
-                  connectionSector: Number(detail.connectionSector || 0),
-                  connectionAccount: Number(detail.connectionAccount || 0),
-                  connectionCadastralKey: detail.connectionCadastralKey || '',
-                  connectionContractNumber:
-                    detail.connectionContractNumber || '',
-                  connectionSewerage: detail.connectionSewerage || false,
-                  connectionStatus: detail.connectionStatus ?? '',
-                  connectionAddress: detail.connectionAddress || '',
-                  connectionInstallationDate: detail.connectionInstallationDate
-                    ? new Date(detail.connectionInstallationDate)
-                    : new Date(),
-                  connectionPeopleNumber: detail.connectionPeopleNumber || 0,
-                  connectionZone: Number(detail.connectionZone || 0),
-                  longitude: detail.longitude || 0,
-                  latitude: detail.latitude || 0,
-                  connectionCoordinates: detail.connectionCoordinates || '',
-                  connectionReference: detail.connectionReference || '',
-                  ConnectionMetaData: detail.connectionMetadata || {},
-                  connectionAltitude: detail.connectionAltitude || 0,
-                  connectionPrecision: detail.connectionPrecision || 0,
-                  connectionGeolocationDate: detail.connectionGeolocationDate
-                    ? new Date(detail.connectionGeolocationDate)
-                    : new Date(),
-                  connectionGeometricZone: detail.connectionGeometricZone || '',
-                  propertyCadastralKey: detail.propertyCadastralKey || '',
-                  zoneId: detail.zoneId || 0,
-                  connectionStateId: 0,
-                  connectionIsReadable: true
-                };
-                chunk = [conn];
-              }
+        let chunk: Connection[] = [];
+        if (activeTab === 'all') {
+          // Los filtros de estado, alcantarillado e incidentes se envían al
+          // backend para que los aplique en SQL — una sola consulta.
+          const hasIncidents: 'yes' | 'no' | undefined =
+            selectedIncidents === 'with'
+              ? 'yes'
+              : selectedIncidents === 'without'
+                ? 'no'
+                : undefined;
+          const sewerageParam: 'yes' | 'no' | undefined =
+            selectedSewerage === 'yes'
+              ? 'yes'
+              : selectedSewerage === 'no'
+                ? 'no'
+                : undefined;
+          // status: 'active'/'inactive' no es el nombre real en BD,
+          // así que lo seguimos filtrando client-side con ACTIVE_STATES.
+          chunk = await getConnectionsUseCase.execute(
+            LIMIT_SIZE,
+            currentOffset,
+            searchQuery,
+            hasIncidents,
+            undefined, // status se filtra client-side (es booleano en BD)
+            sewerageParam
+          );
+        } else if (activeTab === 'sector') {
+          chunk = await findConnectionsBySectorUseCase.execute(
+            sectorInput.trim(),
+            LIMIT_SIZE,
+            currentOffset
+          );
+        } else if (activeTab === 'client') {
+          chunk = await findAllConnectionsByClientIdUseCase.execute(
+            clientIdInput.trim(),
+            LIMIT_SIZE,
+            currentOffset
+          );
+        } else if (activeTab === 'cadastral') {
+          const key = cadastralKeyInput.trim();
+          if (key) {
+            const detail =
+              await findConnectionWithPropertyByCadastralKeyUseCase.execute(
+                key
+              );
+            if (detail) {
+              // Convert ConnectionWithProperty to Connection for the list
+              const conn: Connection = {
+                connectionId: detail.connectionId,
+                clientId: detail.clientId,
+                connectionRateId: Number(detail.connectionRateId),
+                connectionRateName: detail.connectionRateName,
+                connectionMeterNumber: detail.connectionMeterNumber || '',
+                connectionSector: Number(detail.connectionSector || 0),
+                connectionAccount: Number(detail.connectionAccount || 0),
+                connectionCadastralKey: detail.connectionCadastralKey || '',
+                connectionContractNumber: detail.connectionContractNumber || '',
+                connectionSewerage: detail.connectionSewerage || false,
+                connectionStatus: detail.connectionStatus ?? '',
+                connectionAddress: detail.connectionAddress || '',
+                connectionInstallationDate: detail.connectionInstallationDate
+                  ? new Date(detail.connectionInstallationDate)
+                  : new Date(),
+                connectionPeopleNumber: detail.connectionPeopleNumber || 0,
+                connectionZone: Number(detail.connectionZone || 0),
+                longitude: detail.longitude || 0,
+                latitude: detail.latitude || 0,
+                connectionCoordinates: detail.connectionCoordinates || '',
+                connectionReference: detail.connectionReference || '',
+                ConnectionMetaData: detail.connectionMetadata || {},
+                connectionAltitude: detail.connectionAltitude || 0,
+                connectionPrecision: detail.connectionPrecision || 0,
+                connectionGeolocationDate: detail.connectionGeolocationDate
+                  ? new Date(detail.connectionGeolocationDate)
+                  : new Date(),
+                connectionGeometricZone: detail.connectionGeometricZone || '',
+                propertyCadastralKey: detail.propertyCadastralKey || '',
+                zoneId: detail.zoneId || 0,
+                zoneCode: '',
+                zoneName: '',
+                incidents: 0,
+                connectionStateId: 0,
+                connectionIsReadable: true
+              };
+              chunk = [conn];
             }
-          }
-
-          allResults = [...allResults, ...chunk];
-
-          // If in map mode and we got a full page, load more pages recursively
-          if (
-            viewMode === 'map' &&
-            chunk.length >= LIMIT_SIZE &&
-            activeTab !== 'cadastral'
-          ) {
-            offsetToFetch += LIMIT_SIZE;
-          } else {
-            fetchMore = false;
           }
         }
 
-        const enhancedResults = allResults.map((conn) => {
+        const enhancedResults = chunk.map((conn) => {
           if (!conn.latitude || !conn.longitude) {
             const decoded = decodeEWKBPoint(conn.connectionCoordinates);
             if (decoded) {
@@ -308,10 +329,8 @@ export const useConnectionsViewModel = () => {
         setConnections((prev) =>
           append ? [...prev, ...enhancedResults] : enhancedResults
         );
-        setHasMore(
-          viewMode === 'map' ? false : allResults.length >= LIMIT_SIZE
-        );
-        return allResults;
+        setHasMore(enhancedResults.length >= LIMIT_SIZE);
+        return enhancedResults;
       } catch (err: unknown) {
         const message =
           err instanceof Error ? err.message : 'Error al cargar las Acometidas';
@@ -327,7 +346,8 @@ export const useConnectionsViewModel = () => {
       clientIdInput,
       cadastralKeyInput,
       searchQuery,
-      viewMode,
+      selectedIncidents,
+      selectedSewerage,
       getConnectionsUseCase,
       findConnectionsBySectorUseCase,
       findAllConnectionsByClientIdUseCase,
@@ -347,6 +367,9 @@ export const useConnectionsViewModel = () => {
     setOffset(nextOffset);
     fetchConnections(nextOffset, true);
   }, [hasMore, isLoading, offset, fetchConnections]);
+
+  // (Eliminado: ya no se necesita el loop de auto-carga porque los filtros
+  //  de alcantarillado e incidentes se aplican en el backend via SQL)
 
   // ── 4. CRUD ACTIONS ────────────────────────────────────────────────────────
   const loadRates = useCallback(async () => {
@@ -479,6 +502,9 @@ export const useConnectionsViewModel = () => {
         connectionGeometricZone: fullData.connectionGeometricZone ?? '',
         propertyCadastralKey: fullData.propertyCadastralKey ?? '',
         zoneId: fullData.zoneId || 0,
+        zoneCode: '',
+        zoneName: '',
+        incidents: 0,
         connectionStateId: 0,
         connectionIsReadable: true
       };
@@ -552,6 +578,9 @@ export const useConnectionsViewModel = () => {
         connectionGeometricZone: fullData.connectionGeometricZone || '',
         propertyCadastralKey: fullData.propertyCadastralKey || '',
         zoneId: fullData.zoneId || 0,
+        zoneCode: '',
+        zoneName: '',
+        incidents: 0,
         connectionStateId: 0,
         connectionIsReadable: true
       };
@@ -848,6 +877,7 @@ export const useConnectionsViewModel = () => {
         searchField,
         selectedStatus,
         selectedSewerage,
+        selectedIncidents,
         sortConfig
       ),
     [
@@ -856,6 +886,7 @@ export const useConnectionsViewModel = () => {
       searchField,
       selectedStatus,
       selectedSewerage,
+      selectedIncidents,
       sortConfig
     ]
   );
@@ -879,6 +910,7 @@ export const useConnectionsViewModel = () => {
     setSearchField('all');
     setSelectedStatus('');
     setSelectedSewerage('');
+    setSelectedIncidents('');
     setSortConfig(null);
     setError(null);
   };
@@ -907,7 +939,9 @@ export const useConnectionsViewModel = () => {
       searchField,
       selectedStatus,
       selectedSewerage,
+      selectedIncidents,
       sortConfig,
+      connections,
       filteredConnections,
       canFetch,
       hasMore,
@@ -943,6 +977,7 @@ export const useConnectionsViewModel = () => {
       setSearchField,
       setSelectedStatus,
       setSelectedSewerage,
+      setSelectedIncidents,
       // CRUD/Wizard Actions
       setIsFormOpen,
       setIsDeleteOpen,

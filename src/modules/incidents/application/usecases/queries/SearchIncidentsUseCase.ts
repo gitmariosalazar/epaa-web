@@ -1,5 +1,5 @@
 import type { InterfaceIncidentRepository } from '@/modules/incidents/domain/repositories/incident.interface.repository';
-import type { IncidentResponse } from '@/modules/incidents/domain/schemas/dtos/response/incident.response';
+import type { IncidentDetailRowResponse } from '@/modules/incidents/domain/schemas/dtos/response/view_incident.response';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 
 export class SearchIncidentsUseCase {
@@ -14,7 +14,7 @@ export class SearchIncidentsUseCase {
     status?: string | null;
     priority?: string | null;
     incidentTypeId?: number | null;
-  }): Promise<ApiResponse<IncidentResponse[]>> {
+  }): Promise<ApiResponse<IncidentDetailRowResponse[]>> {
     try {
       const incidents = await this.incidentRepository.findIncidents(filters);
       return incidents;

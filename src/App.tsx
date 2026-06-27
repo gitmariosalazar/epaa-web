@@ -82,6 +82,7 @@ import { WorkOrdersProcessPage, WorkOrderCreatePage, AllWorkOrdersListPage, Work
 // Incidents Module
 import { IncidentProvider } from '@/modules/incidents/presentation/context/IncidentContext';
 import { IncidentsListPage } from '@/modules/incidents/presentation/pages/IncidentsListPage';
+import { IncidentsMapPage } from '@/modules/incidents/presentation/pages/IncidentsMapPage';
 import { CreateIncidentPage } from '@/modules/incidents/presentation/pages/CreateIncidentPage';
 
 import UnAuthorizedPage from '@/shared/presentation/components/unauthorized/UnAuthorizedPage';
@@ -299,6 +300,7 @@ function App() {
                       <Routes>
                         <Route index element={<IncidentsListPage />} />
                         <Route path="list" element={<IncidentsListPage />} />
+                        <Route path="map" element={<IncidentsMapPage />} />
                         <Route
                           path="create"
                           element={
