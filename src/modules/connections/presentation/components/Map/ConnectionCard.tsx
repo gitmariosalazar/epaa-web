@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Connection } from '../../../domain/models/Connection';
-import { MdInfo, MdList, MdLocationOn, MdPerson } from 'react-icons/md';
+import { MdLocationOn, MdPerson } from 'react-icons/md';
 import { getConnectionStateChip } from '../../utils/connectionStateChip';
 import { ACTIVE_STATES } from '../../../domain/models/ConnectionState';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';

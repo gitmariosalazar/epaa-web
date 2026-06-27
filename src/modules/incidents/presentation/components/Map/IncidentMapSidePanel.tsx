@@ -42,7 +42,7 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
           {/* Header */}
           <div className="incident-side-panel-header">
             <AlertTriangle size={16} className="incident-side-panel-icon" />
-            <span className="incident-side-panel-title">Incidentes</span>
+            <span className="incident-side-panel-title">Incidentes Reportados</span>
             <span className="incident-side-panel-count">{incidents.length}</span>
           </div>
 
