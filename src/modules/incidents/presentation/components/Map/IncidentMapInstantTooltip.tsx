@@ -6,19 +6,19 @@ const PRIORITY_CONFIG: Record<
   string,
   { color: string; glow: string; label: string }
 > = {
-  CRITICA: { color: '#ef4444', glow: 'rgba(239,68,68,0.5)',   label: 'CRÍTICA'  },
-  ALTA:    { color: '#f97316', glow: 'rgba(249,115,22,0.45)', label: 'ALTA'     },
-  MEDIA:   { color: '#eab308', glow: 'rgba(234,179,8,0.4)',   label: 'MEDIA'    },
-  BAJA:    { color: '#22c55e', glow: 'rgba(34,197,94,0.35)',  label: 'BAJA'     },
+  CRITICA: { color: '#ef4444', glow: 'rgba(239,68,68,0.5)', label: 'CRÍTICA' },
+  ALTA: { color: '#f97316', glow: 'rgba(249,115,22,0.45)', label: 'ALTA' },
+  MEDIA: { color: '#eab308', glow: 'rgba(234,179,8,0.4)', label: 'MEDIA' },
+  BAJA: { color: '#22c55e', glow: 'rgba(34,197,94,0.35)', label: 'BAJA' },
 };
 
 const DEFAULT_CONFIG = { color: '#6b7280', glow: 'rgba(107,114,128,0.3)', label: 'N/A' };
 
 // ── Status → badge config ─────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { color: string; label: string }> = {
-  REPORTADO:     { color: '#f59e0b', label: 'Reportado'     },
+  REPORTADO: { color: '#f59e0b', label: 'Reportado' },
   EN_INSPECCION: { color: '#3b82f6', label: 'En Inspección' },
-  RESUELTO:      { color: '#10b981', label: 'Resuelto'      },
+  RESUELTO: { color: '#10b981', label: 'Resuelto' },
   FALSO_REPORTE: { color: '#ef4444', label: 'Falso Reporte' },
 };
 
@@ -39,6 +39,9 @@ export const IncidentMapInstantTooltip: React.FC<IncidentMapInstantTooltipProps>
     <div className="incident-map-tooltip" style={{ '--tooltip-color': cfg.color } as React.CSSProperties}>
       <span className="incident-map-tooltip-dot" style={{ background: cfg.color }} />
       <span className="incident-map-tooltip-text">{incident.incidentTypeName}</span>
+      <div className="incident-info-tooltip">
+        <span className="incident-map-tooltip-text">{incident.connectionId}</span>
+      </div>
     </div>
   );
 };

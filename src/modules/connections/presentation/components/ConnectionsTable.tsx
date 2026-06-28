@@ -18,6 +18,7 @@ import type { Connection } from '../../domain/models/Connection';
 import type { SortConfig } from '../hooks/useConnectionsViewModel';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { getConnectionStateChip } from '../utils/connectionStateChip';
+import { BsTable } from 'react-icons/bs';
 
 // ── DetailModal (lightweight inline modal for viewing a connection) ────────────
 interface ConnectionDetailModalProps {
@@ -117,7 +118,8 @@ interface ConnectionsTableProps {
   hasMore?: boolean;
   onViewOnMap: (connection: Connection) => void;
   /** Navega a la lista de incidentes filtrando por esta acometida (delegado al padre) */
-  onViewIncidents?: (connectionId: string) => void;
+  onViewIncidentsOnTable?: (connectionId: string) => void;
+  onViewIncidentsOnMap?: (connectionId: string) => void;
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -131,7 +133,8 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
   onEndReached,
   hasMore,
   onViewOnMap,
-  onViewIncidents
+  onViewIncidentsOnTable,
+  onViewIncidentsOnMap
 }) => {
   const { t } = useTranslation();
   const [selectedConnection, setSelectedConnection] =
@@ -173,6 +176,87 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         accessor: 'connectionCadastralKey',
         sortable: true,
         id: 'connectionCadastralKey'
+      },
+
+      {
+        header: t('connections.table.incidents', 'Incidentes'),
+        accessor: (item: Connection) => {
+          // PostgreSQL COUNT devuelve bigint → llega como string. Castear a Number.
+          const count = Number(item.incidents ?? 0);
+
+          return count > 0 ? (
+            <div className="table-column-center">
+              <Tooltip
+                content={t(
+                  'connections.table.incidentsCount',
+                  `La acometida tiene ${count} incidente(s).`
+                )}
+                position="bottom"
+                followCursor={false}
+              >
+                <ColorChip
+                  label={count.toString()}
+                  color="#ef4444" // Rojo = problema
+                  icon={<AlertTriangle size={14} />} // Triángulo de alerta
+                  variant="soft"
+                  size="sm"
+                />
+              </Tooltip>
+              <Tooltip
+                content={'Ver incidentes tabla'}
+                position="bottom"
+                followCursor={false}
+              >
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  circle
+                  style={{ color: '#ef4444' }}
+                  onClick={() => onViewIncidentsOnTable?.(item.connectionId)}
+                >
+                  <BsTable size={14} />
+                </Button>
+              </Tooltip>
+              <Tooltip
+                content={'Ver incidentes en el mapa'}
+                position="bottom"
+                followCursor={false}
+              >
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  circle
+                  style={{ color: '#ef4444' }}
+                  onClick={() => onViewIncidentsOnMap?.(item.connectionId)}
+                >
+                  <FaMapMarkerAlt size={14} />
+                </Button>
+              </Tooltip>
+            </div>
+          ) : (
+            <div className="table-column-center">
+              <Tooltip
+                content={t(
+                  'connections.table.incidentsCount',
+                  'La acometida no tiene incidentes.'
+                )}
+                position="bottom"
+                followCursor={false}
+              >
+                <ColorChip
+                  label="0"
+                  color="#22c55e" // Verde = bueno
+                  icon={<CheckCircle size={14} />} // Check = sin problemas
+                  variant="soft"
+                  size="sm"
+                />
+              </Tooltip>
+            </div>
+          );
+        },
+        sortable: true,
+        sortKey: 'incidents',
+        id: 'incidents'
       },
       {
         header: t('connections.table.contractNumber'),
@@ -239,70 +323,6 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
           />
         ),
         id: 'connectionIsReadable'
-      },
-      {
-        header: t('connections.table.incidents', 'Incidentes'),
-        accessor: (item: Connection) => {
-          // PostgreSQL COUNT devuelve bigint → llega como string. Castear a Number.
-          const count = Number(item.incidents ?? 0);
-
-          return count > 0 ? (
-            <div className="table-column-center">
-              <Tooltip
-                content={t(
-                  'connections.table.incidentsCount',
-                  `La acometida tiene ${count} incidente(s).`
-                )}
-                position="bottom"
-                followCursor={false}
-              >
-                <ColorChip
-                  label={count.toString()}
-                  color="#ef4444" // Rojo = problema
-                  icon={<AlertTriangle size={14} />} // Triángulo de alerta
-                  variant="soft"
-                  size="sm"
-                />
-              </Tooltip>
-              <Tooltip
-                content={t('connections.table.viewDetails', 'Ver incidentes activos')}
-                position="bottom"
-              >
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  circle
-                  style={{ color: '#ef4444' }}
-                  onClick={() => onViewIncidents?.(item.connectionId)}
-                >
-                  <EyeIcon size={14} />
-                </Button>
-              </Tooltip>
-            </div>
-          ) : (
-            <div className="table-column-center">
-              <Tooltip
-                content={t(
-                  'connections.table.incidentsCount',
-                  'La acometida no tiene incidentes.'
-                )}
-                position="bottom"
-                followCursor={false}
-              >
-                <ColorChip
-                  label="0"
-                  color="#22c55e" // Verde = bueno
-                  icon={<CheckCircle size={14} />} // Check = sin problemas
-                  variant="soft"
-                  size="sm"
-                />
-              </Tooltip>
-            </div>
-          );
-        },
-        sortable: true,
-        sortKey: 'incidents',
-        id: 'incidents'
       },
       {
         header: t('connections.table.options'),

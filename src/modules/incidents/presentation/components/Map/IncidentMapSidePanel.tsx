@@ -1,12 +1,25 @@
 import React from 'react';
-import { AlertTriangle, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
+import { AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { IncidentDetailRowResponse } from '../../../domain/schemas/dtos/response/view_incident.response';
-import { PRIORITY_CONFIG, STATUS_CONFIG, DEFAULT_CONFIG } from './IncidentMapInstantTooltip';
+import {
+  PRIORITY_CONFIG,
+  STATUS_CONFIG,
+  DEFAULT_CONFIG
+} from './IncidentMapInstantTooltip';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import './IncidentMapSidePanel.css';
+import { MdCable, MdLocationOn } from 'react-icons/md';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { IoMdEye } from 'react-icons/io';
+import { Divider } from '@/shared/presentation/components/divider/Divider';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { truncateText } from '@/shared/utils/text/truncate-text';
 
 interface IncidentMapSidePanelProps {
   incidents: IncidentDetailRowResponse[];
   selectedIncident: IncidentDetailRowResponse | null;
   onSelect: (incident: IncidentDetailRowResponse) => void;
+  onViewDetail?: (incident: IncidentDetailRowResponse) => void; // ← Agregar esto
   collapsed: boolean;
   onToggle: () => void;
 }
@@ -20,11 +33,14 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
   incidents,
   selectedIncident,
   onSelect,
+  onViewDetail, // ← Recibir
   collapsed,
-  onToggle,
+  onToggle
 }) => {
   const withCoords = incidents.filter((i) => i.latitude && i.longitude);
   const withoutCoords = incidents.filter((i) => !i.latitude || !i.longitude);
+
+  console.log(`Selectet: `, selectedIncident);
 
   return (
     <div className={`incident-side-panel ${collapsed ? 'collapsed' : ''}`}>
@@ -40,25 +56,40 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
       {!collapsed && (
         <>
           {/* Header */}
-          <div className="incident-side-panel-header">
-            <AlertTriangle size={16} className="incident-side-panel-icon" />
-            <span className="incident-side-panel-title">Incidentes Reportados</span>
-            <span className="incident-side-panel-count">{incidents.length}</span>
-          </div>
+          <div className="incident-side-panel-header-container">
+            <div className="incident-side-panel-header">
+              <AlertTriangle size={16} className="incident-side-panel-icon" />
+              <span className="incident-side-panel-title">
+                Incidentes Reportados
+              </span>
+              <span className="incident-side-panel-count">
+                {incidents.length}
+              </span>
+            </div>
 
-          {/* Stats row */}
-          <div className="incident-side-panel-stats">
-            <div className="incident-stat-pill" style={{ '--stat-color': '#22c55e' } as React.CSSProperties}>
-              <span>{incidents.filter((i) => i.status === 'RESUELTO').length}</span>
-              <label>Resueltos</label>
-            </div>
-            <div className="incident-stat-pill" style={{ '--stat-color': '#f59e0b' } as React.CSSProperties}>
-              <span>{incidents.filter((i) => i.status === 'REPORTADO').length}</span>
-              <label>Reportados</label>
-            </div>
-            <div className="incident-stat-pill" style={{ '--stat-color': '#ef4444' } as React.CSSProperties}>
-              <span>{incidents.filter((i) => i.currentPriority === 'CRITICA').length}</span>
-              <label>Críticos</label>
+            {/* Stats row */}
+            <div className="incident-side-panel-stats">
+              <div className="incident-stat-pill priority-success">
+                <span>
+                  {incidents.filter((i) => i.status === 'RESUELTO').length}
+                </span>
+                <label>Resueltos</label>
+              </div>
+              <div className="incident-stat-pill priority-warning">
+                <span>
+                  {incidents.filter((i) => i.status === 'REPORTADO').length}
+                </span>
+                <label>Reportados</label>
+              </div>
+              <div className="incident-stat-pill priority-error">
+                <span>
+                  {
+                    incidents.filter((i) => i.currentPriority === 'CRITICA')
+                      .length
+                  }
+                </span>
+                <label>Críticos</label>
+              </div>
             </div>
           </div>
 
@@ -70,36 +101,108 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                 <p>Sin incidentes para mostrar</p>
               </div>
             )}
-
             {withCoords.map((incident) => {
-              const pCfg = PRIORITY_CONFIG[incident.currentPriority] ?? DEFAULT_CONFIG;
-              const sCfg = STATUS_CONFIG[incident.status] ?? { color: '#6b7280', label: incident.status };
-              const isSelected = selectedIncident?.incidentId === incident.incidentId;
+              const pCfg =
+                PRIORITY_CONFIG[incident.currentPriority] ?? DEFAULT_CONFIG;
+              const sCfg = STATUS_CONFIG[incident.status] ?? {
+                color: '#6b7280',
+                label: incident.status
+              };
+              const isSelected =
+                selectedIncident?.incidentId === incident.incidentId;
 
               return (
-                <button
+                <div
                   key={incident.incidentId}
-                  className={`incident-side-panel-item ${isSelected ? 'is-selected' : ''}`}
-                  onClick={() => onSelect(incident)}
-                  style={{ '--item-accent': pCfg.color } as React.CSSProperties}
+                  className={`incident-item-container ${isSelected ? 'is-selected' : ''}`}
+                  onClick={() => onSelect(incident)} // ← SOLO ENFOCAR MAPA
                 >
-                  <div className="incident-item-dot" style={{ background: pCfg.color }} />
-                  <div className="incident-item-body">
-                    <span className="incident-item-id">#{incident.incidentId}</span>
-                    <span className="incident-item-type">{incident.incidentTypeName}</span>
+                  {/* Contenido principal */}
+                  <div className="incident-item-bottom">
+                    <div className="incident-item-dot-content">
+                      <div
+                        className="incident-item-dot"
+                        style={{ background: pCfg.color }}
+                      />
+                      <div className="incident-item-body">
+                        <span className="incident-item-id">
+                          ID: #{incident.incidentId}
+                        </span>
+                        <span className="incident-item-type">
+                          {incident.incidentTypeName}
+                        </span>
+                      </div>
+                    </div>
+
                     {incident.connectionId && (
-                      <span className="incident-item-conn">
-                        <MapPin size={9} /> {incident.connectionId}
-                      </span>
+                      <ColorChip
+                        label={incident.connectionId}
+                        size="sm"
+                        variant="ghost"
+                        icon={<MdCable size={9} />}
+                        borderRadius={5}
+                      />
                     )}
                   </div>
+
                   <span
                     className="incident-item-status"
                     style={{ color: sCfg.color }}
                   >
                     {sCfg.label}
                   </span>
-                </button>
+
+                  <div className="incident-description">
+                    <p className="incident-text-description">
+                      {truncateText(incident.reportDescription, 60)}
+                    </p>
+                  </div>
+
+                  <Divider variant="dashed" thickness="thin" />
+
+                  {/* Botones de Acción */}
+                  {/* Botones de Acción */}
+                  <div className="card-incidents-actions">
+                    <Tooltip
+                      themeColor="warning"
+                      content="Ver detalles del incidente reportado"
+                      position="bottom"
+                    >
+                      <Button
+                        variant="dashed"
+                        size="xs"
+                        leftIcon={<IoMdEye size={18} />}
+                        onClick={(e) => {
+                          e.stopPropagation(); // ← Muy importante
+                          console.log('✅ Botón Ver Detalles clickeado');
+                          console.log('onViewDetail existe?', !!onViewDetail);
+                          onViewDetail?.(incident);
+                        }}
+                      >
+                        Ver Detalles
+                      </Button>
+                    </Tooltip>
+
+                    <Tooltip
+                      themeColor="warning"
+                      content="Centrar en el mapa"
+                      position="bottom"
+                    >
+                      <Button
+                        variant="dashed"
+                        color="green"
+                        size="xs"
+                        leftIcon={<MdLocationOn size={18} />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelect(incident);
+                        }}
+                      >
+                        Ver Ubicación
+                      </Button>
+                    </Tooltip>
+                  </div>
+                </div>
               );
             })}
 

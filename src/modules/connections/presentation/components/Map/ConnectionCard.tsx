@@ -16,15 +16,21 @@ interface ConnectionCardProps {
   connection: Connection;
   isSelected: boolean;
   onSelect: (conn: Connection) => void;
+  onViewIncidentsOnTable: (connectionId: string) => void;
+  onViewIncidentsOnMap: (connectionId: string) => void;
 }
 
 export const ConnectionCard: React.FC<ConnectionCardProps> = ({
   connection,
   isSelected,
-  onSelect
+  onSelect,
+  onViewIncidentsOnTable,
+  onViewIncidentsOnMap
 }) => {
   const chip = getConnectionStateChip(connection.connectionStatus);
   const isActive = ACTIVE_STATES.has(connection.connectionStatus);
+
+
 
   return (
     <div
@@ -113,7 +119,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
                 variant="dashed"
                 size="xs"
                 leftIcon={<IoMdEye seed={20} />}
-                onClick={() => console.log('Ver detalles de la acometida')}
+                onClick={() => onViewIncidentsOnTable(connection.connectionCadastralKey)}
               >
                 Ver Detalles
               </Button>
@@ -131,7 +137,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
                 color="green"
                 size="xs"
                 leftIcon={<MdLocationOn />}
-                onClick={() => console.log('Ver ubicación de la acometida')}
+                onClick={() => onViewIncidentsOnMap(connection.connectionCadastralKey)}
               >
                 Ver Ubicación
               </Button>

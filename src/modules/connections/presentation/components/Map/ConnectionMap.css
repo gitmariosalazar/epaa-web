@@ -311,11 +311,14 @@
   justify-content: center;
   pointer-events: auto !important;
   z-index: 10;
+  background-color: transparent !important;
+  border-radius: 100%;
 }
 
 .is-hovered,
 .is-selected {
   z-index: 100 !important;
+  background-color: rgba(0, 255, 64, 0.2) !important;
 }
 
 /* --- Instant Tooltip (Clean Reference) --- */
@@ -363,7 +366,6 @@
   pointer-events: none;
 }
 
-
 .marker-dot-core {
   position: absolute;
   width: 16px;
@@ -387,7 +389,10 @@
   opacity: 1;
   transform: scale(1.35); /* Larger on selection */
   border-color: #fff;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 5px 20px rgba(0, 0, 0, 0.7);
+  box-shadow:
+    0 0 15px rgba(255, 255, 255, 0.8),
+    0 5px 20px rgba(0, 0, 0, 0.7);
+  background-color: green !important;
 }
 
 .is-hovered .marker-static-pin,
@@ -434,7 +439,6 @@
     opacity: 0;
   }
 }
-
 
 .status-active .marker-heartbeat-pulse {
   background-color: rgba(16, 185, 129, 0.2);
@@ -558,7 +562,7 @@
 /* Premium Popup Content (Single Layer) */
 .premium-popup {
   min-width: 320px;
-  background: transparent !important;
+  background: var(--surface) !important;
   position: relative;
 }
 .status-active.premium-popup-header-status {

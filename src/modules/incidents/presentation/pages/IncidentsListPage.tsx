@@ -44,21 +44,21 @@ export const IncidentsListPage: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status.toUpperCase()) {
-      case 'RESUELTO':       return 'green';
-      case 'EN_INSPECCION':  return 'orange';
-      case 'REPORTADO':      return 'yellow';
-      case 'FALSO_REPORTE':  return 'red';
-      default:               return 'neutral';
+      case 'RESUELTO': return 'green';
+      case 'EN_INSPECCION': return 'orange';
+      case 'REPORTADO': return 'yellow';
+      case 'FALSO_REPORTE': return 'red';
+      default: return 'neutral';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority.toUpperCase()) {
       case 'CRITICA': return 'red';
-      case 'ALTA':    return 'orange';
-      case 'MEDIA':   return 'yellow';
-      case 'BAJA':    return 'cyan';
-      default:        return 'neutral';
+      case 'ALTA': return 'orange';
+      case 'MEDIA': return 'yellow';
+      case 'BAJA': return 'cyan';
+      default: return 'neutral';
     }
   };
 
@@ -86,6 +86,15 @@ export const IncidentsListPage: React.FC = () => {
         </div>
       ),
       id: 'categoryAndType'
+    },
+    {
+      header: 'UBICACIÓN',
+      accessor: (item) => (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span className="incident-category-text">{`${item.latitude}, ${item.longitude}`}</span>
+        </div>
+      ),
+      id: 'location'
     },
     {
       header: 'PRIORIDAD',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, ShieldAlert, RefreshCw, Plus, AlertCircle, Bookmark } from 'lucide-react';
+import { Search, ShieldAlert, RefreshCw, AlertCircle, Bookmark } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Select } from '@/shared/presentation/components/Input/Select';
@@ -33,42 +33,12 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
   onIncidentTypeIdChange,
   categories,
   onConsultar,
-  onReportIncident,
   isLoading
 }) => {
   const { t } = useTranslation();
 
   return (
     <div className="incident-filters-wrapper">
-      {/* Title & Primary Actions */}
-      <div className="incident-filters-header">
-        <div className="title-group-incident">
-          <ShieldAlert size={24} className="title-icon-incidents" />
-          <h2>{t('incidents.title', 'Gestión de Incidentes Técnicos')}</h2>
-        </div>
-        <div className="toolbar-actions">
-          {/* Consultar = refresh + apply current filters */}
-          <Button
-            variant="outline"
-            size="compact"
-            onClick={onConsultar}
-            isLoading={isLoading}
-            leftIcon={<RefreshCw size={16} />}
-          >
-            {t('common.consult', 'Consultar')}
-          </Button>
-          <Button
-            variant="primary"
-            size="compact"
-            onClick={onReportIncident}
-            leftIcon={<Plus size={16} />}
-          >
-            {t('incidents.actions.reportIncident', 'Reportar Incidente')}
-          </Button>
-        </div>
-      </div>
-
-      {/* Filter Options Row */}
       <div className="incident-filters-body">
         {/* Search */}
         <div className="filter-group filter-group--search">
@@ -84,7 +54,6 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
             />
           </div>
         </div>
-
         {/* Status */}
         <div className="filter-group">
           <label className="filter-label">{t('incidents.filters.status', 'Estado')}</label>
@@ -146,6 +115,15 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
             </Select>
           </div>
         </div>
+        <Button
+          variant="outline"
+          size="compact"
+          onClick={onConsultar}
+          isLoading={isLoading}
+          leftIcon={<RefreshCw size={16} />}
+        >
+          {t('common.consult', 'Consultar')}
+        </Button>
       </div>
     </div>
   );

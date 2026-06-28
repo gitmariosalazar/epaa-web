@@ -4,6 +4,7 @@ import type { Connection } from '../../../domain/models/Connection';
 import { IoSearch } from 'react-icons/io5';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { Input } from '@/shared/presentation/components/Input/Input';
+import { useNavigate } from 'react-router-dom';
 
 interface ConnectionSidePanelProps {
   connections: Connection[];
@@ -18,9 +19,19 @@ export const ConnectionSidePanel: React.FC<ConnectionSidePanelProps> = ({
   selectedConnection,
   onSelect,
   collapsed,
-  onToggle
+  onToggle,
 }) => {
   const [search, setSearch] = useState('');
+
+  const navigate = useNavigate();
+
+  const handleViewIncidentsOnTable = (connectionId: string) => {
+    navigate(`/incidents?connectionId=${encodeURIComponent(connectionId)}`)
+  };
+
+  const handleViewIncidentsOnMap = (connectionId: string) => {
+    navigate(`/incidents/map?connectionId=${encodeURIComponent(connectionId)}`)
+  };
 
   const filteredConnections = connections.filter(
     (conn) =>
@@ -61,6 +72,8 @@ export const ConnectionSidePanel: React.FC<ConnectionSidePanelProps> = ({
             {filteredConnections.map((conn) => (
               <ConnectionCard
                 key={conn.connectionId}
+                onViewIncidentsOnTable={handleViewIncidentsOnTable}
+                onViewIncidentsOnMap={handleViewIncidentsOnMap}
                 connection={conn}
                 isSelected={
                   selectedConnection?.connectionId === conn.connectionId

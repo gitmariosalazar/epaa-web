@@ -1,0 +1,145 @@
+.incident-item-container {
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+  background: var(--surface) !important;
+  text-align: left;
+  width: 100%;
+  transition: all 0.15s ease;
+  position: relative;
+}
+/* ====================== STATS PILLS - Versión Premium ====================== */
+
+.incident-item-bottom {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.incident-item-dot-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.incident-side-panel-stats {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  background: var(--surface);
+}
+
+.incident-stat-pill {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 8px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.incident-stat-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent);
+}
+
+.incident-stat-pill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #60a5fa);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.incident-stat-pill:hover::before {
+  opacity: 1;
+}
+
+/* Número grande */
+.incident-stat-pill span {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+/* Label */
+.incident-stat-pill label {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+
+.incident-stat-pill:hover label {
+  color: var(--text-secondary);
+}
+
+/* Colores por prioridad */
+.priority-success {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.priority-success span {
+  color: #10b981 !important;
+}
+
+.priority-warning {
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+.priority-warning span {
+  color: #f59e0b !important;
+}
+
+.priority-error {
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+.priority-error span {
+  color: #ef4444 !important;
+}
+
+/* Efecto de brillo sutil */
+.incident-stat-pill.priority-success::after,
+.incident-stat-pill.priority-warning::after,
+.incident-stat-pill.priority-error::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 30% 20%,
+    rgba(255, 255, 255, 0.15),
+    transparent 70%
+  );
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.is-selected {
+  box-shadow: var(--shadow-md) !important;
+  background-color: #f0fdfa;
+  color: #047857;
+}

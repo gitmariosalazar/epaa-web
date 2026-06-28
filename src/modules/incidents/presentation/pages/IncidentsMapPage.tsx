@@ -14,7 +14,7 @@ import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/respon
  * IncidentsMapPage — dedicated full-screen incident map.
  *
  * Replicates exactly the same layout pattern as ConnectionsPage (map mode):
- *   PageLayout (className="incident-map-page") 
+ *   PageLayout (className="incident-map-page")
  *     └── div.incident-map-page-content
  *           └── IncidentMapFeature  →  div.incident-map-feature-container (calc(100vh-180px))
  */
@@ -27,12 +27,22 @@ export const IncidentsMapPage: React.FC = () => {
     connectionMode,
     connectionIdFromUrl,
     handleFilterChange,
-    handleConsultar,
+    handleConsultar
   } = useIncidentsViewModel();
 
   const navigate = useNavigate();
-  const [selectedIncident, setSelectedIncident] = useState<IncidentDetailRowResponse | null>(null);
+  const [selectedIncident, setSelectedIncident] =
+    useState<IncidentDetailRowResponse | null>(null);
+  const [focusedIncident, setFocusedIncident] =
+    useState<IncidentDetailRowResponse | null>(null); // ← Nuevo
 
+  // Solo enfoca el mapa (sin abrir modal)
+  const handleFocusOnMap = (incident: IncidentDetailRowResponse) => {
+    setFocusedIncident(incident); // ← Usaremos esto para el highlight visual
+  };
+  const handleViewDetail = (incident: IncidentDetailRowResponse) => {
+    setSelectedIncident(incident);
+  };
   return (
     <>
       <PageLayout
@@ -46,7 +56,9 @@ export const IncidentsMapPage: React.FC = () => {
             selectedPriority={filters.priority}
             onPriorityChange={(val) => handleFilterChange({ priority: val })}
             selectedIncidentTypeId={filters.incidentTypeId}
-            onIncidentTypeIdChange={(val) => handleFilterChange({ incidentTypeId: val })}
+            onIncidentTypeIdChange={(val) =>
+              handleFilterChange({ incidentTypeId: val })
+            }
             categories={categories}
             onConsultar={handleConsultar}
             onReportIncident={() => navigate('/incidents/create')}
@@ -60,8 +72,8 @@ export const IncidentsMapPage: React.FC = () => {
               <Network size={16} />
               <span>
                 Incidentes activos de la acometida
-                <strong> {connectionIdFromUrl}</strong>
-                {' '}— solo estados distintos de RESUELTO
+                <strong> {connectionIdFromUrl}</strong> — solo estados distintos
+                de RESUELTO
               </span>
               <button
                 className="incidents-banner-clear"
@@ -76,9 +88,9 @@ export const IncidentsMapPage: React.FC = () => {
 
           <IncidentMapFeature
             incidents={incidents}
-            selectedIncident={selectedIncident}
-            onSelect={setSelectedIncident}
-            onViewDetail={(incident) => setSelectedIncident(incident)}
+            selectedIncident={focusedIncident} // ← Cambiado
+            onSelect={handleFocusOnMap} // ← Solo focus
+            onViewDetail={handleViewDetail}
           />
         </div>
       </PageLayout>

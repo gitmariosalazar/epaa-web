@@ -16,6 +16,9 @@ interface MapInfoWindowProps {
   theme: string;
   onClose: () => void;
   onEdit?: (conn: Connection) => void;
+  onViewIncidentsOnTable?: (connectionId: string) => void;
+  onViewIncidentsOnMap?: (connectionId: string) => void;
+
 }
 
 export const MapInfoWindow: React.FC<MapInfoWindowProps> = ({
@@ -23,6 +26,8 @@ export const MapInfoWindow: React.FC<MapInfoWindowProps> = ({
   theme,
   onClose,
   onEdit,
+  onViewIncidentsOnTable,
+  onViewIncidentsOnMap
 }) => {
   return (
     <div className={`premium-popup ${theme === 'dark' ? 'dark' : ''}`}>
@@ -126,7 +131,7 @@ export const MapInfoWindow: React.FC<MapInfoWindowProps> = ({
                   variant="dashed"
                   size="xs"
                   leftIcon={<IoMdEye seed={20} />}
-                  onClick={() => console.log('Ver detalles de la acometida')}
+                  onClick={() => onViewIncidentsOnTable?.(connection.connectionId)}
                 >
                   Ver Detalles
                 </Button>
@@ -144,7 +149,7 @@ export const MapInfoWindow: React.FC<MapInfoWindowProps> = ({
                   color="green"
                   size="xs"
                   leftIcon={<MdLocationOn />}
-                  onClick={() => console.log('Ver ubicación de la acometida')}
+                  onClick={() => onViewIncidentsOnMap?.(connection.connectionId)}
                 >
                   Ver Ubicación
                 </Button>

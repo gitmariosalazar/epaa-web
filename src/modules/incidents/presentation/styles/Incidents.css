@@ -48,8 +48,14 @@
 }
 
 @keyframes conn-banner-in {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .incident-modal-overlay {
@@ -1100,9 +1106,11 @@
 
 .incident-marker-container.is-selected {
   transform: translate(-50%, -50%) scale(1.6);
-  z-index: 10000;
+  z-index: 0 !important;
   --marker-color: #a855f7 !important;
   --marker-glow: rgba(168, 85, 247, 0.75) !important;
+  background-color: rgb(168, 85, 247);
+  border-radius: 100%;
 }
 
 .incident-marker-container.is-selected .incident-marker-core {
@@ -1127,8 +1135,10 @@
   justify-content: center;
   box-shadow:
     0 0 0 2px rgba(255, 255, 255, 0.25),
-    0 4px 12px var(--marker-glow, rgba(0,0,0,0.3));
-  transition: box-shadow 0.2s ease, transform 0.18s ease;
+    0 4px 12px var(--marker-glow, rgba(0, 0, 0, 0.3));
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.18s ease;
   z-index: 2;
 }
 
@@ -1136,7 +1146,7 @@
 .incident-marker-container.is-hovered .incident-marker-core {
   box-shadow:
     0 0 0 3px rgba(255, 255, 255, 0.4),
-    0 6px 20px var(--marker-glow, rgba(0,0,0,0.4));
+    0 6px 20px var(--marker-glow, rgba(0, 0, 0, 0.4));
 }
 
 /* Pulsing rings */
@@ -1154,16 +1164,37 @@
 }
 
 @keyframes incident-pulse {
-  0%   { transform: scale(0.85); opacity: 0.8; }
-  70%  { transform: scale(2.2);  opacity: 0;   }
-  100% { transform: scale(2.2);  opacity: 0;   }
+  0% {
+    transform: scale(0.85);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
 }
 
 /* Priority-specific colors (fallback — CSS vars override these) */
-.incident-marker-container.priority-critica { --marker-color: #ef4444; --marker-glow: rgba(239,68,68,0.5); }
-.incident-marker-container.priority-alta    { --marker-color: #f97316; --marker-glow: rgba(249,115,22,0.45); }
-.incident-marker-container.priority-media   { --marker-color: #eab308; --marker-glow: rgba(234,179,8,0.4); }
-.incident-marker-container.priority-baja    { --marker-color: #22c55e; --marker-glow: rgba(34,197,94,0.35); }
+.incident-marker-container.priority-critica {
+  --marker-color: #ef4444;
+  --marker-glow: rgba(239, 68, 68, 0.5);
+}
+.incident-marker-container.priority-alta {
+  --marker-color: #f97316;
+  --marker-glow: rgba(249, 115, 22, 0.45);
+}
+.incident-marker-container.priority-media {
+  --marker-color: #eab308;
+  --marker-glow: rgba(234, 179, 8, 0.4);
+}
+.incident-marker-container.priority-baja {
+  --marker-color: #22c55e;
+  --marker-glow: rgba(34, 197, 94, 0.35);
+}
 
 /* Resolved incidents: no pulse, dimmed */
 .incident-marker-container.is-resolved .incident-marker-core {
@@ -1187,8 +1218,9 @@
   gap: 5px;
   white-space: nowrap;
   pointer-events: none;
-  z-index: 20;
+  z-index: 99999 !important;
   animation: tooltip-appear 0.12s ease-out;
+  height: 100%;
 }
 
 .incident-map-tooltip-dot {
@@ -1209,8 +1241,14 @@
 }
 
 @keyframes tooltip-appear {
-  from { opacity: 0; transform: translateX(-50%) translateY(4px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0);   }
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 /* ── InfoWindow popup ────────────────────────────────────────────────────── */
@@ -1219,7 +1257,7 @@
 .gm-style .gm-style-iw-c {
   padding: 0 !important;
   border-radius: 14px !important;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.35) !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35) !important;
   overflow: hidden !important;
   background: transparent !important;
 }
@@ -1236,10 +1274,14 @@
 .incident-popup {
   width: 270px;
   background: #1e2535;
-  border-radius: 14px;
+  border-radius: 5px !important;
   overflow: hidden;
   font-family: var(--font-body, 'Inter', sans-serif);
   position: relative;
+}
+
+.incident-popup-body {
+  padding: 14px 14px 14px;
 }
 
 .incident-popup:not(.dark) {
@@ -1252,6 +1294,27 @@
   width: 100%;
 }
 
+/* ====================== Z-INDEX FIX ====================== */
+
+.incident-modal-overlay,
+.lightbox-overlay {
+  z-index: 9999 !important;
+}
+
+.incident-modal {
+  z-index: 10000 !important;
+}
+
+.gm-style .gm-style-iw-c,
+.gm-style .gm-style-iw-t {
+  z-index: 1200 !important;
+}
+
+/* Si tienes popups del mapa */
+.incident-popup {
+  z-index: 1300 !important;
+}
+
 .incident-popup-close {
   position: absolute;
   top: 10px;
@@ -1259,8 +1322,8 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1270,19 +1333,15 @@
   z-index: 2;
 }
 .incident-popup:not(.dark) .incident-popup-close {
-  border-color: rgba(0,0,0,0.1);
-  background: rgba(0,0,0,0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.04);
   color: #6b7280;
 }
 
 .incident-popup-close:hover {
-  background: rgba(239,68,68,0.15);
+  background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
-  border-color: rgba(239,68,68,0.3);
-}
-
-.incident-popup-body {
-  padding: 14px 14px 14px;
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 /* Header row */
@@ -1391,13 +1450,13 @@
   line-height: 1.5;
   margin: 0 0 10px;
   padding: 8px;
-  background: rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 7px;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 .incident-popup:not(.dark) .incident-popup-description {
-  background: rgba(0,0,0,0.03);
-  border-color: rgba(0,0,0,0.06);
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.06);
   color: #6b7280;
 }
 
@@ -1415,7 +1474,9 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: filter 0.15s ease, transform 0.15s ease;
+  transition:
+    filter 0.15s ease,
+    transform 0.15s ease;
   letter-spacing: 0.01em;
 }
 
@@ -1490,6 +1551,12 @@
 
 /* ── Animation ──────────────────────────────────────────────────────────── */
 @keyframes incidents-fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

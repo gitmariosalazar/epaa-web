@@ -141,8 +141,11 @@ export const ConnectionsPage = () => {
           actions.setSelectedConnection(conn);
           actions.setViewMode('map');
         }}
-        onViewIncidents={(connectionId) =>
+        onViewIncidentsOnTable={(connectionId) =>
           navigate(`/incidents?connectionId=${encodeURIComponent(connectionId)}`)
+        }
+        onViewIncidentsOnMap={(connectionId) =>
+          navigate(`/incidents/map?connectionId=${encodeURIComponent(connectionId)}`)
         }
       />
     );

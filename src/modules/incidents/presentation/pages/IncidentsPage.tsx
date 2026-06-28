@@ -7,7 +7,10 @@ import { ResolveIncidentModal } from '../components/ResolveIncidentModal';
 import { IncidentDetailModal } from '../components/IncidentDetailModal';
 import { IncidentFilters } from '../components/IncidentFilters';
 import { IncidentMapFeature } from '../components/Map/IncidentMapFeature';
-import { Table, type Column } from '@/shared/presentation/components/Table/Table';
+import {
+  Table,
+  type Column
+} from '@/shared/presentation/components/Table/Table';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { ConverDate } from '@/shared/utils/datetime/ConverDate';
@@ -98,27 +101,43 @@ export const IncidentsPage: React.FC = () => {
   const progress = useSimulatedProgress(isLoading);
 
   // ── Estado local de modales (SRP: la Page gestiona el estado de UI) ──
-  const [resolveIncidentId, setResolveIncidentId] = useState<number | null>(null);
-  const [selectedIncident, setSelectedIncident] = useState<IncidentDetailRowResponse | null>(null);
+  const [resolveIncidentId, setResolveIncidentId] = useState<number | null>(
+    null
+  );
+  const [selectedIncident, setSelectedIncident] =
+    useState<IncidentDetailRowResponse | null>(null);
+
+  const [focusedIncident, setFocusedIncident] =
+    useState<IncidentDetailRowResponse | null>(null);
 
   // ── Helpers de color (aislados aquí, no en el ViewModel) ─────────────────
   const getStatusColor = (status: string) => {
     switch (status.toUpperCase()) {
-      case 'RESUELTO':      return 'green';
-      case 'EN_INSPECCION': return 'orange';
-      case 'REPORTADO':     return 'yellow';
-      case 'FALSO_REPORTE': return 'red';
-      default:              return 'neutral';
+      case 'RESUELTO':
+        return 'green';
+      case 'EN_INSPECCION':
+        return 'orange';
+      case 'REPORTADO':
+        return 'yellow';
+      case 'FALSO_REPORTE':
+        return 'red';
+      default:
+        return 'neutral';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority.toUpperCase()) {
-      case 'CRITICA': return 'red';
-      case 'ALTA':    return 'orange';
-      case 'MEDIA':   return 'yellow';
-      case 'BAJA':    return 'cyan';
-      default:        return 'neutral';
+      case 'CRITICA':
+        return 'red';
+      case 'ALTA':
+        return 'orange';
+      case 'MEDIA':
+        return 'yellow';
+      case 'BAJA':
+        return 'cyan';
+      default:
+        return 'neutral';
     }
   };
 
@@ -127,7 +146,9 @@ export const IncidentsPage: React.FC = () => {
     {
       header: 'ID',
       accessor: (item) => (
-        <span className="text-secondary" style={{ fontWeight: 600 }}>{item.incidentId}</span>
+        <span className="text-secondary" style={{ fontWeight: 600 }}>
+          {item.incidentId}
+        </span>
       ),
       id: 'incidentId',
       style: { width: '80px' }
@@ -147,6 +168,15 @@ export const IncidentsPage: React.FC = () => {
         </div>
       ),
       id: 'categoryAndType'
+    },
+    {
+      header: 'UBICACIÓN',
+      accessor: (item) => (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span className="incident-category-text">{`${item.latitude}, ${item.longitude}`}</span>
+        </div>
+      ),
+      id: 'location'
     },
     {
       header: 'PRIORIDAD',
@@ -177,7 +207,9 @@ export const IncidentsPage: React.FC = () => {
     {
       header: 'F. REPORTE',
       accessor: (item) => (
-        <span style={{ fontSize: '0.8125rem' }}>{ConverDate(item.reportDate)}</span>
+        <span style={{ fontSize: '0.8125rem' }}>
+          {ConverDate(item.reportDate)}
+        </span>
       ),
       id: 'reportDate',
       style: { width: '110px' }
@@ -185,7 +217,10 @@ export const IncidentsPage: React.FC = () => {
     {
       header: 'ACCIONES',
       accessor: (item) => (
-        <div className="incident-actions-cell" style={{ display: 'flex', gap: '8px' }}>
+        <div
+          className="incident-actions-cell"
+          style={{ display: 'flex', gap: '8px' }}
+        >
           <Button
             variant="outline"
             size="xs"
@@ -213,24 +248,25 @@ export const IncidentsPage: React.FC = () => {
   ];
 
   // ── Banner de conexión (reutilizable entre lista y mapa) ─────────────────
-  const ConnectionBanner = connectionMode && connectionIdFromUrl ? (
-    <div className="incidents-connection-banner">
-      <Network size={16} />
-      <span>
-        Incidentes activos de la acometida
-        <strong> {connectionIdFromUrl}</strong>
-        {' '}— solo estados distintos de RESUELTO
-      </span>
-      <button
-        className="incidents-banner-clear"
-        onClick={handleConsultar}
-        title="Ver todos los incidentes"
-      >
-        <X size={14} />
-        Limpiar filtro
-      </button>
-    </div>
-  ) : null;
+  const ConnectionBanner =
+    connectionMode && connectionIdFromUrl ? (
+      <div className="incidents-connection-banner">
+        <Network size={16} />
+        <span>
+          Incidentes activos de la acometida
+          <strong> {connectionIdFromUrl}</strong> — solo estados distintos de
+          RESUELTO
+        </span>
+        <button
+          className="incidents-banner-clear"
+          onClick={handleConsultar}
+          title="Ver todos los incidentes"
+        >
+          <X size={14} />
+          Limpiar filtro
+        </button>
+      </div>
+    ) : null;
 
   // ── Renderizado del contenido según el tab activo ─────────────────────────
   const renderContent = () => {
@@ -238,7 +274,11 @@ export const IncidentsPage: React.FC = () => {
     if (isLoading && incidents.length === 0) {
       return (
         <div className="incidents-loading-state">
-          <CircularProgress progress={progress} size={80} label="Cargando incidentes..." />
+          <CircularProgress
+            progress={progress}
+            size={80}
+            label="Cargando incidentes..."
+          />
         </div>
       );
     }
@@ -254,7 +294,13 @@ export const IncidentsPage: React.FC = () => {
             variant="error"
             minHeight="300px"
           />
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginTop: '1rem'
+            }}
+          >
             <Button onClick={refresh} variant="outline" size="sm">
               Reintentar
             </Button>
@@ -268,11 +314,12 @@ export const IncidentsPage: React.FC = () => {
       return (
         <div className="incident-map-page-content">
           {ConnectionBanner}
+          // Dentro de renderContent(), en el tab 'map':
           <IncidentMapFeature
             incidents={incidents}
-            selectedIncident={selectedIncident}
-            onSelect={setSelectedIncident}
-            onViewDetail={(incident) => setSelectedIncident(incident)}
+            selectedIncident={focusedIncident} // ← Usar focused para highlight
+            onSelect={setFocusedIncident} // ← Solo focus + highlight
+            onViewDetail={(incident) => setSelectedIncident(incident)} // ← Modal
           />
         </div>
       );
@@ -286,9 +333,7 @@ export const IncidentsPage: React.FC = () => {
           <div className="incidents-loading-state">
             <EmptyState
               message={
-                connectionMode
-                  ? 'Sin Incidentes Activos'
-                  : 'Sin Incidentes'
+                connectionMode ? 'Sin Incidentes Activos' : 'Sin Incidentes'
               }
               description={
                 connectionMode
@@ -306,13 +351,26 @@ export const IncidentsPage: React.FC = () => {
             columns={columns}
             isLoading={isLoading}
             loadingState={
-              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '3rem', gap: '1rem' }}>
-                <CircularProgress progress={progress} size={80} label="Cargando incidentes..." />
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  padding: '3rem',
+                  gap: '1rem'
+                }}
+              >
+                <CircularProgress
+                  progress={progress}
+                  size={80}
+                  label="Cargando incidentes..."
+                />
               </div>
             }
             pagination={true}
             pageSize={pageSize}
-            onEndReached={() => { }}
+            onEndReached={() => {}}
             hasMore={false}
             emptyState={
               <div className="incidents-empty-state">
@@ -363,7 +421,9 @@ export const IncidentsPage: React.FC = () => {
             selectedPriority={filters.priority}
             onPriorityChange={(val) => handleFilterChange({ priority: val })}
             selectedIncidentTypeId={filters.incidentTypeId}
-            onIncidentTypeIdChange={(val) => handleFilterChange({ incidentTypeId: val })}
+            onIncidentTypeIdChange={(val) =>
+              handleFilterChange({ incidentTypeId: val })
+            }
             categories={categories}
             onConsultar={handleConsultar}
             onReportIncident={() => navigate('/incidents/create')}
@@ -372,9 +432,7 @@ export const IncidentsPage: React.FC = () => {
         }
       >
         {/* ── Content ── */}
-        <div className="incidents-page-content">
-          {renderContent()}
-        </div>
+        <div className="incidents-page-content">{renderContent()}</div>
       </PageLayout>
 
       {/* ── Modales ── */}

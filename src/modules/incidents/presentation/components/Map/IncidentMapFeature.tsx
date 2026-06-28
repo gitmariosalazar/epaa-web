@@ -28,9 +28,12 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
   incidents,
   selectedIncident,
   onSelect,
-  onViewDetail,
+  onViewDetail
 }) => {
-  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
+  const [mapCenter, setMapCenter] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [mapZoom, setMapZoom] = useState(13);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -47,7 +50,7 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
       if (selectedIncident.latitude && selectedIncident.longitude) {
         setMapCenter({
           lat: Number(selectedIncident.latitude),
-          lng: Number(selectedIncident.longitude),
+          lng: Number(selectedIncident.longitude)
         });
 
         // Zoom to street level only when too zoomed out
@@ -66,11 +69,10 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
         {/* Side panel */}
         <IncidentMapSidePanel
           incidents={incidents}
-          selectedIncident={selectedIncident}
-          onSelect={(incident) => {
-            onSelect(incident);
-          }}
+          selectedIncident={selectedIncident} // Este es el focusedIncident
+          onSelect={onSelect} // ← Ahora es handleFocusOnMap
           collapsed={isSidebarCollapsed}
+          onViewDetail={onViewDetail}
           onToggle={() => setIsSidebarCollapsed((c) => !c)}
         />
 

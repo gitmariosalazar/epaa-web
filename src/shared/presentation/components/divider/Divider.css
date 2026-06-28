@@ -1,0 +1,149 @@
+:root {
+  --divider-color: #e2e8f0;
+  --divider-color-subtle: #f1f5f9;
+  --text-muted: #64748b;
+}
+
+.dark {
+  --divider-color: #334155;
+  --divider-color-subtle: #1e293b;
+  --text-muted: #94a3b8;
+}
+
+/* ====================== DIVIDER BASE ====================== */
+
+.divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  color: var(--text-muted);
+  margin: 5px 0;
+}
+
+.incident-description {
+  margin-bottom: 5px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  width: fit-content;
+}
+
+.incident-text-description {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+}
+
+/* Orientación */
+.divider-horizontal {
+  flex-direction: row;
+  height: auto;
+}
+
+.divider-vertical {
+  flex-direction: column;
+  width: auto;
+  height: 100%;
+}
+
+/* Variantes */
+.divider-solid {
+  border-top: 1px solid var(--divider-color);
+}
+
+.divider-dashed {
+  border-top: 1px dashed var(--divider-color);
+}
+
+.divider-dotted {
+  border-top: 1px dotted var(--divider-color);
+}
+
+.divider-subtle {
+  border-top: 1px solid var(--divider-color-subtle);
+}
+
+/* Grosor */
+.divider-thin {
+  --divider-thickness: 1px;
+}
+.divider-medium {
+  --divider-thickness: 1.5px;
+}
+.divider-thick {
+  --divider-thickness: 2.5px;
+}
+
+.divider-solid,
+.divider-dashed,
+.divider-dotted,
+.divider-subtle {
+  border-width: var(--divider-thickness);
+}
+
+/* Margenes (solo horizontal) */
+.divider-margin-none {
+  margin: 0;
+}
+.divider-margin-sm {
+  margin: 12px 0;
+}
+.divider-margin-md {
+  margin: 20px 0;
+}
+.divider-margin-lg {
+  margin: 32px 0;
+}
+
+/* Label (Texto centrado) */
+.divider-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  padding: 0 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.divider-label::before,
+.divider-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--divider-color);
+}
+
+/* Vertical */
+.divider-vertical {
+  border-left: 1px solid var(--divider-color);
+  width: var(--divider-thickness);
+  height: 100%;
+}
+
+.divider-vertical .divider-label {
+  position: static;
+  transform: none;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 16px 0;
+  left: auto;
+  top: 50%;
+  background: transparent;
+}
+
+.divider-vertical .divider-label::before,
+.divider-vertical .divider-label::after {
+  display: none;
+}
+
+/* Hover effect sutil */
+.divider:hover {
+  opacity: 0.95;
+}

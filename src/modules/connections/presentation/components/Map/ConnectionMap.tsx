@@ -8,6 +8,7 @@ import { DARK_MAP_STYLE, SILVER_MAP_STYLE } from './MapStyles';
 // Decoupled Sub-Components
 import { MapMarker } from './MapMarker';
 import { MapInfoWindow } from './MapInfoWindow';
+import { useNavigate } from 'react-router-dom';
 
 interface ConnectionMapProps {
   connections: Connection[];
@@ -41,7 +42,7 @@ const CustomOverlay = ({
   const overlay = useMemo(() => {
     const google = (window as any).google;
     if (!google) return null;
-    
+
     const ov = new google.maps.OverlayView();
     ov.onAdd = () => {
       const panes = ov.getPanes();
@@ -89,6 +90,18 @@ export const ConnectionMap: React.FC<ConnectionMapProps> = ({
 }) => {
   const map = useMap();
 
+
+  const navigate = useNavigate();
+
+  const handleViewIncidentsOnTable = (connectionId: string) => {
+    navigate(`/incidents?connectionId=${encodeURIComponent(connectionId)}`)
+  };
+
+  const handleViewIncidentsOnMap = (connectionId: string) => {
+    navigate(`/incidents/map?connectionId=${encodeURIComponent(connectionId)}`)
+  };
+
+
   const [infoWindowShown, setInfoWindowShown] = useState(false);
   const [hoveredConnection, setHoveredConnection] = useState<Connection | null>(
     null
@@ -130,9 +143,9 @@ export const ConnectionMap: React.FC<ConnectionMapProps> = ({
       ? center
       : firstWithCoords
         ? {
-            lat: Number(firstWithCoords.latitude),
-            lng: Number(firstWithCoords.longitude)
-          }
+          lat: Number(firstWithCoords.latitude),
+          lng: Number(firstWithCoords.longitude)
+        }
         : fallbackCenter;
 
   return (
@@ -166,8 +179,8 @@ export const ConnectionMap: React.FC<ConnectionMapProps> = ({
                   lng: Number(conn.longitude)
                 }}
                 zIndex={
-                  selectedConnection?.connectionId === conn.connectionId 
-                    ? 10000 
+                  selectedConnection?.connectionId === conn.connectionId
+                    ? 10000
                     : (hoveredConnection?.connectionId === conn.connectionId ? 9900 : 1)
                 }
                 paneName="overlayMouseTarget"
@@ -207,10 +220,13 @@ export const ConnectionMap: React.FC<ConnectionMapProps> = ({
               onCloseClick={() => setInfoWindowShown(false)}
             >
               <MapInfoWindow
+                onViewIncidentsOnTable={handleViewIncidentsOnTable}
+                onViewIncidentsOnMap={handleViewIncidentsOnMap}
                 connection={selectedConnection}
                 theme={theme}
                 onClose={() => setInfoWindowShown(false)}
                 onEdit={onEdit}
+
               />
             </InfoWindow>
           )}
