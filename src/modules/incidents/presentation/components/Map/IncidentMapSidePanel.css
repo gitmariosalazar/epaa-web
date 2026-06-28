@@ -21,6 +21,14 @@
   align-items: center !important;
 }
 
+.incident-item-main-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 5px;
+}
+
 .incident-item-dot-content {
   display: flex;
   align-items: center;

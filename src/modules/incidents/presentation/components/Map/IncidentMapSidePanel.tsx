@@ -8,7 +8,7 @@ import {
 } from './IncidentMapInstantTooltip';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import './IncidentMapSidePanel.css';
-import { MdCable, MdLocationOn } from 'react-icons/md';
+import { MdCable, MdKey, MdLocationOn } from 'react-icons/md';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { IoMdEye } from 'react-icons/io';
 import { Divider } from '@/shared/presentation/components/divider/Divider';
@@ -119,38 +119,64 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                 >
                   {/* Contenido principal */}
                   <div className="incident-item-bottom">
-                    <div className="incident-item-dot-content">
-                      <div
-                        className="incident-item-dot"
-                        style={{ background: pCfg.color }}
-                      />
-                      <div className="incident-item-body">
-                        <span className="incident-item-id">
-                          ID: #{incident.incidentId}
-                        </span>
-                        <span className="incident-item-type">
-                          {incident.incidentTypeName}
-                        </span>
+                    <div className="">
+                      <div className="incident-item-dot-content">
+                        <div
+                          className="incident-item-dot"
+                          style={{ background: pCfg.color }}
+                        />
+                        <div className="incident-item-body">
+
+                          <Tooltip
+                            content={incident.incidentTypeName}
+                            themeColor="primary"
+                            position="top"
+                            followCursor={false}
+                          >
+                            <span className="incident-item-type">
+                              {truncateText(incident.incidentTypeName, 20)}
+                            </span>
+                          </Tooltip>
+                        </div>
                       </div>
+
+                      {incident.connectionId && (
+                        <>
+                          <ColorChip
+                            label={incident.incidentId}
+                            size="sm"
+                            variant="ghost"
+                            icon={<MdKey size={9} />}
+                            borderRadius={5}
+                          />
+                          <ColorChip
+                            label={incident.connectionId}
+                            size="sm"
+                            variant="ghost"
+                            icon={<MdCable size={9} />}
+                            borderRadius={5}
+                          /></>
+                      )}
+                    </div>
+                    <div className="incident-item-main-info">
+                      <span
+                        className="incident-item-status"
+                        style={{ color: "var(--color-text-muted) !important" }}
+                      >
+                        {'ESTADO'}
+                      </span>
+
+
+                      <span
+                        className="incident-item-status"
+                        style={{ color: sCfg.color }}
+                      >
+                        {sCfg.label}
+                      </span>
                     </div>
 
-                    {incident.connectionId && (
-                      <ColorChip
-                        label={incident.connectionId}
-                        size="sm"
-                        variant="ghost"
-                        icon={<MdCable size={9} />}
-                        borderRadius={5}
-                      />
-                    )}
                   </div>
 
-                  <span
-                    className="incident-item-status"
-                    style={{ color: sCfg.color }}
-                  >
-                    {sCfg.label}
-                  </span>
 
                   <div className="incident-description">
                     <p className="incident-text-description">
