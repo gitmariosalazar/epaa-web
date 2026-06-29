@@ -1,11 +1,12 @@
 import React from 'react';
-import { Search, ShieldAlert, RefreshCw, AlertCircle, Bookmark } from 'lucide-react';
+import { Search, ShieldAlert, RefreshCw, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import type { IncidentCategoryResponse } from '../../domain/schemas/dtos/response/incident-category-type.response';
 import '../styles/IncidentFilters.css';
+import { MdCategory } from 'react-icons/md';
 
 interface IncidentFiltersProps {
   searchQuery: string;
@@ -94,23 +95,23 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
 
         {/* Incident Type */}
         <div className="filter-group">
-          <label className="filter-label">{t('incidents.filters.incidentType', 'Tipo de Incidente')}</label>
+          <label className="filter-label">{t('incidents.filters.incidentType', 'Categoría')}</label>
           <div className="filter-input-wrapper">
             <Select
               value={selectedIncidentTypeId}
               onChange={(e) => onIncidentTypeIdChange(e.target.value)}
               size="compact"
-              leftIcon={<Bookmark size={18} />}
+              leftIcon={<MdCategory size={18} />}
             >
-              <option value="">{t('incidents.filters.allTypes', 'Todos los Tipos')}</option>
-              {categories.map((cat) => (
-                <optgroup key={cat.categoryId} label={cat.categoryName}>
-                  {cat.incidentTypes.map((type: any) => (
-                    <option key={type.typeCode} value={type.typeCode}>
-                      {type.typeName}
-                    </option>
-                  ))}
-                </optgroup>
+              <option value="">{t('incidents.filters.allCategories', 'Todas las Categorías')}</option>
+
+              {categories.map((category) => (
+                <option
+                  key={category.categoryId}
+                  value={category.categoryId}
+                >
+                  {category.categoryName}
+                </option>
               ))}
             </Select>
           </div>
