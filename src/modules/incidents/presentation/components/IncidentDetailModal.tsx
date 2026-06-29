@@ -10,6 +10,9 @@ import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip
 import { StatusTimeline } from '@/shared/presentation/components/Timeline';
 import { GeoSection } from '@/shared/presentation/components/GeoLocation';
 import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { MdOutlineTripOrigin, MdPhotoLibrary } from 'react-icons/md';
+import { FaUserCheck, FaUsersCog } from 'react-icons/fa';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -232,10 +235,31 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                       <User size={12} style={{ marginRight: 4 }} />
                       Reportado Por (Usuario / Cliente)
                     </span>
-                    <span className="detail-value">
-                      {incident.reportedBy.name || 'Desconocido'}
-                      {incident.reportOrigin ? ` (${incident.reportOrigin})` : ''}
-                    </span>
+                    <div className="detail-value detail-value-user">
+
+                      <ColorChip
+                        label={incident.reportedBy.name ? incident.reportedBy.name : 'N/A'}
+                        variant="ghost"
+                        size="xs"
+                        borderRadius={5}
+                        icon={<FaUserCheck />}
+                      />
+                      <ColorChip
+                        label={incident.reportOrigin ? incident.reportOrigin : 'N/A'}
+                        variant="ghost"
+                        size="xs"
+                        borderRadius={5}
+                        icon={<MdOutlineTripOrigin />}
+                      />
+                      <ColorChip
+                        label={incident.reportedBy.userType ? incident.reportedBy.userType : 'N/A'}
+                        variant="ghost"
+                        size="xs"
+                        borderRadius={5}
+                        icon={<FaUsersCog />}
+                      />
+
+                    </div>
                   </div>
                 </div>
               </div>
@@ -313,11 +337,11 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
               )}
 
               {/* ── Evidence photos ── */}
-              {photosReport.length > 0 && (
-                <div className="detail-section">
-                  <h4 className="detail-section-title">
-                    Evidencia Fotográfica ({photosReport.length})
-                  </h4>
+              <div className="detail-section">
+                <h4 className="detail-section-title">
+                  Evidencia Fotográfica de Reporte ({photosReport.length})
+                </h4>
+                {photosReport.length > 0 ? (
                   <div className="photos-gallery">
                     {photosReport.map((photo, idx) => (
                       <EvidencePhoto
@@ -329,15 +353,24 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                       />
                     ))}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="evidence-empty-state">
+                    <EmptyState
+                      message="Sin evidencia de reporte"
+                      description="No se ha agregado evidencia fotográfica de reporte."
+                      icon={<MdPhotoLibrary size={35} className='icon-error-color' />}
+                      variant='warning'
+                    />
+                  </div>
+                )}
+              </div>
 
               {/* ── Resolution photo evidence ── */}
-              {photosResolution.length > 0 && (
-                <div className="detail-section">
-                  <h4 className="detail-section-title">
-                    Evidencia Fotográfica de Resolución ({photosResolution.length})
-                  </h4>
+              <div className="detail-section">
+                <h4 className="detail-section-title">
+                  Evidencia Fotográfica de Resolución ({photosResolution.length})
+                </h4>
+                {photosResolution.length > 0 ? (
                   <div className="photos-gallery">
                     {photosResolution.map((photo, idx) => (
                       <EvidencePhoto
@@ -349,8 +382,17 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                       />
                     ))}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="evidence-empty-state">
+                    <EmptyState
+                      message="Sin evidencia de resolución"
+                      description="No se ha agregado evidencia fotográfica de resolución."
+                      icon={<MdPhotoLibrary size={35} className='icon-error-color' />}
+                      variant='warning'
+                    />
+                  </div>
+                )}
+              </div>
 
               {/* ── Status history — uses shared StatusTimeline ── */}
               {incident.historyRecent && incident.historyRecent.length > 0 && (

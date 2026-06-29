@@ -31,6 +31,7 @@
   --surface-hover: #f1f5f9; /* Slate 100 */
 
   --border-color: #e2e8f0; /* Slate 200 */
+  --border-hover: #cbd5e1; /* Slate 300 */
 
   --text-main: #0f172a; /* Slate 900 */
   --text-secondary: #475569; /* Slate 600 */
@@ -127,6 +128,7 @@
   --surface-hover: #1e293b; /* Slate 800 - Input/Hover background */
 
   --border-color: #1e293b; /* Slate 800 - Subtle border */
+  --border-hover: #334155; /* Slate 700 - Hover border */
 
   --text-main: #f8fafc; /* Slate 50 */
   --text-secondary: #94a3b8; /* Slate 400 */

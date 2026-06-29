@@ -118,7 +118,7 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                   onClick={() => onSelect(incident)} // ← SOLO ENFOCAR MAPA
                 >
                   {/* Contenido principal */}
-                  <div className="incident-item-bottom">
+                  <div className={`incident-item-bottom`}>
                     <div className="">
                       <div className="incident-item-dot-content">
                         <div
@@ -126,7 +126,6 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                           style={{ background: pCfg.color }}
                         />
                         <div className="incident-item-body">
-
                           <Tooltip
                             content={incident.incidentTypeName}
                             themeColor="primary"
@@ -139,9 +138,8 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                           </Tooltip>
                         </div>
                       </div>
-
-                      {incident.connectionId && (
-                        <>
+                      <>
+                        {incident.incidentId && (
                           <ColorChip
                             label={incident.incidentId}
                             size="sm"
@@ -149,23 +147,27 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                             icon={<MdKey size={9} />}
                             borderRadius={5}
                           />
-                          <ColorChip
-                            label={incident.connectionId}
-                            size="sm"
-                            variant="ghost"
-                            icon={<MdCable size={9} />}
-                            borderRadius={5}
-                          /></>
-                      )}
+                        )}
+                        <ColorChip
+                          label={
+                            incident.connectionId
+                              ? incident.connectionId
+                              : 'Sin Clave'
+                          }
+                          size="sm"
+                          variant="ghost"
+                          icon={<MdCable size={9} />}
+                          borderRadius={5}
+                        />
+                      </>
                     </div>
                     <div className="incident-item-main-info">
                       <span
                         className="incident-item-status"
-                        style={{ color: "var(--color-text-muted) !important" }}
+                        style={{ color: 'var(--color-text-muted) !important' }}
                       >
                         {'ESTADO'}
                       </span>
-
 
                       <span
                         className="incident-item-status"
@@ -174,9 +176,7 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                         {sCfg.label}
                       </span>
                     </div>
-
                   </div>
-
 
                   <div className="incident-description">
                     <p className="incident-text-description">
@@ -193,11 +193,13 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                       themeColor="warning"
                       content="Ver detalles del incidente reportado"
                       position="bottom"
+                      followCursor={false}
                     >
                       <Button
                         variant="dashed"
                         size="xs"
                         leftIcon={<IoMdEye size={18} />}
+
                         onClick={(e) => {
                           e.stopPropagation(); // ← Muy importante
                           console.log('✅ Botón Ver Detalles clickeado');
@@ -213,6 +215,7 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                       themeColor="warning"
                       content="Centrar en el mapa"
                       position="bottom"
+                      followCursor={false}
                     >
                       <Button
                         variant="dashed"

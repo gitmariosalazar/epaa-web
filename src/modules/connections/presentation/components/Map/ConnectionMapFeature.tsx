@@ -4,6 +4,7 @@ import { ConnectionMap } from './ConnectionMap.tsx';
 import { ConnectionSidePanel } from './ConnectionSidePanel';
 import { useConnectionsViewModel } from '../../hooks/useConnectionsViewModel';
 import './ConnectionMap.css';
+import { FALLBACK_CENTER_ANTONIO_ANTE } from '@/shared/utils/types/IGeolocationData.ts';
 
 interface ConnectionMapFeatureProps {
   viewModel: ReturnType<typeof useConnectionsViewModel>;
@@ -29,7 +30,8 @@ export const ConnectionMapFeature: React.FC<ConnectionMapFeatureProps> = ({
     handleFetch
   } = actions;
 
-  const fallbackCenter = { lat: 0.33, lng: -78.17 };
+
+  const fallbackCenter = FALLBACK_CENTER_ANTONIO_ANTE;
   const latestCameraRef = React.useRef<{
     center: { lat: number; lng: number };
     zoom: number;

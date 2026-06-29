@@ -6,6 +6,7 @@ import { useTheme } from '@/shared/presentation/context/ThemeContext';
 import { DARK_MAP_STYLE, SILVER_MAP_STYLE } from './IncidentMapStyles';
 import { IncidentMapMarker } from './IncidentMapMarker';
 import { IncidentMapInfoWindow } from './IncidentMapInfoWindow';
+import { FALLBACK_CENTER_ANTONIO_ANTE } from '@/shared/utils/types/IGeolocationData';
 
 // ── Props ────────────────────────────────────────────────────────────────────
 export interface IncidentMapProps {
@@ -67,9 +68,9 @@ const CustomOverlay = ({
         new google.maps.LatLng(position.lat, position.lng)
       );
       if (point) {
-        container.style.left   = `${point.x}px`;
-        container.style.top    = `${point.y}px`;
-        container.style.zIndex = zIndex != null ? String(zIndex) : '1';
+        container.style.left = `${point.x}px`;
+        container.style.top = `${point.y}px`;
+        container.style.zIndex = zIndex != null ? String(zIndex) : '1000';
       }
     };
 
@@ -137,14 +138,14 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
 
   // Determine map center: prop → first incident with coords → fallback (Ecuador)
   const firstWithCoords = incidents.find((i) => i.latitude && i.longitude);
-  const FALLBACK_CENTER = { lat: 0.33, lng: -78.17 };
+  const FALLBACK_CENTER = FALLBACK_CENTER_ANTONIO_ANTE;
 
   const finalCenter =
     center?.lat && center?.lng
       ? center
       : firstWithCoords
-      ? { lat: Number(firstWithCoords.latitude), lng: Number(firstWithCoords.longitude) }
-      : FALLBACK_CENTER;
+        ? { lat: Number(firstWithCoords.latitude), lng: Number(firstWithCoords.longitude) }
+        : FALLBACK_CENTER;
 
   const handleMarkerClick = (incident: IncidentDetailRowResponse) => {
     setHoveredIncident(null);
@@ -185,10 +186,10 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
                 }}
                 zIndex={
                   selectedIncident?.incidentId === incident.incidentId
-                    ? 10000
+                    ? 30000
                     : hoveredIncident?.incidentId === incident.incidentId
-                    ? 9900
-                    : 1
+                      ? 25000
+                      : 12000   // ← Aumentado mucho
                 }
                 paneName="overlayMouseTarget"
               >

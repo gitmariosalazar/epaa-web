@@ -4,6 +4,8 @@ import { IncidentMap } from './IncidentMap';
 import { IncidentMapSidePanel } from './IncidentMapSidePanel';
 import type { IncidentDetailRowResponse } from '../../../domain/schemas/dtos/response/view_incident.response';
 import './IncidentMap.css';
+import { useCenterLocationIncident } from '@/shared/location/presentation';
+import { FALLBACK_CENTER_ANTONIO_ANTE } from '@/shared/utils/types/IGeolocationData';
 
 export interface IncidentMapFeatureProps {
   /** All incidents to display */
@@ -24,27 +26,37 @@ export interface IncidentMapFeatureProps {
  * OCP: new sidebar sections or map controls can be added via props without
  *      modifying this component.
  */
+
 export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
   incidents,
   selectedIncident,
   onSelect,
   onViewDetail
 }) => {
-  const [mapCenter, setMapCenter] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
-  const [mapZoom, setMapZoom] = useState(13);
+  const { centerLocationIncident, loading, error } = useCenterLocationIncident();
+
+  const [mapCenter, setMapCenter] = useState({
+    lat: centerLocationIncident.centerLat,
+    lng: centerLocationIncident.centerLng
+  });
+
+  const [mapZoom, setMapZoom] = useState(17);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const prevSelectedIdRef = useRef<number | null>(null);
 
-  // Sync map center to newly selected incident
   useEffect(() => {
-    if (
-      selectedIncident &&
-      selectedIncident.incidentId !== prevSelectedIdRef.current
-    ) {
+    if (!loading && !error) {
+      setMapCenter({
+        lat: Number(FALLBACK_CENTER_ANTONIO_ANTE.lat),
+        lng: Number(FALLBACK_CENTER_ANTONIO_ANTE.lng)
+      });
+      setMapZoom(17);
+    }
+  }, [centerLocationIncident, loading, error]);
+
+  useEffect(() => {
+    if (selectedIncident && selectedIncident.incidentId !== prevSelectedIdRef.current) {
       prevSelectedIdRef.current = selectedIncident.incidentId;
 
       if (selectedIncident.latitude && selectedIncident.longitude) {
@@ -52,47 +64,42 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
           lat: Number(selectedIncident.latitude),
           lng: Number(selectedIncident.longitude)
         });
-
-        // Zoom to street level only when too zoomed out
-        if (mapZoom < 17) setMapZoom(17);
+        setMapZoom(19);
       }
     } else if (!selectedIncident) {
       prevSelectedIdRef.current = null;
     }
-  }, [selectedIncident, mapZoom]);
+  }, [selectedIncident]);
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
 
   return (
     <APIProvider apiKey={apiKey}>
       <div className="incident-map-feature-container">
-        {/* Side panel */}
         <IncidentMapSidePanel
           incidents={incidents}
-          selectedIncident={selectedIncident} // Este es el focusedIncident
-          onSelect={onSelect} // ← Ahora es handleFocusOnMap
+          selectedIncident={selectedIncident}
+          onSelect={onSelect}
           collapsed={isSidebarCollapsed}
           onViewDetail={onViewDetail}
           onToggle={() => setIsSidebarCollapsed((c) => !c)}
         />
 
-        {/* Map */}
         <div className="incident-map-view-wrapper">
           <IncidentMap
             incidents={incidents}
             selectedIncident={selectedIncident}
             onSelect={onSelect}
-            center={mapCenter ?? undefined}
+            center={mapCenter}
             zoom={mapZoom}
             onViewDetail={onViewDetail}
             onCameraChange={(center, zoom) => {
-              if (
-                center.lat !== mapCenter?.lat ||
-                center.lng !== mapCenter?.lng
-              ) {
-                setMapCenter(center);
-              }
-              if (zoom !== mapZoom) setMapZoom(zoom);
+              // ← Corrección aquí
+              setMapCenter({
+                lat: Number(center.lat),
+                lng: Number(center.lng)
+              });
+              setMapZoom(zoom);
             }}
           />
         </div>

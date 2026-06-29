@@ -36,3 +36,11 @@ export interface IGeoLocationData {
     deviceName: string; // Modelo del celular (ej: "Xiaomi Redmi Note 13")
   };
 }
+// Latitud: 0.3590087
+// Longitud: -78.1958529
+const FALLBACK_CENTER_ANTONIO_ANTE = {
+  lat: 0.3590087,
+  lng: -78.1958529
+};
+
+export { FALLBACK_CENTER_ANTONIO_ANTE };

@@ -26,6 +26,7 @@ import { APIProvider, Map, Marker, InfoWindow, useMap } from '@vis.gl/react-goog
 import { useTheme } from '@/shared/presentation/context/ThemeContext';
 import { DARK_MAP_STYLE, SILVER_MAP_STYLE } from '../../components/Map/MapStyles';
 import type { LiveMapConnectionResponse } from '../../../domain/models/DashboardStats';
+import { FALLBACK_CENTER_ANTONIO_ANTE } from '@/shared/utils/types/IGeolocationData';
 
 const MapController: React.FC<{
   theme: string;
@@ -864,7 +865,7 @@ export const ConnectionsDashboardPage: React.FC = () => {
                       defaultCenter={
                         liveData.length > 0
                           ? { lat: Number(liveData[0].latitude), lng: Number(liveData[0].longitude) }
-                          : { lat: 0.33, lng: -78.17 }
+                          : { lat: FALLBACK_CENTER_ANTONIO_ANTE.lat, lng: FALLBACK_CENTER_ANTONIO_ANTE.lng }
                       }
                       defaultZoom={13}
                       gestureHandling="greedy"

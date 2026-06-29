@@ -349,14 +349,17 @@
 
 .detail-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: 1fr 1fr; /* 50% - 50% */
   gap: 1rem;
+  margin-top: 10px;
+  width: 100%;
 }
 
 .detail-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  width: 100%;
 }
 
 .detail-label {
@@ -370,11 +373,12 @@
   font-size: 0.875rem;
   color: var(--text-main);
   font-weight: 500;
+  width: 100%;
 }
 
 .detail-description-box {
-  background-color: var(--background);
-  padding: 1rem;
+  background-color: var(--surface);
+  padding: 0.5rem 0.5rem;
   border-radius: var(--radius-sm, 6px);
   border: 1px solid var(--border-color);
 }

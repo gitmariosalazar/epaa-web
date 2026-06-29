@@ -9,6 +9,7 @@ import { DARK_MAP_STYLE, SILVER_MAP_STYLE } from './MapStyles';
 import { MapMarker } from './MapMarker';
 import { MapInfoWindow } from './MapInfoWindow';
 import { useNavigate } from 'react-router-dom';
+import { FALLBACK_CENTER_ANTONIO_ANTE } from '@/shared/utils/types/IGeolocationData';
 
 interface ConnectionMapProps {
   connections: Connection[];
@@ -136,7 +137,7 @@ export const ConnectionMap: React.FC<ConnectionMapProps> = ({
   }, [currentZoom, hoveredConnection]);
 
   const firstWithCoords = connections.find((c) => c.latitude && c.longitude);
-  const fallbackCenter = { lat: 0.33, lng: -78.17 };
+  const fallbackCenter = FALLBACK_CENTER_ANTONIO_ANTE;
 
   const finalCenter =
     center && center.lat && center.lng
