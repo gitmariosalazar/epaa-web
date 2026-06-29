@@ -925,8 +925,6 @@ export const useConnectionsViewModel = () => {
     handleFetch();
   }, [loadRates]);
 
-  console.log(selectedConnection);
-
   return {
     state: {
       isLoading,

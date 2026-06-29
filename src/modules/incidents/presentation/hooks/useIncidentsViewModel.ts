@@ -17,7 +17,7 @@ export interface IncidentsFilterState {
   search: string;
   status: string;
   priority: string;
-  incidentTypeId: string;
+  categoryId: number | null;
 }
 
 const sortFn = (
@@ -27,9 +27,13 @@ const sortFn = (
 ): number => {
   switch (key) {
     case 'fecha_desc':
-      return new Date(b.reportDate).getTime() - new Date(a.reportDate).getTime();
+      return (
+        new Date(b.reportDate).getTime() - new Date(a.reportDate).getTime()
+      );
     case 'fecha_asc':
-      return new Date(a.reportDate).getTime() - new Date(b.reportDate).getTime();
+      return (
+        new Date(a.reportDate).getTime() - new Date(b.reportDate).getTime()
+      );
     case 'status':
       return a.status.localeCompare(b.status);
     case 'priority':
@@ -78,7 +82,7 @@ export const useIncidentsViewModel = () => {
     search: connectionIdFromUrl ?? '',
     status: '',
     priority: '',
-    incidentTypeId: ''
+    categoryId: null
   });
 
   // ── Modo "por acometida": true cuando llegamos desde ConnectionsPage ──────
@@ -100,7 +104,7 @@ export const useIncidentsViewModel = () => {
       loadIncidents({
         status: filters.status || null,
         priority: filters.priority || null,
-        incidentTypeId: filters.incidentTypeId ? Number(filters.incidentTypeId) : null,
+        categoryId: filters.categoryId ? Number(filters.categoryId) : null,
         connectionId: null
       });
     }
@@ -127,7 +131,9 @@ export const useIncidentsViewModel = () => {
 
   // Ref estable para loadIncidents — evita loop isLoading → useEffect → fetch
   const loadIncidentsRef = useRef(loadIncidents);
-  useEffect(() => { loadIncidentsRef.current = loadIncidents; }, [loadIncidents]);
+  useEffect(() => {
+    loadIncidentsRef.current = loadIncidents;
+  }, [loadIncidents]);
 
   /** Auto-fetch cuando cambian los filtros (solo fuera del modo-conexión). */
   useEffect(() => {
@@ -138,7 +144,7 @@ export const useIncidentsViewModel = () => {
       loadIncidentsRef.current({
         status: filters.status || null,
         priority: filters.priority || null,
-        incidentTypeId: filters.incidentTypeId ? Number(filters.incidentTypeId) : null,
+        categoryId: filters.categoryId ? Number(filters.categoryId) : null,
         connectionId: filters.search.includes('-') ? filters.search : null
       });
     }, delay);
@@ -153,7 +159,7 @@ export const useIncidentsViewModel = () => {
     loadIncidents({
       status: filters.status || null,
       priority: filters.priority || null,
-      incidentTypeId: filters.incidentTypeId ? Number(filters.incidentTypeId) : null,
+      categoryId: filters.categoryId ? Number(filters.categoryId) : null,
       connectionId: filters.search.includes('-') ? filters.search : null
     });
     setPage(1);

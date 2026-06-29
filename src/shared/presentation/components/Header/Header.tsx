@@ -174,7 +174,7 @@ export const Header: React.FC = () => {
     window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
   };
 
-  console.log(user);
+  //console.log(user);
 
 
 

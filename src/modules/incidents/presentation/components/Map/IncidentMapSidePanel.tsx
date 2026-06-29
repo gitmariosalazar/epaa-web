@@ -40,8 +40,6 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
   const withCoords = incidents.filter((i) => i.latitude && i.longitude);
   const withoutCoords = incidents.filter((i) => !i.latitude || !i.longitude);
 
-  console.log(`Selectet: `, selectedIncident);
-
   return (
     <div className={`incident-side-panel ${collapsed ? 'collapsed' : ''}`}>
       {/* Toggle button */}
@@ -202,8 +200,6 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
 
                         onClick={(e) => {
                           e.stopPropagation(); // ← Muy importante
-                          console.log('✅ Botón Ver Detalles clickeado');
-                          console.log('onViewDetail existe?', !!onViewDetail);
                           onViewDetail?.(incident);
                         }}
                       >

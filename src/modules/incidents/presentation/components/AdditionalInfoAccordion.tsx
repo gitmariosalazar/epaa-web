@@ -32,9 +32,6 @@ export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
   const emails = info.clientEmails?.map((e) => e.email).join(', ') || '—';
 
 
-
-  console.log(info);
-
   return (
     <div className="ai-wrapper">
       {/* ── Header ── */}

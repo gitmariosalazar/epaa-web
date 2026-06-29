@@ -13,7 +13,7 @@ export class SearchIncidentsUseCase {
     connectionId?: string | null;
     status?: string | null;
     priority?: string | null;
-    incidentTypeId?: number | null;
+    categoryId?: number | null;
   }): Promise<ApiResponse<IncidentDetailRowResponse[]>> {
     try {
       const incidents = await this.incidentRepository.findIncidents(filters);

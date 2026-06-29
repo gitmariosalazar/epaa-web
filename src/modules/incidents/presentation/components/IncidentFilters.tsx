@@ -15,8 +15,8 @@ interface IncidentFiltersProps {
   onStatusChange: (val: string) => void;
   selectedPriority: string;
   onPriorityChange: (val: string) => void;
-  selectedIncidentTypeId: string;
-  onIncidentTypeIdChange: (val: string) => void;
+  selectedCategoryId: number | null;
+  onCategoryIdChange: (val: number) => void;
   categories: IncidentCategoryResponse[];
   onConsultar: () => void;
   onReportIncident: () => void;
@@ -30,8 +30,8 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
   onStatusChange,
   selectedPriority,
   onPriorityChange,
-  selectedIncidentTypeId,
-  onIncidentTypeIdChange,
+  selectedCategoryId,
+  onCategoryIdChange,
   categories,
   onConsultar,
   isLoading
@@ -98,8 +98,8 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
           <label className="filter-label">{t('incidents.filters.incidentType', 'Categoría')}</label>
           <div className="filter-input-wrapper">
             <Select
-              value={selectedIncidentTypeId}
-              onChange={(e) => onIncidentTypeIdChange(e.target.value)}
+              value={selectedCategoryId?.toString() ?? ''}
+              onChange={(e) => onCategoryIdChange(Number(e.target.value))}
               size="compact"
               leftIcon={<MdCategory size={18} />}
             >

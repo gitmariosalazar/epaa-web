@@ -140,7 +140,7 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
   const [selectedConnection, setSelectedConnection] =
     useState<Connection | null>(null);
 
-  console.log(data[0]);
+  //console.log(data[0]);
 
   // ── Columns ──────────────────────────────────────────────────────────────
   const columns: Column<Connection>[] = useMemo(

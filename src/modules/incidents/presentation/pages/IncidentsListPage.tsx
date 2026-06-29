@@ -172,8 +172,8 @@ export const IncidentsListPage: React.FC = () => {
             onStatusChange={(val) => handleFilterChange({ status: val })}
             selectedPriority={filters.priority}
             onPriorityChange={(val) => handleFilterChange({ priority: val })}
-            selectedIncidentTypeId={filters.incidentTypeId}
-            onIncidentTypeIdChange={(val) => handleFilterChange({ incidentTypeId: val })}
+            selectedCategoryId={filters.categoryId}
+            onCategoryIdChange={(val) => handleFilterChange({ categoryId: val })}
             categories={categories}
             onConsultar={handleConsultar}
             onReportIncident={() => navigate('/incidents/create')}

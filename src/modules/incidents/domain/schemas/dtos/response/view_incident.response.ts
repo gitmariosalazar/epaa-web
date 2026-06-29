@@ -76,6 +76,7 @@ export interface IncidentDetailRowResponse {
   readingId: number | null;
 
   // Categoría y Tipo
+  categoryId: number;
   categoryCode: string;
   categoryName: string;
   incidentTypeId: number;
