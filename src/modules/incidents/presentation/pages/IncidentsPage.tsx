@@ -314,7 +314,6 @@ export const IncidentsPage: React.FC = () => {
       return (
         <div className="incident-map-page-content">
           {ConnectionBanner}
-          // Dentro de renderContent(), en el tab 'map':
           <IncidentMapFeature
             incidents={incidents}
             selectedIncident={focusedIncident} // ← Usar focused para highlight
@@ -370,7 +369,7 @@ export const IncidentsPage: React.FC = () => {
             }
             pagination={true}
             pageSize={pageSize}
-            onEndReached={() => {}}
+            onEndReached={() => { }}
             hasMore={false}
             emptyState={
               <div className="incidents-empty-state">

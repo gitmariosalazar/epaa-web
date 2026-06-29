@@ -6,7 +6,9 @@
 
 /* ── Spin animation ─────────────────────────────────────────────────────────── */
 @keyframes geoSpin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 .geo-spin {
   animation: geoSpin 1s linear infinite;
@@ -15,8 +17,14 @@
 
 /* ── Fade-in animation ───────────────────────────────────────────────────────── */
 @keyframes geoFadeSlide {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0);   }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Root wrapper ────────────────────────────────────────────────────────────── */
@@ -52,7 +60,8 @@
   background: color-mix(in srgb, var(--accent, #3b82f6) 14%, var(--surface));
   border-color: var(--accent, #3b82f6);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--accent, #3b82f6) 18%, transparent);
+  box-shadow: 0 6px 18px
+    color-mix(in srgb, var(--accent, #3b82f6) 18%, transparent);
 }
 
 .geo-capture-btn:active:not(:disabled) {
@@ -96,7 +105,7 @@
   gap: 6px 12px;
   padding: 0.5rem 0.875rem;
   border-radius: 8px;
-  background: var(--background, rgba(0,0,0,0.15));
+  background: var(--background, rgba(0, 0, 0, 0.15));
   border: 1px solid var(--border-color);
   font-size: 0.72rem;
   animation: geoFadeSlide 0.25s ease-out;
@@ -121,9 +130,15 @@
   flex-shrink: 0;
 }
 
-.geo-status-bar__icon--precision { color: #10b981; }
-.geo-status-bar__icon--lat       { color: #f97316; }
-.geo-status-bar__icon--lng       { color: #6366f1; }
+.geo-status-bar__icon--precision {
+  color: #10b981;
+}
+.geo-status-bar__icon--lat {
+  color: #f97316;
+}
+.geo-status-bar__icon--lng {
+  color: #6366f1;
+}
 
 .geo-status-bar__label {
   color: var(--text-muted);
@@ -135,8 +150,10 @@
   font-weight: 600;
 }
 
-.geo-status-bar__value--precision { color: #10b981; }
-.geo-status-bar__value--coord     {
+.geo-status-bar__value--precision {
+  color: #10b981;
+}
+.geo-status-bar__value--coord {
   color: var(--text-main);
   font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
   font-size: 0.7rem;
@@ -263,7 +280,9 @@
 }
 
 @media (max-width: 480px) {
-  .geo-card__grid { grid-template-columns: 1fr; }
+  .geo-card__grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Address field */
@@ -337,6 +356,7 @@
   font-size: 0.78rem;
   color: var(--text-secondary);
   line-height: 1.45;
+  font-weight: 700;
 }
 
 /* Google Maps link */

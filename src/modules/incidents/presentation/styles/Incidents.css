@@ -88,7 +88,7 @@
 }
 
 .incident-detail-modal {
-  max-width: 800px;
+  max-width: 950px;
 }
 
 .incident-modal-header {
@@ -391,14 +391,17 @@
 }
 
 .geolocation-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: var(--background);
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-sm, 6px);
-  border: 1px dashed var(--border-color);
-  margin-top: 10px;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  background-color: var(--background) !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: var(--radius-sm, 6px) !important;
+  border: 1px dashed var(--border-color) !important;
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+  min-height: 38px;
+  max-height: 38px;
 }
 
 .maps-link {
@@ -406,6 +409,8 @@
   color: var(--accent);
   text-decoration: underline;
   font-weight: 500;
+  width: 100%;
+  text-align: end;
 }
 
 .highlight-resolved {

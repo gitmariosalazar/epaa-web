@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Calendar, MapPin, User, CheckCircle, Loader2, ImageOff } from 'lucide-react';
+import { X, Calendar, MapPin, User, CheckCircle, Loader2, ImageOff, Navigation } from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
-import { ConverDate } from '@/shared/utils/datetime/ConverDate';
+import { ConverDate, ConverDateTimeToText } from '@/shared/utils/datetime/ConverDate';
 import { useFilePreview } from '@/shared/files';
 import { PhotoLightbox } from './PhotoLightbox';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
@@ -210,8 +210,11 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                     <span className="detail-value">{incident.connectionId || 'No asociado'}</span>
                   </div>
                   <div className="detail-item">
-                    <span className="detail-label">ID de Lectura</span>
-                    <span className="detail-value">{incident.readingId || 'No asociado'}</span>
+                    <span className="detail-label">Días en curso</span>
+                    <span className="detail-value font-medium">
+                      {incident.openDays || 0} {' '}
+                      {incident.openDays && incident.openDays == 0 ? 'días' : incident.openDays == 1 ? 'día' : 'días'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -228,7 +231,14 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                       <Calendar size={12} style={{ marginRight: 4 }} />
                       Fecha de Reporte
                     </span>
-                    <span className="detail-value">{ConverDate(incident.reportDate)}</span>
+                    <span className="detail-value">
+                      <ColorChip
+                        label={ConverDateTimeToText(incident.reportDate)}
+                        variant="ghost"
+                        size="xs"
+                        borderRadius={5}
+                      />
+                    </span>
                   </div>
                   <div className="detail-item">
                     <span className="detail-label">
@@ -280,14 +290,16 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                       <span className="detail-value">
                         Coordenadas: {incident.latitude}, {incident.longitude}
                       </span>
-                      <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${incident.latitude},${incident.longitude}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="maps-link"
-                      >
-                        Ver en Google Maps
-                      </a>
+                      <div className="maps-link">
+                        <a className='geo-card__maps-link'
+                          href={`https://www.google.com/maps/search/?api=1&query=${incident.latitude},${incident.longitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Navigation size={12} />
+                          Ver en Google Maps
+                        </a>
+                      </div>
                     </div>
                   )}
                   {/* Geocoded address card — reverse geocodes the saved coordinates */}
