@@ -14,6 +14,7 @@ import { IoMdEye } from 'react-icons/io';
 import { Divider } from '@/shared/presentation/components/divider/Divider';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { truncateText } from '@/shared/utils/text/truncate-text';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 interface IncidentMapSidePanelProps {
   incidents: IncidentDetailRowResponse[];
@@ -94,10 +95,12 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
           {/* List */}
           <div className="incident-side-panel-list">
             {withCoords.length === 0 && withoutCoords.length === 0 && (
-              <div className="incident-side-panel-empty">
-                <AlertTriangle size={24} opacity={0.3} />
-                <p>Sin incidentes para mostrar</p>
-              </div>
+              <EmptyState
+                message="Sin incidentes para mostrar"
+                description='No se han encontrado incidentes para los filtros seleccionados.'
+                icon={<AlertTriangle size={24} opacity={0.3} />}
+                variant='info'
+              />
             )}
             {withCoords.map((incident) => {
               const pCfg =
