@@ -8,25 +8,28 @@ interface MapMarkerProps {
   isHovered: boolean;
   isSelected: boolean;
   onClick: () => void;
-  onMouseOver: () => void;
-  onMouseOut: () => void;
 }
 
 export const MapMarker: React.FC<MapMarkerProps> = ({
   connection,
   isHovered,
   isSelected,
-  onClick,
-  onMouseOver,
-  onMouseOut
+  onClick
 }) => {
   return (
     <div
       className={`marker-pulse-container status-${connection.connectionStatus ? 'active' : 'inactive'} ${isHovered ? 'is-hovered' : ''} ${isSelected ? 'is-selected' : ''}`}
       onClick={onClick}
-      onMouseOver={onMouseOver}
-      onMouseOut={onMouseOut}
       style={{ cursor: 'pointer' }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Acometida ${connection.connectionCadastralKey}`}
+      onKeyDown={(ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          onClick();
+        }
+      }}
     >
       {isHovered && <MapInstantTooltip connection={connection} />}
 
@@ -34,6 +37,5 @@ export const MapMarker: React.FC<MapMarkerProps> = ({
       <div className="marker-dot-core" />
       <div className="marker-heartbeat-pulse" />
     </div>
-
   );
 };

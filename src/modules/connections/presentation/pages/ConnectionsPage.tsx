@@ -4,7 +4,7 @@ import {
   type ConnectionTab
 } from '../hooks/useConnectionsViewModel';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Plus, Network, Users, LayoutGrid } from 'lucide-react';
@@ -46,17 +46,24 @@ export const ConnectionsPage = () => {
 
   // ── Unified ViewModel (Handles both List and CRUD/Wizard) ────────────────
   const { state, actions } = useConnectionsViewModel();
-  const { setViewMode } = actions;
+  const { setViewMode, handleFetch } = actions;
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const initializedModeRef = useRef({ table: false, map: false });
 
   useEffect(() => {
-    if (pathname.endsWith('/map')) {
-      setViewMode('map');
-    } else {
-      setViewMode('table');
+    const nextMode: 'table' | 'map' = pathname.endsWith('/map')
+      ? 'map'
+      : 'table';
+
+    setViewMode(nextMode);
+
+    // Fetch once per mode to avoid repeated empty-result loops.
+    if (!initializedModeRef.current[nextMode]) {
+      handleFetch();
+      initializedModeRef.current[nextMode] = true;
     }
-  }, [pathname, setViewMode]);
+  }, [pathname, setViewMode, handleFetch]);
 
   const loadingProgress = useSimulatedProgress(state.isLoading);
 
@@ -111,7 +118,10 @@ export const ConnectionsPage = () => {
       return (
         <div className="connections-loading">
           <EmptyState
-            message={t('connections.noFilterResults', 'Sin resultados para este filtro')}
+            message={t(
+              'connections.noFilterResults',
+              'Sin resultados para este filtro'
+            )}
             description={t(
               'connections.noFilterResultsDescription',
               'Ninguna acometida coincide con los filtros aplicados. Prueba cambiando o limpiando los filtros.'
@@ -142,10 +152,14 @@ export const ConnectionsPage = () => {
           actions.setViewMode('map');
         }}
         onViewIncidentsOnTable={(connectionId) =>
-          navigate(`/incidents?connectionId=${encodeURIComponent(connectionId)}`)
+          navigate(
+            `/incidents?connectionId=${encodeURIComponent(connectionId)}`
+          )
         }
         onViewIncidentsOnMap={(connectionId) =>
-          navigate(`/incidents/map?connectionId=${encodeURIComponent(connectionId)}`)
+          navigate(
+            `/incidents/map?connectionId=${encodeURIComponent(connectionId)}`
+          )
         }
       />
     );

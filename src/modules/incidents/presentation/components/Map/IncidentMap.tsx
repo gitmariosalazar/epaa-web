@@ -1,9 +1,19 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { createPortal } from 'react-dom';
-import { Map, InfoWindow, useMap } from '@vis.gl/react-google-maps';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef
+} from 'react';
+import {
+  Map,
+  InfoWindow,
+  useMap,
+  AdvancedMarker,
+  AdvancedMarkerAnchorPoint
+} from '@vis.gl/react-google-maps';
 import type { IncidentDetailRowResponse } from '../../../domain/schemas/dtos/response/view_incident.response';
 import { useTheme } from '@/shared/presentation/context/ThemeContext';
-import { DARK_MAP_STYLE, SILVER_MAP_STYLE } from './IncidentMapStyles';
 import { IncidentMapMarker } from './IncidentMapMarker';
 import { IncidentMapInfoWindow } from './IncidentMapInfoWindow';
 import { FALLBACK_CENTER_ANTONIO_ANTE } from '@/shared/utils/types/IGeolocationData';
@@ -24,71 +34,9 @@ export interface IncidentMapProps {
   onViewDetail?: (incident: IncidentDetailRowResponse) => void;
   /** Callback al mover la cámara (para sincronizar con estado del ViewModel) */
   onCameraChange?: (center: { lat: number; lng: number }, zoom: number) => void;
+  /** Map ID requerido para AdvancedMarker */
+  mapId?: string;
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// CustomOverlay
-// Utilidad interna: monta un nodo React en un OverlayView de Google Maps.
-// Permite usar HTML+CSS puro para los marcadores (sin limitación de la API de
-// AdvancedMarker) y mantiene los z-index correctos.
-// ─────────────────────────────────────────────────────────────────────────────
-const CustomOverlay = ({
-  position,
-  children,
-  zIndex,
-  paneName = 'overlayMouseTarget',
-}: {
-  position: { lat: number; lng: number };
-  children: React.ReactNode;
-  zIndex?: number;
-  paneName?: 'floatPane' | 'overlayMouseTarget' | 'markerLayer' | 'overlayLayer';
-}) => {
-  const map = useMap();
-  const [container] = useState(() => {
-    const div = document.createElement('div');
-    div.style.position = 'absolute';
-    return div;
-  });
-
-  const overlay = useMemo(() => {
-    const google = (window as any).google;
-    if (!google) return null;
-
-    const ov = new google.maps.OverlayView();
-
-    ov.onAdd = () => {
-      const panes = ov.getPanes();
-      if (panes) panes[paneName].appendChild(container);
-    };
-
-    ov.draw = () => {
-      const projection = ov.getProjection();
-      if (!projection) return;
-      const point = projection.fromLatLngToDivPixel(
-        new google.maps.LatLng(position.lat, position.lng)
-      );
-      if (point) {
-        container.style.left = `${point.x}px`;
-        container.style.top = `${point.y}px`;
-        container.style.zIndex = zIndex != null ? String(zIndex) : '1000';
-      }
-    };
-
-    ov.onRemove = () => {
-      if (container.parentNode) container.parentNode.removeChild(container);
-    };
-
-    return ov;
-  }, [container, position.lat, position.lng, paneName, zIndex]);
-
-  useEffect(() => {
-    if (!map || !overlay) return;
-    overlay.setMap(map);
-    return () => overlay.setMap(null);
-  }, [map, overlay]);
-
-  return createPortal(children, container);
-};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // IncidentMap — componente principal
@@ -105,19 +53,27 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
   zoom = 13,
   onViewDetail,
   onCameraChange,
+  mapId
 }) => {
   const [infoWindowShown, setInfoWindowShown] = useState(false);
-  const [hoveredIncident, setHoveredIncident] = useState<IncidentDetailRowResponse | null>(null);
+  const [hoveredIncident, setHoveredIncident] =
+    useState<IncidentDetailRowResponse | null>(null);
   const [currentZoom, setCurrentZoom] = useState<number>(zoom);
   const { theme } = useTheme();
-
-  const mapStyles = theme === 'dark' ? DARK_MAP_STYLE : SILVER_MAP_STYLE;
+  const HOVER_TOOLTIP_MIN_ZOOM = 14;
+  const lastCameraRef = useRef<{
+    lat: number;
+    lng: number;
+    zoom: number;
+  } | null>(null);
 
   const map = useMap();
 
   // Hide hover tooltip when zoomed out (prevents visual clutter)
   useEffect(() => {
-    if (currentZoom < 17 && hoveredIncident) setHoveredIncident(null);
+    if (currentZoom < HOVER_TOOLTIP_MIN_ZOOM && hoveredIncident) {
+      setHoveredIncident(null);
+    }
   }, [currentZoom, hoveredIncident]);
 
   // Programmatic pan/zoom when selectedIncident changes (SOLID / SRP)
@@ -144,22 +100,39 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
     center?.lat && center?.lng
       ? center
       : firstWithCoords
-        ? { lat: Number(firstWithCoords.latitude), lng: Number(firstWithCoords.longitude) }
+        ? {
+            lat: Number(firstWithCoords.latitude),
+            lng: Number(firstWithCoords.longitude)
+          }
         : FALLBACK_CENTER;
 
-  const handleMarkerClick = (incident: IncidentDetailRowResponse) => {
-    setHoveredIncident(null);
-    onSelect(incident);
-    setInfoWindowShown(true);
-  };
+  const incidentsWithCoords = useMemo(
+    () =>
+      incidents.filter((incident) => incident.latitude && incident.longitude),
+    [incidents]
+  );
 
-  const handleInfoWindowClose = () => setInfoWindowShown(false);
+  const handleMarkerClick = useCallback(
+    (incident: IncidentDetailRowResponse) => {
+      setHoveredIncident(null);
+      onSelect(incident);
+      setInfoWindowShown(true);
+    },
+    [onSelect]
+  );
+
+  const handleInfoWindowClose = useCallback(
+    () => setInfoWindowShown(false),
+    []
+  );
 
   return (
     <div className="incident-fullscreen-map-container">
       <Map
-        center={finalCenter}
-        zoom={zoom}
+        theme={theme}
+        defaultCenter={finalCenter}
+        defaultZoom={zoom}
+        mapId={mapId}
         gestureHandling="greedy"
         disableDefaultUI={false}
         mapTypeControl={true}
@@ -167,45 +140,59 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
         fullscreenControl={true}
         onCameraChanged={(ev) => {
           const newZoom = ev.detail.zoom;
-          setCurrentZoom(newZoom);
-          onCameraChange?.(ev.detail.center, newZoom);
+          if (newZoom !== currentZoom) {
+            setCurrentZoom(newZoom);
+          }
+
+          if (!onCameraChange) return;
+          const lat = Number(ev.detail.center.lat);
+          const lng = Number(ev.detail.center.lng);
+          const last = lastCameraRef.current;
+
+          // Avoid flooding parent state with tiny camera deltas.
+          if (
+            !last ||
+            last.zoom !== newZoom ||
+            Math.abs(last.lat - lat) > 0.00015 ||
+            Math.abs(last.lng - lng) > 0.00015
+          ) {
+            lastCameraRef.current = { lat, lng, zoom: newZoom };
+            onCameraChange(ev.detail.center, newZoom);
+          }
         }}
         style={{ width: '100%', height: '100%' }}
-        styles={mapStyles}
       >
         {/* ── Markers ───────────────────────────────────────────────────── */}
-        {incidents.map(
-          (incident) =>
-            incident.latitude &&
-            incident.longitude && (
-              <CustomOverlay
-                key={incident.incidentId}
-                position={{
-                  lat: Number(incident.latitude),
-                  lng: Number(incident.longitude),
-                }}
-                zIndex={
-                  selectedIncident?.incidentId === incident.incidentId
-                    ? 30000
-                    : hoveredIncident?.incidentId === incident.incidentId
-                      ? 25000
-                      : 12000   // ← Aumentado mucho
-                }
-                paneName="overlayMouseTarget"
-              >
-                <IncidentMapMarker
-                  incident={incident}
-                  isHovered={hoveredIncident?.incidentId === incident.incidentId}
-                  isSelected={selectedIncident?.incidentId === incident.incidentId}
-                  onClick={() => handleMarkerClick(incident)}
-                  onMouseOver={() => {
-                    setHoveredIncident(incident);
-                  }}
-                  onMouseOut={() => setHoveredIncident(null)}
-                />
-              </CustomOverlay>
-            )
-        )}
+        {incidentsWithCoords.map((incident) => (
+          <AdvancedMarker
+            key={incident.incidentId}
+            position={{
+              lat: Number(incident.latitude),
+              lng: Number(incident.longitude)
+            }}
+            anchorPoint={AdvancedMarkerAnchorPoint.CENTER}
+            onMouseEnter={() => {
+              if (currentZoom >= HOVER_TOOLTIP_MIN_ZOOM) {
+                setHoveredIncident(incident);
+              }
+            }}
+            onMouseLeave={() => setHoveredIncident(null)}
+            zIndex={
+              selectedIncident?.incidentId === incident.incidentId
+                ? 30000
+                : hoveredIncident?.incidentId === incident.incidentId
+                  ? 25000
+                  : 12000
+            }
+          >
+            <IncidentMapMarker
+              incident={incident}
+              isHovered={hoveredIncident?.incidentId === incident.incidentId}
+              isSelected={selectedIncident?.incidentId === incident.incidentId}
+              onClick={() => handleMarkerClick(incident)}
+            />
+          </AdvancedMarker>
+        ))}
 
         {/* ── InfoWindow (click popup) ───────────────────────────────── */}
         {selectedIncident &&
@@ -215,10 +202,12 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
             <InfoWindow
               position={{
                 lat: Number(selectedIncident.latitude),
-                lng: Number(selectedIncident.longitude),
+                lng: Number(selectedIncident.longitude)
               }}
               pixelOffset={[0, -28]}
               onCloseClick={handleInfoWindowClose}
+              maxWidth={340}
+              disableAutoPan={false}
             >
               <IncidentMapInfoWindow
                 incident={selectedIncident}

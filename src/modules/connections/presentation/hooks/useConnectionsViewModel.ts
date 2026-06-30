@@ -34,7 +34,7 @@ export interface SortConfig {
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const LIMIT_SIZE = 1000;
+const LIMIT_SIZE = 100;
 
 // ── Generic helpers ───────────────────────────────────────────────────────────
 function applySortConfig<T>(data: T[], sortConfig: SortConfig | null): T[] {
@@ -864,15 +864,7 @@ export const useConnectionsViewModel = () => {
   const filteredConnections = useMemo(
     () =>
       applyLocalFilters(
-        connections.map((conn) => {
-          if (!conn.latitude || !conn.longitude) {
-            const coords = decodeEWKBPoint(conn.connectionCoordinates);
-            if (coords) {
-              return { ...conn, latitude: coords.lat, longitude: coords.lng };
-            }
-          }
-          return conn;
-        }),
+        connections,
         searchQuery,
         searchField,
         selectedStatus,
@@ -922,7 +914,6 @@ export const useConnectionsViewModel = () => {
   // ── 6. INITIALIZATION ──
   useEffect(() => {
     loadRates();
-    handleFetch();
   }, [loadRates]);
 
   return {

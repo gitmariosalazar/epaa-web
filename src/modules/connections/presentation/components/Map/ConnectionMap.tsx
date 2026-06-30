@@ -1,11 +1,20 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { createPortal } from 'react-dom';
-import { Map, InfoWindow, useMap } from '@vis.gl/react-google-maps';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo
+} from 'react';
+import {
+  Map,
+  InfoWindow,
+  useMap,
+  AdvancedMarker,
+  AdvancedMarkerAnchorPoint
+} from '@vis.gl/react-google-maps';
 import type { Connection } from '../../../domain/models/Connection';
 import { useTheme } from '@/shared/presentation/context/ThemeContext';
-import { DARK_MAP_STYLE, SILVER_MAP_STYLE } from './MapStyles';
 
-// Decoupled Sub-Components
 import { MapMarker } from './MapMarker';
 import { MapInfoWindow } from './MapInfoWindow';
 import { useNavigate } from 'react-router-dom';
@@ -19,66 +28,8 @@ interface ConnectionMapProps {
   zoom?: number;
   onEdit?: (conn: Connection) => void;
   onCameraChange?: (center: { lat: number; lng: number }, zoom: number) => void;
+  mapId?: string;
 }
-
-// --- Custom Overlay Helper for Pulsing Markers ---
-const CustomOverlay = ({
-  position,
-  children,
-  zIndex,
-  paneName = 'overlayMouseTarget'
-}: {
-  position: { lat: number; lng: number };
-  children: React.ReactNode;
-  zIndex?: number;
-  paneName?: 'floatPane' | 'overlayMouseTarget' | 'markerLayer' | 'overlayLayer';
-}) => {
-  const map = useMap();
-  const [container] = useState(() => {
-    const div = document.createElement('div');
-    div.style.position = 'absolute';
-    return div;
-  });
-
-  const overlay = useMemo(() => {
-    const google = (window as any).google;
-    if (!google) return null;
-
-    const ov = new google.maps.OverlayView();
-    ov.onAdd = () => {
-      const panes = ov.getPanes();
-      if (panes) {
-        panes[paneName].appendChild(container);
-      }
-    };
-    ov.draw = () => {
-      const projection = ov.getProjection();
-      if (!projection) return;
-      const point = projection.fromLatLngToDivPixel(
-        new google.maps.LatLng(position.lat, position.lng)
-      );
-      if (point) {
-        container.style.left = `${point.x}px`;
-        container.style.top = `${point.y}px`;
-        container.style.zIndex = zIndex ? String(zIndex) : '1';
-      }
-    };
-    ov.onRemove = () => {
-      if (container.parentNode) {
-        container.parentNode.removeChild(container);
-      }
-    };
-    return ov;
-  }, [container, position.lat, position.lng, paneName, zIndex]);
-
-  useEffect(() => {
-    if (!map || !overlay) return;
-    overlay.setMap(map);
-    return () => overlay.setMap(null);
-  }, [map, overlay]);
-
-  return createPortal(children, container);
-};
 
 export const ConnectionMap: React.FC<ConnectionMapProps> = ({
   connections,
@@ -87,152 +38,205 @@ export const ConnectionMap: React.FC<ConnectionMapProps> = ({
   center,
   zoom = 13,
   onEdit,
-  onCameraChange
+  onCameraChange,
+  mapId
 }) => {
+  const BOUNDS_PADDING_DEG = 0.01;
+
   const map = useMap();
-
-
   const navigate = useNavigate();
+  const isInternalActionRef = useRef(false); // ← Previene re-render agresivo
+  const lastBoundsUpdateRef = useRef(0);
 
-  const handleViewIncidentsOnTable = (connectionId: string) => {
-    navigate(`/incidents?connectionId=${encodeURIComponent(connectionId)}`)
-  };
+  const handleViewIncidentsOnTable = useCallback(
+    (connectionId: string) => {
+      navigate(`/incidents?connectionId=${encodeURIComponent(connectionId)}`);
+    },
+    [navigate]
+  );
 
-  const handleViewIncidentsOnMap = (connectionId: string) => {
-    navigate(`/incidents/map?connectionId=${encodeURIComponent(connectionId)}`)
-  };
-
+  const handleViewIncidentsOnMap = useCallback(
+    (connectionId: string) => {
+      navigate(
+        `/incidents/map?connectionId=${encodeURIComponent(connectionId)}`
+      );
+    },
+    [navigate]
+  );
 
   const [infoWindowShown, setInfoWindowShown] = useState(false);
   const [hoveredConnection, setHoveredConnection] = useState<Connection | null>(
     null
   );
-  // Track current zoom level for interaction thresholds
   const [currentZoom, setCurrentZoom] = useState<number>(zoom);
+  const [visibleBounds, setVisibleBounds] = useState<{
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+  } | null>(null);
   const { theme } = useTheme();
 
-  const mapStyles = theme === 'dark' ? DARK_MAP_STYLE : SILVER_MAP_STYLE;
-
-  // Programmatic pan/zoom when selectedConnection changes (SOLID / SRP)
+  // Solo mover el mapa cuando se selecciona desde fuera del popup
   useEffect(() => {
-    if (!map || !selectedConnection) return;
+    if (!map || !selectedConnection || isInternalActionRef.current) return;
+
     if (selectedConnection.latitude && selectedConnection.longitude) {
-      const targetCenter = {
+      map.setCenter({
         lat: Number(selectedConnection.latitude),
         lng: Number(selectedConnection.longitude)
-      };
-      map.setCenter(targetCenter);
+      });
       setInfoWindowShown(true);
-      if (map.getZoom() < 17) {
-        map.setZoom(17);
-      }
+      if (map.getZoom() < 17) map.setZoom(17);
     }
   }, [map, selectedConnection]);
 
-  // Clear hover if user zooms out below threshold
-  useEffect(() => {
-    if (currentZoom < 17 && hoveredConnection) {
-      setHoveredConnection(null);
-    }
-  }, [currentZoom, hoveredConnection]);
+  const handleEdit = useCallback(
+    (conn: Connection) => {
+      isInternalActionRef.current = true;
+      onEdit?.(conn);
+
+      // Reset después de la acción
+      setTimeout(() => {
+        isInternalActionRef.current = false;
+      }, 1000);
+    },
+    [onEdit]
+  );
+
+  const handleClose = useCallback(() => {
+    setInfoWindowShown(false);
+  }, []);
 
   const firstWithCoords = connections.find((c) => c.latitude && c.longitude);
   const fallbackCenter = FALLBACK_CENTER_ANTONIO_ANTE;
 
   const finalCenter =
-    center && center.lat && center.lng
+    center?.lat && center?.lng
       ? center
       : firstWithCoords
         ? {
-          lat: Number(firstWithCoords.latitude),
-          lng: Number(firstWithCoords.longitude)
-        }
+            lat: Number(firstWithCoords.latitude),
+            lng: Number(firstWithCoords.longitude)
+          }
         : fallbackCenter;
+
+  const connectionsWithCoords = useMemo(
+    () => connections.filter((conn) => conn.latitude && conn.longitude),
+    [connections]
+  );
+
+  const visibleConnections = useMemo(() => {
+    if (!visibleBounds) {
+      // Keep initial mount light; full set appears once bounds are available.
+      return connectionsWithCoords.slice(0, 350);
+    }
+
+    return connectionsWithCoords.filter((conn) => {
+      const lat = Number(conn.latitude);
+      const lng = Number(conn.longitude);
+      return (
+        lat <= visibleBounds.north + BOUNDS_PADDING_DEG &&
+        lat >= visibleBounds.south - BOUNDS_PADDING_DEG &&
+        lng <= visibleBounds.east + BOUNDS_PADDING_DEG &&
+        lng >= visibleBounds.west - BOUNDS_PADDING_DEG
+      );
+    });
+  }, [connectionsWithCoords, visibleBounds]);
 
   return (
     <div className="map-view-container">
       <Map
         defaultCenter={finalCenter}
         defaultZoom={zoom}
+        mapId={mapId}
         gestureHandling="greedy"
         disableDefaultUI={false}
         mapTypeControl={true}
         streetViewControl={true}
         fullscreenControl={true}
         onCameraChanged={(ev) => {
-          const newZoom = ev.detail.zoom;
-          setCurrentZoom(newZoom);
-          if (onCameraChange) {
-            onCameraChange(ev.detail.center, newZoom);
+          if (ev.detail.zoom !== currentZoom) {
+            setCurrentZoom(ev.detail.zoom);
           }
+
+          if (map) {
+            const now = Date.now();
+            if (now - lastBoundsUpdateRef.current > 120) {
+              const bounds = map.getBounds();
+              if (bounds) {
+                const northEast = bounds.getNorthEast();
+                const southWest = bounds.getSouthWest();
+                setVisibleBounds({
+                  north: northEast.lat(),
+                  south: southWest.lat(),
+                  east: northEast.lng(),
+                  west: southWest.lng()
+                });
+              }
+              lastBoundsUpdateRef.current = now;
+            }
+          }
+
+          onCameraChange?.(ev.detail.center, ev.detail.zoom);
         }}
         style={{ width: '100%', height: '100%' }}
-        styles={mapStyles}
       >
-        {connections.map(
-          (conn) =>
-            conn.latitude &&
-            conn.longitude && (
-              <CustomOverlay
-                key={conn.connectionId}
-                position={{
-                  lat: Number(conn.latitude),
-                  lng: Number(conn.longitude)
-                }}
-                zIndex={
-                  selectedConnection?.connectionId === conn.connectionId
-                    ? 10000
-                    : (hoveredConnection?.connectionId === conn.connectionId ? 9900 : 1)
-                }
-                paneName="overlayMouseTarget"
-              >
-                <MapMarker
-                  connection={conn}
-                  isHovered={hoveredConnection?.connectionId === conn.connectionId}
-                  isSelected={selectedConnection?.connectionId === conn.connectionId}
-                  onClick={() => {
-                    setHoveredConnection(null);
-                    onSelect(conn);
-                    setInfoWindowShown(true);
-                  }}
-                  onMouseOver={() => {
-                    // REQUIRE zoom level street-level (17+) for details to prevent flickering in clusters
-                    if (infoWindowShown || currentZoom < 17) return;
-                    setHoveredConnection(conn);
-                  }}
-                  onMouseOut={() => setHoveredConnection(null)}
-                />
-              </CustomOverlay>
-            )
-        )}
-
-
+        {visibleConnections.map((conn) => (
+          <AdvancedMarker
+            key={conn.connectionId}
+            position={{
+              lat: Number(conn.latitude),
+              lng: Number(conn.longitude)
+            }}
+            anchor={AdvancedMarkerAnchorPoint.CENTER}
+            zIndex={
+              selectedConnection?.connectionId === conn.connectionId ? 10000 : 1
+            }
+            onMouseEnter={() => {
+              if (infoWindowShown || currentZoom < 17) return;
+              setHoveredConnection(conn);
+            }}
+            onMouseLeave={() => setHoveredConnection(null)}
+          >
+            <MapMarker
+              connection={conn}
+              isHovered={hoveredConnection?.connectionId === conn.connectionId}
+              isSelected={
+                selectedConnection?.connectionId === conn.connectionId
+              }
+              onClick={() => {
+                setHoveredConnection(null);
+                onSelect(conn);
+                setInfoWindowShown(true);
+              }}
+            />
+          </AdvancedMarker>
+        ))}
 
         {selectedConnection &&
           infoWindowShown &&
           selectedConnection.latitude &&
           selectedConnection.longitude && (
             <InfoWindow
+              key={`infowindow-${selectedConnection.connectionId}`} // ← Clave estable
               position={{
                 lat: Number(selectedConnection.latitude),
                 lng: Number(selectedConnection.longitude)
               }}
               pixelOffset={[0, -25]}
-              onCloseClick={() => setInfoWindowShown(false)}
+              onCloseClick={handleClose}
             >
               <MapInfoWindow
-                onViewIncidentsOnTable={handleViewIncidentsOnTable}
-                onViewIncidentsOnMap={handleViewIncidentsOnMap}
                 connection={selectedConnection}
                 theme={theme}
-                onClose={() => setInfoWindowShown(false)}
-                onEdit={onEdit}
-
+                onClose={handleClose}
+                onEdit={handleEdit}
+                onViewIncidentsOnTable={handleViewIncidentsOnTable}
+                onViewIncidentsOnMap={handleViewIncidentsOnMap}
               />
             </InfoWindow>
           )}
-
-        {/* Instant tooltips are now handled inside MapMarker for zero-lag performance */}
       </Map>
     </div>
   );

@@ -8,14 +8,27 @@
 }
 
 .card-text-incidents {
-  font-size: 0.8rem;
+  font-size: 0.685rem;
   margin: 0;
   color: #ff7300;
   font-weight: 500;
 }
 
+.card-label-footer {
+  font-size: 0.685rem !important;
+  font-weight: 600 !important;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
 .card-text {
-  font-size: 0.7rem;
+  font-size: 0.685rem;
+}
+
+.card-text-client,
+.card-text-address {
+  font-size: 0.685rem;
+  font-weight: 500;
 }
 
 .card-body-incidents-wrapper {

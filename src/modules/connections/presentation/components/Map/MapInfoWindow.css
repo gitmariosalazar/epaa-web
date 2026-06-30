@@ -3,3 +3,17 @@
   justify-content: center;
   margin-top: 20px;
 }
+.premium-popup {
+  transition: none !important; /* evita transiciones al re-render */
+  will-change: transform; /* ayuda con rendimiento */
+}
+
+.premium-action-btn,
+.card-incidents-actions button {
+  transition: all 0.1s ease; /* transiciones suaves pero cortas */
+}
+
+.popup-actions-centered,
+.card-incidents-actions {
+  pointer-events: auto; /* asegura que los clicks funcionen */
+}

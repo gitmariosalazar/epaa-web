@@ -33,7 +33,8 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
   onSelect,
   onViewDetail
 }) => {
-  const { centerLocationIncident, loading, error } = useCenterLocationIncident();
+  const { centerLocationIncident, loading, error } =
+    useCenterLocationIncident();
 
   const [mapCenter, setMapCenter] = useState({
     lat: centerLocationIncident.centerLat,
@@ -42,21 +43,43 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
 
   const [mapZoom, setMapZoom] = useState(17);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const latestCameraRef = useRef<{
+    center: { lat: number; lng: number };
+    zoom: number;
+  }>({
+    center: {
+      lat: Number(FALLBACK_CENTER_ANTONIO_ANTE.lat),
+      lng: Number(FALLBACK_CENTER_ANTONIO_ANTE.lng)
+    },
+    zoom: 17
+  });
 
   const prevSelectedIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!loading && !error) {
+      const nextCenter = {
+        lat: Number(centerLocationIncident.centerLat),
+        lng: Number(centerLocationIncident.centerLng)
+      };
+
       setMapCenter({
-        lat: Number(FALLBACK_CENTER_ANTONIO_ANTE.lat),
-        lng: Number(FALLBACK_CENTER_ANTONIO_ANTE.lng)
+        lat: Number.isFinite(nextCenter.lat)
+          ? nextCenter.lat
+          : Number(FALLBACK_CENTER_ANTONIO_ANTE.lat),
+        lng: Number.isFinite(nextCenter.lng)
+          ? nextCenter.lng
+          : Number(FALLBACK_CENTER_ANTONIO_ANTE.lng)
       });
       setMapZoom(17);
     }
   }, [centerLocationIncident, loading, error]);
 
   useEffect(() => {
-    if (selectedIncident && selectedIncident.incidentId !== prevSelectedIdRef.current) {
+    if (
+      selectedIncident &&
+      selectedIncident.incidentId !== prevSelectedIdRef.current
+    ) {
       prevSelectedIdRef.current = selectedIncident.incidentId;
 
       if (selectedIncident.latitude && selectedIncident.longitude) {
@@ -72,9 +95,10 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
   }, [selectedIncident]);
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
+  const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID ?? 'DEMO_MAP_ID';
 
   return (
-    <APIProvider apiKey={apiKey}>
+    <APIProvider apiKey={apiKey} libraries={['marker']}>
       <div className="incident-map-feature-container">
         <IncidentMapSidePanel
           incidents={incidents}
@@ -92,14 +116,16 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
             onSelect={onSelect}
             center={mapCenter}
             zoom={mapZoom}
+            mapId={mapId}
             onViewDetail={onViewDetail}
             onCameraChange={(center, zoom) => {
-              // ← Corrección aquí
-              setMapCenter({
-                lat: Number(center.lat),
-                lng: Number(center.lng)
-              });
-              setMapZoom(zoom);
+              latestCameraRef.current = {
+                center: {
+                  lat: Number(center.lat),
+                  lng: Number(center.lng)
+                },
+                zoom
+              };
             }}
           />
         </div>

@@ -14,22 +14,11 @@ export const ConnectionMapFeature: React.FC<ConnectionMapFeatureProps> = ({
   viewModel
 }) => {
   const { state, actions } = viewModel;
-  const {
-    filteredConnections,
-    selectedConnection,
-    isLoading,
-    mapCenter,
-    mapZoom
-  } = state;
+  const { filteredConnections, selectedConnection, mapCenter, mapZoom } = state;
+  const { hasMore, isLoading } = state;
 
-  const {
-    setSelectedConnection,
-    openEdit,
-    setMapCenter,
-    setMapZoom,
-    handleFetch
-  } = actions;
-
+  const { setSelectedConnection, openEdit, setMapCenter, setMapZoom } = actions;
+  const { loadMore } = actions; // Added loadMore from actions
 
   const fallbackCenter = FALLBACK_CENTER_ANTONIO_ANTE;
   const latestCameraRef = React.useRef<{
@@ -39,13 +28,6 @@ export const ConnectionMapFeature: React.FC<ConnectionMapFeatureProps> = ({
     center: mapCenter || fallbackCenter,
     zoom: mapZoom
   });
-
-  // Auto-fetch if empty and map is opened
-  useEffect(() => {
-    if (filteredConnections.length === 0 && !isLoading) {
-      handleFetch();
-    }
-  }, [filteredConnections.length, isLoading, handleFetch]);
 
   // Persist final camera position on unmount
   useEffect(() => {
@@ -58,17 +40,21 @@ export const ConnectionMapFeature: React.FC<ConnectionMapFeatureProps> = ({
   }, [setMapCenter, setMapZoom]);
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+  const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID';
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
 
   return (
-    <APIProvider apiKey={apiKey}>
+    <APIProvider apiKey={apiKey} libraries={['marker']}>
       <div className="map-feature-container">
         {/* Decoupled Professional Side Panel */}
         <ConnectionSidePanel
           connections={filteredConnections}
           selectedConnection={selectedConnection}
           onSelect={setSelectedConnection}
+          hasMore={hasMore}
+          isLoading={isLoading}
+          onLoadMore={loadMore}
           collapsed={isSidebarCollapsed}
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
@@ -81,6 +67,7 @@ export const ConnectionMapFeature: React.FC<ConnectionMapFeatureProps> = ({
             onSelect={setSelectedConnection}
             center={mapCenter || undefined}
             zoom={mapZoom}
+            mapId={mapId}
             onEdit={openEdit}
             onCameraChange={(center, zoom) => {
               latestCameraRef.current = { center, zoom };

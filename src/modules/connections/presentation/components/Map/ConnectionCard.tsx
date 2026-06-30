@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Connection } from '../../../domain/models/Connection';
-import { MdLocationOn, MdPerson } from 'react-icons/md';
+import { MdCategory, MdLocationOn, MdPerson } from 'react-icons/md';
 import { getConnectionStateChip } from '../../utils/connectionStateChip';
 import { ACTIVE_STATES } from '../../../domain/models/ConnectionState';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
@@ -29,8 +29,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
 }) => {
   const chip = getConnectionStateChip(connection.connectionStatus);
   const isActive = ACTIVE_STATES.has(connection.connectionStatus);
-
-
+  console.log('ConnectionCard render', connection, isSelected);
 
   return (
     <div
@@ -58,15 +57,17 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
         <div className="card-body-incidents-wrapper">
           <div className="card-body-incidents">
             <div className="card-info-row">
-              <TbAlertTriangle className="card-icon-incident" size={25} />
+              <TbAlertTriangle className="card-icon-incident" size={17} />
               <span className="card-text-incidents">
-                La acometida tiene {connection.incidents} incidente(s) reportados.
+                La acometida tiene {connection.incidents} incidente(s)
+                reportados.
               </span>
             </div>
             <div className="card-info-row">
               {Number(connection.incidents) > 0 ? (
                 <div className="table-column-center">
-                  <Tooltip themeColor='warning'
+                  <Tooltip
+                    themeColor="warning"
                     content={t(
                       'connections.table.incidentsCount',
                       `La acometida tiene ${connection.incidents} incidente(s).`
@@ -79,7 +80,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
                       color="#ef4444" // Rojo = problema
                       icon={<AlertTriangle size={14} />} // Triángulo de alerta
                       variant="soft"
-                      size="sm"
+                      size="xs"
                     />
                   </Tooltip>
                 </div>
@@ -98,16 +99,16 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
                       color="#22c55e" // Verde = bueno
                       icon={<CheckCircle size={14} />} // Check = sin problemas
                       variant="soft"
-                      size="sm"
+                      size="xs"
                     />
                   </Tooltip>
                 </div>
               )}
-
             </div>
           </div>
           <div className="card-incidents-actions">
-            <Tooltip themeColor='warning'
+            <Tooltip
+              themeColor="warning"
               content={t(
                 'connections.table.incidentsCount',
                 `Ver detalles de la acometida`
@@ -118,13 +119,16 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
               <Button
                 variant="dashed"
                 size="xs"
-                leftIcon={<IoMdEye seed={20} />}
-                onClick={() => onViewIncidentsOnTable(connection.connectionCadastralKey)}
+                leftIcon={<IoMdEye size={14} />}
+                onClick={() =>
+                  onViewIncidentsOnTable(connection.connectionCadastralKey)
+                }
               >
                 Ver Detalles
               </Button>
             </Tooltip>
-            <Tooltip themeColor='warning'
+            <Tooltip
+              themeColor="warning"
               content={t(
                 'connections.incidents.viewLocation',
                 `Ver ubicación del incidente en el mapa`
@@ -137,7 +141,9 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
                 color="green"
                 size="xs"
                 leftIcon={<MdLocationOn />}
-                onClick={() => onViewIncidentsOnMap(connection.connectionCadastralKey)}
+                onClick={() =>
+                  onViewIncidentsOnMap(connection.connectionCadastralKey)
+                }
               >
                 Ver Ubicación
               </Button>
@@ -148,15 +154,17 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
 
       <div className="card-body">
         <div className="card-info-row">
-          <MdPerson className="card-icon" />
-          <span className="card-text">
+          <MdPerson className="card-icon" size={14} />
+          <span className="card-text-client">
             {connection.clientId || '1000211126'}
           </span>
         </div>
         <div className="card-info-row">
-          <MdLocationOn className="card-icon" />
-          <span className="card-text address-text">
-            {connection.connectionAddress ? connection.connectionAddress : 'SIN DIRECCIÓN CATASTRAL'}
+          <MdLocationOn className="card-icon" size={14} />
+          <span className="card-text-address">
+            {connection.connectionAddress
+              ? connection.connectionAddress
+              : 'SIN DIRECCIÓN CATASTRAL'}
           </span>
         </div>
       </div>
@@ -165,14 +173,14 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
       <div className="card-footer">
         <div className="card-footer-info">
           <span className="card-label-footer">
-            LATITUD
-            <p className="card-text">
+            <span className="card-label-footer">LATITUD</span>
+            <p className="card-text-address">
               {connection.latitude ? connection.latitude : '0.000000'}
             </p>
           </span>
           <span className="card-label-footer">
-            LONGITUD
-            <p className="card-text">
+            <span className="card-label-footer">LONGITUD</span>
+            <p className="card-text-address">
               {connection.longitude ? connection.longitude : '0.000000'}
             </p>
           </span>
@@ -181,9 +189,16 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
           <div className="footer-icon-btn">
             <MdLocationOn />
           </div>
-          <div className="footer-icon-btn">
+          {/**   <div className="footer-icon-btn">
             <MdPerson />
-          </div>
+          </div>*/}
+          <ColorChip
+            label={connection.connectionRateName}
+            icon={<MdCategory size={14} />}
+            variant="soft"
+            size="xs"
+            borderRadius={5}
+          />
         </div>
       </div>
     </div>

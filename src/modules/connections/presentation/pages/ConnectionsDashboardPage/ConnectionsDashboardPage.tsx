@@ -6,7 +6,10 @@ import {
   type DonutSlice
 } from '@/shared/presentation/components/Charts/DonutChart';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
-import { Table, type Column } from '@/shared/presentation/components/Table/Table';
+import {
+  Table,
+  type Column
+} from '@/shared/presentation/components/Table/Table';
 import {
   Activity,
   Target,
@@ -22,9 +25,19 @@ import styles from './ConnectionsDashboardPage.module.css';
 import { ProgressBar } from '@/shared/presentation/components/ProgressBar/ProgressBar';
 import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
-import { APIProvider, Map, Marker, InfoWindow, useMap } from '@vis.gl/react-google-maps';
+import {
+  APIProvider,
+  Map,
+  InfoWindow,
+  useMap,
+  AdvancedMarker,
+  AdvancedMarkerAnchorPoint
+} from '@vis.gl/react-google-maps';
 import { useTheme } from '@/shared/presentation/context/ThemeContext';
-import { DARK_MAP_STYLE, SILVER_MAP_STYLE } from '../../components/Map/MapStyles';
+import {
+  DARK_MAP_STYLE,
+  SILVER_MAP_STYLE
+} from '../../components/Map/MapStyles';
 import type { LiveMapConnectionResponse } from '../../../domain/models/DashboardStats';
 import { FALLBACK_CENTER_ANTONIO_ANTE } from '@/shared/utils/types/IGeolocationData';
 
@@ -43,7 +56,10 @@ const MapController: React.FC<{
 
   useEffect(() => {
     if (!map || !selectedPin) return;
-    map.panTo({ lat: Number(selectedPin.latitude), lng: Number(selectedPin.longitude) });
+    map.panTo({
+      lat: Number(selectedPin.latitude),
+      lng: Number(selectedPin.longitude)
+    });
     if (map.getZoom() < 16) {
       map.setZoom(16);
     }
@@ -53,17 +69,15 @@ const MapController: React.FC<{
 };
 
 export const ConnectionsDashboardPage: React.FC = () => {
-  const {
-    data,
-    liveData,
-    isLoading,
-    error,
-    fetchStats,
-    fetchLiveData
-  } = useConnectionDashboard();
+  const { data, liveData, isLoading, error, fetchStats, fetchLiveData } =
+    useConnectionDashboard();
   const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState<'update' | 'general' | 'map'>('update');
-  const [selectedPin, setSelectedPin] = useState<LiveMapConnectionResponse | null>(null);
+  const [activeTab, setActiveTab] = useState<'update' | 'general' | 'map'>(
+    'update'
+  );
+  const [selectedPin, setSelectedPin] =
+    useState<LiveMapConnectionResponse | null>(null);
+  const [hoveredPinId, setHoveredPinId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredLiveData = useMemo(() => {
@@ -97,141 +111,150 @@ export const ConnectionsDashboardPage: React.FC = () => {
     sinCliente: number;
   }
 
-  const zonasColumns = useMemo<Column<ZonaRow>[]>(() => [
-    {
-      header: 'ID Zona',
-      accessor: (item) => <strong>Zona {item.zona_id}</strong>
-    },
-    {
-      header: 'Total Acometidas',
-      accessor: (item) => item.total.toLocaleString()
-    },
-    {
-      header: 'Completados (100%)',
-      accessor: (item) => (
-        <span className={`${styles.badge} ${styles.success}`}>
-          {item.completados.toLocaleString()}
-        </span>
-      )
-    },
-    {
-      header: 'Pendientes (Faltan datos)',
-      accessor: (item) => (
-        <span className={`${styles.badge} ${styles.warning}`}>
-          {item.pendientes.toLocaleString()}
-        </span>
-      )
-    },
-    {
-      header: 'Progreso',
-      accessor: (item) => {
-        const total = Number(item.total);
-        const completados = Number(item.completados);
-        const pct = total > 0 ? ((completados / total) * 100).toFixed(1) : '0';
-        return (
-          <ProgressBar
-            value={Number(pct)}
-            color={getTrafficLightColor(Number(pct))}
-          />
-        );
-      }
-    }
-  ], []);
-
-  const sectoresColumns = useMemo<Column<SectorRow>[]>(() => [
-    {
-      header: 'Sector',
-      accessor: (item) => <strong>Sector {item.sector}</strong>
-    },
-    {
-      header: 'Total Acometidas',
-      accessor: (item) => item.total.toLocaleString()
-    },
-    {
-      header: 'Actualizadas',
-      accessor: (item) => (
-        <span className={`${styles.badge} ${styles.success}`}>
-          {item.totalActualizadas.toLocaleString()}
-        </span>
-      )
-    },
-    {
-      header: 'Pendientes',
-      accessor: (item) => (
-        <span className={`${styles.badge} ${styles.warning}`}>
-          {item.pendientes.toLocaleString()}
-        </span>
-      )
-    },
-    {
-      header: 'Faltantes por Dimensión',
-      accessor: (item) => (
-        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-          {item.sinGeolocalizacion > 0 && (
-            <Tooltip
-              content={`Falta Geolocalización. No esta geolocalizada.`}
-              themeColor='info'
-              followCursor={false}
-              position="top"
-            >
-              <span className={styles.missingBadge}>
-                📍 GPS: {item.sinGeolocalizacion}
-              </span>
-            </Tooltip>
-          )}
-          {item.sinPredio > 0 && (
-            <Tooltip
-              content={`Falta información del predio. No esta vinculado a un predio.`}
-              themeColor='info'
-              followCursor={false}
-              position="top"
-            >
-              <span className={styles.missingBadge}>
-                🏢 Predio: {item.sinPredio}
-              </span>
-            </Tooltip>
-          )}
-          {item.sinCliente > 0 && (
-            <Tooltip
-              content={`Falta Contacto Cliente (correo electrónico, teléfono o celular...)`}
-              themeColor='info'
-              followCursor={false}
-              position="top"
-            >
-              <span className={styles.missingBadge}>
-                👤 Cliente: {item.sinCliente}
-              </span>
-            </Tooltip>
-          )}
-          {item.sinGeolocalizacion === 0 && item.sinPredio === 0 && item.sinCliente === 0 && (
-            <Tooltip
-              content={`Todo al día`}
-              themeColor='success'
-              followCursor={false}
-              position="top"
-            >
-              <span className={styles.allCorrectBadge}>✓ Todo al día</span>
-            </Tooltip>
-          )}
-        </div>
-      )
-    },
-    {
-      header: 'Progreso',
-      accessor: (item) => {
-        const pct = Number(item.porcentaje).toFixed(1);
-        return (
-          <ProgressBar
-            value={Number(pct)}
-            widthSize='md'
-            color={getTrafficLightColor(Number(pct))}
-          />
-        );
+  const zonasColumns = useMemo<Column<ZonaRow>[]>(
+    () => [
+      {
+        header: 'ID Zona',
+        accessor: (item) => <strong>Zona {item.zona_id}</strong>
       },
-      isNumeric: true,
-      sortKey: 'porcentaje'
-    }
-  ], []);
+      {
+        header: 'Total Acometidas',
+        accessor: (item) => item.total.toLocaleString()
+      },
+      {
+        header: 'Completados (100%)',
+        accessor: (item) => (
+          <span className={`${styles.badge} ${styles.success}`}>
+            {item.completados.toLocaleString()}
+          </span>
+        )
+      },
+      {
+        header: 'Pendientes (Faltan datos)',
+        accessor: (item) => (
+          <span className={`${styles.badge} ${styles.warning}`}>
+            {item.pendientes.toLocaleString()}
+          </span>
+        )
+      },
+      {
+        header: 'Progreso',
+        accessor: (item) => {
+          const total = Number(item.total);
+          const completados = Number(item.completados);
+          const pct =
+            total > 0 ? ((completados / total) * 100).toFixed(1) : '0';
+          return (
+            <ProgressBar
+              value={Number(pct)}
+              color={getTrafficLightColor(Number(pct))}
+            />
+          );
+        }
+      }
+    ],
+    []
+  );
+
+  const sectoresColumns = useMemo<Column<SectorRow>[]>(
+    () => [
+      {
+        header: 'Sector',
+        accessor: (item) => <strong>Sector {item.sector}</strong>
+      },
+      {
+        header: 'Total Acometidas',
+        accessor: (item) => item.total.toLocaleString()
+      },
+      {
+        header: 'Actualizadas',
+        accessor: (item) => (
+          <span className={`${styles.badge} ${styles.success}`}>
+            {item.totalActualizadas.toLocaleString()}
+          </span>
+        )
+      },
+      {
+        header: 'Pendientes',
+        accessor: (item) => (
+          <span className={`${styles.badge} ${styles.warning}`}>
+            {item.pendientes.toLocaleString()}
+          </span>
+        )
+      },
+      {
+        header: 'Faltantes por Dimensión',
+        accessor: (item) => (
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+            {item.sinGeolocalizacion > 0 && (
+              <Tooltip
+                content={`Falta Geolocalización. No esta geolocalizada.`}
+                themeColor="info"
+                followCursor={false}
+                position="top"
+              >
+                <span className={styles.missingBadge}>
+                  📍 GPS: {item.sinGeolocalizacion}
+                </span>
+              </Tooltip>
+            )}
+            {item.sinPredio > 0 && (
+              <Tooltip
+                content={`Falta información del predio. No esta vinculado a un predio.`}
+                themeColor="info"
+                followCursor={false}
+                position="top"
+              >
+                <span className={styles.missingBadge}>
+                  🏢 Predio: {item.sinPredio}
+                </span>
+              </Tooltip>
+            )}
+            {item.sinCliente > 0 && (
+              <Tooltip
+                content={`Falta Contacto Cliente (correo electrónico, teléfono o celular...)`}
+                themeColor="info"
+                followCursor={false}
+                position="top"
+              >
+                <span className={styles.missingBadge}>
+                  👤 Cliente: {item.sinCliente}
+                </span>
+              </Tooltip>
+            )}
+            {item.sinGeolocalizacion === 0 &&
+              item.sinPredio === 0 &&
+              item.sinCliente === 0 && (
+                <Tooltip
+                  content={`Todo al día`}
+                  themeColor="success"
+                  followCursor={false}
+                  position="top"
+                >
+                  <span className={styles.allCorrectBadge}>✓ Todo al día</span>
+                </Tooltip>
+              )}
+          </div>
+        )
+      },
+      {
+        header: 'Progreso',
+        accessor: (item) => {
+          const pct = Number(item.porcentaje).toFixed(1);
+          return (
+            <ProgressBar
+              value={Number(pct)}
+              widthSize="md"
+              color={getTrafficLightColor(Number(pct))}
+            />
+          );
+        },
+        isNumeric: true,
+        sortKey: 'porcentaje'
+      }
+    ],
+    []
+  );
 
   useEffect(() => {
     fetchStats();
@@ -293,15 +316,23 @@ export const ConnectionsDashboardPage: React.FC = () => {
   const sortedZonas = useMemo(() => {
     if (!data?.porZonas) return [];
     return [...data.porZonas].sort((a, b) => {
-      const pctA = Number(a.total) > 0 ? (Number(a.completados) / Number(a.total)) * 100 : 0;
-      const pctB = Number(b.total) > 0 ? (Number(b.completados) / Number(b.total)) * 100 : 0;
+      const pctA =
+        Number(a.total) > 0
+          ? (Number(a.completados) / Number(a.total)) * 100
+          : 0;
+      const pctB =
+        Number(b.total) > 0
+          ? (Number(b.completados) / Number(b.total)) * 100
+          : 0;
       return pctB - pctA;
     });
   }, [data?.porZonas]);
 
   const sortedSectores = useMemo(() => {
     if (!data?.porSectores) return [];
-    return [...data.porSectores].sort((a, b) => Number(b.porcentaje) - Number(a.porcentaje));
+    return [...data.porSectores].sort(
+      (a, b) => Number(b.porcentaje) - Number(a.porcentaje)
+    );
   }, [data?.porSectores]);
 
   if (isLoading && !data) {
@@ -454,14 +485,26 @@ export const ConnectionsDashboardPage: React.FC = () => {
           {data.embudo && data.embudo.length > 0 && (
             <section className={styles.funnelSection}>
               <div className={styles.chartCard} style={{ minHeight: 'auto' }}>
-                <h3 className={styles.chartTitle}>Calidad y Completitud de Datos</h3>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9e9e9e)', margin: '-0.5rem 0 1.5rem 0' }}>
-                  Flujo de decantación catastral y validación física de las conexiones.
+                <h3 className={styles.chartTitle}>
+                  Calidad y Completitud de Datos
+                </h3>
+                <p
+                  style={{
+                    fontSize: '0.8rem',
+                    color: 'var(--text-secondary, #9e9e9e)',
+                    margin: '-0.5rem 0 1.5rem 0'
+                  }}
+                >
+                  Flujo de decantación catastral y validación física de las
+                  conexiones.
                 </p>
                 <div className={styles.funnelContainer}>
                   {data.embudo.map((step, idx) => {
                     const firstStepTotal = data.embudo[0].total || 1;
-                    const percentOfTotal = ((step.total / firstStepTotal) * 100).toFixed(1);
+                    const percentOfTotal = (
+                      (step.total / firstStepTotal) *
+                      100
+                    ).toFixed(1);
                     return (
                       <div key={idx} className={styles.funnelStepRow}>
                         <div className={styles.funnelStepLabel}>
@@ -469,9 +512,11 @@ export const ConnectionsDashboardPage: React.FC = () => {
                           <span>{step.total.toLocaleString()} acometidas</span>
                         </div>
                         <div className={styles.funnelStepBarWrapper}>
-                          <ProgressBar value={Number(percentOfTotal)}
-                            height='15px'
-                            color={getTrafficLightColor(Number(percentOfTotal))} />
+                          <ProgressBar
+                            value={Number(percentOfTotal)}
+                            height="15px"
+                            color={getTrafficLightColor(Number(percentOfTotal))}
+                          />
                         </div>
                       </div>
                     );
@@ -497,9 +542,18 @@ export const ConnectionsDashboardPage: React.FC = () => {
           {/* Table: Sectores */}
           {data.porSectores && data.porSectores.length > 0 && (
             <section className={styles.tableSection}>
-              <h3 className={styles.chartTitle}>Auditoría y Avance por Sector</h3>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9e9e9e)', margin: '-0.5rem 0 1rem 0' }}>
-                Detalle del avance de actualización catastral por sectores geográficos y desglose de datos faltantes.
+              <h3 className={styles.chartTitle}>
+                Auditoría y Avance por Sector
+              </h3>
+              <p
+                style={{
+                  fontSize: '0.8rem',
+                  color: 'var(--text-secondary, #9e9e9e)',
+                  margin: '-0.5rem 0 1rem 0'
+                }}
+              >
+                Detalle del avance de actualización catastral por sectores
+                geográficos y desglose de datos faltantes.
               </p>
               <Table
                 data={sortedSectores}
@@ -744,36 +798,80 @@ export const ConnectionsDashboardPage: React.FC = () => {
       {activeTab === 'map' && (
         <div className={styles.tabContent}>
           <section className={styles.mapSection}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
               <div>
-                <h3 className={styles.chartTitle} style={{ margin: 0 }}>Mapa de Avance Catastral</h3>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #9e9e9e)', margin: '0.25rem 0 0 0' }}>
-                  Visualización geoespacial en vivo de las acometidas registradas y su estado de completitud.
+                <h3 className={styles.chartTitle} style={{ margin: 0 }}>
+                  Mapa de Avance Catastral
+                </h3>
+                <p
+                  style={{
+                    fontSize: '0.8rem',
+                    color: 'var(--text-secondary, #9e9e9e)',
+                    margin: '0.25rem 0 0 0'
+                  }}
+                >
+                  Visualización geoespacial en vivo de las acometidas
+                  registradas y su estado de completitud.
                 </p>
               </div>
-              <span style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-secondary)' }}>
-                <Clock size={14} /> Total georreferenciadas: {liveData.length.toLocaleString()}
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  color: 'var(--text-secondary)'
+                }}
+              >
+                <Clock size={14} /> Total georreferenciadas:{' '}
+                {liveData.length.toLocaleString()}
               </span>
             </div>
 
             {/* Control Bar: Search + Legend */}
-            <div className={styles.mapControlsRow}>
+            <div
+              className={styles.mapControlsRow}
+              style={{ marginTop: '10px' }}
+            >
               {/* Legend */}
-              <div className={styles.mapLegend}>
+              <div
+                className={styles.mapLegend}
+                style={{
+                  backgroundColor: 'var(--surface-hover) !important'
+                }}
+              >
                 <div className={styles.legendItem}>
-                  <span className={styles.legendColor} style={{ backgroundColor: '#10b981' }} />
+                  <span
+                    className={styles.legendColor}
+                    style={{ backgroundColor: '#10b981' }}
+                  />
                   <span>Completado (100%)</span>
                 </div>
                 <div className={styles.legendItem}>
-                  <span className={styles.legendColor} style={{ backgroundColor: '#f59e0b' }} />
+                  <span
+                    className={styles.legendColor}
+                    style={{ backgroundColor: '#f59e0b' }}
+                  />
                   <span>Pendiente Datos Cliente</span>
                 </div>
                 <div className={styles.legendItem}>
-                  <span className={styles.legendColor} style={{ backgroundColor: '#3b82f6' }} />
+                  <span
+                    className={styles.legendColor}
+                    style={{ backgroundColor: '#3b82f6' }}
+                  />
                   <span>Pendiente Ficha Predial</span>
                 </div>
                 <div className={styles.legendItem}>
-                  <span className={styles.legendColor} style={{ backgroundColor: '#ef4444' }} />
+                  <span
+                    className={styles.legendColor}
+                    style={{ backgroundColor: '#ef4444' }}
+                  />
                   <span>Pendiente Geolocalización</span>
                 </div>
               </div>
@@ -812,7 +910,14 @@ export const ConnectionsDashboardPage: React.FC = () => {
                   </div>
                   <div className={styles.mapSidePanelList}>
                     {filteredLiveData.length === 0 ? (
-                      <div style={{ padding: '1rem', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                      <div
+                        style={{
+                          padding: '1rem',
+                          textAlign: 'center',
+                          fontSize: '0.8rem',
+                          color: 'var(--text-secondary)'
+                        }}
+                      >
                         Sin resultados
                       </div>
                     ) : (
@@ -823,25 +928,40 @@ export const ConnectionsDashboardPage: React.FC = () => {
                           onClick={() => setSelectedPin(conn)}
                         >
                           <div className={styles.itemHeader}>
-                            <span className={styles.itemTitle}>Acometida {conn.cadastralKey}</span>
+                            <span className={styles.itemTitle}>
+                              Acometida {conn.cadastralKey}
+                            </span>
                             <span
                               className={styles.itemDot}
-                              style={{ backgroundColor: conn.markerColor || '#ef4444' }}
+                              style={{
+                                backgroundColor: conn.markerColor || '#ef4444'
+                              }}
                             />
                           </div>
                           <div className={styles.itemBody}>
                             <div className={styles.itemRow}>
                               <span className={styles.itemLabel}>Cliente:</span>
-                              <span className={styles.itemVal}>{conn.clientName}</span>
+                              <span className={styles.itemVal}>
+                                {conn.clientName}
+                              </span>
                             </div>
                             <div className={styles.itemRow}>
                               <span className={styles.itemLabel}>Sector:</span>
-                              <span className={styles.itemVal}>{conn.sector}</span>
+                              <span className={styles.itemVal}>
+                                {conn.sector}
+                              </span>
                             </div>
                             {conn.address && (
                               <div className={styles.itemRow}>
-                                <span className={styles.itemLabel}>Dirección:</span>
-                                <span className={styles.itemVal} title={conn.address}>{conn.address}</span>
+                                <span className={styles.itemLabel}>
+                                  Dirección:
+                                </span>
+                                <span
+                                  className={styles.itemVal}
+                                  title={conn.address}
+                                >
+                                  {conn.address}
+                                </span>
                               </div>
                             )}
                           </div>
@@ -855,17 +975,41 @@ export const ConnectionsDashboardPage: React.FC = () => {
               {/* Google Map */}
               <div className={styles.mapContainer}>
                 {liveData.length === 0 && isLoading ? (
-                  <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.1)' }}>
-                    <Activity size={24} className="animate-spin" style={{ marginRight: '0.5rem' }} />
+                  <div
+                    style={{
+                      display: 'flex',
+                      height: '100%',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: 'rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    <Activity
+                      size={24}
+                      className="animate-spin"
+                      style={{ marginRight: '0.5rem' }}
+                    />
                     <span>Cargando mapa de avance...</span>
                   </div>
                 ) : (
-                  <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}>
+                  <APIProvider
+                    apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}
+                    libraries={['marker']}
+                  >
                     <Map
+                      mapId={
+                        import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID'
+                      }
                       defaultCenter={
                         liveData.length > 0
-                          ? { lat: Number(liveData[0].latitude), lng: Number(liveData[0].longitude) }
-                          : { lat: FALLBACK_CENTER_ANTONIO_ANTE.lat, lng: FALLBACK_CENTER_ANTONIO_ANTE.lng }
+                          ? {
+                              lat: Number(liveData[0].latitude),
+                              lng: Number(liveData[0].longitude)
+                            }
+                          : {
+                              lat: FALLBACK_CENTER_ANTONIO_ANTE.lat,
+                              lng: FALLBACK_CENTER_ANTONIO_ANTE.lng
+                            }
                       }
                       defaultZoom={13}
                       gestureHandling="greedy"
@@ -875,83 +1019,80 @@ export const ConnectionsDashboardPage: React.FC = () => {
                     >
                       <MapController theme={theme} selectedPin={selectedPin} />
                       {filteredLiveData.map((conn) => {
-                        const isSelected = selectedPin?.connectionId === conn.connectionId;
-                        const svgPin = isSelected
-                          ? `
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="36" height="36">
-                            <style>
-                              @keyframes heartbeat {
-                                0% { transform: scale(1); }
-                                14% { transform: scale(1.15); }
-                                28% { transform: scale(1); }
-                                42% { transform: scale(1.15); }
-                                70% { transform: scale(1); }
-                              }
-                              @keyframes activeHeartbeat {
-                                0% {
-                                  r: 2;
-                                  opacity: 0.9;
-                                  stroke-width: 2.5;
-                                }
-                                70% {
-                                  r: 10;
-                                  opacity: 0;
-                                  stroke-width: 0.5;
-                                }
-                                100% {
-                                  r: 10;
-                                  opacity: 0;
-                                  stroke-width: 0;
-                                }
-                              }
-                              .pulsating-pin {
-                                animation: heartbeat 1.2s infinite ease-in-out;
-                                transform-origin: 20px 28px;
-                              }
-                              .heartbeat-ring {
-                                animation: activeHeartbeat 1.2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
-                                transform-origin: 20px 28px;
-                              }
-                            </style>
-                            <circle class="heartbeat-ring" cx="20" cy="28" r="2" fill="none" stroke="${conn.markerColor || '#ef4444'}" />
-                            <g class="pulsating-pin" transform="translate(8, 6)">
-                              <path fill="${conn.markerColor || '#ef4444'}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                            </g>
-                          </svg>
-                          `
-                          : `
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${conn.markerColor || '#ef4444'}" width="30" height="30">
-                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                          </svg>
-                          `;
-                        const iconUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgPin)}`;
-                        const google = (window as any).google;
+                        const isSelected =
+                          selectedPin?.connectionId === conn.connectionId;
+                        const isHovered = hoveredPinId === conn.connectionId;
+                        const markerColor = conn.markerColor || '#ef4444';
 
                         return (
-                          <Marker
+                          <AdvancedMarker
                             key={conn.connectionId}
-                            position={{ lat: Number(conn.latitude), lng: Number(conn.longitude) }}
+                            position={{
+                              lat: Number(conn.latitude),
+                              lng: Number(conn.longitude)
+                            }}
                             title={`Clave Catastral: ${conn.cadastralKey}`}
-                            icon={google ? {
-                              url: iconUrl,
-                              scaledSize: isSelected ? new google.maps.Size(36, 36) : new google.maps.Size(30, 30),
-                              anchor: isSelected ? new google.maps.Point(18, 25) : new google.maps.Point(15, 27)
-                            } : iconUrl}
+                            anchorPoint={
+                              AdvancedMarkerAnchorPoint.BOTTOM_CENTER
+                            }
                             zIndex={isSelected ? 1000 : 1}
-                            onClick={() => setSelectedPin(conn)}
-                          />
+                            onClick={() => {
+                              setHoveredPinId(null);
+                              setSelectedPin(conn);
+                            }}
+                            onMouseEnter={() =>
+                              setHoveredPinId(conn.connectionId)
+                            }
+                            onMouseLeave={() =>
+                              setHoveredPinId((prev) =>
+                                prev === conn.connectionId ? null : prev
+                              )
+                            }
+                          >
+                            <button
+                              type="button"
+                              className={`${styles.mapAdvancedMarker} ${isSelected ? styles.mapAdvancedMarkerSelected : ''}`}
+                              style={
+                                {
+                                  '--marker-color': markerColor
+                                } as React.CSSProperties
+                              }
+                              aria-label={`Acometida ${conn.cadastralKey}`}
+                            >
+                              <span className={styles.mapAdvancedMarkerPin} />
+                              <span className={styles.mapAdvancedMarkerDot} />
+                              {isSelected && (
+                                <span
+                                  className={styles.mapAdvancedMarkerPulse}
+                                />
+                              )}
+                              {isHovered && !isSelected && (
+                                <span
+                                  className={styles.mapAdvancedMarkerTooltip}
+                                >
+                                  {conn.cadastralKey}
+                                </span>
+                              )}
+                            </button>
+                          </AdvancedMarker>
                         );
                       })}
 
                       {selectedPin && (
                         <InfoWindow
-                          position={{ lat: Number(selectedPin.latitude), lng: Number(selectedPin.longitude) }}
+                          position={{
+                            lat: Number(selectedPin.latitude),
+                            lng: Number(selectedPin.longitude)
+                          }}
                           pixelOffset={[0, -30]}
                           onCloseClick={() => setSelectedPin(null)}
                         >
                           <div className={styles.infoWindowContent}>
                             <div className={styles.infoWindowHeader}>
-                              <MapPin size={16} color={selectedPin.markerColor || '#ef4444'} />
+                              <MapPin
+                                size={16}
+                                color={selectedPin.markerColor || '#ef4444'}
+                              />
                               <h4 className={styles.infoWindowTitle}>
                                 Acometida {selectedPin.cadastralKey}
                               </h4>
@@ -961,33 +1102,51 @@ export const ConnectionsDashboardPage: React.FC = () => {
 
                             <div className={styles.infoWindowBody}>
                               <div className={styles.infoWindowRow}>
-                                <span className={styles.infoWindowLabel}>ID:</span>
-                                <span className={styles.infoWindowVal}>{selectedPin.connectionId}</span>
-                              </div>
-
-                              <div className={styles.infoWindowRow}>
-                                <span className={styles.infoWindowLabel}>Cliente:</span>
-                                <span className={styles.infoWindowVal}>{selectedPin.clientName}</span>
-                              </div>
-
-                              <div className={styles.infoWindowRow}>
-                                <span className={styles.infoWindowLabel}>Dirección:</span>
+                                <span className={styles.infoWindowLabel}>
+                                  ID:
+                                </span>
                                 <span className={styles.infoWindowVal}>
-                                  {selectedPin.address || 'Sin dirección registrada'}
+                                  {selectedPin.connectionId}
                                 </span>
                               </div>
 
                               <div className={styles.infoWindowRow}>
-                                <span className={styles.infoWindowLabel}>Ubicación:</span>
+                                <span className={styles.infoWindowLabel}>
+                                  Cliente:
+                                </span>
                                 <span className={styles.infoWindowVal}>
-                                  Sector {selectedPin.sector} | Zona {selectedPin.zoneId}
+                                  {selectedPin.clientName}
                                 </span>
                               </div>
 
                               <div className={styles.infoWindowRow}>
-                                <span className={styles.infoWindowLabel}>Actualizado:</span>
+                                <span className={styles.infoWindowLabel}>
+                                  Dirección:
+                                </span>
                                 <span className={styles.infoWindowVal}>
-                                  {new Date(selectedPin.lastUpdated).toLocaleString()}
+                                  {selectedPin.address ||
+                                    'Sin dirección registrada'}
+                                </span>
+                              </div>
+
+                              <div className={styles.infoWindowRow}>
+                                <span className={styles.infoWindowLabel}>
+                                  Ubicación:
+                                </span>
+                                <span className={styles.infoWindowVal}>
+                                  Sector {selectedPin.sector} | Zona{' '}
+                                  {selectedPin.zoneId}
+                                </span>
+                              </div>
+
+                              <div className={styles.infoWindowRow}>
+                                <span className={styles.infoWindowLabel}>
+                                  Actualizado:
+                                </span>
+                                <span className={styles.infoWindowVal}>
+                                  {new Date(
+                                    selectedPin.lastUpdated
+                                  ).toLocaleString()}
                                 </span>
                               </div>
                             </div>
@@ -1010,8 +1169,8 @@ export const ConnectionsDashboardPage: React.FC = () => {
               </div>
             </div>
           </section>
-        </div >
+        </div>
       )}
-    </PageLayout >
+    </PageLayout>
   );
 };

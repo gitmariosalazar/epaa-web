@@ -1108,13 +1108,19 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  transform: translate(-50%, -50%);
+  transform: scale(1);
   transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
   pointer-events: auto !important;
 }
 
+.incident-marker-container::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
 .incident-marker-container.is-selected {
-  transform: translate(-50%, -50%) scale(1.6);
+  transform: scale(1.6);
   z-index: 0 !important;
   --marker-color: #a855f7 !important;
   --marker-glow: rgba(168, 85, 247, 0.75) !important;
@@ -1130,7 +1136,7 @@
 }
 
 .incident-marker-container.is-hovered {
-  transform: translate(-50%, -50%) scale(1.2);
+  transform: scale(1.2);
 }
 
 /* Core circle */
@@ -1229,7 +1235,7 @@
   pointer-events: none;
   z-index: 99999 !important;
   animation: tooltip-appear 0.12s ease-out;
-  height: 100%;
+  height: auto;
 }
 
 .incident-map-tooltip-dot {
@@ -1263,34 +1269,35 @@
 /* ── InfoWindow popup ────────────────────────────────────────────────────── */
 
 /* Override Google Maps' white box frame */
-.gm-style .gm-style-iw-c {
+.incident-fullscreen-map-container .gm-style .gm-style-iw-c {
   padding: 0 !important;
-  border-radius: 14px !important;
+  border-radius: 8px !important;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35) !important;
   overflow: hidden !important;
-  background: transparent !important;
+  background: var(--surface) !important;
+  color: var(--text-main) !important;
 }
-.gm-style .gm-style-iw-d {
+.incident-fullscreen-map-container .gm-style .gm-style-iw-d {
   overflow: hidden !important;
 }
-.gm-style .gm-style-iw-t::after {
+.incident-fullscreen-map-container .gm-style .gm-style-iw-t::after {
   display: none;
 }
-.gm-style .gm-ui-hover-effect {
+.incident-fullscreen-map-container .gm-style .gm-ui-hover-effect {
   display: none !important;
 }
 
 .incident-popup {
-  width: 270px;
-  background: #1e2535;
-  border-radius: 5px !important;
+  width: 280px;
+  background: transparent;
+  border-radius: 0 !important;
   overflow: hidden;
   font-family: var(--font-body, 'Inter', sans-serif);
   position: relative;
 }
 
 .incident-popup-body {
-  padding: 14px 14px 14px;
+  padding: 12px 14px 14px;
 }
 
 .incident-popup:not(.dark) {
@@ -1314,12 +1321,11 @@
   z-index: 10000 !important;
 }
 
-.gm-style .gm-style-iw-c,
-.gm-style .gm-style-iw-t {
+.incident-fullscreen-map-container .gm-style .gm-style-iw-c,
+.incident-fullscreen-map-container .gm-style .gm-style-iw-t {
   z-index: 1200 !important;
 }
 
-/* Si tienes popups del mapa */
 .incident-popup {
   z-index: 1300 !important;
 }
@@ -1328,18 +1334,18 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #94a3b8;
+  color: #cbd5e1;
   transition: all 0.15s ease;
-  z-index: 2;
+  z-index: 3;
 }
 .incident-popup:not(.dark) .incident-popup-close {
   border-color: rgba(0, 0, 0, 0.1);
@@ -1351,6 +1357,28 @@
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
   border-color: rgba(239, 68, 68, 0.3);
+}
+
+.incident-popup-titlebar {
+  padding-right: 28px;
+  margin-bottom: 10px;
+}
+
+.incident-popup-titlebar-label {
+  display: block;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.incident-popup-titlebar-title {
+  margin: 2px 0 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--text-main);
 }
 
 /* Header row */
@@ -1386,7 +1414,7 @@
 .incident-popup-title {
   font-size: 0.875rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text-secondary);
   margin: 1px 0 2px;
   line-height: 1.3;
   white-space: nowrap;

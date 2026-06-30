@@ -1,4 +1,9 @@
-import React, { createContext, useContext, type ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  type ReactNode
+} from 'react';
 import { GetConnectionsUseCase } from '../../application/usecases/GetConnectionsUseCase';
 import { GetRatesUseCase } from '../../application/usecases/GetRatesUseCase';
 import { CreateConnectionUseCase } from '../../application/usecases/CreateConnectionUseCase';
@@ -41,43 +46,48 @@ const ConnectionContext = createContext<ConnectionContextType | null>(null);
 export const ConnectionProvider: React.FC<{ children: ReactNode }> = ({
   children
 }) => {
-  const connectionRepository = new ConnectionRepositoryImpl();
-  const customerRepository = new CustomerRepositoryImpl();
-  const companyRepository = new CompanyRepositoryImpl();
+  const connectionRepository = useMemo(
+    () => new ConnectionRepositoryImpl(),
+    []
+  );
+  const customerRepository = useMemo(() => new CustomerRepositoryImpl(), []);
+  const companyRepository = useMemo(() => new CompanyRepositoryImpl(), []);
 
-  const getConnectionsUseCase = new GetConnectionsUseCase(connectionRepository);
-  const getRatesUseCase = new GetRatesUseCase(connectionRepository);
-  const createConnectionUseCase = new CreateConnectionUseCase(connectionRepository);
-  const updateConnectionUseCase = new UpdateConnectionUseCase(connectionRepository);
-  const deleteConnectionUseCase = new DeleteConnectionUseCase(connectionRepository);
-  const findConnectionsBySectorUseCase = new FindConnectionsBySectorUseCase(connectionRepository);
-  const findAllConnectionsByClientIdUseCase = new FindAllConnectionsByClientIdUseCase(connectionRepository);
-  const findConnectionWithPropertyByCadastralKeyUseCase = new FindConnectionWithPropertyByCadastralKeyUseCase(connectionRepository);
-  const getAdvanceDashboardStatsUseCase = new GetAdvanceDashboardStatsUseCase(connectionRepository);
-  const getCustomerByIdentificationUseCase = new GetCustomerByIdentificationUseCase(customerRepository);
-  const createCustomerUseCase = new CreateCustomerUseCase(customerRepository);
-  const createCompanyUseCase = new CreateCompanyUseCase(companyRepository);
-  const updateCustomerUseCase = new UpdateCustomerUseCase(customerRepository);
-  const updateCompanyUseCase = new UpdateCompanyUseCase(companyRepository);
-  const getLiveUpdateMapConnectionsUseCase = new GetLiveUpdateMapConnectionsUseCase(connectionRepository);
-
-  const value = {
-    getConnectionsUseCase,
-    getRatesUseCase,
-    createConnectionUseCase,
-    updateConnectionUseCase,
-    deleteConnectionUseCase,
-    findConnectionsBySectorUseCase,
-    findAllConnectionsByClientIdUseCase,
-    findConnectionWithPropertyByCadastralKeyUseCase,
-    getAdvanceDashboardStatsUseCase,
-    getCustomerByIdentificationUseCase,
-    createCustomerUseCase,
-    createCompanyUseCase,
-    updateCustomerUseCase,
-    updateCompanyUseCase,
-    getLiveUpdateMapConnectionsUseCase
-  };
+  const value = useMemo<ConnectionContextType>(() => {
+    return {
+      getConnectionsUseCase: new GetConnectionsUseCase(connectionRepository),
+      getRatesUseCase: new GetRatesUseCase(connectionRepository),
+      createConnectionUseCase: new CreateConnectionUseCase(
+        connectionRepository
+      ),
+      updateConnectionUseCase: new UpdateConnectionUseCase(
+        connectionRepository
+      ),
+      deleteConnectionUseCase: new DeleteConnectionUseCase(
+        connectionRepository
+      ),
+      findConnectionsBySectorUseCase: new FindConnectionsBySectorUseCase(
+        connectionRepository
+      ),
+      findAllConnectionsByClientIdUseCase:
+        new FindAllConnectionsByClientIdUseCase(connectionRepository),
+      findConnectionWithPropertyByCadastralKeyUseCase:
+        new FindConnectionWithPropertyByCadastralKeyUseCase(
+          connectionRepository
+        ),
+      getAdvanceDashboardStatsUseCase: new GetAdvanceDashboardStatsUseCase(
+        connectionRepository
+      ),
+      getCustomerByIdentificationUseCase:
+        new GetCustomerByIdentificationUseCase(customerRepository),
+      createCustomerUseCase: new CreateCustomerUseCase(customerRepository),
+      createCompanyUseCase: new CreateCompanyUseCase(companyRepository),
+      updateCustomerUseCase: new UpdateCustomerUseCase(customerRepository),
+      updateCompanyUseCase: new UpdateCompanyUseCase(companyRepository),
+      getLiveUpdateMapConnectionsUseCase:
+        new GetLiveUpdateMapConnectionsUseCase(connectionRepository)
+    };
+  }, [connectionRepository, customerRepository, companyRepository]);
 
   return (
     <ConnectionContext.Provider value={value}>
