@@ -15,6 +15,7 @@
 import React, { useState } from 'react';
 import { Users, UserPlus, UserMinus, ShieldCheck, Wrench } from 'lucide-react';
 import { WoModalShell } from './WoModalShell';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
 // ── Rol labels (deben coincidir con work_orders.rol_trabajador) ──────────────
 const ROL_OPTIONS = [
@@ -38,12 +39,8 @@ interface ManageWorkersModalProps {
   workOrderCode: string;
   /** Lista actual de personal asignado (obtenida del detalle de la OT) */
   currentWorkers: WorkerAssignment[];
-  /** Callback para agregar un trabajador */
-  onAddWorker: (
-    workerId: string,
-    roleId: number | null,
-    isResponsible: boolean
-  ) => Promise<void>;
+  /** Callback para agregar trabajadores en lote */
+  onSaveWorkersBatch?: (workers: { workerId: string; roleId?: number | null; isResponsible?: boolean }[]) => Promise<void>;
   /** Callback para remover un trabajador */
   onRemoveWorker: (workerId: string) => Promise<void>;
   isLoading?: boolean;
@@ -54,7 +51,7 @@ export const ManageWorkersModal: React.FC<ManageWorkersModalProps> = ({
   onClose,
   workOrderCode,
   currentWorkers,
-  onAddWorker,
+  onSaveWorkersBatch,
   onRemoveWorker,
   isLoading,
 }) => {
@@ -62,17 +59,66 @@ export const ManageWorkersModal: React.FC<ManageWorkersModalProps> = ({
   const [roleId, setRoleId]           = useState<number | null>(null);
   const [isResponsible, setIsRes]     = useState(false);
   const [removingId, setRemovingId]   = useState<string | null>(null);
+  const [pendingWorkers, setPendingWorkers] = useState<WorkerAssignment[]>([]);
 
-  const handleAdd = async (e: React.FormEvent) => {
+  const handleAddLocal = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!workerId.trim()) return;
-    await onAddWorker(workerId.trim(), roleId, isResponsible);
+    const id = workerId.trim();
+    if (!id) return;
+    
+    // Validación 1: No repetir trabajadores
+    const alreadyExists = currentWorkers.some(w => w.workerId === id) || 
+                          pendingWorkers.some(w => w.workerId === id);
+    if (alreadyExists) {
+      MessageToastCustom('warning', 'Trabajador duplicado', 'Este trabajador ya está en la lista.');
+      return;
+    }
+
+    // Validación 2: Máximo un responsable
+    if (isResponsible || roleId === 1) {
+      const responsibleExistsNow = currentWorkers.some(w => w.isResponsible) || 
+                                   pendingWorkers.some(w => w.isResponsible || w.roleId === 1);
+      if (responsibleExistsNow) {
+        MessageToastCustom('warning', 'Límite de responsable', 'Ya existe un Técnico Responsable asignado.');
+        return;
+      }
+    }
+
+    const roleObj = ROL_OPTIONS.find(r => r.id === roleId);
+    
+    setPendingWorkers([
+      ...pendingWorkers,
+      {
+        workerId: id,
+        workerName: `Trabajador (${id})`,
+        roleId,
+        roleName: roleObj ? roleObj.label : 'Sin Rol',
+        isResponsible: isResponsible || roleId === 1
+      }
+    ]);
+    
     setWorkerId('');
     setRoleId(null);
     setIsRes(false);
   };
 
+  const handleSaveBatch = async () => {
+    if (!onSaveWorkersBatch || pendingWorkers.length === 0) return;
+    const batch = pendingWorkers.map(w => ({
+      workerId: w.workerId,
+      roleId: w.roleId,
+      isResponsible: w.isResponsible
+    }));
+    await onSaveWorkersBatch(batch);
+    setPendingWorkers([]);
+    onClose();
+  };
+
   const handleRemove = async (wid: string) => {
+    if (pendingWorkers.some(w => w.workerId === wid)) {
+      setPendingWorkers(pendingWorkers.filter(w => w.workerId !== wid));
+      return;
+    }
     setRemovingId(wid);
     await onRemoveWorker(wid);
     setRemovingId(null);
@@ -94,48 +140,55 @@ export const ManageWorkersModal: React.FC<ManageWorkersModalProps> = ({
         Personal asignado ({currentWorkers.length})
       </div>
 
-      {currentWorkers.length === 0 ? (
+      {currentWorkers.length === 0 && pendingWorkers.length === 0 ? (
         <p className="wo-modal-empty-note">
           Aún no hay personal asignado a esta orden.
         </p>
+
       ) : (
         <ul className="wo-workers-list">
-          {currentWorkers.map((w) => (
-            <li key={w.workerId} className="wo-worker-item">
-              <div className="wo-worker-info">
-                {w.isResponsible ? (
-                  <ShieldCheck size={14} className="wo-worker-icon wo-worker-icon--resp" />
-                ) : (
-                  <Wrench size={14} className="wo-worker-icon wo-worker-icon--field" />
-                )}
-                <div>
-                  <span className="wo-worker-name">{w.workerName}</span>
-                  <span className="wo-worker-role">
-                    {w.isResponsible ? 'Técnico Responsable' : (w.roleName ?? 'Sin Rol')}
-                  </span>
+          {[...currentWorkers, ...pendingWorkers].map((w, idx) => {
+            const isPending = pendingWorkers.some(pw => pw.workerId === w.workerId && pw.isResponsible === w.isResponsible);
+            return (
+              <li key={`${w.workerId}-${idx}`} className="wo-worker-item" style={{ opacity: isPending ? 0.7 : 1 }}>
+                <div className="wo-worker-info">
+                  {w.isResponsible ? (
+                    <ShieldCheck size={14} className="wo-worker-icon wo-worker-icon--resp" />
+                  ) : (
+                    <Wrench size={14} className="wo-worker-icon wo-worker-icon--field" />
+                  )}
+                  <div>
+                    <span className="wo-worker-name">{w.workerName} {isPending && <span style={{ color: 'var(--warning, #f59e0b)', fontSize: '0.7rem' }}>(Pendiente)</span>}</span>
+                    <span className="wo-worker-role">
+                      {w.isResponsible ? 'Técnico Responsable' : (w.roleName ?? 'Sin Rol')}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <button
-                type="button"
-                className="wo-worker-remove-btn"
-                onClick={() => handleRemove(w.workerId)}
-                disabled={isLoading || removingId === w.workerId}
-                title="Remover de la orden"
-              >
-                <UserMinus size={14} />
-              </button>
-            </li>
-          ))}
+                <button
+                  type="button"
+                  className="wo-worker-remove-btn"
+                  onClick={() => handleRemove(w.workerId)}
+                  disabled={isLoading || removingId === w.workerId}
+                  title="Remover de la orden"
+                >
+                  <UserMinus size={14} />
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
 
       {/* ── Agregar nuevo ──────────────────────────────────────────── */}
-      <div className="wo-modal-section-title" style={{ marginTop: '1.25rem' }}>
-        <UserPlus size={14} />
-        Agregar trabajador
-      </div>
+      {onSaveWorkersBatch && (
+        <div className="wo-modal-section-title" style={{ marginTop: '1.25rem' }}>
+          <UserPlus size={14} />
+          Agregar trabajador
+        </div>
+      )}
 
-      <form onSubmit={handleAdd} className="wo-modal-form" style={{ marginTop: '0.5rem' }}>
+      {onSaveWorkersBatch && (
+        <form onSubmit={handleAddLocal} className="wo-modal-form" style={{ marginTop: '0.5rem' }}>
         <div className="wo-modal-field">
           <label className="wo-modal-label">
             UUID del Trabajador <span className="wo-modal-required">*</span>
@@ -191,22 +244,36 @@ export const ManageWorkersModal: React.FC<ManageWorkersModalProps> = ({
 
         <div className="wo-modal-actions">
           <button
-            type="button"
-            className="wo-modal-btn wo-modal-btn--cancel"
-            onClick={onClose}
-          >
-            Cerrar
-          </button>
-          <button
             type="submit"
-            className="wo-modal-btn wo-modal-btn--primary"
-            style={{ '--btn-color': '#6366f1' } as React.CSSProperties}
+            className="wo-modal-btn wo-modal-btn--secondary"
             disabled={!workerId.trim() || isLoading}
           >
-            {isLoading ? 'Guardando...' : 'Agregar Trabajador'}
+            Agregar a la lista
           </button>
         </div>
       </form>
+      )}
+
+      <div className="wo-modal-actions" style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+        <button
+          type="button"
+          className="wo-modal-btn wo-modal-btn--cancel"
+          onClick={onClose}
+        >
+          Cerrar
+        </button>
+        {onSaveWorkersBatch && pendingWorkers.length > 0 && (
+          <button
+            type="button"
+            onClick={handleSaveBatch}
+            className="wo-modal-btn wo-modal-btn--primary"
+            style={{ '--btn-color': '#10b981' } as React.CSSProperties}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Guardando...' : `Guardar ${pendingWorkers.length} Trabajador(es)`}
+          </button>
+        )}
+      </div>
     </WoModalShell>
   );
 };

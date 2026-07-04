@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { Search, RefreshCw, Filter } from 'lucide-react';
+import { Input } from '@/shared/presentation/components/Input/Input';
 
 export interface WorkOrderFilterState {
   search: string;
@@ -47,14 +48,14 @@ export const WorkOrderToolbar: React.FC<WorkOrderToolbarProps> = ({
   <div className="wo-toolbar">
     {/* Buscador */}
     <div className="wo-toolbar__search">
-      <Search size={15} className="wo-toolbar__search-icon" />
-      <input
+      <Input
         type="text"
         placeholder="Buscar por código, tipo, ejecutor..."
         value={filters.search}
+        width={300}
         onChange={(e) => onFilterChange({ search: e.target.value })}
-        className="wo-toolbar__input"
         id="wo-list-search"
+        leftIcon={<Search size={14} />}
       />
       {/* Campo de búsqueda */}
       <select

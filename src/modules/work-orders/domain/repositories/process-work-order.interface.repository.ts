@@ -11,7 +11,10 @@ import type {
   CreateQualityControlCommand,
   CreateWorkOrderCommand,
   RegisterSatisfactionSurveyCommand,
-  RemoveWorkerFromWorkOrderCommand
+  RemoveWorkerFromWorkOrderCommand,
+  AddWorkOrderMaterialsBatchCommand,
+  AddAdditionalCostsBatchCommand,
+  AddWorkersBatchToWorkOrderCommand
 } from '../schemas/dto/process-work-order.commands';
 import type { ProcessWorkOrderRequest } from '../schemas/dto/request/process-work-order.request';
 import type { ProcessWorkOrderResponse } from '../schemas/dto/response/process-work-order.response';
@@ -86,6 +89,18 @@ export interface ProcessWorkOrderRepository {
   /** Agrega un trabajador directamente a la OT () */
   addWorkerToWorkOrder(
     cmd: AddWorkerToWorkOrderCommand
+  ): Promise<ProcessWorkOrderResponse | null>;
+
+  addWorkersBatchToWorkOrder(
+    cmd: AddWorkersBatchToWorkOrderCommand
+  ): Promise<ProcessWorkOrderResponse | null>;
+
+  addWorkOrderMaterialsBatch(
+    cmd: AddWorkOrderMaterialsBatchCommand
+  ): Promise<ProcessWorkOrderResponse | null>;
+
+  addAdditionalCostsBatch(
+    cmd: AddAdditionalCostsBatchCommand
   ): Promise<ProcessWorkOrderResponse | null>;
 
   /** Remueve un trabajador de la OT (borrado lógico) */

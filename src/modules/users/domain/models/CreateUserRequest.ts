@@ -1,73 +1,50 @@
+/**
+ * DTO para crear un usuario-empleado.
+ * Alineado con el endpoint POST /user-employee-gateway/create.
+ * Principio de Segregación de Interfaces (ISP): solo contiene
+ * los campos que el endpoint realmente acepta.
+ */
 export class CreateUserEmployeeRequest {
-  // Datos de autenticación (para crear el usuario interno)
-  userId: string;
-  username: string;
-  email: string;
-  password: string;
+  // Datos de autenticación
+  readonly username: string;
+  readonly email: string;
+  readonly password: string;
 
-  // Datos personales básicos
-  firstName: string;
-  lastName: string;
-  dateOfBirth?: Date;
-  sexId?: number;
-  idCard?: string; // Cédula
-  citizenId?: string; // FK a ciudadano (opcional)
+  // Datos personales
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly dateOfBirth: string;
+  readonly sexId: number;
+  readonly idCard: string;
+  readonly citizenId: string;
 
-  // Datos laborales (obligatorios para empleado)
-  positionId: number; // cargo_id
-  contractTypeId: number; // tipo_contrato_id
-  employeeStatusId?: number; // Default: 1 (ACTIVO)
-  hireDate: Date;
-  terminationDate?: Date;
-  baseSalary?: number;
-  supervisorId?: string;
+  // Datos laborales
+  readonly positionId: number;
+  readonly hireDate: string;
+  readonly contractTypeId: number;
+  readonly baseSalary: number;
 
-  // Asignaciones
-  assignedZones?: number[];
-
-  // Seguridad y cumplimiento
-  driverLicense?: string;
-  hasCompanyVehicle?: boolean;
-
-  // Contacto
-  internalPhone?: string;
-  internalEmail?: string;
-  photoUrl?: string;
-
-  // Flexibilidad
-  metadata?: Record<string, any>;
-
-  // Auditoría (opcional, se llena en backend)
-  createdBy?: string;
+  // Contacto interno
+  readonly internalPhone: string;
+  readonly internalEmail: string;
 
   constructor(params: {
-    userId: string;
     username: string;
     email: string;
     password: string;
     firstName: string;
     lastName: string;
-    dateOfBirth?: Date;
-    sexId?: number;
-    idCard?: string;
-    citizenId?: string;
+    dateOfBirth: string;
+    sexId: number;
+    idCard: string;
+    citizenId: string;
     positionId: number;
+    hireDate: string;
     contractTypeId: number;
-    employeeStatusId?: number;
-    hireDate: Date;
-    terminationDate?: Date;
-    baseSalary?: number;
-    supervisorId?: string;
-    assignedZones?: number[];
-    driverLicense?: string;
-    hasCompanyVehicle?: boolean;
-    internalPhone?: string;
-    internalEmail?: string;
-    photoUrl?: string;
-    metadata?: Record<string, any>;
-    createdBy?: string;
+    baseSalary: number;
+    internalPhone: string;
+    internalEmail: string;
   }) {
-    this.userId = params.userId;
     this.username = params.username;
     this.email = params.email;
     this.password = params.password;
@@ -78,19 +55,10 @@ export class CreateUserEmployeeRequest {
     this.idCard = params.idCard;
     this.citizenId = params.citizenId;
     this.positionId = params.positionId;
-    this.contractTypeId = params.contractTypeId;
-    this.employeeStatusId = params.employeeStatusId;
     this.hireDate = params.hireDate;
-    this.terminationDate = params.terminationDate;
+    this.contractTypeId = params.contractTypeId;
     this.baseSalary = params.baseSalary;
-    this.supervisorId = params.supervisorId;
-    this.assignedZones = params.assignedZones;
-    this.driverLicense = params.driverLicense;
-    this.hasCompanyVehicle = params.hasCompanyVehicle;
     this.internalPhone = params.internalPhone;
     this.internalEmail = params.internalEmail;
-    this.photoUrl = params.photoUrl;
-    this.metadata = params.metadata;
-    this.createdBy = params.createdBy;
   }
 }

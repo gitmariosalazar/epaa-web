@@ -6,6 +6,12 @@ import { dateService } from '@/shared/infrastructure/services/EcuadorDateService
 import type { UserFormData } from '../models/UserFormData';
 import { useUsersContext } from '../context/UsersContext';
 
+/**
+ * ViewModel para la página de usuarios.
+ * Principio de Responsabilidad Única (SRP): maneja estado y lógica de UI.
+ * Principio de Inversión de Dependencias (DIP): depende de abstracciones
+ * (use cases) inyectadas via Context, no de implementaciones concretas.
+ */
 export const useUsersViewModel = () => {
   // Dependencies (Injected via Context)
   const {
@@ -13,7 +19,9 @@ export const useUsersViewModel = () => {
     createUserUseCase,
     updateUserUseCase,
     deleteUserUseCase,
-    getUserDetailUseCase
+    getUserDetailUseCase,
+    getCustomerByIdentificationUseCase,
+    existsByUsernameUseCase
   } = useUsersContext();
 
   // State
@@ -33,44 +41,56 @@ export const useUsersViewModel = () => {
   const [viewUser, setViewUser] = useState<User | null>(null);
   const [isViewLoading, setIsViewLoading] = useState(false);
 
-  // Wizard State
+  // Wizard State — 3 pasos alineados con el endpoint
   const [currentStep, setCurrentStep] = useState(0);
-  const steps = [
-    'Account Details',
-    'Personal Info',
-    'Employment',
-    'Contact & Other'
-  ];
+  const steps = ['Ficha del Empleado', 'Datos Laborales', 'Datos de Acceso'];
 
-  // Form State
+  // Auto-fill State — patrón inspirado en RegisterPage de customers
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
+  const [autoFillMessage, setAutoFillMessage] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Form State — organizado por pasos del wizard
   const initialFormData: UserFormData = {
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    // Step 1 — Ficha del Empleado
+    idCard: '',
+    citizenId: '',
     firstName: '',
     lastName: '',
     dateOfBirth: '',
-    sexId: '',
-    idCard: '',
-    citizenId: '',
+    sexId: '1',
+    // Step 1 — Ubicación Domiciliaria (defaults Ecuador)
+    address: '',
+    countryId: 'ECU',
+    provinceId: '',
+    cantonId: '',
+    parishId: '',
+    // Step 2 — Datos Laborales
     positionId: '',
     contractTypeId: '',
-    employeeStatusId: '',
     hireDate: '',
-    terminationDate: '',
     baseSalary: '',
-    supervisorId: '',
-    assignedZones: '',
-    driverLicense: '',
-    hasCompanyVehicle: '',
     internalPhone: '',
     internalEmail: '',
-    photoUrl: '',
-    createdBy: ''
+    // Step 3 — Datos de Acceso
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
   };
 
   const [formData, setFormData] = useState<UserFormData>(initialFormData);
+
+  // Auto-sync: al llegar al Step 3, username = cédula, email = internalEmail
+  useEffect(() => {
+    if (currentStep === 2) {
+      setFormData((prev) => ({
+        ...prev,
+        username: prev.idCard?.trim() || prev.username,
+        email: prev.internalEmail?.trim() || prev.email
+      }));
+    }
+  }, [currentStep]);
 
   // Load Data
   const loadUsers = async () => {
@@ -91,9 +111,11 @@ export const useUsersViewModel = () => {
     loadUsers();
   }, [page]);
 
-  // Handlers
+  // Handlers — acepta ChangeEvent real y objetos sintéticos del DatePicker
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      | { target: { name: string; value: any; type?: string } }
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -102,61 +124,149 @@ export const useUsersViewModel = () => {
     setFormData(initialFormData);
     setSelectedUser(null);
     setCurrentStep(0);
+    setAutoFillMessage(null);
   };
 
+  /**
+   * Busca un cliente por cédula usando GET /Customers/get-customer-by-id/:customerId
+   * y pre-llena el formulario. Mismo endpoint y patrón que RegisterPage de customers.
+   *
+   * Clean Architecture: usa el use case del módulo customers (cross-module).
+   * SOLID (DIP): depende de la abstracción GetCustomerByIdentificationUseCase.
+   */
+  const handleIdCardLookup = async (idCard: string) => {
+    const trimmed = idCard.trim();
+
+    // Validar formato: solo dígitos
+    if (!trimmed || !/^\d+$/.test(trimmed)) {
+      setAutoFillMessage('Ingresa un número de cédula válido');
+      return;
+    }
+
+    setIsAutoFilling(true);
+    setAutoFillMessage(null);
+
+    try {
+      const customer =
+        await getCustomerByIdentificationUseCase.execute(trimmed);
+
+      if (customer) {
+        // Pre-llenar formulario con datos del Customer (mismo mapeo que RegisterPage)
+        setFormData((prev) => ({
+          ...prev,
+          // Step 1 — Ficha del Empleado
+          idCard: trimmed,
+          citizenId: trimmed,
+          firstName: customer.firstName || prev.firstName,
+          lastName: customer.lastName || prev.lastName,
+          dateOfBirth: customer.dateOfBirth
+            ? new Date(customer.dateOfBirth).toISOString().split('T')[0]
+            : prev.dateOfBirth,
+          sexId: customer.sexId ? customer.sexId.toString() : prev.sexId,
+          // Step 1 — Ubicación (LocationSelector resuelve la jerarquía automáticamente con parishId)
+          address: customer.address || prev.address,
+          parishId: customer.parishId || prev.parishId,
+          // Step 2 — Contacto (usa email y teléfono del customer)
+          internalPhone:
+            customer.phoneNumbers && customer.phoneNumbers.length > 0
+              ? customer.phoneNumbers[0]
+              : prev.internalPhone,
+          internalEmail:
+            customer.emails && customer.emails.length > 0
+              ? customer.emails[0]
+              : prev.internalEmail,
+          // Step 3 — Datos de Acceso
+          username: trimmed, // username = cédula
+          email:
+            customer.emails && customer.emails.length > 0
+              ? customer.emails[0]
+              : prev.email
+        }));
+
+        setAutoFillMessage('✓ Datos del cliente cargados automáticamente');
+      } else {
+        // No encontrado — limpiar todo, conservar solo la cédula (mismo patrón que RegisterPage)
+        setFormData({
+          ...initialFormData,
+          idCard: trimmed
+        });
+        setAutoFillMessage(
+          'No se encontró un cliente con esta cédula. Completa los datos manualmente.'
+        );
+      }
+    } catch (error) {
+      console.error('[UsersViewModel] Customer lookup failed:', error);
+      // No encontrado (404) — limpiar todo, conservar solo la cédula
+      setFormData({
+        ...initialFormData,
+        idCard: trimmed
+      });
+      setAutoFillMessage(
+        'No se encontró un cliente con esta cédula. Completa los datos manualmente.'
+      );
+    } finally {
+      setIsAutoFilling(false);
+    }
+  };
+
+  /**
+   * Crea un usuario-empleado con los datos del formulario.
+   * Validaciones pre-creación:
+   * 1. Contraseñas coinciden
+   * 2. Username no existe (evita error 500 por unicidad)
+   * Convierte strings del formulario a tipos del DTO (SRP del mapper).
+   */
   const handleCreate = async () => {
     try {
+      // Validación: contraseñas
       if (formData.password !== formData.confirmPassword) {
-        alert("Passwords don't match"); // Replace with toast later
+        alert('Las contraseñas no coinciden');
         return;
       }
 
-      // Create strictly typed request object
+      // Validación: username único (evita error 500 del backend)
+      const usernameExists = await existsByUsernameUseCase.execute(
+        formData.username
+      );
+      console.log(usernameExists);
+      if (!usernameExists) {
+        alert(
+          `El usuario "${formData.username}" ya existe en el sistema. ` +
+            'No se puede crear un usuario duplicado.'
+        );
+        return;
+      }
+
       const newUserRequest = new CreateUserEmployeeRequest({
-        userId: crypto.randomUUID(),
         username: formData.username,
         email: formData.email,
         password: formData.password!,
         firstName: formData.firstName,
         lastName: formData.lastName,
-        dateOfBirth: formData.dateOfBirth
-          ? new Date(formData.dateOfBirth)
-          : undefined,
-        sexId: formData.sexId ? Number(formData.sexId) : undefined,
+        dateOfBirth: formData.dateOfBirth,
+        sexId: Number(formData.sexId),
         idCard: formData.idCard,
         citizenId: formData.citizenId,
         positionId: Number(formData.positionId),
+        hireDate: formData.hireDate,
         contractTypeId: Number(formData.contractTypeId),
-        employeeStatusId: formData.employeeStatusId
-          ? Number(formData.employeeStatusId)
-          : undefined,
-        hireDate: new Date(formData.hireDate),
-        terminationDate: formData.terminationDate
-          ? new Date(formData.terminationDate)
-          : undefined,
-        baseSalary: formData.baseSalary
-          ? Number(formData.baseSalary)
-          : undefined,
-        supervisorId: formData.supervisorId,
-        assignedZones: formData.assignedZones
-          ? formData.assignedZones.split(',').map(Number)
-          : undefined,
-        driverLicense: formData.driverLicense,
-        hasCompanyVehicle: formData.hasCompanyVehicle === 'true',
+        baseSalary: Number(formData.baseSalary),
         internalPhone: formData.internalPhone,
-        internalEmail: formData.internalEmail,
-        photoUrl: formData.photoUrl,
-        metadata: undefined,
-        createdBy: formData.createdBy
+        internalEmail: formData.internalEmail
       });
 
       await createUserUseCase.execute(newUserRequest);
       setIsCreateOpen(false);
       resetForm();
       loadUsers();
-    } catch (error) {
-      console.error('Create failed', error);
-      alert('Failed to create user');
+    } catch (error: any) {
+      console.error('[UsersViewModel] Create failed:', error);
+      // Parsear mensaje del backend para mostrarlo al usuario
+      const backendMessage =
+        error?.response?.data?.message?.[0] ||
+        error?.message ||
+        'Error desconocido al crear el usuario';
+      alert(`Error al crear usuario: ${backendMessage}`);
     }
   };
 
@@ -175,26 +285,18 @@ export const useUsersViewModel = () => {
       sexId: user.sexId ? user.sexId.toString() : '',
       idCard: user.idCard || '',
       citizenId: user.citizenId || '',
+      // Ubicación (se resuelve automáticamente con parishId en LocationSelector)
+      address: '',
+      countryId: 'ECU',
+      provinceId: '',
+      cantonId: '',
+      parishId: '',
       positionId: user.positionId ? user.positionId.toString() : '',
       contractTypeId: user.contractTypeId ? user.contractTypeId.toString() : '',
-      employeeStatusId: user.employeeStatusId
-        ? user.employeeStatusId.toString()
-        : '',
       hireDate: user.hireDate ? dateService.toISODateString(user.hireDate) : '',
-      terminationDate: user.terminationDate
-        ? dateService.toISODateString(user.terminationDate)
-        : '',
       baseSalary: user.baseSalary ? user.baseSalary.toString() : '',
-      supervisorId: user.supervisorId || '',
-      assignedZones: user.assignedZones ? user.assignedZones.toString() : '',
-      driverLicense: user.driverLicense || '',
-      hasCompanyVehicle: user.hasCompanyVehicle
-        ? user.hasCompanyVehicle.toString()
-        : '',
       internalPhone: user.internalPhone || '',
-      internalEmail: user.internalEmail || '',
-      photoUrl: user.photoUrl || '',
-      createdBy: user.createdBy || ''
+      internalEmail: user.internalEmail || ''
     });
     setIsEditOpen(true);
   };
@@ -223,25 +325,11 @@ export const useUsersViewModel = () => {
         contractTypeId: formData.contractTypeId
           ? Number(formData.contractTypeId)
           : undefined,
-        employeeStatusId: formData.employeeStatusId
-          ? Number(formData.employeeStatusId)
-          : undefined,
-        terminationDate: formData.terminationDate
-          ? new Date(formData.terminationDate)
-          : undefined,
         baseSalary: formData.baseSalary
           ? Number(formData.baseSalary)
           : undefined,
-        supervisorId: formData.supervisorId,
-        assignedZones: formData.assignedZones
-          ? formData.assignedZones.split(',').map(Number)
-          : undefined,
-        driverLicense: formData.driverLicense,
-        hasCompanyVehicle: formData.hasCompanyVehicle === 'true',
         internalPhone: formData.internalPhone,
-        internalEmail: formData.internalEmail,
-        photoUrl: formData.photoUrl,
-        metadata: undefined
+        internalEmail: formData.internalEmail
       });
 
       await updateUserUseCase.execute(
@@ -299,7 +387,44 @@ export const useUsersViewModel = () => {
         user.lastName.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  /**
+   * Validación por paso del wizard.
+   * Retorna mensaje de error si falla, null si pasa.
+   */
+  const validateCurrentStep = (): string | null => {
+    switch (currentStep) {
+      case 0: // Ficha del Empleado
+        if (!formData.idCard?.trim()) return 'La cédula es obligatoria';
+        if (!formData.firstName?.trim()) return 'El nombre es obligatorio';
+        if (!formData.lastName?.trim()) return 'El apellido es obligatorio';
+        if (!formData.dateOfBirth?.trim()) return 'La fecha de nacimiento es obligatoria';
+        if (!formData.sexId) return 'El sexo es obligatorio';
+        return null;
+
+      case 1: // Datos Laborales
+        if (!formData.positionId?.trim()) return 'El cargo es obligatorio';
+        if (!formData.contractTypeId?.trim()) return 'El tipo de contrato es obligatorio';
+        if (!formData.hireDate?.trim()) return 'La fecha de contratación es obligatoria';
+        if (!formData.baseSalary?.trim()) return 'El salario base es obligatorio';
+        if (!formData.internalPhone?.trim()) return 'El teléfono interno es obligatorio';
+        if (!formData.internalEmail?.trim()) return 'El email interno es obligatorio';
+        return null;
+
+      case 2: // Datos de Acceso
+        if (!formData.username?.trim()) return 'El nombre de usuario es obligatorio';
+        if (!formData.email?.trim()) return 'El correo electrónico es obligatorio';
+        if (!formData.password?.trim()) return 'La contraseña es obligatoria';
+        if (!formData.confirmPassword?.trim()) return 'Confirme la contraseña';
+        if (formData.password !== formData.confirmPassword) return 'Las contraseñas no coinciden';
+        return null;
+
+      default:
+        return null;
+    }
+  };
+
   return {
+    // Data
     users,
     filteredUsers,
     isLoading,
@@ -327,11 +452,19 @@ export const useUsersViewModel = () => {
     currentStep,
     setCurrentStep,
     steps,
+    validateCurrentStep,
 
     // Form
     formData,
     handleInputChange,
     resetForm,
+
+    // Auto-fill
+    isAutoFilling,
+    autoFillMessage,
+    handleIdCardLookup,
+    validationError,
+    setValidationError,
 
     // Actions
     handleCreate,

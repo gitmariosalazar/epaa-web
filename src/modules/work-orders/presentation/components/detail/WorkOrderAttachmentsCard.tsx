@@ -4,20 +4,19 @@
  * SRP: galería de fotos de evidencia y adjuntos de la OT.
  */
 import React, { useState } from 'react';
-import { Paperclip, Image, FileText, ExternalLink, Plus } from 'lucide-react';
+import { Paperclip, Image as ImageIcon, FileText, ExternalLink, UploadCloud, X } from 'lucide-react';
 import { Card } from '@/shared/presentation/components/Card/Card';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import type { AdjuntoEvidencia } from '../../../domain/schemas/dto/response/work-orders.get.response';
+import './WorkOrderAttachmentsCard.css';
 
 interface WorkOrderAttachmentsCardProps {
   adjuntos: AdjuntoEvidencia[];
-  onAddAttachment?: (fileName: string, fileType: string, fileUrl: string) => Promise<void>;
+  onAddAttachment?: (files: File[]) => Promise<void>;
   isLoading?: boolean;
 }
 
 const isImage = (mime: string) => mime?.startsWith('image/');
-
-const FILE_TYPES = ['FOTO', 'VIDEO', 'DOCUMENTO', 'INFORME', 'OTRO'];
 
 export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> = ({
   adjuntos: adjuntosRaw,
@@ -28,19 +27,74 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
   const [preview, setPreview] = useState<string | null>(null);
 
   // Form states
-  const [fileName, setFileName] = useState('');
-  const [fileType, setFileType] = useState('FOTO');
-  const [fileUrl, setFileUrl]   = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleFilesSelected = (files: File[]) => {
+    if (files.length + selectedFiles.length > 10) {
+      alert('Máximo 10 archivos a la vez.');
+      return;
+    }
+    setSelectedFiles((prev) => [...prev, ...files]);
+
+    // Generate previews
+    const newPreviews = files.map(file => {
+      if (file.type.startsWith('image/')) {
+        return URL.createObjectURL(file);
+      }
+      return ''; // No preview for docs
+    });
+    setPreviews(prev => [...prev, ...newPreviews]);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFilesSelected(Array.from(e.dataTransfer.files));
+    }
+  };
+
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviews((prev) => {
+      const newPreviews = [...prev];
+      if (newPreviews[index]) {
+        URL.revokeObjectURL(newPreviews[index]);
+      }
+      newPreviews.splice(index, 1);
+      return newPreviews;
+    });
+  };
+
+  // Cleanup object urls on unmount
+  React.useEffect(() => {
+    return () => {
+      previews.forEach(p => {
+        if (p) URL.revokeObjectURL(p);
+      });
+    };
+  }, [previews]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fileName.trim() || !fileUrl.trim() || !onAddAttachment) return;
+    if (selectedFiles.length === 0 || !onAddAttachment) return;
     try {
-      await onAddAttachment(fileName.trim(), fileType, fileUrl.trim());
-      setFileName('');
-      setFileType('FOTO');
-      setFileUrl('');
-    } catch (err) {}
+      await onAddAttachment(selectedFiles);
+      setSelectedFiles([]);
+      setPreviews([]);
+    } catch (err) { }
   };
 
   if (adjuntos.length === 0 && !onAddAttachment) {
@@ -51,7 +105,7 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
     );
   }
 
-  const imagenes   = adjuntos.filter((a) => isImage(a.mimeType));
+  const imagenes = adjuntos.filter((a) => isImage(a.mimeType));
   const documentos = adjuntos.filter((a) => !isImage(a.mimeType));
 
   return (
@@ -82,7 +136,7 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
                     }}
                   />
                   <div className="wo-attachment-thumb__overlay">
-                    <Image size={16} />
+                    <ImageIcon size={16} />
                   </div>
                 </div>
               ))}
@@ -113,61 +167,79 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
 
       {/* Formulario Inline para adjuntar archivo */}
       {onAddAttachment && (
-        <div className="wo-attachments-inline-form-box" style={{ background: 'var(--surface-hover)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', marginTop: '0.5rem' }}>
-          <div className="wo-modal-section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.75rem', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-            <Plus size={14} /> Adjuntar Evidencia
+        <div
+          className="wo-attachments-upload-container"
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <div className="wo-modal-section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '1rem', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+            <UploadCloud size={16} /> Subir Evidencia (Max. 10 archivos)
           </div>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 2fr auto', gap: '0.6rem', alignItems: 'end' }}>
-            <div className="wo-modal-field" style={{ margin: 0 }}>
-              <label className="wo-modal-label" style={{ fontSize: '0.72rem', fontWeight: 600 }}>Nombre Archivo *</label>
-              <input
-                type="text"
-                className="wo-modal-input"
-                style={{ height: '32px', padding: '0.2rem 0.5rem', fontSize: '0.78rem' }}
-                value={fileName}
-                onChange={(e) => setFileName(e.target.value)}
-                placeholder="Ej: foto-tubería.jpg"
-                required
-                disabled={isLoading}
-              />
+
+          <form onSubmit={handleSubmit} className="wo-attachments-upload-form">
+            <div className="wo-attachments-upload-grid">
+              {/* Box de Carga */}
+              <div className={`wo-attachments-upload-trigger ${isDragging ? 'dragging' : ''}`}>
+                <UploadCloud size={24} className="wo-attachments-upload-trigger__icon" />
+                <span className="wo-attachments-upload-trigger__text">CARGAR</span>
+                <input
+                  type="file"
+                  className="wo-attachments-upload-trigger__input"
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      handleFilesSelected(Array.from(e.target.files));
+                      e.target.value = ''; // Reset
+                    }
+                  }}
+                  multiple
+                  disabled={isLoading}
+                  accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip"
+                />
+              </div>
+
+              {/* Miniaturas de Archivos */}
+              {selectedFiles.map((file, idx) => (
+                <div key={idx} className="wo-attachments-preview-card">
+                  {previews[idx] ? (
+                    <img
+                      src={previews[idx]}
+                      alt={file.name}
+                      className="wo-attachments-preview-card__img"
+                    />
+                  ) : (
+                    <div className="wo-attachments-preview-card__doc">
+                      <FileText size={24} className="wo-attachments-preview-card__doc-icon" />
+                      <span className="wo-attachments-preview-card__doc-name">
+                        {file.name}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Botón X */}
+                  <button
+                    type="button"
+                    onClick={() => removeSelectedFile(idx)}
+                    className="wo-attachments-preview-card__remove-btn"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
             </div>
-            <div className="wo-modal-field" style={{ margin: 0 }}>
-              <label className="wo-modal-label" style={{ fontSize: '0.72rem', fontWeight: 600 }}>Tipo *</label>
-              <select
-                className="wo-modal-select"
-                style={{ height: '32px', padding: '0.2rem 0.5rem', fontSize: '0.78rem' }}
-                value={fileType}
-                onChange={(e) => setFileType(e.target.value)}
-                disabled={isLoading}
+
+            <div className="wo-attachments-upload-actions">
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={selectedFiles.length === 0 || isLoading}
+                leftIcon={<UploadCloud size={14} />}
+                isLoading={isLoading}
+                style={{ padding: '0 1.5rem', background: '#0891b2', fontWeight: 600 }}
               >
-                {FILE_TYPES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
+                Subir Archivos ({selectedFiles.length})
+              </Button>
             </div>
-            <div className="wo-modal-field" style={{ margin: 0 }}>
-              <label className="wo-modal-label" style={{ fontSize: '0.72rem', fontWeight: 600 }}>URL Archivo *</label>
-              <input
-                type="url"
-                className="wo-modal-input"
-                style={{ height: '32px', padding: '0.2rem 0.5rem', fontSize: '0.78rem' }}
-                value={fileUrl}
-                onChange={(e) => setFileUrl(e.target.value)}
-                placeholder="https://storage.empresa.com/..."
-                required
-                disabled={isLoading}
-              />
-            </div>
-            <Button
-              type="submit"
-              variant="primary"
-              size="xs"
-              disabled={!fileName.trim() || !fileUrl.trim() || isLoading}
-              leftIcon={<Plus size={12} />}
-              style={{ height: '32px', padding: '0 0.75rem', fontSize: '0.78rem', background: '#0891b2' }}
-            >
-              Adjuntar
-            </Button>
           </form>
         </div>
       )}

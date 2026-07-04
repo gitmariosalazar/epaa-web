@@ -119,3 +119,68 @@ export interface Email {
   emailid: number;
   email: string;
 }
+
+export interface ConnectionAndPropertyResponse {
+  // Connection Data
+  connectionId: string;
+  clientId: string;
+  connectionRateId: string;
+  connectionRateName: string;
+  connectionMeterNumber: string | null;
+  connectionMeterNumberCurrent: string | null;
+  connectionMeterNumberPreview: string | null;
+  connectionSector: string | null;
+  connectionAccount: string | null;
+  connectionCadastralKey: string | null;
+  connectionContractNumber: string | null;
+  connectionSewerage: boolean | null;
+  connectionStatus: string | null; // nombre from cat_estados_acometida
+  connectionStateId: number | null; // estado_id FK
+  connectionIsReadable: boolean | null; // permite_lectura
+  connectionAddress: string | null;
+  connectionInstallationDate: string | Date | null;
+  connectionPeopleNumbers: number | null;
+  connectionZone: string | null;
+  connectionCoordinates: string | null;
+  connectionReference: string | null;
+  connectionMetadata: Record<string, any> | null;
+  connectionAltitude: number | null;
+  connectionPrecision: number | null;
+  connectionGeolocationDate: string | Date | null;
+  connectionGeometricZone: string | null;
+  propertyCadastralKey: string | null;
+  zoneId: number;
+  zoneCode: string;
+  zoneName: string;
+  // Client Data
+  company: Company | null;
+  person: Client | null;
+  // Property Data
+  property: PropertyResponse | null;
+  lastReadings: LastReading[] | null;
+}
+
+export interface LastReading {
+  cadastralKey: string;
+  readingDate: string | Date;
+  readingTime: string;
+  readingMonth: string;
+  readingValueCurrent: number | null;
+  readingValuePreview: number | null;
+  novelty: string | null;
+}
+
+export interface PropertyResponse {
+  propertyId: string;
+  propertySector: string | null;
+  propertyTypeId: number | null;
+  propertyAddress: string | null;
+  propertyAlleyway: string | null;
+  propertyAltitude: number | null;
+  propertyTypeName: string | null;
+  propertyPrecision: number | null;
+  propertyReference: string | null;
+  propertyCoordinates: string | null;
+  propertyCadastralKey: string | null;
+  propertyGeometricZone: string | null;
+}

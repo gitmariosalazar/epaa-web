@@ -73,7 +73,7 @@ export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelect
           bottom: alignTop ? window.innerHeight - rect.top + 4 : 'auto',
           left: rect.left,
           width: rect.width,
-          zIndex: 9999,
+          zIndex: 99999,
         });
         setAlignment(alignTop ? 'top' : 'bottom');
       }
@@ -220,7 +220,7 @@ export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelect
                   <li
                     key={opt.value}
                     className={`searchable-select-option ${opt.value === value ? 'searchable-select-option--selected' : ''}`}
-                    onClick={() => handleOptionSelect(opt)}
+                    onMouseDown={(e) => { e.preventDefault(); handleOptionSelect(opt); }}
                   >
                     <span className="searchable-select-option-label">{opt.label}</span>
                     {opt.value === value && <Check size={16} className="searchable-select-option-check" />}

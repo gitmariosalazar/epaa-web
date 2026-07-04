@@ -15,6 +15,7 @@ import {
   RefreshCw,
   XCircle,
   CheckCircle,
+  Check,
   Eye,
   Settings,
   SearchX
@@ -29,6 +30,7 @@ import { UserFormWizard } from '../../components/UserFormWizard/UserFormWizard';
 import type { User } from '@/modules/users/domain/models/User';
 import { UsersProvider } from '../../context/UsersContext';
 import { Input } from '@/shared/presentation/components/Input/Input';
+import { Alert } from '@/shared/presentation/components/Alert/Alert';
 
 const UsersLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -58,11 +60,19 @@ const UsersLayout: React.FC = () => {
     currentStep,
     setCurrentStep,
     steps,
+    validateCurrentStep,
 
     // Form
     formData,
     handleInputChange,
     resetForm,
+
+    // Auto-fill
+    isAutoFilling,
+    autoFillMessage,
+    handleIdCardLookup,
+    validationError,
+    setValidationError,
 
     // Actions
     handleCreate,
@@ -299,43 +309,74 @@ const UsersLayout: React.FC = () => {
       <Modal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        title="Create New User"
+        title="Nuevo Usuario"
         size="lg"
         footer={
-          <div className="users-modal__footer--between">
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (currentStep > 0) setCurrentStep(currentStep - 1);
-                else setIsCreateOpen(false);
-              }}
-            >
-              Back
-            </Button>
-            <Button
-              onClick={() => {
-                if (currentStep < steps.length - 1)
-                  setCurrentStep(currentStep + 1);
-                else handleCreate();
-              }}
-            >
-              {currentStep === steps.length - 1 ? 'Create User' : 'Next'}
-            </Button>
+          <div style={{ width: '100%' }}>
+            {validationError && (
+              <div style={{ marginBottom: '12px' }}>
+                <Alert
+                  type="error"
+                  message={validationError}
+                  dismissible
+                  onClose={() => setValidationError(null)}
+                />
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setValidationError(null);
+                  if (currentStep > 0) setCurrentStep(currentStep - 1);
+                  else setIsCreateOpen(false);
+                }}
+              >
+                Atrás
+              </Button>
+              <Button
+                onClick={() => {
+                  const error = validateCurrentStep();
+                  if (error) {
+                    setValidationError(error);
+                    return;
+                  }
+                  setValidationError(null);
+                  if (currentStep < steps.length - 1)
+                    setCurrentStep(currentStep + 1);
+                  else handleCreate();
+                }}
+              >
+                {currentStep === steps.length - 1 ? 'Crear Empleado' : 'Siguiente'}
+              </Button>
+            </div>
           </div>
         }
       >
         <div className="users-modal__body">
           <div className="users-wizard__stepper">
             {steps.map((step, idx) => (
-              <div
-                key={step}
-                className={`users-wizard__step-indicator ${idx === currentStep
-                  ? 'users-wizard__step-indicator--active'
-                  : ''
-                  }`}
-              >
-                {step}
-              </div>
+              <React.Fragment key={step}>
+                <div
+                  className={`users-wizard__step-item${idx === currentStep
+                    ? ' users-wizard__step-item--active'
+                    : ''
+                    }${idx < currentStep ? ' users-wizard__step-item--completed' : ''}`}
+                >
+                  <div className="users-wizard__step-number">
+                    {idx < currentStep ? <Check size={16} /> : idx + 1}
+                  </div>
+                  <div className="users-wizard__step-label">{step}</div>
+                </div>
+                {idx < steps.length - 1 && (
+                  <div
+                    className={`users-wizard__step-connector${idx < currentStep
+                      ? ' users-wizard__step-connector--active'
+                      : ''
+                      }`}
+                  />
+                )}
+              </React.Fragment>
             ))}
           </div>
           <UserFormWizard
@@ -344,6 +385,9 @@ const UsersLayout: React.FC = () => {
             onChange={handleInputChange}
             isEditMode={false}
             isCreateMode={true}
+            onIdCardLookup={handleIdCardLookup}
+            isAutoFilling={isAutoFilling}
+            autoFillMessage={autoFillMessage}
           />
         </div>
       </Modal>
@@ -382,14 +426,6 @@ const UsersLayout: React.FC = () => {
           <div className="users-modal__divider"></div>
           <UserFormWizard
             currentStep={2}
-            formData={formData}
-            onChange={handleInputChange}
-            isEditMode={true}
-            isCreateMode={false}
-          />
-          <div className="users-modal__divider"></div>
-          <UserFormWizard
-            currentStep={3}
             formData={formData}
             onChange={handleInputChange}
             isEditMode={true}

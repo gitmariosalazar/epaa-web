@@ -15,6 +15,7 @@ export interface AlertProps {
   className?: string;
   /** Si la alerta puede ser cerrada por el usuario */
   dismissible?: boolean;
+  icon?: React.ReactNode;
   /** Callback opcional que se ejecuta al cerrar la alerta */
   onClose?: () => void;
 }
@@ -33,6 +34,7 @@ export const Alert: React.FC<AlertProps> = ({
   message,
   className = '',
   dismissible = true,
+  icon,
   onClose
 }) => {
   const [isVisible, setIsVisible] = useState(true);
@@ -55,7 +57,7 @@ export const Alert: React.FC<AlertProps> = ({
     <div className={`epaa-alert-container epaa-alert-${type} ${className}`} role="alert">
       <div className="epaa-alert-content-wrapper">
         <div className="epaa-alert-icon-wrapper">
-          {icons[type]}
+          {icon || icons[type]}
         </div>
         <div className="epaa-alert-text-wrapper">
           {title && <span className="epaa-alert-title">{title}</span>}
@@ -63,9 +65,9 @@ export const Alert: React.FC<AlertProps> = ({
         </div>
       </div>
       {dismissible && (
-        <button 
-          className="epaa-alert-close-btn" 
-          onClick={handleClose} 
+        <button
+          className="epaa-alert-close-btn"
+          onClick={handleClose}
           aria-label="Cerrar alerta"
           type="button"
         >

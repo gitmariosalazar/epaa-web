@@ -91,10 +91,235 @@
   outline: none;
 }
 
-/* User Form Wizard */
+/* ============================================================
+   WIZARD STEPPER — Premium numbered circle design
+   ============================================================ */
+.users-wizard__stepper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 var(--spacing-sm) !important;
+  padding-top: var(--spacing-xs) !important;
+  margin-bottom: var(--spacing-xs) !important;
+  background-color: var(--surface-hover) !important;
+}
+
+.users-wizard__step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  gap: var(--spacing-xs, 6px);
+}
+
+.users-wizard__step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface, #fff);
+  border: 2px solid var(--border-color, #e2e8f0);
+  color: var(--text-secondary, #94a3b8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.users-wizard__step-item--active .users-wizard__step-number {
+  border-color: var(--accent, #3b82f6);
+  background: var(--accent, #3b82f6);
+  color: #fff;
+  box-shadow: 0 0 14px
+    color-mix(in srgb, var(--accent, #3b82f6) 40%, transparent);
+  transform: scale(1.08);
+}
+
+.users-wizard__step-item--completed .users-wizard__step-number {
+  border-color: var(--success, #10b981);
+  background: var(--success, #10b981);
+  color: #fff;
+  box-shadow: 0 2px 8px
+    color-mix(in srgb, var(--success, #10b981) 25%, transparent);
+}
+
+.users-wizard__step-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary, #94a3b8);
+  transition: color 0.3s ease;
+  white-space: nowrap;
+}
+
+.users-wizard__step-item--active .users-wizard__step-label {
+  color: var(--text-main, #1e293b);
+}
+
+.users-wizard__step-item--completed .users-wizard__step-label {
+  color: var(--success, #10b981);
+}
+
+.users-wizard__step-connector {
+  flex: 1;
+  height: 2px;
+  background: var(--border-color, #e2e8f0);
+  margin: 0 var(--spacing-sm, 12px);
+  margin-top: 18px;
+  z-index: 1;
+  position: relative;
+  overflow: hidden;
+  border-radius: 1px;
+}
+
+.users-wizard__step-connector::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
+  background: var(--accent, #3b82f6);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.users-wizard__step-connector--active::after {
+  width: 100%;
+}
+
+/* ============================================================
+   WIZARD MODAL — Body, scroll, dividers
+   ============================================================ */
+.users-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 16px);
+  height: 620px; /* Altura fija — no cambia entre pasos */
+}
+
+.users-modal__scroll-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg, 24px);
+  max-height: 65vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+}
+
+/* Wizard step — ocupa todo el espacio disponible con scroll */
 .user-form-wizard__step {
-  display: grid;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+}
+
+/* Premium scrollbar */
+.users-modal__scroll-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.users-modal__scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.users-modal__scroll-container::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--accent, #3b82f6) 20%, transparent);
+  border-radius: 20px;
+  transition: background-color 0.2s ease;
+}
+
+.users-modal__scroll-container::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--accent, #3b82f6) 50%, transparent);
+}
+
+.users-modal__divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--border-color, #e2e8f0),
+    transparent
+  );
+  margin: var(--spacing-xs, 4px) 0;
+}
+
+.users-modal__footer--between {
+  display: flex;
+  justify-content: space-between;
   gap: 16px;
+  width: 100%;
+}
+
+.users-modal__footer--between button,
+.users-modal__footer--between .btn {
+  min-width: 120px;
+}
+
+/* ============================================================
+   WIZARD FORM — Step layout, section labels, grid rows
+   ============================================================ */
+.user-form-wizard__step {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: wizardStepFadeIn 0.35s ease-out;
+  min-height: 320px;
+}
+
+@keyframes wizardStepFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Section label with gradient accent line */
+.user-form-wizard__section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent, #3b82f6);
+  background: linear-gradient(
+    90deg,
+    var(--accent, #3b82f6),
+    color-mix(in srgb, var(--accent, #3b82f6) 60%, var(--primary, #6366f1))
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: var(--spacing-xs, 4px);
+}
+
+.user-form-wizard__section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent, #3b82f6) 30%, transparent),
+    transparent
+  );
+}
+
+/* Icon in section label needs original color (not gradient text) */
+.user-form-wizard__section-icon {
+  -webkit-text-fill-color: var(--accent, #3b82f6);
+  color: var(--accent, #3b82f6);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .user-form-wizard__row-2 {
@@ -109,33 +334,131 @@
   gap: 16px;
 }
 
-.user-form-wizard__vehicle-select {
+/* ============================================================
+   AUTO-FILL — Feedback message and spinner
+   ============================================================ */
+.user-form-wizard__autofill-message {
+  font-size: 0.8rem;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm, 6px);
+  animation: wizardStepFadeIn 0.3s ease-out;
+  line-height: 1.4;
+}
+
+.user-form-wizard__autofill-message--success {
+  background: color-mix(in srgb, var(--success, #10b981) 10%, transparent);
+  color: var(--success, #10b981);
+  border: 1px solid color-mix(in srgb, var(--success, #10b981) 25%, transparent);
+}
+
+.user-form-wizard__autofill-message--info {
+  background: color-mix(in srgb, var(--accent, #3b82f6) 8%, transparent);
+  color: var(--text-secondary, #94a3b8);
+  border: 1px solid color-mix(in srgb, var(--accent, #3b82f6) 15%, transparent);
+}
+
+/* Spinner animation for the Loader icon during auto-fill */
+.user-form-wizard__spinner {
+  animation: wizardSpin 1s linear infinite;
+}
+
+@keyframes wizardSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Search button for ID Card auto-fill */
+.user-form-wizard__search-btn {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--surface, #1e293b);
+  color: var(--accent, #3b82f6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 2px;
 }
 
-.user-form-wizard__vehicle-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-primary);
+.user-form-wizard__search-btn:hover:not(:disabled) {
+  background: color-mix(
+    in srgb,
+    var(--accent, #3b82f6) 12%,
+    var(--surface, #1e293b)
+  );
+  border-color: var(--accent, #3b82f6);
+  box-shadow: 0 0 10px
+    color-mix(in srgb, var(--accent, #3b82f6) 20%, transparent);
 }
 
-.user-form-wizard__vehicle-input {
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-  background-color: var(--surface);
-  color: var(--text-primary);
-  font-size: 0.9rem;
+.user-form-wizard__search-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
-.user-form-wizard__vehicle-input:focus {
-  outline: 2px solid var(--primary);
-  border-color: transparent;
+/* Location section */
+.user-form-wizard__location-section {
+  margin-top: 8px;
 }
 
-/* Responsive adjustments */
+/* Info box — same pattern as RegisterPage */
+.user-form-wizard__info-box {
+  display: flex;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: color-mix(
+    in srgb,
+    var(--accent, #3b82f6) 6%,
+    var(--surface, #1e293b)
+  );
+  border: 1px solid color-mix(in srgb, var(--accent, #3b82f6) 15%, transparent);
+  animation: wizardStepFadeIn 0.3s ease-out;
+}
+
+.user-form-wizard__info-box-icon {
+  color: var(--accent, #3b82f6);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.user-form-wizard__info-box-content {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.user-form-wizard__info-box-content h4 {
+  margin: 0 0 8px 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main, #f1f5f9);
+}
+
+.user-form-wizard__info-box-content ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.user-form-wizard__info-box-content li {
+  margin-bottom: 4px;
+}
+
+.user-form-wizard__info-box-content strong {
+  color: var(--text-main, #f1f5f9);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 @media (max-width: 768px) {
   .user-form-wizard__row-2,
   .user-form-wizard__row-3 {
@@ -147,9 +470,41 @@
     align-items: flex-start;
     gap: 12px;
   }
+
+  .users-wizard__step-label {
+    font-size: 0.68rem;
+  }
+
+  .users-wizard__step-number {
+    width: 30px;
+    height: 30px;
+    font-size: 0.75rem;
+  }
+
+  .users-wizard__step-connector {
+    margin-top: 14px;
+  }
+
+  .users-modal__footer--between {
+    flex-direction: column-reverse;
+  }
+
+  .users-modal__footer--between button,
+  .users-modal__footer--between .btn {
+    width: 100%;
+    min-width: unset;
+  }
 }
 
-/* Customers Page Specific */
+@media (max-width: 600px) {
+  .users-modal__footer--between {
+    flex-direction: column-reverse;
+  }
+}
+
+/* ============================================================
+   Customers Page Specific
+   ============================================================ */
 .users-page__actions {
   display: flex;
   gap: 8px;

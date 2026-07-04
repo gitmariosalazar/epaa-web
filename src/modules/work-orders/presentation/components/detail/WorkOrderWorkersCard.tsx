@@ -9,6 +9,7 @@ import { Card } from '@/shared/presentation/components/Card/Card';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Table, type Column } from '@/shared/presentation/components/Table/Table';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 import type { TrabajadorAsignado } from '../../../domain/schemas/dto/response/work-orders.get.response';
 
 const ROL_OPTIONS = [
@@ -21,10 +22,8 @@ const ROL_OPTIONS = [
 interface WorkOrderWorkersCardProps {
   codigoOrden: string;
   personalAsignado: TrabajadorAsignado[];
-  onAddWorker?: (
-    workerId: string,
-    roleId: number | null,
-    isResponsible: boolean
+  onSaveWorkersBatch?: (
+    workers: { workerId: string; roleId?: number | null; isResponsible?: boolean }[]
   ) => Promise<void>;
   onRemoveWorker?: (workerId: string) => Promise<void>;
   isLoading?: boolean;
@@ -32,7 +31,7 @@ interface WorkOrderWorkersCardProps {
 
 export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
   personalAsignado = [],
-  onAddWorker,
+  onSaveWorkersBatch,
   onRemoveWorker,
   isLoading = false,
 }) => {
@@ -41,17 +40,57 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
   const [isResponsible, setIsResponsible] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
-  const handleAdd = async (e: React.FormEvent) => {
+  const [pendingWorkers, setPendingWorkers] = useState<{
+    workerId: string;
+    roleId: number | null;
+    isResponsible: boolean;
+    workerName?: string;
+    roleName?: string;
+  }[]>([]);
+
+  const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!workerId.trim() || !onAddWorker) return;
-    try {
-      await onAddWorker(workerId.trim(), roleId, isResponsible);
-      setWorkerId('');
-      setRoleId(null);
-      setIsResponsible(false);
-    } catch (err) {
-      // Error is toast-notified in parent
+    const id = workerId.trim();
+    if (!id) return;
+
+    // Validación 1: No repetir trabajadores
+    const alreadyExists = personalAsignado.some(w => w.idTrabajador === id) || 
+                          pendingWorkers.some(w => w.workerId === id);
+    if (alreadyExists) {
+      MessageToastCustom('warning', 'Trabajador duplicado', 'Este trabajador ya está en la lista.');
+      return;
     }
+
+    // Validación 2: Máximo un responsable
+    if (isResponsible || roleId === 1) {
+      const responsibleExistsNow = personalAsignado.some(w => w.esResponsable) || 
+                                   pendingWorkers.some(w => w.isResponsible || w.roleId === 1);
+      if (responsibleExistsNow) {
+        MessageToastCustom('warning', 'Límite de responsable', 'Ya existe un Técnico Responsable asignado.');
+        return;
+      }
+    }
+
+    setPendingWorkers(prev => [...prev, {
+      workerId: id,
+      roleId,
+      isResponsible: isResponsible || roleId === 1,
+      workerName: id, // Placeholder
+      roleName: (roleId === 1 || isResponsible) ? 'Técnico Responsable' : 'Técnico Operativo'
+    }]);
+    setWorkerId('');
+    setRoleId(null);
+    setIsResponsible(false);
+  };
+
+  const handleSaveBatch = async () => {
+    if (!onSaveWorkersBatch || pendingWorkers.length === 0) return;
+    await onSaveWorkersBatch(pendingWorkers.map(w => ({
+      workerId: w.workerId,
+      roleId: w.roleId,
+      isResponsible: w.isResponsible
+    })));
+    setPendingWorkers([]);
   };
 
   const handleRemove = async (wid: string) => {
@@ -82,9 +121,21 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
     }
   };
 
-  const responsibleExists = personalAsignado.some((w) => w.esResponsable);
+  const responsibleExists = personalAsignado.some((w) => w.esResponsable) || pendingWorkers.some(w => w.isResponsible);
 
-  const columns: Column<TrabajadorAsignado>[] = [
+  const combinedWorkers = [
+    ...personalAsignado,
+    ...pendingWorkers.map((w, i) => ({
+      idTrabajador: w.workerId,
+      nombreTrabajador: w.workerName ?? 'Pendiente',
+      esResponsable: w.isResponsible,
+      rol: w.roleName ?? 'Sin Rol',
+      _isPending: true,
+      _pendingIndex: i
+    } as TrabajadorAsignado & { _isPending?: boolean; _pendingIndex?: number }) )
+  ];
+
+  const columns: Column<TrabajadorAsignado & { _isPending?: boolean; _pendingIndex?: number }>[] = [
     {
       header: 'Técnico',
       accessor: (w) => (
@@ -97,6 +148,9 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
           <span className="wo-worker-name" style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-main)' }}>
             {w.nombreTrabajador}
           </span>
+          {w._isPending && (
+            <span style={{ fontSize: '0.65rem', color: 'var(--warning)', marginLeft: '4px' }}>(Pendiente)</span>
+          )}
         </div>
       )
     },
@@ -132,35 +186,52 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
     },
     ...(onRemoveWorker ? [{
       header: 'Acciones',
-      accessor: (w: TrabajadorAsignado) => (
-        <button
-          type="button"
-          onClick={() => handleRemove(w.idTrabajador)}
-          disabled={isLoading || removingId === w.idTrabajador}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            color: 'var(--error, #ef4444)',
-            padding: '0.3rem',
-            display: 'flex',
-            alignItems: 'center',
-            opacity: removingId === w.idTrabajador ? 0.5 : 1
-          }}
-          title="Remover trabajador"
-        >
-          <UserMinus size={15} />
-        </button>
-      )
+      accessor: (w: TrabajadorAsignado & { _isPending?: boolean; _pendingIndex?: number }) => {
+        if (w._isPending) {
+          return (
+            <button
+              type="button"
+              onClick={() => {
+                setPendingWorkers(prev => prev.filter((_, i) => i !== w._pendingIndex));
+              }}
+              style={{
+                background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--warning)'
+              }}
+            >
+              <UserMinus size={15} />
+            </button>
+          );
+        }
+        return (
+          <button
+            type="button"
+            onClick={() => handleRemove(w.idTrabajador)}
+            disabled={isLoading || removingId === w.idTrabajador}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--error, #ef4444)',
+              padding: '0.3rem',
+              display: 'flex',
+              alignItems: 'center',
+              opacity: removingId === w.idTrabajador ? 0.5 : 1
+            }}
+            title="Remover trabajador"
+          >
+            <UserMinus size={15} />
+          </button>
+        );
+      }
     }] : [])
   ];
 
   return (
     <Card title="Personal Asignado" className="wo-detail-card">
       <div className="wo-workers-section">
-        <div style={{ marginBottom: onAddWorker ? '1.25rem' : '0' }}>
+        <div style={{ marginBottom: onSaveWorkersBatch ? '1.25rem' : '0' }}>
           <Table
-            data={personalAsignado}
+            data={combinedWorkers}
             columns={columns}
             isLoading={isLoading}
             pagination={false}
@@ -177,7 +248,7 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
         </div>
 
         {/* Formulario Inline para agregar trabajador */}
-        {onAddWorker && (
+        {onSaveWorkersBatch && (
           <div className="wo-workers-inline-form-box" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '0.5rem' }}>
             <div className="wo-modal-section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.75rem', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
               <UserPlus size={14} /> Asignar Nuevo Trabajador
@@ -252,6 +323,19 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
                 )}
               </div>
             </form>
+            
+            {pendingWorkers.length > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                <Button
+                  variant="primary"
+                  onClick={handleSaveBatch}
+                  isLoading={isLoading}
+                  style={{ background: 'var(--success, #10b981)' }}
+                >
+                  Guardar Todos
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>

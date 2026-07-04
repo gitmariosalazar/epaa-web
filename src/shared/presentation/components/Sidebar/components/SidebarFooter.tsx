@@ -1,5 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import {
+  Box,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Tooltip
+} from '@mui/material';
 import { User, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/shared/presentation/context/AuthContext';
@@ -15,33 +22,101 @@ export const SidebarFooter: React.FC<SidebarFooterProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="sidebar__footer">
-      <NavLink
-        to="/profile"
-        className={({ isActive }) =>
-          `sidebar__link ${isActive ? 'sidebar__link--active' : ''}`
-        }
+    <Box
+      sx={{
+        borderTop: 1,
+        borderColor: 'divider',
+        p: 0.75,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 0.25,
+        flexShrink: 0
+      }}
+    >
+      <Tooltip
         title={isCollapsed ? t('sidebar.profile') : ''}
+        placement="right"
+        arrow
       >
-        <span className="sidebar__icon">
-          <User size={20} />
-        </span>
-        {!isCollapsed && (
-          <span className="sidebar__label">{t('sidebar.profile')}</span>
-        )}
-      </NavLink>
-      <button
-        className="sidebar__link sidebar__link--logout"
-        onClick={logout}
+        <NavLink
+          to="/profile"
+          end
+          style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+        >
+          {({ isActive }) => (
+            <ListItemButton
+              selected={isActive}
+              sx={{
+                justifyContent: isCollapsed ? 'center' : 'flex-start',
+                px: isCollapsed ? 1 : 1.5,
+                py: 0.875,
+                color: 'text.secondary',
+                '&:hover': { color: 'text.primary' },
+                '&.Mui-selected': {
+                  color: 'primary.main',
+                  bgcolor: 'action.selected'
+                }
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: isCollapsed ? 0 : 36,
+                  color: 'inherit',
+                  justifyContent: 'center'
+                }}
+              >
+                <User size={20} />
+              </ListItemIcon>
+              {!isCollapsed && (
+                <ListItemText
+                  primary={t('sidebar.profile')}
+                  slotProps={{
+                    primary: { sx: { fontSize: '0.9375rem', fontWeight: 500 } }
+                  }}
+                />
+              )}
+            </ListItemButton>
+          )}
+        </NavLink>
+      </Tooltip>
+
+      <Tooltip
         title={isCollapsed ? t('sidebar.signOut') : ''}
+        placement="right"
+        arrow
       >
-        <span className="sidebar__icon">
-          <LogOut size={20} />
-        </span>
-        {!isCollapsed && (
-          <span className="sidebar__label">{t('sidebar.signOut')}</span>
-        )}
-      </button>
-    </div>
+        <ListItemButton
+          onClick={logout}
+          sx={{
+            justifyContent: isCollapsed ? 'center' : 'flex-start',
+            px: isCollapsed ? 1 : 1.5,
+            py: 0.875,
+            color: 'error.main',
+            '&:hover': {
+              bgcolor: 'rgba(239,68,68,0.08)',
+              color: 'error.main'
+            }
+          }}
+        >
+          <ListItemIcon
+            sx={{
+              minWidth: isCollapsed ? 0 : 36,
+              color: 'inherit',
+              justifyContent: 'center'
+            }}
+          >
+            <LogOut size={20} />
+          </ListItemIcon>
+          {!isCollapsed && (
+            <ListItemText
+              primary={t('sidebar.signOut')}
+              slotProps={{
+                primary: { sx: { fontSize: '0.9375rem', fontWeight: 500 } }
+              }}
+            />
+          )}
+        </ListItemButton>
+      </Tooltip>
+    </Box>
   );
 };

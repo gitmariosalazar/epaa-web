@@ -18,9 +18,11 @@ export const validateStep = (
 
   if (step === 1) {
     if (!form.clientId.trim())
-      errors.clientId = 'Ingresa y busca la cédula o RUC del cliente.';
+      errors.clientId = 'Busca por cédula o clave catastral y selecciona una acometida.';
     if (!form.clientName.trim())
-      errors.clientName = 'El cliente no fue encontrado. Realiza una búsqueda válida.';
+      errors.clientName = 'No se ha seleccionado un cliente. Realiza una búsqueda.';
+    if (!form.cadastralKey.trim())
+      errors.cadastralKey = 'Selecciona una acometida de la tabla de resultados.';
   }
 
   if (step === 2) {

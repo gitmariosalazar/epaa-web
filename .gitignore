@@ -25,6 +25,8 @@ dist-ssr
 .informe.md
 .env
 
+docs
+
 conv.md
 #deploy.dev.sh
 #deploy.prod.sh

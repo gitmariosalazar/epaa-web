@@ -8,6 +8,10 @@ import { DeleteUserUseCase } from '@/modules/users/application/usecases/DeleteUs
 import { GetUserDetailUseCase } from '@/modules/users/application/usecases/GetUserDetailUseCase';
 import { GetProfileUseCase } from '@/modules/users/application/usecases/GetProfileUseCase';
 import { ChangePasswordUseCase } from '@/modules/users/application/usecases/ChangePasswordUseCase';
+import { ExistsByUsernameUseCase } from '@/modules/users/application/usecases/ExistsByUsernameUseCase';
+// Cross-module dependency: Customers module (DIP — depends on abstraction)
+import { CustomerRepositoryImpl } from '@/modules/customers/infrastructure/repositories/CustomerRepositoryImpl';
+import { GetCustomerByIdentificationUseCase } from '@/modules/customers/application/usecases/GetCustomerByIdentificationUseCase';
 
 interface UsersContextType {
   getUsersUseCase: GetUsersUseCase;
@@ -17,6 +21,8 @@ interface UsersContextType {
   getUserDetailUseCase: GetUserDetailUseCase;
   getProfileUseCase: GetProfileUseCase;
   changePasswordUseCase: ChangePasswordUseCase;
+  getCustomerByIdentificationUseCase: GetCustomerByIdentificationUseCase;
+  existsByUsernameUseCase: ExistsByUsernameUseCase;
 }
 
 const UsersContext = createContext<UsersContextType | null>(null);
@@ -25,6 +31,7 @@ export const UsersProvider: React.FC<{ children: ReactNode }> = ({
   children
 }) => {
   const userRepository = useMemo(() => new UserRepositoryImpl(), []);
+  const customerRepository = useMemo(() => new CustomerRepositoryImpl(), []);
 
   const getUsersUseCase = useMemo(
     () => new GetUsersUseCase(userRepository),
@@ -54,6 +61,16 @@ export const UsersProvider: React.FC<{ children: ReactNode }> = ({
     () => new ChangePasswordUseCase(userRepository),
     [userRepository]
   );
+  // Usa el repositorio de customers para buscar por cédula (GET /Customers/get-customer-by-id/:id)
+  const getCustomerByIdentificationUseCase = useMemo(
+    () => new GetCustomerByIdentificationUseCase(customerRepository),
+    [customerRepository]
+  );
+  // Validación pre-creación: verifica si el username ya existe
+  const existsByUsernameUseCase = useMemo(
+    () => new ExistsByUsernameUseCase(userRepository),
+    [userRepository]
+  );
 
   const value = {
     getUsersUseCase,
@@ -62,7 +79,9 @@ export const UsersProvider: React.FC<{ children: ReactNode }> = ({
     deleteUserUseCase,
     getUserDetailUseCase,
     getProfileUseCase,
-    changePasswordUseCase
+    changePasswordUseCase,
+    getCustomerByIdentificationUseCase,
+    existsByUsernameUseCase
   };
 
   return (

@@ -69,9 +69,60 @@ export class UserRepositoryImpl implements UserRepository {
     return response.data.data;
   }
 
+  async findByIdCard(idCard: string): Promise<User | null> {
+    try {
+      // El backend retorna UserEmployeeResponse con campos distintos a User
+      // (employeeId, fullName, etc.). Mapeamos explícitamente.
+      const response = await this.client.get<ApiResponse<Record<string, any>>>(
+        `/user-employee-gateway/find-by-id-card/${idCard}`
+      );
+      const data = response.data.data;
+      if (!data) return null;
+
+      // Mapper: UserEmployeeResponse → User
+      const user: User = {
+        userId: data.userId || data.employeeId || '',
+        username: data.username || '',
+        email: data.email || data.internalEmail || '',
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        dateOfBirth: data.dateOfBirth || undefined,
+        sexId: data.sexId || undefined,
+        idCard: data.idCard || undefined,
+        citizenId: data.citizenId || undefined,
+        positionId: data.positionId || undefined,
+        contractTypeId: data.contractTypeId || undefined,
+        employeeStatusId: data.employeeStatusId || undefined,
+        hireDate: data.hireDate || undefined,
+        terminationDate: data.terminationDate || undefined,
+        baseSalary: data.baseSalary || undefined,
+        supervisorId: data.supervisorId || undefined,
+        assignedZones: data.assignedZones || [],
+        driverLicense: data.driverLicense || undefined,
+        hasCompanyVehicle: data.hasCompanyVehicle ?? false,
+        internalPhone: data.internalPhone || undefined,
+        internalEmail: data.internalEmail || undefined,
+        photoUrl: data.photoUrl || undefined,
+        roles: data.roles || [],
+        permissions: data.permissions || [],
+        isActive: data.isActive ?? true,
+        registeredAt: data.createdAt || new Date(),
+        lastLogin: null,
+        failedAttempts: 0,
+        twoFactorEnabled: false
+      };
+
+      return user;
+    } catch (error) {
+      // Retorna null si no se encuentra (404) — no lanza error
+      console.warn('[UserRepository] findByIdCard failed:', error);
+      return null;
+    }
+  }
+
   async createUser(user: CreateUserEmployeeRequest): Promise<User> {
     const response = await this.client.post<ApiResponse<User>>(
-      '/users-gateway/create-user',
+      '/user-employee-gateway/create',
       user
     );
     return response.data.data;

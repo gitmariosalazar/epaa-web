@@ -1,6 +1,6 @@
 import React from 'react';
+import { Box, IconButton, Tooltip, Typography } from '@mui/material';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Tooltip } from '../../common/Tooltip/Tooltip';
 
 interface SidebarHeaderProps {
   isCollapsed: boolean;
@@ -10,15 +10,49 @@ interface SidebarHeaderProps {
 export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   isCollapsed,
   toggleSidebar
-}) => {
-  return (
-    <div className="sidebar__header">
-     <div className="sidebar__logo">{isCollapsed ? 'EA' : 'EPAA-AA'}</div>
-     <Tooltip content={isCollapsed ? 'Expandir' : 'Contraer'} position="bottom" themeColor='info'>
-       <button className="sidebar__toggle" onClick={toggleSidebar}>
-         {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-       </button>
-     </Tooltip>
-    </div>
-  );
-};
+}) => (
+  <Box
+    sx={{
+      height: 64,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: isCollapsed ? 'center' : 'space-between',
+      px: isCollapsed ? 1 : 2,
+      borderBottom: 1,
+      borderColor: 'divider',
+      flexShrink: 0
+    }}
+  >
+    {!isCollapsed && (
+      <Typography
+        variant="h6"
+        sx={{
+          fontWeight: 800,
+          fontSize: '1.25rem',
+          letterSpacing: '-0.025em',
+          color: 'primary.main',
+          userSelect: 'none',
+          whiteSpace: 'nowrap'
+        }}
+      >
+        EPAA-AA
+      </Typography>
+    )}
+    <Tooltip
+      title={isCollapsed ? 'Expandir' : 'Contraer'}
+      placement="right"
+      arrow
+    >
+      <IconButton
+        onClick={toggleSidebar}
+        size="small"
+        sx={{
+          color: 'text.secondary',
+          '&:hover': { color: 'text.primary', bgcolor: 'action.hover' }
+        }}
+      >
+        {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+      </IconButton>
+    </Tooltip>
+  </Box>
+);

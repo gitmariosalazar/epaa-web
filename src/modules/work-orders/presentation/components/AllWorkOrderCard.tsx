@@ -16,13 +16,17 @@ import {
   Eye,
   FileText,
   Hash,
-  Settings2
+  Settings2,
+  Tag
 } from 'lucide-react';
 import type { WorkOrderListItem } from '../../domain/schemas/dto/response/work-orders.get.response';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { getEstadoOrdenConfig } from './WorkOrderConfig';
+import { ConverDateTimeToText } from '@/shared/utils/datetime/ConverDate';
+import { Alert } from '@/shared/presentation/components/Alert';
+import { MdOutlineDescription } from 'react-icons/md';
 
 // ── Priority label/color map ─────────────────────────────────────────────────
 const PRIORITY_MAP: Record<number, { label: string; color: string }> = {
@@ -70,11 +74,13 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
 
   const fechaStr = orden.creationDate
     ? new Date(orden.creationDate).toLocaleDateString('es-EC', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      })
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    })
     : '—';
+
+  console.log(orden);
 
   return (
     <article
@@ -165,26 +171,36 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
             size="sm"
             leftIcon={<Settings2 size={14} />}
             onClick={() => onProcess(orden.orderCode)}
+            disabled={orden.status === 'COMPLETADA' || orden.status === 'CANCELADA'}
           >
             Procesar
           </Button>
           <Button
             id={`btn-wo-view-${orden.workOrderId}`}
-            variant="ghost"
+            variant="dashed"
             size="sm"
             leftIcon={<Eye size={14} />}
             onClick={() => onView(orden.orderCode)}
           >
             Ver detalle
           </Button>
-          <button
-            className="wo-list-card__expand-btn"
-            onClick={() => setExpanded((e) => !e)}
-            aria-label={expanded ? 'Ocultar detalles' : 'Ver más detalles'}
-            aria-expanded={expanded}
+          <Tooltip
+            content={
+              expanded ? 'Ocultar detalles' : 'Ver más detalles'
+            }
+            position='top'
+            followCursor={false}
           >
-            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </button>
+            <Button
+              onClick={() => setExpanded((e) => !e)}
+              size='sm'
+              variant='dashed'
+              aria-label={expanded ? 'Ocultar detalles' : 'Ver más detalles'}
+              aria-expanded={expanded}
+            >
+              {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </Button>
+          </Tooltip>
         </div>
       </div>
 
@@ -194,34 +210,46 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
           <div className="wo-list-card__expanded-grid">
             {orden.assignationDate && (
               <div className="wo-list-card__exp-item">
-                <span className="wo-list-card__exp-label">Asignación</span>
-                <span className="wo-list-card__exp-value">
-                  {new Date(orden.assignationDate).toLocaleDateString('es-EC')}
-                </span>
+                <span className="wo-list-card__exp-label">Fecha de asignación</span>
+                <ColorChip label={ConverDateTimeToText(orden.assignationDate)} icon={<Calendar size={12} />}
+                  variant="ghost"
+                  color="var(--info, #10b981)"
+                  borderRadius={4}
+                  size='sm'
+                />
               </div>
             )}
             {orden.completionDate && (
               <div className="wo-list-card__exp-item">
-                <span className="wo-list-card__exp-label">Completada</span>
-                <span className="wo-list-card__exp-value">
-                  {new Date(orden.completionDate).toLocaleDateString('es-EC')}
-                </span>
+                <span className="wo-list-card__exp-label">Fecha de finalización</span>
+                <ColorChip label={ConverDateTimeToText(orden.completionDate)} icon={<Calendar size={12} />}
+                  variant="ghost"
+                  color="var(--success, #3b82f6)"
+                  borderRadius={4}
+                  size='sm'
+                />
               </div>
             )}
             {orden.cadastralKey && (
               <div className="wo-list-card__exp-item">
                 <span className="wo-list-card__exp-label">Clave Catastral</span>
-                <span className="wo-list-card__exp-value">
-                  {orden.cadastralKey}
-                </span>
+                <ColorChip label={orden.cadastralKey} icon={<Tag size={12} />}
+                  variant="ghost"
+                  color="var(--info, #3b82f6)"
+                  borderRadius={4}
+                  size='sm'
+                />
               </div>
             )}
             {orden.description && (
               <div className="wo-list-card__exp-item wo-list-card__exp-item--full">
                 <span className="wo-list-card__exp-label">Descripción</span>
-                <span className="wo-list-card__exp-value">
-                  {orden.description}
-                </span>
+                <Alert
+                  message={orden.description}
+                  type='gray'
+                  icon={<MdOutlineDescription size={25} />}
+                  dismissible={false}
+                />
               </div>
             )}
             {!orden.assignationDate &&

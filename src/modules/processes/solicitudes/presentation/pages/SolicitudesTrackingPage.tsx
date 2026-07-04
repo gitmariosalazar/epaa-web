@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import '../styles/SolicitudesTrackingPage.css';
+import { Input } from '@/shared/presentation/components/Input/Input';
 
 // ── Toolbar ───────────────────────────────────────────────────────────────────
 interface ToolbarProps {
@@ -45,13 +46,15 @@ const TrackingToolbar: React.FC<ToolbarProps> = ({
     <div className="trk-toolbar">
       {/* Search */}
       <div className="trk-toolbar__search">
-        <Search size={14} className="trk-toolbar__search-icon" />
-        <input
+        <Input
           type="text"
           placeholder="Buscar por código, dirección, estado..."
           value={search}
+          size='compact'
+          width={350}
           onChange={(e) => onSearchChange(e.target.value)}
           id="trk-search-input"
+          leftIcon={<Search size={14} />}
         />
       </div>
 

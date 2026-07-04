@@ -22,6 +22,7 @@ import { CustomerRepositoryImpl } from '@/modules/customers/infrastructure/repos
 import { UpdateCustomerUseCase } from '@/modules/customers/application/usecases/UpdateCustomerUseCase';
 import { UpdateCompanyUseCase } from '@/modules/customers/application/usecases/UpdateCompanyUseCase';
 import { GetLiveUpdateMapConnectionsUseCase } from '../../application/usecases/GetLiveUpdateMapConnectionsUseCase';
+import { FindConnectionAndPropertyByCadastralKeyOrCardIdUseCase } from '../../application/usecases/FindConnectionAndPropertyByCadastralKeyOrCardIdUseCase';
 
 interface ConnectionContextType {
   getConnectionsUseCase: GetConnectionsUseCase;
@@ -39,6 +40,7 @@ interface ConnectionContextType {
   updateCustomerUseCase: UpdateCustomerUseCase;
   updateCompanyUseCase: UpdateCompanyUseCase;
   getLiveUpdateMapConnectionsUseCase: GetLiveUpdateMapConnectionsUseCase;
+  findConnectionAndPropertyByCadastralKeyOrCardIdUseCase: FindConnectionAndPropertyByCadastralKeyOrCardIdUseCase;
 }
 
 const ConnectionContext = createContext<ConnectionContextType | null>(null);
@@ -85,7 +87,11 @@ export const ConnectionProvider: React.FC<{ children: ReactNode }> = ({
       updateCustomerUseCase: new UpdateCustomerUseCase(customerRepository),
       updateCompanyUseCase: new UpdateCompanyUseCase(companyRepository),
       getLiveUpdateMapConnectionsUseCase:
-        new GetLiveUpdateMapConnectionsUseCase(connectionRepository)
+        new GetLiveUpdateMapConnectionsUseCase(connectionRepository),
+      findConnectionAndPropertyByCadastralKeyOrCardIdUseCase:
+        new FindConnectionAndPropertyByCadastralKeyOrCardIdUseCase(
+          connectionRepository
+        )
     };
   }, [connectionRepository, customerRepository, companyRepository]);
 

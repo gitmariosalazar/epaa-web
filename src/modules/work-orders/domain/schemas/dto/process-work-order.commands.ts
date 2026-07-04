@@ -61,10 +61,8 @@ export interface AddAdditionalCostCommand {
 
 export interface AddWorkOrderAttachmentCommand {
   workOrderId: string;
-  fileName: string;
-  fileType: string;
-  fileUrl: string;
   createdByUserId: string;
+  files: File[];
 }
 
 export interface CreateQualityControlCommand {
@@ -104,4 +102,44 @@ export interface RemoveWorkerFromWorkOrderCommand {
   workOrderId: string;
   workerId: string;
   removedByUserId: string;
+}
+
+// ─── Lotes (Batch) ─────────────────────────────────────────────────────────────
+
+export interface WorkOrderMaterialItemCommand {
+  materialId: number;
+  quantity: number;
+  unitCost: number;
+  codigoMaterial?: string;
+  nombreMaterial?: string;
+}
+
+export interface AddWorkOrderMaterialsBatchCommand {
+  workOrderId: string;
+  createdByUserId: string;
+  materials: WorkOrderMaterialItemCommand[];
+}
+
+export interface AdditionalCostItemCommand {
+  concept: string;
+  quantity: number;
+  unitCost: number;
+}
+
+export interface AddAdditionalCostsBatchCommand {
+  workOrderId: string;
+  createdByUserId: string;
+  costs: AdditionalCostItemCommand[];
+}
+
+export interface WorkOrderWorkerItemCommand {
+  workerId: string;
+  roleId?: number | null;
+  isResponsible?: boolean;
+}
+
+export interface AddWorkersBatchToWorkOrderCommand {
+  workOrderId: string;
+  assignedByUserId: string;
+  workers: WorkOrderWorkerItemCommand[];
 }

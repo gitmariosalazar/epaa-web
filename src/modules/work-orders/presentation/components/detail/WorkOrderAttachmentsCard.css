@@ -1,0 +1,126 @@
+.wo-attachments-upload-container {
+  background: var(--surface);
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  margin-top: 1rem;
+}
+
+.wo-attachments-upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.wo-attachments-upload-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.wo-attachments-upload-trigger {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-hover);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.wo-attachments-upload-trigger.dragging {
+  border: 2px dashed var(--primary-color, #0891b2);
+}
+
+.wo-attachments-upload-trigger__icon {
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.wo-attachments-upload-trigger__text {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.wo-attachments-upload-trigger__input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.wo-attachments-preview-card {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.wo-attachments-preview-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wo-attachments-preview-card__doc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+}
+
+.wo-attachments-preview-card__doc-icon {
+  color: #3b82f6;
+  margin-bottom: 0.25rem;
+}
+
+.wo-attachments-preview-card__doc-name {
+  font-size: 0.55rem;
+  color: var(--text-primary);
+  text-align: center;
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wo-attachments-preview-card__remove-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.wo-attachments-upload-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}

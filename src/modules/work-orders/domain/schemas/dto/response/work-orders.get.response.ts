@@ -10,8 +10,8 @@ export interface TrabajadorAsignado {
 export interface MaterialUtilizado {
   idDetalle: string; // UUID
   idMaterial: string; // UUID
+  codigoMaterial: string | null; // ALTER TABLE agregado
   nombreMaterial: string | null; // ALTER TABLE agregado
-  descripcion: string | null; // ALTER TABLE agregado
   cantidad: number;
   costoUnitario: number;
   subtotal: number;

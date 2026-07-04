@@ -28,10 +28,10 @@ import { StartPreparationUseCase } from '../../application/usecases/StartPrepara
 import { CreatePreparationInspectionUseCase } from '../../application/usecases/CreatePreparationInspectionUseCase';
 import { ResolvePreparationInspectionUseCase } from '../../application/usecases/ResolvePreparationInspectionUseCase';
 import { FinishExecutionUseCase } from '../../application/usecases/FinishExecutionUseCase';
-import { AddWorkerToWorkOrderUseCase } from '../../application/usecases/AddWorkerToWorkOrderUseCase';
+import { AddWorkersBatchToWorkOrderUseCase } from '../../application/usecases/AddWorkersBatchToWorkOrderUseCase';
 import { RemoveWorkerFromWorkOrderUseCase } from '../../application/usecases/RemoveWorkerFromWorkOrderUseCase';
-import { AddWorkOrderMaterialUseCase } from '../../application/usecases/AddWorkOrderMaterialUseCase';
-import { AddAdditionalCostUseCase } from '../../application/usecases/AddAdditionalCostUseCase';
+import { AddWorkOrderMaterialsBatchUseCase } from '../../application/usecases/AddWorkOrderMaterialsBatchUseCase';
+import { AddAdditionalCostsBatchUseCase } from '../../application/usecases/AddAdditionalCostsBatchUseCase';
 import { AddWorkOrderAttachmentUseCase } from '../../application/usecases/AddWorkOrderAttachmentUseCase';
 import { CreateQualityControlUseCase } from '../../application/usecases/CreateQualityControlUseCase';
 import { CompleteWorkOrderUseCase } from '../../application/usecases/CompleteWorkOrderUseCase';
@@ -71,8 +71,6 @@ import { WorkOrderPhaseActionBtn } from '../components/WorkOrderPhaseActionBtn';
 import { AssignToCrewModal } from '../components/modals/AssignToCrewModal';
 import { AssignToWorkerModal } from '../components/modals/AssignToWorkerModal';
 import { CreateChecklistModal } from '../components/modals/CreateChecklistModal';
-import { AddMaterialModal } from '../components/modals/AddMaterialModal';
-import { AddCostModal } from '../components/modals/AddCostModal';
 import { AddAttachmentModal } from '../components/modals/AddAttachmentModal';
 import { CreateQualityControlModal } from '../components/modals/CreateQualityControlModal';
 import { RegisterSurveyModal } from '../components/modals/RegisterSurveyModal';
@@ -147,8 +145,6 @@ export const WorkOrderDetailPage: React.FC = () => {
   const [assignWorkerOpen, setAssignWorkerOpen] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(false);
   const [isResolvingChecklist, setIsResolvingChecklist] = useState(false);
-  const [addMaterialOpen, setAddMaterialOpen] = useState(false);
-  const [addCostOpen, setAddCostOpen] = useState(false);
   const [addAttachmentOpen, setAddAttachmentOpen] = useState(false);
   const [manageWorkersOpen, setManageWorkersOpen] = useState(false);
   const [qualityControlOpen, setQualityControlOpen] = useState(false);
@@ -206,20 +202,20 @@ export const WorkOrderDetailPage: React.FC = () => {
     () => new FinishExecutionUseCase(repo),
     [repo]
   );
-  const addWorkerUseCase = React.useMemo(
-    () => new AddWorkerToWorkOrderUseCase(repo),
+  const addWorkersBatchUseCase = React.useMemo(
+    () => new AddWorkersBatchToWorkOrderUseCase(repo),
     [repo]
   );
   const removeWorkerUseCase = React.useMemo(
     () => new RemoveWorkerFromWorkOrderUseCase(repo),
     [repo]
   );
-  const materialUseCase = React.useMemo(
-    () => new AddWorkOrderMaterialUseCase(repo),
+  const materialsBatchUseCase = React.useMemo(
+    () => new AddWorkOrderMaterialsBatchUseCase(repo),
     [repo]
   );
-  const costUseCase = React.useMemo(
-    () => new AddAdditionalCostUseCase(repo),
+  const costsBatchUseCase = React.useMemo(
+    () => new AddAdditionalCostsBatchUseCase(repo),
     [repo]
   );
   const attachmentUseCase = React.useMemo(
@@ -555,32 +551,28 @@ export const WorkOrderDetailPage: React.FC = () => {
     reload();
   }, [reload]);
 
-  const handleAddWorker = async (
-    workerId: string,
-    roleId: number | null,
-    isResponsible: boolean
+  const handleSaveWorkersBatch = async (
+    workers: { workerId: string; roleId?: number | null; isResponsible?: boolean }[]
   ) => {
     if (!orden) return;
     setIsModalLoading(true);
     try {
-      await addWorkerUseCase.execute({
+      await addWorkersBatchUseCase.execute({
         workOrderId: orden.idOrdenTrabajo,
-        workerId,
-        roleId: roleId ?? undefined,
-        isResponsible,
-        assignedByUserId: currentUserId
+        assignedByUserId: currentUserId,
+        workers
       });
       MessageToastCustom(
         'success',
         'Personal Agregado',
-        'El trabajador fue asignado a la OT.'
+        `Se agregaron ${workers.length} trabajador(es) a la OT.`
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
         'error',
         'Error',
-        e.message || 'No se pudo agregar al trabajador.'
+        e.message || 'No se pudo agregar al personal.'
       );
     } finally {
       setIsModalLoading(false);
@@ -613,66 +605,72 @@ export const WorkOrderDetailPage: React.FC = () => {
     }
   };
 
-  const handleAddMaterial = async (
-    materialId: number,
-    quantity: number,
-    unitCost: number
+  const handleSaveMaterialsBatch = async (
+    materials: { materialId: number; quantity: number; unitCost: number }[]
   ) => {
     if (!orden) return;
     setIsModalLoading(true);
     try {
-      await materialUseCase.execute({
+      await materialsBatchUseCase.execute({
         workOrderId: orden.idOrdenTrabajo,
-        materialId,
-        quantity,
-        unitCost,
-        createdByUserId: currentUserId
+        createdByUserId: currentUserId,
+        materials
       });
       MessageToastCustom(
         'success',
-        'Material Registrado',
-        'El material fue agregado a la OT.'
+        'Materiales Registrados',
+        `Se agregaron ${materials.length} material(es) a la OT.`
       );
-      setAddMaterialOpen(false);
       reload();
     } catch (e: any) {
       MessageToastCustom(
         'error',
         'Error',
-        e.message || 'No se pudo registrar el material.'
+        e.message || 'No se pudo registrar los materiales.'
       );
     } finally {
       setIsModalLoading(false);
     }
   };
 
-  const handleAddCost = async (
-    concept: string,
-    quantity: number,
-    unitCost: number
+  const handleRemoveMaterial = async (_idDetalle: string | number) => {
+    MessageToastCustom(
+      'info',
+      'En desarrollo',
+      'La función para remover materiales está en desarrollo.'
+    );
+  };
+
+  const handleRemoveCost = async (_idCosto: string | number) => {
+    MessageToastCustom(
+      'info',
+      'En desarrollo',
+      'La función para remover costos adicionales está en desarrollo.'
+    );
+  };
+
+  const handleSaveCostsBatch = async (
+    costs: { concept: string; quantity: number; unitCost: number }[]
   ) => {
     if (!orden) return;
     setIsModalLoading(true);
     try {
-      await costUseCase.execute({
+      await costsBatchUseCase.execute({
         workOrderId: orden.idOrdenTrabajo,
-        concept,
-        quantity,
-        unitCost,
-        createdByUserId: currentUserId
+        createdByUserId: currentUserId,
+        costs
       });
       MessageToastCustom(
         'success',
-        'Costo Registrado',
-        'El costo adicional fue registrado.'
+        'Costos Registrados',
+        `Se agregaron ${costs.length} costo(s) adicional(es).`
       );
-      setAddCostOpen(false);
       reload();
     } catch (e: any) {
       MessageToastCustom(
         'error',
         'Error',
-        e.message || 'No se pudo registrar el costo.'
+        e.message || 'No se pudo registrar los costos.'
       );
     } finally {
       setIsModalLoading(false);
@@ -680,24 +678,20 @@ export const WorkOrderDetailPage: React.FC = () => {
   };
 
   const handleAddAttachment = async (
-    fileName: string,
-    fileType: string,
-    fileUrl: string
+    files: File[]
   ) => {
     if (!orden) return;
     setIsModalLoading(true);
     try {
       await attachmentUseCase.execute({
         workOrderId: orden.idOrdenTrabajo,
-        fileName,
-        fileType,
-        fileUrl,
+        files,
         createdByUserId: currentUserId
       });
       MessageToastCustom(
         'success',
         'Evidencia Adjuntada',
-        'El archivo fue adjuntado a la OT.'
+        `${files.length} archivo(s) adjuntado(s) a la OT.`
       );
       setAddAttachmentOpen(false);
       reload();
@@ -1169,17 +1163,24 @@ export const WorkOrderDetailPage: React.FC = () => {
           <WorkOrderMaterialsCard
             materiales={orden.materiales ?? []}
             costosAdicionales={orden.costosAdicionales ?? []}
-            costoTotalMateriales={orden.costoTotalMateriales ?? 0}
-            costoTotalAdicionales={orden.costoTotalAdicionales ?? 0}
-            costoTotalOrden={orden.costoTotalOrden ?? 0}
-            onAddMaterial={
+            onSaveMaterialsBatch={
               ['EN_PROCESO', 'EN_PROCESO_INSPECCION', 'EN_PROCESO_INSTALACION'].includes(orden.estado ?? '')
-                ? handleAddMaterial
+                ? handleSaveMaterialsBatch
                 : undefined
             }
-            onAddCost={
+            onRemoveMaterial={
               ['EN_PROCESO', 'EN_PROCESO_INSPECCION', 'EN_PROCESO_INSTALACION'].includes(orden.estado ?? '')
-                ? handleAddCost
+                ? handleRemoveMaterial
+                : undefined
+            }
+            onSaveCostsBatch={
+              ['EN_PROCESO', 'EN_PROCESO_INSPECCION', 'EN_PROCESO_INSTALACION'].includes(orden.estado ?? '')
+                ? handleSaveCostsBatch
+                : undefined
+            }
+            onRemoveCost={
+              ['EN_PROCESO', 'EN_PROCESO_INSPECCION', 'EN_PROCESO_INSTALACION'].includes(orden.estado ?? '')
+                ? handleRemoveCost
                 : undefined
             }
           />
@@ -1244,25 +1245,7 @@ export const WorkOrderDetailPage: React.FC = () => {
         />
       )}
 
-      {addMaterialOpen && orden && (
-        <AddMaterialModal
-          isOpen={addMaterialOpen}
-          onClose={() => setAddMaterialOpen(false)}
-          workOrderId={orden.idOrdenTrabajo}
-          onSubmit={handleAddMaterial}
-          isLoading={isModalLoading}
-        />
-      )}
 
-      {addCostOpen && orden && (
-        <AddCostModal
-          isOpen={addCostOpen}
-          onClose={() => setAddCostOpen(false)}
-          workOrderId={orden.idOrdenTrabajo}
-          onSubmit={handleAddCost}
-          isLoading={isModalLoading}
-        />
-      )}
 
       {addAttachmentOpen && orden && (
         <AddAttachmentModal
@@ -1286,7 +1269,7 @@ export const WorkOrderDetailPage: React.FC = () => {
             roleName: w.rol ?? undefined,
             isResponsible: w.esResponsable
           }))}
-          onAddWorker={handleAddWorker}
+          onSaveWorkersBatch={handleSaveWorkersBatch}
           onRemoveWorker={handleRemoveWorker}
           isLoading={isModalLoading}
         />

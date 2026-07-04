@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useImperativeHandle } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ChevronLeft,
   ChevronRight,
@@ -31,6 +32,7 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
     }>({ horizontal: 'left', vertical: 'bottom' });
     const containerRef = useRef<HTMLDivElement>(null);
     const popoverRef = useRef<HTMLDivElement>(null);
+    const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
 
     // Parse initial date or default to today in Ecuador time
     const initialDate = value
@@ -48,13 +50,12 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
       setManualValue(value || '');
     }, [value]);
 
-    // Close calendar if clicking outside
+    // Close calendar if clicking outside (check both container and portal popover)
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
-        if (
-          containerRef.current &&
-          !containerRef.current.contains(event.target as Node)
-        ) {
+        const isInContainer = containerRef.current?.contains(event.target as Node);
+        const isInPopover = popoverRef.current?.contains(event.target as Node);
+        if (!isInContainer && !isInPopover) {
           setIsOpen(false);
         }
       };
@@ -79,20 +80,31 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
       }
     }, [value]);
 
+    // Compute fixed position for the portal popover
+    const updatePopoverPosition = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const spaceRight = window.innerWidth - rect.left;
+        const spaceBottom = window.innerHeight - rect.bottom;
+        const horizontal = spaceRight < 300 ? 'right' : 'left';
+        const vertical = spaceBottom < 350 ? 'top' : 'bottom';
+        setAlignment({ horizontal, vertical });
+        setPopoverStyle({
+          position: 'fixed',
+          top: vertical === 'bottom' ? rect.bottom + 4 : undefined,
+          bottom: vertical === 'top' ? window.innerHeight - rect.top + 4 : undefined,
+          left: horizontal === 'left' ? rect.left : undefined,
+          right: horizontal === 'right' ? window.innerWidth - rect.right : undefined,
+          zIndex: 99999,
+          width: 280
+        });
+      }
+    };
+
     const toggleCalendar = () => {
       if (!disabled) {
         if (!isOpen) {
-          // Calculate alignment before opening
-          if (containerRef.current) {
-            const rect = containerRef.current.getBoundingClientRect();
-            const spaceRight = window.innerWidth - rect.left;
-            const spaceBottom = window.innerHeight - rect.bottom;
-
-            const horizontal = spaceRight < 300 ? 'right' : 'left';
-            const vertical = spaceBottom < 350 ? 'top' : 'bottom';
-
-            setAlignment({ horizontal, vertical });
-          }
+          updatePopoverPosition();
         }
         setIsOpen(!isOpen);
       }
@@ -332,10 +344,11 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
           <span className="datepicker-value">{getFormattedDateDisplay()}</span>
         </button>
 
-        {isOpen && (
+        {isOpen && createPortal(
           <div
             ref={popoverRef}
             className={`datepicker-popover ${alignment.horizontal === 'right' ? 'datepicker-popover--right-aligned' : ''} ${alignment.vertical === 'top' ? 'datepicker-popover--top-aligned' : ''}`}
+            style={popoverStyle}
           >
             <div className="datepicker-header">
               <button
@@ -418,7 +431,8 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
                 </Button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     );

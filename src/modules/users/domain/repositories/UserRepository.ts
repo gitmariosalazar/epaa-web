@@ -12,6 +12,7 @@ export interface UserRepository {
   getDetail(usernameOrEmail: string): Promise<User>;
   existsByUsername(username: string): Promise<boolean>;
   existsByEmail(email: string): Promise<boolean>;
+  findByIdCard(idCard: string): Promise<User | null>;
   deleteUser(userId: string): Promise<void>;
 
   // Commands

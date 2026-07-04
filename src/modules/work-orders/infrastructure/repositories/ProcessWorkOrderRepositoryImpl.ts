@@ -34,7 +34,10 @@ import type {
   AddQualityControlDetailCommand,
   RegisterSatisfactionSurveyCommand,
   AddWorkerToWorkOrderCommand,
-  RemoveWorkerFromWorkOrderCommand
+  RemoveWorkerFromWorkOrderCommand,
+  AddWorkOrderMaterialsBatchCommand,
+  AddAdditionalCostsBatchCommand,
+  AddWorkersBatchToWorkOrderCommand
 } from '../../domain/schemas/dto/process-work-order.commands';
 import type {
   OrdenTrabajoDetalle,
@@ -277,9 +280,21 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
   async addWorkOrderAttachment(
     addWorkOrderAttachment: AddWorkOrderAttachmentCommand
   ): Promise<ProcessWorkOrderResponse | null> {
+    const formData = new FormData();
+    formData.append('workOrderId', addWorkOrderAttachment.workOrderId);
+    formData.append('createdByUserId', addWorkOrderAttachment.createdByUserId);
+    addWorkOrderAttachment.files.forEach((file) => {
+      formData.append('files', file);
+    });
+
     const response = await this.client.post<ProcessWorkOrderResponse>(
       `${BASE}/add-work-order-attachment`,
-      addWorkOrderAttachment
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
     );
     return (response.data as any)?.data ?? null;
   }
@@ -409,6 +424,39 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
   ): Promise<ProcessWorkOrderResponse | null> {
     const response = await this.client.post<ProcessWorkOrderResponse>(
       `${BASE}/remove-worker`,
+      cmd
+    );
+    return (response.data as any)?.data ?? null;
+  }
+
+  // POST /process-work-orders/add-workers-batch
+  async addWorkersBatchToWorkOrder(
+    cmd: AddWorkersBatchToWorkOrderCommand
+  ): Promise<ProcessWorkOrderResponse | null> {
+    const response = await this.client.post<ProcessWorkOrderResponse>(
+      `${BASE}/add-workers-batch`,
+      cmd
+    );
+    return (response.data as any)?.data ?? null;
+  }
+
+  // POST /process-work-orders/add-work-order-materials-batch
+  async addWorkOrderMaterialsBatch(
+    cmd: AddWorkOrderMaterialsBatchCommand
+  ): Promise<ProcessWorkOrderResponse | null> {
+    const response = await this.client.post<ProcessWorkOrderResponse>(
+      `${BASE}/add-work-order-materials-batch`,
+      cmd
+    );
+    return (response.data as any)?.data ?? null;
+  }
+
+  // POST /process-work-orders/add-additional-costs-batch
+  async addAdditionalCostsBatch(
+    cmd: AddAdditionalCostsBatchCommand
+  ): Promise<ProcessWorkOrderResponse | null> {
+    const response = await this.client.post<ProcessWorkOrderResponse>(
+      `${BASE}/add-additional-costs-batch`,
       cmd
     );
     return (response.data as any)?.data ?? null;

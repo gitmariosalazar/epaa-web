@@ -11,11 +11,13 @@ interface InputProps extends Omit<
   leftIcon?: React.ReactNode;
   size?: 'small' | 'compact' | 'medium' | 'large';
   focused?: boolean;
+  /** Sets the width of the input container. */
+  width?: string | number;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
-    { label, error, info, leftIcon, className = '', size = 'medium', focused, ...props },
+    { label, error, info, leftIcon, className = '', size = 'medium', focused, width, style, ...props },
     ref
   ) => {
     const localRef = useRef<HTMLInputElement>(null);
@@ -37,8 +39,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       }
     };
 
+    const containerStyle: React.CSSProperties = {
+      ...(width !== undefined
+        ? { width: typeof width === 'number' ? `${width}px` : width }
+        : {}),
+      ...style
+    };
+
     return (
-      <div className={`input-component input--${size} ${className}`}>
+      <div className={`input-component input--${size} ${className}`} style={containerStyle}>
         {label && (
           <label className="input__label">
             {label}

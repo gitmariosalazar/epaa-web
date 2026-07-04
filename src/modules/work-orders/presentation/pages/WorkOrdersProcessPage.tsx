@@ -39,10 +39,10 @@ import { StartPreparationUseCase } from '../../application/usecases/StartPrepara
 import { CreatePreparationInspectionUseCase } from '../../application/usecases/CreatePreparationInspectionUseCase';
 import { ResolvePreparationInspectionUseCase } from '../../application/usecases/ResolvePreparationInspectionUseCase';
 import { FinishExecutionUseCase } from '../../application/usecases/FinishExecutionUseCase';
-import { AddWorkerToWorkOrderUseCase } from '../../application/usecases/AddWorkerToWorkOrderUseCase';
+import { AddWorkersBatchToWorkOrderUseCase } from '../../application/usecases/AddWorkersBatchToWorkOrderUseCase';
 import { RemoveWorkerFromWorkOrderUseCase } from '../../application/usecases/RemoveWorkerFromWorkOrderUseCase';
-import { AddWorkOrderMaterialUseCase } from '../../application/usecases/AddWorkOrderMaterialUseCase';
-import { AddAdditionalCostUseCase } from '../../application/usecases/AddAdditionalCostUseCase';
+import { AddWorkOrderMaterialsBatchUseCase } from '../../application/usecases/AddWorkOrderMaterialsBatchUseCase';
+import { AddAdditionalCostsBatchUseCase } from '../../application/usecases/AddAdditionalCostsBatchUseCase';
 import { AddWorkOrderAttachmentUseCase } from '../../application/usecases/AddWorkOrderAttachmentUseCase';
 import { CreateQualityControlUseCase } from '../../application/usecases/CreateQualityControlUseCase';
 import { CompleteWorkOrderUseCase } from '../../application/usecases/CompleteWorkOrderUseCase';
@@ -93,6 +93,8 @@ import {
   ChevronRight
 } from 'lucide-react';
 import '../styles/WorkOrdersProcessPage.css';
+import { Input } from '@/shared/presentation/components/Input/Input';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 const STEPS = [
   { label: 'Recepción', icon: Inbox },
@@ -245,20 +247,20 @@ export const WorkOrdersProcessPage: React.FC = () => {
     () => new FinishExecutionUseCase(repo),
     [repo]
   );
-  const addWorkerUseCase = useMemo(
-    () => new AddWorkerToWorkOrderUseCase(repo),
+  const addWorkersBatchUseCase = useMemo(
+    () => new AddWorkersBatchToWorkOrderUseCase(repo),
     [repo]
   );
   const removeWorkerUseCase = useMemo(
     () => new RemoveWorkerFromWorkOrderUseCase(repo),
     [repo]
   );
-  const materialUseCase = useMemo(
-    () => new AddWorkOrderMaterialUseCase(repo),
+  const materialsBatchUseCase = useMemo(
+    () => new AddWorkOrderMaterialsBatchUseCase(repo),
     [repo]
   );
-  const costUseCase = useMemo(
-    () => new AddAdditionalCostUseCase(repo),
+  const costsBatchUseCase = useMemo(
+    () => new AddAdditionalCostsBatchUseCase(repo),
     [repo]
   );
   const attachmentUseCase = useMemo(
@@ -385,8 +387,13 @@ export const WorkOrdersProcessPage: React.FC = () => {
   useEffect(() => {
     if (!currentCode) return;
     let isMounted = true;
+    // Si ya hay una orden cargada, es un reload (agregar material/personal/costo)
+    // No mostrar loading spinner para evitar desmontaje del contenido y scroll jump
+    const isReload = orden !== null;
     const load = async () => {
-      setIsLoading(true);
+      if (!isReload) {
+        setIsLoading(true);
+      }
       setError(null);
       try {
         const [det, trk] = await Promise.all([
@@ -396,7 +403,9 @@ export const WorkOrdersProcessPage: React.FC = () => {
         if (isMounted) {
           setOrden(det);
           setTracking(trk);
-          setExecutionSubStep(0);
+          if (!isReload) {
+            setExecutionSubStep(0);
+          }
         }
       } catch (e: any) {
         if (isMounted)
@@ -409,6 +418,7 @@ export const WorkOrdersProcessPage: React.FC = () => {
     return () => {
       isMounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentCode, detalleUseCase, trackingUseCase, reloadTrigger]);
 
   // ── Search handler ───────────────────────────────────────────────────────────
@@ -725,32 +735,28 @@ export const WorkOrdersProcessPage: React.FC = () => {
   };
 
   // ── Personal en campo: Agregar / Remover trabajador ─────────────────────────
-  const handleAddWorker = async (
-    workerId: string,
-    roleId: number | null,
-    isResponsible: boolean
+  const handleSaveWorkersBatch = async (
+    workers: { workerId: string; roleId?: number | null; isResponsible?: boolean }[]
   ) => {
     if (!orden) return;
     setIsModalLoading(true);
     try {
-      await addWorkerUseCase.execute({
+      await addWorkersBatchUseCase.execute({
         workOrderId: orden.idOrdenTrabajo,
-        workerId,
-        roleId: roleId ?? undefined,
-        isResponsible,
-        assignedByUserId: currentUserId
+        assignedByUserId: currentUserId,
+        workers
       });
       MessageToastCustom(
         'success',
         'Personal Agregado',
-        'El trabajador fue asignado a la OT.'
+        `Se agregaron ${workers.length} trabajador(es) a la OT.`
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
         'error',
         'Error',
-        e.message || 'No se pudo agregar al trabajador.'
+        e.message || 'No se pudo agregar al personal.'
       );
     } finally {
       setIsModalLoading(false);
@@ -783,92 +789,96 @@ export const WorkOrdersProcessPage: React.FC = () => {
     }
   };
 
-  // ── Fase 4: Registrar material ───────────────────────────────────────────────
-  const handleAddMaterial = async (
-    materialId: number,
-    quantity: number,
-    unitCost: number
+  // ── Fase 4: Registrar materiales en lote ───────────────────────────────────────
+  const handleSaveMaterialsBatch = async (
+    materials: { materialId: number; quantity: number; unitCost: number; codigoMaterial?: string; nombreMaterial?: string }[]
   ) => {
     if (!orden) return;
     setIsModalLoading(true);
     try {
-      await materialUseCase.execute({
+      await materialsBatchUseCase.execute({
         workOrderId: orden.idOrdenTrabajo,
-        materialId,
-        quantity,
-        unitCost,
-        createdByUserId: currentUserId
+        createdByUserId: currentUserId,
+        materials
       });
       MessageToastCustom(
         'success',
-        'Material Registrado',
-        'El material fue agregado a la OT.'
+        'Materiales Registrados',
+        `Se agregaron ${materials.length} material(es) a la OT.`
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
         'error',
         'Error',
-        e.message || 'No se pudo registrar el material.'
+        e.message || 'No se pudo registrar los materiales.'
       );
     } finally {
       setIsModalLoading(false);
     }
   };
 
-  // ── Fase 4: Registrar costo adicional ────────────────────────────────────────
-  const handleAddCost = async (
-    concept: string,
-    quantity: number,
-    unitCost: number
+  // ── Fase 4: Registrar costos adicionales en lote ─────────────────────────────
+  const handleSaveCostsBatch = async (
+    costs: { concept: string; quantity: number; unitCost: number }[]
   ) => {
     if (!orden) return;
     setIsModalLoading(true);
     try {
-      await costUseCase.execute({
+      await costsBatchUseCase.execute({
         workOrderId: orden.idOrdenTrabajo,
-        concept,
-        quantity,
-        unitCost,
-        createdByUserId: currentUserId
+        createdByUserId: currentUserId,
+        costs
       });
       MessageToastCustom(
         'success',
-        'Costo Registrado',
-        'El costo adicional fue registrado.'
+        'Costos Registrados',
+        `Se agregaron ${costs.length} costo(s) adicional(es).`
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
         'error',
         'Error',
-        e.message || 'No se pudo registrar el costo.'
+        e.message || 'No se pudo registrar los costos.'
       );
     } finally {
       setIsModalLoading(false);
     }
+  };
+
+  const handleRemoveMaterial = async (_idDetalle: string | number) => {
+    MessageToastCustom(
+      'info',
+      'En desarrollo',
+      'La función para remover materiales está en desarrollo.'
+    );
+  };
+
+  const handleRemoveCost = async (_idCosto: string | number) => {
+    MessageToastCustom(
+      'info',
+      'En desarrollo',
+      'La función para remover costos adicionales está en desarrollo.'
+    );
   };
 
   // ── Fase 4: Adjuntar evidencia ───────────────────────────────────────────────
   const handleAddAttachment = async (
-    fileName: string,
-    fileType: string,
-    fileUrl: string
+    files: File[]
   ) => {
     if (!orden) return;
     setIsModalLoading(true);
     try {
       await attachmentUseCase.execute({
         workOrderId: orden.idOrdenTrabajo,
-        fileName,
-        fileType,
-        fileUrl,
+        files,
         createdByUserId: currentUserId
       });
       MessageToastCustom(
         'success',
         'Evidencia Adjuntada',
-        'El archivo fue adjuntado a la OT.'
+        `${files.length} archivo(s) adjuntado(s) a la OT.`
       );
       reload();
     } catch (e: any) {
@@ -977,7 +987,14 @@ export const WorkOrdersProcessPage: React.FC = () => {
   };
 
   const renderStepper = (estado: string) => {
-    const activeIndex = getActiveStepIndex(estado, executionSubStep);
+    let activeIndex = getActiveStepIndex(estado, executionSubStep);
+
+    // Si la orden ya tiene encuesta registrada y estamos en la fase de Cierre, 
+    // forzamos el índice a 7 para que el paso 6 (Cierre) aparezca como "isCompleted" con el check verde.
+    if (activeIndex === 6 && orden?.idEncuesta) {
+      activeIndex = 7;
+    }
+
     return (
       <div className="wo-stepper" role="progressbar" aria-label="Progreso de la Orden de Trabajo">
         {STEPS.map((step, idx) => {
@@ -1058,8 +1075,15 @@ export const WorkOrdersProcessPage: React.FC = () => {
             <WorkOrderWorkersCard
               codigoOrden={orden.codigoOrden}
               personalAsignado={orden.personalAsignado ?? []}
-              onAddWorker={async (workerId) => {
-                await handleAssignWorker(workerId, 'Asignación inline de técnico responsable');
+              onSaveWorkersBatch={async (workers) => {
+                if (workers.length > 0) {
+                  // 1. Guardar todos los trabajadores en el lote para que se registren en la base de datos
+                  await handleSaveWorkersBatch(workers);
+                  
+                  // 2. Transicionar el estado de la OT a ASIGNADA usando el workerId del responsable
+                  const responsible = workers.find(w => w.isResponsible || w.roleId === 1) || workers[0];
+                  await handleAssignWorker(responsible.workerId, 'Asignación de personal y transición a estado ASIGNADA');
+                }
               }}
               isLoading={isModalLoading}
             />
@@ -1147,11 +1171,11 @@ export const WorkOrdersProcessPage: React.FC = () => {
             </div>
 
             <WorkOrderInfoCard orden={orden} />
-            
+
             <WorkOrderWorkersCard
               codigoOrden={orden.codigoOrden}
               personalAsignado={orden.personalAsignado ?? []}
-              onAddWorker={handleAddWorker}
+              onSaveWorkersBatch={handleSaveWorkersBatch}
               onRemoveWorker={handleRemoveWorker}
               isLoading={isModalLoading}
             />
@@ -1166,7 +1190,7 @@ export const WorkOrdersProcessPage: React.FC = () => {
             <WorkOrderWorkersCard
               codigoOrden={orden.codigoOrden}
               personalAsignado={orden.personalAsignado ?? []}
-              onAddWorker={handleAddWorker}
+              onSaveWorkersBatch={handleSaveWorkersBatch}
               onRemoveWorker={handleRemoveWorker}
               isLoading={isModalLoading}
             />
@@ -1174,11 +1198,10 @@ export const WorkOrdersProcessPage: React.FC = () => {
             <WorkOrderMaterialsCard
               materiales={orden.materiales ?? []}
               costosAdicionales={orden.costosAdicionales ?? []}
-              costoTotalMateriales={orden.costoTotalMateriales ?? 0}
-              costoTotalAdicionales={orden.costoTotalAdicionales ?? 0}
-              costoTotalOrden={orden.costoTotalOrden ?? 0}
-              onAddMaterial={handleAddMaterial}
-              onAddCost={handleAddCost}
+              onSaveMaterialsBatch={handleSaveMaterialsBatch}
+              onRemoveMaterial={handleRemoveMaterial}
+              onSaveCostsBatch={handleSaveCostsBatch}
+              onRemoveCost={handleRemoveCost}
               isLoading={isModalLoading}
             />
 
@@ -1260,7 +1283,24 @@ export const WorkOrdersProcessPage: React.FC = () => {
             </div>
 
             <WorkOrderInfoCard orden={orden} />
-            
+
+            <WorkOrderWorkersCard
+              codigoOrden={orden.codigoOrden}
+              personalAsignado={orden.personalAsignado ?? []}
+              isLoading={false}
+            />
+
+            <WorkOrderMaterialsCard
+              materiales={orden.materiales ?? []}
+              costosAdicionales={orden.costosAdicionales ?? []}
+              isLoading={false}
+            />
+
+            <WorkOrderAttachmentsCard
+              adjuntos={orden.adjuntos ?? []}
+              isLoading={false}
+            />
+
             <WorkOrderQualityCard orden={orden} />
           </>
         );
@@ -1293,6 +1333,25 @@ export const WorkOrdersProcessPage: React.FC = () => {
 
             <WorkOrderInfoCard orden={orden} />
 
+            <WorkOrderWorkersCard
+              codigoOrden={orden.codigoOrden}
+              personalAsignado={orden.personalAsignado ?? []}
+              isLoading={false}
+            />
+
+            <WorkOrderMaterialsCard
+              materiales={orden.materiales ?? []}
+              costosAdicionales={orden.costosAdicionales ?? []}
+              isLoading={false}
+            />
+
+            <WorkOrderAttachmentsCard
+              adjuntos={orden.adjuntos ?? []}
+              isLoading={false}
+            />
+
+            <WorkOrderQualityCard orden={orden} />
+
             <WorkOrderSatisfactionCard orden={orden} />
           </>
         );
@@ -1305,12 +1364,12 @@ export const WorkOrdersProcessPage: React.FC = () => {
   // ── Derived ──────────────────────────────────────────────────────────────────
   const updatedStr = orden?.updatedAt
     ? new Date(orden.updatedAt).toLocaleDateString('es-EC', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
     : '—';
 
   // ── Render ───────────────────────────────────────────────────────────────────
@@ -1329,14 +1388,16 @@ export const WorkOrdersProcessPage: React.FC = () => {
 
           {/* Barra de búsqueda */}
           <div className="wo-process-search">
-            <input
+            <Input
               id="wo-process-search-input"
-              className="wo-process-search__input"
+              width={'350px'}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Código OT — Ej: OT-2026-0000001"
               autoComplete="off"
+              leftIcon={<Search size={14} />}
+              size='compact'
             />
             <Button
               id="wo-process-search-btn"
@@ -1344,14 +1405,15 @@ export const WorkOrdersProcessPage: React.FC = () => {
               variant="primary"
               leftIcon={<Search size={14} />}
               disabled={!searchInput.trim() || isLoading}
-              size="sm"
+              size="compact"
             >
               {isLoading ? 'Buscando...' : 'Buscar'}
             </Button>
             {currentCode && (
               <Button
-                variant="ghost"
-                size="sm"
+                variant="dashed"
+                color='warning'
+                size="compact"
                 leftIcon={<X size={14} />}
                 onClick={handleClear}
               >
@@ -1365,12 +1427,15 @@ export const WorkOrdersProcessPage: React.FC = () => {
       {/* ── Empty state ── */}
       {!currentCode && !isLoading && (
         <div className="wo-process-empty">
-          <Search size={48} opacity={0.3} />
-          <h3>Ingresa un código de OT para comenzar</h3>
-          <p>
-            Escribe el código de la orden (Ej: OT-2026-0000001) y presiona
-            Buscar
-          </p>
+          <EmptyState
+            icon={
+              <div className="wo-process-empty__icon">
+                <Search size={48} opacity={0.3} />
+              </div>
+            }
+            message="Ingresa un código de OT para comenzar"
+            description="Escribe el código de la orden (Ej: OT-2026-0000001) y presiona Buscar"
+          />
         </div>
       )}
 

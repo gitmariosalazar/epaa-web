@@ -1,6 +1,7 @@
 import type { HttpClientInterface } from '@/shared/infrastructure/api/interfaces/HttpClientInterface';
 import type {
   Connection,
+  ConnectionAndPropertyResponse,
   ConnectionWithProperty,
   Rate
 } from '../../domain/models/Connection';
@@ -50,10 +51,10 @@ export class ConnectionRepositoryImpl implements ConnectionRepository {
         params: {
           limit,
           offset,
-          ...(query        ? { query }        : {}),
+          ...(query ? { query } : {}),
           ...(hasIncidents ? { hasIncidents } : {}),
-          ...(status       ? { status }       : {}),
-          ...(sewerage     ? { sewerage }     : {}),
+          ...(status ? { status } : {}),
+          ...(sewerage ? { sewerage } : {})
         }
       }
     );
@@ -132,6 +133,17 @@ export class ConnectionRepositoryImpl implements ConnectionRepository {
           offset
         }
       }
+    );
+    return response.data.data;
+  }
+
+  async findConnectionAndPropertyByCadastralKeyOrCardId(
+    searchValue: string
+  ): Promise<ConnectionAndPropertyResponse[]> {
+    const response = await this.client.get<
+      ApiResponse<ConnectionAndPropertyResponse[]>
+    >(
+      `/connections/find-connection-by-cadastral-key-or-card-id/${searchValue}`
     );
     return response.data.data;
   }
