@@ -55,6 +55,7 @@ export interface SolicitudRepository {
 
   // Fase 5 — Confirmar pago (analista)
   confirmPayment(dto: ConfirmPaymentDto): Promise<void>;
+  rejectPayment(dto: RejectPaymentDto): Promise<void>;
 
   // Fase 6 — Emitir OT de inspección
   emitInspectionOrder(dto: EmitInspectionOrderDto): Promise<void>;
@@ -82,6 +83,27 @@ export interface SolicitudRepository {
 
   // Fase 14 — Registro catastral y activación
   registerCadastral(dto: RegisterCadastralDto): Promise<void>;
+
+  // ── Document and Receipt Uploads (Admin on behalf of Customer)
+  updateConnectionDocument(
+    documentId: string,
+    file: File,
+    userId: string,
+    requestId: string,
+    documentTypeId: number
+  ): Promise<boolean>;
+
+  submitCorrections(
+    solicitudId: string,
+    userId: string,
+    files: File[],
+    documentIds: string[]
+  ): Promise<boolean>;
+
+  uploadInspectionInvoiceReceipt(
+    invoiceId: string,
+    file: File
+  ): Promise<boolean>;
 }
 
 // ─── DTOs ────────────────────────────────────────────────────────────────────
@@ -101,6 +123,12 @@ export interface ConfirmPaymentDto {
   paymentReference: string;
   proofOfPaymentUrl?: string;
   collectorId: string;
+}
+
+export interface RejectPaymentDto {
+  invoiceId: string;
+  adminId: string;
+  reason: string;
 }
 
 export interface EmitInspectionOrderDto {

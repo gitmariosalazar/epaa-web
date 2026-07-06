@@ -33,9 +33,13 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { GetRequestDetailByRequestIdOrNumberUseCase } from '../../application/usecases/GetRequestDetailByRequestIdOrNumberUseCase';
 import { GetTrackingBySolicitudIdUseCase } from '../../application/usecases/GetTrackingBySolicitudIdUseCase';
 import { ConfirmPaymentUseCase } from '../../application/usecases/ConfirmPaymentUseCase';
+import { RejectPaymentUseCase } from '../../application/usecases/RejectPaymentUseCase';
+import { SubmitCorrectionsUseCase } from '../../application/usecases/SubmitCorrectionsUseCase';
 import { StartInspectionUseCase } from '../../application/usecases/StartInspectionUseCase';
 import { StartInstallationUseCase } from '../../application/usecases/StartInstallationUseCase';
 import { SolicitudRepositoryImpl } from '../../infrastructure/repositories/SolicitudRepositoryImpl';
+import { UpdateConnectionDocumentUseCase } from '../../application/usecases/UpdateConnectionDocumentUseCase';
+import { UploadInspectionInvoiceReceiptUseCase } from '../../application/usecases/UploadInspectionInvoiceReceiptUseCase';
 
 // ── Domain Models ─────────────────────────────────────────────────────────────
 import type { DocumentoAdjuntoResponse, RequestDetailByClientResponse, SolicitudOrdenTrabajoResponse, TrackingSolicitudResponse } from '../../domain/models/Solicitud';
@@ -44,6 +48,7 @@ import type { DocumentoAdjuntoResponse, RequestDetailByClientResponse, Solicitud
 import { SolicitudDocumentPreviewModal } from '../components/SolicitudDocumentPreviewModal';
 import { CreateInspectionInvoiceModal } from '../components/CreateInspectionInvoiceModal';
 import { PaymentReceiptPreviewModal } from '../components/PaymentReceiptPreviewModal';
+import { SubmitCorrectionsModal } from '../components/modals/SubmitCorrectionsModal';
 
 // ── New Phase Modals ──────────────────────────────────────────────────────────
 import { EmitInspectionOrderModal } from '../components/EmitInspectionOrderModal';
@@ -140,6 +145,7 @@ export const SolicitudDetailPage: React.FC = () => {
   // ── Modal state ────────────────────────────────────────────────────────────
   const [docsOpen, setDocsOpen] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState<string | undefined>(undefined);
+  const [uploadingDocId, setUploadingDocId] = useState<string | null>(null);
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
   const [receiptModalOpen, setReceiptModalOpen] = useState(false);
   const [emitInspectionOpen, setEmitInspectionOpen] = useState(false);
@@ -150,10 +156,13 @@ export const SolicitudDetailPage: React.FC = () => {
   const [emitInstallationOpen, setEmitInstallationOpen] = useState(false);
   const [registerCadastralOpen, setRegisterCadastralOpen] = useState(false);
 
-  // ── Payment confirm state ──────────────────────────────────────────────────
   const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
+  const [isRejectingPayment, setIsRejectingPayment] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('TRANSFERENCIA');
   const [paymentReference, setPaymentReference] = useState('');
+  
+  const [submitCorrectionsModalOpen, setSubmitCorrectionsModalOpen] = useState(false);
+  const [isSubmittingCorrections, setIsSubmittingCorrections] = useState(false);
 
   // ── Quick-action loading state (for inline start buttons) ──────────────────
   const [isStartingInspection, setIsStartingInspection] = useState(false);
@@ -165,8 +174,12 @@ export const SolicitudDetailPage: React.FC = () => {
   const trackingUseCase = React.useMemo(() => new GetTrackingBySolicitudIdUseCase(repo), [repo]);
   const workOrderUseCase = React.useMemo(() => new GetOrdenesTrabajoBysSolicitudIdUseCase(repo), [repo]);
   const confirmPaymentUseCase = React.useMemo(() => new ConfirmPaymentUseCase(repo), [repo]);
+  const rejectPaymentUseCase = React.useMemo(() => new RejectPaymentUseCase(repo), [repo]);
   const startInspectionUseCase = React.useMemo(() => new StartInspectionUseCase(repo), [repo]);
   const startInstallUseCase = React.useMemo(() => new StartInstallationUseCase(repo), [repo]);
+  const updateDocUseCase = React.useMemo(() => new UpdateConnectionDocumentUseCase(repo), [repo]);
+  const uploadReceiptUseCase = React.useMemo(() => new UploadInspectionInvoiceReceiptUseCase(repo), [repo]);
+  const submitCorrectionsUseCase = React.useMemo(() => new SubmitCorrectionsUseCase(repo), [repo]);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   const reload = () => setReloadTrigger(p => p + 1);
@@ -194,14 +207,22 @@ export const SolicitudDetailPage: React.FC = () => {
     load();
     return () => { isMounted = false; };
   }, [id, requestDetailUseCase, trackingUseCase, reloadTrigger]);
-
-  // ── Confirm payment ────────────────────────────────────────────────────────
-  const handleConfirmPayment = async () => {
+  // ── Confirm Payment (Fase 5) ───────────────────────────────────────────────
+  const handleConfirmPayment = async (localFile?: File) => {
     if (!solicitud?.facturaId) { MessageToastCustom('error', 'Error', 'ID de factura no encontrado.'); return; }
     if (!paymentReference.trim()) { MessageToastCustom('error', 'Requerido', 'Ingrese la referencia de pago.'); return; }
     if (!user?.userId) { MessageToastCustom('error', 'Sesión', 'Inicie sesión nuevamente.'); return; }
     setIsConfirmingPayment(true);
     try {
+      // 1. If a local file is provided, upload it first
+      if (localFile) {
+        const uploadSuccess = await uploadReceiptUseCase.execute(solicitud.facturaId, localFile);
+        if (!uploadSuccess) {
+          throw new Error('No se pudo subir el comprobante. Abortando confirmación.');
+        }
+      }
+
+      // 2. Proceed with confirmation
       await confirmPaymentUseCase.execute({
         invoiceId: solicitud.facturaId,
         paymentMethod,
@@ -216,6 +237,70 @@ export const SolicitudDetailPage: React.FC = () => {
       MessageToastCustom('error', 'Error', e.message || 'Error al confirmar el pago.');
     } finally {
       setIsConfirmingPayment(false);
+    }
+  };
+
+  const handleRejectPayment = async (reason: string) => {
+    if (!solicitud?.facturaId) { MessageToastCustom('error', 'Error', 'ID de factura no encontrado.'); return; }
+    if (!user?.userId) { MessageToastCustom('error', 'Sesión', 'Inicie sesión nuevamente.'); return; }
+    
+    setIsRejectingPayment(true);
+    try {
+      await rejectPaymentUseCase.execute({
+        invoiceId: solicitud.facturaId,
+        adminId: user.userId,
+        reason: reason.trim()
+      });
+      MessageToastCustom('success', 'Comprobante Rechazado', 'El trámite regresó a Recolección de Pago.');
+      setReceiptModalOpen(false); // Close the modal
+      reload();
+    } catch (e: any) {
+      MessageToastCustom('error', 'Error', e.message || 'Error al rechazar el pago.');
+    } finally {
+      setIsRejectingPayment(false);
+    }
+  };
+
+  // ── File Replace (Document Corrección) ─────────────────────────────────────
+  const handleDocFileReplace = async (docId: string, file: File, documentTypeId: number) => {
+    if (!solicitud || !user) return;
+    setUploadingDocId(docId);
+    try {
+      const success = await updateDocUseCase.execute(docId, file, user.userId, solicitud.solicitudId, documentTypeId);
+      if (success) {
+        MessageToastCustom('success', 'Documento Actualizado', 'El documento se subió correctamente.');
+        reload();
+      } else {
+        throw new Error('Error al actualizar el documento.');
+      }
+    } catch (e: any) {
+      MessageToastCustom('error', 'Error', e.message || 'Error al actualizar el documento.');
+    } finally {
+      setUploadingDocId(null);
+    }
+  };
+
+  const handleBulkCorrectionsSubmit = async (files: File[], documentIds: string[]) => {
+    if (!solicitud || !user) return;
+    setIsSubmittingCorrections(true);
+    try {
+      const success = await submitCorrectionsUseCase.execute(
+        solicitud.solicitudId,
+        user.userId,
+        files,
+        documentIds
+      );
+      if (success) {
+        MessageToastCustom('success', 'Correcciones Subidas', 'Los documentos fueron subidos y enviados a revisión correctamente.');
+        setSubmitCorrectionsModalOpen(false);
+        reload();
+      } else {
+        throw new Error('Error al subir las correcciones en lote.');
+      }
+    } catch (e: any) {
+      MessageToastCustom('error', 'Error', e.message || 'Error al subir las correcciones en lote.');
+    } finally {
+      setIsSubmittingCorrections(false);
     }
   };
 
@@ -316,10 +401,16 @@ export const SolicitudDetailPage: React.FC = () => {
     ? (solicitud.company?.phones?.[0]?.numero || solicitud.datosAdicionales?.telefono || '')
     : (solicitud.person?.phones?.[0]?.numero || solicitud.datosAdicionales?.telefono || '');
 
-  const paymentDocument: DocumentoAdjuntoResponse | null =
-    solicitud.documentos?.find(
-      (doc) => String(doc.tipodocumento) === '5'
-    ) ?? null;
+  // Determine actual payment document logic
+  const paymentDocument: DocumentoAdjuntoResponse | null = solicitud.urlComprobante
+    ? {
+        id: 'mock-comprobante-id',
+        tipodocumento: 'COMPROBANTE_PAGO_INSPECCION',
+        url: solicitud.urlComprobante,
+        estadoValidacion: 'PENDIENTE',
+        observacion: null
+      }
+    : null;
 
 
 
@@ -375,14 +466,14 @@ export const SolicitudDetailPage: React.FC = () => {
               />
             )}
 
-            {/* Fase 5: Confirmar pago — abre el modal con preview + formulario */}
-            {solicitud.estado === 'PAGO_PENDIENTE' && (
+            {/* Fase 4.5 / 5: Confirmar pago — abre el modal con preview + formulario */}
+            {(solicitud.estado === 'FACTURA_INSPECCION_EMITIDA' || solicitud.estado === 'PAGO_PENDIENTE') && (
               <>
                 <PhaseActionBtn
                   color="#10b981" bg="rgba(16,185,129,0.1)"
                   icon={<CreditCard size={18} />}
-                  label="Validar y Confirmar Pago"
-                  description="Revise el comprobante del cliente y registre la confirmación del pago"
+                  label={solicitud.urlComprobante ? "Validar y Confirmar Pago" : "Subir y Confirmar Pago"}
+                  description={solicitud.urlComprobante ? "Revise el comprobante del cliente y registre la confirmación del pago" : "Suba el comprobante de pago entregado por el cliente y confirme el pago en un solo paso"}
                   onClick={() => setReceiptModalOpen(true)}
                 />
                 {/* Info básica de la factura debajo del botón */}
@@ -428,7 +519,12 @@ export const SolicitudDetailPage: React.FC = () => {
                     ) : (
                       <div className="sol-detail-payment-info-card__item sol-detail-payment-info-card__item--full">
                         <span className="sol-detail-payment-info-card__label">Comprobante</span>
-                        <span className="sol-detail-payment-info-card__value" style={{ color: '#f59e0b' }}>⚠ Pendiente de subir</span>
+                        <span className="sol-detail-payment-info-card__value" style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          ⚠ Pendiente de subir
+                          <Button size="xs" variant="outline" color="primary" onClick={() => setReceiptModalOpen(true)}>
+                            Subir por el cliente
+                          </Button>
+                        </span>
                       </div>
                     )}
                   </div>
@@ -558,10 +654,13 @@ export const SolicitudDetailPage: React.FC = () => {
 
           {/* Card 3: Documentos */}
           <SolicitudDocsCard
-            solicitud={solicitud}
-            setDocsOpen={setDocsOpen}
-            setSelectedDocId={setSelectedDocId}
-          />
+          solicitud={solicitud}
+          setDocsOpen={setDocsOpen}
+          setSelectedDocId={setSelectedDocId}
+          onFileReplace={handleDocFileReplace}
+          uploadingDocId={uploadingDocId}
+          onBulkCorrectionsClick={() => setSubmitCorrectionsModalOpen(true)}
+        />
         </div>
 
         {/* ══ COLUMNA DERECHA ══ */}
@@ -616,8 +715,22 @@ export const SolicitudDetailPage: React.FC = () => {
         paymentReference={paymentReference}
         setPaymentReference={setPaymentReference}
         isConfirmingPayment={isConfirmingPayment}
-        handleConfirmPayment={async () => { await handleConfirmPayment(); setReceiptModalOpen(false); }}
+        handleConfirmPayment={async (file) => { await handleConfirmPayment(file); setReceiptModalOpen(false); }}
+        isRejectingPayment={isRejectingPayment}
+        handleRejectPayment={handleRejectPayment}
       />
+
+      {solicitud.documentos && (
+        <SubmitCorrectionsModal
+          isOpen={submitCorrectionsModalOpen}
+          onClose={() => setSubmitCorrectionsModalOpen(false)}
+          rejectedDocuments={solicitud.documentos.filter(
+            (d) => d.estadoValidacion === 'RECHAZADO' || d.estadoValidacion === 'INVALIDO'
+          )}
+          onSubmitCorrections={handleBulkCorrectionsSubmit}
+          isSubmitting={isSubmittingCorrections}
+        />
+      )}
 
       {/* Fase 6: Emitir OT Inspección */}
       {emitInspectionOpen && (

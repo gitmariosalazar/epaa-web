@@ -26,6 +26,7 @@ import type {
 } from '../schemas/dto/response/work-orders.get.response';
 import type { ProcessWorkOrderModel } from '../schemas/models/process-work-order.model';
 import type { SubmitInspectionReportCommand } from '../schemas/dto/commands/submit-inspection-report.command';
+import type { SubmitInstallationReportCommand } from '../schemas/dto/commands/submit-installation-report.command';
 
 export interface ProcessWorkOrderRepository {
   createWorkOrder(
@@ -132,7 +133,11 @@ export interface ProcessWorkOrderRepository {
    * Fase 8 Acometidas — Subir informe técnico de inspección de factibilidad.
    * Cierra la OT y hace avanzar la solicitud a INFORME_EN_REVISION.
    */
-  submitInspectionReport(
-    cmd: SubmitInspectionReportCommand
-  ): Promise<void>;
+  submitInspectionReport(cmd: SubmitInspectionReportCommand): Promise<void>;
+
+  /**
+   * Fase 14 Acometidas — Subir informe de instalación de medidor.
+   * Cierra la OT de instalación y hace avanzar la solicitud a INSTALACION_COMPLETADA o FALLIDA.
+   */
+  submitInstallationReport(cmd: SubmitInstallationReportCommand): Promise<void>;
 }

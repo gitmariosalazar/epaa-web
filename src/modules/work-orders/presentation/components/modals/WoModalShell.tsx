@@ -11,11 +11,12 @@ interface WoModalShellProps {
   title: string;
   subtitle?: string;
   color?: string;
+  maxWidth?: string;
   children: React.ReactNode;
 }
 
 export const WoModalShell: React.FC<WoModalShellProps> = ({
-  isOpen, onClose, title, subtitle, color = 'var(--accent)', children,
+  isOpen, onClose, title, subtitle, color = 'var(--accent)', maxWidth, children,
 }) => {
   if (!isOpen) return null;
 
@@ -23,6 +24,7 @@ export const WoModalShell: React.FC<WoModalShellProps> = ({
     <div className="wo-modal-overlay" onClick={onClose}>
       <div
         className="wo-modal"
+        style={maxWidth ? { maxWidth } : undefined}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"

@@ -25,6 +25,7 @@ import type {
   SubmitWithDocumentsRequest,
   SubmitWithDocumentsResponse
 } from '../../domain/dto/submit-with-documents.request';
+import type { RejectPaymentDto } from '../../domain/repositories/SolicitudRepository';
 
 // ─── API DTO definitions ──────────────────────────────────────────────────────
 export interface DocumentoAdjuntoResponse {
@@ -268,6 +269,17 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
     await this.client.patch<void>('/payment-confirmation/facturas/pagar', dto);
   }
 
+  async rejectPayment(dto: RejectPaymentDto): Promise<void> {
+    if (!dto.invoiceId) throw new Error('El ID de la factura es requerido');
+    if (!dto.adminId) throw new Error('El ID del administrador es requerido');
+    if (!dto.reason) throw new Error('El motivo de rechazo es requerido');
+
+    await this.client.patch<void>(`/payment-confirmation/facturas/${dto.invoiceId}/rechazar`, {
+      adminId: dto.adminId,
+      reason: dto.reason
+    });
+  }
+
   // ── Fase 6 — Emitir OT de inspección ─────────────────────────────────────
 
   async emitInspectionOrder(dto: EmitInspectionOrderDto): Promise<void> {
@@ -481,6 +493,94 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
       }
     });
     return response.data?.data || ({} as SubmitWithDocumentsResponse);
+  }
+
+  // ── Document and Receipt Uploads (Admin on behalf of Customer) ───────────
+
+  async updateConnectionDocument(
+    documentId: string,
+    file: File,
+    userId: string,
+    requestId: string,
+    documentTypeId: number
+  ): Promise<boolean> {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('userId', userId);
+      formData.append('requestId', requestId);
+      formData.append('documentTypeId', documentTypeId.toString());
+      formData.append('validatorId', userId);
+
+      const response = await this.client.put<any>(
+        `/connection-documents/${documentId}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      return response.status_code === 200 || response.status_code === 201 || !!response.data;
+    } catch (error) {
+      console.error('Error in updateConnectionDocument:', error);
+      return false;
+    }
+  }
+
+  async submitCorrections(
+    solicitudId: string,
+    userId: string,
+    files: File[],
+    documentIds: string[]
+  ): Promise<boolean> {
+    try {
+      const formData = new FormData();
+      formData.append('userId', userId);
+      formData.append('documentIds', documentIds.join(','));
+      
+      files.forEach((file) => {
+        formData.append('files', file);
+      });
+
+      const response = await this.client.post<any>(
+        `/requests/${solicitudId}/corrections`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      return response.status_code === 200 || response.status_code === 201 || !!response.data;
+    } catch (error) {
+      console.error('Error in submitCorrections:', error);
+      return false;
+    }
+  }
+
+  async uploadInspectionInvoiceReceipt(
+    invoiceId: string,
+    file: File
+  ): Promise<boolean> {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await this.client.put<any>(
+        `/inspection-invoice/update/${invoiceId}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      return response.status_code === 200 || response.status_code === 201 || !!response.data;
+    } catch (error) {
+      console.error('Error in uploadInspectionInvoiceReceipt:', error);
+      return false;
+    }
   }
 }
 

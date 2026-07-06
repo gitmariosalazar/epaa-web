@@ -8,10 +8,10 @@
  * DIP: consumes useDocumentPreview and useDocumentDownload (hook abstractions),
  *      never depends on concrete repositories directly.
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X, FileText, Download, ExternalLink, AlertTriangle,
-  Loader2, CheckCircle, Clock, CreditCard
+  Loader2, CheckCircle, Clock, CreditCard, Upload, Trash2
 } from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import type { DocumentoAdjuntoResponse } from '../../domain/models/Solicitud';
@@ -40,7 +40,11 @@ interface PaymentReceiptPreviewModalProps {
   /** Loading state while confirming payment */
   isConfirmingPayment: boolean;
   /** Confirm payment handler */
-  handleConfirmPayment: () => void;
+  handleConfirmPayment: (file?: File) => void;
+  /** Loading state while rejecting payment */
+  isRejectingPayment?: boolean;
+  /** Reject payment handler */
+  handleRejectPayment?: (reason: string) => void;
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────
@@ -58,7 +62,25 @@ export const PaymentReceiptPreviewModal: React.FC<PaymentReceiptPreviewModalProp
   setPaymentReference,
   isConfirmingPayment,
   handleConfirmPayment,
+  isRejectingPayment = false,
+  handleRejectPayment,
 }) => {
+  const [localFile, setLocalFile] = useState<File | null>(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+  const [forceUpload, setForceUpload] = useState<boolean>(false);
+  const [showRejectForm, setShowRejectForm] = useState<boolean>(false);
+  const [rejectReason, setRejectReason] = useState<string>('');
+
+  useEffect(() => {
+    if (localFile) {
+      const url = URL.createObjectURL(localFile);
+      setLocalPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setLocalPreviewUrl(null);
+    }
+  }, [localFile]);
+
   // ── Document preview & download (delegated to dedicated hooks) ───────────────
 
   const {
@@ -70,8 +92,10 @@ export const PaymentReceiptPreviewModal: React.FC<PaymentReceiptPreviewModalProp
 
   const { download, isDownloading } = useDocumentDownload();
 
-  const isPdf   = previewMimeType === 'application/pdf';
-  const isImage = previewMimeType?.startsWith('image/') ?? false;
+  const isPdf   = (localFile ? localFile.type === 'application/pdf' : previewMimeType === 'application/pdf');
+  const isImage = (localFile ? localFile.type.startsWith('image/') : previewMimeType?.startsWith('image/') ?? false);
+
+  const activePreviewUrl = localPreviewUrl || previewBlobUrl;
 
   const handleDownload = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -82,7 +106,18 @@ export const PaymentReceiptPreviewModal: React.FC<PaymentReceiptPreviewModalProp
 
   // ── Early exit ────────────────────────────────────────────────────────────────
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    if (showRejectForm) setShowRejectForm(false);
+    return null;
+  }
+
+  const hasDocument = (!!documento || !!localFile) && !forceUpload;
+
+  const onRejectSubmit = () => {
+    if (handleRejectPayment && rejectReason.trim()) {
+      handleRejectPayment(rejectReason);
+    }
+  };
 
   // ── Render ────────────────────────────────────────────────────────────────────
 
@@ -137,51 +172,93 @@ export const PaymentReceiptPreviewModal: React.FC<PaymentReceiptPreviewModalProp
             </div>
 
             <div className="doc-modal__viewer">
-              {!documento ? (
-                <div className="doc-modal__no-preview">
+              {!hasDocument ? (
+                <div className="doc-modal__no-preview" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '2rem' }}>
                   <AlertTriangle size={48} style={{ color: '#f59e0b' }} />
-                  <p>El cliente aún no ha subido el comprobante de pago.</p>
+                  <p>El comprobante de pago no ha sido cargado aún.</p>
+                  
+                  <label
+                    htmlFor="admin-receipt-upload"
+                    style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                      gap: '0.5rem', padding: '1.5rem', border: '2px dashed var(--border-color)', borderRadius: '8px',
+                      cursor: 'pointer', background: 'var(--bg-secondary)', transition: 'all 0.2s', marginTop: '1rem'
+                    }}
+                  >
+                    <input
+                      type="file"
+                      id="admin-receipt-upload"
+                      style={{ display: 'none' }}
+                      accept=".pdf,image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setLocalFile(file);
+                          setForceUpload(false);
+                        }
+                      }}
+                    />
+                    <Upload size={24} style={{ color: 'var(--accent)' }} />
+                    <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--accent)' }}>Cargar Comprobante</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Haga clic para seleccionar una imagen o PDF</span>
+                  </label>
                 </div>
-              ) : loadingPreview ? (
+              ) : !localFile && loadingPreview ? (
                 <div className="doc-modal__no-preview"
                   style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '0.5rem' }}>
                   <Loader2 size={28} style={{ color: 'var(--accent)', animation: 'btn-spin 0.8s linear infinite' }} />
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Cargando vista previa...</p>
                 </div>
-              ) : previewBlobUrl ? (
-                isPdf ? (
-                  <iframe
-                    key={previewBlobUrl}
-                    src={`${previewBlobUrl}#toolbar=1&navpanes=0`}
-                    title="Comprobante de Pago"
-                    className="doc-modal__iframe"
-                  />
-                ) : isImage ? (
-                  <div className="doc-modal__no-preview"
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '1rem', boxSizing: 'border-box' }}>
-                    <img
-                      src={previewBlobUrl}
-                      alt="Comprobante de Pago"
-                      style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '4px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
+              ) : activePreviewUrl ? (
+                <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                  {localFile && (
+                    <button
+                      onClick={() => setLocalFile(null)}
+                      style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10, background: 'var(--error)', color: 'white', border: 'none', borderRadius: '4px', padding: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}
+                    >
+                      <Trash2 size={14} /> Eliminar
+                    </button>
+                  )}
+                  {isPdf ? (
+                    <iframe
+                      key={activePreviewUrl}
+                      src={`${activePreviewUrl}#toolbar=1&navpanes=0`}
+                      title="Comprobante de Pago"
+                      className="doc-modal__iframe"
                     />
-                  </div>
-                ) : (
-                  <div className="doc-modal__no-preview">
-                    <FileText size={48} style={{ color: 'var(--text-muted)' }} />
-                    <p>Vista previa no disponible para este tipo de archivo.</p>
-                    <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Descarga el archivo para visualizarlo.</small>
-                  </div>
-                )
+                  ) : isImage ? (
+                    <div className="doc-modal__no-preview"
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '1rem', boxSizing: 'border-box' }}>
+                      <img
+                        src={activePreviewUrl}
+                        alt="Comprobante de Pago"
+                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '4px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="doc-modal__no-preview">
+                      <FileText size={48} style={{ color: 'var(--text-muted)' }} />
+                      <p>Vista previa no disponible para este tipo de archivo.</p>
+                      <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Descarga el archivo para visualizarlo.</small>
+                    </div>
+                  )}
+                </div>
               ) : previewError ? (
                 <div className="doc-modal__no-preview">
                   <FileText size={48} style={{ color: 'var(--text-muted)' }} />
                   <p>No se pudo cargar la vista previa.</p>
-                  <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{previewError}</small>
+                  <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '1rem' }}>{previewError}</small>
+                  <Button size="sm" variant="outline" onClick={() => setForceUpload(true)} leftIcon={<Upload size={14} />}>
+                    Volver a subir comprobante
+                  </Button>
                 </div>
               ) : (
                 <div className="doc-modal__no-preview">
                   <FileText size={48} style={{ color: 'var(--text-muted)' }} />
                   <p>Vista previa no disponible.</p>
+                  <Button size="sm" variant="outline" onClick={() => setForceUpload(true)} leftIcon={<Upload size={14} />} style={{ marginTop: '1rem' }}>
+                    Subir nuevo comprobante
+                  </Button>
                 </div>
               )}
             </div>
@@ -237,20 +314,73 @@ export const PaymentReceiptPreviewModal: React.FC<PaymentReceiptPreviewModalProp
             </div>
 
             <div className="doc-validation__footer">
-              <Button
-                type="button"
-                disabled={isConfirmingPayment || !paymentReference.trim()}
-                onClick={handleConfirmPayment}
-                leftIcon={isConfirmingPayment
-                  ? <Clock size={15} className="sol-detail-loading__spinner" />
-                  : <CheckCircle size={15} />}
-                isLoading={isConfirmingPayment}
-                color="primary"
-                size="sm"
-                style={{ width: '100%', justifyContent: 'center' }}
-              >
-                {isConfirmingPayment ? 'Registrando...' : 'Confirmar y Registrar Pago'}
-              </Button>
+              {!showRejectForm ? (
+                <>
+                  <Button
+                    type="button"
+                    disabled={isConfirmingPayment || !paymentReference.trim() || !hasDocument}
+                    onClick={() => handleConfirmPayment(localFile ?? undefined)}
+                    leftIcon={isConfirmingPayment
+                      ? <Clock size={15} className="sol-detail-loading__spinner" />
+                      : <CheckCircle size={15} />}
+                    isLoading={isConfirmingPayment}
+                    color="primary"
+                    size="sm"
+                    style={{ width: '100%', justifyContent: 'center' }}
+                  >
+                    {isConfirmingPayment ? 'Registrando...' : 'Confirmar y Registrar Pago'}
+                  </Button>
+                  
+                  {handleRejectPayment && hasDocument && (
+                    <Button
+                      type="button"
+                      disabled={isConfirmingPayment}
+                      onClick={() => setShowRejectForm(true)}
+                      color="error"
+                      variant="outline"
+                      size="sm"
+                      style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}
+                    >
+                      Rechazar Comprobante
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
+                  <label className="doc-validation__label" style={{ color: 'var(--error)' }}>Motivo del Rechazo</label>
+                  <textarea
+                    className="sol-detail-payment-confirm-field__input"
+                    rows={3}
+                    placeholder="Escriba el motivo (ej. El comprobante está borroso o incompleto)"
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    autoFocus
+                  />
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <Button
+                      type="button"
+                      disabled={isRejectingPayment}
+                      onClick={() => setShowRejectForm(false)}
+                      variant="ghost"
+                      size="sm"
+                      style={{ flex: 1, justifyContent: 'center' }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="button"
+                      disabled={isRejectingPayment || !rejectReason.trim()}
+                      onClick={onRejectSubmit}
+                      isLoading={isRejectingPayment}
+                      color="error"
+                      size="sm"
+                      style={{ flex: 1, justifyContent: 'center' }}
+                    >
+                      {isRejectingPayment ? 'Rechazando...' : 'Rechazar'}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

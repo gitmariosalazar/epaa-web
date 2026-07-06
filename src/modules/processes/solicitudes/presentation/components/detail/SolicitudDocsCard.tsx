@@ -1,5 +1,5 @@
 import React from 'react';
-import { ClipboardList, FolderOpen, FileText } from 'lucide-react';
+import { ClipboardList, FolderOpen, FileText, Upload } from 'lucide-react';
 import { Card } from '@/shared/presentation/components/Card/Card';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import type { RequestDetailByClientResponse } from '../../../domain/models/Solicitud';
@@ -9,14 +9,22 @@ interface SolicitudDocsCardProps {
   solicitud: RequestDetailByClientResponse;
   setDocsOpen: (open: boolean) => void;
   setSelectedDocId: (id: string) => void;
+  onFileReplace?: (docId: string, file: File, documentTypeId: number) => void;
+  uploadingDocId?: string | null;
+  onBulkCorrectionsClick?: () => void;
 }
 
 export const SolicitudDocsCard: React.FC<SolicitudDocsCardProps> = ({
   solicitud,
   setDocsOpen,
   setSelectedDocId,
+  onFileReplace,
+  uploadingDocId,
+  onBulkCorrectionsClick,
 }) => {
   const hasDocs = solicitud.documentos?.length > 0;
+  const rejectedDocs = solicitud.documentos?.filter(d => d.estadoValidacion === 'RECHAZADO' || d.estadoValidacion === 'INVALIDO') || [];
+  const hasRejectedDocs = rejectedDocs.length > 0;
 
   return (
     <Card className="sol-detail-card">
@@ -26,15 +34,26 @@ export const SolicitudDocsCard: React.FC<SolicitudDocsCardProps> = ({
           Requisitos y Documentos Adjuntos
         </h3>
         {hasDocs && (
-          <Button
-            variant="outline"
-            size="compact"
-            leftIcon={<FolderOpen size={14} />}
-            onClick={() => setDocsOpen(true)}
-            style={{ marginLeft: 'auto' }}
-          >
-            Visor Completo
-          </Button>
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
+            {hasRejectedDocs && onBulkCorrectionsClick && (
+              <Button
+                variant="primary"
+                size="compact"
+                leftIcon={<Upload size={14} />}
+                onClick={onBulkCorrectionsClick}
+              >
+                Subir Correcciones Lote
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="compact"
+              leftIcon={<FolderOpen size={14} />}
+              onClick={() => setDocsOpen(true)}
+            >
+              Visor Completo
+            </Button>
+          </div>
         )}
       </div>
       {!hasDocs ? (
@@ -48,6 +67,8 @@ export const SolicitudDocsCard: React.FC<SolicitudDocsCardProps> = ({
             <SolicitudDocRow
               key={doc.id}
               doc={doc}
+              uploadingDocId={uploadingDocId}
+              onFileReplace={onFileReplace}
               onClick={() => {
                 setSelectedDocId(doc.id);
                 setDocsOpen(true);

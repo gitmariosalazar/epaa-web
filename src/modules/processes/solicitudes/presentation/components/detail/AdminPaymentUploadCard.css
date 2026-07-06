@@ -1,0 +1,119 @@
+.sol-detail-payment-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.875rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-top: 0.5rem;
+}
+
+.sol-detail-payment-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+}
+
+.sol-detail-payment-card__header-icon {
+  color: var(--accent);
+}
+
+.sol-detail-payment-card__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.sol-detail-payment-card__subtitle {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.sol-detail-payment-card__body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.sol-detail-payment-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg);
+  padding: 1rem 1.25rem;
+  border-radius: 0.625rem;
+  border: 1px dashed var(--border-color);
+}
+
+.sol-detail-payment-summary__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.sol-detail-payment-summary__title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.sol-detail-payment-summary__meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.sol-detail-payment-summary__amount {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.sol-detail-payment-upload-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--border-color);
+  border-radius: 0.625rem;
+  padding: 2rem 1.5rem;
+  background: var(--bg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.sol-detail-payment-upload-zone:hover {
+  border-color: var(--accent);
+  background: var(--surface-hover);
+}
+
+.sol-detail-payment-upload-zone--disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.sol-detail-payment-upload-zone__icon {
+  color: var(--text-muted);
+}
+
+.sol-detail-payment-upload-zone:hover .sol-detail-payment-upload-zone__icon {
+  color: var(--accent);
+}
+
+.sol-detail-payment-upload-zone__text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin: 0;
+}
+
+.sol-detail-payment-upload-zone__subtext {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin: 0;
+}

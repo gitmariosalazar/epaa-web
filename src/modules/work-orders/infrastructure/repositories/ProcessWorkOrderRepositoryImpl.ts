@@ -46,6 +46,7 @@ import type {
   WorkOrderListItem
 } from '../../domain/schemas/dto/response/work-orders.get.response';
 import type { SubmitInspectionReportCommand } from '../../domain/schemas/dto/commands/submit-inspection-report.command';
+import type { SubmitInstallationReportCommand } from '../../domain/schemas/dto/commands/submit-installation-report.command';
 
 // ── Base paths ──────────────────────────────────────────────────────────────
 const BASE = '/process-work-orders';
@@ -488,6 +489,15 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
   ): Promise<void> {
     await this.client.post<void>(
       `${INSPECTION_REPORT_BASE}/ordenes/informe`,
+      cmd
+    );
+  }
+
+  async submitInstallationReport(
+    cmd: SubmitInstallationReportCommand
+  ): Promise<void> {
+    await this.client.post<void>(
+      `/installation-report/ordenes/informe`,
       cmd
     );
   }

@@ -3,6 +3,7 @@ import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import type { DocumentoAdjuntoResponse } from '../../../domain/models/Solicitud';
 import { getDocEstadoUI } from '@/shared/presentation/utils/colors/docs.colors';
 import { DocumentIcon } from '@/shared/presentation/utils/icons/CustomIcons';
+import { Upload, Clock } from 'lucide-react';
 
 const TIPO_DOC_LABEL: Record<number | string, string> = {
   1: 'Cédula de Identidad',
@@ -17,11 +18,15 @@ const TIPO_DOC_LABEL: Record<number | string, string> = {
 interface SolicitudDocRowProps {
   doc: DocumentoAdjuntoResponse;
   onClick: () => void;
+  uploadingDocId?: string | null;
+  onFileReplace?: (docId: string, file: File, documentTypeId: number) => void;
 }
 
 export const SolicitudDocRow: React.FC<SolicitudDocRowProps> = ({
   doc,
-  onClick
+  onClick,
+  uploadingDocId,
+  onFileReplace
 }) => {
   const docUI = getDocEstadoUI(doc.estadoValidacion);
   const docLabel =
@@ -54,7 +59,7 @@ export const SolicitudDocRow: React.FC<SolicitudDocRowProps> = ({
           />
         )}
       </div>
-      <div className="sol-detail-doc-row__badge">
+      <div className="sol-detail-doc-row__badge" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem' }}>
         <ColorChip
           color={docUI.color}
           label={doc.estadoValidacion}
@@ -62,6 +67,40 @@ export const SolicitudDocRow: React.FC<SolicitudDocRowProps> = ({
           size="xs"
           icon={<StateIcon size={12} />}
         />
+        {onFileReplace && (doc.estadoValidacion.toUpperCase() === 'RECHAZADO' || doc.estadoValidacion.toUpperCase() === 'INVALIDO') && (
+          <>
+            <button
+              type="button"
+              className="sol-detail-doc-row__upload-btn"
+              disabled={uploadingDocId === doc.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                const input = document.getElementById(`file-input-admin-${doc.id}`);
+                if (input) input.click();
+              }}
+            >
+              {uploadingDocId === doc.id ? (
+                <Clock size={10} className="sol-detail-loading__spinner" />
+              ) : (
+                <Upload size={10} />
+              )}
+              {uploadingDocId === doc.id ? 'Subiendo...' : 'Subir Corrección'}
+            </button>
+            <input
+              type="file"
+              id={`file-input-admin-${doc.id}`}
+              style={{ display: 'none' }}
+              accept=".pdf,image/*"
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file && onFileReplace) {
+                  onFileReplace(doc.id, file, Number(doc.tipodocumento));
+                }
+              }}
+            />
+          </>
+        )}
       </div>
     </div>
   );
