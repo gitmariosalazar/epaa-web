@@ -206,22 +206,9 @@ export const useIncidentsViewModel = () => {
   // ── Estado derivado ───────────────────────────────────────────────────────
   const filteredSorted = useMemo(() => {
     let list = [...incidents];
-
-    if (filters.search && !filters.search.includes('-') && !connectionMode) {
-      const q = filters.search.toLowerCase().trim();
-      list = list.filter(
-        (item) =>
-          item.reportDescription.toLowerCase().includes(q) ||
-          (item.referenceAddress ?? '').toLowerCase().includes(q) ||
-          (item.categoryName ?? '').toLowerCase().includes(q) ||
-          (item.incidentTypeName ?? '').toLowerCase().includes(q) ||
-          String(item.incidentId).includes(q)
-      );
-    }
-
     list.sort((a, b) => sortFn(a, b, sortBy));
     return list;
-  }, [incidents, filters.search, sortBy, connectionMode]);
+  }, [incidents, sortBy]);
 
   const paginated = useMemo(() => {
     const start = (page - 1) * pageSize;

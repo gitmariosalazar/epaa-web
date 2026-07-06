@@ -24,7 +24,8 @@ import {
   Network,
   X,
   List,
-  Map
+  Map,
+  Navigation
 } from 'lucide-react';
 import {
   CircularProgress,
@@ -173,7 +174,26 @@ export const IncidentsPage: React.FC = () => {
       header: 'UBICACIÓN',
       accessor: (item) => (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span className="incident-category-text">{`${item.latitude}, ${item.longitude}`}</span>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span className="incident-category-text">{item.referenceAddress?.toUpperCase()}</span>
+            <div className="geo-status-bar-table">
+              <div className="geo-status-bar__item">
+                <Navigation size={12} className="geo-status-bar__icon geo-status-bar__icon--lat" />
+                <span className="geo-status-bar__label">Latitud:</span>
+                <span className="geo-status-bar__value geo-status-bar__value--coord">
+                  {item.latitude ? Number(item.latitude).toFixed(7) : '-'}
+                </span>
+              </div>
+              <div className="geo-status-bar__divider" />
+              <div className="geo-status-bar__item">
+                <Navigation size={12} className="geo-status-bar__icon geo-status-bar__icon--lng" style={{ transform: 'rotate(90deg)' }} />
+                <span className="geo-status-bar__label">Longitud:</span>
+                <span className="geo-status-bar__value geo-status-bar__value--coord">
+                  {item.longitude ? Number(item.longitude).toFixed(7) : '-'}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       ),
       id: 'location'

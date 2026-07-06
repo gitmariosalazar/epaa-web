@@ -111,6 +111,16 @@
   animation: geoFadeSlide 0.25s ease-out;
 }
 
+.geo-status-bar-table {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-size: 0.72rem;
+  margin-top: 5px;
+  animation: geoFadeSlide 0.25s ease-out;
+}
+
 .geo-status-bar__item {
   display: flex;
   align-items: center;
