@@ -8,16 +8,23 @@ export type IncidentSortKey =
   | 'fecha_asc'
   | 'status'
   | 'priority'
-  | 'connection';
+  | 'connection'
+  | 'sector'
+  | 'reference'
+  | 'reportDate';
 
 // ── Tab type (Open/Closed: add tabs here without touching logic) ─────────────
 export type IncidentTab = 'list' | 'map';
 
 export interface IncidentsFilterState {
   search: string;
+  searchField: string;
   status: string;
   priority: string;
   categoryId: number | null;
+  sector?: string | null;
+  reference?: string | null;
+  reportDate?: Date | null;
 }
 
 const sortFn = (
@@ -80,9 +87,13 @@ export const useIncidentsViewModel = () => {
   // ── Estado de filtros ────────────────────────────────────────────────────
   const [filters, setFilters] = useState<IncidentsFilterState>({
     search: connectionIdFromUrl ?? '',
+    searchField: 'all',
     status: '',
     priority: '',
-    categoryId: null
+    categoryId: null,
+    sector: null,
+    reference: null,
+    reportDate: null
   });
 
   // ── Modo "por acometida": true cuando llegamos desde ConnectionsPage ──────
@@ -105,7 +116,10 @@ export const useIncidentsViewModel = () => {
         status: filters.status || null,
         priority: filters.priority || null,
         categoryId: filters.categoryId ? Number(filters.categoryId) : null,
-        connectionId: null
+        connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
+        sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
+        reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
+        reportDate: filters.reportDate || null
       });
     }
     // Solo se ejecuta una vez al montar (o si cambia el connectionId de la URL)
@@ -145,7 +159,10 @@ export const useIncidentsViewModel = () => {
         status: filters.status || null,
         priority: filters.priority || null,
         categoryId: filters.categoryId ? Number(filters.categoryId) : null,
-        connectionId: filters.search.includes('-') ? filters.search : null
+        connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
+        sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
+        reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
+        reportDate: filters.reportDate || null
       });
     }, delay);
     return () => clearTimeout(timer);
@@ -160,7 +177,10 @@ export const useIncidentsViewModel = () => {
       status: filters.status || null,
       priority: filters.priority || null,
       categoryId: filters.categoryId ? Number(filters.categoryId) : null,
-      connectionId: filters.search.includes('-') ? filters.search : null
+      connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
+      sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
+      reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
+      reportDate: filters.reportDate || null
     });
     setPage(1);
   }, [filters, loadIncidents, setSearchParams]);

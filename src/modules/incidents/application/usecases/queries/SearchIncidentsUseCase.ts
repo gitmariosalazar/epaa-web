@@ -14,6 +14,9 @@ export class SearchIncidentsUseCase {
     status?: string | null;
     priority?: string | null;
     categoryId?: number | null;
+    sector?: string | null;
+    reference?: string | null;
+    reportDate?: Date | null;
   }): Promise<ApiResponse<IncidentDetailRowResponse[]>> {
     try {
       const incidents = await this.incidentRepository.findIncidents(filters);

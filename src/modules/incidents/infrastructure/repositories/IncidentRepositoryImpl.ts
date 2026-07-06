@@ -148,6 +148,9 @@ export class IncidentRepositoryImpl implements InterfaceIncidentRepository {
     status?: string | null;
     priority?: string | null;
     categoryId?: number | null;
+    sector?: string | null;
+    reference?: string | null;
+    reportDate?: Date | null;
   }): Promise<ApiResponse<IncidentDetailRowResponse[]>> {
     const response = await this.client.get<
       ApiResponse<IncidentDetailRowResponse[]>

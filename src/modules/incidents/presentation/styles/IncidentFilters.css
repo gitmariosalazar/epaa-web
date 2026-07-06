@@ -39,6 +39,10 @@
   gap: 10px;
 }
 
+.filter-group--search {
+  max-width: 350px;
+}
+
 /* ── Container — single flat flex row ────────────────────────────────── */
 .incident-filters-body {
   display: flex;

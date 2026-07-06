@@ -28,6 +28,9 @@ export interface InterfaceIncidentRepository {
     status?: string | null;
     priority?: string | null;
     categoryId?: number | null;
+    sector?: string | null;
+    reference?: string | null;
+    reportDate?: Date | null;
   }): Promise<ApiResponse<IncidentDetailRowResponse[]>>;
   findIncidentCategories(): Promise<ApiResponse<IncidentCategoryResponse[]>>;
 }

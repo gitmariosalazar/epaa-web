@@ -24,6 +24,9 @@ interface IncidentContextType {
     status?: string | null;
     priority?: string | null;
     categoryId?: number | null;
+    sector?: string | null;
+    reference?: string | null;
+    reportDate?: Date | null;
   }) => Promise<void>;
   loadCategories: () => Promise<void>;
   createIncident: (request: CreateIncidentRequest) => Promise<ApiResponse<IncidentResponse> | null>;
@@ -56,6 +59,9 @@ export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }
       status?: string | null;
       priority?: string | null;
       categoryId?: number | null;
+      sector?: string | null;
+      reference?: string | null;
+      reportDate?: Date | null;
     } = {}) => {
       setIsLoading(true);
       setError(null);

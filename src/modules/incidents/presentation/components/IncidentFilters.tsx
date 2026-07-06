@@ -7,10 +7,14 @@ import { Input } from '@/shared/presentation/components/Input/Input';
 import type { IncidentCategoryResponse } from '../../domain/schemas/dtos/response/incident-category-type.response';
 import '../styles/IncidentFilters.css';
 import { MdCategory } from 'react-icons/md';
+import { Divider } from '@/shared/presentation/components/divider/Divider';
+import { FaFilter } from 'react-icons/fa';
 
 interface IncidentFiltersProps {
   searchQuery: string;
   onSearchQueryChange: (val: string) => void;
+  searchField: string;
+  onSearchFieldChange: (val: string) => void;
   selectedStatus: string;
   onStatusChange: (val: string) => void;
   selectedPriority: string;
@@ -23,9 +27,30 @@ interface IncidentFiltersProps {
   isLoading: boolean;
 }
 
+const SEARCH_FIELDS = [
+  { value: 'all', labelKey: 'common.all', labelDefault: 'Todos los campos' },
+  {
+    value: 'sector',
+    labelKey: 'common.sector',
+    labelDefault: 'Sector'
+  },
+  {
+    value: 'reference',
+    labelKey: 'common.reference',
+    labelDefault: 'Referencia'
+  },
+  {
+    value: 'connectionId',
+    labelKey: 'common.connectionId',
+    labelDefault: 'ID Acometida'
+  }
+];
+
 export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
   searchQuery,
   onSearchQueryChange,
+  searchField,
+  onSearchFieldChange,
   selectedStatus,
   onStatusChange,
   selectedPriority,
@@ -54,6 +79,35 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
               leftIcon={<Search size={18} />}
             />
           </div>
+        </div>
+        <Divider orientation='vertical' variant='dashed' thickness='medium' />
+        <div className="filter-group">
+          <label className="filter-label">{t('incidents.filters.searchField', 'Buscar por')}</label>
+          <Select
+            className="conn-filter-group conn-filter-group--search-field"
+            size="compact"
+            value={searchField}
+            onChange={(e) => onSearchFieldChange(e.target.value)}
+            leftIcon={<FaFilter size={18} />}
+          >
+            {SEARCH_FIELDS.map((field) => (
+              <option key={field.value} value={field.value}>
+                {t(field.labelKey, field.labelDefault)}
+              </option>
+            ))}
+          </Select>
+        </div>
+
+        <div className="filter-group">
+          <label className="filter-label">{t('common.search', 'Búsqueda')}</label>
+          <Input
+            type="text"
+            size="compact"
+            placeholder={t('common.searchPlaceholder')}
+            value={searchQuery}
+            onChange={(e) => onSearchQueryChange(e.target.value)}
+            leftIcon={<Search size={18} />}
+          />
         </div>
         {/* Status */}
         <div className="filter-group">

@@ -16,9 +16,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  width: 100%;
   color: var(--text-muted);
-  margin: 5px 0;
 }
 
 .incident-description {
@@ -37,30 +35,50 @@
 /* Orientación */
 .divider-horizontal {
   flex-direction: row;
+  width: 100%;
   height: auto;
 }
 
 .divider-vertical {
   flex-direction: column;
   width: auto;
-  height: 100%;
+  align-self: stretch;
+  min-height: 20px;
+  height: auto;
 }
 
-/* Variantes */
-.divider-solid {
+/* Variantes Horizontales */
+.divider-horizontal.divider-solid {
   border-top: 1px solid var(--divider-color);
 }
 
-.divider-dashed {
+.divider-horizontal.divider-dashed {
   border-top: 1px dashed var(--divider-color);
 }
 
-.divider-dotted {
+.divider-horizontal.divider-dotted {
   border-top: 1px dotted var(--divider-color);
 }
 
-.divider-subtle {
+.divider-horizontal.divider-subtle {
   border-top: 1px solid var(--divider-color-subtle);
+}
+
+/* Variantes Verticales */
+.divider-vertical.divider-solid {
+  border-left: 1px solid var(--divider-color);
+}
+
+.divider-vertical.divider-dashed {
+  border-left: 1px dashed var(--divider-color);
+}
+
+.divider-vertical.divider-dotted {
+  border-left: 1px dotted var(--divider-color);
+}
+
+.divider-vertical.divider-subtle {
+  border-left: 1px solid var(--divider-color-subtle);
 }
 
 /* Grosor */
@@ -81,18 +99,32 @@
   border-width: var(--divider-thickness);
 }
 
-/* Margenes (solo horizontal) */
-.divider-margin-none {
+/* Margenes Horizontales (Arriba / Abajo) */
+.divider-horizontal.divider-margin-none {
   margin: 0;
 }
-.divider-margin-sm {
+.divider-horizontal.divider-margin-sm {
   margin: 12px 0;
 }
-.divider-margin-md {
+.divider-horizontal.divider-margin-md {
   margin: 20px 0;
 }
-.divider-margin-lg {
+.divider-horizontal.divider-margin-lg {
   margin: 32px 0;
+}
+
+/* Margenes Verticales (Izquierda / Derecha) */
+.divider-vertical.divider-margin-none {
+  margin: 0;
+}
+.divider-vertical.divider-margin-sm {
+  margin: 0 12px;
+}
+.divider-vertical.divider-margin-md {
+  margin: 0 20px;
+}
+.divider-vertical.divider-margin-lg {
+  margin: 0 32px;
 }
 
 /* Label (Texto centrado) */
@@ -120,11 +152,9 @@
   background: var(--divider-color);
 }
 
-/* Vertical */
+/* Vertical Ajustes */
 .divider-vertical {
-  border-left: 1px solid var(--divider-color);
   width: var(--divider-thickness);
-  height: 100%;
 }
 
 .divider-vertical .divider-label {

@@ -168,6 +168,8 @@ export const IncidentsListPage: React.FC = () => {
           <IncidentFilters
             searchQuery={filters.search}
             onSearchQueryChange={(val) => handleFilterChange({ search: val })}
+            searchField={filters.searchField}
+            onSearchFieldChange={(val) => handleFilterChange({ searchField: val })}
             selectedStatus={filters.status}
             onStatusChange={(val) => handleFilterChange({ status: val })}
             selectedPriority={filters.priority}
