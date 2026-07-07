@@ -119,7 +119,7 @@ export const useIncidentsViewModel = () => {
         connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
         sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
         reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
-        reportDate: filters.reportDate || null
+        reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null)
       });
     }
     // Solo se ejecuta una vez al montar (o si cambia el connectionId de la URL)
@@ -162,7 +162,7 @@ export const useIncidentsViewModel = () => {
         connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
         sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
         reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
-        reportDate: filters.reportDate || null
+        reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null)
       });
     }, delay);
     return () => clearTimeout(timer);
@@ -180,7 +180,7 @@ export const useIncidentsViewModel = () => {
       connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
       sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
       reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
-      reportDate: filters.reportDate || null
+      reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null)
     });
     setPage(1);
   }, [filters, loadIncidents, setSearchParams]);

@@ -82,6 +82,7 @@ export const PersonalDataStep: React.FC<PersonalDataStepProps> = ({
       } else {
         // CED o PAS (Cédula o Pasaporte)
         const customer = await customerUseCase.execute(identification);
+        console.log(customer?.address);
         if (customer) {
           onFormChange({
             cedula: customer.customerId,
@@ -104,13 +105,21 @@ export const PersonalDataStep: React.FC<PersonalDataStepProps> = ({
           );
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al buscar cliente:', error);
-      MessageToastCustom(
-        'error',
-        'Hubo un error al realizar la búsqueda en el servidor',
-        'Error de Búsqueda'
-      );
+      if (error.status === 404) {
+        MessageToastCustom(
+          'error',
+          'No se encontró ningún cliente con la identificación ingresada',
+          'No Encontrado'
+        );
+      } else {
+        MessageToastCustom(
+          'error',
+          'Hubo un error al realizar la búsqueda',
+          'Error de Búsqueda'
+        );
+      }
     }
   };
 

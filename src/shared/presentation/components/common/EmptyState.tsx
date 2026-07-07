@@ -16,6 +16,7 @@ interface EmptyStateProps {
   icon?: React.ReactNode | React.ElementType;
   minHeight?: string;
   variant?: EmptyStateVariant;
+  actionButton?: React.ReactNode;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
@@ -23,7 +24,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   description,
   icon: Icon = Info,
   minHeight = '100%',
-  variant = 'default'
+  variant = 'default',
+  actionButton
 }) => {
   const isDefault = variant === 'default';
   const iconColor = isDefault ? 'var(--primary)' : 'var(--empty-state-text)';
@@ -51,6 +53,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       </div>
       <h4 className="empty-state__message">{message}</h4>
       {description && <p className="empty-state__description">{description}</p>}
+      {actionButton && <div className="empty-state__button-wrapper">{actionButton}</div>}
     </div>
   );
 };

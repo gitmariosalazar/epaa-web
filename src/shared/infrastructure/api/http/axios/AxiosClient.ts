@@ -179,7 +179,14 @@ export class AxiosHttpClient implements HttpClientInterface {
       };
     } catch (error: any) {
       if (error.name === 'AbortError') throw new Error('Request was aborted');
-      throw new Error(error.response?.data?.message || error.message);
+      
+      const errorMessage = error.response?.data?.message || error.message;
+      const apiError: any = new Error(errorMessage);
+      apiError.status = error.response?.status;
+      apiError.data = error.response?.data;
+      apiError.isAxiosError = error.isAxiosError;
+      
+      throw apiError;
     }
   }
 

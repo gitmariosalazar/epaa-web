@@ -9,11 +9,12 @@ import { Table, type Column } from '@/shared/presentation/components/Table/Table
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { ConverDate } from '@/shared/utils/datetime/ConverDate';
-import { AlertCircle, Eye, Wrench, ShieldAlert, Network, X, Navigation } from 'lucide-react';
+import { AlertCircle, Eye, Wrench, ShieldAlert, Network, X, Navigation, Repeat } from 'lucide-react';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress/CircularProgress';
 import { useSimulatedProgress } from '@/shared/presentation/components/CircularProgress/useSimulatedProgress';
 import '../styles/Incidents.css';
 import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 /**
  * IncidentsListPage
@@ -223,12 +224,20 @@ export const IncidentsListPage: React.FC = () => {
 
         {error ? (
           <div className="incidents-error-state">
-            <AlertCircle size={28} />
-            <h3>Error al cargar incidentes</h3>
-            <p>{error}</p>
-            <Button onClick={refresh} variant="outline" size="sm">
-              Reintentar
-            </Button>
+            <EmptyState
+              message="Error al cargar incidentes"
+              description={error}
+              icon={AlertCircle}
+              variant="error"
+              minHeight="300px"
+              actionButton={
+                <Button onClick={refresh} variant="outline" size="sm" color='error'
+                  leftIcon={<Repeat size={12} />}
+                >
+                  Actualizar
+                </Button>
+              }
+            />
           </div>
         ) : (
           <Table<IncidentDetailRowResponse>

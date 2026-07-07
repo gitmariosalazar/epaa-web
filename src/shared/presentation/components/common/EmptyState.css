@@ -20,6 +20,12 @@
   white-space: normal !important;
 }
 
+.empty-state__button-wrapper {
+  margin-top: 1rem !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
 .empty-state:hover {
   border-style: solid;
   border: 1px dashed var(--empty-state-text);

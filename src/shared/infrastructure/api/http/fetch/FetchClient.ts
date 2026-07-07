@@ -79,7 +79,12 @@ export class FetchHttpClient implements HttpClientInterface {
           responseData?.message?.[0] ||
           responseData?.message ||
           'Request failed!';
-        throw new Error(errorMessage);
+          
+        const apiError: any = new Error(errorMessage);
+        apiError.status = response.status;
+        apiError.data = responseData;
+        
+        throw apiError;
       }
 
       const apiResponse: ApiResponse<T> = {
@@ -96,7 +101,11 @@ export class FetchHttpClient implements HttpClientInterface {
         throw new Error('Request was aborted');
       }
 
-      throw new Error(error.message || 'Unexpected error occurred');
+      const apiError: any = new Error(error.message || 'Unexpected error occurred');
+      apiError.status = error.status;
+      apiError.data = error.data;
+      
+      throw apiError;
     }
   }
 

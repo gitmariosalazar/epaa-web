@@ -25,7 +25,8 @@ import {
   X,
   List,
   Map,
-  Navigation
+  Navigation,
+  Repeat
 } from 'lucide-react';
 import {
   CircularProgress,
@@ -313,18 +314,15 @@ export const IncidentsPage: React.FC = () => {
             icon={AlertCircle}
             variant="error"
             minHeight="300px"
+            actionButton={
+              <Button onClick={refresh} variant="outline" size="sm" color='error'
+                leftIcon={<Repeat size={12} />}
+              >
+                Actualizar
+              </Button>
+            }
           />
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              marginTop: '1rem'
-            }}
-          >
-            <Button onClick={refresh} variant="outline" size="sm">
-              Reintentar
-            </Button>
-          </div>
+
         </div>
       );
     }

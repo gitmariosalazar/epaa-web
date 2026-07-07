@@ -9,6 +9,7 @@ import '../styles/IncidentFilters.css';
 import { MdCategory } from 'react-icons/md';
 import { Divider } from '@/shared/presentation/components/divider/Divider';
 import { FaFilter } from 'react-icons/fa';
+import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 
 interface IncidentFiltersProps {
   searchQuery: string;
@@ -43,6 +44,11 @@ const SEARCH_FIELDS = [
     value: 'connectionId',
     labelKey: 'common.connectionId',
     labelDefault: 'ID Acometida'
+  },
+  {
+    value: 'reportDate',
+    labelKey: 'common.reportDate',
+    labelDefault: 'Fecha de reporte'
   }
 ];
 
@@ -99,15 +105,27 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
         </div>
 
         <div className="filter-group">
-          <label className="filter-label">{t('common.search', 'Búsqueda')}</label>
-          <Input
-            type="text"
-            size="compact"
-            placeholder={t('common.searchPlaceholder')}
-            value={searchQuery}
-            onChange={(e) => onSearchQueryChange(e.target.value)}
-            leftIcon={<Search size={18} />}
-          />
+          <label className="filter-label">{
+            searchField === 'reportDate' ? t('common.reportDate', 'Fecha de reporte') : searchField === 'sector' ? t('common.sector', 'Sector') : searchField === 'reference' ? t('common.reference', 'Referencia') : searchField === 'connectionId' ? t('common.connectionId', 'ID Acometida') : t('common.search', 'Búsqueda')
+          }</label>
+          {
+            searchField === 'reportDate' ? (
+              <DatePicker
+                size="compact"
+                value={searchQuery}
+                onChange={(val) => onSearchQueryChange(val)}
+              />
+            ) : (
+              <Input
+                type={'text'}
+                size="compact"
+                placeholder={searchField === 'reportDate' ? t('common.reportDate', 'Fecha de reporte') : searchField === 'sector' ? t('common.sector', 'Sector') : searchField === 'reference' ? t('common.reference', 'Referencia') : searchField === 'connectionId' ? t('common.connectionId', 'ID Acometida') : t('common.searchPlaceholder', 'Buscar por descripción, dirección, ID...')}
+                value={searchQuery}
+                onChange={(e) => onSearchQueryChange(e.target.value)}
+                leftIcon={<Search size={18} />}
+              />
+            )
+          }
         </div>
         {/* Status */}
         <div className="filter-group">
