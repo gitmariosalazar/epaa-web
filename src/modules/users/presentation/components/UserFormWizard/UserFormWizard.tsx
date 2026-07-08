@@ -19,6 +19,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import '@/shared/presentation/styles/Users.css';
+import { usePositionsViewModel } from '@/modules/roles/presentation/hooks/usePositionsViewModel';
 
 interface UserFormWizardProps {
   currentStep: number;
@@ -65,6 +66,29 @@ export const UserFormWizard: React.FC<UserFormWizardProps> = ({
   isAutoFilling = false,
   autoFillMessage
 }) => {
+  const { positions } = usePositionsViewModel();
+  
+  const positionOptions = React.useMemo(() => [
+    { value: '', label: 'Seleccionar Cargo...' },
+    ...positions.map((pos) => ({
+      value: pos.positionId,
+      label: pos.name
+    }))
+  ], [positions]);
+
+  const contractTypeOptions = [
+    { value: '', label: 'Seleccionar...' },
+    { value: 1, label: 'Nombramiento Permanente' },
+    { value: 2, label: 'Servicios Ocasionales' },
+    { value: 3, label: 'Código del Trabajo (Indefinido)' },
+    { value: 4, label: 'Código del Trabajo (Prueba)' },
+    { value: 5, label: 'Nombramiento Provisional' },
+    { value: 6, label: 'Libre Nombramiento y Remoción' },
+    { value: 7, label: 'Contrato por Inversión' },
+    { value: 8, label: 'Contrato Indefinido' },
+    { value: 9, label: 'Servicios Profesionales' }
+  ];
+
   switch (currentStep) {
     // ════════════════════════════════════════════════════════════
     // STEP 1: Ficha del Empleado
@@ -217,23 +241,21 @@ export const UserFormWizard: React.FC<UserFormWizardProps> = ({
             label="Datos Laborales"
           />
           <div className="user-form-wizard__row-3">
-            <Input
-              label="Cargo (Position ID)"
-              type="number"
+            <Select
+              label="Cargo (Position)"
               name="positionId"
-              value={formData.positionId}
+              value={formData.positionId || ''}
               onChange={onChange}
               size="small"
-              placeholder="Ej: 2"
+              options={positionOptions}
             />
-            <Input
+            <Select
               label="Tipo de Contrato"
-              type="number"
               name="contractTypeId"
-              value={formData.contractTypeId}
+              value={formData.contractTypeId || ''}
               onChange={onChange}
               size="small"
-              placeholder="Ej: 1"
+              options={contractTypeOptions}
             />
             <div className="input-component input--small">
               <label className="input__label">Fecha de Contratación</label>

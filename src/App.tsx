@@ -22,6 +22,7 @@ import {
 } from '@/modules/customers/presentation/pages';
 import { UserDetailPage } from '@/modules/users/presentation/pages/users/UserDetailPage';
 import { RolesPage } from '@/modules/roles/presentation/pages/roles/RolesPage';
+import { PositionsPage } from '@/modules/roles/presentation/pages/positions/PositionsPage';
 import { ConnectionsPage } from '@/modules/connections/presentation/pages/ConnectionsPage';
 import { ConnectionsDashboardPage } from '@/modules/connections/presentation/pages/ConnectionsDashboardPage/ConnectionsDashboardPage';
 import { PermissionsPage } from '@/modules/permissions/presentation/pages/permissions/PermissionsPage';
@@ -128,8 +129,8 @@ const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
     const name = typeof r === 'object' && r.name ? r.name : String(r);
     const upper = name.toUpperCase();
     // Mapeamos 'ADMINISTRADOR' a 'ADMIN' para compatibilidad con allowedRoles={['ADMIN']}
-    if (upper === 'ADMINISTRADOR' || upper === 'ADMIN') {
-      return ['ADMIN', 'ADMINISTRADOR'];
+    if (upper === 'SUPER ADMINISTRADOR') {
+      return ['SUPER ADMINISTRADOR', 'ADMINISTRADOR'];
     }
     return [upper];
   });
@@ -137,6 +138,8 @@ const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
   const hasAccess = allowedRoles.some((role) =>
     userRoles.includes(role.toUpperCase())
   );
+
+  console.log('hasAccess', hasAccess);
 
   if (!hasAccess) {
     return <Navigate to="/unauthorized" replace />;
@@ -168,7 +171,7 @@ function App() {
                 <Route path="/reports" element={<ReportsPage />} />
 
                 {/* Ejemplo de protección por Rol: Solo ADMIN puede ver usuarios */}
-                <Route element={<RoleGuard allowedRoles={['ADMIN']} />}>
+                <Route element={<RoleGuard allowedRoles={['SUPER ADMINISTRADOR', 'ADMINISTRADOR']} />}>
                   <Route
                     path="/users/*"
                     element={
@@ -220,6 +223,10 @@ function App() {
                       <RolesPage />
                     </RolesProvider>
                   }
+                />
+                <Route
+                  path="/positions"
+                  element={<PositionsPage />}
                 />
                 <Route
                   path="/permissions"

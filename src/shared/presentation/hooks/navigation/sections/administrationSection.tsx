@@ -1,4 +1,4 @@
-import { Lock, Users, Shield, CheckCircle, Settings, FileText } from 'lucide-react';
+import { Lock, Users, Shield, CheckCircle, Settings, FileText, Briefcase } from 'lucide-react';
 import type { NavSection } from '@/shared/domain/models/Navigation';
 
 export const getAdministrationSection = (t: any): NavSection => ({
@@ -18,6 +18,11 @@ export const getAdministrationSection = (t: any): NavSection => ({
           icon: <Shield size={18} />,
           label: t('sidebar.roles'),
           to: '/roles'
+        },
+        {
+          icon: <Briefcase size={18} />,
+          label: t('sidebar.positions', 'Cargos'),
+          to: '/positions'
         },
         {
           icon: <CheckCircle size={18} />,

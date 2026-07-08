@@ -10,6 +10,7 @@ export const es = {
       user: 'Usuario',
       users: 'Usuarios',
       roles: 'Roles',
+      positions: 'Cargos',
       permissions: 'Permisos',
       settings: 'Configuración',
       signOut: 'Cerrar Sesión',
