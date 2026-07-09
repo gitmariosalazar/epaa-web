@@ -107,6 +107,9 @@
 .btn-pro--outline:hover {
   background-color: color-mix(in srgb, var(--btn-bg), transparent 92%);
 }
+.btn-pro--outline:active {
+  background-color: color-mix(in srgb, var(--btn-bg), transparent 85%);
+}
 
 .btn-pro--subtle {
   background-color: color-mix(in srgb, var(--btn-bg), transparent 90%);
@@ -114,6 +117,9 @@
 }
 .btn-pro--subtle:hover {
   background-color: color-mix(in srgb, var(--btn-bg), transparent 85%);
+}
+.btn-pro--subtle:active {
+  background-color: color-mix(in srgb, var(--btn-bg), transparent 75%);
 }
 
 .btn-pro--ghost {
@@ -124,6 +130,9 @@
 .btn-pro--ghost:hover {
   background-color: color-mix(in srgb, var(--btn-bg), transparent 92%);
 }
+.btn-pro--ghost:active {
+  background-color: color-mix(in srgb, var(--btn-bg), transparent 85%);
+}
 
 .btn-pro--dashed {
   background-color: transparent;
@@ -133,6 +142,9 @@
 }
 .btn-pro--dashed:hover {
   background-color: color-mix(in srgb, var(--btn-bg), transparent 92%);
+}
+.btn-pro--dashed:active {
+  background-color: color-mix(in srgb, var(--btn-bg), transparent 85%);
 }
 
 /* --- Rounded --- */
@@ -201,33 +213,20 @@
 .dark .btn-pro--subtle:hover {
   background-color: color-mix(in srgb, var(--btn-bg), transparent 70%);
 }
+.dark .btn-pro--subtle:active {
+  background-color: color-mix(in srgb, var(--btn-bg), transparent 60%);
+}
 
 .dark .btn-pro--ghost:hover,
 .dark .btn-pro--outline:hover,
 .dark .btn-pro--dashed:hover {
-  background-color: rgba(
-    255,
-    255,
-    255,
-    0.08
-  ); /* Generic professional translucent highlight */
+  background-color: color-mix(in srgb, var(--btn-bg), transparent 85%);
 }
 
-/* Base button primary dark mode override - only for standard/unspecified buttons */
-.dark
-  .btn-pro:not([class*='--primary']):not([class*='--secondary']):not(
-    [class*='--accent']
-  ):not([class*='--success']):not([class*='--error']):not(
-    [class*='--warning']
-  ):not([class*='--info']):not([class*='--blue']):not([class*='--red']):not(
-    [class*='--green']
-  ) {
-  --btn-bg: rgba(255, 255, 255, 0.1);
-  --btn-hover-bg: rgba(255, 255, 255, 0.15);
-  --btn-active-bg: rgba(255, 255, 255, 0.2);
-  --btn-border: rgba(255, 255, 255, 0.1);
-  --btn-ring: rgba(255, 255, 255, 0.3);
-  color: #ffffff;
+.dark .btn-pro--ghost:active,
+.dark .btn-pro--outline:active,
+.dark .btn-pro--dashed:active {
+  background-color: color-mix(in srgb, var(--btn-bg), transparent 75%);
 }
 
 /* Palette - these stay fixed but we can lighten them for dark mode if needed */

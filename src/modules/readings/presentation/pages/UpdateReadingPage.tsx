@@ -260,9 +260,11 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
                 <div className="cs-state-name">
                   <Tag size={15} style={{ marginRight: 6, flexShrink: 0 }} />
                   {currentReadingInfoForRequest.connectionStateName
-                    .replace(/_/g, ' ')
-                    .replace(/([A-Z])/g, ' $1')
-                    .trim()}
+                    ? currentReadingInfoForRequest.connectionStateName
+                        .replace(/_/g, ' ')
+                        .replace(/([A-Z])/g, ' $1')
+                        .trim()
+                    : 'Estado Desconocido'}
                 </div>
                 <div className="cs-state-description">
                   <FileText

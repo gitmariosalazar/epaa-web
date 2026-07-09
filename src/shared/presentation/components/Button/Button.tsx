@@ -84,12 +84,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((
   const roundedClass = `${baseClass}--rounded-${rounded}`;
 
   // Use explicit color if provided, otherwise derive from variant
+  const nonSolidVariants = ['outline', 'ghost', 'dashed', 'link', 'subtle'];
+  
   const finalColor =
     color ||
-    (['outline', 'ghost', 'dashed', 'link'].includes(variant)
+    (nonSolidVariants.includes(variant)
       ? 'primary'
       : (variant as ButtonColor));
-  const finalVariant = ['outline', 'ghost', 'dashed', 'link'].includes(variant)
+  const finalVariant = nonSolidVariants.includes(variant)
     ? variant
     : 'solid';
 

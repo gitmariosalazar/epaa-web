@@ -147,6 +147,7 @@ export const ConnectionMap: React.FC<ConnectionMapProps> = ({
   return (
     <div className="map-view-container">
       <Map
+        colorScheme={theme === 'dark' ? 'DARK' : 'LIGHT'}
         defaultCenter={finalCenter}
         defaultZoom={zoom}
         mapId={mapId}

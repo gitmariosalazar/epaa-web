@@ -97,7 +97,7 @@ export const Modal: React.FC<ModalProps> = ({
               zIndex: 50
             }}
           >
-            <Tooltip content="Cerrar" position="bottom">
+            <Tooltip content="Cerrar" position="bottom" followCursor={false}>
               <Button
                 variant="outline"
                 className="modal-close"

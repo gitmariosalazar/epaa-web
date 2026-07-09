@@ -10,6 +10,7 @@
   width: var(--toastify-toast-width) !important;
   min-width: var(--toastify-toast-min-width) !important;
   max-width: var(--toastify-toast-max-width) !important;
+  z-index: 99999 !important;
 }
 
 /* Estilo Glassmorphism Profesional */

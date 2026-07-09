@@ -17,6 +17,7 @@ import { PositionsFilters } from '../../components/positions/PositionsFilters';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useTranslation } from 'react-i18next';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 export const PositionsPage: React.FC = () => {
   const {
@@ -117,27 +118,29 @@ export const PositionsPage: React.FC = () => {
             alignItems: 'center'
           }}
         >
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => openEdit(pos)}
-            title="Edit Position"
-            circle
-            style={{ color: 'var(--blue)' }}
-          >
-            <Edit2 size={16} />
-          </Button>
+          <Tooltip content="Edit Position" followCursor={false}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => openEdit(pos)}
+              circle
+              style={{ color: 'var(--blue)' }}
+            >
+              <Edit2 size={16} />
+            </Button>
+          </Tooltip>
 
-          <Button
-            size="sm"
-            variant="ghost"
-            title="Disable Position"
-            onClick={() => handleDisable(pos)}
-            circle
-            style={{ color: 'var(--error)' }}
-          >
-            <MdClose size={16} />
-          </Button>
+          <Tooltip content={pos.isActive ? "Disable Position" : "Enable Position"} followCursor={false}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleDisable(pos)}
+              circle
+              style={{ color: pos.isActive ? 'var(--error)' : 'var(--success)' }}
+            >
+              <MdClose size={16} />
+            </Button>
+          </Tooltip>
         </div>
       )
     }

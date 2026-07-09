@@ -18,6 +18,8 @@
   font-size: 1.5rem;
 }
 
+
+
 .user-detail__status {
   margin-top: var(--spacing-xs);
   display: inline-flex;
@@ -50,7 +52,9 @@
 }
 
 .user-detail__item label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.75rem;
   color: var(--text-muted);
   margin-bottom: 4px;

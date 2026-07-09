@@ -30,4 +30,6 @@ export interface User {
   failedAttempts?: number;
   twoFactorEnabled?: boolean;
   observations?: string | null;
+  positionName?: string;
+  contractTypeName?: string;
 }

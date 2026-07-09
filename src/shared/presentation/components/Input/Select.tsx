@@ -149,14 +149,14 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       (val: string) => {
         if (onChange) {
           const syntheticEvent = {
-            target: { value: val } as HTMLSelectElement,
-            currentTarget: { value: val } as HTMLSelectElement
+            target: { value: val, name: props.name } as HTMLSelectElement,
+            currentTarget: { value: val, name: props.name } as HTMLSelectElement
           } as React.ChangeEvent<HTMLSelectElement>;
           onChange(syntheticEvent);
         }
         close();
       },
-      [onChange, close]
+      [onChange, close, props.name]
     );
 
     // Close when clicking outside

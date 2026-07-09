@@ -29,4 +29,23 @@ export interface UserRepository {
 
   // Security
   resetFailedAttempts(userId: string): Promise<void>;
+
+  // Additional Endpoints from Gateway
+  findByUsername(username: string): Promise<User>;
+  findByEmail(email: string): Promise<User>;
+  findByRefreshToken(token: string): Promise<User>;
+  verifyCredentials(username: string, password: string): Promise<User>;
+  existsByUsernameOrEmail(username: string, email: string): Promise<boolean>;
+  incrementFailedAttempts(userId: string): Promise<void>;
+  getCustomerProfile(usernameOrEmail: string): Promise<User>;
+  
+  assignRoleToUser(userId: string, roleId: number): Promise<void>;
+  assignPermissionToUser(userId: string, permissionId: number): Promise<void>;
+  removeRoleFromUser(userId: string, roleId: number): Promise<void>;
+  removePermissionFromUser(userId: string, permissionId: number): Promise<void>;
+  
+  getRolesByUser(userId: string): Promise<{ id: number; name: string }[]>;
+  getPermissionsByUser(userId: string): Promise<{ id: number; name: string }[]>;
+  getUsersByPermission(permissionId: number): Promise<User[]>;
+  getUsersByRole(roleId: number): Promise<User[]>;
 }

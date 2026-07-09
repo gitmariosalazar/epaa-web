@@ -17,6 +17,8 @@ import { MdAdd, MdClose, MdLockOpen } from 'react-icons/md';
 import { useRolesViewModel } from '../../hooks/useRolesViewModel';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useTranslation } from 'react-i18next';
+import { truncateText } from '@/shared/utils/text/truncate-text';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 export const RolesPage: React.FC = () => {
   const {
@@ -44,7 +46,10 @@ export const RolesPage: React.FC = () => {
   const columns: Column<Role>[] = [
     { header: 'ID', accessor: 'rolId' },
     { header: 'Name', accessor: 'name' },
-    { header: 'Description', accessor: 'description' },
+    {
+      header: 'Description',
+      accessor: (role) => truncateText(role.description, 35)
+    },
     {
       header: 'Active',
       accessor: (role) => (
@@ -70,48 +75,54 @@ export const RolesPage: React.FC = () => {
             alignItems: 'center'
           }}
         >
-          <Button
-            size="sm"
-            variant="ghost"
-            title="Add Permission"
-            onClick={() => openPermissions(role)}
-            circle
-            style={{ color: 'var(--success)' }}
-          >
-            <MdAdd size={16} />
-          </Button>
+          <Tooltip content="Add Permission" followCursor={false}>
 
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => openEdit(role)}
-            title="Edit Role"
-            circle
-            style={{ color: 'var(--blue)' }}
-          >
-            <Edit2 size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => openPermissions(role)}
-            title="View Permissions"
-            circle
-            style={{ color: 'var(--orange)' }}
-          >
-            <MdLockOpen size={16} />
-          </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => openPermissions(role)}
+              circle
+              style={{ color: 'var(--success)' }}
+            >
+              <MdAdd size={16} />
+            </Button>
+          </Tooltip>
 
-          <Button
-            size="sm"
-            variant="ghost"
-            title="Remove Role"
-            onClick={() => handleDelete(role)}
-            circle
-            style={{ color: 'var(--error)' }}
-          >
-            <MdClose size={16} />
-          </Button>
+          <Tooltip content="Edit Role" followCursor={false}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => openEdit(role)}
+              circle
+              style={{ color: 'var(--blue)' }}
+            >
+              <Edit2 size={16} />
+            </Button>
+          </Tooltip>
+
+          <Tooltip content="View Permissions" followCursor={false}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => openPermissions(role)}
+              circle
+              style={{ color: 'var(--orange)' }}
+            >
+              <MdLockOpen size={16} />
+            </Button>
+          </Tooltip>
+
+          <Tooltip content="Remove Role" followCursor={false}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleDelete(role)}
+              circle
+              style={{ color: 'var(--error)' }}
+            >
+              <MdClose size={16} />
+            </Button>
+          </Tooltip>
         </div>
       )
     }

@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import './CompletedReadingConnectionTable.css';
 import {
   Table,
   type Column
@@ -9,12 +10,16 @@ import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Eye } from 'lucide-react';
-import { FaEdit } from 'react-icons/fa';
+import { FaEdit, FaCheckCircle, FaHome } from 'react-icons/fa';
+import { MdMyLocation } from 'react-icons/md';
+import { IoIosCloseCircle } from 'react-icons/io';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { FaLocationCrosshairs } from 'react-icons/fa6';
+import { ReadingLocationModal } from './draw-map/ReadingLocationModal';
 
 interface PropTypes {
   data: TakenReadingConnection[];
@@ -28,6 +33,16 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
   onAction
 }) => {
   const { t } = useTranslation();
+
+  const [selectedReading, setSelectedReading] = useState<TakenReadingConnection | null>(null);
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+
+  const handleOpenMap = (reading: TakenReadingConnection) => {
+    setSelectedReading(reading);
+    setIsMapModalOpen(true);
+  };
+
+  console.log('data', data[0]);
 
   const columns: Column<TakenReadingConnection>[] = useMemo(
     () => [
@@ -82,18 +97,62 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
         }
       },
       {
+        header: t('readings.columns.meterSeal', 'Información de Lectura'),
+        accessor: (r) => {
+          return (
+            <div className="reading-info-container">
+              <div className="reading-info-graphic">
+                <Tooltip content="Lugar de Acometida" themeColor="info" followCursor={false}>
+                  <div className="reading-info-home-icon" >
+                    <FaHome size={16} />
+                  </div>
+                </Tooltip>
+
+                <div className="reading-info-distance-container">
+                  <span className="reading-info-distance-text">
+                    {r.distanceMeters != null ? `${r.distanceMeters.toFixed(2)} m` : '-'}
+                  </span>
+                  <div className="reading-info-distance-line">
+                    <div className="reading-info-distance-tick left" />
+                    <div className="reading-info-distance-tick right" />
+                  </div>
+                </div>
+
+                <Tooltip content="Punto de Lectura" themeColor="info" followCursor={false}>
+                  <div className="reading-info-location-icon">
+                    <MdMyLocation size={16} />
+                  </div>
+                </Tooltip>
+              </div>
+
+              {r.isInsideAllowedRadius != null && (
+                <ColorChip
+                  label={r.isInsideAllowedRadius ? 'Dentro del radio' : 'Fuera del radio'}
+                  color={r.isInsideAllowedRadius ? '#10b981' : '#ef4444'}
+                  size="xs"
+                  borderRadius={6}
+                  variant="soft"
+                  icon={r.isInsideAllowedRadius ? <FaCheckCircle /> : <IoIosCloseCircle />}
+                />
+              )}
+            </div>
+          )
+        }
+      },
+      {
         header: t('common.actions', 'Acciones'),
         accessor: (reading) => (
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="reading-table-actions">
             <Tooltip
               themeColor="info"
+              followCursor={false}
               content={t('common.viewDetails', 'Ver Detalles')}
             >
-              <Button size="sm" variant="ghost" onClick={() => {}} circle>
+              <Button size="sm" variant="ghost" onClick={() => { }} circle>
                 <Eye size={16} />
               </Button>
             </Tooltip>
-            <Tooltip themeColor="warning" content={t('common.edit', 'Editar')}>
+            <Tooltip themeColor="warning" followCursor={false} content={t('common.edit', 'Editar')}>
               <Button
                 size="sm"
                 variant="ghost"
@@ -104,6 +163,17 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
                 circle
               >
                 <FaEdit size={16} />
+              </Button>
+            </Tooltip>
+            <Tooltip themeColor="cyan" followCursor={false} content={t('common.viewLocation', 'Ver Ubicación de la Lectura')}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => handleOpenMap(reading)}
+                color="cyan"
+                circle
+              >
+                <FaLocationCrosshairs size={16} />
               </Button>
             </Tooltip>
           </div>
@@ -132,6 +202,11 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
             variant="info"
           />
         }
+      />
+      <ReadingLocationModal
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        reading={selectedReading}
       />
     </div>
   );

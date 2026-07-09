@@ -1,0 +1,77 @@
+/* Contenedor principal de la columna Información de Lectura */
+.reading-info-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Gráfico visual de distancia (Casa --- distancia ---> Lectura) */
+.reading-info-graphic {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* Icono de acometida (Casa) */
+.reading-info-home-icon {
+  color: #10b981;
+  display: flex;
+  align-items: center;
+}
+
+/* Contenedor de la línea y el texto de distancia */
+.reading-info-distance-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px;
+}
+
+/* Texto de la distancia en metros */
+.reading-info-distance-text {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #64748b);
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Línea horizontal principal de la distancia */
+.reading-info-distance-line {
+  width: 100%;
+  height: 2px;
+  background-color: var(--border-color, #cbd5e1);
+  position: relative;
+  margin-top: 4px;
+}
+
+/* Ticks o marcadores verticales en los extremos de la línea */
+.reading-info-distance-tick {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 8px;
+  background-color: var(--border-color, #cbd5e1);
+}
+
+.reading-info-distance-tick.left {
+  left: 0;
+}
+
+.reading-info-distance-tick.right {
+  right: 0;
+}
+
+/* Icono del punto de lectura */
+.reading-info-location-icon {
+  color: #3b82f6;
+  display: flex;
+  align-items: center;
+}
+
+/* Contenedor de acciones (Botones Ver y Editar) */
+.reading-table-actions {
+  display: flex;
+  gap: 8px;
+}

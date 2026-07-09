@@ -65,6 +65,8 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
     }
   }, [initialCadastralKey, location.state?.cadastralKey]);
 
+  console.log(readingInfo);
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   /** Construye el DTO de creación a partir del estado actual del formulario. */
@@ -226,9 +228,11 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
               <div className="cs-state-name">
                 <Tag size={15} style={{ marginRight: 6, flexShrink: 0 }} />
                 {readingInfoForRequest.connectionStateName
-                  .replace(/_/g, ' ')
-                  .replace(/([A-Z])/g, ' $1')
-                  .trim()}
+                  ? readingInfoForRequest.connectionStateName
+                    .replace(/_/g, ' ')
+                    .replace(/([A-Z])/g, ' $1')
+                    .trim()
+                  : 'Estado Desconocido'}
               </div>
               <div className="cs-state-description">
                 <FileText

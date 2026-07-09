@@ -164,4 +164,109 @@ export class UserRepositoryImpl implements UserRepository {
       `/users-gateway/reset-failed-attempts/${userId}`
     );
   }
+
+  async findByUsername(username: string): Promise<User> {
+    const response = await this.client.get<ApiResponse<User>>(
+      `/users-gateway/find-by-username/${username}`
+    );
+    return response.data.data;
+  }
+
+  async findByEmail(email: string): Promise<User> {
+    const response = await this.client.get<ApiResponse<User>>(
+      `/users-gateway/find-by-email/${email}`
+    );
+    return response.data.data;
+  }
+
+  async findByRefreshToken(token: string): Promise<User> {
+    const response = await this.client.get<ApiResponse<User>>(
+      `/users-gateway/find-by-refresh-token`,
+      { params: { token } }
+    );
+    return response.data.data;
+  }
+
+  async verifyCredentials(username: string, password: string): Promise<User> {
+    const response = await this.client.get<ApiResponse<User>>(
+      `/users-gateway/verify-credentials`,
+      { params: { username, password } }
+    );
+    return response.data.data;
+  }
+
+  async existsByUsernameOrEmail(username: string, email: string): Promise<boolean> {
+    const response = await this.client.get<ApiResponse<boolean>>(
+      `/users-gateway/exists-by-username-or-email`,
+      { params: { username, email } }
+    );
+    return response.data.data;
+  }
+
+  async incrementFailedAttempts(userId: string): Promise<void> {
+    await this.client.put<ApiResponse<void>>(
+      `/users-gateway/increment-failed-attempts/${userId}`
+    );
+  }
+
+  async getCustomerProfile(usernameOrEmail: string): Promise<User> {
+    const response = await this.client.get<ApiResponse<User>>(
+      `/users-gateway/get-customer-profile/${usernameOrEmail}`
+    );
+    return response.data.data;
+  }
+
+  async assignRoleToUser(userId: string, roleId: number): Promise<void> {
+    await this.client.post<ApiResponse<void>>(
+      `/users-gateway/assign-role-to-user`,
+      { userId, roleId }
+    );
+  }
+
+  async assignPermissionToUser(userId: string, permissionId: number): Promise<void> {
+    await this.client.post<ApiResponse<void>>(
+      `/users-gateway/assign-permission-to-user`,
+      { userId, permissionId }
+    );
+  }
+
+  async removeRoleFromUser(userId: string, roleId: number): Promise<void> {
+    await this.client.delete<ApiResponse<void>>(
+      `/users-gateway/remove-role-from-user/${userId}/${roleId}`
+    );
+  }
+
+  async removePermissionFromUser(userId: string, permissionId: number): Promise<void> {
+    await this.client.delete<ApiResponse<void>>(
+      `/users-gateway/remove-permission-from-user/${userId}/${permissionId}`
+    );
+  }
+
+  async getRolesByUser(userId: string): Promise<{ id: number; name: string }[]> {
+    const response = await this.client.get<ApiResponse<{ id: number; name: string }[]>>(
+      `/users-gateway/get-roles-by-user/${userId}`
+    );
+    return response.data.data;
+  }
+
+  async getPermissionsByUser(userId: string): Promise<{ id: number; name: string }[]> {
+    const response = await this.client.get<ApiResponse<{ id: number; name: string }[]>>(
+      `/users-gateway/get-permissions-by-user/${userId}`
+    );
+    return response.data.data;
+  }
+
+  async getUsersByPermission(permissionId: number): Promise<User[]> {
+    const response = await this.client.get<ApiResponse<User[]>>(
+      `/users-gateway/get-users-by-permission/${permissionId}`
+    );
+    return response.data.data;
+  }
+
+  async getUsersByRole(roleId: number): Promise<User[]> {
+    const response = await this.client.get<ApiResponse<User[]>>(
+      `/users-gateway/get-users-by-role/${roleId}`
+    );
+    return response.data.data;
+  }
 }

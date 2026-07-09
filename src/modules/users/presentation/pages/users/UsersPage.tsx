@@ -18,9 +18,11 @@ import {
   Check,
   Eye,
   Settings,
-  SearchX
+  SearchX,
+  Shield
 } from 'lucide-react';
 import { UserDetailModal } from '../../components/UserDetailModal/UserDetailModal';
+import AddRoleModal from '../../components/AddRoleModal/AddRoleModal';
 import '@/shared/presentation/styles/Table.css';
 import '@/modules/accounting/presentation/styles/entry-data/EntryDataFilters.css';
 import '@/shared/presentation/styles/Users.css';
@@ -31,6 +33,9 @@ import type { User } from '@/modules/users/domain/models/User';
 import { UsersProvider } from '../../context/UsersContext';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { Alert } from '@/shared/presentation/components/Alert/Alert';
+import { BiSolidErrorAlt } from 'react-icons/bi';
+import { MdSecurity } from 'react-icons/md';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 const UsersLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -49,6 +54,8 @@ const UsersLayout: React.FC = () => {
     setIsEditOpen,
     isDeleteOpen,
     setIsDeleteOpen,
+    isAssignRoleOpen,
+    setIsAssignRoleOpen,
     selectedUser,
     setSelectedUser,
     isViewOpen,
@@ -79,6 +86,7 @@ const UsersLayout: React.FC = () => {
     handleUpdate,
     handleView,
     handleDelete,
+    handleAssignRole,
     openEdit,
     refresh
   } = useUsersViewModel();
@@ -86,7 +94,7 @@ const UsersLayout: React.FC = () => {
   // Columns Configuration
   const columns: Column<User>[] = [
     {
-      header: 'User',
+      header: 'Username',
       accessor: (user: User) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Avatar
@@ -117,33 +125,32 @@ const UsersLayout: React.FC = () => {
               const roleKey =
                 typeof role === 'string' ? role : role.id || roleName;
               return (
-                <span
+                <ColorChip
                   key={roleKey}
-                  style={{
-                    fontSize: '0.75rem',
-                    padding: '2px 8px',
-                    borderRadius: '12px',
-                    backgroundColor:
-                      'color-mix(in srgb, var(--accent), transparent 90%)',
-                    color: 'var(--accent)'
-                  }}
-                >
-                  {roleName}
-                </span>
+                  status='info'
+                  label={roleName}
+                  borderRadius={5}
+                  size="xs"
+                  variant="solid"
+                  icon={<MdSecurity size={12} />}
+                />
               );
             })
-          ) : user.username === 'root' ? (
-            <span
-              style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}
-            >
-              No roles assigned
-            </span>
+          ) : user.username !== 'root' ? (
+            <ColorChip
+              color="var(--error)"
+              label="Sin asignar roles"
+              size="sm"
+              variant="soft"
+              icon={<BiSolidErrorAlt />}
+            />
           ) : (
             <ColorChip
               color="var(--warning)"
-              label="All permissions"
+              label="Todos los permisos"
               size="sm"
               variant="soft"
+              icon={<Shield />}
             />
           )}
         </div>
@@ -171,58 +178,78 @@ const UsersLayout: React.FC = () => {
       header: 'Actions',
       accessor: (user: User) => (
         <div style={{ display: 'flex', gap: '8px' }}>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => handleView(user)}
-            title="View Details"
-            circle
-          >
-            <Eye size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => navigate(`/users/${user.username}`)}
-            title="Manage User"
-            circle
-          >
-            <Settings size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => openEdit(user)}
-            title="Edit User"
-            disabled={user.username === 'root'}
-            className={
-              user.username === 'root'
-                ? `disabled:opacity-50 disabled:cursor-not-allowed`
-                : ''
-            }
-            circle
-          >
-            <Edit2 size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            style={{ color: 'var(--error)' }}
-            disabled={user.username === 'root'}
-            className={
-              user.username === 'root'
-                ? `disabled:opacity-50 disabled:cursor-not-allowed`
-                : ''
-            }
-            onClick={() => {
-              setSelectedUser(user);
-              setIsDeleteOpen(true);
-            }}
-            title="Delete User"
-            circle
-          >
-            <Trash2 size={16} />
-          </Button>
+          <Tooltip content="Ver detalles" position="top" followCursor={false}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleView(user)}
+              circle
+            >
+              <Eye size={16} />
+            </Button>
+          </Tooltip>
+
+          <Tooltip content="Gestionar" position="top" followCursor={false}>
+            <Button
+              size="sm"
+              variant="ghost"
+              circle
+              onClick={() => navigate(`/users/${user.username}`)}
+            >
+              <Settings size={16} />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Editar" position="top" followCursor={false}>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={user.username === 'root'}
+              className={
+                user.username === 'root'
+                  ? `disabled:opacity-50 disabled:cursor-not-allowed`
+                  : ''
+              }
+              circle
+              onClick={() => openEdit(user)}
+            >
+              <Edit2 size={16} />
+            </Button>
+          </Tooltip>
+
+          <Tooltip content="Eliminar" position="top" followCursor={false}>
+            <Button
+              size="sm"
+              variant="ghost"
+              style={{ color: 'var(--error)' }}
+              disabled={user.username === 'root'}
+              className={
+                user.username === 'root'
+                  ? `disabled:opacity-50 disabled:cursor-not-allowed`
+                  : ''
+              }
+              onClick={() => {
+                setSelectedUser(user);
+                setIsDeleteOpen(true);
+              }}
+              title="Delete User"
+              circle
+            >
+              <Trash2 size={16} />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Asignar rol" position="top" followCursor={false}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setSelectedUser(user);
+                setIsAssignRoleOpen(true);
+              }}
+              circle
+            >
+              <MdSecurity size={16} />
+            </Button>
+          </Tooltip>
         </div>
       )
     }
@@ -396,36 +423,80 @@ const UsersLayout: React.FC = () => {
       <Modal
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
-        title="Edit User"
+        title="Editar Usuario"
         size="lg"
         footer={
-          <div className="users-modal__footer--end">
-            <Button variant="outline" onClick={() => setIsEditOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleUpdate}>Save Changes</Button>
+          <div style={{ width: '100%' }}>
+            {validationError && (
+              <div style={{ marginBottom: '12px' }}>
+                <Alert 
+                  type="error" 
+                  message={validationError} 
+                  dismissible
+                  onClose={() => setValidationError(null)}
+                />
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+              <Button
+                variant="outline"
+                disabled={currentStep === 0}
+                onClick={() => {
+                  setValidationError(null);
+                  if (currentStep > 0) setCurrentStep(currentStep - 1);
+                }}
+              >
+                Atrás
+              </Button>
+              <Button
+                onClick={() => {
+                  const error = validateCurrentStep();
+                  if (error) {
+                    setValidationError(error);
+                    return;
+                  }
+                  setValidationError(null);
+                  if (currentStep < steps.length - 1)
+                    setCurrentStep(currentStep + 1);
+                  else handleUpdate();
+                }}
+              >
+                {currentStep === steps.length - 1 ? 'Guardar Cambios' : 'Siguiente'}
+              </Button>
+            </div>
           </div>
         }
       >
-        <div className="users-modal__scroll-container">
+        <div className="users-modal__body">
+          <div className="users-wizard__stepper">
+            {steps.map((step, idx) => (
+              <React.Fragment key={step}>
+                <div
+                  className={`users-wizard__step-item${
+                    idx === currentStep
+                      ? ' users-wizard__step-item--active'
+                      : ''
+                  }${idx < currentStep ? ' users-wizard__step-item--completed' : ''}`}
+                >
+                  <div className="users-wizard__step-number">
+                    {idx < currentStep ? <Check size={16} /> : idx + 1}
+                  </div>
+                  <div className="users-wizard__step-label">{step}</div>
+                </div>
+                {idx < steps.length - 1 && (
+                  <div
+                    className={`users-wizard__step-connector${
+                      idx < currentStep
+                        ? ' users-wizard__step-connector--active'
+                        : ''
+                    }`}
+                  />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
           <UserFormWizard
-            currentStep={0}
-            formData={formData}
-            onChange={handleInputChange}
-            isEditMode={true}
-            isCreateMode={false}
-          />
-          <div className="users-modal__divider"></div>
-          <UserFormWizard
-            currentStep={1}
-            formData={formData}
-            onChange={handleInputChange}
-            isEditMode={true}
-            isCreateMode={false}
-          />
-          <div className="users-modal__divider"></div>
-          <UserFormWizard
-            currentStep={2}
+            currentStep={currentStep}
             formData={formData}
             onChange={handleInputChange}
             isEditMode={true}
@@ -470,6 +541,15 @@ const UsersLayout: React.FC = () => {
         user={viewUser}
         isLoading={isViewLoading}
       />
+
+      {/* Assign Role Modal */}
+      {selectedUser && (
+        <AddRoleModal
+          isOpen={isAssignRoleOpen}
+          onClose={() => setIsAssignRoleOpen(false)}
+          onSave={handleAssignRole}
+        />
+      )}
     </PageLayout>
   );
 };

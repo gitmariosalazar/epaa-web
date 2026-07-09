@@ -3,8 +3,11 @@ import type { User } from '@/modules/users/domain/models/User';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
-import { CheckCircle, XCircle, Shield, Key } from 'lucide-react';
+import { CheckCircle, XCircle, Shield, Key, FileUser, Mail, Calendar, Clock } from 'lucide-react';
 import './UserDetailModal.css';
+import { ConverDateTimeToText } from '@/shared/utils/datetime/ConverDate';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { MdSecurity } from 'react-icons/md';
 
 interface UserDetailModalProps {
   isOpen: boolean;
@@ -26,10 +29,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     return null;
   }
 
-  const formatDate = (date: Date | string | undefined | null) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleString();
-  };
+
+  console.log('user', user);
 
   return (
     <Modal
@@ -79,23 +80,23 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
           </div>
 
           <div className="user-detail__section">
-            <h3>General Information</h3>
+            <h3>Información General</h3>
             <div className="user-detail__grid">
               <div className="user-detail__item">
-                <label>Username</label>
+                <label><FileUser size={16} /> Nombre de Usuario</label>
                 <span>{user.username}</span>
               </div>
               <div className="user-detail__item">
-                <label>Email</label>
+                <label><Mail size={16} /> Correo Electrónico</label>
                 <span>{user.email}</span>
               </div>
               <div className="user-detail__item">
-                <label>Registered At</label>
-                <span>{formatDate(user.registeredAt)}</span>
+                <label><Calendar size={16} /> Fecha de Registro</label>
+                <span>{ConverDateTimeToText(user.registeredAt)}</span>
               </div>
               <div className="user-detail__item">
-                <label>Last Login</label>
-                <span>{formatDate(user.lastLogin)}</span>
+                <label><Clock size={16} /> Último Inicio de Sesión</label>
+                <span>{ConverDateTimeToText(user.lastLogin)}</span>
               </div>
             </div>
           </div>
@@ -109,23 +110,26 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 user.roles.map((role, idx) => {
                   const roleName = typeof role === 'string' ? role : role.name;
                   return (
-                    <span
+                    <ColorChip
                       key={idx}
-                      className="user-detail__tag user-detail__tag--role"
-                    >
-                      {roleName}
-                    </span>
+                      label={roleName}
+                      status="info"
+                      variant="outline"
+                      size="xs"
+                      borderRadius={8}
+                      icon={<MdSecurity size={12} />}
+                    />
                   );
                 })
               ) : user.username === 'root' ? (
                 <span className="user-detail__tag user-detail__tag--role">
-                  All Permissions - Super User
+                  Todos los permisos - Super Usuario
                 </span>
               ) : (
                 <span
                   style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}
                 >
-                  No roles assigned
+                  Sin roles asignados
                 </span>
               )}
             </div>
@@ -133,7 +137,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
           <div className="user-detail__section">
             <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Key size={16} /> Permissions
+              <Key size={16} /> Permisos
             </h3>
             <div className="user-detail__tags">
               {user.permissions && user.permissions.length > 0 ? (
@@ -150,13 +154,13 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 })
               ) : user.username === 'root' ? (
                 <span className="user-detail__tag user-detail__tag--perm">
-                  All Permissions - Super User
+                  Todos los permisos - Super Usuario
                 </span>
               ) : (
                 <span
                   style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}
                 >
-                  No specific permissions
+                  Sin permisos específicos
                 </span>
               )}
             </div>
@@ -164,23 +168,23 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
           {(typeof user.failedAttempts === 'number' ||
             user.twoFactorEnabled !== undefined) && (
-            <div className="user-detail__section">
-              <h3>Security & Audit</h3>
-              <div className="user-detail__grid">
-                <div className="user-detail__item">
-                  <label>Failed Login Attempts</label>
-                  <span>{user.failedAttempts || 0}</span>
-                </div>
-                <div className="user-detail__item">
-                  <label>2FA Enabled</label>
-                  <span>{user.twoFactorEnabled ? 'Yes' : 'No'}</span>
+              <div className="user-detail__section">
+                <h3>Seguridad y Auditoría</h3>
+                <div className="user-detail__grid">
+                  <div className="user-detail__item">
+                    <label>Intentos de Inicio de Sesión Fallidos</label>
+                    <span>{user.failedAttempts || 0}</span>
+                  </div>
+                  <div className="user-detail__item">
+                    <label>Autenticación de Dos Factores</label>
+                    <span>{user.twoFactorEnabled ? 'Sí' : 'No'}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       ) : (
-        <div>User not found</div>
+        <div>Usuario no encontrado</div>
       )}
     </Modal>
   );

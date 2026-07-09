@@ -5,6 +5,7 @@ import { UpdateUserRequest } from '@/modules/users/domain/models/UpdateUserReque
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import type { UserFormData } from '../models/UserFormData';
 import { useUsersContext } from '../context/UsersContext';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
 /**
  * ViewModel para la página de usuarios.
@@ -21,7 +22,8 @@ export const useUsersViewModel = () => {
     deleteUserUseCase,
     getUserDetailUseCase,
     getCustomerByIdentificationUseCase,
-    existsByUsernameUseCase
+    existsByUsernameUseCase,
+    assignRoleToUserUseCase
   } = useUsersContext();
 
   // State
@@ -36,6 +38,7 @@ export const useUsersViewModel = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isAssignRoleOpen, setIsAssignRoleOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [viewUser, setViewUser] = useState<User | null>(null);
@@ -156,7 +159,7 @@ export const useUsersViewModel = () => {
           ...prev,
           // Step 1 — Ficha del Empleado
           idCard: trimmed,
-          citizenId: trimmed,
+          citizenId: customer.customerId,
           firstName: customer.firstName || prev.firstName,
           lastName: customer.lastName || prev.lastName,
           dateOfBirth: customer.dateOfBirth
@@ -261,12 +264,21 @@ export const useUsersViewModel = () => {
       loadUsers();
     } catch (error: any) {
       console.error('[UsersViewModel] Create failed:', error);
-      // Parsear mensaje del backend para mostrarlo al usuario
-      const backendMessage =
-        error?.response?.data?.message?.[0] ||
-        error?.message ||
-        'Error desconocido al crear el usuario';
-      alert(`Error al crear usuario: ${backendMessage}`);
+      
+      const errorData = error?.response?.data;
+      let errorMessage = 'Error al crear el usuario.';
+
+      if (errorData?.message) {
+        errorMessage = Array.isArray(errorData.message)
+          ? errorData.message[0]
+          : errorData.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      MessageToastCustom('error', errorMessage, 'Error', {
+        position: 'top-right'
+      });
     }
   };
 
@@ -298,6 +310,7 @@ export const useUsersViewModel = () => {
       internalPhone: user.internalPhone || '',
       internalEmail: user.internalEmail || ''
     });
+    setCurrentStep(0);
     setIsEditOpen(true);
   };
 
@@ -339,9 +352,23 @@ export const useUsersViewModel = () => {
       setIsEditOpen(false);
       resetForm();
       loadUsers();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Update failed', error);
-      alert('Failed to update user');
+
+      const errorData = error?.response?.data;
+      let errorMessage = 'Error al actualizar el usuario.';
+
+      if (errorData?.message) {
+        errorMessage = Array.isArray(errorData.message)
+          ? errorData.message[0]
+          : errorData.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      MessageToastCustom('error', errorMessage, 'Error', {
+        position: 'top-right'
+      });
     }
   };
 
@@ -371,9 +398,50 @@ export const useUsersViewModel = () => {
       setIsDeleteOpen(false);
       resetForm();
       loadUsers();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Delete failed', error);
-      alert('Failed to delete user');
+
+      const errorData = error?.response?.data;
+      let errorMessage = 'Error al eliminar el usuario.';
+
+      if (errorData?.message) {
+        errorMessage = Array.isArray(errorData.message)
+          ? errorData.message[0]
+          : errorData.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      MessageToastCustom('error', errorMessage, 'Error', {
+        position: 'top-right'
+      });
+    }
+  };
+
+  const handleAssignRole = async (roleId: number) => {
+    if (!selectedUser) return;
+    try {
+      await assignRoleToUserUseCase.execute(selectedUser.userId, roleId);
+      // alert('Rol asignado exitosamente');
+      setIsAssignRoleOpen(false);
+      loadUsers(); // refresh data to show the new role in the UI if we fetch roles in user listing
+    } catch (error: any) {
+      console.error('Failed to assign role', error);
+      
+      const errorData = error?.response?.data;
+      let errorMessage = 'Error al asignar el rol.';
+
+      if (errorData?.message) {
+        errorMessage = Array.isArray(errorData.message)
+          ? errorData.message[0]
+          : errorData.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      MessageToastCustom('error', errorMessage, 'Error', {
+        position: 'top-right'
+      });
     }
   };
 
@@ -397,25 +465,34 @@ export const useUsersViewModel = () => {
         if (!formData.idCard?.trim()) return 'La cédula es obligatoria';
         if (!formData.firstName?.trim()) return 'El nombre es obligatorio';
         if (!formData.lastName?.trim()) return 'El apellido es obligatorio';
-        if (!formData.dateOfBirth?.trim()) return 'La fecha de nacimiento es obligatoria';
+        if (!formData.dateOfBirth?.trim())
+          return 'La fecha de nacimiento es obligatoria';
         if (!formData.sexId) return 'El sexo es obligatorio';
         return null;
 
       case 1: // Datos Laborales
         if (!formData.positionId?.trim()) return 'El cargo es obligatorio';
-        if (!formData.contractTypeId?.trim()) return 'El tipo de contrato es obligatorio';
-        if (!formData.hireDate?.trim()) return 'La fecha de contratación es obligatoria';
-        if (!formData.baseSalary?.trim()) return 'El salario base es obligatorio';
-        if (!formData.internalPhone?.trim()) return 'El teléfono interno es obligatorio';
-        if (!formData.internalEmail?.trim()) return 'El email interno es obligatorio';
+        if (!formData.contractTypeId?.trim())
+          return 'El tipo de contrato es obligatorio';
+        if (!formData.hireDate?.trim())
+          return 'La fecha de contratación es obligatoria';
+        if (!formData.baseSalary?.trim())
+          return 'El salario base es obligatorio';
+        if (!formData.internalPhone?.trim())
+          return 'El teléfono interno es obligatorio';
+        if (!formData.internalEmail?.trim())
+          return 'El email interno es obligatorio';
         return null;
 
       case 2: // Datos de Acceso
-        if (!formData.username?.trim()) return 'El nombre de usuario es obligatorio';
-        if (!formData.email?.trim()) return 'El correo electrónico es obligatorio';
+        if (!formData.username?.trim())
+          return 'El nombre de usuario es obligatorio';
+        if (!formData.email?.trim())
+          return 'El correo electrónico es obligatorio';
         if (!formData.password?.trim()) return 'La contraseña es obligatoria';
         if (!formData.confirmPassword?.trim()) return 'Confirme la contraseña';
-        if (formData.password !== formData.confirmPassword) return 'Las contraseñas no coinciden';
+        if (formData.password !== formData.confirmPassword)
+          return 'Las contraseñas no coinciden';
         return null;
 
       default:
@@ -441,6 +518,8 @@ export const useUsersViewModel = () => {
     setIsEditOpen,
     isDeleteOpen,
     setIsDeleteOpen,
+    isAssignRoleOpen,
+    setIsAssignRoleOpen,
     selectedUser,
     setSelectedUser,
     isViewOpen,
@@ -471,6 +550,7 @@ export const useUsersViewModel = () => {
     handleUpdate,
     handleView,
     handleDelete,
+    handleAssignRole,
     openEdit,
     refresh: loadUsers
   };

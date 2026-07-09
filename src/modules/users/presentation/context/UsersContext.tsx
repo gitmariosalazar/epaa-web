@@ -9,6 +9,7 @@ import { GetUserDetailUseCase } from '@/modules/users/application/usecases/GetUs
 import { GetProfileUseCase } from '@/modules/users/application/usecases/GetProfileUseCase';
 import { ChangePasswordUseCase } from '@/modules/users/application/usecases/ChangePasswordUseCase';
 import { ExistsByUsernameUseCase } from '@/modules/users/application/usecases/ExistsByUsernameUseCase';
+import { AssignRoleToUserUseCase } from '@/modules/users/application/usecases/AssignRoleToUserUseCase';
 // Cross-module dependency: Customers module (DIP — depends on abstraction)
 import { CustomerRepositoryImpl } from '@/modules/customers/infrastructure/repositories/CustomerRepositoryImpl';
 import { GetCustomerByIdentificationUseCase } from '@/modules/customers/application/usecases/GetCustomerByIdentificationUseCase';
@@ -23,6 +24,7 @@ interface UsersContextType {
   changePasswordUseCase: ChangePasswordUseCase;
   getCustomerByIdentificationUseCase: GetCustomerByIdentificationUseCase;
   existsByUsernameUseCase: ExistsByUsernameUseCase;
+  assignRoleToUserUseCase: AssignRoleToUserUseCase;
 }
 
 const UsersContext = createContext<UsersContextType | null>(null);
@@ -71,6 +73,10 @@ export const UsersProvider: React.FC<{ children: ReactNode }> = ({
     () => new ExistsByUsernameUseCase(userRepository),
     [userRepository]
   );
+  const assignRoleToUserUseCase = useMemo(
+    () => new AssignRoleToUserUseCase(userRepository),
+    [userRepository]
+  );
 
   const value = {
     getUsersUseCase,
@@ -81,7 +87,8 @@ export const UsersProvider: React.FC<{ children: ReactNode }> = ({
     getProfileUseCase,
     changePasswordUseCase,
     getCustomerByIdentificationUseCase,
-    existsByUsernameUseCase
+    existsByUsernameUseCase,
+    assignRoleToUserUseCase
   };
 
   return (

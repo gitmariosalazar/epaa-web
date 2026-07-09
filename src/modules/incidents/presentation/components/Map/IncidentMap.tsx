@@ -129,7 +129,7 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
   return (
     <div className="incident-fullscreen-map-container">
       <Map
-        theme={theme}
+        colorScheme={theme === 'dark' ? 'DARK' : 'LIGHT'}
         defaultCenter={finalCenter}
         defaultZoom={zoom}
         mapId={mapId}

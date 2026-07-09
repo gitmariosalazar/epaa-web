@@ -15,15 +15,23 @@ import {
   Edit2,
   Lock,
   ArrowLeft,
-  Loader
+  Loader,
+  Unlock,
+  X,
+  Check
 } from 'lucide-react';
 import '../profile/Profile.css'; // Reusing profile styles
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { MdAdd, MdDeleteForever, MdLockOpen } from 'react-icons/md';
+import { MdAdd, MdDeleteForever, MdLockOpen, MdSecurity } from 'react-icons/md';
 import { CheckBox } from '@/shared/presentation/components/Input/CheckBox';
 import '@/shared/presentation/styles/UserDetailPage.css';
-import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
+import AddRoleModal from '../../components/AddRoleModal/AddRoleModal';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { ConverDateTimeToText } from '@/shared/utils/datetime/ConverDate';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { FaFileContract, FaUserShield } from 'react-icons/fa';
 
 // Mock component for roles table (will be implemented fully later)
 const UserRolesTable = ({ user }: { user: User }) => {
@@ -32,8 +40,10 @@ const UserRolesTable = ({ user }: { user: User }) => {
 
   // Local state for roles to handle UI toggles immediately
   const [localRoles, setLocalRoles] = useState<any[]>([]);
+  const [isAssignRoleOpen, setIsAssignRoleOpen] = useState(false);
 
-  const { getProfileUseCase } = useUsersContext();
+  const { getProfileUseCase, assignRoleToUserUseCase } = useUsersContext();
+
 
   const fetchUser = useCallback(async () => {
     if (!user?.username) return;
@@ -80,6 +90,32 @@ const UserRolesTable = ({ user }: { user: User }) => {
     alert(
       `Changes saved! Active roles: ${activeRoles.map((r) => r.name).join(', ')}`
     );
+  };
+
+  const handleAssignRole = async (roleId: number) => {
+    if (!user?.userId) return;
+    try {
+      await assignRoleToUserUseCase.execute(user.userId, roleId);
+      setIsAssignRoleOpen(false);
+      fetchUser(); // Refresh roles list
+    } catch (error: any) {
+      console.error('Failed to assign role', error);
+
+      const errorData = error?.response?.data;
+      let errorMessage = 'Error al asignar el rol.';
+
+      if (errorData?.message) {
+        errorMessage = Array.isArray(errorData.message)
+          ? errorData.message[0]
+          : errorData.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      MessageToastCustom('error', errorMessage, 'Error', {
+        position: 'top-right'
+      });
+    }
   };
 
   if (loading) {
@@ -137,7 +173,7 @@ const UserRolesTable = ({ user }: { user: User }) => {
           size="sm"
           variant="outline"
           leftIcon={<MdAdd size={16} />}
-          onClick={() => alert('Open Add Role Modal')}
+          onClick={() => setIsAssignRoleOpen(true)}
         >
           Assign New Role
         </Button>
@@ -239,7 +275,7 @@ const UserRolesTable = ({ user }: { user: User }) => {
                         justifyContent: 'center'
                       }}
                     >
-                      <Shield size={16} />
+                      <MdSecurity size={16} />
                     </div>
                     <span
                       style={{ fontWeight: 500, color: 'var(--text-main)' }}
@@ -280,71 +316,70 @@ const UserRolesTable = ({ user }: { user: User }) => {
                     style={{
                       display: 'flex',
                       justifyContent: 'flex-end',
+                      alignItems: 'center',
                       gap: '8px'
                     }}
                   >
                     {/* Enable/Disable Toggle */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        marginRight: '1rem'
-                      }}
-                      title={role.active ? 'Disable Role' : 'Enable Role'}
-                    >
-                      <CheckBox
-                        checked={role.active}
-                        onCheckedChange={() =>
-                          toggleRoleStatus(role.id || role.name)
+                    <Tooltip content={role.active ? 'Desactivar Rol' : 'Activar Rol'} followCursor={false}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <CheckBox
+                          checked={role.active}
+                          onCheckedChange={() =>
+                            toggleRoleStatus(role.id || role.name)
+                          }
+                          name={`role-${role.id}`}
+                          value={String(role.id)}
+                          className="cursor-pointer"
+                        />
+                      </div>
+                    </Tooltip>
+
+                    <Tooltip content="Añadir Permiso" followCursor={false}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() =>
+                          alert(`Add permission to role: ${role.name}`)
                         }
-                        name={`role-${role.id}`}
-                        value={String(role.id)}
-                        className="cursor-pointer"
-                      />
-                    </div>
+                        circle
+                        style={{ color: 'var(--primary)' }}
+                      >
+                        <MdAdd size={18} />
+                      </Button>
+                    </Tooltip>
 
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      title="Add Permission"
-                      onClick={() =>
-                        alert(`Add permission to role: ${role.name}`)
-                      }
-                      circle
-                      style={{ color: 'var(--primary)' }}
-                    >
-                      <MdAdd size={18} />
-                    </Button>
+                    <Tooltip content="Ver Permisos" followCursor={false}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => alert(`View permissions for ${role.name}`)}
+                        circle
+                        style={{ color: 'var(--text-secondary)' }}
+                      >
+                        <MdLockOpen size={18} />
+                      </Button>
+                    </Tooltip>
 
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      title="View Permissions"
-                      onClick={() => alert(`View permissions for ${role.name}`)}
-                      circle
-                      style={{ color: 'var(--text-secondary)' }}
-                    >
-                      <MdLockOpen size={18} />
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      title="Remove Role"
-                      onClick={() => {
-                        if (
-                          confirm('Are you sure you want to remove this role?')
-                        ) {
-                          setLocalRoles((prev) =>
-                            prev.filter((r) => r.id !== role.id)
-                          );
-                        }
-                      }}
-                      circle
-                      style={{ color: 'var(--error)' }}
-                    >
-                      <MdDeleteForever size={18} />
-                    </Button>
+                    <Tooltip content="Eliminar Rol" followCursor={false}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          if (
+                            confirm('Are you sure you want to remove this role?')
+                          ) {
+                            setLocalRoles((prev) =>
+                              prev.filter((r) => r.id !== role.id)
+                            );
+                          }
+                        }}
+                        circle
+                        style={{ color: 'var(--error)' }}
+                      >
+                        <MdDeleteForever size={18} />
+                      </Button>
+                    </Tooltip>
                   </div>
                 </td>
               </tr>
@@ -397,6 +432,12 @@ const UserRolesTable = ({ user }: { user: User }) => {
           Save Changes
         </Button>
       </div>
+
+      <AddRoleModal
+        isOpen={isAssignRoleOpen}
+        onClose={() => setIsAssignRoleOpen(false)}
+        onSave={handleAssignRole}
+      />
     </div>
   );
 };
@@ -536,7 +577,21 @@ export const UserDetailPage = () => {
             <label>Registered At</label>
             <div className="profile-page__info-value">
               <Calendar size={16} />{' '}
-              {dateService.formatToLocaleString(user.registeredAt)}
+              {ConverDateTimeToText(user.registeredAt)}
+            </div>
+          </div>
+
+          <div className="profile-page__info-group">
+            <label>Cargo en la Empresa</label>
+            <div className="profile-page__info-value">
+              <FaUserShield size={16} />{' '}
+              {user.positionName ? user.positionName : 'No disponible'}
+            </div>
+          </div><div className="profile-page__info-group">
+            <label>Tipo de Contrato</label>
+            <div className="profile-page__info-value">
+              <FaFileContract size={16} />{' '}
+              {user.contractTypeName ? user.contractTypeName : 'No disponible'}
             </div>
           </div>
         </div>
@@ -560,8 +615,33 @@ export const UserDetailPage = () => {
             <div className="profile-page__info-value">
               <Calendar size={16} />
               {user.lastLogin
-                ? dateService.formatToLocaleString(user.lastLogin)
+                ? ConverDateTimeToText(user.lastLogin)
                 : 'Last login not available'}
+            </div>
+          </div>
+          <div className="profile-page__info-group">
+            <label>Failed Attempts</label>
+            <div className="profile-page__info-value">
+              <Lock size={16} />
+              <ColorChip
+                label={(user.failedAttempts || 0).toString()}
+                color={(user.failedAttempts || 0) > 0 ? "#ef4444" : "#10b981"}
+                variant="soft"
+                icon={(user.failedAttempts || 0) > 0 ? <X size={16} color="#ef4444" /> : <Check size={16} color="#10b981" />}
+                size='md'
+              />
+            </div>
+          </div>
+          <div className="profile-page__info-group">
+            <label>Two Factor Enabled</label>
+            <div className="profile-page__info-value">
+              <ColorChip
+                label={user.twoFactorEnabled ? 'Enabled' : 'Disabled'}
+                color={user.twoFactorEnabled ? '#10b981' : '#ef4444'}
+                variant="soft"
+                icon={user.twoFactorEnabled ? <Lock size={16} color="#10b981" /> : <Unlock size={16} color="#ef4444" />}
+                size='md'
+              />
             </div>
           </div>
         </div>
