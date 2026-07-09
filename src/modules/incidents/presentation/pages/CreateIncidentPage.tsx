@@ -16,6 +16,8 @@ import { MessageToastCustom } from '@/shared/presentation/components/toast/Custo
 import { useReading } from '@/modules/readings/presentation/hooks/useReading';
 import { AdditionalInfoAccordion } from '../components/AdditionalInfoAccordion';
 import { IconSize } from '@/shared/utils/sizes/size-icon';
+import { Alert } from '@/shared/presentation/components/Alert';
+import { TiWarning } from 'react-icons/ti';
 
 // Helper to dynamically load Leaflet from CDN
 const loadLeaflet = (): Promise<any> => {
@@ -228,13 +230,58 @@ export const CreateIncidentPage: React.FC = () => {
 
   const activeReadingInfo = readingInfo && readingInfo.length > 0 ? readingInfo[0] : null;
 
+  const triggerReverseGeocode = (lat: number, lng: number) => {
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=jsonv2`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.address) {
+          const addr = data.address;
+          setGpsData((prev) => {
+            const currentAccuracy = prev?.coords?.accuracy ?? 10;
+            const currentAltitude = prev?.coords?.altitude ?? null;
+            return {
+              coords: {
+                latitude: lat,
+                longitude: lng,
+                accuracy: currentAccuracy,
+                altitude: currentAltitude,
+                altitudeAccuracy: prev?.coords?.altitudeAccuracy ?? null,
+                speed: prev?.coords?.speed ?? null,
+                heading: prev?.coords?.heading ?? null
+              },
+              timestamp: Date.now(),
+              address: {
+                country: addr.country || 'Ecuador',
+                countryCode: (addr.country_code || 'EC').toUpperCase(),
+                state: addr.state || addr.region || '',
+                city: addr.city || addr.town || addr.village || addr.municipality || '',
+                neighborhood: addr.neighbourhood || addr.suburb || addr.quarter || '',
+                street: addr.road || '',
+                streetNumber: addr.house_number || '',
+                postalCode: addr.postcode || null,
+                formattedAddress: data.display_name || ''
+              }
+            };
+          });
+        }
+      })
+      .catch((err) => console.error('Error in drag reverse geocoding:', err));
+  };
+
   useEffect(() => {
     if (activeReadingInfo) {
+      console.log('Objeto encontrado:', activeReadingInfo);
       if (activeReadingInfo.readingId) {
         setReadingId(String(activeReadingInfo.readingId));
       }
       if (activeReadingInfo.cadastralKey) {
         setConnectionId(activeReadingInfo.cadastralKey);
+      }
+      if (activeReadingInfo.connectionLocation) {
+        setLatitude(String(activeReadingInfo.connectionLocation.lat));
+        setLongitude(String(activeReadingInfo.connectionLocation.lng));
+        triggerReverseGeocode(activeReadingInfo.connectionLocation.lat, activeReadingInfo.connectionLocation.lng);
+        setShowMap(true);
       }
     } else {
       setReadingId('');
@@ -277,45 +324,7 @@ export const CreateIncidentPage: React.FC = () => {
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
 
-  const triggerReverseGeocode = (lat: number, lng: number) => {
-    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=jsonv2`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.address) {
-          const addr = data.address;
-          setGpsData((prev) => {
-            const currentAccuracy = prev?.coords?.accuracy ?? 10;
-            const currentAltitude = prev?.coords?.altitude ?? null;
-            return {
-              coords: {
-                latitude: lat,
-                longitude: lng,
-                accuracy: currentAccuracy,
-                altitude: currentAltitude,
-                altitudeAccuracy: prev?.coords?.altitudeAccuracy ?? null,
-                speed: prev?.coords?.speed ?? null,
-                heading: prev?.coords?.heading ?? null
-              },
-              timestamp: Date.now(),
-              address: {
-                country: addr.country || 'Ecuador',
-                countryCode: (addr.country_code || 'EC').toUpperCase(),
-                state: addr.state || addr.region || '',
-                city: addr.city || addr.town || addr.village || addr.municipality || '',
-                neighborhood: addr.neighbourhood || addr.suburb || addr.quarter || '',
-                street: addr.road || '',
-                streetNumber: addr.house_number || '',
-                postalCode: addr.postcode || null,
-                formattedAddress: data.display_name || ''
-              }
-            };
-          });
 
-
-        }
-      })
-      .catch((err) => console.error('Error in drag reverse geocoding:', err));
-  };
 
   useEffect(() => {
     if (!showMap || !latitude || !longitude) return;
@@ -326,6 +335,12 @@ export const CreateIncidentPage: React.FC = () => {
         const center: [number, number] = [Number(latitude), Number(longitude)];
         mapInstance = L.map('incident-map').setView(center, 16);
         mapRef.current = mapInstance;
+
+        setTimeout(() => {
+          if (mapInstance) {
+            mapInstance.invalidateSize();
+          }
+        }, 250);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19,
@@ -534,6 +549,17 @@ export const CreateIncidentPage: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
+  console.log('connectionId', connectionId)
+  console.log('readingId', readingId)
+  console.log('incidentTypeId', incidentTypeId)
+  console.log('reportDescription', reportDescription)
+  console.log('referenceAddress', referenceAddress)
+  console.log('reportOrigin', reportOrigin)
+  console.log('priority', priority)
+  console.log('latitude', latitude)
+  console.log('longitude', longitude)
+  console.log('images', images)
 
   if (isLoading) {
     return (
@@ -785,7 +811,19 @@ export const CreateIncidentPage: React.FC = () => {
             </div>
           )}
 
-          <div className="form-group" style={{ marginBottom: '1rem' }}>
+          {
+            !activeReadingInfo?.connectionLocation && (
+              <Alert
+                type='warning'
+                dismissible={false}
+                title={'Atención'}
+                message={'La acometida no tiene una ubicación establecida, por favor establezca una con el botón de ubicación actual o desde el mapa.'}
+                icon={<TiWarning size={30} />}
+              />
+            )
+          }
+
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap', width: '100%' }}>
             <Button
               type="button"
               variant="outline"
@@ -793,10 +831,30 @@ export const CreateIncidentPage: React.FC = () => {
               onClick={handleGetLocation}
               isLoading={isLocating}
               leftIcon={<MapPin size={16} />}
-              style={{ width: '100%', justifyContent: 'center' }}
+              style={{ flex: 1, justifyContent: 'center', minWidth: '200px' }}
             >
-              Obtener Ubicación GPS Actual
+              Ubicación GPS Actual
             </Button>
+
+            {activeReadingInfo?.connectionLocation && (
+              <Button
+                type="button"
+                variant="outline"
+                size="compact"
+                disabled={!activeReadingInfo.connectionLocation}
+                onClick={() => {
+                  setLatitude(String(activeReadingInfo.connectionLocation!.lat));
+                  setLongitude(String(activeReadingInfo.connectionLocation!.lng));
+                  triggerReverseGeocode(activeReadingInfo.connectionLocation!.lat, activeReadingInfo.connectionLocation!.lng);
+                  setShowMap(true);
+                }}
+                leftIcon={<MapPin size={16} />}
+                style={{ flex: 1, justifyContent: 'center', minWidth: '200px' }}
+              >
+                Ubicación Acometida
+              </Button>
+            )}
+
             {latitude && longitude && (
               <Button
                 type="button"
@@ -804,9 +862,9 @@ export const CreateIncidentPage: React.FC = () => {
                 size="compact"
                 onClick={() => setShowMap(!showMap)}
                 leftIcon={<MapPin size={16} />}
-                style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}
+                style={{ flex: 1, justifyContent: 'center', minWidth: '200px' }}
               >
-                {showMap ? 'Ocultar Mapa de Ajuste' : 'Ver y Ajustar en el Mapa'}
+                {showMap ? 'Ocultar Mapa' : 'Ajustar en Mapa'}
               </Button>
             )}
           </div>
@@ -816,7 +874,7 @@ export const CreateIncidentPage: React.FC = () => {
               <span className="gps-map-instruction">
                 📍 Arrastra el marcador o haz clic en el mapa para ajustar la ubicación exacta.
               </span>
-              <div id="incident-map" className="incident-map-container" />
+              <div id="incident-map" className="incident-map-container" style={{ height: '280px', minHeight: '280px', zIndex: 1 }} />
             </div>
           )}
 

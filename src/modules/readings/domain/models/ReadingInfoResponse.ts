@@ -35,4 +35,5 @@ export interface ReadingInfo {
   connectionStateName: string;
   connectionStateDescription: string;
   permitReading: boolean;
+  connectionLocation?: { lat: number; lng: number } | null;
 }
