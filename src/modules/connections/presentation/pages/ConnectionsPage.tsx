@@ -209,6 +209,8 @@ export const ConnectionsPage = () => {
           onSewerageChange={actions.setSelectedSewerage}
           selectedIncidents={state.selectedIncidents}
           onIncidentsChange={actions.setSelectedIncidents}
+          selectedCoordinates={state.selectedCoordinates}
+          onCoordinatesChange={actions.setSelectedCoordinates}
         />
       }
     >

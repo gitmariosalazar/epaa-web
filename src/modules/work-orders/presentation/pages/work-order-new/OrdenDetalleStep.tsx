@@ -13,14 +13,17 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Wrench, MapPin, FileText, AlertTriangle } from 'lucide-react';
 import { Select } from '@/shared/presentation/components/Input/Select';
-import { Input }  from '@/shared/presentation/components/Input/Input';
+import { Input } from '@/shared/presentation/components/Input/Input';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { FaMapLocationDot } from 'react-icons/fa6';
+import { TbMapPin, TbMapPinOff } from 'react-icons/tb';
 import { ORIGINS, WORK_TYPES, PRIORITIES } from './constants';
 import type { WorkOrderForm } from './types';
-import type { IGeoLocationData } from '@/shared/utils/types/IGeolocationData';
+
 
 // ── Estilos GPS/mapa (reutiliza los de incidents) ───────────────────────────
 import '@/modules/incidents/presentation/styles/CreateIncidentPage.css';
+import { GeoSection } from '@/shared/presentation/components/GeoLocation';
 
 // ── Helper: Carga dinámica de Leaflet desde CDN ─────────────────────────────
 const loadLeaflet = (): Promise<any> => {
@@ -55,9 +58,9 @@ const loadLeaflet = (): Promise<any> => {
 };
 
 interface OrdenDetalleStepProps {
-  form:         WorkOrderForm;
+  form: WorkOrderForm;
   onFormChange: (fields: Partial<WorkOrderForm>) => void;
-  errors?:      Record<string, string>;
+  errors?: Record<string, string>;
 }
 
 export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
@@ -68,57 +71,28 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
       onFormChange({ [key]: e.target.value } as Partial<WorkOrderForm>);
 
   // ── GPS state ─────────────────────────────────────────────────────────
-  const [gpsData, setGpsData]       = useState<IGeoLocationData | null>(null);
   const [isLocating, setIsLocating] = useState(false);
-  const [showMap, setShowMap]       = useState(false);
-  const [formError, setFormError]   = useState<string | null>(null);
+  const [showMap, setShowMap] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
 
-  const mapRef    = useRef<any>(null);
+  const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
 
   // Si hay coordenadas pre-llenadas del Step 1, activar mapa automáticamente
   const hasPrefilledCoords = useRef(false);
+  const [initialLocation, setInitialLocation] = useState<{ lat: string, lng: string } | null>(null);
+
   useEffect(() => {
     if (form.latitude && form.longitude && !hasPrefilledCoords.current) {
       hasPrefilledCoords.current = true;
+      setInitialLocation({ lat: form.latitude, lng: form.longitude });
       // Delay para que el componente haga su primer render
       setTimeout(() => setShowMap(true), 300);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Reverse geocoding helper ──────────────────────────────────────────
-  const triggerReverseGeocode = (lat: number, lng: number) => {
-    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=jsonv2`)
-      .then(res => res.json())
-      .then(data => {
-        if (data?.address) {
-          const addr = data.address;
-          setGpsData(prev => ({
-            coords: {
-              latitude: lat, longitude: lng,
-              accuracy: prev?.coords?.accuracy ?? 10,
-              altitude: prev?.coords?.altitude ?? null,
-              altitudeAccuracy: prev?.coords?.altitudeAccuracy ?? null,
-              speed: prev?.coords?.speed ?? null,
-              heading: prev?.coords?.heading ?? null,
-            },
-            timestamp: Date.now(),
-            address: {
-              country: addr.country || 'Ecuador',
-              countryCode: (addr.country_code || 'EC').toUpperCase(),
-              state: addr.state || addr.region || '',
-              city: addr.city || addr.town || addr.village || addr.municipality || '',
-              neighborhood: addr.neighbourhood || addr.suburb || addr.quarter || '',
-              street: addr.road || '', streetNumber: addr.house_number || '',
-              postalCode: addr.postcode || null, formattedAddress: data.display_name || '',
-            },
-          }));
-        }
-      })
-      .catch(err => console.error('Error in reverse geocoding:', err));
-  };
 
   // ── GPS: Obtener ubicación actual ─────────────────────────────────────
   const handleGetLocation = () => {
@@ -130,38 +104,8 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
     setFormError(null);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const geoData: IGeoLocationData = {
-          coords: {
-            latitude: position.coords.latitude, longitude: position.coords.longitude,
-            accuracy: position.coords.accuracy, altitude: position.coords.altitude,
-            altitudeAccuracy: position.coords.altitudeAccuracy,
-            speed: position.coords.speed, heading: position.coords.heading,
-          },
-          timestamp: position.timestamp,
-        };
         onFormChange({ latitude: String(position.coords.latitude), longitude: String(position.coords.longitude) });
-
-        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=jsonv2`)
-          .then(res => res.json())
-          .then(data => {
-            if (data?.address) {
-              const addr = data.address;
-              setGpsData({
-                ...geoData,
-                address: {
-                  country: addr.country || 'Ecuador',
-                  countryCode: (addr.country_code || 'EC').toUpperCase(),
-                  state: addr.state || addr.region || '',
-                  city: addr.city || addr.town || addr.village || addr.municipality || '',
-                  neighborhood: addr.neighbourhood || addr.suburb || addr.quarter || '',
-                  street: addr.road || '', streetNumber: addr.house_number || '',
-                  postalCode: addr.postcode || null, formattedAddress: data.display_name || '',
-                },
-              });
-            } else { setGpsData(geoData); }
-          })
-          .catch(() => setGpsData(geoData))
-          .finally(() => setIsLocating(false));
+        setIsLocating(false);
       },
       (error) => {
         setIsLocating(false);
@@ -211,14 +155,12 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
         marker.on('dragend', () => {
           const pos = marker.getLatLng();
           onFormChange({ latitude: String(pos.lat.toFixed(6)), longitude: String(pos.lng.toFixed(6)) });
-          triggerReverseGeocode(pos.lat, pos.lng);
         });
 
         mapInstance.on('click', (e: any) => {
           const pos = e.latlng;
           marker.setLatLng(pos);
           onFormChange({ latitude: String(pos.lat.toFixed(6)), longitude: String(pos.lng.toFixed(6)) });
-          triggerReverseGeocode(pos.lat, pos.lng);
         });
 
         // Forzar recalcular tamaño del mapa
@@ -259,14 +201,14 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
       </div>
 
       <div className="wo-create-grid">
-        <Select label="Origen *" name="origin" value={form.origin} onChange={field('origin')} required>
+        <Select label="Origen *" name="origin" value={form.origin} size="compact" onChange={field('origin')} required>
           {ORIGINS.map(o => (<option key={o.value} value={o.value}>{o.label}</option>))}
         </Select>
-        <Select label="Tipo de Trabajo *" name="workTypeId" value={String(form.workTypeId)}
+        <Select label="Tipo de Trabajo *" name="workTypeId" size="compact" value={String(form.workTypeId)}
           onChange={e => onFormChange({ workTypeId: Number(e.target.value) })} error={errors?.workTypeId} required>
           {WORK_TYPES.map(t => (<option key={t.id} value={t.id}>{t.label}</option>))}
         </Select>
-        <Select label="Prioridad *" name="priorityId" value={String(form.priorityId)}
+        <Select label="Prioridad *" name="priorityId" size="compact" value={String(form.priorityId)}
           onChange={e => onFormChange({ priorityId: Number(e.target.value) })} error={errors?.priorityId} required>
           {PRIORITIES.map(p => (<option key={p.id} value={p.id}>{p.label}</option>))}
         </Select>
@@ -278,97 +220,64 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
         <h3>Ubicación</h3>
       </div>
 
-      <Input label="Dirección / Lugar del trabajo *" name="location" value={form.location}
+      <Input label="Dirección / Lugar del trabajo *" name="location" size="compact" value={form.location}
         onChange={field('location')} placeholder="Ej: Av. de los Shyris y Naciones Unidas"
         error={errors?.location} required />
 
       <div className="wo-create-grid" style={{ marginTop: '0.75rem' }}>
-        <Input label="Latitud" name="latitude" type="text" value={form.latitude} placeholder="No capturada" readOnly disabled />
-        <Input label="Longitud" name="longitude" type="text" value={form.longitude} placeholder="No capturada" readOnly disabled />
+        <Input label="Latitud" name="latitude" type="text" size="compact" value={form.latitude} placeholder="No capturada" readOnly disabled />
+        <Input label="Longitud" name="longitude" type="text" size="compact" value={form.longitude} placeholder="No capturada" readOnly disabled />
       </div>
 
-      {/* ── GPS Metadata ──────────────────────────────────────────── */}
-      {gpsData && (
-        <div className="gps-metadata-container">
-          <div className="gps-metadata-item">
-            <span className="gps-metadata-label">Precisión:</span>
-            <span className="gps-metadata-value">± {gpsData.coords.accuracy.toFixed(2)} m</span>
-          </div>
-          {gpsData.coords.altitude !== null && (
-            <div className="gps-metadata-item">
-              <span className="gps-metadata-label">Altitud:</span>
-              <span className="gps-metadata-value">{gpsData.coords.altitude.toFixed(2)} m</span>
-            </div>
-          )}
-          <div className="gps-metadata-item">
-            <span className="gps-metadata-label">Captura:</span>
-            <span className="gps-metadata-value">{new Date(gpsData.timestamp).toLocaleTimeString()}</span>
-          </div>
-          <div className="gps-metadata-item">
-            <span className="gps-metadata-label">Latitud:</span>
-            <span className="gps-metadata-value">{gpsData.coords.latitude}</span>
-          </div>
-          <div className="gps-metadata-item">
-            <span className="gps-metadata-label">Longitud:</span>
-            <span className="gps-metadata-value">{gpsData.coords.longitude}</span>
-          </div>
-        </div>
-      )}
 
-      {/* ── Address card ──────────────────────────────────────────── */}
-      {gpsData?.address && (
-        <div className="gps-address-card">
-          <div className="gps-address-card__header">
-            <MapPin size={14} className="gps-address-card__icon" />
-            <span className="gps-address-card__title">Dirección de Ubicación Actual (Geocodificada)</span>
-          </div>
-          <div className="gps-address-card__body">
-            <div className="address-grid">
-              <div className="address-field">
-                <span className="address-field-label">Calle Principal</span>
-                <span className="address-field-value">{gpsData.address.street || 'No disponible'} {gpsData.address.streetNumber}</span>
-              </div>
-              <div className="address-field">
-                <span className="address-field-label">Barrio / Sector</span>
-                <span className="address-field-value">{gpsData.address.neighborhood || 'No disponible'}</span>
-              </div>
-              <div className="address-field">
-                <span className="address-field-label">Ciudad / Cantón</span>
-                <span className="address-field-value">{gpsData.address.city || 'No disponible'}</span>
-              </div>
-              <div className="address-field">
-                <span className="address-field-label">Provincia</span>
-                <span className="address-field-value">{gpsData.address.state || 'No disponible'}</span>
-              </div>
-              <div className="address-field">
-                <span className="address-field-label">País</span>
-                <span className="address-field-value">{gpsData.address.country} ({gpsData.address.countryCode})</span>
-              </div>
-              <div className="address-field">
-                <span className="address-field-label">Cód. Postal</span>
-                <span className="address-field-value">{gpsData.address.postalCode || 'No disponible'}</span>
-              </div>
-            </div>
-            <div className="address-full">
-              <span className="address-field-label">Dirección Completa</span>
-              <span className="address-full-value">{gpsData.address.formattedAddress}</span>
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="gps-address-card">
+        <GeoSection lat={Number(form.latitude)} lng={Number(form.longitude)} />
+      </div>
+
 
       {/* ── Botones GPS + Mapa ────────────────────────────────────── */}
-      <div className="form-group" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-        <Button type="button" variant="outline" size="compact" onClick={handleGetLocation}
-          isLoading={isLocating} leftIcon={<MapPin size={16} />}
-          style={{ width: '100%', justifyContent: 'center' }}>
-          Obtener Ubicación GPS Actual
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap', width: '100%' }}>
+        <Button
+          type="button"
+          variant="dashed"
+          color='primary'
+          size="compact"
+          onClick={handleGetLocation}
+          isLoading={isLocating}
+          leftIcon={<MapPin size={16} />}
+          style={{ flex: 1, justifyContent: 'center', minWidth: '200px' }}
+        >
+          Ubicación GPS Actual
         </Button>
+
+        {initialLocation && (
+          <Button
+            type="button"
+            variant="dashed"
+            color='emerald'
+            size="compact"
+            onClick={() => {
+              onFormChange({ latitude: initialLocation.lat, longitude: initialLocation.lng });
+              setShowMap(true);
+            }}
+            leftIcon={<FaMapLocationDot size={16} />}
+            style={{ flex: 1, justifyContent: 'center', minWidth: '200px' }}
+          >
+            Ubicación Acometida
+          </Button>
+        )}
+
         {form.latitude && form.longitude && (
-          <Button type="button" variant="outline" size="compact"
-            onClick={() => setShowMap(!showMap)} leftIcon={<MapPin size={16} />}
-            style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}>
-            {showMap ? 'Ocultar Mapa de Ajuste' : 'Ver y Ajustar en el Mapa'}
+          <Button
+            type="button"
+            variant="dashed"
+            color='indigo'
+            size="compact"
+            onClick={() => setShowMap(!showMap)}
+            leftIcon={showMap ? <TbMapPinOff size={16} /> : <TbMapPin size={16} />}
+            style={{ flex: 1, justifyContent: 'center', minWidth: '200px' }}
+          >
+            {showMap ? 'Ocultar Mapa' : 'Ajustar en Mapa'}
           </Button>
         )}
       </div>

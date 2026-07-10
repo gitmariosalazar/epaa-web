@@ -13,10 +13,19 @@ export class GetConnectionsUseCase {
     query?: string,
     hasIncidents?: 'yes' | 'no',
     status?: string,
-    sewerage?: 'yes' | 'no'
+    sewerage?: 'yes' | 'no',
+    hasCoordinates?: 'yes' | 'no',
+    searchField?: string
   ): Promise<Connection[]> {
     return this.connectionRepository.getConnections(
-      limit, offset, query, hasIncidents, status, sewerage
+      limit,
+      offset,
+      query,
+      hasIncidents,
+      status,
+      sewerage,
+      hasCoordinates,
+      searchField
     );
   }
 }

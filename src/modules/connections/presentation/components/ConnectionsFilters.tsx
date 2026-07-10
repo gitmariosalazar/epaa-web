@@ -37,6 +37,8 @@ interface ConnectionsFiltersProps {
   onSewerageChange: (val: string) => void;
   selectedIncidents: string;
   onIncidentsChange: (val: string) => void;
+  selectedCoordinates: string;
+  onCoordinatesChange: (val: string) => void;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -58,7 +60,9 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
   selectedSewerage,
   onSewerageChange,
   selectedIncidents,
-  onIncidentsChange
+  onIncidentsChange,
+  selectedCoordinates,
+  onCoordinatesChange
 }) => {
   const { t } = useTranslation();
 
@@ -219,6 +223,26 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
           </option>
           <option value="without">
             {t('connections.filters.withoutIncidents', 'Sin incidentes')}
+          </option>
+        </Select>
+
+        {/* Coordinates filter */}
+        <Select
+          className="conn-filter-group"
+          label={t('connections.filters.coordinates', 'Coordenadas')}
+          size="compact"
+          value={selectedCoordinates}
+          onChange={(e) => onCoordinatesChange(e.target.value)}
+          leftIcon={<FaCheck size={18} />}
+        >
+          <option value="">
+            {t('connections.filters.allCoordinates', 'Todos')}
+          </option>
+          <option value="yes">
+            {t('connections.filters.hasCoordinates', 'Con coordenadas')}
+          </option>
+          <option value="no">
+            {t('connections.filters.withoutCoordinates', 'Sin coordenadas')}
           </option>
         </Select>
       </div>

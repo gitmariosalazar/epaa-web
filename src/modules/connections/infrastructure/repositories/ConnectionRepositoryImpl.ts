@@ -43,7 +43,9 @@ export class ConnectionRepositoryImpl implements ConnectionRepository {
     query?: string,
     hasIncidents?: 'yes' | 'no',
     status?: string,
-    sewerage?: 'yes' | 'no'
+    sewerage?: 'yes' | 'no',
+    hasCoordinates?: 'yes' | 'no',
+    searchField?: string
   ): Promise<Connection[]> {
     const response = await this.client.get<ApiResponse<Connection[]>>(
       `/connections/get-connections-paginated`,
@@ -54,7 +56,9 @@ export class ConnectionRepositoryImpl implements ConnectionRepository {
           ...(query ? { query } : {}),
           ...(hasIncidents ? { hasIncidents } : {}),
           ...(status ? { status } : {}),
-          ...(sewerage ? { sewerage } : {})
+          ...(sewerage ? { sewerage } : {}),
+          ...(hasCoordinates ? { hasCoordinates } : {}),
+          ...(searchField ? { searchField } : {})
         }
       }
     );

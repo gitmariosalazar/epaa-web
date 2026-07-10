@@ -34,7 +34,7 @@ export interface SortConfig {
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const LIMIT_SIZE = 100;
+const LIMIT_SIZE = 1000;
 
 // ── Generic helpers ───────────────────────────────────────────────────────────
 function applySortConfig<T>(data: T[], sortConfig: SortConfig | null): T[] {
@@ -61,6 +61,7 @@ function applyLocalFilters(
   selectedStatus: string,
   selectedSewerage: string,
   selectedIncidents: string,
+  selectedCoordinates: string,
   sortConfig: SortConfig | null
 ): Connection[] {
   let result = data;
@@ -124,6 +125,19 @@ function applyLocalFilters(
     result = result.filter((item) => Number(item.incidents ?? 0) === 0);
   }
 
+  // Filtro de Coordenadas
+  if (selectedCoordinates !== '') {
+    const hasCoordsFilter = selectedCoordinates === 'yes';
+    result = result.filter((item) => {
+      // Tiene coordenadas si el string de coordinates no está vacío o nulo
+      const hasCoords =
+        (item.connectionCoordinates && item.connectionCoordinates !== '') ||
+        (item.latitude !== undefined && item.longitude !== undefined);
+
+      return hasCoordsFilter ? !!hasCoords : !hasCoords;
+    });
+  }
+
   return applySortConfig(result, sortConfig);
 }
 
@@ -163,6 +177,7 @@ export const useConnectionsViewModel = () => {
   const [searchField, setSearchField] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedSewerage, setSelectedSewerage] = useState('');
+  const [selectedCoordinates, setSelectedCoordinates] = useState('');
   const [selectedIncidents, setSelectedIncidents] = useState('');
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'map'>('table');
@@ -224,6 +239,19 @@ export const useConnectionsViewModel = () => {
   // ── 3. CORE FETCH LOGIC (Pagination / Tabs) ───────────────────────────────
   const fetchConnections = useCallback(
     async (currentOffset: number, append = false) => {
+      console.log('Fetching connections with filters:', {
+        activeTab,
+        searchQuery,
+        selectedStatus,
+        selectedIncidents,
+        selectedSewerage,
+        selectedCoordinates,
+        sectorInput,
+        clientIdInput,
+        currentOffset,
+        append
+      });
+
       setIsLoading(true);
       setError(null);
       try {
@@ -243,15 +271,36 @@ export const useConnectionsViewModel = () => {
               : selectedSewerage === 'no'
                 ? 'no'
                 : undefined;
+          const hasCoordinatesParam: 'yes' | 'no' | undefined =
+            selectedCoordinates === 'yes'
+              ? 'yes'
+              : selectedCoordinates === 'no'
+                ? 'no'
+                : undefined;
+
           // status: 'active'/'inactive' no es el nombre real en BD,
           // así que lo seguimos filtrando client-side con ACTIVE_STATES.
+
+          console.log('Filtros enviados al backend:', {
+            limit: LIMIT_SIZE,
+            offset: currentOffset,
+            query: searchQuery,
+            hasIncidents,
+            status: selectedStatus,
+            sewerage: sewerageParam,
+            hasCoordinates: hasCoordinatesParam,
+            searchField: searchField !== 'all' ? searchField : undefined
+          });
+
           chunk = await getConnectionsUseCase.execute(
             LIMIT_SIZE,
             currentOffset,
             searchQuery,
             hasIncidents,
-            undefined, // status se filtra client-side (es booleano en BD)
-            sewerageParam
+            selectedStatus,
+            sewerageParam,
+            hasCoordinatesParam,
+            searchField !== 'all' ? searchField : undefined
           );
         } else if (activeTab === 'sector') {
           chunk = await findConnectionsBySectorUseCase.execute(
@@ -348,6 +397,8 @@ export const useConnectionsViewModel = () => {
       searchQuery,
       selectedIncidents,
       selectedSewerage,
+      selectedStatus,
+      selectedCoordinates,
       getConnectionsUseCase,
       findConnectionsBySectorUseCase,
       findAllConnectionsByClientIdUseCase,
@@ -870,6 +921,7 @@ export const useConnectionsViewModel = () => {
         selectedStatus,
         selectedSewerage,
         selectedIncidents,
+        selectedCoordinates,
         sortConfig
       ),
     [
@@ -879,6 +931,7 @@ export const useConnectionsViewModel = () => {
       selectedStatus,
       selectedSewerage,
       selectedIncidents,
+      selectedCoordinates,
       sortConfig
     ]
   );
@@ -903,6 +956,7 @@ export const useConnectionsViewModel = () => {
     setSelectedStatus('');
     setSelectedSewerage('');
     setSelectedIncidents('');
+    setSelectedCoordinates('');
     setSortConfig(null);
     setError(null);
   };
@@ -929,6 +983,7 @@ export const useConnectionsViewModel = () => {
       selectedStatus,
       selectedSewerage,
       selectedIncidents,
+      selectedCoordinates,
       sortConfig,
       connections,
       filteredConnections,
@@ -967,6 +1022,7 @@ export const useConnectionsViewModel = () => {
       setSelectedStatus,
       setSelectedSewerage,
       setSelectedIncidents,
+      setSelectedCoordinates,
       // CRUD/Wizard Actions
       setIsFormOpen,
       setIsDeleteOpen,

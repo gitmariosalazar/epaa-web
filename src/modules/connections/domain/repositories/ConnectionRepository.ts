@@ -19,7 +19,9 @@ export interface ConnectionRepository {
     query?: string,
     hasIncidents?: 'yes' | 'no',
     status?: string,
-    sewerage?: 'yes' | 'no'
+    sewerage?: 'yes' | 'no',
+    hasCoordinates?: 'yes' | 'no',
+    searchField?: string
   ): Promise<Connection[]>;
   createConnection(connection: CreateConnectionRequest): Promise<Connection>;
   updateConnection(

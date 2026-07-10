@@ -90,6 +90,8 @@ export const GeoLocationDisplay: React.FC<GeoLocationDisplayProps> = ({
   const isLoading = isLocating || isGeocoding;
   const loadingLabel = isLocating ? 'Adquiriendo señal GPS...' : 'Geocodificando dirección...';
 
+  const existCoordinates = address?.latitude && address?.longitude && address?.latitude !== 0 && address?.longitude !== 0 && address?.latitude !== -0 && address?.longitude !== -0 && address?.latitude !== null && address?.longitude !== null && address?.latitude !== undefined && address?.longitude !== undefined;
+
   return (
     <div className={`geo-display ${className}`}>
 
@@ -257,7 +259,7 @@ export const GeoLocationDisplay: React.FC<GeoLocationDisplayProps> = ({
 
           {/* Google Maps link */}
           <a
-            className="geo-card__maps-link"
+            className={`geo-card__maps-link ${existCoordinates ? '' : 'geo-card__maps-link--disabled'}`}
             href={`https://www.google.com/maps/search/?api=1&query=${address.latitude},${address.longitude}`}
             target="_blank"
             rel="noopener noreferrer"

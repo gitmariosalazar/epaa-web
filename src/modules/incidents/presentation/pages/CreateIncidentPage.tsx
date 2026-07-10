@@ -8,7 +8,6 @@ import { Select } from '@/shared/presentation/components/Input/Select';
 import { TextArea } from '@/shared/presentation/components/TextArea/TextArea';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
-import type { IGeoLocationData } from '@/shared/utils/types/IGeolocationData';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress/CircularProgress';
 import '../styles/CreateIncidentPage.css';
 import { SearchToolbar } from '../components/SearchToolbar';
@@ -18,6 +17,9 @@ import { AdditionalInfoAccordion } from '../components/AdditionalInfoAccordion';
 import { IconSize } from '@/shared/utils/sizes/size-icon';
 import { Alert } from '@/shared/presentation/components/Alert';
 import { TiWarning } from 'react-icons/ti';
+import { FaMapLocationDot } from 'react-icons/fa6';
+import { TbMapPin, TbMapPinOff } from 'react-icons/tb';
+import { GeoSection } from '@/shared/presentation/components/GeoLocation';
 
 // Helper to dynamically load Leaflet from CDN
 const loadLeaflet = (): Promise<any> => {
@@ -217,7 +219,6 @@ export const CreateIncidentPage: React.FC = () => {
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [images, setImages] = useState<string[]>([]);
-  const [gpsData, setGpsData] = useState<IGeoLocationData | null>(null);
   const [showMap, setShowMap] = useState(false);
   const [isTypeModalOpen, setIsTypeModalOpen] = useState(false);
 
@@ -230,64 +231,35 @@ export const CreateIncidentPage: React.FC = () => {
 
   const activeReadingInfo = readingInfo && readingInfo.length > 0 ? readingInfo[0] : null;
 
-  const triggerReverseGeocode = (lat: number, lng: number) => {
-    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=jsonv2`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.address) {
-          const addr = data.address;
-          setGpsData((prev) => {
-            const currentAccuracy = prev?.coords?.accuracy ?? 10;
-            const currentAltitude = prev?.coords?.altitude ?? null;
-            return {
-              coords: {
-                latitude: lat,
-                longitude: lng,
-                accuracy: currentAccuracy,
-                altitude: currentAltitude,
-                altitudeAccuracy: prev?.coords?.altitudeAccuracy ?? null,
-                speed: prev?.coords?.speed ?? null,
-                heading: prev?.coords?.heading ?? null
-              },
-              timestamp: Date.now(),
-              address: {
-                country: addr.country || 'Ecuador',
-                countryCode: (addr.country_code || 'EC').toUpperCase(),
-                state: addr.state || addr.region || '',
-                city: addr.city || addr.town || addr.village || addr.municipality || '',
-                neighborhood: addr.neighbourhood || addr.suburb || addr.quarter || '',
-                street: addr.road || '',
-                streetNumber: addr.house_number || '',
-                postalCode: addr.postcode || null,
-                formattedAddress: data.display_name || ''
-              }
-            };
-          });
-        }
-      })
-      .catch((err) => console.error('Error in drag reverse geocoding:', err));
-  };
-
   useEffect(() => {
     if (activeReadingInfo) {
       console.log('Objeto encontrado:', activeReadingInfo);
       if (activeReadingInfo.readingId) {
         setReadingId(String(activeReadingInfo.readingId));
+      } else {
+        setReadingId('');
       }
+
       if (activeReadingInfo.cadastralKey) {
         setConnectionId(activeReadingInfo.cadastralKey);
       }
+
       if (activeReadingInfo.connectionLocation) {
         setLatitude(String(activeReadingInfo.connectionLocation.lat));
         setLongitude(String(activeReadingInfo.connectionLocation.lng));
-        triggerReverseGeocode(activeReadingInfo.connectionLocation.lat, activeReadingInfo.connectionLocation.lng);
         setShowMap(true);
+      } else {
+        setLatitude('');
+        setLongitude('');
+        setShowMap(false);
       }
     } else {
       setReadingId('');
+      setLatitude('');
+      setLongitude('');
+      setShowMap(false);
     }
   }, [activeReadingInfo]);
-
 
   const handleSearch = () => {
     if (!connectionId.trim()) {
@@ -304,6 +276,16 @@ export const CreateIncidentPage: React.FC = () => {
 
   const handleCancel = () => {
     setConnectionId('');
+    setIncidentTypeId('');
+    setReportDescription('');
+    setReferenceAddress('');
+    setPriority('MEDIA');
+    setReportOrigin('ATENCION_AL_CLIENTE');
+    setLatitude('');
+    setLongitude('');
+    setImages([]);
+    setShowMap(false);
+    setFormError(null);
     clearData();
   };
 
@@ -329,15 +311,18 @@ export const CreateIncidentPage: React.FC = () => {
   useEffect(() => {
     if (!showMap || !latitude || !longitude) return;
 
+    let isMounted = true;
     let mapInstance: any = null;
     loadLeaflet()
       .then((L) => {
+        if (!isMounted) return;
+
         const center: [number, number] = [Number(latitude), Number(longitude)];
         mapInstance = L.map('incident-map').setView(center, 16);
         mapRef.current = mapInstance;
 
         setTimeout(() => {
-          if (mapInstance) {
+          if (mapInstance && isMounted) {
             mapInstance.invalidateSize();
           }
         }, 250);
@@ -364,7 +349,6 @@ export const CreateIncidentPage: React.FC = () => {
           const position = marker.getLatLng();
           setLatitude(String(position.lat.toFixed(6)));
           setLongitude(String(position.lng.toFixed(6)));
-          triggerReverseGeocode(position.lat, position.lng);
         });
 
         mapInstance.on('click', (e: any) => {
@@ -372,7 +356,6 @@ export const CreateIncidentPage: React.FC = () => {
           marker.setLatLng(position);
           setLatitude(String(position.lat.toFixed(6)));
           setLongitude(String(position.lng.toFixed(6)));
-          triggerReverseGeocode(position.lat, position.lng);
         });
       })
       .catch((err) => {
@@ -380,8 +363,11 @@ export const CreateIncidentPage: React.FC = () => {
       });
 
     return () => {
+      isMounted = false;
       if (mapInstance) {
         mapInstance.remove();
+        mapRef.current = null;
+        markerRef.current = null;
       }
     };
   }, [showMap]);
@@ -410,55 +396,9 @@ export const CreateIncidentPage: React.FC = () => {
     setFormError(null);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const geoData: IGeoLocationData = {
-          coords: {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            accuracy: position.coords.accuracy,
-            altitude: position.coords.altitude,
-            altitudeAccuracy: position.coords.altitudeAccuracy,
-            speed: position.coords.speed,
-            heading: position.coords.heading
-          },
-          timestamp: position.timestamp
-        };
-
         setLatitude(String(position.coords.latitude));
         setLongitude(String(position.coords.longitude));
-
-        // Call Nominatim API for reverse geocoding
-        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=jsonv2`)
-          .then((res) => res.json())
-          .then((data) => {
-            if (data && data.address) {
-              const addr = data.address;
-              const completedGeoData: IGeoLocationData = {
-                ...geoData,
-                address: {
-                  country: addr.country || 'Ecuador',
-                  countryCode: (addr.country_code || 'EC').toUpperCase(),
-                  state: addr.state || addr.region || '',
-                  city: addr.city || addr.town || addr.village || addr.municipality || '',
-                  neighborhood: addr.neighbourhood || addr.suburb || addr.quarter || '',
-                  street: addr.road || '',
-                  streetNumber: addr.house_number || '',
-                  postalCode: addr.postcode || null,
-                  formattedAddress: data.display_name || ''
-                }
-              };
-              setGpsData(completedGeoData);
-
-            } else {
-              setGpsData(geoData);
-            }
-          })
-          .catch((err) => {
-            console.error('Error in reverse geocoding:', err);
-            setGpsData(geoData);
-          })
-          .finally(() => {
-            setIsLocating(false);
-          });
+        setIsLocating(false);
       },
       (error) => {
         setIsLocating(false);
@@ -550,16 +490,6 @@ export const CreateIncidentPage: React.FC = () => {
     }
   };
 
-  console.log('connectionId', connectionId)
-  console.log('readingId', readingId)
-  console.log('incidentTypeId', incidentTypeId)
-  console.log('reportDescription', reportDescription)
-  console.log('referenceAddress', referenceAddress)
-  console.log('reportOrigin', reportOrigin)
-  console.log('priority', priority)
-  console.log('latitude', latitude)
-  console.log('longitude', longitude)
-  console.log('images', images)
 
   if (isLoading) {
     return (
@@ -684,7 +614,7 @@ export const CreateIncidentPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="form-group">
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <TextArea
               label="Descripción detallada del reporte *"
               rows={3}
@@ -707,7 +637,9 @@ export const CreateIncidentPage: React.FC = () => {
             />
           </div>
 
-          <div className="form-grid">
+          <div className="form-grid" style={{
+            marginBottom: '-0.25rem'
+          }}>
             <div className="form-group">
               <Input
                 label="Latitud *"
@@ -733,83 +665,10 @@ export const CreateIncidentPage: React.FC = () => {
             </div>
           </div>
 
-          {gpsData && (
-            <div className="gps-metadata-container">
-              <div className="gps-metadata-item">
-                <span className="gps-metadata-label">Precisión:</span>
-                <span className="gps-metadata-value">± {gpsData.coords.accuracy.toFixed(2)} m</span>
-              </div>
-              {gpsData.coords.altitude !== null && (
-                <div className="gps-metadata-item">
-                  <span className="gps-metadata-label">Altitud:</span>
-                  <span className="gps-metadata-value">{gpsData.coords.altitude.toFixed(2)} m</span>
-                </div>
-              )}
-              <div className="gps-metadata-item">
-                <span className="gps-metadata-label">Captura:</span>
-                <span className="gps-metadata-value">
-                  {new Date(gpsData.timestamp).toLocaleTimeString()}
-                </span>
-              </div>
-              <div className="gps-metadata-item">
-                <span className="gps-metadata-label">Latitud:</span>
-                <span className="gps-metadata-value">
-                  {gpsData.coords.latitude}
-                </span>
-              </div>
-              <div className="gps-metadata-item">
-                <span className="gps-metadata-label">Longitud:</span>
-                <span className="gps-metadata-value">
-                  {gpsData.coords.longitude}
-                </span>
-              </div>
-            </div>
-          )}
 
-          {gpsData && gpsData.address && (
-            <div className="gps-address-card">
-              <div className="gps-address-card__header">
-                <MapPin size={14} className="gps-address-card__icon" />
-                <span className="gps-address-card__title">Dirección de Ubicación Actual (Geocodificada)</span>
-              </div>
-              <div className="gps-address-card__body">
-                <div className="address-grid">
-                  <div className="address-field">
-                    <span className="address-field-label">Calle Principal</span>
-                    <span className="address-field-value">
-                      {gpsData.address.street || 'No disponible'} {gpsData.address.streetNumber}
-                    </span>
-                  </div>
-                  <div className="address-field">
-                    <span className="address-field-label">Barrio / Sector</span>
-                    <span className="address-field-value">{gpsData.address.neighborhood || 'No disponible'}</span>
-                  </div>
-                  <div className="address-field">
-                    <span className="address-field-label">Ciudad / Cantón</span>
-                    <span className="address-field-value">{gpsData.address.city || 'No disponible'}</span>
-                  </div>
-                  <div className="address-field">
-                    <span className="address-field-label">Provincia</span>
-                    <span className="address-field-value">{gpsData.address.state || 'No disponible'}</span>
-                  </div>
-                  <div className="address-field">
-                    <span className="address-field-label">País</span>
-                    <span className="address-field-value">
-                      {gpsData.address.country} ({gpsData.address.countryCode})
-                    </span>
-                  </div>
-                  <div className="address-field">
-                    <span className="address-field-label">Cód. Postal</span>
-                    <span className="address-field-value">{gpsData.address.postalCode || 'No disponible'}</span>
-                  </div>
-                </div>
-                <div className="address-full">
-                  <span className="address-field-label">Dirección Completa</span>
-                  <span className="address-full-value">{gpsData.address.formattedAddress}</span>
-                </div>
-              </div>
-            </div>
-          )}
+          <div className="gps-address-card">
+            <GeoSection lat={Number(latitude)} lng={Number(longitude)} />
+          </div>
 
           {
             !activeReadingInfo?.connectionLocation && (
@@ -826,8 +685,9 @@ export const CreateIncidentPage: React.FC = () => {
           <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap', width: '100%' }}>
             <Button
               type="button"
-              variant="outline"
+              variant="dashed"
               size="compact"
+              color='primary'
               onClick={handleGetLocation}
               isLoading={isLocating}
               leftIcon={<MapPin size={16} />}
@@ -839,16 +699,16 @@ export const CreateIncidentPage: React.FC = () => {
             {activeReadingInfo?.connectionLocation && (
               <Button
                 type="button"
-                variant="outline"
+                variant="dashed"
                 size="compact"
+                color='emerald'
                 disabled={!activeReadingInfo.connectionLocation}
                 onClick={() => {
                   setLatitude(String(activeReadingInfo.connectionLocation!.lat));
                   setLongitude(String(activeReadingInfo.connectionLocation!.lng));
-                  triggerReverseGeocode(activeReadingInfo.connectionLocation!.lat, activeReadingInfo.connectionLocation!.lng);
                   setShowMap(true);
                 }}
-                leftIcon={<MapPin size={16} />}
+                leftIcon={<FaMapLocationDot size={16} />}
                 style={{ flex: 1, justifyContent: 'center', minWidth: '200px' }}
               >
                 Ubicación Acometida
@@ -858,10 +718,11 @@ export const CreateIncidentPage: React.FC = () => {
             {latitude && longitude && (
               <Button
                 type="button"
-                variant="outline"
+                variant="dashed"
+                color='indigo'
                 size="compact"
                 onClick={() => setShowMap(!showMap)}
-                leftIcon={<MapPin size={16} />}
+                leftIcon={showMap ? <TbMapPinOff size={16} /> : <TbMapPin size={16} />}
                 style={{ flex: 1, justifyContent: 'center', minWidth: '200px' }}
               >
                 {showMap ? 'Ocultar Mapa' : 'Ajustar en Mapa'}
@@ -874,7 +735,7 @@ export const CreateIncidentPage: React.FC = () => {
               <span className="gps-map-instruction">
                 📍 Arrastra el marcador o haz clic en el mapa para ajustar la ubicación exacta.
               </span>
-              <div id="incident-map" className="incident-map-container" style={{ height: '280px', minHeight: '280px', zIndex: 1 }} />
+              <div id="incident-map" className="incident-map-container" style={{ height: '480px', minHeight: '280px', zIndex: 1 }} />
             </div>
           )}
 
