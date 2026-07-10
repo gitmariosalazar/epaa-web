@@ -357,6 +357,14 @@ export const CreateIncidentPage: React.FC = () => {
           setLatitude(String(position.lat.toFixed(6)));
           setLongitude(String(position.lng.toFixed(6)));
         });
+
+        // Forzar recalcular tamaño y centrado del mapa después de la animación CSS
+        setTimeout(() => {
+          if (isMounted && mapInstance) {
+            mapInstance.invalidateSize();
+            mapInstance.setView(center, 16);
+          }
+        }, 400);
       })
       .catch((err) => {
         console.error('Error loading Leaflet map:', err);

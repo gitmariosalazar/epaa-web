@@ -163,8 +163,13 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
           onFormChange({ latitude: String(pos.lat.toFixed(6)), longitude: String(pos.lng.toFixed(6)) });
         });
 
-        // Forzar recalcular tamaño del mapa
-        setTimeout(() => mapInstance.invalidateSize(), 300);
+        // Forzar recalcular tamaño y centrado del mapa después de la animación CSS
+        setTimeout(() => {
+          if (document.body.contains(container) && mapInstance) {
+            mapInstance.invalidateSize();
+            mapInstance.setView(center, 16);
+          }
+        }, 400);
       })
       .catch(err => console.error('Error loading Leaflet:', err));
     // eslint-disable-next-line react-hooks/exhaustive-deps
