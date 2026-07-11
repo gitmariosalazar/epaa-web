@@ -90,7 +90,12 @@ export const GeoLocationDisplay: React.FC<GeoLocationDisplayProps> = ({
   const isLoading = isLocating || isGeocoding;
   const loadingLabel = isLocating ? 'Adquiriendo señal GPS...' : 'Geocodificando dirección...';
 
-  const existCoordinates = address?.latitude && address?.longitude && address?.latitude !== 0 && address?.longitude !== 0 && address?.latitude !== -0 && address?.longitude !== -0 && address?.latitude !== null && address?.longitude !== null && address?.latitude !== undefined && address?.longitude !== undefined;
+  const existCoordinates = Boolean(
+    address?.latitude &&
+    address?.longitude &&
+    Number(address.latitude) !== 0 &&
+    Number(address.longitude) !== 0
+  );
 
   return (
     <div className={`geo-display ${className}`}>

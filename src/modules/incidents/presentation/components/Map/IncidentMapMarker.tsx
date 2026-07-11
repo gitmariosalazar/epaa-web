@@ -53,7 +53,7 @@ export const IncidentMapMarker: React.FC<IncidentMapMarkerProps> = ({
       }
       role="button"
       tabIndex={0}
-      aria-label={`Incidente ${incident.incidentId}: ${incident.incidentTypeName}`}
+      aria-label={`Incidente ${incident.incidentCode}: ${incident.incidentTypeName}`}
       onKeyDown={(ev) => {
         if (ev.key === 'Enter' || ev.key === ' ') {
           ev.preventDefault();

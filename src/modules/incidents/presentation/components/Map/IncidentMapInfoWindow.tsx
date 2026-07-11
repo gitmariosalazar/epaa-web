@@ -77,7 +77,7 @@ export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
               INFORMACIÓN BÁSICA
             </span>
             <h3 className="incident-popup-titlebar-title">
-              Incidente ID: {incident.incidentId}
+              Incidente ID: <span className='text-secondary'>{incident.incidentCode}</span>
             </h3>
           </div>
 
@@ -94,7 +94,7 @@ export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
             </div>
             <div className="incident-popup-title-block">
               <span className="incident-popup-id">
-                ID: {incident.incidentId}
+                ID: {incident.incidentCode}
               </span>
               <h3 className="incident-popup-title">
                 {incident.incidentTypeName}

@@ -16,11 +16,18 @@ export interface EvidencePhotoResponse {
   createdAt: string; // ISO 8601 Date string
 }
 
+export interface ManagedByUser {
+  nombre: string;
+  apellido: string;
+  correo?: string;
+  celular?: string;
+}
+
 export interface IncidentHistoryResponse {
   dateChange: string; // ISO 8601 Date string
   previousStatus: string | null;
   newStatus: string;
-  managedBy: string;
+  managedBy: string | ManagedByUser | null;
   observation: string | null;
 }
 
@@ -67,12 +74,15 @@ export interface UserRowResponse {
   name: string; // UUID
   cardId: string;
   userType: string;
+  email: string | null;
+  phone: string | null;
 }
 
 // 3. Interfaz Principal (La Fila de la Vista)
 export interface IncidentDetailRowResponse {
-  incidentId: number;
+  incidentId: string;
   connectionId: string | null;
+  incidentCode: string;
   readingId: number | null;
 
   // Categoría y Tipo

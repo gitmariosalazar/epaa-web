@@ -1,76 +1,53 @@
 /* src/modules/connections/presentation/styles/ConnectionsFilters.css */
 
-/* ── Container: single horizontal row ──────────────────────────────────────── */
-/* IMPORTANT: no overflow property here — overflow:auto/hidden creates          */
-/* a new stacking context that clips absolute popover elements.                 */
 .conn-filters {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   align-items: flex-end;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  gap: 16px;
+  padding: 0.75rem 1rem;
   background-color: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: 0.5rem;
   box-shadow: var(--shadow-sm);
-  flex-shrink: 0;
+  width: 100%;
 }
 
-/* ── Sections flat flex rows ────────────────────────────────────────────────── */
-.conn-filter-section-left {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: flex-end;
-  gap: 0.75rem;
-  flex-shrink: 0;
-}
-
-.conn-filter-section-right {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: flex-end;
-  gap: 0.75rem;
-  flex: 1 1 auto;
-  justify-content: flex-end;
-}
-
-/* ── Individual filter group ────────────────────────────────────────────────── */
 .conn-filter-group {
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-  width: 11rem;
+  gap: 4px;
+  min-width: 150px;
+  flex: 1 1 0%;
 }
 
 .conn-filter-group--btn {
-  gap: 0.5rem;
+  flex: 0 1 auto;
 }
-/* Search bar slightly wider */
+
 .conn-filter-group--search {
-  width: 14rem;
+  flex: 2 1 0%;
+  min-width: 250px;
 }
 
-/* ── Label ──────────────────────────────────────────────────────────────────── */
 .conn-filter-label {
-  display: block;
-  height: 18px;
-  line-height: 18px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-muted);
+  font-size: 0.675rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.025em;
-  pointer-events: none;
   white-space: nowrap;
-  margin-bottom: 4px;
 }
 
-/* ── Input wrapper ──────────────────────────────────────────────────────────── */
 .conn-filter-input-wrapper {
   position: relative;
+  width: 100%;
+}
+
+.conn-filter-input-wrapper .input,
+.conn-filter-input-wrapper select {
   width: 100%;
 }
 
@@ -88,7 +65,6 @@
   color: var(--primary);
 }
 
-/* ── Inputs & selects ────────────────────────────────────────────────────────── */
 .conn-filter-input,
 .conn-filter-input[type='text'],
 .conn-filter-input[type='number'],
@@ -116,12 +92,10 @@
   box-shadow: 0 0 0 2px var(--primary);
 }
 
-/* Narrow number inputs */
 .conn-filter-input--narrow {
   width: 5rem;
 }
 
-/* Select-specific */
 .conn-filter-select {
   padding-left: 0.625rem;
   cursor: pointer;
@@ -133,12 +107,10 @@
   padding-right: 1.75rem;
 }
 
-/* Text inputs keep icon padding */
 .conn-filter-input--text {
   padding-left: 2.25rem;
 }
 
-/* ── Spinner ─────────────────────────────────────────────────────────────────── */
 .conn-filter-spinner {
   width: 1.125rem;
   height: 1.125rem;
@@ -155,7 +127,6 @@
   }
 }
 
-/* Ensure Consultar button matches input height */
 .conn-filters .btn-pro {
   height: 34px !important;
   padding: 0 1rem;

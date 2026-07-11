@@ -136,7 +136,7 @@ export class IncidentRepositoryImpl implements InterfaceIncidentRepository {
   }
 
   async findById(
-    _incidentId: number
+    _incidentId: string
   ): Promise<ApiResponse<IncidentDetailRowResponse> | null> {
     throw new Error(
       'Method not implemented because the backend gateway does not expose a find-by-id endpoint.'

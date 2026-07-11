@@ -1,5 +1,5 @@
 export class ResolveIncidentRequest {
-  incidentId!: number;
+  incidentId!: string;
   resolverUserId!: string;
   description!: string;
   repairCost!: number;

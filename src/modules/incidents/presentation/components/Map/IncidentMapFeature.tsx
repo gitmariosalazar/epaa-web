@@ -54,7 +54,7 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
     zoom: 17
   });
 
-  const prevSelectedIdRef = useRef<number | null>(null);
+  const prevSelectedIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!loading && !error) {

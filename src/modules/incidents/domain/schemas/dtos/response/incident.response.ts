@@ -2,8 +2,9 @@
  * Data Transfer Object representing the response of an Incident.
  */
 export class IncidentResponse {
-  incidentId!: number;
+  incidentId!: string;
   connectionId!: string | null;
+  incidentCode!: string;
   readingId!: number | null;
   incidentTypeId!: number;
   reportDescription!: string;
@@ -39,4 +40,10 @@ export class IncidentResponse {
     managedBy: string | null;
     observation: string | null;
   }> | null;
+  reportClient?: {
+    firstName: string;
+    lastName: string;
+    email: string | null;
+    cellPhone: string | null;
+  } | null;
 }

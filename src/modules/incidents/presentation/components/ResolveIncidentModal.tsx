@@ -12,7 +12,7 @@ import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip
 interface ResolveIncidentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  incidentId: number;
+  incidentId: string;
 }
 
 // Helper to compress images client-side before base64 conversion
@@ -137,7 +137,7 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
     <div className="incident-modal-overlay" onClick={onClose}>
       <div className="incident-modal premium-theme" onClick={(e) => e.stopPropagation()}>
         <div className="incident-modal-header">
-          <h3>Resolver Incidente {incidentId}</h3>
+          <h3>Resolver Incidente {incident?.incidentCode}</h3>
           <Tooltip content="Cerrar" position="left">
             <Button variant="ghost" size="sm" circle onClick={onClose} className="close-btn-p">
               <X size={20} />

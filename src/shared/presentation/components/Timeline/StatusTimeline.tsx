@@ -40,7 +40,7 @@ export interface TimelineItem {
   /** Optional comment / observation. */
   comment?: string;
   /** Who performed the action. */
-  actor?: string;
+  actor?: React.ReactNode;
   /**
    * Accent color for this node (hex, CSS variable, or named color).
    * Falls back to `--accent` when omitted.
@@ -164,9 +164,9 @@ interface TimelineNodeProps {
  */
 const TimelineNode: React.FC<TimelineNodeProps> = ({ item, isLast }) => {
   const color = resolveColor(item.status, item.color);
-  const icon  = resolveIcon(item.status, item.icon);
+  const icon = resolveIcon(item.status, item.icon);
 
-  const currentLabel  = item.statusLabel  ?? formatLabel(item.status);
+  const currentLabel = item.statusLabel ?? formatLabel(item.status);
   const previousLabel = item.previousStatusLabel ?? (item.previousStatus ? formatLabel(item.previousStatus) : undefined);
   const dateFormatted = formatDate(item.date);
 
@@ -246,7 +246,7 @@ const TimelineNode: React.FC<TimelineNodeProps> = ({ item, isLast }) => {
         {/* Actor */}
         {item.actor && (
           <span className="status-timeline-node__actor">
-            Por: {item.actor}
+            {item.actor}
           </span>
         )}
       </div>

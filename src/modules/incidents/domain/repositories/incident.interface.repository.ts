@@ -21,7 +21,7 @@ export interface InterfaceIncidentRepository {
     connectionId: string
   ): Promise<ApiResponse<IncidentDetailRowResponse[]>>;
   findById(
-    incidentId: number
+    incidentId: string
   ): Promise<ApiResponse<IncidentDetailRowResponse> | null>;
   findIncidents(filters: {
     connectionId?: string | null;

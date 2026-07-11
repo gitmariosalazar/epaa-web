@@ -260,10 +260,9 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
       return (
         <>
           <Tooltip
-            title={item.label}
+            title={flyoutAnchor ? '' : item.label}
             placement="right"
             arrow
-            open={flyoutAnchor ? false : undefined}
           >
             <ListItemButton
               onMouseEnter={openFlyout}

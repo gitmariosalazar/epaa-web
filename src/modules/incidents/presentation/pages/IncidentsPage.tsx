@@ -37,6 +37,7 @@ import { useState } from 'react';
 import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
 import '../styles/Incidents.css';
 import '../components/Map/IncidentMap.css';
+import { truncateText } from '@/shared/utils/text/truncate-text';
 
 /**
  * IncidentsPage — Página principal de incidentes con tabs (Lista | Mapa).
@@ -103,7 +104,7 @@ export const IncidentsPage: React.FC = () => {
   const progress = useSimulatedProgress(isLoading);
 
   // ── Estado local de modales (SRP: la Page gestiona el estado de UI) ──
-  const [resolveIncidentId, setResolveIncidentId] = useState<number | null>(
+  const [resolveIncidentId, setResolveIncidentId] = useState<string | null>(
     null
   );
   const [selectedIncident, setSelectedIncident] =
@@ -146,13 +147,13 @@ export const IncidentsPage: React.FC = () => {
   // ── Columnas de la tabla ──────────────────────────────────────────────────
   const columns: Column<IncidentDetailRowResponse>[] = [
     {
-      header: 'ID',
+      header: 'Nº Incidente',
       accessor: (item) => (
         <span className="text-secondary" style={{ fontWeight: 600 }}>
-          {item.incidentId}
+          {item.incidentCode}
         </span>
       ),
-      id: 'incidentId',
+      id: 'incidentCode',
       style: { width: '80px' }
     },
     {
@@ -176,7 +177,7 @@ export const IncidentsPage: React.FC = () => {
       accessor: (item) => (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span className="incident-category-text">{item.referenceAddress?.toUpperCase()}</span>
+            <span className="incident-category-text">{truncateText(item.referenceAddress?.toUpperCase() || '-', 40)}</span>
             <div className="geo-status-bar-table">
               <div className="geo-status-bar__item">
                 <Navigation size={12} className="geo-status-bar__icon geo-status-bar__icon--lat" />

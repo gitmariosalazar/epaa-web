@@ -13,6 +13,9 @@ import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/respon
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { MdOutlineTripOrigin, MdPhotoLibrary } from 'react-icons/md';
 import { FaUserCheck, FaUsersCog } from 'react-icons/fa';
+import { IoMail } from 'react-icons/io5';
+import '../styles/IncidentDetailModal.css';
+import { GiPhone } from "react-icons/gi";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -78,24 +81,14 @@ const EvidencePhoto: React.FC<EvidencePhotoProps> = ({ photoId, filePath, type, 
     <div className="gallery-item">
       <Tooltip content={blobUrl ? 'Clic para ampliar' : ''} position='bottom'>
         <button
-          className="gallery-img gallery-img--clickable"
+          className="gallery-img gallery-img--clickable evidence-photo-btn"
           onClick={blobUrl ? onClick : undefined}
           disabled={!blobUrl}
           aria-label={`Ver evidencia ${type} #${photoId} en pantalla completa`}
-          style={{
-            position: 'relative', overflow: 'hidden',
-            padding: 0, border: 'none',
-            cursor: blobUrl ? 'zoom-in' : 'default',
-            background: 'none', width: '100%'
-          }}
         >
           {loading && (
-            <div style={{
-              position: 'absolute', inset: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'var(--surface-2, rgba(0,0,0,0.06))'
-            }}>
-              <Loader2 size={22} style={{ color: 'var(--accent)', animation: 'spin 1s linear infinite' }} />
+            <div className="evidence-photo-loading-overlay">
+              <Loader2 size={22} className="evidence-photo-loader" />
             </div>
           )}
           {!loading && blobUrl && (
@@ -103,7 +96,7 @@ const EvidencePhoto: React.FC<EvidencePhotoProps> = ({ photoId, filePath, type, 
               <img
                 src={blobUrl}
                 alt={`Evidencia #${photoId}`}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                className="evidence-photo-img"
               />
               <div className="gallery-zoom-hint">
                 <span>🔍 Ampliar</span>
@@ -111,14 +104,8 @@ const EvidencePhoto: React.FC<EvidencePhotoProps> = ({ photoId, filePath, type, 
             </>
           )}
           {!loading && (error || !blobUrl) && (
-            <div style={{
-              position: 'absolute', inset: 0,
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: '4px',
-              background: 'var(--surface-2, rgba(0,0,0,0.06))',
-              color: 'var(--text-muted)', fontSize: '0.72rem'
-            }}>
-              <ImageOff size={20} style={{ opacity: 0.5 }} />
+            <div className="evidence-photo-error-overlay">
+              <ImageOff size={20} className="evidence-photo-error-icon" />
               <span>Sin imagen</span>
             </div>
           )}
@@ -157,6 +144,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
   const photosReport = incident?.photosReport ?? [];
   const photosResolution = incident?.photosResolution ?? [];
 
+
   if (!isOpen || !incident) return null;
 
   return (
@@ -169,8 +157,8 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
           >
             {/* ── Header ── */}
             <div className="incident-modal-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <h3>Detalle de Incidente {incident.incidentId}</h3>
+              <div className="incident-modal-header-badges">
+                <h3>Detalle de Incidente {incident.incidentCode}</h3>
                 <ColorChip
                   label={incident.status.replace(/_/g, ' ')}
                   color={getStatusColor(incident.status)}
@@ -228,7 +216,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                 <div className="detail-grid mt-2">
                   <div className="detail-item">
                     <span className="detail-label">
-                      <Calendar size={12} style={{ marginRight: 4 }} />
+                      <Calendar size={12} className="detail-label-icon" />
                       Fecha de Reporte
                     </span>
                     <span className="detail-value">
@@ -242,7 +230,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                   </div>
                   <div className="detail-item">
                     <span className="detail-label">
-                      <User size={12} style={{ marginRight: 4 }} />
+                      <User size={12} className="detail-label-icon" />
                       Reportado Por (Usuario / Cliente)
                     </span>
                     <div className="detail-value detail-value-user">
@@ -250,6 +238,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                       <ColorChip
                         label={incident.reportedBy.name ? incident.reportedBy.name : 'N/A'}
                         variant="ghost"
+                        color='yellow'
                         size="xs"
                         borderRadius={5}
                         icon={<FaUserCheck />}
@@ -257,6 +246,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                       <ColorChip
                         label={incident.reportOrigin ? incident.reportOrigin : 'N/A'}
                         variant="ghost"
+                        color='gray'
                         size="xs"
                         borderRadius={5}
                         icon={<MdOutlineTripOrigin />}
@@ -264,11 +254,35 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                       <ColorChip
                         label={incident.reportedBy.userType ? incident.reportedBy.userType : 'N/A'}
                         variant="ghost"
+                        color='green'
                         size="xs"
                         borderRadius={5}
                         icon={<FaUsersCog />}
                       />
-
+                      {
+                        incident.reportedBy.phone && (
+                          <ColorChip
+                            label={incident.reportedBy.phone ? incident.reportedBy.phone : 'N/A'}
+                            variant="ghost"
+                            status='info'
+                            size="xs"
+                            borderRadius={5}
+                            icon={<GiPhone />}
+                          />
+                        )
+                      }
+                      {
+                        incident.reportedBy.email && (
+                          <ColorChip
+                            label={incident.reportedBy.email ? incident.reportedBy.email : 'N/A'}
+                            variant="ghost"
+                            status='info'
+                            size="xs"
+                            borderRadius={5}
+                            icon={<IoMail />}
+                          />
+                        )
+                      }
                     </div>
                   </div>
                 </div>
@@ -279,7 +293,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                 <div className="detail-section">
                   <h4 className="detail-section-title">Ubicación</h4>
                   {incident.referenceAddress && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                    <div className="incident-location-header">
                       <MapPin size={16} className="text-secondary" />
                       <span className="detail-value">{incident.referenceAddress}</span>
                     </div>
@@ -304,7 +318,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                   )}
                   {/* Geocoded address card — reverse geocodes the saved coordinates */}
                   {incident.latitude && incident.longitude && (
-                    <div style={{ marginTop: '10px' }}>
+                    <div className="incident-location-map-wrapper">
                       <GeoSection lat={Number(incident.latitude)} lng={Number(incident.longitude)} />
                     </div>
                   )}
@@ -314,8 +328,8 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
               {/* ── Resolution ── */}
               {incident.status === 'RESUELTO' && (
                 <div className="detail-section highlight-resolved">
-                  <h4 className="detail-section-title" style={{ color: 'var(--success-color)' }}>
-                    <CheckCircle size={14} style={{ marginRight: 4 }} />
+                  <h4 className="detail-section-title detail-section-title--success">
+                    <CheckCircle size={14} className="detail-section-title-icon" />
                     Resolución
                   </h4>
                   <div className="detail-description-box">
@@ -336,7 +350,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                     </div>
                     <div className="detail-item">
                       <span className="detail-label">Costo de Reparación</span>
-                      <span className="detail-value" style={{ fontWeight: 'bold' }}>
+                      <span className="detail-value detail-value--bold">
                         ${Number(incident.repairCost || 0).toFixed(2)}
                       </span>
                     </div>
@@ -418,7 +432,35 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                       previousStatusLabel: h.previousStatus?.replace(/_/g, ' '),
                       date: h.dateChange,
                       comment: h.observation ?? undefined,
-                      actor: h.managedBy ?? undefined,
+                      actor: h.managedBy ? (
+                        <div className="timeline-actor-container">
+                          <p className='timeline-actor-title'>Actor del cambio:</p>
+                          <div className="timeline-actor-secondary">
+                            <ColorChip size='xs' variant='ghost' color='yellow' label={
+                              typeof h.managedBy === 'string'
+                                ? h.managedBy
+                                : `${h.managedBy.nombre} ${h.managedBy.apellido}`
+
+                            }
+                              icon={<FaUserCheck />}
+                            />
+                            {typeof h.managedBy === 'object' && h.managedBy !== null && (h.managedBy.celular || h.managedBy.correo) && (
+                              <div className="timeline-actor-secondary">
+                                {h.managedBy.celular && (
+                                  <ColorChip size='xs' variant='ghost' status='info' label={h.managedBy.celular}
+                                    icon={<GiPhone size={10} />}
+                                  />
+                                )}
+                                {h.managedBy.correo && (
+                                  <ColorChip size='xs' variant='ghost' status='accent' label={h.managedBy.correo}
+                                    icon={<IoMail size={10} />}
+                                  />
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : undefined,
                     }))}
                     emptyMessage="Sin historial de estados."
                   />

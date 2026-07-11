@@ -140,9 +140,9 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                         </div>
                       </div>
                       <>
-                        {incident.incidentId && (
+                        {incident.incidentCode && (
                           <ColorChip
-                            label={incident.incidentId}
+                            label={incident.incidentCode}
                             size="sm"
                             variant="ghost"
                             icon={<MdKey size={9} />}

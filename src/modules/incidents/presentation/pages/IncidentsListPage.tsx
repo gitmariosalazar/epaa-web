@@ -15,6 +15,7 @@ import { useSimulatedProgress } from '@/shared/presentation/components/CircularP
 import '../styles/Incidents.css';
 import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { truncateText } from '@/shared/utils/text/truncate-text';
 
 /**
  * IncidentsListPage
@@ -40,7 +41,7 @@ export const IncidentsListPage: React.FC = () => {
   const progress = useSimulatedProgress(isLoading);
   const navigate = useNavigate();
 
-  const [resolveIncidentId, setResolveIncidentId] = useState<number | null>(null);
+  const [resolveIncidentId, setResolveIncidentId] = useState<string | null>(null);
   const [selectedIncident, setSelectedIncident] = useState<IncidentDetailRowResponse | null>(null);
 
   const getStatusColor = (status: string) => {
@@ -65,11 +66,11 @@ export const IncidentsListPage: React.FC = () => {
 
   const columns: Column<IncidentDetailRowResponse>[] = [
     {
-      header: 'ID',
+      header: 'Nº Incidente',
       accessor: (item) => (
-        <span className="text-secondary" style={{ fontWeight: 600 }}>{item.incidentId}</span>
+        <span className="text-secondary" style={{ fontWeight: 600 }}>{item.incidentCode}</span>
       ),
-      id: 'incidentId',
+      id: 'incidentCode',
       style: { width: '80px' }
     },
     {
@@ -92,7 +93,7 @@ export const IncidentsListPage: React.FC = () => {
       header: 'UBICACIÓN',
       accessor: (item) => (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span className="incident-category-text">{item.referenceAddress}</span>
+          <span className="incident-category-text">{truncateText(item.referenceAddress?.toUpperCase() || '-', 40)}</span>
           <div className="geo-status-bar">
             <div className="geo-status-bar__divider" />
             <div className="geo-status-bar__divider" />

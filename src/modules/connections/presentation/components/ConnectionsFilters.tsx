@@ -68,13 +68,11 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
 
   return (
     <div className="conn-filters">
-      {/* ── LEFT: fetch inputs + Consultar ── */}
-      <div className="conn-filter-section-left">
-        {/* Sector input — sector tab only */}
-        {activeTab === 'sector' && (
+      {/* Sector input — sector tab only */}
+      {activeTab === 'sector' && (
+        <div className="conn-filter-group">
+          <label className="conn-filter-label">{t('connections.filters.sector', 'Sector')}</label>
           <Input
-            className="conn-filter-group"
-            label={t('connections.filters.sector', 'Sector')}
             type="text"
             size="compact"
             placeholder={t('connections.filters.sectorPlaceholder', 'Ej: 1')}
@@ -82,13 +80,14 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
             onChange={(e) => onSectorInputChange(e.target.value)}
             leftIcon={<HiChartPie size={18} />}
           />
-        )}
+        </div>
+      )}
 
-        {/* Client ID input — client tab only */}
-        {activeTab === 'client' && (
+      {/* Client ID input — client tab only */}
+      {activeTab === 'client' && (
+        <div className="conn-filter-group">
+          <label className="conn-filter-label">{t('connections.filters.clientId', 'ID Cliente')}</label>
           <Input
-            className="conn-filter-group"
-            label={t('connections.filters.clientId', 'ID Cliente')}
             type="text"
             size="compact"
             placeholder={t(
@@ -99,77 +98,64 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
             onChange={(e) => onClientIdInputChange(e.target.value)}
             leftIcon={<FaUser size={18} />}
           />
-        )}
-
-        <div className="conn-filter-group conn-filter-group--btn">
-          <label className="input__label" style={{ visibility: 'hidden' }}>
-            .
-          </label>
-          <Button onClick={onFetch} disabled={!canFetch} size="compact">
-            {isLoading ? (
-              <div className="conn-filter-spinner" />
-            ) : (
-              <Search size={18} />
-            )}
-            {isLoading ? t('common.loading') : t('common.fetch')}
-          </Button>
         </div>
+      )}
+
+      <div className="conn-filter-group conn-filter-group--btn">
+        <Button
+          variant="outline"
+          size="compact"
+          onClick={onFetch}
+          disabled={!canFetch}
+          isLoading={isLoading}
+          leftIcon={<Search size={16} />}
+        >
+          {t('common.consult', 'Consultar')}
+        </Button>
       </div>
 
-      {/* ── RIGHT: local search + dropdown filters ── */}
-      <div className="conn-filter-section-right">
-        {/* Search Field Selector (ListBox) */}
+      <div className="conn-filter-group conn-filter-group--search">
+        <label className="conn-filter-label">{t('common.search', 'Búsqueda Local')}</label>
+        <Input
+          type="text"
+          size="compact"
+          placeholder={t(
+            'connections.filters.searchPlaceholder',
+            'Buscar en resultados...'
+          )}
+          value={searchQuery}
+          onChange={(e) => onSearchQueryChange(e.target.value)}
+          leftIcon={<Search size={18} />}
+        />
+      </div>
+
+      <div className="conn-filter-group">
+        <label className="conn-filter-label">{t('connections.filters.searchField', 'Campo')}</label>
         <Select
-          className="conn-filter-group conn-filter-group--search-field"
-          label={t('connections.filters.field', 'Filtrar por')}
           size="compact"
           value={searchField}
           onChange={(e) => onSearchFieldChange(e.target.value)}
           leftIcon={<FaFilter size={18} />}
         >
-          <option value="all">{t('common.all', 'Todos')}</option>
-          <option value="connectionCadastralKey">
-            {t('connections.fields.cadastralKey', 'Clave Catastral')}
+          <option value="all">
+            {t('connections.filters.allFields', 'Todos')}
           </option>
-          <option value="connectionAccount">
-            {t('connections.fields.account', 'Cuenta / Abonado')}
+          <option value="name">
+            {t('connections.filters.name', 'Nombre')}
           </option>
-          <option value="connectionMeterNumber">
-            {t('connections.fields.meterNumber', 'Número de Medidor')}
+          <option value="address">
+            {t('connections.filters.address', 'Dirección')}
           </option>
-          <option value="clientId">
-            {t('connections.fields.clientId', 'ID Cliente / RUC')}
-          </option>
-          <option value="connectionAddress">
-            {t('connections.fields.address', 'Dirección')}
-          </option>
-          <option value="connectionContractNumber">
-            {t('connections.fields.contractNumber', 'Número de Contrato')}
-          </option>
-          <option value="connectionReference">
-            {t('connections.fields.reference', 'Referencia')}
-          </option>
-          <option value="connectionSector">
-            {t('connections.fields.sector', 'Sector')}
+          <option value="meter">
+            {t('connections.filters.meter', 'Medidor')}
           </option>
         </Select>
+      </div>
 
-        {/* Multi-field search */}
-        <Input
-          className="conn-filter-group conn-filter-group--search"
-          label={t('common.search')}
-          type="text"
-          size="compact"
-          placeholder={t('common.searchPlaceholder')}
-          value={searchQuery}
-          onChange={(e) => onSearchQueryChange(e.target.value)}
-          leftIcon={<Search size={18} />}
-        />
-
-        {/* Status filter */}
+      {/* Status filter */}
+      <div className="conn-filter-group">
+        <label className="conn-filter-label">{t('connections.filters.status', 'Estado')}</label>
         <Select
-          className="conn-filter-group"
-          label={t('connections.filters.status', 'Estado')}
           size="compact"
           value={selectedStatus}
           onChange={(e) => onStatusChange(e.target.value)}
@@ -185,11 +171,12 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
             {t('connections.filters.inactive', 'Inactivo')}
           </option>
         </Select>
+      </div>
 
-        {/* Sewerage filter */}
+      {/* Sewerage filter */}
+      <div className="conn-filter-group">
+        <label className="conn-filter-label">{t('connections.filters.sewerage', 'Alcantarillado')}</label>
         <Select
-          className="conn-filter-group"
-          label={t('connections.filters.sewerage', 'Alcantarillado')}
           size="compact"
           value={selectedSewerage}
           onChange={(e) => onSewerageChange(e.target.value)}
@@ -205,11 +192,12 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
             {t('connections.filters.sewerageNo', 'Sin alcantarillado')}
           </option>
         </Select>
+      </div>
 
-        {/* Incidents filter */}
+      {/* Incidents filter */}
+      <div className="conn-filter-group">
+        <label className="conn-filter-label">{t('connections.filters.incidents', 'Incidentes')}</label>
         <Select
-          className="conn-filter-group"
-          label={t('connections.filters.incidents', 'Incidentes')}
           size="compact"
           value={selectedIncidents}
           onChange={(e) => onIncidentsChange(e.target.value)}
@@ -225,11 +213,12 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
             {t('connections.filters.withoutIncidents', 'Sin incidentes')}
           </option>
         </Select>
+      </div>
 
         {/* Coordinates filter */}
+      <div className="conn-filter-group">
+        <label className="conn-filter-label">{t('connections.filters.coordinates', 'Coordenadas')}</label>
         <Select
-          className="conn-filter-group"
-          label={t('connections.filters.coordinates', 'Coordenadas')}
           size="compact"
           value={selectedCoordinates}
           onChange={(e) => onCoordinatesChange(e.target.value)}
