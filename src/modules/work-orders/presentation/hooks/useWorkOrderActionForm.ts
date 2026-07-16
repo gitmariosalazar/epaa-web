@@ -261,6 +261,8 @@ const ACTION_TO_FORM_KEY: Record<WorkOrderActionKey, FormKey> = {
   'add-quality-control-detail': 'addQualityControlDetail',
   'resolve-quality-control': 'resolveQualityControl',
   'complete-work-order': 'completeWorkOrder',
+  'complete-inspection-work-order': 'completeWorkOrder',
+  'complete-installation-work-order': 'completeWorkOrder',
   'register-satisfaction-survey': 'registerSatisfactionSurvey'
 };
 
