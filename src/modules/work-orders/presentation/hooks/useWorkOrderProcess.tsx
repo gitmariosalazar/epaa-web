@@ -255,13 +255,37 @@ export const WORK_ORDER_ACTIONS: WorkOrderActionDefinition[] = [
   {
     key: 'complete-work-order',
     phase: 'phase-6',
-    title: 'Completar orden de trabajo',
+    title: 'Completar orden de trabajo (Genérica)',
     description: 'Fase 6 - Paso 1',
     defaultPayload: {
       workOrderId: 'WORK-ORDER-ID',
       newStatus: 'COMPLETADA',
       userId: 'USER-ADMIN',
       comment: 'Cierre administrativo completo'
+    }
+  },
+  {
+    key: 'complete-inspection-work-order',
+    phase: 'phase-6',
+    title: 'Completar orden de trabajo (Inspección)',
+    description: 'Fase 6 - Paso 1',
+    defaultPayload: {
+      workOrderId: 'WORK-ORDER-ID',
+      newStatus: 'INSPECCION_COMPLETADA',
+      userId: 'USER-ADMIN',
+      comment: 'Cierre administrativo de inspección'
+    }
+  },
+  {
+    key: 'complete-installation-work-order',
+    phase: 'phase-6',
+    title: 'Completar orden de trabajo (Instalación)',
+    description: 'Fase 6 - Paso 1',
+    defaultPayload: {
+      workOrderId: 'WORK-ORDER-ID',
+      newStatus: 'INSTALACION_COMPLETADA',
+      userId: 'USER-ADMIN',
+      comment: 'Cierre administrativo de instalación'
     }
   },
   {
@@ -583,6 +607,8 @@ export const useWorkOrderProcess = (
             );
             break;
           case 'complete-work-order':
+          case 'complete-inspection-work-order':
+          case 'complete-installation-work-order':
             response = await dependencies.completeWorkOrderUseCase.execute(
               payload as any
             );

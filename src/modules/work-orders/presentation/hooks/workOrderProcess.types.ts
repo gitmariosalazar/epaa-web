@@ -45,6 +45,8 @@ export type WorkOrderActionKey =
   | 'add-quality-control-detail'
   | 'resolve-quality-control'
   | 'complete-work-order'
+  | 'complete-inspection-work-order'
+  | 'complete-installation-work-order'
   | 'register-satisfaction-survey';
 
 export type WorkOrderActionPayload =
