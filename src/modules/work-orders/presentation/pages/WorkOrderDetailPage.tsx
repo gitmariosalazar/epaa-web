@@ -738,9 +738,15 @@ export const WorkOrderDetailPage: React.FC = () => {
   // ── Fase 6: Completar OT ─────────────────────────────────────────────────────
   const handleComplete = async () => {
     if (!orden) return;
-    // Si es instalación de acometida, abrir catastro primero
+    const nextStatus =
+      orden.estado === 'INSPECCION_EJECUTADA'
+        ? 'INSPECCION_COMPLETADA'
+        : orden.estado === 'INSTALACION_EJECUTADA'
+          ? 'INSTALACION_COMPLETADA'
+          : 'COMPLETADA';
+
     if (esInstalacionAcometida) {
-      setPendingNextState('COMPLETADA');
+      setPendingNextState(nextStatus);
       setShowCadastral(true);
       return;
     }
@@ -749,7 +755,7 @@ export const WorkOrderDetailPage: React.FC = () => {
       await completeUseCase.execute(
         new ProcessWorkOrderRequest(
           orden.idOrdenTrabajo,
-          'COMPLETADA',
+          nextStatus,
           currentUserId,
           'Cierre administrativo'
         )

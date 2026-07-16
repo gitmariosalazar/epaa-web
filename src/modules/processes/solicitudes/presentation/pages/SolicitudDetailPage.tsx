@@ -404,7 +404,7 @@ export const SolicitudDetailPage: React.FC = () => {
   // Determine actual payment document logic
   const paymentDocument: DocumentoAdjuntoResponse | null = solicitud.urlComprobante
     ? {
-        id: 'mock-comprobante-id',
+        id: '',
         tipodocumento: 'COMPROBANTE_PAGO_INSPECCION',
         url: solicitud.urlComprobante,
         estadoValidacion: 'PENDIENTE',
