@@ -16,9 +16,10 @@ import { FaTrashCan } from 'react-icons/fa6';
 import { FaEdit, FaMapMarkerAlt } from 'react-icons/fa';
 import type { Connection } from '../../domain/models/Connection';
 import type { SortConfig } from '../hooks/useConnectionsViewModel';
-import { IoInformationCircleOutline } from 'react-icons/io5';
+import { IoInformationCircleOutline, IoWaterSharp } from 'react-icons/io5';
 import { getConnectionStateChip } from '../utils/connectionStateChip';
 import { BsTable } from 'react-icons/bs';
+import { GiHexagonalNut } from 'react-icons/gi';
 
 // ── DetailModal (lightweight inline modal for viewing a connection) ────────────
 interface ConnectionDetailModalProps {
@@ -140,7 +141,7 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
   const [selectedConnection, setSelectedConnection] =
     useState<Connection | null>(null);
 
-  //console.log(data[0]);
+  console.log(data[0]);
 
   // ── Columns ──────────────────────────────────────────────────────────────
   const columns: Column<Connection>[] = useMemo(
@@ -176,6 +177,21 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         accessor: 'connectionCadastralKey',
         sortable: true,
         id: 'connectionCadastralKey'
+      },
+
+      {
+        header: t('connections.table.connectionType', 'Tipo de acometida'),
+        accessor: (item: Connection) => {
+          return <ColorChip label={item.connectionTypeName}
+            variant='ghost'
+            color={item.connectionType === 'AGUA_POTABLE' ? '#2258C5' : '#a049db'} size="xs" icon={
+              item.connectionType === 'AGUA_POTABLE'
+                ? <IoWaterSharp size={14} />
+                : <GiHexagonalNut size={14} />
+            } />
+        },
+        sortable: true,
+        id: 'connectionTypeName'
       },
 
       {

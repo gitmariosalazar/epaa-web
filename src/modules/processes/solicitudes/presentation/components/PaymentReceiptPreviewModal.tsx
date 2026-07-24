@@ -17,6 +17,7 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import type { DocumentoAdjuntoResponse } from '../../domain/models/Solicitud';
 import { useDocumentPreview } from '@/modules/documents/presentation/hooks/useDocumentPreview';
 import { useDocumentDownload } from '@/modules/documents/presentation/hooks/useDocumentDownload';
+import { Select } from '@/shared/presentation/components/Input/Select';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -92,7 +93,7 @@ export const PaymentReceiptPreviewModal: React.FC<PaymentReceiptPreviewModalProp
 
   const { download, isDownloading } = useDocumentDownload();
 
-  const isPdf   = (localFile ? localFile.type === 'application/pdf' : previewMimeType === 'application/pdf');
+  const isPdf = (localFile ? localFile.type === 'application/pdf' : previewMimeType === 'application/pdf');
   const isImage = (localFile ? localFile.type.startsWith('image/') : previewMimeType?.startsWith('image/') ?? false);
 
   const activePreviewUrl = localPreviewUrl || previewBlobUrl;
@@ -176,7 +177,7 @@ export const PaymentReceiptPreviewModal: React.FC<PaymentReceiptPreviewModalProp
                 <div className="doc-modal__no-preview" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '2rem' }}>
                   <AlertTriangle size={48} style={{ color: '#f59e0b' }} />
                   <p>El comprobante de pago no ha sido cargado aún.</p>
-                  
+
                   <label
                     htmlFor="admin-receipt-upload"
                     style={{
@@ -290,17 +291,18 @@ export const PaymentReceiptPreviewModal: React.FC<PaymentReceiptPreviewModalProp
                 )}
               </div>
 
-              <label className="doc-validation__label">Método de Pago</label>
-              <select
-                className="sol-detail-payment-confirm-field__select"
+
+              <Select
                 value={paymentMethod}
+                label='Método de Pago'
                 onChange={(e) => setPaymentMethod(e.target.value)}
+                options={[
+                  { value: 'TRANSFERENCIA', label: 'Transferencia Bancaria' },
+                  { value: 'VENTANILLA', label: 'Depósito en Ventanilla' },
+                  { value: 'ONLINE', label: 'Pago en Línea' }
+                ]}
                 style={{ marginBottom: '0.75rem' }}
-              >
-                <option value="TRANSFERENCIA">Transferencia Bancaria</option>
-                <option value="VENTANILLA">Depósito en Ventanilla</option>
-                <option value="ONLINE">Pago en Línea</option>
-              </select>
+              />
 
               <label className="doc-validation__label">Referencia / N° Transacción</label>
               <input
@@ -330,7 +332,7 @@ export const PaymentReceiptPreviewModal: React.FC<PaymentReceiptPreviewModalProp
                   >
                     {isConfirmingPayment ? 'Registrando...' : 'Confirmar y Registrar Pago'}
                   </Button>
-                  
+
                   {handleRejectPayment && hasDocument && (
                     <Button
                       type="button"

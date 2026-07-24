@@ -1,0 +1,135 @@
+/* ─── Work Orders List ─── */
+.sol-wo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* ─── Single Work Order Row (Card) ─── */
+.sol-wo-row {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.sol-wo-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: var(--text-muted);
+}
+
+.sol-wo-row--active {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* ─── Accent Left Bar ─── */
+.sol-wo-row__accent {
+  width: 5px;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* ─── Main Body ─── */
+.sol-wo-row__body {
+  padding: 1.25rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+/* ─── Top Section (Code + Chips) ─── */
+.sol-wo-row__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.sol-wo-row__code-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  background: var(--surface-hover);
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+.sol-wo-row__hash-icon {
+  color: var(--text-muted);
+}
+
+.sol-wo-row__chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ─── Description ─── */
+.sol-wo-row__desc {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* ─── Metadata Bottom Grid ─── */
+.sol-wo-row__meta {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border-color);
+  flex-wrap: wrap;
+}
+
+.sol-wo-row__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.sol-wo-row__meta-label {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.sol-wo-row__meta-value {
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.sol-wo-row__meta-icon {
+  opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .sol-wo-row__top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .sol-wo-row__chips {
+    width: 100%;
+  }
+  .sol-wo-row__meta {
+    gap: 0.75rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

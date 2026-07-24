@@ -161,8 +161,9 @@ function App() {
           pauseOnHover
           theme="colored"
         />
-        <BrowserRouter>
-          <Routes>
+        <UsersProvider>
+          <BrowserRouter>
+            <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/unauthorized" element={<UnAuthorizedPage />} />
             <Route element={<ProtectedRoute />}>
@@ -175,15 +176,13 @@ function App() {
                   <Route
                     path="/users/*"
                     element={
-                      <UsersProvider>
-                        <Routes>
-                          <Route index element={<UsersPage />} />
-                          <Route
-                            path=":username"
-                            element={<UserDetailPage />}
-                          />
-                        </Routes>
-                      </UsersProvider>
+                      <Routes>
+                        <Route index element={<UsersPage />} />
+                        <Route
+                          path=":username"
+                          element={<UserDetailPage />}
+                        />
+                      </Routes>
                     }
                   />
                 </Route>
@@ -239,11 +238,7 @@ function App() {
                 <Route path="/audit" element={<AuditPage />} />
                 <Route
                   path="/profile"
-                  element={
-                    <UsersProvider>
-                      <ProfilePage />
-                    </UsersProvider>
-                  }
+                  element={<ProfilePage />}
                 />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route
@@ -480,8 +475,9 @@ function App() {
                 />
               </Route>
             </Route>
-          </Routes>
-        </BrowserRouter>
+            </Routes>
+          </BrowserRouter>
+        </UsersProvider>
       </ThemeProvider>
     </AuthProvider>
   );

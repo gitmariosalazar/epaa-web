@@ -1,0 +1,126 @@
+.sol-detail-card--timeline {
+  background: var(--surface);
+}
+
+.sol-detail-timeline {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1.5rem;
+  position: relative;
+}
+
+.sol-detail-timeline-node {
+  display: flex;
+  gap: 1rem;
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.sol-detail-timeline-node:last-child {
+  padding-bottom: 0;
+}
+
+.sol-detail-timeline-node__line {
+  position: absolute;
+  left: 5px;
+  top: 14px;
+  bottom: 0;
+  width: 2px;
+  background: var(--border-color);
+}
+
+.sol-detail-timeline-node:last-child .sol-detail-timeline-node__line {
+  display: none;
+}
+
+.sol-detail-timeline-node__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 3px solid var(--accent);
+  z-index: 1;
+  margin-top: 4px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 4px var(--surface);
+}
+
+.sol-detail-timeline-node:first-child .sol-detail-timeline-node__dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--surface), 0 0 8px var(--accent);
+}
+
+.sol-detail-timeline-node__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.sol-detail-timeline-node__date {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.sol-detail-timeline-node__title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.sol-detail-timeline-node__comment {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: var(--background);
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.4rem;
+  border: 1px solid var(--border-color);
+  margin-top: 0.25rem;
+}
+
+.sol-detail-timeline-node__comment p {
+  margin: 0;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.sol-detail-card--timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.sol-detail-timeline-scroll {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding: 0 1.25rem 1.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+.sol-detail-timeline-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sol-detail-timeline-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sol-detail-timeline-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 10px;
+}
+
+.sol-detail-card--timeline .card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+}

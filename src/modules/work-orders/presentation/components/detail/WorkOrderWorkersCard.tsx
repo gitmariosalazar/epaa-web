@@ -3,7 +3,7 @@
  *
  * SRP: Componente dedicado a la visualización y gestión inline del personal asignado a la OT (Maestro-Detalle).
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserPlus, UserMinus, ShieldCheck, Wrench, Plus } from 'lucide-react';
 import { Card } from '@/shared/presentation/components/Card/Card';
 import { Button } from '@/shared/presentation/components/Button/Button';
@@ -11,11 +11,14 @@ import { Table, type Column } from '@/shared/presentation/components/Table/Table
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 import type { TrabajadorAsignado } from '../../../domain/schemas/dto/response/work-orders.get.response';
+import { useUsersContext } from '@/modules/users/presentation/context/UsersContext';
+import type { User } from '@/modules/users/domain/models/User';
+import { SearchableSelect } from '@/shared/presentation/components/Input/SearchableSelect';
 
 const ROL_OPTIONS = [
-  { id: 1,    label: 'Técnico Responsable' },
-  { id: 2,    label: 'Técnico Operativo' },
-  { id: 3,    label: 'Supervisor GIS' },
+  { id: 1, label: 'Técnico Responsable' },
+  { id: 2, label: 'Técnico Operativo' },
+  { id: 3, label: 'Supervisor GIS' },
   { id: null, label: 'Sin Rol' },
 ] as const;
 
@@ -39,6 +42,21 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
   const [roleId, setRoleId] = useState<number | null>(null);
   const [isResponsible, setIsResponsible] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const { getUsersUseCase } = useUsersContext();
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const data = (await getUsersUseCase.execute(500, 0)).filter(u =>
+          u.positionName?.includes('Analista de Servicios') || u.positionName?.includes('Tecnico de Servicios'));
+        setUsers(data);
+      } catch (err) {
+        console.error('Error al cargar usuarios:', err);
+      }
+    };
+    loadUsers();
+  }, [getUsersUseCase]);
 
   const [pendingWorkers, setPendingWorkers] = useState<{
     workerId: string;
@@ -48,14 +66,15 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
     roleName?: string;
   }[]>([]);
 
+
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     const id = workerId.trim();
     if (!id) return;
 
     // Validación 1: No repetir trabajadores
-    const alreadyExists = personalAsignado.some(w => w.idTrabajador === id) || 
-                          pendingWorkers.some(w => w.workerId === id);
+    const alreadyExists = personalAsignado.some(w => w.idTrabajador === id) ||
+      pendingWorkers.some(w => w.workerId === id);
     if (alreadyExists) {
       MessageToastCustom('warning', 'Trabajador duplicado', 'Este trabajador ya está en la lista.');
       return;
@@ -63,20 +82,28 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
 
     // Validación 2: Máximo un responsable
     if (isResponsible || roleId === 1) {
-      const responsibleExistsNow = personalAsignado.some(w => w.esResponsable) || 
-                                   pendingWorkers.some(w => w.isResponsible || w.roleId === 1);
+      const responsibleExistsNow = personalAsignado.some(w => w.esResponsable) ||
+        pendingWorkers.some(w => w.isResponsible || w.roleId === 1);
       if (responsibleExistsNow) {
         MessageToastCustom('warning', 'Límite de responsable', 'Ya existe un Técnico Responsable asignado.');
         return;
       }
     }
 
+    const selectedUser = users.find(u => u.userId === id);
+    const workerName = selectedUser 
+      ? `${selectedUser.firstName || ''} ${selectedUser.lastName || ''}`.trim() || id
+      : id;
+
+    const selectedRole = ROL_OPTIONS.find(r => r.id === roleId);
+    const resolvedRoleName = selectedRole?.label ?? 'Sin Rol';
+
     setPendingWorkers(prev => [...prev, {
       workerId: id,
       roleId,
       isResponsible: isResponsible || roleId === 1,
-      workerName: id, // Placeholder
-      roleName: (roleId === 1 || isResponsible) ? 'Técnico Responsable' : 'Técnico Operativo'
+      workerName: workerName,
+      roleName: resolvedRoleName
     }]);
     setWorkerId('');
     setRoleId(null);
@@ -132,7 +159,7 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
       rol: w.roleName ?? 'Sin Rol',
       _isPending: true,
       _pendingIndex: i
-    } as TrabajadorAsignado & { _isPending?: boolean; _pendingIndex?: number }) )
+    } as TrabajadorAsignado & { _isPending?: boolean; _pendingIndex?: number }))
   ];
 
   const columns: Column<TrabajadorAsignado & { _isPending?: boolean; _pendingIndex?: number }>[] = [
@@ -253,44 +280,39 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
             <div className="wo-modal-section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.75rem', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
               <UserPlus size={14} /> Asignar Nuevo Trabajador
             </div>
-            
+
             <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div className="wo-inline-fields-row" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1.2fr auto', gap: '0.6rem', alignItems: 'end' }}>
                 <div className="wo-modal-field" style={{ margin: 0 }}>
-                  <label className="wo-modal-label" style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                    UUID del Trabajador <span className="wo-modal-required" style={{ color: 'var(--error)' }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="wo-modal-input"
-                    style={{ height: '32px', padding: '0.2rem 0.5rem', fontSize: '0.78rem' }}
+
+                  <SearchableSelect
+                    options={users.map(user => ({
+                      value: user.userId,
+                      label: user.firstName + ' ' + user.lastName + ' (' + user.positionName + ')'
+                    }))}
+                    label='Trabajador '
+                    size='compact'
                     value={workerId}
-                    onChange={(e) => setWorkerId(e.target.value)}
-                    placeholder="UUID del técnico"
-                    required
+                    onChange={(value) => setWorkerId(String(value))}
                     disabled={isLoading}
                   />
                 </div>
 
                 <div className="wo-modal-field" style={{ margin: 0 }}>
-                  <label className="wo-modal-label" style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Rol</label>
-                  <select
-                    className="wo-modal-select"
-                    style={{ height: '32px', padding: '0.2rem 0.5rem', fontSize: '0.78rem' }}
+
+                  <SearchableSelect
+                    options={ROL_OPTIONS
+                      .filter(r => !(r.id === 1 && responsibleExists))
+                      .map((r) => ({
+                        value: r.id ?? '',
+                        label: r.label
+                      }))}
+                    label='Rol'
+                    size='compact'
                     value={roleId ?? ''}
-                    onChange={(e) => handleRoleChange(e.target.value ? Number(e.target.value) : null)}
+                    onChange={(value) => handleRoleChange(value ? Number(value) : null)}
                     disabled={isLoading}
-                  >
-                    {ROL_OPTIONS.map((r) => (
-                      <option 
-                        key={String(r.id)} 
-                        value={r.id ?? ''}
-                        disabled={r.id === 1 && responsibleExists}
-                      >
-                        {r.label}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <Button
@@ -323,7 +345,7 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
                 )}
               </div>
             </form>
-            
+
             {pendingWorkers.length > 0 && (
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
                 <Button

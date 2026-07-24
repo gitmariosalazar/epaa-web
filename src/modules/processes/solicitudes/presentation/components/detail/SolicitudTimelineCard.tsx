@@ -1,71 +1,56 @@
 import React from 'react';
 import { Card } from '@/shared/presentation/components/Card/Card';
-import { StatusTimeline } from '@/shared/presentation/components/Timeline';
-import type { TimelineItem } from '@/shared/presentation/components/Timeline';
-import type {
-  TrackingSolicitudResponse,
-  HistorialTrackingEntry
-} from '../../../domain/models/Solicitud';
+import type { HistorialTrackingEntry, TrackingSolicitudResponse } from '../../../domain/models/Solicitud';
+import '../../styles/SolicitudDetailTimelineCard.css';
+import { StatusTimeline, type TimelineItem } from '@/shared/presentation/components/Timeline';
 import { getEstadoConfig } from '../SolicitudConfig';
-
-// ─── Props ─────────────────────────────────────────────────────────────────────
+import { HistorialModal } from './HistorialModal';
 
 interface SolicitudTimelineCardProps {
-  matchedTracking: TrackingSolicitudResponse | null;
+  matchedTracking?: TrackingSolicitudResponse | null;
 }
 
 // ─── Domain → generic adapter (pure function, module-level) ───────────────────
 
-/**
- * Maps a domain `HistorialTrackingEntry` to the generic `TimelineItem`.
- *
- * OCP: SolicitudTimelineCard is closed for modification — new field mappings
- *      go here, not inside StatusTimeline.
- * DIP: StatusTimeline depends on TimelineItem, not on HistorialTrackingEntry.
- */
 function toTimelineItem(entry: HistorialTrackingEntry): TimelineItem {
-  const config         = getEstadoConfig(entry.estado);
-  const prevConfig     = entry.estadoAnterior ? getEstadoConfig(entry.estadoAnterior) : null;
+  const config = getEstadoConfig(entry.estado);
+  const prevConfig = entry.estadoAnterior ? getEstadoConfig(entry.estadoAnterior) : null;
 
   return {
-    status:              entry.estado,
-    statusLabel:         entry.estadoLabel,
-    previousStatus:      entry.estadoAnterior ?? undefined,
-    // Use the config label (e.g. "Documentos Recibidos") instead of the
-    // generic formatLabel fallback (e.g. "Docs Submitted").
+    status: entry.estado,
+    statusLabel: entry.estadoLabel,
+    previousStatus: entry.estadoAnterior ?? undefined,
     previousStatusLabel: prevConfig?.label ?? undefined,
-    date:                entry.fecha,
-    comment:             entry.comentario ?? undefined,
-    color:               config.color,
+    date: entry.fecha,
+    comment: entry.comentario ?? undefined,
+    color: config.color,
   };
 }
 
-// ─── Component ─────────────────────────────────────────────────────────────────
-
-/**
- * SolicitudTimelineCard
- *
- * Thin wrapper: adapts `TrackingSolicitudResponse` to the generic StatusTimeline.
- *
- * SRP: responsible only for Card layout + domain-to-generic mapping.
- * DIP: delegates all timeline rendering to StatusTimeline (shared).
- */
 export const SolicitudTimelineCard: React.FC<SolicitudTimelineCardProps> = ({
   matchedTracking
 }) => {
-  const historial = matchedTracking?.historial ?? [];
-  const items: TimelineItem[] = historial.map(toTimelineItem);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const matchedHistorial = matchedTracking?.historial ?? [];
+  const items: TimelineItem[] = matchedHistorial.map(toTimelineItem);
 
   return (
     <Card className="sol-detail-card sol-detail-card--timeline">
-      <div style={{ padding: '0 1.25rem 1.25rem' }}>
+      <div className="sol-detail-timeline-scroll">
         <StatusTimeline
           title="Historial de Movimientos"
           items={items}
+          limit={3}
+          onViewAll={() => setIsModalOpen(true)}
           emptyMessage="No se registran movimientos de seguimiento."
           emptySubMessage="Los cambios de estado se mostrarán aquí."
         />
       </div>
+      <HistorialModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        historial={matchedHistorial}
+      />
     </Card>
   );
 };

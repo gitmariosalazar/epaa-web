@@ -217,11 +217,30 @@
   }
 }
 
-.sol-detail-main-col,
+.sol-detail-main-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
 .sol-detail-sidebar-col {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  position: sticky;
+  top: 1.25rem;
+  align-self: start;
+  max-height: calc(100vh - 2.5rem);
+}
+
+.sol-detail-sidebar-col > .sol-detail-card {
+  flex-shrink: 0;
+}
+
+.sol-detail-sidebar-col .sol-detail-card--timeline {
+  flex: 1;
+  flex-shrink: 1;
+  min-height: 0;
 }
 
 /* Card overrides */

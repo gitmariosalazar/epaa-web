@@ -13,26 +13,33 @@ import { Card } from '@/shared/presentation/components/Card/Card';
 import type { RequestDetailByClientResponse } from '../../../domain/models/Solicitud';
 import { BiSolidBusiness } from 'react-icons/bi';
 import { FaAddressCard, FaUserCog } from 'react-icons/fa';
+import { TIPO_PERSONA_LABELS, USO_PREDIO_LABELS } from '../SolicitudConfig';
 
 interface SolicitudInfoCardProps {
   solicitud: RequestDetailByClientResponse;
-  titular: string;
-  identificationVal: string;
-  emailVal: string;
-  phoneVal: string;
-  personaLabel: string;
-  usoLabel: string;
 }
 
 export const SolicitudInfoCard: React.FC<SolicitudInfoCardProps> = ({
-  solicitud,
-  titular,
-  identificationVal,
-  emailVal,
-  phoneVal,
-  personaLabel,
-  usoLabel
+  solicitud
 }) => {
+  const personaLabel = TIPO_PERSONA_LABELS[solicitud.tipoPersona] ?? solicitud.tipoPersona;
+  const usoLabel = USO_PREDIO_LABELS[solicitud.usoPredio] ?? solicitud.usoPredio;
+  const isJuridica = solicitud.tipoPersona === 'JURIDICA';
+  const titular = isJuridica
+    ? (solicitud.company?.businessName || solicitud.datosAdicionales?.nombres || solicitud.clienteId)
+    : (solicitud.person ? `${solicitud.person.firstName} ${solicitud.person.lastName}`
+      : (solicitud.datosAdicionales?.nombres && solicitud.datosAdicionales?.apellidos
+        ? `${solicitud.datosAdicionales.nombres} ${solicitud.datosAdicionales.apellidos}`
+        : solicitud.clienteId));
+  const identificationVal = isJuridica
+    ? (solicitud.company?.ruc || solicitud.clienteId)
+    : (solicitud.person?.personId || solicitud.clienteId);
+  const emailVal = isJuridica
+    ? (solicitud.company?.emails?.[0]?.correo || solicitud.datosAdicionales?.email || '')
+    : (solicitud.person?.emails?.[0]?.correo || solicitud.datosAdicionales?.email || '');
+  const phoneVal = isJuridica
+    ? (solicitud.company?.phones?.[0]?.numero || solicitud.datosAdicionales?.telefono || '')
+    : (solicitud.person?.phones?.[0]?.numero || solicitud.datosAdicionales?.telefono || '');
   return (
     <Card className="sol-detail-card">
       <div className="sol-detail-card__title-row">

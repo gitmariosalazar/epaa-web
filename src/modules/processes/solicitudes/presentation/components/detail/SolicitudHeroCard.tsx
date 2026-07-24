@@ -2,24 +2,20 @@ import React from 'react';
 import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import { Card } from '@/shared/presentation/components/Card/Card';
 import type { RequestDetailByClientResponse } from '../../../domain/models/Solicitud';
+import { getEstadoConfig, TIPO_ACOMETIDA_LABELS } from '../SolicitudConfig';
 
 interface SolicitudHeroCardProps {
   solicitud: RequestDetailByClientResponse;
-  statusConfig: {
-    label: string;
-    color: string;
-    bg: string;
-  };
-  tipoLabel: string;
-  updatedStr: string;
 }
 
 export const SolicitudHeroCard: React.FC<SolicitudHeroCardProps> = ({
   solicitud,
-  statusConfig,
-  tipoLabel,
-  updatedStr,
 }) => {
+  const statusConfig = getEstadoConfig(solicitud.estado);
+  const tipoLabel = TIPO_ACOMETIDA_LABELS[solicitud.tipoAcometida] ?? solicitud.tipoAcometida;
+  const updatedStr = solicitud.updatedAt
+    ? new Date(solicitud.updatedAt).toLocaleDateString('es-EC', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : '—';
   const isApprovedOrCompleted = [
     'aprobada',
     'completada',

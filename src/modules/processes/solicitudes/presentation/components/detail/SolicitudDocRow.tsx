@@ -4,6 +4,8 @@ import type { DocumentoAdjuntoResponse } from '../../../domain/models/Solicitud'
 import { getDocEstadoUI } from '@/shared/presentation/utils/colors/docs.colors';
 import { DocumentIcon } from '@/shared/presentation/utils/icons/CustomIcons';
 import { Upload, Clock } from 'lucide-react';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 const TIPO_DOC_LABEL: Record<number | string, string> = {
   1: 'Cédula de Identidad',
@@ -35,10 +37,10 @@ export const SolicitudDocRow: React.FC<SolicitudDocRowProps> = ({
   const StateIcon = docUI.icon;
 
   return (
-    <div
+    <Tooltip
       className="sol-detail-doc-row sol-detail-doc-row--interactive"
       onClick={onClick}
-      title="Haz clic para abrir el visor en este documento"
+      content="Haz clic para abrir el visor en este documento"
     >
       <div className="sol-detail-doc-row__icon">
         <DocumentIcon fileName={doc.url} size={16} />
@@ -69,15 +71,16 @@ export const SolicitudDocRow: React.FC<SolicitudDocRowProps> = ({
         />
         {onFileReplace && (doc.estadoValidacion.toUpperCase() === 'RECHAZADO' || doc.estadoValidacion.toUpperCase() === 'INVALIDO') && (
           <>
-            <button
+            <Button
               type="button"
-              className="sol-detail-doc-row__upload-btn"
               disabled={uploadingDocId === doc.id}
               onClick={(e) => {
                 e.stopPropagation();
                 const input = document.getElementById(`file-input-admin-${doc.id}`);
                 if (input) input.click();
               }}
+              variant='dashed'
+              size='compact'
             >
               {uploadingDocId === doc.id ? (
                 <Clock size={10} className="sol-detail-loading__spinner" />
@@ -85,7 +88,7 @@ export const SolicitudDocRow: React.FC<SolicitudDocRowProps> = ({
                 <Upload size={10} />
               )}
               {uploadingDocId === doc.id ? 'Subiendo...' : 'Subir Corrección'}
-            </button>
+            </Button>
             <input
               type="file"
               id={`file-input-admin-${doc.id}`}
@@ -102,6 +105,6 @@ export const SolicitudDocRow: React.FC<SolicitudDocRowProps> = ({
           </>
         )}
       </div>
-    </div>
+    </Tooltip>
   );
 };

@@ -262,7 +262,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                       {
                         incident.reportedBy.phone && (
                           <ColorChip
-                            label={incident.reportedBy.phone ? incident.reportedBy.phone : 'N/A'}
+                            label={typeof incident.reportedBy.phone === 'object' ? (incident.reportedBy.phone as any).numero : incident.reportedBy.phone}
                             variant="ghost"
                             status='info'
                             size="xs"
@@ -274,7 +274,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                       {
                         incident.reportedBy.email && (
                           <ColorChip
-                            label={incident.reportedBy.email ? incident.reportedBy.email : 'N/A'}
+                            label={typeof incident.reportedBy.email === 'object' ? (incident.reportedBy.email as any).correo : incident.reportedBy.email}
                             variant="ghost"
                             status='info'
                             size="xs"
@@ -425,6 +425,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                 <div className="detail-section">
                   <StatusTimeline
                     title="Historial de Estados"
+                    key={incident.incidentId}
                     items={incident.historyRecent.map((h) => ({
                       status: h.newStatus,
                       statusLabel: h.newStatus.replace(/_/g, ' '),
@@ -447,12 +448,12 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                             {typeof h.managedBy === 'object' && h.managedBy !== null && (h.managedBy.celular || h.managedBy.correo) && (
                               <div className="timeline-actor-secondary">
                                 {h.managedBy.celular && (
-                                  <ColorChip size='xs' variant='ghost' status='info' label={h.managedBy.celular}
+                                  <ColorChip size='xs' variant='ghost' status='info' label={typeof h.managedBy.celular === 'object' ? (h.managedBy.celular as any).numero : h.managedBy.celular}
                                     icon={<GiPhone size={10} />}
                                   />
                                 )}
                                 {h.managedBy.correo && (
-                                  <ColorChip size='xs' variant='ghost' status='accent' label={h.managedBy.correo}
+                                  <ColorChip size='xs' variant='ghost' status='accent' label={typeof h.managedBy.correo === 'object' ? (h.managedBy.correo as any).correo : h.managedBy.correo}
                                     icon={<IoMail size={10} />}
                                   />
                                 )}

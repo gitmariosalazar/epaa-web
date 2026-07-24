@@ -267,6 +267,10 @@ interface StatusTimelineProps {
   emptySubMessage?: string;
   /** Additional CSS class on the root element. */
   className?: string;
+  /** Max items to show initially */
+  limit?: number;
+  /** Callback when user clicks "View All" (only shown if limit < items.length) */
+  onViewAll?: () => void;
 }
 
 /**
@@ -310,8 +314,12 @@ export const StatusTimeline: React.FC<StatusTimelineProps> = ({
   emptyMessage = 'No se registran movimientos.',
   emptySubMessage = 'Los cambios de estado se mostrarán aquí.',
   className = '',
+  limit,
+  onViewAll
 }) => {
   const hasItems = items.length > 0;
+  const visibleItems = limit ? items.slice(0, limit) : items;
+  const hasMore = limit ? items.length > limit : false;
 
   return (
     <div className={`status-timeline-wrapper ${className}`}>
@@ -342,13 +350,18 @@ export const StatusTimeline: React.FC<StatusTimelineProps> = ({
         </div>
       ) : (
         <div className="status-timeline-body">
-          {items.map((item, idx) => (
+          {visibleItems.map((item, idx) => (
             <TimelineNode
               key={idx}
               item={item}
-              isLast={idx === items.length - 1}
+              isLast={idx === visibleItems.length - 1}
             />
           ))}
+          {hasMore && onViewAll && (
+            <button className="status-timeline-view-all" onClick={onViewAll} type="button">
+              Ver historial completo ({items.length - limit!} más)
+            </button>
+          )}
         </div>
       )}
     </div>

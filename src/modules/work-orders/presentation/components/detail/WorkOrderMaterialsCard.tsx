@@ -218,7 +218,7 @@ const WorkOrderMaterialsCardInner: React.FC<WorkOrderMaterialsCardProps> = ({
     {
       header: 'Costo Unit.',
       id: 'costoUnitario',
-      accessor: (m) => `S/ ${parseFloat(m.costoUnitario as any).toFixed(2)}`,
+      accessor: (m) => `$ ${parseFloat(m.costoUnitario as any).toFixed(2)}`,
       isNumeric: true,
     },
     {
@@ -228,7 +228,7 @@ const WorkOrderMaterialsCardInner: React.FC<WorkOrderMaterialsCardProps> = ({
         <span style={{
           color: String(m.idDetalle).startsWith('temp_') ? 'var(--warning, #f59e0b)' : 'inherit'
         }}>
-          S/ ${parseFloat(m.subtotal as any).toFixed(2)}
+          $ {parseFloat(m.subtotal as any).toFixed(2)}
         </span>
       ),
       isNumeric: true,

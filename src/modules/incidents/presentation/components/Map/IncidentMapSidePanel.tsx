@@ -163,6 +163,7 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                       </>
                     </div>
                     <div className="incident-item-main-info">
+
                       <span
                         className="incident-item-status"
                         style={{ color: 'var(--color-text-muted) !important' }}
@@ -176,7 +177,15 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                       >
                         {sCfg.label}
                       </span>
+
+                      <span
+                        className="incident-item-status"
+                        style={{ color: 'var(--color-text-muted)' }}
+                      >
+                        {incident.categoryName}
+                      </span>
                     </div>
+
                   </div>
 
                   <div className="incident-description">

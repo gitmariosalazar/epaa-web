@@ -429,9 +429,9 @@ const UsersLayout: React.FC = () => {
           <div style={{ width: '100%' }}>
             {validationError && (
               <div style={{ marginBottom: '12px' }}>
-                <Alert 
-                  type="error" 
-                  message={validationError} 
+                <Alert
+                  type="error"
+                  message={validationError}
                   dismissible
                   onClose={() => setValidationError(null)}
                 />
@@ -472,11 +472,10 @@ const UsersLayout: React.FC = () => {
             {steps.map((step, idx) => (
               <React.Fragment key={step}>
                 <div
-                  className={`users-wizard__step-item${
-                    idx === currentStep
+                  className={`users-wizard__step-item${idx === currentStep
                       ? ' users-wizard__step-item--active'
                       : ''
-                  }${idx < currentStep ? ' users-wizard__step-item--completed' : ''}`}
+                    }${idx < currentStep ? ' users-wizard__step-item--completed' : ''}`}
                 >
                   <div className="users-wizard__step-number">
                     {idx < currentStep ? <Check size={16} /> : idx + 1}
@@ -485,11 +484,10 @@ const UsersLayout: React.FC = () => {
                 </div>
                 {idx < steps.length - 1 && (
                   <div
-                    className={`users-wizard__step-connector${
-                      idx < currentStep
+                    className={`users-wizard__step-connector${idx < currentStep
                         ? ' users-wizard__step-connector--active'
                         : ''
-                    }`}
+                      }`}
                   />
                 )}
               </React.Fragment>
@@ -548,6 +546,7 @@ const UsersLayout: React.FC = () => {
           isOpen={isAssignRoleOpen}
           onClose={() => setIsAssignRoleOpen(false)}
           onSave={handleAssignRole}
+          userSelected={selectedUser}
         />
       )}
     </PageLayout>

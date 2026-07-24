@@ -48,6 +48,7 @@ interface TooltipProps {
   children: ReactNode;
   position?: TooltipPosition;
   className?: string;
+  onClick?: (e: React.MouseEvent) => void;
   style?: React.CSSProperties;
   disabled?: boolean;
   as?: React.ElementType;
@@ -128,7 +129,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
   variant = 'soft',
   followCursor = true,
   onMouseEnter,
-  onMouseLeave
+  onMouseLeave,
+  onClick
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0, arrowLeft: '50%', arrowTop: '50%' });
@@ -265,9 +267,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
         if (followCursor) setMouseCoords(null);
         onMouseLeave?.(e);
       }}
-      onClick={() => {
-        setIsVisible(false);
-        if (followCursor) setMouseCoords(null);
+      onClick={(e: React.MouseEvent) => {
+        onClick?.(e);
       }}
     >
       {children}

@@ -152,7 +152,7 @@ export const SubmitCorrectionsModal: React.FC<SubmitCorrectionsModalProps> = ({
                   </Button>
                 </div>
               ) : (
-                <div style={{
+                <label style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -160,26 +160,19 @@ export const SubmitCorrectionsModal: React.FC<SubmitCorrectionsModalProps> = ({
                   padding: '1.5rem',
                   border: '1px dashed var(--border-color)',
                   borderRadius: '6px',
-                  position: 'relative',
                   cursor: 'pointer',
-                  background: 'var(--surface)'
+                  background: 'var(--surface)',
+                  width: '100%'
                 }}>
                   <input
                     type="file"
                     onChange={(e) => handleFileChange(doc.id, e)}
                     accept=".pdf,.png,.jpg,.jpeg"
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      opacity: 0,
-                      cursor: 'pointer',
-                      width: '100%',
-                      height: '100%'
-                    }}
+                    style={{ display: 'none' }}
                   />
                   <Upload size={24} style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
-                  <span style={{ fontSize: '0.875rem', opacity: 0.8 }}>Haz clic o arrastra para subir la corrección</span>
-                </div>
+                  <span style={{ fontSize: '0.875rem', opacity: 0.8 }}>Haz clic para subir la corrección</span>
+                </label>
               )}
             </div>
           ))}

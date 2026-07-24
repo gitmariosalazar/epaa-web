@@ -32,6 +32,8 @@ export interface Connection {
   zoneCode: string;
   zoneName: string;
   incidents: number;
+  connectionType: string | null;
+  connectionTypeName: string | null;
 }
 
 export interface Rate {
@@ -74,6 +76,8 @@ export interface ConnectionWithProperty {
   zoneId: number;
   zoneCode: string;
   zoneName: string;
+  connectionType: string | null;
+  connectionTypeName: string | null;
   // Client Data
   company: Company | null;
   person: Client | null;

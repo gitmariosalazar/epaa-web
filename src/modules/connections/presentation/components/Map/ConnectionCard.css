@@ -64,3 +64,13 @@
 .card-icon-incident {
   color: #ff7300;
 }
+
+.active-water {
+  border-color: #00c8ff;
+  color: #00c8ff;
+}
+
+.active-sewer {
+  border-color: #7f8c8d;
+  color: #7f8c8d;
+}

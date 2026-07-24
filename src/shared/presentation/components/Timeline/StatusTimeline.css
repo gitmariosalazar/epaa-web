@@ -258,3 +258,34 @@
   font-size: 0.72rem;
   color: var(--text-secondary);
 }
+
+/* Sticky Header */
+.status-timeline-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--surface);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+/* Button "View all" */
+.status-timeline-view-all {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0.6rem;
+  background: var(--surface-hover);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  color: var(--text-main);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-timeline-view-all:hover {
+  background: var(--background);
+  border-color: var(--accent);
+  color: var(--accent);
+}

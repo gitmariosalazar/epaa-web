@@ -42,7 +42,7 @@ export const SolicitudDocsCard: React.FC<SolicitudDocsCardProps> = ({
                 leftIcon={<Upload size={14} />}
                 onClick={onBulkCorrectionsClick}
               >
-                Subir Correcciones Lote
+                Subir Documentos Rechazados
               </Button>
             )}
             <Button

@@ -11,6 +11,8 @@ import './ConnectionCard.css';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { IoMdEye } from 'react-icons/io';
 import { TbAlertTriangle } from 'react-icons/tb';
+import { IoWaterSharp } from 'react-icons/io5';
+import { GiHexagonalNut } from 'react-icons/gi';
 
 interface ConnectionCardProps {
   connection: Connection;
@@ -44,12 +46,15 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
           </h4>
         </div>
         <div
-          className={`card-status-pill ${isActive ? 'active' : 'inactive'}`}
-          style={{ color: chip.color, borderColor: chip.color }}
+          style={{ color: chip.color, borderColor: chip.color, display: 'flex', gap: '8px' }}
         >
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span className={`card-status-pill ${isActive ? 'active' : 'inactive'}`} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             {chip.icon}
             {chip.label}
+          </span>
+          <span className={`card-status-pill ${connection.connectionType === 'AGUA_POTABLE' ? 'active-water' : 'active-sewer'}`} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            {connection.connectionType === 'AGUA_POTABLE' ? <IoWaterSharp size={12} /> : <GiHexagonalNut size={12} />}
+            {connection.connectionTypeName}
           </span>
         </div>
       </div>

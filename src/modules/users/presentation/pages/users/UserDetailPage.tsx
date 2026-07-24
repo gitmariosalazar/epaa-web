@@ -437,6 +437,7 @@ const UserRolesTable = ({ user }: { user: User }) => {
         isOpen={isAssignRoleOpen}
         onClose={() => setIsAssignRoleOpen(false)}
         onSave={handleAssignRole}
+        userSelected={user}
       />
     </div>
   );

@@ -8,8 +8,8 @@ import { Button } from '../Button/Button';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
-  description?: string;
+  title: string | React.ReactNode;
+  description?: string | React.ReactNode;
   children: React.ReactNode;
   headerActions?: React.ReactNode;
   footer?: React.ReactNode;
@@ -62,7 +62,7 @@ export const Modal: React.FC<ModalProps> = ({
             style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
             className="modal-header-content"
           >
-            <h2 className="modal-title">{title}</h2>
+            <div className="modal-title">{title}</div>
             {description && (
               <p
                 className="modal-description"

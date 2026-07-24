@@ -7,9 +7,12 @@ import { RoleRepositoryImpl } from '@/modules/roles/infrastructure/repositories/
 import type { Role } from '@/modules/roles/domain/models/Role';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import './AddRoleModal.css';
+import type { User as UserModel } from '@/modules/users/domain/models/User';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 
 interface AddRoleModalProps {
   isOpen: boolean;
+  userSelected: UserModel;
   onClose: () => void;
   onSave: (roleId: number) => void;
 }
@@ -20,6 +23,7 @@ const getRolesUseCase = new GetRolesUseCase(roleRepository);
 
 export default function AddRoleModal({
   isOpen,
+  userSelected,
   onClose,
   onSave,
 }: AddRoleModalProps) {
@@ -35,7 +39,7 @@ export default function AddRoleModal({
       getRolesUseCase.execute(100, 0)
         .then(data => {
           // Guardar solo roles activos
-          setRoles(data.filter(r => r.isActive));
+          setRoles(data.filter(r => r.isActive && r.rolId !== 9 && !userSelected.roles.map(role => role.id).includes(r.rolId)));
         })
         .catch(err => {
           console.error('Error fetching roles:', err);
@@ -77,7 +81,25 @@ export default function AddRoleModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Asignar Nuevo Rol"
+      title={<>
+        <div className="modal-title">
+          <span>Asignar Nuevo Rol al usuario {userSelected.firstName} {userSelected.lastName}</span>
+        </div>
+        <div className="current-roles">
+          {
+            userSelected.roles.length > 0 ? (
+              <>
+                <span className="current-roles__title">Roles Actuales: </span>
+                {userSelected.roles.map(role => (
+                  <ColorChip className='color-chip-roles' key={role.id} color="yellow" label={role.name} size='xs' variant='soft' borderRadius={5} />
+                ))}
+              </>
+            ) : (
+              <p className="user-without-role">El usuario no tiene roles asignados actualmente</p>
+            )
+          }
+        </div>
+      </>}
       description="Selecciona el rol que deseas otorgarle a este usuario. Esto definirá sus permisos de acceso y capacidades en la plataforma."
       footer={footerContent}
       size="lg" // Hacemos el modal más ancho

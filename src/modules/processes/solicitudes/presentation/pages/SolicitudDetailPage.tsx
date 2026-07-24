@@ -34,7 +34,6 @@ import { GetRequestDetailByRequestIdOrNumberUseCase } from '../../application/us
 import { GetTrackingBySolicitudIdUseCase } from '../../application/usecases/GetTrackingBySolicitudIdUseCase';
 import { ConfirmPaymentUseCase } from '../../application/usecases/ConfirmPaymentUseCase';
 import { RejectPaymentUseCase } from '../../application/usecases/RejectPaymentUseCase';
-import { SubmitCorrectionsUseCase } from '../../application/usecases/SubmitCorrectionsUseCase';
 import { StartInspectionUseCase } from '../../application/usecases/StartInspectionUseCase';
 import { StartInstallationUseCase } from '../../application/usecases/StartInstallationUseCase';
 import { SolicitudRepositoryImpl } from '../../infrastructure/repositories/SolicitudRepositoryImpl';
@@ -59,13 +58,6 @@ import { SignContractModal } from '../components/SignContractModal';
 import { EmitInstallationOrderModal } from '../components/EmitInstallationOrderModal';
 import { RegisterCadastralModal } from '../components/RegisterCadastralModal';
 
-// ── Config & Helpers ──────────────────────────────────────────────────────────
-import {
-  getEstadoConfig,
-  TIPO_ACOMETIDA_LABELS,
-  TIPO_PERSONA_LABELS,
-  USO_PREDIO_LABELS
-} from '../components/SolicitudConfig';
 
 // ── Shared Components ─────────────────────────────────────────────────────────
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
@@ -160,7 +152,7 @@ export const SolicitudDetailPage: React.FC = () => {
   const [isRejectingPayment, setIsRejectingPayment] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('TRANSFERENCIA');
   const [paymentReference, setPaymentReference] = useState('');
-  
+
   const [submitCorrectionsModalOpen, setSubmitCorrectionsModalOpen] = useState(false);
   const [isSubmittingCorrections, setIsSubmittingCorrections] = useState(false);
 
@@ -179,7 +171,6 @@ export const SolicitudDetailPage: React.FC = () => {
   const startInstallUseCase = React.useMemo(() => new StartInstallationUseCase(repo), [repo]);
   const updateDocUseCase = React.useMemo(() => new UpdateConnectionDocumentUseCase(repo), [repo]);
   const uploadReceiptUseCase = React.useMemo(() => new UploadInspectionInvoiceReceiptUseCase(repo), [repo]);
-  const submitCorrectionsUseCase = React.useMemo(() => new SubmitCorrectionsUseCase(repo), [repo]);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   const reload = () => setReloadTrigger(p => p + 1);
@@ -243,7 +234,7 @@ export const SolicitudDetailPage: React.FC = () => {
   const handleRejectPayment = async (reason: string) => {
     if (!solicitud?.facturaId) { MessageToastCustom('error', 'Error', 'ID de factura no encontrado.'); return; }
     if (!user?.userId) { MessageToastCustom('error', 'Sesión', 'Inicie sesión nuevamente.'); return; }
-    
+
     setIsRejectingPayment(true);
     try {
       await rejectPaymentUseCase.execute({
@@ -284,13 +275,24 @@ export const SolicitudDetailPage: React.FC = () => {
     if (!solicitud || !user) return;
     setIsSubmittingCorrections(true);
     try {
-      const success = await submitCorrectionsUseCase.execute(
-        solicitud.solicitudId,
-        user.userId,
-        files,
-        documentIds
-      );
-      if (success) {
+      const uploadPromises = files.map((file, index) => {
+        const docId = documentIds[index];
+        const doc = solicitud.documentos.find(d => d.id === docId);
+        if (!doc) throw new Error(`Documento original no encontrado: ${docId}`);
+
+        return updateDocUseCase.execute(
+          docId,
+          file,
+          user.userId,
+          solicitud.solicitudId,
+          Number(doc.tipodocumento)
+        );
+      });
+
+      const results = await Promise.all(uploadPromises);
+      const allSuccess = results.every(r => r === true);
+
+      if (allSuccess) {
         MessageToastCustom('success', 'Correcciones Subidas', 'Los documentos fueron subidos y enviados a revisión correctamente.');
         setSubmitCorrectionsModalOpen(false);
         reload();
@@ -374,42 +376,29 @@ export const SolicitudDetailPage: React.FC = () => {
   );
 
   // ── Derived data ───────────────────────────────────────────────────────────
-  const statusConfig = getEstadoConfig(solicitud.estado);
-  const tipoLabel = TIPO_ACOMETIDA_LABELS[solicitud.tipoAcometida] ?? solicitud.tipoAcometida;
-  const personaLabel = TIPO_PERSONA_LABELS[solicitud.tipoPersona] ?? solicitud.tipoPersona;
-  const usoLabel = USO_PREDIO_LABELS[solicitud.usoPredio] ?? solicitud.usoPredio;
-  const isJuridica = solicitud.tipoPersona === 'JURIDICA';
   const fechaStr = solicitud.fechaSolicitud
     ? new Date(solicitud.fechaSolicitud).toLocaleDateString('es-EC', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
     : '—';
-  const updatedStr = solicitud.updatedAt
-    ? new Date(solicitud.updatedAt).toLocaleDateString('es-EC', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-    : '—';
-  const titular = isJuridica
-    ? (solicitud.company?.businessName || solicitud.datosAdicionales?.nombres || solicitud.clienteId)
-    : (solicitud.person ? `${solicitud.person.firstName} ${solicitud.person.lastName}`
-      : (solicitud.datosAdicionales?.nombres && solicitud.datosAdicionales?.apellidos
-        ? `${solicitud.datosAdicionales.nombres} ${solicitud.datosAdicionales.apellidos}`
-        : solicitud.clienteId));
-  const identificationVal = isJuridica
-    ? (solicitud.company?.ruc || solicitud.clienteId)
-    : (solicitud.person?.personId || solicitud.clienteId);
-  const emailVal = isJuridica
-    ? (solicitud.company?.emails?.[0]?.correo || solicitud.datosAdicionales?.email || '')
-    : (solicitud.person?.emails?.[0]?.correo || solicitud.datosAdicionales?.email || '');
-  const phoneVal = isJuridica
-    ? (solicitud.company?.phones?.[0]?.numero || solicitud.datosAdicionales?.telefono || '')
-    : (solicitud.person?.phones?.[0]?.numero || solicitud.datosAdicionales?.telefono || '');
 
   // Determine actual payment document logic
+  const getPreviewUrl = (url?: string | null) => {
+    if (!url) return undefined;
+    // Map /uploads/connection-documents/xxx.ext to /files/connection_documents/xxx.ext/preview
+    if (url.startsWith('/uploads/connection-documents/')) {
+      const filename = url.replace('/uploads/connection-documents/', '');
+      return `/files/connection_documents/${filename}/preview`;
+    }
+    return url;
+  };
+
   const paymentDocument: DocumentoAdjuntoResponse | null = solicitud.urlComprobante
     ? {
-        id: '',
-        tipodocumento: 'COMPROBANTE_PAGO_INSPECCION',
-        url: solicitud.urlComprobante,
-        estadoValidacion: 'PENDIENTE',
-        observacion: null
-      }
+      id: '',
+      tipodocumento: 'COMPROBANTE_PAGO_INSPECCION',
+      url: getPreviewUrl(solicitud.urlComprobante) || solicitud.urlComprobante,
+      estadoValidacion: 'PENDIENTE',
+      observacion: null
+    }
     : null;
 
 
@@ -436,9 +425,6 @@ export const SolicitudDetailPage: React.FC = () => {
           {/* Card 1: Estado Hero + Acciones primarias */}
           <SolicitudHeroCard
             solicitud={solicitud}
-            statusConfig={statusConfig}
-            tipoLabel={tipoLabel}
-            updatedStr={updatedStr}
           />
 
           {/* ══ ACCIONES POR FASE ══ */}
@@ -644,23 +630,17 @@ export const SolicitudDetailPage: React.FC = () => {
           {/* Card 2: Información General */}
           <SolicitudInfoCard
             solicitud={solicitud}
-            titular={titular}
-            identificationVal={identificationVal}
-            emailVal={emailVal}
-            phoneVal={phoneVal}
-            personaLabel={personaLabel}
-            usoLabel={usoLabel}
           />
 
           {/* Card 3: Documentos */}
           <SolicitudDocsCard
-          solicitud={solicitud}
-          setDocsOpen={setDocsOpen}
-          setSelectedDocId={setSelectedDocId}
-          onFileReplace={handleDocFileReplace}
-          uploadingDocId={uploadingDocId}
-          onBulkCorrectionsClick={() => setSubmitCorrectionsModalOpen(true)}
-        />
+            solicitud={solicitud}
+            setDocsOpen={setDocsOpen}
+            setSelectedDocId={setSelectedDocId}
+            onFileReplace={handleDocFileReplace}
+            uploadingDocId={uploadingDocId}
+            onBulkCorrectionsClick={() => setSubmitCorrectionsModalOpen(true)}
+          />
         </div>
 
         {/* ══ COLUMNA DERECHA ══ */}

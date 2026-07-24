@@ -230,7 +230,9 @@ export const useConnectionsViewModel = () => {
     zoneName: '',
     incidents: 0,
     connectionStateId: 0,
-    connectionIsReadable: true
+    connectionIsReadable: true,
+    connectionType: 'AGUA_POTABLE',
+    connectionTypeName: 'Agua Potable'
   };
 
   const [formData, setFormData] =
@@ -358,7 +360,9 @@ export const useConnectionsViewModel = () => {
                 zoneName: '',
                 incidents: 0,
                 connectionStateId: 0,
-                connectionIsReadable: true
+                connectionIsReadable: true,
+                connectionType: 'AGUA_POTABLE',
+                connectionTypeName: 'Agua Potable'
               };
               chunk = [conn];
             }
@@ -557,7 +561,9 @@ export const useConnectionsViewModel = () => {
         zoneName: '',
         incidents: 0,
         connectionStateId: 0,
-        connectionIsReadable: true
+        connectionIsReadable: true,
+        connectionType: 'AGUA_POTABLE',
+        connectionTypeName: 'Agua Potable'
       };
 
       setSelectedConnection(connection);
@@ -633,7 +639,9 @@ export const useConnectionsViewModel = () => {
         zoneName: '',
         incidents: 0,
         connectionStateId: 0,
-        connectionIsReadable: true
+        connectionIsReadable: true,
+        connectionType: 'AGUA_POTABLE',
+        connectionTypeName: 'Agua Potable'
       };
 
       // 2. Reuse the Edit logic by calling openEdit with the newly created conn
