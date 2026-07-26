@@ -106,7 +106,8 @@
   min-height: 64px;
   flex-shrink: 0;
   background: color-mix(in srgb, var(--phase-color) 14%, transparent);
-  border-right: 1px solid color-mix(in srgb, var(--phase-color) 20%, transparent);
+  border-right: 1px solid
+    color-mix(in srgb, var(--phase-color) 20%, transparent);
   transition: background 0.22s ease;
 }
 
@@ -925,7 +926,6 @@
   font-size: 1rem;
 }
 
-
 .sol-detail-payment-confirm-form {
   display: flex;
   flex-direction: column;
@@ -1025,6 +1025,36 @@
   border-color: rgba(249, 115, 22, 0.4);
   box-shadow: 0 4px 16px rgba(249, 115, 22, 0.1);
   transform: translateY(-1px);
+}
+
+.sol-row {
+  position: relative;
+}
+
+.report-download {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  right: 0;
+  bottom: 0;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--text-muted);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.report-button {
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.report-download:hover {
+  background-color: var(--bg-body);
+  color: var(--accent);
+  border-radius: 8px 0 0 8px;
 }
 
 /* Active (first / current) row gets a subtle highlight */
@@ -1140,4 +1170,3 @@
   color: var(--text-main);
   font-weight: 600;
 }
-

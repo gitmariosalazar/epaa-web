@@ -11,6 +11,8 @@ import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.co
 
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
+import { DailyReportPdfTemplate } from '@/modules/dashboard/infrastructure/pdf-templates/DailyReportPdfTemplate';
+import type { DailyReportPdfData } from '@/modules/dashboard/domain/models/daily-report-pdf.model';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
@@ -220,6 +222,21 @@ export const DailyReport: React.FC<DailyReportProps> = ({
     t
   ]);
 
+  const pdfTemplate = useMemo(() => new DailyReportPdfTemplate(), []);
+
+  const buildPdfData = useCallback(
+    (orientation: 'portrait' | 'landscape', selectedColumns: ExportColumn[], currentData: DailyReadingsReport[]): DailyReportPdfData => {
+      return {
+        reportDate: date,
+        readings: currentData,
+        orientation,
+        selectedColumns,
+        mapRowData,
+      };
+    },
+    [date, mapRowData]
+  );
+
   const { setShowPdfPreview, PdfPreviewModal } = useTablePdfExport({
     data: filteredData,
     availableColumns,
@@ -237,7 +254,9 @@ export const DailyReport: React.FC<DailyReportProps> = ({
         new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
     },
     totalRows,
-    mapRowData
+    mapRowData,
+    pdfGenerator: pdfTemplate,
+    buildPdfData
   });
 
   const columns = useMemo<Column<DailyReadingsReport>[]>(

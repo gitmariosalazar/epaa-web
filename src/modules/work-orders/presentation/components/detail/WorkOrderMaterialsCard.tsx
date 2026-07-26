@@ -35,8 +35,11 @@ const WorkOrderMaterialsCardInner: React.FC<WorkOrderMaterialsCardProps> = ({
 
   const { state, loadInitialData } = useInventoryViewModel();
 
+  const dataLoaded = React.useRef(false);
+
   useEffect(() => {
-    if (onSaveMaterialsBatch) {
+    if (onSaveMaterialsBatch && !dataLoaded.current) {
+      dataLoaded.current = true;
       loadInitialData();
     }
   }, [loadInitialData, onSaveMaterialsBatch]);

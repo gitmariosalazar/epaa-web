@@ -10,6 +10,7 @@ import type {
   CreatePreparationInspectionCommand,
   CreateQualityControlCommand,
   CreateWorkOrderCommand,
+  CreateWorkOrderFromIncidentCommand,
   RegisterSatisfactionSurveyCommand,
   RemoveWorkerFromWorkOrderCommand,
   AddWorkOrderMaterialsBatchCommand,
@@ -31,6 +32,9 @@ import type { SubmitInstallationReportCommand } from '../schemas/dto/commands/su
 export interface ProcessWorkOrderRepository {
   createWorkOrder(
     createWorkOrder: CreateWorkOrderCommand
+  ): Promise<ProcessWorkOrderResponse | null>;
+  createWorkOrderFromIncident(
+    command: CreateWorkOrderFromIncidentCommand
   ): Promise<ProcessWorkOrderResponse | null>;
   processWorkOrder(
     processWorkOrder: ProcessWorkOrderModel

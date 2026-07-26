@@ -147,7 +147,7 @@ export const ESTADO_CONFIG: Record<
     iconColor: '#8b5cf6'
   },
   INFORME_EN_REVISION: {
-    label: 'Informe en Revisión',
+    label: 'Informe de Inspección Técnica en Revisión',
     color: '#a855f7',
     bg: 'rgba(168,85,247,0.12)',
     border: 'rgba(168,85,247,0.3)',

@@ -5,6 +5,11 @@ import { SolicitudRepositoryImpl } from '../../infrastructure/repositories/Solic
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 import { X, FileText, Calendar, CreditCard, DollarSign, Loader2 } from 'lucide-react';
 import '../styles/CreateInspectionInvoiceModal.css';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
+import { Input } from '@/shared/presentation/components/Input/Input';
+import { FaFileInvoice } from 'react-icons/fa';
+import { Alert } from '@/shared/presentation/components/Alert';
 
 interface CreateInspectionInvoiceModalProps {
   isOpen: boolean;
@@ -104,22 +109,24 @@ export const CreateInspectionInvoiceModal: React.FC<
             <CreditCard size={18} style={{ color: 'var(--accent)' }} />
             <div>
               <span className="invoice-modal__title">Generar Factura de Inspección</span>
-              <span className="invoice-modal__subtitle">Expediente: {solicitudNumero}</span>
+              <span className="invoice-modal__subtitle">Solicitud N°: <strong>{solicitudNumero}</strong></span>
             </div>
           </div>
-          <button
-            className="invoice-modal__close"
+          <Button
             onClick={onClose}
             aria-label="Cerrar"
+            circle
+            size='compact'
+            color='error'
           >
             <X size={18} />
-          </button>
+          </Button>
         </div>
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="invoice-modal__form">
           <div className="invoice-modal__body">
-            
+
             {/* Info Concept (Read only) */}
             <div className="invoice-modal__field">
               <label className="invoice-modal__label">Concepto de Facturación</label>
@@ -136,16 +143,16 @@ export const CreateInspectionInvoiceModal: React.FC<
               </label>
               <div className="invoice-modal__input-wrap">
                 <CreditCard size={14} className="invoice-modal__field-icon" />
-                <input
+                <Input
                   type="text"
                   id="invoiceNumber"
-                  className="invoice-modal__input"
                   placeholder="Ej: 001-002-00000342"
                   value={invoiceNumber}
                   onChange={(e) => setInvoiceNumber(e.target.value)}
                   disabled={isSaving}
                   required
                   autoFocus
+                  size='compact'
                 />
               </div>
             </div>
@@ -159,12 +166,12 @@ export const CreateInspectionInvoiceModal: React.FC<
                 </label>
                 <div className="invoice-modal__input-wrap">
                   <DollarSign size={14} className="invoice-modal__field-icon" />
-                  <input
+                  <Input
                     type="number"
                     id="amount"
                     step="0.01"
                     min="0.01"
-                    className="invoice-modal__input"
+                    size='compact'
                     value={amount}
                     onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
                     disabled={isSaving}
@@ -180,42 +187,44 @@ export const CreateInspectionInvoiceModal: React.FC<
                 </label>
                 <div className="invoice-modal__input-wrap">
                   <Calendar size={14} className="invoice-modal__field-icon" />
-                  <input
-                    type="date"
-                    id="expirationDate"
-                    className="invoice-modal__input"
+                  <DatePicker
                     value={expirationDate}
-                    onChange={(e) => setExpirationDate(e.target.value)}
+                    onChange={(dateStr) => setExpirationDate(dateStr)}
                     disabled={isSaving}
-                    required
+                    size='compact'
                   />
                 </div>
               </div>
             </div>
 
             {/* Alert info */}
-            <div className="invoice-modal__alert">
-              <span className="invoice-modal__alert-text">
-                * Al generar la factura, se notificará automáticamente al cliente y el estado del expediente pasará a **Factura Emitida**.
-              </span>
+            <div className="">
+              <Alert message='* Al generar la factura, se notificará automáticamente al cliente y el estado del expediente pasará a **Factura Emitida**.'
+                dismissible={false}
+                type='warning'
+                size='xsmall'
+              />
             </div>
 
           </div>
 
           {/* Footer actions */}
           <div className="invoice-modal__footer">
-            <button
+            <Button
               type="button"
-              className="invoice-modal__btn invoice-modal__btn--secondary"
               onClick={onClose}
               disabled={isSaving}
+              color='error'
+              variant='dashed'
+              leftIcon={<X size={15} />}
             >
               Cancelar
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="invoice-modal__btn invoice-modal__btn--primary"
               disabled={isSaving || !invoiceNumber.trim()}
+              color='success'
+              leftIcon={<FaFileInvoice size={15} />}
             >
               {isSaving ? (
                 <div className="invoice-modal__spinner-wrap">
@@ -225,7 +234,7 @@ export const CreateInspectionInvoiceModal: React.FC<
               ) : (
                 <span>Generar Factura</span>
               )}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

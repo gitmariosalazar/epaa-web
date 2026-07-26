@@ -23,6 +23,7 @@ import type { ProcessWorkOrderRequest } from '../../domain/schemas/dto/request/p
 import type { ProcessWorkOrderResponse } from '../../domain/schemas/dto/response/process-work-order.response';
 import type {
   CreateWorkOrderCommand,
+  CreateWorkOrderFromIncidentCommand,
   AssignWorkOrderToCrewCommand,
   AssignWorkOrderToWorkerCommand,
   CreatePreparationInspectionCommand,
@@ -80,6 +81,17 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
     const response = await this.client.post<ProcessWorkOrderResponse>(
       `${BASE}/create-work-order`,
       createWorkOrder
+    );
+    return (response.data as any)?.data ?? null;
+  }
+
+  // POST /process-work-orders/create-work-order-from-incident
+  async createWorkOrderFromIncident(
+    command: CreateWorkOrderFromIncidentCommand
+  ): Promise<ProcessWorkOrderResponse | null> {
+    const response = await this.client.post<ProcessWorkOrderResponse>(
+      `${BASE}/create-work-order-from-incident`,
+      command
     );
     return (response.data as any)?.data ?? null;
   }

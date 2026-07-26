@@ -309,8 +309,10 @@ export const SolicitudTrackingCard: React.FC<SolicitudTrackingCardProps> = ({
     ? 100
     : (() => {
       const idx = ALL_STEPS.findIndex(s => s.id === resolvedCurrentStep);
-      return idx >= 0 ? Math.round(((idx) / ALL_STEPS.length) * 100) : 0;
+      return idx >= 0 ? Math.round((idx / (ALL_STEPS.length - 1)) * 100) : 0;
     })();
+
+  console.log("STATUS", tracking.estadoCodigo);
 
   const ultimoMov = tracking.ultimoMovimiento
     ? new Date(tracking.ultimoMovimiento).toLocaleDateString('es-EC', {

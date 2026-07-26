@@ -80,7 +80,6 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
     })
     : '—';
 
-  console.log(orden);
 
   return (
     <article

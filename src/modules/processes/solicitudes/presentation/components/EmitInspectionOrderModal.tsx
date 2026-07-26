@@ -13,7 +13,8 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import { SearchableSelect } from '@/shared/presentation/components/Input/SearchableSelect';
 import type { SearchableSelectOption } from '@/shared/presentation/components/Input/SearchableSelect';
-import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
+import { FindTechniciansUseCase } from '@/modules/users/application/usecases/FindTechniciansUseCase';
+import { UserRepositoryImpl } from '@/modules/users/infrastructure/repositories/UserRepositoryImpl';
 import { Search, X, FileText, Clock } from 'lucide-react';
 import '../styles/ActionModal.css';
 
@@ -31,10 +32,10 @@ const useCase = new EmitInspectionOrderUseCase(new SolicitudRepositoryImpl());
 export const EmitInspectionOrderModal: React.FC<EmitInspectionOrderModalProps> = ({
   isOpen, onClose, solicitudId, solicitudNumero, emitterId, onSuccess
 }) => {
-  const [technicianId, setTechnicianId] = useState('');
   const [scheduledDate, setScheduledDate] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [technicianId, setTechnicianId] = useState('');
   const [employees, setEmployees] = useState<SearchableSelectOption[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
 
@@ -43,22 +44,20 @@ export const EmitInspectionOrderModal: React.FC<EmitInspectionOrderModalProps> =
     if (!isOpen) return;
     let mounted = true;
     setLoadingEmployees(true);
-    apiClient
-      .get<any>('/user-employee-gateway/find-technicians?type=INSPECTOR')
-      .then((res) => {
+    
+    const repository = new UserRepositoryImpl();
+    const findTechniciansUseCase = new FindTechniciansUseCase(repository);
+    
+    findTechniciansUseCase.execute('INSPECTOR')
+      .then((list) => {
         if (!mounted) return;
-        // res.data = body del backend (ApiResponse del gateway)
-        // res.data.data = array de empleados
-        const raw = res.data?.data ?? res.data ?? [];
-        const list: any[] = Array.isArray(raw) ? raw : [];
-        console.debug('[EmitInspectionOrderModal] empleados recibidos:', list);
-        const opts: SearchableSelectOption[] = list
+        const opts: SearchableSelectOption[] = (list || [])
           .filter((emp: any) => emp != null)
           .map((emp: any) => {
             const firstName = emp.firstName ?? emp.first_name ?? emp.nombres ?? '';
-            const lastName  = emp.lastName  ?? emp.last_name  ?? emp.apellidos ?? '';
-            const fullName  = emp.fullName  ?? emp.full_name  ?? `${firstName} ${lastName}`.trim();
-            const id        = emp.userId    ?? emp.user_id    ?? emp.employeeId ?? emp.employee_id ?? emp.id;
+            const lastName = emp.lastName ?? emp.last_name ?? emp.apellidos ?? '';
+            const fullName = emp.fullName ?? emp.full_name ?? `${firstName} ${lastName}`.trim();
+            const id = emp.userId ?? emp.user_id ?? emp.employeeId ?? emp.employee_id ?? emp.id;
             return {
               value: String(id ?? ''),
               label: fullName || id || '(sin nombre)'

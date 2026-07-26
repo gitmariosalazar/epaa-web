@@ -203,6 +203,14 @@ export class UserRepositoryImpl implements UserRepository {
     return response.data.data;
   }
 
+  async findTechnicians(type: string): Promise<any[]> {
+    const response = await this.client.get<ApiResponse<any[]>>(
+      `/user-employee-gateway/find-technicians`,
+      { params: { type } }
+    );
+    return response.data.data;
+  }
+
   async incrementFailedAttempts(userId: string): Promise<void> {
     await this.client.put<ApiResponse<void>>(
       `/users-gateway/increment-failed-attempts/${userId}`

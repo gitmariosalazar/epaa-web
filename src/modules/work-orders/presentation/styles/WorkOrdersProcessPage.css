@@ -9,8 +9,10 @@
 /* ── Layout header ────────────────────────────────────────────────────────── */
 .wo-process-header {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .wo-process-header__title {
@@ -29,6 +31,7 @@
 /* ── Search bar ───────────────────────────────────────────────────────────── */
 .wo-process-search {
   display: flex;
+  justify-content: flex-end;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;

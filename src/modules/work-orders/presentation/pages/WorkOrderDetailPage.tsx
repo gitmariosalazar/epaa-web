@@ -879,12 +879,12 @@ export const WorkOrderDetailPage: React.FC = () => {
   // ── Formatted date ───────────────────────────────────────────────────────────
   const updatedStr = orden?.updatedAt
     ? new Date(orden.updatedAt).toLocaleDateString('es-EC', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
     : '—';
 
   // ── Loading ──────────────────────────────────────────────────────────────────
@@ -919,6 +919,10 @@ export const WorkOrderDetailPage: React.FC = () => {
   }
 
   const isTerminal = ESTADOS_TERMINAL.has(orden.estado ?? '');
+
+  console.log(orden.adjuntos);
+  console.log('aqui');
+
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (

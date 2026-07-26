@@ -394,3 +394,13 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+.action-modal__custom-checkbox {
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 0 !important;
+}
+
+.action-modal__custom-checkbox span:empty {
+  display: none !important;
+}

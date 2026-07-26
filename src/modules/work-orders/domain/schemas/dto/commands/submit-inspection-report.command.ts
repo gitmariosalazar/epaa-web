@@ -43,5 +43,5 @@ export interface SubmitInspectionReportCommand {
    * Status ID que se asignará a la OT al cerrar (tipicamente el que
    * corresponde a COMPLETADA en el catálogo work_orders.cat_estado_orden).
    */
-  completedStatusId: number;
+  completedStatus: string;
 }

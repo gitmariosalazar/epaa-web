@@ -87,7 +87,7 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
         const spaceRight = window.innerWidth - rect.left;
         const spaceBottom = window.innerHeight - rect.bottom;
         const horizontal = spaceRight < 300 ? 'right' : 'left';
-        const vertical = spaceBottom < 350 ? 'top' : 'bottom';
+        const vertical = spaceBottom < 450 ? 'top' : 'bottom';
         setAlignment({ horizontal, vertical });
         setPopoverStyle({
           position: 'fixed',

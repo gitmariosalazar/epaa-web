@@ -12,7 +12,7 @@
  * Mirrors exactly the same composition pattern as SolicitudMetricsCard,
  * SolicitudTechnicalReportCard, and SolicitudTimelineCard.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Wrench,
   Calendar,
@@ -22,16 +22,21 @@ import {
   AlertCircle,
   Play,
   Hash,
-  Hourglass,
+  Hourglass
 } from 'lucide-react';
 import { Card } from '@/shared/presentation/components/Card/Card';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import type { SolicitudOrdenTrabajoResponse } from '../../../domain/models/Solicitud';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { FaFileInvoice, FaTools } from 'react-icons/fa';
+import { PreviewReportInspectionModal } from '../modals/PreviewReportInspectionModal';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface SolicitudWorkOrderCardProps {
   workOrders: SolicitudOrdenTrabajoResponse[];
+  onViewOrder: (orderCode: string) => void;
 }
 
 // ─── Estado config (OCP: add new states here, nowhere else) ───────────────────
@@ -48,13 +53,13 @@ const getEstadoOtConfig = (estado: string): EstadoOtConfig => {
   if (code.includes('PENDIENTE') || code === 'PENDIENTE_ASIGNACION')
     return { label: 'Pendiente Asignación', color: '#94a3b8', icon: <Hourglass size={13} /> };
   if (code.includes('ASIGNADA') || code.includes('ASIGNADO'))
-    return { label: 'Asignada',            color: '#3b82f6', icon: <User size={13} /> };
+    return { label: 'Asignada', color: '#3b82f6', icon: <User size={13} /> };
   if (code.includes('PROCESO') || code.includes('EN_CURSO') || code.includes('INICIADA'))
-    return { label: 'En Proceso',          color: '#8b5cf6', icon: <Play size={13} /> };
+    return { label: 'En Proceso', color: '#8b5cf6', icon: <Play size={13} /> };
   if (code.includes('COMPLETADA') || code.includes('FINALIZADA') || code.includes('CERRADA'))
-    return { label: 'Completada',          color: '#10b981', icon: <CheckCircle2 size={13} /> };
+    return { label: 'Completada', color: '#10b981', icon: <CheckCircle2 size={13} /> };
   if (code.includes('FALLIDA') || code.includes('CANCELADA') || code.includes('ANULADA'))
-    return { label: 'Cancelada',           color: '#ef4444', icon: <AlertCircle size={13} /> };
+    return { label: 'Cancelada', color: '#ef4444', icon: <AlertCircle size={13} /> };
 
   return { label: estado ?? 'Sin estado', color: '#64748b', icon: <Clock size={13} /> };
 };
@@ -62,10 +67,10 @@ const getEstadoOtConfig = (estado: string): EstadoOtConfig => {
 // ─── Tipo config ──────────────────────────────────────────────────────────────
 
 const TIPO_OT_LABELS: Record<string, { label: string; color: string }> = {
-  INSPECCION:  { label: 'Inspección',  color: '#6366f1' },
+  INSPECCION: { label: 'Inspección', color: '#6366f1' },
   INSTALACION: { label: 'Instalación', color: '#f97316' },
   MANTENIMIENTO: { label: 'Mantenimiento', color: '#06b6d4' },
-  REPARACION:  { label: 'Reparación',  color: '#ec4899' },
+  REPARACION: { label: 'Reparación', color: '#ec4899' },
 };
 
 const getTipoOtConfig = (tipo: string) =>
@@ -74,10 +79,10 @@ const getTipoOtConfig = (tipo: string) =>
 // ─── Prioridad config ──────────────────────────────────────────────────────────
 
 const PRIORIDAD_COLORS: Record<string, string> = {
-  ALTA:   '#ef4444',
-  MEDIA:  '#f59e0b',
-  BAJA:   '#10b981',
-  URGENTE:'#dc2626',
+  ALTA: '#ef4444',
+  MEDIA: '#f59e0b',
+  BAJA: '#10b981',
+  URGENTE: '#dc2626',
 };
 
 const getPrioridadColor = (prioridad: string) =>
@@ -99,15 +104,23 @@ const formatDate = (date: Date | string | null | undefined): string => {
 interface WorkOrderRowProps {
   workOrder: SolicitudOrdenTrabajoResponse;
   isFirst: boolean;
+  onPreview: (wo: SolicitudOrdenTrabajoResponse) => void;
+  onViewOrder: (orderCode: string) => void;
 }
 
-const WorkOrderRow: React.FC<WorkOrderRowProps> = ({ workOrder, isFirst }) => {
+const WorkOrderRow: React.FC<WorkOrderRowProps> = ({ workOrder, isFirst, onPreview, onViewOrder }) => {
   const estadoConfig = getEstadoOtConfig(workOrder.estadoOt);
-  const tipoConfig   = getTipoOtConfig(workOrder.tipoOrden);
-  const prioColor    = getPrioridadColor(workOrder.prioridad);
+  const tipoConfig = getTipoOtConfig(workOrder.tipoOrden);
+  const prioColor = getPrioridadColor(workOrder.prioridad);
+
+
+  const tooltipLabel: string = !workOrder.estadoOt?.toString().includes('Complet') ? `Reporte de ${tipoConfig.label} en Proceso` : `Ver Reporte de ${tipoConfig.label}`;
+  const dissableButton: boolean = !workOrder.estadoOt?.toString().includes('Complet');
+  const tooltipColor: string = tipoConfig.color;
+  const tooltipFollowCursor: boolean = false;
 
   return (
-    <div className={`sol-wo-row${isFirst ? ' sol-wo-row--active' : ''}`}>
+    <div className={`sol-row sol-wo-row${isFirst ? ' sol-wo-row--active' : ''}`}>
       {/* ── Left accent strip colored by tipo ── */}
       <div
         className="sol-wo-row__accent"
@@ -196,6 +209,47 @@ const WorkOrderRow: React.FC<WorkOrderRowProps> = ({ workOrder, isFirst }) => {
           )}
         </div>
       </div>
+      <div className="report-download">
+
+        {
+          dissableButton ?
+            <Tooltip
+              content={'Ver Proceso de la Orden de Trabajo'}
+              position="bottom"
+              className='report-button'
+              followCursor={tooltipFollowCursor}
+              themeColor={'accent'}
+            >
+              <Button
+                disabled={!dissableButton}
+                variant="dashed"
+                size="xs"
+                color={!dissableButton ? 'neutral' : 'accent'}
+                circle
+                leftIcon={<FaTools size={12} />}
+                onClick={() => onViewOrder(workOrder.codigoOrden)}
+              />
+            </Tooltip> : null
+        }
+
+        <Tooltip
+          content={tooltipLabel}
+          position="bottom"
+          className='report-button'
+          followCursor={tooltipFollowCursor}
+          themeColor={dissableButton ? 'error' : tooltipColor}
+        >
+          <Button
+            disabled={dissableButton}
+            variant="dashed"
+            size="xs"
+            color={dissableButton ? 'neutral' : 'accent'}
+            circle
+            leftIcon={<FaFileInvoice size={12} />}
+            onClick={() => onPreview(workOrder)}
+          />
+        </Tooltip>
+      </div>
     </div>
   );
 };
@@ -204,39 +258,53 @@ const WorkOrderRow: React.FC<WorkOrderRowProps> = ({ workOrder, isFirst }) => {
 
 export const SolicitudWorkOrderCard: React.FC<SolicitudWorkOrderCardProps> = ({
   workOrders,
+  onViewOrder
 }) => {
+  const [selectedWorkOrder, setSelectedWorkOrder] = useState<SolicitudOrdenTrabajoResponse | null>(null);
+
   if (!workOrders || workOrders.length === 0) return null;
 
   return (
-    <Card className="sol-detail-card sol-detail-card--work-orders">
-      {/* ── Header ── */}
-      <div className="sol-detail-card__title-row">
-        <Wrench size={16} className="sol-detail-card__title-icon" style={{ color: '#f97316' }} />
-        <h3 className="sol-detail-card__title" style={{ fontSize: '0.875rem' }}>
-          Órdenes de Trabajo
-        </h3>
-        <div style={{ marginLeft: 'auto' }}>
-          <ColorChip
-            label={`${workOrders.length} ${workOrders.length === 1 ? 'orden' : 'órdenes'}`}
-            variant="soft"
-            size="xs"
-            color="#f97316"
-            borderRadius={6}
-            icon={<Wrench size={12} />}
-          />
+    <>
+      <Card className="sol-detail-card sol-detail-card--work-orders">
+        {/* ── Header ── */}
+        <div className="sol-detail-card__title-row">
+          <FaTools size={16} className="sol-detail-card__title-icon" style={{ color: '#f97316' }} />
+          <h3 className="sol-detail-card__title" style={{ fontSize: '0.875rem' }}>
+            Órdenes de Trabajo
+          </h3>
+          <div style={{ marginLeft: 'auto' }}>
+            <ColorChip
+              label={`${workOrders.length} ${workOrders.length === 1 ? 'orden' : 'órdenes'}`}
+              variant="soft"
+              size="xs"
+              color="#f97316"
+              borderRadius={6}
+              icon={<Wrench size={12} />}
+            />
+          </div>
         </div>
-      </div>
 
-      {/* ── Work order list ── */}
-      <div className="sol-wo-list">
-        {workOrders.map((wo, idx) => (
-          <WorkOrderRow
-            key={wo.codigoOrden}
-            workOrder={wo}
-            isFirst={idx === 0}
-          />
-        ))}
-      </div>
-    </Card>
+        {/* ── Work order list ── */}
+        <div className="sol-wo-list">
+          {workOrders.map((wo, idx) => (
+            <WorkOrderRow
+              key={wo.codigoOrden}
+              workOrder={wo}
+              isFirst={idx === 0}
+              onPreview={setSelectedWorkOrder}
+              onViewOrder={onViewOrder}
+            />
+          ))}
+        </div>
+      </Card>
+
+      <PreviewReportInspectionModal
+        isOpen={!!selectedWorkOrder}
+        onClose={() => setSelectedWorkOrder(null)}
+        tipoOrden={selectedWorkOrder?.tipoOrden || ''}
+        orderCode={selectedWorkOrder?.codigoOrden || ''}
+      />
+    </>
   );
 };

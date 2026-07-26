@@ -22,23 +22,22 @@ export const ProcessTimeline = <T extends string>({
   return (
     <div className="process-timeline-horizontal">
       {steps.map((step, index) => {
-        const isCompleted = index < currentIndex;
-        const isCurrent = index === currentIndex;
+        const isLastStepAndCurrent = index === steps.length - 1 && index === currentIndex;
+        const isCompleted = index < currentIndex || isLastStepAndCurrent;
+        const isCurrent = index === currentIndex && !isLastStepAndCurrent;
         const isPending = index > currentIndex;
 
         return (
           <React.Fragment key={step.id}>
             <div className="process-timeline-horizontal__step">
               <div
-                className={`process-timeline-horizontal__circle ${
-                  isCompleted
-                    ? 'process-timeline-horizontal__circle--completed'
-                    : ''
-                } ${isCurrent ? 'process-timeline-horizontal__circle--current' : ''} ${
-                  isPending
+                className={`process-timeline-horizontal__circle ${isCompleted
+                  ? 'process-timeline-horizontal__circle--completed'
+                  : ''
+                  } ${isCurrent ? 'process-timeline-horizontal__circle--current' : ''} ${isPending
                     ? 'process-timeline-horizontal__circle--pending'
                     : ''
-                }`}
+                  }`}
               >
                 {/* Main icon inside the circle */}
                 <div className="process-timeline-horizontal__main-icon">
@@ -59,22 +58,20 @@ export const ProcessTimeline = <T extends string>({
                 )}
               </div>
               <span
-                className={`process-timeline-horizontal__label ${
-                  isCurrent || isCompleted
-                    ? 'process-timeline-horizontal__label--active'
-                    : ''
-                }`}
+                className={`process-timeline-horizontal__label ${isCurrent || isCompleted
+                  ? 'process-timeline-horizontal__label--active'
+                  : ''
+                  }`}
               >
                 {step.label}
               </span>
             </div>
             {index < steps.length - 1 && (
               <div
-                className={`process-timeline-horizontal__line ${
-                  index < currentIndex
-                    ? 'process-timeline-horizontal__line--active'
-                    : ''
-                }`}
+                className={`process-timeline-horizontal__line ${index < currentIndex
+                  ? 'process-timeline-horizontal__line--active'
+                  : ''
+                  }`}
               />
             )}
           </React.Fragment>

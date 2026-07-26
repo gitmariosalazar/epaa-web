@@ -94,8 +94,8 @@ import {
   ChevronRight
 } from 'lucide-react';
 import '../styles/WorkOrdersProcessPage.css';
-import { Input } from '@/shared/presentation/components/Input/Input';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 const STEPS = [
   { label: 'Recepción', icon: Inbox },
@@ -120,8 +120,12 @@ const getActiveStepIndex = (estado: string, executionSubStep: number): number =>
   return 0;
 };
 
+interface WorkOrdersProcessPageProps {
+  isEmbedded?: boolean;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-export const WorkOrdersProcessPage: React.FC = () => {
+export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ isEmbedded = false }) => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
 
@@ -177,8 +181,8 @@ export const WorkOrdersProcessPage: React.FC = () => {
     const nombre = (workOrder.tipoTrabajo ?? '').toUpperCase();
     const descripcion = (workOrder.tipoTrabajoDescripcion ?? '').toUpperCase();
     const origen = (workOrder.origen ?? '').toUpperCase();
-    
-    const isInstalacion = 
+
+    const isInstalacion =
       nombre.includes('INSTALACION') || nombre.includes('INSTALACIÓN') || nombre.includes('MEDIDOR') ||
       descripcion.includes('INSTALACION') || descripcion.includes('INSTALACIÓN') || descripcion.includes('MEDIDOR');
 
@@ -197,7 +201,6 @@ export const WorkOrdersProcessPage: React.FC = () => {
   const [executionSubStep, setExecutionSubStep] = useState(0); // 0: Personal y Materiales, 1: Evidencias
 
   // ── Search state ────────────────────────────────────────────────────────────
-  const [searchInput, setSearchInput] = useState('');
   const [currentCode, setCurrentCode] = useState('');
 
   // ── Modal state (uno por fase) ──────────────────────────────────────────────
@@ -310,7 +313,7 @@ export const WorkOrdersProcessPage: React.FC = () => {
     orden !== null && esOTInspeccionAcometida(orden);
   const requiereInformeSolicitud =
     esFlujoAcometidaSolicitud && orden?.estado === 'EN_PROCESO_INSPECCION';
-    
+
   const esFlujoAcometidaInstalacion =
     orden !== null && esOTInstalacionAcometida(orden);
   const requiereInformeInstalacionSolicitud =
@@ -407,7 +410,6 @@ export const WorkOrdersProcessPage: React.FC = () => {
   useEffect(() => {
     const codeParam = searchParams.get('code')?.trim().toUpperCase();
     if (!codeParam) return;
-    setSearchInput(codeParam);
     setCurrentCode(codeParam);
   }, [searchParams]);
 
@@ -431,11 +433,14 @@ export const WorkOrdersProcessPage: React.FC = () => {
           setTracking(trk);
           if (!isReload) {
             setExecutionSubStep(0);
+            MessageToastCustom('success', 'Búsqueda Exitosa', 'Orden de trabajo encontrada.');
           }
         }
       } catch (e: any) {
-        if (isMounted)
+        if (isMounted) {
           setError(e.message || 'Error al cargar la orden de trabajo.');
+          MessageToastCustom('error', 'Error de Búsqueda', e.message || 'No se pudo cargar la orden de trabajo.');
+        }
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -447,29 +452,15 @@ export const WorkOrdersProcessPage: React.FC = () => {
   }, [currentCode, detalleUseCase, trackingUseCase, reloadTrigger]);
 
   const fetchWorkOrderDetails = async () => {
-      if (!currentCode) return;
-      const det = await detalleUseCase.execute(currentCode);
-      setOrden(det);
+    if (!currentCode) return;
+    const det = await detalleUseCase.execute(currentCode);
+    setOrden(det);
   };
 
   const fetchTrackingData = async () => {
-      if (!currentCode) return;
-      const trk = await trackingUseCase.execute(currentCode);
-      setTracking(trk);
-  };
-
-  const handleSearch = () => {
-    const code = searchInput.trim().toUpperCase();
-    if (!code) return;
-    setCurrentCode(code);
-  };
-
-  const handleClear = () => {
-    setSearchInput('');
-    setCurrentCode('');
-    setOrden(null);
-    setTracking(null);
-    setError(null);
+    if (!currentCode) return;
+    const trk = await trackingUseCase.execute(currentCode);
+    setTracking(trk);
   };
 
   const handleReceive = async () => {
@@ -866,6 +857,11 @@ export const WorkOrdersProcessPage: React.FC = () => {
     );
   };
 
+
+  console.log(orden?.estado);
+  console.log('aqui');
+
+
   const renderStepContent = (estado: string) => {
     if (!orden) return null;
     const stepIndex = getActiveStepIndex(estado, executionSubStep);
@@ -875,16 +871,21 @@ export const WorkOrdersProcessPage: React.FC = () => {
         return (
           <>
             <div className="wo-process-phase-actions">
-              <WorkOrderPhaseActionBtn
-                id="wo-btn-recepcionar"
-                color="#3b82f6"
-                bg="rgba(59,130,246,0.1)"
-                icon={<Inbox size={18} />}
-                label="Recepcionar Orden de Trabajo"
-                sublabel="Fase 2 — Confirmar recepción operativa"
-                onClick={handleReceive}
-                loading={isReceiving}
-              />
+              <Tooltip content={orden.estado === 'PENDIENTE_ASIGNACION' ? `De Click para recepcionar la orden de trabajo` : `La orden de trabajo está en proceso de Asignación y no se puede recepcionar`}
+                themeColor={orden.estado === 'PENDIENTE_ASIGNACION' ? 'info' : 'error'}
+              >
+                <WorkOrderPhaseActionBtn
+                  id="wo-btn-recepcionar"
+                  color="#3b82f6"
+                  bg="rgba(59,130,246,0.1)"
+                  icon={<Inbox size={18} />}
+                  label={`${orden.estado === 'PENDIENTE_ASIGNACION' ? 'Recepcionar Orden de Trabajo' : 'La orden de trabajo está en proceso de Asignación'}`}
+                  sublabel="Fase 2 — Confirmar recepción operativa"
+                  onClick={handleReceive}
+                  loading={isReceiving}
+                  disabled={orden?.estado !== 'PENDIENTE_ASIGNACION' ? true : false}
+                />
+              </Tooltip>
             </div>
             <WorkOrderInfoCard orden={orden} />
           </>
@@ -1151,57 +1152,14 @@ export const WorkOrdersProcessPage: React.FC = () => {
     })
     : '—';
 
-  return (
-    <PageLayout
-      header={
-        <div className="wo-process-header">
-          <div className="wo-process-header__info">
-            <h2 className="wo-process-header__title">Proceso de Órdenes de Trabajo</h2>
-            <p className="wo-process-header__subtitle">Busca una OT por código y avanza cada fase</p>
-          </div>
-          <div className="wo-process-search">
-            <Input
-              id="wo-process-search-input"
-              width={'350px'}
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="Código OT — Ej: OT-2026-0000001"
-              autoComplete="off"
-              leftIcon={<Search size={14} />}
-              size='compact'
-            />
-            <Button
-              id="wo-process-search-btn"
-              onClick={handleSearch}
-              variant="primary"
-              leftIcon={<Search size={14} />}
-              disabled={!searchInput.trim() || isLoading}
-              size="compact"
-            >
-              {isLoading ? 'Buscando...' : 'Buscar'}
-            </Button>
-            {currentCode && (
-              <Button
-                variant="dashed"
-                color='warning'
-                size="compact"
-                leftIcon={<X size={14} />}
-                onClick={handleClear}
-              >
-                Limpiar
-              </Button>
-            )}
-          </div>
-        </div>
-      }
-    >
-      {!currentCode && !isLoading && (
+  const content = (
+    <>
+      {!currentCode && !isLoading && !isEmbedded && (
         <div className="wo-process-empty">
           <EmptyState
             icon={<div className="wo-process-empty__icon"><Search size={48} opacity={0.3} /></div>}
-            message="Ingresa un código de OT para comenzar"
-            description="Escribe el código de la orden (Ej: OT-2026-0000001) y presiona Buscar"
+            message="No se ha especificado una Orden de Trabajo"
+            description="Por favor, usa la vista de 'Buscar OT' o 'Ver todas las OTs' para procesar una orden."
           />
         </div>
       )}
@@ -1210,7 +1168,7 @@ export const WorkOrdersProcessPage: React.FC = () => {
           <AlertTriangle size={40} />
           <h3>No se pudo cargar la OT</h3>
           <p>{error}</p>
-          <Button variant="primary" onClick={handleSearch}>Reintentar</Button>
+          <Button variant="primary" onClick={reload}>Reintentar</Button>
         </div>
       )}
       {isLoading && (
@@ -1296,6 +1254,27 @@ export const WorkOrdersProcessPage: React.FC = () => {
           }}
         />
       )}
+    </>
+  );
+
+  if (isEmbedded) {
+    return content;
+  }
+
+  return (
+    <PageLayout
+      header={
+        <div className="wo-process-header">
+          <div className="wo-process-header__info">
+            <h2 className="wo-process-header__title">Proceso de Órdenes de Trabajo</h2>
+            <p className="wo-process-header__subtitle">
+              {currentCode ? `Procesando OT: ${currentCode}` : 'Avanza cada fase del flujo de la orden de trabajo'}
+            </p>
+          </div>
+        </div>
+      }
+    >
+      {content}
     </PageLayout>
   );
 };

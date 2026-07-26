@@ -12,6 +12,11 @@ export interface CreateWorkOrderCommand {
   metadata?: string;
 }
 
+export interface CreateWorkOrderFromIncidentCommand {
+  incidentCode: string;
+  userIdAssignee?: string | null;
+}
+
 export interface AssignWorkOrderToCrewCommand {
   workOrderId: string;
   crewId: string;

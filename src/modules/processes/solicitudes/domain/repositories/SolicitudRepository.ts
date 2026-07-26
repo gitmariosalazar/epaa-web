@@ -159,7 +159,7 @@ export interface SubmitInspectionReportDto {
   materialCost?: number;
   laborCost?: number;
   technicianId: string;
-  completedStatusId: number;
+  completedStatus: string;
 }
 
 export interface ApproveInspectionReportDto {

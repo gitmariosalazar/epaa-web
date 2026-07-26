@@ -1,0 +1,12 @@
+.wo-modal-form-manage-workers {
+}
+
+.wo-modal-row-manage-workers {
+  position: relative;
+}
+
+.wo-modal-actions-manage-workers {
+  position: absolute;
+  right: 0;
+  top: -15px;
+}

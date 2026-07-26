@@ -5,3 +5,4 @@ export { WorkOrderDetailPage }     from './WorkOrderDetailPage';
 export { WorkOrderTrackingPage }   from './WorkOrderTrackingPage';
 export { WorkOrdersProcessPage }   from './WorkOrdersProcessPage';
 export { WorkOrderCreatePage }     from './WorkOrderCreatePage';
+export { WorkOrderSearchPage }     from './WorkOrderSearchPage';

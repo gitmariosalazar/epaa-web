@@ -1,0 +1,82 @@
+/* Responsive container for the split view */
+.incident-resolve-modal-body {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .incident-resolve-modal-body {
+    grid-template-columns: 1fr;
+    flex: none;
+    height: auto;
+    overflow-y: auto;
+  }
+}
+
+/* Modificador de ancho para el modal principal */
+.incident-modal.resolve-modal-wide {
+  max-width: 1300px;
+  width: 95%;
+  height: 85vh; /* Fixed absolute height */
+  display: flex;
+  flex-direction: column;
+}
+
+.incident-modal-content-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  height: 100%;
+  min-height: 0;
+  min-width: 450px !important;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.incident-modal-content-left {
+  display: block; /* Block is more reliable for scrolling */
+  height: 100%;
+  min-height: 0;
+  min-width: 550px !important;
+  overflow-y: auto;
+  padding-right: 0.75rem;
+}
+
+.incident-modal-left-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-bottom: 1.5rem; /* Breathing room at bottom */
+}
+
+@media (max-width: 900px) {
+  .incident-modal-content-left,
+  .incident-modal-content-right {
+    min-width: 0 !important;
+    overflow-y: visible;
+    padding-right: 0;
+  }
+}
+
+.incident-modal-body-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  height: 100%;
+}
+
+/* Force EvidenceFiles to act as a 90x90 thumbnail matching the other images */
+.incident-evidence-thumb {
+  min-width: 0 !important;
+  max-width: none !important;
+  width: 90px !important;
+  height: 90px !important;
+  aspect-ratio: auto !important;
+  margin: 0;
+  border-radius: 0.5rem !important;
+}

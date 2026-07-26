@@ -1,0 +1,46 @@
+.register-cadastral-modal {
+  max-width: 95% !important;
+  width: 85% !important;
+}
+
+.register-cadastral-content {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.register-cadastral-subcontent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+  background-color: var(--surface);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.register-cadastral-subcontent--left {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.register-cadastral-subcontent--left::-webkit-scrollbar {
+  width: 6px;
+}
+.register-cadastral-subcontent--left::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+.register-cadastral-subcontent--left::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.installation-report {
+  margin: auto;
+  width: 100%;
+  border: none !important;
+  margin: 0;
+  padding: 0;
+}

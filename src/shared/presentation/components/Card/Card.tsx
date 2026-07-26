@@ -4,7 +4,7 @@ import '@/shared/presentation/styles/Card.css';
 interface CardProps {
   children: React.ReactNode;
   className?: string;
-  title?: string;
+  title?: string | React.ReactNode;
   footer?: React.ReactNode;
 }
 

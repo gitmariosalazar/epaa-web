@@ -36,6 +36,7 @@ export interface UserRepository {
   findByRefreshToken(token: string): Promise<User>;
   verifyCredentials(username: string, password: string): Promise<User>;
   existsByUsernameOrEmail(username: string, email: string): Promise<boolean>;
+  findTechnicians(type: string): Promise<any[]>;
   incrementFailedAttempts(userId: string): Promise<void>;
   getCustomerProfile(usernameOrEmail: string): Promise<User>;
   

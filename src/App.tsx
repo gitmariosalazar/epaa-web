@@ -78,7 +78,7 @@ import { SolicitudNuevaPage } from '@/modules/processes/solicitudes/presentation
 import { SolicitudesTrackingPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudesTrackingPage';
 import { SolicitudesListPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudesListPage';
 import { SolicitudDetailPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudDetailPage';
-import { WorkOrdersProcessPage, WorkOrderCreatePage, AllWorkOrdersListPage, WorkOrderDetailPage } from '@/modules/work-orders/presentation/pages';
+import { WorkOrdersProcessPage, WorkOrderCreatePage, AllWorkOrdersListPage, WorkOrderDetailPage, WorkOrderSearchPage } from '@/modules/work-orders/presentation/pages';
 
 // Incidents Module
 import { IncidentProvider } from '@/modules/incidents/presentation/context/IncidentContext';
@@ -355,6 +355,10 @@ function App() {
                 <Route
                   path="/work-orders/list"
                   element={<AllWorkOrdersListPage />}
+                />
+                <Route
+                  path="/work-orders/search"
+                  element={<WorkOrderSearchPage />}
                 />
                 <Route
                   path="/work-orders/process"

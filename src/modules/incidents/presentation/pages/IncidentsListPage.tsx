@@ -3,19 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { useIncidentsViewModel } from '../hooks/useIncidentsViewModel';
 import { ResolveIncidentModal } from '../components/ResolveIncidentModal';
+import { AddWorkOrderModal } from '../components/AddWorkOrderModal';
 import { IncidentDetailModal } from '../components/IncidentDetailModal';
 import { IncidentFilters } from '../components/IncidentFilters';
 import { Table, type Column } from '@/shared/presentation/components/Table/Table';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { ConverDate } from '@/shared/utils/datetime/ConverDate';
-import { AlertCircle, Eye, Wrench, ShieldAlert, Network, X, Navigation, Repeat } from 'lucide-react';
+import { AlertCircle, Eye, Wrench, ShieldAlert, Network, X, Navigation, Repeat, Plus } from 'lucide-react';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress/CircularProgress';
 import { useSimulatedProgress } from '@/shared/presentation/components/CircularProgress/useSimulatedProgress';
 import '../styles/Incidents.css';
 import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { truncateText } from '@/shared/utils/text/truncate-text';
+import { getPriorityColor, getStatusColor, getWorkOrderStatusColor } from '@/shared/presentation/utils/colors/status-color';
+import { FaTools } from 'react-icons/fa';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 /**
  * IncidentsListPage
@@ -43,26 +47,8 @@ export const IncidentsListPage: React.FC = () => {
 
   const [resolveIncidentId, setResolveIncidentId] = useState<string | null>(null);
   const [selectedIncident, setSelectedIncident] = useState<IncidentDetailRowResponse | null>(null);
+  const [addWorkOrderIncident, setAddWorkOrderIncident] = useState<IncidentDetailRowResponse | null>(null);
 
-  const getStatusColor = (status: string) => {
-    switch (status.toUpperCase()) {
-      case 'RESUELTO': return 'green';
-      case 'EN_INSPECCION': return 'orange';
-      case 'REPORTADO': return 'yellow';
-      case 'FALSO_REPORTE': return 'red';
-      default: return 'neutral';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority.toUpperCase()) {
-      case 'CRITICA': return 'red';
-      case 'ALTA': return 'orange';
-      case 'MEDIA': return 'yellow';
-      case 'BAJA': return 'cyan';
-      default: return 'neutral';
-    }
-  };
 
   const columns: Column<IncidentDetailRowResponse>[] = [
     {
@@ -152,6 +138,52 @@ export const IncidentsListPage: React.FC = () => {
       style: { width: '110px' }
     },
     {
+      header: 'ESTADO OT',
+      accessor: (item) => (
+        item.currentOrderState ? (
+          <div
+            className="incident-actions-cell-state">
+            <ColorChip
+              label={item.currentOrderState.replace(/_/g, ' ')}
+              color={getWorkOrderStatusColor(item.currentOrderState || '')}
+              variant="soft"
+              size="xs"
+              borderRadius={5}
+            />
+            {
+              item.orderCode !== null && (
+                <Tooltip content={`Ver Orden de Trabajo`} themeColor='accent' followCursor={false}>
+                  <Button
+                    onClick={() => navigate(`/work-orders/search?code=${item.orderCode}`)}
+                    size='xs'
+                    color='accent'
+                    circle
+                    variant='dashed'
+                  >
+                    <FaTools size={13} />
+                  </Button>
+                </Tooltip>
+              )
+            }
+          </div>
+        ) : (
+          <div
+            className="incident-actions-cell">
+            <ColorChip
+              label="Sin Orden de Trabajo"
+              color="red"
+              variant="soft"
+              size="xs"
+              borderRadius={5}
+            />
+          </div>
+        )
+
+      ),
+      id: 'currentOrderState',
+      style: { width: '110px' }
+    },
+    {
       header: 'ACCIONES',
       accessor: (item) => (
         <div className="incident-actions-cell" style={{ display: 'flex', gap: '8px' }}>
@@ -163,7 +195,7 @@ export const IncidentsListPage: React.FC = () => {
           >
             Ver
           </Button>
-          {item.status !== 'RESUELTO' && item.status !== 'FALSO_REPORTE' && (
+          {item.currentOrderState == 'COMPLETADA' && item.status != 'RESUELTO' && (
             <Button
               variant="dashed"
               color="amber"
@@ -174,6 +206,19 @@ export const IncidentsListPage: React.FC = () => {
               Resolver
             </Button>
           )}
+          {
+            !item.orderCode && item.status != 'RESUELTO' && item.status !== 'FALSO_REPORTE' && (
+              <Button
+                variant="dashed"
+                color="green"
+                size="xs"
+                onClick={() => setAddWorkOrderIncident(item)}
+                leftIcon={<Plus size={12} />}
+              >
+                Agregar OT
+              </Button>
+            )
+          }
         </div>
       ),
       id: 'actions',
@@ -284,6 +329,18 @@ export const IncidentsListPage: React.FC = () => {
           isOpen={true}
           onClose={() => setSelectedIncident(null)}
           incident={selectedIncident}
+        />
+      )}
+
+      {addWorkOrderIncident !== null && (
+        <AddWorkOrderModal
+          isOpen={true}
+          onClose={() => setAddWorkOrderIncident(null)}
+          incident={addWorkOrderIncident}
+          onSubmit={() => {
+            setAddWorkOrderIncident(null);
+            refresh();
+          }}
         />
       )}
     </>

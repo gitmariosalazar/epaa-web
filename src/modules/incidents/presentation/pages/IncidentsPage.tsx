@@ -4,6 +4,7 @@ import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { useIncidentsViewModel } from '../hooks/useIncidentsViewModel';
 import type { IncidentTab } from '../hooks/useIncidentsViewModel';
 import { ResolveIncidentModal } from '../components/ResolveIncidentModal';
+import { AddWorkOrderModal } from '../components/AddWorkOrderModal';
 import { IncidentDetailModal } from '../components/IncidentDetailModal';
 import { IncidentFilters } from '../components/IncidentFilters';
 import { IncidentMapFeature } from '../components/Map/IncidentMapFeature';
@@ -26,7 +27,8 @@ import {
   List,
   Map,
   Navigation,
-  Repeat
+  Repeat,
+  Plus,
 } from 'lucide-react';
 import {
   CircularProgress,
@@ -38,6 +40,9 @@ import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/respon
 import '../styles/Incidents.css';
 import '../components/Map/IncidentMap.css';
 import { truncateText } from '@/shared/utils/text/truncate-text';
+import { getPriorityColor, getStatusColor, getWorkOrderStatusColor } from '@/shared/presentation/utils/colors/status-color';
+import { FaTools } from 'react-icons/fa';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 /**
  * IncidentsPage — Página principal de incidentes con tabs (Lista | Mapa).
@@ -112,37 +117,11 @@ export const IncidentsPage: React.FC = () => {
 
   const [focusedIncident, setFocusedIncident] =
     useState<IncidentDetailRowResponse | null>(null);
+  const [addWorkOrderIncident, setAddWorkOrderIncident] =
+    useState<IncidentDetailRowResponse | null>(null);
 
-  // ── Helpers de color (aislados aquí, no en el ViewModel) ─────────────────
-  const getStatusColor = (status: string) => {
-    switch (status.toUpperCase()) {
-      case 'RESUELTO':
-        return 'green';
-      case 'EN_INSPECCION':
-        return 'orange';
-      case 'REPORTADO':
-        return 'yellow';
-      case 'FALSO_REPORTE':
-        return 'red';
-      default:
-        return 'neutral';
-    }
-  };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority.toUpperCase()) {
-      case 'CRITICA':
-        return 'red';
-      case 'ALTA':
-        return 'orange';
-      case 'MEDIA':
-        return 'yellow';
-      case 'BAJA':
-        return 'cyan';
-      default:
-        return 'neutral';
-    }
-  };
+
 
   // ── Columnas de la tabla ──────────────────────────────────────────────────
   const columns: Column<IncidentDetailRowResponse>[] = [
@@ -237,6 +216,52 @@ export const IncidentsPage: React.FC = () => {
       style: { width: '110px' }
     },
     {
+      header: 'ESTADO OT',
+      accessor: (item) => (
+        item.currentOrderState ? (
+          <div
+            className="incident-actions-cell-state">
+            <ColorChip
+              label={item.currentOrderState.replace(/_/g, ' ')}
+              color={getWorkOrderStatusColor(item.currentOrderState || '')}
+              variant="soft"
+              size="xs"
+              borderRadius={5}
+            />
+            {
+              item.orderCode !== null && (
+                <Tooltip content={`Ver Orden de Trabajo`} themeColor='accent' followCursor={false}>
+                  <Button
+                    onClick={() => navigate(`/work-orders/search?code=${item.orderCode}`)}
+                    size='xs'
+                    color='accent'
+                    circle
+                    variant='dashed'
+                  >
+                    <FaTools size={13} />
+                  </Button>
+                </Tooltip>
+              )
+            }
+          </div>
+        ) : (
+          <div
+            className="incident-actions-cell">
+            <ColorChip
+              label="Sin Orden de Trabajo"
+              color="red"
+              variant="soft"
+              size="xs"
+              borderRadius={5}
+            />
+          </div>
+        )
+
+      ),
+      id: 'currentOrderState',
+      style: { width: '110px' }
+    },
+    {
       header: 'ACCIONES',
       accessor: (item) => (
         <div
@@ -251,7 +276,7 @@ export const IncidentsPage: React.FC = () => {
           >
             Ver
           </Button>
-          {item.status !== 'RESUELTO' && item.status !== 'FALSO_REPORTE' && (
+          {item.currentOrderState == 'COMPLETADA' && item.status != 'RESUELTO' && (
             <Button
               variant="dashed"
               color="amber"
@@ -262,6 +287,19 @@ export const IncidentsPage: React.FC = () => {
               Resolver
             </Button>
           )}
+          {
+            !item.orderCode && item.status != 'RESUELTO' && item.status !== 'FALSO_REPORTE' && (
+              <Button
+                variant="dashed"
+                color="green"
+                size="xs"
+                onClick={() => setAddWorkOrderIncident(item)}
+                leftIcon={<Plus size={12} />}
+              >
+                Agregar OT
+              </Button>
+            )
+          }
         </div>
       ),
       id: 'actions',
@@ -467,6 +505,18 @@ export const IncidentsPage: React.FC = () => {
           isOpen={true}
           onClose={() => setSelectedIncident(null)}
           incident={selectedIncident}
+        />
+      )}
+
+      {addWorkOrderIncident !== null && (
+        <AddWorkOrderModal
+          isOpen={true}
+          onClose={() => setAddWorkOrderIncident(null)}
+          incident={addWorkOrderIncident}
+          onSubmit={() => {
+            setAddWorkOrderIncident(null);
+            refresh();
+          }}
         />
       )}
     </>

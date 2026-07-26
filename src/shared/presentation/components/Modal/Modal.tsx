@@ -14,6 +14,8 @@ interface ModalProps {
   headerActions?: React.ReactNode;
   footer?: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'full';
+  icon?: React.ReactNode;
+  headerColor?: 'teal' | 'indigo' | 'purple' | 'pink' | 'green' | 'orange' | 'default';
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -24,7 +26,9 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   headerActions,
   footer,
-  size = 'md'
+  size = 'md',
+  icon,
+  headerColor = 'default'
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -46,9 +50,6 @@ export const Modal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Portal: renderiza el overlay directamente en document.body para escapar
-  // cualquier stacking context creado por tabs, drawers u otros ancestros con
-  // position / z-index / transform / overflow que lo atraparían.
   return ReactDOM.createPortal(
     <div
       className="modal-overlay"
@@ -57,55 +58,35 @@ export const Modal: React.FC<ModalProps> = ({
       }}
     >
       <div className={`modal-content modal--${size}`} ref={modalRef}>
-        <div className="modal-header">
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
-            className="modal-header-content"
-          >
-            <div className="modal-title">{title}</div>
-            {description && (
-              <p
-                className="modal-description"
-                style={{
-                  margin: 0,
-                  fontSize: '0.85rem',
-                  color: 'var(--text-secondary)'
-                }}
-              >
-                {description}
-              </p>
+        <div className={`modal-header ${headerColor !== 'default' ? `modal-header--${headerColor}` : ''}`}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
+            {icon && (
+              <div className="modal-header-icon">
+                {icon}
+              </div>
             )}
+            <div className="modal-header-content">
+              <div className="modal-title">{title}</div>
+              {description && (
+                <p className="modal-description">
+                  {description}
+                </p>
+              )}
+            </div>
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              marginLeft: 'auto',
-              marginRight: '4rem'
-            }}
-          >
+          <div className="modal-header-actions">
             {headerActions}
           </div>
 
-          <div
-            style={{
-              position: 'absolute',
-              top: '1rem',
-              right: '1.25rem',
-              zIndex: 50
-            }}
-          >
-            <Tooltip content="Cerrar" position="bottom" followCursor={false}>
+          <div className="modal-close-container">
+            <Tooltip content="Cerrar modal" followCursor={false} position="bottom" themeColor='accent'>
               <Button
-                variant="outline"
-                className="modal-close"
+                className="modal-close-modern"
                 onClick={onClose}
-                circle
-                color="error"
+                aria-label="Cerrar modal"
               >
-                <X size={24} />
+                <X size={18} />
               </Button>
             </Tooltip>
           </div>

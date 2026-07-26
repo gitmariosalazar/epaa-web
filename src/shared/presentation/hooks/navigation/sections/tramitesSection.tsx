@@ -11,6 +11,7 @@ import { MdOutlineWaterDrop } from 'react-icons/md';
 import { FaWheelchair } from 'react-icons/fa';
 import type { NavSection } from '@/shared/domain/models/Navigation';
 import { generateTramiteMenu } from '../builders/tramiteMenuBuilder';
+import { Search } from 'lucide-react';
 
 export const getTramitesSection = (): NavSection => ({
   title: 'Trámites',
@@ -70,6 +71,11 @@ export const getTramitesSection = (): NavSection => ({
               icon: <ListIcon size={16} />,
               label: 'Ver todas las OTs',
               to: '/work-orders/list'
+            },
+            {
+              icon: <Search size={16} />,
+              label: 'Buscar OT',
+              to: '/work-orders/search'
             }
           ]
         }

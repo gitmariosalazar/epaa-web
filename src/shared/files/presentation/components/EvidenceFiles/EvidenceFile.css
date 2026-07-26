@@ -1,0 +1,383 @@
+/* ==========================================================================
+   EvidencePhoto Component Styles (Multi-Format Document & Photo Thumbnail)
+   ========================================================================== */
+
+.evidence-photo-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-color, rgba(226, 232, 240, 0.8));
+  background: var(--surface, #ffffff);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+  min-width: 140px;
+  max-width: 220px;
+  aspect-ratio: 4 / 3;
+}
+
+.evidence-photo-wrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  border-color: var(--accent, #3b82f6);
+}
+
+.evidence-photo-wrapper .evidence-photo-main-tooltip {
+  width: 100%;
+  height: 100%;
+  display: flex !important;
+  flex: 1;
+}
+
+.evidence-photo-wrapper .evidence-photo-download-tooltip {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  width: auto !important;
+  height: auto !important;
+  flex: none !important;
+}
+
+.evidence-photo-btn {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: var(--surface-2, rgba(248, 250, 252, 1));
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.evidence-photo-btn:not([disabled]) {
+  cursor: pointer;
+}
+
+.evidence-photo-btn[disabled] {
+  cursor: default;
+  opacity: 0.7;
+}
+
+/* --- Overlays --- */
+.evidence-photo-loading-overlay,
+.evidence-photo-error-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--surface-2, rgba(241, 245, 249, 0.85));
+  color: var(--text-muted, #64748b);
+  font-size: 0.75rem;
+  z-index: 2;
+  backdrop-filter: blur(2px);
+}
+
+.evidence-photo-loader {
+  color: var(--accent, #3b82f6);
+  animation: spin 1s linear infinite;
+}
+
+.evidence-photo-error-icon {
+  opacity: 0.6;
+  color: var(--error, #ef4444);
+}
+
+/* --- Image View --- */
+.evidence-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  flex: 1;
+  transition: transform 0.3s ease;
+}
+
+.evidence-photo-btn:hover .evidence-photo-img {
+  transform: scale(1.05);
+}
+
+.evidence-photo-zoom-hint {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    0deg,
+    rgba(15, 23, 42, 0.8) 0%,
+    rgba(15, 23, 42, 0) 100%
+  );
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 12px 8px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.evidence-photo-wrapper:hover .evidence-photo-zoom-hint {
+  opacity: 1;
+}
+
+/* --- Document (Non-Image) View --- */
+.evidence-photo-doc-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 1rem 0.5rem;
+  background-color: var(--surface-2, #f8fafc);
+  gap: 8px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.evidence-photo-doc-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease;
+}
+
+.evidence-photo-wrapper:hover .evidence-photo-doc-icon-wrapper {
+  transform: scale(1.08);
+}
+
+.doc-icon--pdf {
+  background: linear-gradient(135deg, #fecca2, #ef4444);
+  color: white;
+}
+
+.doc-icon--spreadsheet {
+  background: linear-gradient(135deg, #86efac, #10b981);
+  color: white;
+}
+
+.doc-icon--document {
+  background: linear-gradient(135deg, #93c5fd, #3b82f6);
+  color: white;
+}
+
+.doc-icon--other {
+  background: linear-gradient(135deg, #cbd5e1, #64748b);
+  color: white;
+}
+
+.evidence-photo-doc-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-main, #334155);
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.evidence-photo-doc-ext {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted, #94a3b8);
+  letter-spacing: 0.05em;
+}
+
+/* --- Badges & Actions --- */
+.evidence-photo-tag {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(15, 23, 42, 0.8);
+  color: #f8fafc;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  pointer-events: none;
+  z-index: 3;
+  backdrop-filter: blur(4px);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.evidence-photo-download-btn {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 3;
+  opacity: 1 !important;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.evidence-photo-download-btn:hover {
+  background: var(--accent, #3b82f6);
+  transform: scale(1.08);
+}
+
+.evidence-photo-download-btn:active {
+  transform: scale(0.95);
+}
+
+.evidence-photo-download-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --- Responsive Mode when no fixed aspect ratio is desired --- */
+.evidence-photo-wrapper--compact {
+  aspect-ratio: auto;
+  min-height: 80px;
+}
+
+/* ==========================================================================
+   In-App Preview Modal (Lightbox / PDF Viewer)
+   ========================================================================== */
+
+.evidence-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background-color: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.evidence-preview-topbar {
+  position: absolute;
+  top: 16px;
+  left: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 10px 20px;
+  border-radius: 12px;
+  color: #f8fafc;
+  z-index: 2;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.evidence-preview-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.evidence-preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.evidence-preview-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #f8fafc;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.evidence-preview-action-btn:hover {
+  background: var(--accent, #3b82f6);
+  transform: translateY(-1px);
+}
+
+.evidence-preview-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.evidence-preview-close-btn:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.evidence-preview-content {
+  width: 100%;
+  height: 100%;
+  max-width: 1200px;
+  max-height: calc(100vh - 120px);
+  margin-top: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.evidence-preview-modal-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.evidence-preview-modal-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}

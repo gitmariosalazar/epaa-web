@@ -149,6 +149,15 @@
   gap: 6px;
 }
 */
+
+.incident-actions-cell-state {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  justify-content: space-around;
+}
+
 .form-group label {
   font-size: 0.8125rem;
   font-weight: 500;
@@ -422,10 +431,10 @@
 }
 
 .photos-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 12px;
-  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 12px;
 }
 
 .gallery-item {

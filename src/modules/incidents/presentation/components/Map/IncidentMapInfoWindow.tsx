@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState, useEffect } from 'react';
 import {
   AlertTriangle,
   Calendar,
@@ -15,12 +15,26 @@ import {
 } from './IncidentMapInstantTooltip';
 import { ConverDate } from '@/shared/utils/datetime/ConverDate';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { SearchableSelect, type SearchableSelectOption } from '@/shared/presentation/components/Input/SearchableSelect';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
+
+// UseCases and Repositories for Clean Architecture
+import { FindTechniciansUseCase } from '@/modules/users/application/usecases/FindTechniciansUseCase';
+import { UserRepositoryImpl } from '@/modules/users/infrastructure/repositories/UserRepositoryImpl';
+import { CreateWorkOrderFromIncidentUseCase } from '@/modules/work-orders/application/usecases/CreateWorkOrderFromIncidentUseCase';
+import { ProcessWorkOrderRepositoryImpl } from '@/modules/work-orders/infrastructure/repositories/ProcessWorkOrderRepositoryImpl';
+
+// Styles
+import './IncidentMapInfoWindow.css';
+import { Alert } from '@/shared/presentation/components/Alert';
 
 interface IncidentMapInfoWindowProps {
   incident: IncidentDetailRowResponse;
   theme: string;
   onClose: () => void;
   onViewDetail?: (incident: IncidentDetailRowResponse) => void;
+  onViewOrder: (orderCode: string) => void;
+
 }
 
 /**
@@ -29,7 +43,7 @@ interface IncidentMapInfoWindowProps {
  * ISP: recibe solo los datos que necesita, sin el contexto entero.
  */
 export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
-  ({ incident, theme, onClose, onViewDetail }) => {
+  ({ incident, theme, onClose, onViewDetail, onViewOrder }) => {
     const pCfg = PRIORITY_CONFIG[incident.currentPriority] ?? DEFAULT_CONFIG;
     const sCfg = STATUS_CONFIG[incident.status] ?? {
       color: '#6b7280',
@@ -58,6 +72,72 @@ export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
       [incident, onViewDetail, stopEventPropagation]
     );
 
+
+    const [loading, setLoading] = useState(false);
+    const [technicianId, setTechnicianId] = useState('');
+    const [employees, setEmployees] = useState<SearchableSelectOption[]>([]);
+    const [loadingEmployees, setLoadingEmployees] = useState(false);
+
+    useEffect(() => {
+      let mounted = true;
+      setLoadingEmployees(true);
+
+      const repository = new UserRepositoryImpl();
+      const useCase = new FindTechniciansUseCase(repository);
+
+      useCase.execute('INSPECTOR')
+        .then((list) => {
+          if (!mounted) return;
+          const opts: SearchableSelectOption[] = (list || [])
+            .filter((emp: any) => emp != null)
+            .map((emp: any) => {
+              const firstName = emp.firstName ?? emp.first_name ?? emp.nombres ?? '';
+              const lastName = emp.lastName ?? emp.last_name ?? emp.apellidos ?? '';
+              const fullName = emp.fullName ?? emp.full_name ?? `${firstName} ${lastName}`.trim();
+              const id = emp.userId ?? emp.user_id ?? emp.employeeId ?? emp.employee_id ?? emp.id;
+              return {
+                value: String(id ?? ''),
+                label: fullName || id || '(sin nombre)'
+              } as SearchableSelectOption;
+            })
+            .filter(opt => opt.value !== '');
+          setEmployees(opts);
+        })
+        .catch(() => {
+          if (mounted) setEmployees([]);
+        })
+        .finally(() => {
+          if (mounted) setLoadingEmployees(false);
+        });
+
+      return () => { mounted = false; };
+    }, []);
+
+    const handleCreateWorkOrder = useCallback(
+      async (ev: React.MouseEvent) => {
+        stopEventPropagation(ev);
+        setLoading(true);
+        try {
+          const repository = new ProcessWorkOrderRepositoryImpl();
+          const useCase = new CreateWorkOrderFromIncidentUseCase(repository);
+
+          await useCase.execute({
+            incidentCode: incident.incidentCode,
+            userIdAssignee: technicianId || null,
+          });
+
+          MessageToastCustom('success', 'OT Creada', `Se creó la OT para el incidente ${incident.incidentCode}`);
+          onClose(); // Cerrar el popup tras crear la OT exitosamente
+        } catch (error: any) {
+          MessageToastCustom('error', 'Error', error.message || 'No se pudo generar la orden de trabajo');
+        } finally {
+          setLoading(false);
+        }
+      },
+      [incident, technicianId, stopEventPropagation, onClose]
+    );
+
+    const canCreateOrder: boolean = technicianId !== '' && !loading;
     return (
       <div className={`premium-popup ${isDark ? 'dark' : ''}`}>
         <button
@@ -180,7 +260,63 @@ export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
               </Button>
             </div>
           )}
+
+          {
+            incident.status !== 'RESUELTO' && incident.status === 'REPORTADO' && (
+              <div className="incident-work-order-form">
+
+                <Alert
+                  type='info'
+                  size='small'
+                  className='heartbeat-alert'
+                  dismissible={false}
+                  message="El reporte no tiene una orden de trabajo, por favor asigne un técnico inspector"
+                />
+                <label htmlFor="employee-select">Técnico Inspector *</label>
+                <SearchableSelect
+                  value={technicianId}
+                  onChange={v => setTechnicianId(String(v))}
+                  options={employees}
+                  placeholder={loadingEmployees ? 'Cargando técnicos...' : 'Buscar técnico...'}
+                  disabled={loadingEmployees}
+                  size="compact"
+                />
+                { /* Button for add work order from inciden selected*/}
+                <Button
+                  className="incident-popup-action"
+                  onClick={handleCreateWorkOrder}
+                  disabled={!canCreateOrder}
+                >
+                  <ExternalLink size={13} />
+                  {loading ? 'Generando...' : 'Generar Orden de Trabajo'}
+                </Button>
+              </div>
+            )
+          }
+          {
+            incident.orderCode !== null && (
+              <div className="incident-work-order-form">
+                <Alert
+                  type='success'
+                  size='small'
+                  dismissible={false}
+                  message={`El incidente tiene una orden de trabajo: ${incident.orderCode}`}
+                />
+                {/* Button for add work order from inciden selected*/}
+                <Button
+                  className="incident-popup-action"
+                  onClick={() => onViewOrder(incident.orderCode!)}
+                  disabled={loading}
+                  size='compact'
+                >
+                  <ExternalLink size={13} />
+                  {loading ? 'Generando...' : 'Ver Orden de Trabajo'}
+                </Button>
+              </div>
+            )
+          }
         </div>
+
       </div>
     );
   }

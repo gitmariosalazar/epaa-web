@@ -625,7 +625,10 @@ export const SolicitudDetailPage: React.FC = () => {
           <SolicitudTechnicalReportCard solicitud={solicitud} />
 
           {/* ══ ÓRDENES DE TRABAJO (cuando aplica) ══ */}
-          <SolicitudWorkOrderCard workOrders={workOrders} />
+          <SolicitudWorkOrderCard 
+            workOrders={workOrders} 
+            onViewOrder={(code) => navigate(`/work-orders/search?code=${encodeURIComponent(code)}`)} 
+          />
 
           {/* Card 2: Información General */}
           <SolicitudInfoCard
@@ -731,7 +734,8 @@ export const SolicitudDetailPage: React.FC = () => {
           onClose={() => setSubmitReportOpen(false)}
           solicitudId={solicitud.solicitudId}
           solicitudNumero={solicitud.solicitudNumero}
-          workOrderId={workOrders.find(wo => wo.tipoOrden === 'INSPECCION')?.workOrderId ?? ''}
+          workOrderId={workOrders.find(wo => (solicitud && wo.codigoOrden === solicitud.solicitudNumero) || wo.tipoOrden === 'INSPECCION')?.workOrderId ?? ''}
+          codigoOrden={workOrders.find(wo => (solicitud && wo.codigoOrden === solicitud.solicitudNumero) || wo.tipoOrden === 'INSPECCION')?.codigoOrden ?? ''}
           technicianId={user?.userId ?? ''}
           onSuccess={reload}
         />

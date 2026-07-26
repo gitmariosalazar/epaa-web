@@ -3,10 +3,12 @@ import { Check, Info, AlertTriangle, XCircle, X, Bell } from 'lucide-react';
 import './Alert.css';
 
 export type AlertType = 'success' | 'info' | 'warning' | 'error' | 'gray';
-
+export type AlertSize = 'xsmall' | 'small' | 'medium' | 'large' | 'default' | 'xlarge';
 export interface AlertProps {
   /** El tipo de alerta que determina el color y el icono (success, info, warning, error) */
   type: AlertType;
+  /** El tamaño de la alerta (small, medium, large, default, xlarge) */
+  size?: AlertSize;
   /** El título de la alerta (se muestra en negrita) */
   title?: string;
   /** El mensaje principal de la alerta */
@@ -30,6 +32,7 @@ const icons = {
 
 export const Alert: React.FC<AlertProps> = ({
   type = 'gray',
+  size = 'default',
   title,
   message,
   className = '',
@@ -54,7 +57,7 @@ export const Alert: React.FC<AlertProps> = ({
   };
 
   return (
-    <div className={`epaa-alert-container epaa-alert-${type} ${className}`} role="alert">
+    <div className={`epaa-alert-container epaa-alert-${type} epaa-alert-size-${size} ${className}`} role="alert">
       <div className="epaa-alert-content-wrapper">
         <div className="epaa-alert-icon-wrapper">
           {icon || icons[type]}

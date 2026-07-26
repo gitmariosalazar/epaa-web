@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Calendar, MapPin, User, CheckCircle, Loader2, ImageOff, Navigation } from 'lucide-react';
+import { X, Calendar, MapPin, User, CheckCircle, Navigation } from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { ConverDate, ConverDateTimeToText } from '@/shared/utils/datetime/ConverDate';
-import { useFilePreview } from '@/shared/files';
+import { EvidenceFiles } from '@/shared/files';
 import { PhotoLightbox } from './PhotoLightbox';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { StatusTimeline } from '@/shared/presentation/components/Timeline';
@@ -47,74 +47,6 @@ function getPriorityColor(priority: string): string {
     default: return 'neutral';
   }
 }
-
-function extractFilename(filePath: string): string {
-  return filePath.split('/').pop() ?? filePath;
-}
-
-// ─── EvidencePhoto sub-component ───────────────────────────────────────────────
-
-interface EvidencePhotoProps {
-  photoId: number;
-  filePath: string;
-  type: string;
-  /** Opens the lightbox at this thumbnail's position. */
-  onClick: () => void;
-}
-
-/**
- * EvidencePhoto
- *
- * Renders a single clickable thumbnail that opens the lightbox on click.
- *
- * SRP: load and display one authenticated thumbnail.
- * DIP: depends on useFilePreview (hook abstraction).
- *
- * Sub-component pattern: required because hooks cannot be called inside loops.
- * Each instance owns its blob URL lifecycle, preventing memory leaks.
- */
-const EvidencePhoto: React.FC<EvidencePhotoProps> = ({ photoId, filePath, type, onClick }) => {
-  const filename = extractFilename(filePath);
-  const { blobUrl, loading, error } = useFilePreview('incidents', filename);
-
-  return (
-    <div className="gallery-item">
-      <Tooltip content={blobUrl ? 'Clic para ampliar' : ''} position='bottom'>
-        <button
-          className="gallery-img gallery-img--clickable evidence-photo-btn"
-          onClick={blobUrl ? onClick : undefined}
-          disabled={!blobUrl}
-          aria-label={`Ver evidencia ${type} #${photoId} en pantalla completa`}
-        >
-          {loading && (
-            <div className="evidence-photo-loading-overlay">
-              <Loader2 size={22} className="evidence-photo-loader" />
-            </div>
-          )}
-          {!loading && blobUrl && (
-            <>
-              <img
-                src={blobUrl}
-                alt={`Evidencia #${photoId}`}
-                className="evidence-photo-img"
-              />
-              <div className="gallery-zoom-hint">
-                <span>🔍 Ampliar</span>
-              </div>
-            </>
-          )}
-          {!loading && (error || !blobUrl) && (
-            <div className="evidence-photo-error-overlay">
-              <ImageOff size={20} className="evidence-photo-error-icon" />
-              <span>Sin imagen</span>
-            </div>
-          )}
-        </button>
-      </Tooltip>
-      <span className="gallery-tag">{type}</span>
-    </div>
-  );
-};
 
 // ─── IncidentDetailModal ────────────────────────────────────────────────────────
 
@@ -202,6 +134,12 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                     <span className="detail-value font-medium">
                       {incident.openDays || 0} {' '}
                       {incident.openDays && incident.openDays == 0 ? 'días' : incident.openDays == 1 ? 'día' : 'días'}
+                    </span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">Orden de Trabajo</span>
+                    <span className="detail-value font-medium">
+                      {incident.orderCode || 'No asignada'}
                     </span>
                   </div>
                 </div>
@@ -370,9 +308,9 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                 {photosReport.length > 0 ? (
                   <div className="photos-gallery">
                     {photosReport.map((photo, idx) => (
-                      <EvidencePhoto
+                      <EvidenceFiles
                         key={photo.id}
-                        photoId={photo.id}
+                        fileId={photo.id}
                         filePath={photo.filePath}
                         type={photo.type}
                         onClick={() => setLightboxIndex(idx)}
@@ -399,9 +337,9 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                 {photosResolution.length > 0 ? (
                   <div className="photos-gallery">
                     {photosResolution.map((photo, idx) => (
-                      <EvidencePhoto
+                      <EvidenceFiles
                         key={photo.id}
-                        photoId={photo.id}
+                        fileId={photo.id}
                         filePath={photo.filePath}
                         type={photo.type}
                         onClick={() => setLightboxResolutionIndex(idx)}

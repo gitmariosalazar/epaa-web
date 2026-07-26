@@ -17,6 +17,7 @@ import { useTheme } from '@/shared/presentation/context/ThemeContext';
 import { IncidentMapMarker } from './IncidentMapMarker';
 import { IncidentMapInfoWindow } from './IncidentMapInfoWindow';
 import { FALLBACK_CENTER_ANTONIO_ANTE } from '@/shared/utils/types/IGeolocationData';
+import { useNavigate } from 'react-router-dom';
 
 // ── Props ────────────────────────────────────────────────────────────────────
 export interface IncidentMapProps {
@@ -68,6 +69,7 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
   } | null>(null);
 
   const map = useMap();
+  const navigate = useNavigate();
 
   // Hide hover tooltip when zoomed out (prevents visual clutter)
   useEffect(() => {
@@ -101,9 +103,9 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
       ? center
       : firstWithCoords
         ? {
-            lat: Number(firstWithCoords.latitude),
-            lng: Number(firstWithCoords.longitude)
-          }
+          lat: Number(firstWithCoords.latitude),
+          lng: Number(firstWithCoords.longitude)
+        }
         : FALLBACK_CENTER;
 
   const incidentsWithCoords = useMemo(
@@ -214,6 +216,7 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
                 theme={theme}
                 onClose={handleInfoWindowClose}
                 onViewDetail={onViewDetail}
+                onViewOrder={(code) => navigate(`/work-orders/search?code=${code}`)}
               />
             </InfoWindow>
           )}

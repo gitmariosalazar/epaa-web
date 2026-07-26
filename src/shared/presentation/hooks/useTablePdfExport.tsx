@@ -3,6 +3,7 @@ import { ExportService } from '@/shared/infrastructure/services/ExportService';
 import { ReportPreviewModal } from '@/modules/dashboard/presentation/components/reports/ReportPreviewModal';
 import type { ExportColumn } from '@/modules/dashboard/presentation/components/reports/ReportPreviewModal';
 import type { Signature } from '@/shared/domain/services/IExportService';
+import type { IPdfDocumentGenerator } from '@/shared/domain/services/IPdfDocumentGenerator';
 
 export interface UseTablePdfExportOptions<T> {
   data: T[];
@@ -21,6 +22,8 @@ export interface UseTablePdfExportOptions<T> {
     columnId?: string;
   }[];
   mapRowData: (row: T, selectedCols: ExportColumn[]) => any[];
+  pdfGenerator?: IPdfDocumentGenerator<any>;
+  buildPdfData?: (orientation: 'portrait' | 'landscape', selectedColumns: ExportColumn[], data: T[]) => any;
 }
 
 export const useTablePdfExport = <T,>({
@@ -34,7 +37,9 @@ export const useTablePdfExport = <T,>({
   signatures,
   showSign,
   totalRows,
-  mapRowData
+  mapRowData,
+  pdfGenerator,
+  buildPdfData
 }: UseTablePdfExportOptions<T>) => {
   const [showPdfPreview, setShowPdfPreview] = useState(false);
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>(
@@ -107,54 +112,62 @@ export const useTablePdfExport = <T,>({
       isGeneratingRef.current = true;
 
       // Small timeout to allow the spinner UI to render
-      setTimeout(() => {
+      setTimeout(async () => {
         try {
           const selectedCols = availableColumns.filter((col) =>
             currentColumns.includes(col.id) || (col.columnId && currentColumns.includes(col.columnId))
           );
-          const colLabels = selectedCols.map((c) => c.label);
-          const rows = data.map((d) => mapRowData(d, selectedCols));
+          
+          let url: string;
 
-          let totals: string[] | undefined;
-          if (totalRows && totalRows.length > 0) {
-            totals = selectedCols.map((col, colIndex) => {
-              if (colIndex === 0) return 'TOTAL';
-              const matchingTotal =
-                totalRows.find((r) => r.columnId && r.columnId === col.id) ||
-                totalRows.find((r) => r.label === col.label) ||
-                totalRows.find(
-                  (r) =>
-                    r.label.toLowerCase().includes(col.label.toLowerCase()) ||
-                    r.label
-                      .toLowerCase()
-                      .includes(col.label.toLowerCase().replace('total', '').trim())
-                );
-              if (matchingTotal) {
-                return typeof matchingTotal.value === 'number'
-                  ? new Intl.NumberFormat('en-US', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    }).format(matchingTotal.value)
-                  : String(matchingTotal.value);
-              }
-              return '';
+          if (pdfGenerator && buildPdfData) {
+            const pdfData = buildPdfData(currentOrientation, selectedCols, data);
+            url = await Promise.resolve(pdfGenerator.generateBlobUrl(pdfData));
+          } else {
+            const colLabels = selectedCols.map((c) => c.label);
+            const rows = data.map((d) => mapRowData(d, selectedCols));
+
+            let totals: string[] | undefined;
+            if (totalRows && totalRows.length > 0) {
+              totals = selectedCols.map((col, colIndex) => {
+                if (colIndex === 0) return 'TOTAL';
+                const matchingTotal =
+                  totalRows.find((r) => r.columnId && r.columnId === col.id) ||
+                  totalRows.find((r) => r.label === col.label) ||
+                  totalRows.find(
+                    (r) =>
+                      r.label.toLowerCase().includes(col.label.toLowerCase()) ||
+                      r.label
+                        .toLowerCase()
+                        .includes(col.label.toLowerCase().replace('total', '').trim())
+                  );
+                if (matchingTotal) {
+                  return typeof matchingTotal.value === 'number'
+                    ? new Intl.NumberFormat('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      }).format(matchingTotal.value)
+                    : String(matchingTotal.value);
+                }
+                return '';
+              });
+            }
+
+            url = exportService.generatePdfBlobUrl({
+              rows,
+              columns: colLabels,
+              fileName: `reporte_${Date.now()}`,
+              title: reportTitle,
+              orientation: currentOrientation,
+              description: reportDescription,
+              labelsHorizontal,
+              labelsVertical,
+              clientInfo,
+              signatures,
+              showSign,
+              totals
             });
           }
-
-          const url = exportService.generatePdfBlobUrl({
-            rows,
-            columns: colLabels,
-            fileName: `reporte_${Date.now()}`,
-            title: reportTitle,
-            orientation: currentOrientation,
-            description: reportDescription,
-            labelsHorizontal,
-            labelsVertical,
-            clientInfo,
-            signatures,
-            showSign,
-            totals
-          });
 
           setPreviewUrl((old) => {
             revokeOldUrl(old);
@@ -223,54 +236,60 @@ export const useTablePdfExport = <T,>({
   }, [showPdfPreview]);
 
   const handleDownloadPdf = useCallback(
-    ({ orientation: currentOrientation, selectedColumnIds: currentColumns }: any) => {
+    async ({ orientation: currentOrientation, selectedColumnIds: currentColumns }: any) => {
       const selectedCols = availableColumns.filter((col) =>
         currentColumns.includes(col.id) || (col.columnId && currentColumns.includes(col.columnId))
       );
-      const colLabels = selectedCols.map((c) => c.label);
-      const rows = data.map((d) => mapRowData(d, selectedCols));
+      
+      if (pdfGenerator && buildPdfData) {
+        const pdfData = buildPdfData(currentOrientation, selectedCols, data);
+        await Promise.resolve(pdfGenerator.downloadPdf(pdfData));
+      } else {
+        const colLabels = selectedCols.map((c) => c.label);
+        const rows = data.map((d) => mapRowData(d, selectedCols));
 
-      let totals: string[] | undefined;
-      if (totalRows && totalRows.length > 0) {
-        totals = selectedCols.map((col, colIndex) => {
-          if (colIndex === 0) return 'TOTAL';
-          const matchingTotal =
-            totalRows.find((r) => r.columnId && r.columnId === col.id) ||
-            totalRows.find((r) => r.label === col.label) ||
-            totalRows.find(
-              (r) =>
-                r.label.toLowerCase().includes(col.label.toLowerCase()) ||
-                r.label
-                  .toLowerCase()
-                  .includes(col.label.toLowerCase().replace('total', '').trim())
-            );
+        let totals: string[] | undefined;
+        if (totalRows && totalRows.length > 0) {
+          totals = selectedCols.map((col, colIndex) => {
+            if (colIndex === 0) return 'TOTAL';
+            const matchingTotal =
+              totalRows.find((r) => r.columnId && r.columnId === col.id) ||
+              totalRows.find((r) => r.label === col.label) ||
+              totalRows.find(
+                (r) =>
+                  r.label.toLowerCase().includes(col.label.toLowerCase()) ||
+                  r.label
+                    .toLowerCase()
+                    .includes(col.label.toLowerCase().replace('total', '').trim())
+              );
 
-          if (matchingTotal) {
-            return typeof matchingTotal.value === 'number'
-              ? new Intl.NumberFormat('en-US', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                }).format(matchingTotal.value)
-              : String(matchingTotal.value);
-          }
-          return '';
+            if (matchingTotal) {
+              return typeof matchingTotal.value === 'number'
+                ? new Intl.NumberFormat('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  }).format(matchingTotal.value)
+                : String(matchingTotal.value);
+            }
+            return '';
+          });
+        }
+
+        exportService.exportToPdf({
+          rows,
+          columns: colLabels,
+          fileName: `reporte_${Date.now()}`,
+          title: reportTitle,
+          orientation: currentOrientation,
+          description: reportDescription,
+          labelsHorizontal,
+          labelsVertical,
+          clientInfo,
+          signatures,
+          showSign,
+          totals
         });
       }
-
-      exportService.exportToPdf({
-        rows,
-        columns: colLabels,
-        fileName: `reporte_${Date.now()}`,
-        title: reportTitle,
-        orientation: currentOrientation,
-        description: reportDescription,
-        labelsHorizontal,
-        labelsVertical,
-        clientInfo,
-        signatures,
-        showSign,
-        totals
-      });
       setShowPdfPreview(false);
     },
     [

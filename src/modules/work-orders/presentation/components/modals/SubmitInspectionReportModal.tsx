@@ -129,7 +129,7 @@ export const SubmitInspectionReportModal: React.FC<SubmitInspectionReportModalPr
       solicitudId,
       technicianId,
       result,
-      completedStatusId: 9, // COMPLETADA en work_orders.cat_estado_orden
+      completedStatus: 'COMPLETADA', // COMPLETADA en work_orders.cat_estado_orden
       networkDistanceM:   networkDistanceM  ? parseFloat(networkDistanceM)  : undefined,
       connectionDiameter: connectionDiameter.trim() || undefined,
       terrainConditions:  terrainConditions.trim()  || undefined,
