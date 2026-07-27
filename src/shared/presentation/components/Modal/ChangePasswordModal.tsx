@@ -37,7 +37,6 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
     setLoading(true);
     setError(null);
     try {
-      console.log('[ChangePasswordModal] Datos enviados al backend:', formData);
       await onSave(formData);
       onClose();
     } catch (err: any) {

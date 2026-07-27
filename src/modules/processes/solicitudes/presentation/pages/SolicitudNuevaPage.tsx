@@ -174,8 +174,6 @@ export const SolicitudNuevaPage: React.FC = () => {
       const useCase = new SubmitWithDocumentsUseCase(new SolicitudRepositoryImpl());
       const response = await useCase.execute(requestDto);
 
-      console.log('DEBUG [Create Solicitud Response]:', response);
-
       if (response && response.solicitudId) {
         setCreatedSolicitudId(response.solicitudId);
         setRequestNumber(response.numeroSolicitud);

@@ -274,10 +274,13 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
     if (!dto.adminId) throw new Error('El ID del administrador es requerido');
     if (!dto.reason) throw new Error('El motivo de rechazo es requerido');
 
-    await this.client.patch<void>(`/payment-confirmation/facturas/${dto.invoiceId}/rechazar`, {
-      adminId: dto.adminId,
-      reason: dto.reason
-    });
+    await this.client.patch<void>(
+      `/payment-confirmation/facturas/${dto.invoiceId}/rechazar`,
+      {
+        adminId: dto.adminId,
+        reason: dto.reason
+      }
+    );
   }
 
   // ── Fase 6 — Emitir OT de inspección ─────────────────────────────────────
@@ -483,7 +486,6 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
         });
       }
     });
-    console.log('DEBUG [Create Solicitud DTO Payload]:', debugDto);
 
     const response = await this.client.post<
       ApiResponse<SubmitWithDocumentsResponse>
@@ -521,7 +523,11 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
           }
         }
       );
-      return response.status_code === 200 || response.status_code === 201 || !!response.data;
+      return (
+        response.status_code === 200 ||
+        response.status_code === 201 ||
+        !!response.data
+      );
     } catch (error) {
       console.error('Error in updateConnectionDocument:', error);
       return false;
@@ -538,7 +544,7 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
       const formData = new FormData();
       formData.append('userId', userId);
       formData.append('documentIds', documentIds.join(','));
-      
+
       files.forEach((file) => {
         formData.append('files', file);
       });
@@ -548,11 +554,15 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
         formData,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
-          },
+            'Content-Type': 'multipart/form-data'
+          }
         }
       );
-      return response.status_code === 200 || response.status_code === 201 || !!response.data;
+      return (
+        response.status_code === 200 ||
+        response.status_code === 201 ||
+        !!response.data
+      );
     } catch (error) {
       console.error('Error in submitCorrections:', error);
       return false;
@@ -576,7 +586,11 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
           }
         }
       );
-      return response.status_code === 200 || response.status_code === 201 || !!response.data;
+      return (
+        response.status_code === 200 ||
+        response.status_code === 201 ||
+        !!response.data
+      );
     } catch (error) {
       console.error('Error in uploadInspectionInvoiceReceipt:', error);
       return false;

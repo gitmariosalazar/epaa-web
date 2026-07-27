@@ -241,19 +241,6 @@ export const useConnectionsViewModel = () => {
   // ── 3. CORE FETCH LOGIC (Pagination / Tabs) ───────────────────────────────
   const fetchConnections = useCallback(
     async (currentOffset: number, append = false) => {
-      console.log('Fetching connections with filters:', {
-        activeTab,
-        searchQuery,
-        selectedStatus,
-        selectedIncidents,
-        selectedSewerage,
-        selectedCoordinates,
-        sectorInput,
-        clientIdInput,
-        currentOffset,
-        append
-      });
-
       setIsLoading(true);
       setError(null);
       try {
@@ -282,17 +269,6 @@ export const useConnectionsViewModel = () => {
 
           // status: 'active'/'inactive' no es el nombre real en BD,
           // así que lo seguimos filtrando client-side con ACTIVE_STATES.
-
-          console.log('Filtros enviados al backend:', {
-            limit: LIMIT_SIZE,
-            offset: currentOffset,
-            query: searchQuery,
-            hasIncidents,
-            status: selectedStatus,
-            sewerage: sewerageParam,
-            hasCoordinates: hasCoordinatesParam,
-            searchField: searchField !== 'all' ? searchField : undefined
-          });
 
           chunk = await getConnectionsUseCase.execute(
             LIMIT_SIZE,
@@ -892,8 +868,6 @@ export const useConnectionsViewModel = () => {
         propertyCadastralKey: formData.propertyCadastralKey || null,
         ConnectionMetaData: formData.ConnectionMetaData || {}
       };
-
-      //console.log('Final Wizard Payload:', finalData);
 
       if (selectedConnection) {
         await updateConnectionUseCase.execute(

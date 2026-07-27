@@ -229,8 +229,6 @@ export const GeneralCollectionYearlyDashboard: React.FC<
       ? mapFullAllYearsTotal(unfilteredKpi)
       : mapFullAllYearsTotal(kpi);
 
-  console.log(sourseFullAllYearsTotal);
-
   return (
     <div className="dashboard-list-container yearly">
       {/* ─── Year Paginator (SRP: state owned by YearPaginator sub-component) ─── */}

@@ -30,7 +30,6 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   }
 
 
-  console.log('user', user);
 
   return (
     <Modal

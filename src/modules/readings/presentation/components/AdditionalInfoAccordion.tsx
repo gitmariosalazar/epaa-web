@@ -40,8 +40,6 @@ export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
     ? dateService.toISODateStringWithOffset(info.endDatePeriod)
     : '---';
 
-  console.log(info);
-
   return (
     <div className="ai-wrapper">
       {/* ── Header ── */}

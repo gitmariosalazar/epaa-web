@@ -173,9 +173,6 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
     }
   };
 
-  //const requestPayload = buildRequest();
-  //console.log(requestPayload);
-
   const handleCloseModal = () => {
     if (!isSubmitting) setIsConfirmModalOpen(false);
   };
@@ -261,9 +258,9 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
                   <Tag size={15} style={{ marginRight: 6, flexShrink: 0 }} />
                   {currentReadingInfoForRequest.connectionStateName
                     ? currentReadingInfoForRequest.connectionStateName
-                        .replace(/_/g, ' ')
-                        .replace(/([A-Z])/g, ' $1')
-                        .trim()
+                      .replace(/_/g, ' ')
+                      .replace(/([A-Z])/g, ' $1')
+                      .trim()
                     : 'Estado Desconocido'}
                 </div>
                 <div className="cs-state-description">

@@ -37,8 +37,6 @@ export const InstallationReportDocument: React.FC<Props> = ({ installationReport
   const installationType = installationReport.request.connectionType || 'N/A';
 
   const totalMaterials = materials.reduce((acc, m) => acc + Number(m.subtotal || 0), 0);
-  console.log(requestByClient)
-  console.log(installationReport)
 
   const connectionInfo: ConnectionInfo = {
     cadastralKey: requestByClient.claveCatastral!,

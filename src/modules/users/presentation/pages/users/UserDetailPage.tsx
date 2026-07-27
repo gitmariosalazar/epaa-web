@@ -86,7 +86,6 @@ const UserRolesTable = ({ user }: { user: User }) => {
   const handleSaveChanges = () => {
     // Here only enabled roles would be sent to the backend
     const activeRoles = localRoles.filter((r) => r.active);
-    console.log('Saving roles:', activeRoles);
     alert(
       `Changes saved! Active roles: ${activeRoles.map((r) => r.name).join(', ')}`
     );

@@ -80,7 +80,6 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
     })
     : '—';
 
-
   return (
     <article
       className="wo-list-card"
@@ -170,7 +169,7 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
             size="sm"
             leftIcon={<Settings2 size={14} />}
             onClick={() => onProcess(orden.orderCode)}
-            disabled={orden.status === 'COMPLETADA' || orden.status === 'CANCELADA'}
+            disabled={orden.status === 'COMPLETADA' || orden.status === 'CANCELADA' || orden.status === 'INSPECCION_COMPLETADA' || orden.status === 'INSTALACION_COMPLETADA'}
           >
             Procesar
           </Button>

@@ -9,7 +9,6 @@ export class GetUserDetailUseCase {
   }
 
   async execute(username: string, email: string): Promise<User> {
-    console.log('GetUserDetailUseCase execute:', { username, email });
     const user = await this.userRepository.getDetail(
       username === '' ? email : username
     );

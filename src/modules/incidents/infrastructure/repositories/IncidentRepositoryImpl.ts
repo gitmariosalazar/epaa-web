@@ -34,7 +34,6 @@ export class IncidentRepositoryImpl implements InterfaceIncidentRepository {
   async createIncident(
     incident: CreateIncidentRequest
   ): Promise<ApiResponse<IncidentResponse> | null> {
-    console.log('DEBUG [Create Incident Request]:', incident);
     const formData = new FormData();
 
     if (incident.connectionId !== undefined && incident.connectionId !== null) {

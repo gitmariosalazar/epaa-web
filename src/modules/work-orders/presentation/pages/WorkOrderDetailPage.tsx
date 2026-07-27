@@ -920,10 +920,6 @@ export const WorkOrderDetailPage: React.FC = () => {
 
   const isTerminal = ESTADOS_TERMINAL.has(orden.estado ?? '');
 
-  console.log(orden.adjuntos);
-  console.log('aqui');
-
-
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <PageLayout

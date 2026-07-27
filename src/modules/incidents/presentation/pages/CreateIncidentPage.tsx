@@ -233,7 +233,6 @@ export const CreateIncidentPage: React.FC = () => {
 
   useEffect(() => {
     if (activeReadingInfo) {
-      console.log('Objeto encontrado:', activeReadingInfo);
       if (activeReadingInfo.readingId) {
         setReadingId(String(activeReadingInfo.readingId));
       } else {

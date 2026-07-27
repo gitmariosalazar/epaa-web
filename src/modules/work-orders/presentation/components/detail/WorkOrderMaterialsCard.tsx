@@ -200,7 +200,6 @@ const WorkOrderMaterialsCardInner: React.FC<WorkOrderMaterialsCardProps> = ({
     (sum, c) => sum + (parseFloat(c.cantidad as any) * parseFloat(c.costoUnitario as any) || 0), 0
   );
   const calculatedTotalOrden = calculatedTotalMateriales + calculatedTotalAdicionales;
-  console.log(mats, costs)
   const matColumns: Column<MaterialUtilizado>[] = [
     {
       header: 'Material',

@@ -75,7 +75,6 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
         return;
       }
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        console.log('Closing menu because click was outside:', event.target);
         setActiveMenuRowId(null);
         setMenuCoords(null);
       }
@@ -306,10 +305,6 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
                                 <div
                                   className="menu-item"
                                   onClick={(e) => {
-                                    console.log(
-                                      'Clicked: Por Clave Catastral',
-                                      { val: row.cadastralKey }
-                                    );
                                     e.stopPropagation();
                                     e.preventDefault();
                                     const val = row.cadastralKey;
@@ -328,9 +323,6 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
                             <div
                               className="menu-item"
                               onClick={(e) => {
-                                console.log('Clicked: Por ID Cliente (Todo)', {
-                                  val: row.clientId
-                                });
                                 e.stopPropagation();
                                 e.preventDefault();
                                 // NO cerramos el menú aquí para ver el Loading en toda la página
@@ -577,8 +569,6 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
       title: t('accounting.overdue.reportTitle', 'Reporte de Facturas en Mora')
     });
   }, [availableColumns, data, handleMapRowData]);
-
-  //console.log('data', data);
 
   return (
     <div className={`payments-table-wrapper ${isLoading ? 'is-loading' : ''}`}>

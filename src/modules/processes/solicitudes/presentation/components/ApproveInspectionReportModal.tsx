@@ -51,10 +51,6 @@ const ApproveInspectionReportModalInner: React.FC<ApproveInspectionReportModalPr
   }, [isOpen, solicitudNumero, fetchInspectionReport]);
 
   if (!isOpen) return null;
-  console.log("Materiales: ", inspectionReport?.workOrder.materials);
-  console.log(" Trabajadores: ", inspectionReport?.workOrder.workers);
-  console.log("Evidencias: ", inspectionReport?.workOrder.evidenceAttachments);
-  console.log("Observaciones: ", inspectionReport?.workOrder.observations);
 
   const materialList: MaterialResponse[] = inspectionReport?.workOrder?.materials ?? [];
   const workersList: WorkerResponse[] = inspectionReport?.workOrder?.workers ?? [];

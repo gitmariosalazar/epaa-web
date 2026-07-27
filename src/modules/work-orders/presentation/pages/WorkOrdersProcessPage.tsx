@@ -858,9 +858,6 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
   };
 
 
-  console.log(orden?.estado);
-  console.log('aqui');
-
 
   const renderStepContent = (estado: string) => {
     if (!orden) return null;

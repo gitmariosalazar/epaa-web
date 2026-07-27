@@ -31,8 +31,6 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
 }) => {
   const chip = getConnectionStateChip(connection.connectionStatus);
   const isActive = ACTIVE_STATES.has(connection.connectionStatus);
-  // console.log('ConnectionCard render', connection, isSelected);
-
   return (
     <div
       className={`connection-card ${isSelected ? 'selected' : ''} ${isActive ? 'active-card' : 'inactive-card'}`}

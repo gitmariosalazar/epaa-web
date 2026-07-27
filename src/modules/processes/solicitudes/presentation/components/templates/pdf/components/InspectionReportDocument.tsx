@@ -41,9 +41,6 @@ export const InspectionReportDocument: React.FC<Props> = ({ inspectionReport: in
   const companyClient: CompanyResponse | null = requestByClient.company !== null ? requestByClient.company : null;
   const personClient: ClientResponse | null = requestByClient.company !== null ? null : requestByClient.person;
 
-  console.log('data', inspectionReport);
-  console.log('requestByClient', requestByClient);
-
   return (
     <Document>
       <Page size="A4" style={styles.page}>

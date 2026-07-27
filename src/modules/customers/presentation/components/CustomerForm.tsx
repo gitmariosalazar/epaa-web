@@ -71,7 +71,6 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
     }));
   };
 
-  console.log(formData);
 
   return (
     <div className="customer-form__container">

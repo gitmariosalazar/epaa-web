@@ -168,9 +168,6 @@ const MonthlyAgreementsDashboardDashboardItem: React.FC<MonthlyItemProps> = ({
       })),
     [overdueSlices]
   );
-
-  //console.log('datA ProfessionalPie', dataProfessional3DPie);
-
   return (
     <div className="yearly-paginator-card">
       <div className="yearly-paginator-header">

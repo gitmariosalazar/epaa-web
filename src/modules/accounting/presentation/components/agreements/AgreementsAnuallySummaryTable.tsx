@@ -143,11 +143,6 @@ export const AgreementsAnuallySummaryTable: React.FC<
       highlight: true
     }
   ];
-  /*
-    console.log('searchType', searchType);
-    console.log('data', data);
-    console.log('totalRows', totalRows);\
-    */
 
   const { setShowPdfPreview, PdfPreviewModal } =
     useTablePdfExport<AgreementKPIsResponse>({
@@ -175,10 +170,10 @@ export const AgreementsAnuallySummaryTable: React.FC<
         { id: 'overdueAmount', label: 'En Mora', isDefault: true }
       ],
       reportTitle: `Resumen de Convenios (${searchType === 'YEAR'
-          ? 'Anual'
-          : searchType === 'MONTH'
-            ? 'Mensual'
-            : 'Diario'
+        ? 'Anual'
+        : searchType === 'MONTH'
+          ? 'Mensual'
+          : 'Diario'
         })`,
       reportDescription: 'Análisis de evolución histórica SIGEPAA',
       totalRows: totalRows,

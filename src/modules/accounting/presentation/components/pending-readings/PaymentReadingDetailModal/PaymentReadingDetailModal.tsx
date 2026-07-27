@@ -46,8 +46,6 @@ export const PaymentReadingDetailModal: React.FC<
 
   const isPaid = reading.incomeStatus?.toLowerCase() === 'p';
 
-  console.log(reading.incomeStatus);
-
   return (
     <Modal
       isOpen={isOpen}

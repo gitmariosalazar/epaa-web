@@ -73,7 +73,6 @@ export const useReading = () => {
           setReadingInfo(infoResultSettled.value);
         } else {
           setReadingInfo([]);
-          console.log(infoResultSettled);
           if (infoResultSettled.status === 'rejected') {
             console.error('Error fetching info:', infoResultSettled.reason);
 

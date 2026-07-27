@@ -65,7 +65,6 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
     }
   }, [initialCadastralKey, location.state?.cadastralKey]);
 
-  console.log(readingInfo);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 

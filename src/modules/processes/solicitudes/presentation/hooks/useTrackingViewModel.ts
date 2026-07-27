@@ -97,7 +97,6 @@ export const useTrackingViewModel = () => {
     },
     []
   );
-  console.log(trackingList);
 
   return {
     tracking: filtered,

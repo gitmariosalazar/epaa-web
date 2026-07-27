@@ -42,8 +42,6 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
     setIsMapModalOpen(true);
   };
 
-  console.log('data', data[0]);
-
   const columns: Column<TakenReadingConnection>[] = useMemo(
     () => [
       { header: t('readings.columns.cadastralKey'), accessor: 'cadastralKey' },

@@ -82,7 +82,6 @@ export const PersonalDataStep: React.FC<PersonalDataStepProps> = ({
       } else {
         // CED o PAS (Cédula o Pasaporte)
         const customer = await customerUseCase.execute(identification);
-        console.log(customer?.address);
         if (customer) {
           onFormChange({
             cedula: customer.customerId,

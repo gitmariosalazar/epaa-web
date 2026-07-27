@@ -279,8 +279,6 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
     }
   ];
 
-  // console.log({ missingValorBills }); // Removed for performance
-  // console.log({ trashRateAuditReport }); // Removed for performance
 
   return (
     <div className="trash-dashboard" style={{ padding: '5px 0 12px 0' }}>
@@ -417,15 +415,14 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
                   <tr key={idx}>
                     <td>
                       <span
-                        className={`status-badge status-badge--${
-                          item.Estado === 'P'
+                        className={`status-badge status-badge--${item.Estado === 'P'
                             ? 'P'
                             : item.Estado === 'B'
                               ? 'B'
                               : item.Estado === 'S/E'
                                 ? 'S'
                                 : ''
-                        }`}
+                          }`}
                       >
                         {item.Estado === 'P'
                           ? 'Pagado'
@@ -437,15 +434,14 @@ export const TrashRateDashboardKPI: React.FC<TrashRateDashboardKPIProps> = ({
                       </span>
                     </td>
                     <td
-                      className={`monto-value color-value--${
-                        item.Estado === 'P'
+                      className={`monto-value color-value--${item.Estado === 'P'
                           ? 'P'
                           : item.Estado === 'B'
                             ? 'B'
                             : item.Estado === 'S/E'
                               ? 'S'
                               : ''
-                      }`}
+                        }`}
                     >
                       {fmtMoney(item.Monto)}
                     </td>

@@ -231,7 +231,6 @@ export const useUsersViewModel = () => {
       const usernameExists = await existsByUsernameUseCase.execute(
         formData.username
       );
-      console.log(usernameExists);
       if (!usernameExists) {
         alert(
           `El usuario "${formData.username}" ya existe en el sistema. ` +
@@ -264,7 +263,7 @@ export const useUsersViewModel = () => {
       loadUsers();
     } catch (error: any) {
       console.error('[UsersViewModel] Create failed:', error);
-      
+
       const errorData = error?.response?.data;
       let errorMessage = 'Error al crear el usuario.';
 
@@ -427,7 +426,7 @@ export const useUsersViewModel = () => {
       loadUsers(); // refresh data to show the new role in the UI if we fetch roles in user listing
     } catch (error: any) {
       console.error('Failed to assign role', error);
-      
+
       const errorData = error?.response?.data;
       let errorMessage = 'Error al asignar el rol.';
 
