@@ -1,4 +1,4 @@
-.horizontal-novelty-layout {
+.horizontal-donut-layout {
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -14,7 +14,7 @@
   gap: 1rem;
 }
 
-.novelty-item {
+.chart-legend-item {
   padding: 12px;
   background-color: var(--bg-secondary);
   border-radius: 8px;
@@ -27,27 +27,27 @@
   cursor: pointer;
 }
 
-.novelty-item.active {
+.chart-legend-item.active {
   background-color: var(--bg-hover);
   transform: translateX(5px);
 }
 
-.novelty-info {
+.legend-info {
   display: flex;
   flex-direction: column;
 }
 
-.novelty-name {
+.legend-name {
   font-weight: 500;
   color: var(--text-primary);
 }
 
-.novelty-meta {
+.legend-meta {
   font-size: 0.8rem;
   color: var(--text-secondary);
 }
 
-.novelty-badge {
+.legend-badge {
   padding: 4px 8px;
   border-radius: 12px;
   font-size: 0.8rem;
@@ -71,7 +71,7 @@
   align-items: center;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border: 1px solid var(--border-color);
-  pointer-events: auto; /* Allow interaction if needed, though mostly visual */
+  pointer-events: auto;
   min-width: 120px;
 }
 
@@ -97,7 +97,7 @@
 }
 
 @media (min-width: 1024px) {
-  .horizontal-novelty-layout {
+  .horizontal-donut-layout {
     flex-direction: row;
     align-items: center;
   }
@@ -111,46 +111,44 @@
 }
 
 /* Fullscreen Overrides */
-.dashboard-fullscreen-overlay .content-card {
+.dashboard-fullscreen-overlay .content-card.donut-chart-card {
   height: 100%;
   border: none;
   box-shadow: none;
   display: flex;
   flex-direction: column;
-  background: transparent; /* Let overlay bg show */
+  background: transparent;
 }
 
-/* Hide card header in fullscreen to prevent overlap with floating controls */
-.dashboard-fullscreen-overlay .card-header {
+.dashboard-fullscreen-overlay .content-card.donut-chart-card .card-header {
   display: none;
 }
 
-.dashboard-fullscreen-overlay .novelty-content-wrapper {
+.dashboard-fullscreen-overlay .donut-content-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Center vertically */
-  align-items: center; /* Center horizontally */
-  padding: 0;
+  justify-content: center;
+  align-items: center;
+  padding: 0 !important;
   height: 100%;
   box-sizing: border-box;
 }
 
-.dashboard-fullscreen-overlay .horizontal-novelty-layout {
+.dashboard-fullscreen-overlay .horizontal-donut-layout {
   flex: 1;
   width: 100%;
-  max-width: 1400px; /* Constrain max width for centering */
+  max-width: 1400px;
   margin: 0 auto;
   height: 100%;
   display: flex;
-  flex-direction: column; /* Mobile first */
+  flex-direction: column;
   gap: 2rem;
   overflow: hidden;
 }
 
-/* Chart Section in Fullscreen */
 .dashboard-fullscreen-overlay .chart-section {
-  flex: 0 0 40%; /* Take 40% height on mobile */
+  flex: 0 0 40%;
   height: auto !important;
   min-height: 300px;
   display: flex;
@@ -163,36 +161,31 @@
   max-width: 100%;
 }
 
-/* List Section in Fullscreen */
 .dashboard-fullscreen-overlay .list-section {
   flex: 1;
-  overflow-y: auto; /* Internal scroll */
-  padding-right: 0.5rem; /* Space for scrollbar */
+  overflow-y: auto;
+  padding-right: 0.5rem;
 }
 
 .dashboard-fullscreen-overlay .custom-legend-grid {
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(170px, 1fr)
-  ); /* 2 columns on mobile */
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 1rem;
 }
 
-.dashboard-fullscreen-overlay .novelty-item {
+.dashboard-fullscreen-overlay .chart-legend-item {
   padding: 1rem;
   font-size: 1rem;
 }
 
-/* Desktop / Landscape Fullscreen - Trigger earlier for 2 columns */
 @media (min-width: 768px) {
-  .dashboard-fullscreen-overlay .horizontal-novelty-layout {
-    flex-direction: row; /* Side by side */
-    align-items: center; /* Center Vertically */
-    gap: 4rem; /* More breathing room */
+  .dashboard-fullscreen-overlay .horizontal-donut-layout {
+    flex-direction: row;
+    align-items: center;
+    gap: 4rem;
   }
 
   .dashboard-fullscreen-overlay .chart-section {
-    flex: 0 0 45%; /* 45% Chart */
+    flex: 0 0 45%;
     height: 100% !important;
     border-bottom: none;
     border-right: 1px solid var(--border-color);
@@ -200,12 +193,8 @@
     margin-right: 0;
   }
 
-  /* Wider columns for fewer wide boxes */
   .dashboard-fullscreen-overlay .custom-legend-grid {
-    grid-template-columns: repeat(
-      auto-fill,
-      minmax(280px, 1fr)
-    ); /* Force wider boxes */
-    align-content: center; /* Center rows */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    align-content: center;
   }
 }

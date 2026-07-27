@@ -1,20 +1,7 @@
-import React from 'react';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Sector,
-  Tooltip
-} from 'recharts';
-import { Search } from 'lucide-react';
+import React, { useMemo } from 'react';
 import type { NoveltyStatsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
-import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import './NoveltyStats.css';
 import { useNoveltyStats } from '@/shared/presentation/hooks/dashboard/useNoveltyStats';
-import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
-import { useTranslation } from 'react-i18next';
-import { Tooltip as UITooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { InteractiveDonutChart, type DonutChartDataItem } from '@/shared/presentation/components/Charts/InteractiveDonutChart/InteractiveDonutChart';
 
 interface NoveltyStatsProps {
   data: NoveltyStatsReport[];
@@ -22,210 +9,45 @@ interface NoveltyStatsProps {
   onSelectNovelty?: (novelty: string) => void;
 }
 
-const renderActiveShape = (props: any) => {
-  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } =
-    props;
-
-  return (
-    <g>
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={innerRadius}
-        outerRadius={outerRadius + 8}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-        cornerRadius={4}
-      />
-      <Sector
-        cx={cx}
-        cy={cy}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        innerRadius={innerRadius - 6}
-        outerRadius={innerRadius - 2}
-        fill={fill}
-        cornerRadius={4}
-      />
-    </g>
-  );
-};
-
 export const NoveltyStats: React.FC<NoveltyStatsProps> = ({
   data,
   loading,
   onSelectNovelty
 }) => {
-  const { t } = useTranslation();
-  const {
-    activeIndex,
-    setActiveIndex,
-    onPieEnter,
-    onPieLeave,
-    chartData,
-    total,
-    activeItem
-  } = useNoveltyStats({ data });
+  const { chartData } = useNoveltyStats({ data });
 
-  if (loading) {
-    return (
-      <div
-        style={{
-          padding: '2.5rem',
-          display: 'flex',
-          justifyContent: 'center',
-          width: '100%'
-        }}
-      >
-        <CircularProgress
-          label={t('common.loading')}
-          strokeWidth={9}
-          size={110}
-        />
-      </div>
-    );
-  }
+  const mappedData: DonutChartDataItem[] = useMemo(() => {
+    return chartData.map((item) => ({
+      id: item.name,
+      name: item.name,
+      value: item.value,
+      color: item.color,
+      subtitle: `Avg: ${item.average} m³`
+    }));
+  }, [chartData]);
 
-  if (!data || data.length === 0) {
-    return (
-      <EmptyState
-        message="No Novelties Found"
-        description="There are no reading novelties recorded for this period."
-        icon={Search}
-      />
-    );
-  }
+  const tooltipFormatter = (value: number, name: string) => {
+    const item = chartData.find((d) => d.name === name);
+    return [
+      `${value} - Avg: ${item?.average || 0} m³`,
+      name
+    ];
+  };
 
   return (
-    <div
-      className="content-card"
-      style={{
-        transition: 'border-color 0.3s ease',
-        borderColor: activeItem ? activeItem.color : undefined
+    <InteractiveDonutChart
+      title="Desglose por Novedad"
+      data={mappedData}
+      loading={loading}
+      emptyStateMessage="No Novelties Found"
+      emptyStateDescription="There are no reading novelties recorded for this period."
+      onItemSelect={(id) => {
+        if (onSelectNovelty) {
+          onSelectNovelty(String(id));
+        }
       }}
-    >
-      <div className="card-header">
-        <h3>Desglose por Novedad</h3>
-      </div>
-
-      <div className="novelty-content-wrapper" style={{ padding: '1.5rem' }}>
-        <div className="horizontal-novelty-layout">
-          {/* Chart Section */}
-          <div className="chart-section">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  activeIndex={activeIndex}
-                  activeShape={renderActiveShape}
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius="70%"
-                  outerRadius="90%"
-                  paddingAngle={5}
-                  dataKey="value"
-                  onMouseEnter={onPieEnter}
-                  onMouseLeave={onPieLeave}
-                  cornerRadius={6}
-                  startAngle={90}
-                  endAngle={-270}
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={entry.color}
-                      strokeWidth={0}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(value: number, name: string) => [
-                    `${value} - Avg: ${chartData.find((d) => d.name === name)?.average} m³`,
-                    name
-                  ]}
-                  contentStyle={{
-                    backgroundColor: 'var(--surface)',
-                    borderColor: 'var(--border-color)',
-                    color: 'var(--text-main)',
-                    borderRadius: '8px'
-                  }}
-                  itemStyle={{ color: 'var(--text-main)' }}
-                />
-                {/* Center Content Overlay */}
-                <foreignObject
-                  x="0"
-                  y="0"
-                  width="100%"
-                  height="100%"
-                  pointerEvents="none"
-                >
-                  <div className="chart-center-overlay">
-                    <div className="total-card">
-                      <span className="total-label">
-                        {activeItem ? activeItem.name : 'Total'}
-                      </span>
-                      <span className="total-value">
-                        {activeItem ? activeItem.value : total}
-                      </span>
-                    </div>
-                  </div>
-                </foreignObject>
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* List/Legend Section */}
-          <div className="list-section">
-            <div className="custom-legend-grid">
-              {chartData.map((item, index) => (
-                <UITooltip
-                  key={index}
-                  themeColor="info"
-                  content={
-                    <div>
-                      <p>{`Click para ver el detalle de las lecturas con novedad ${item.name}`}</p>
-                    </div>
-                  }
-                >
-                  <div
-                    key={index}
-                    className={`novelty-item ${activeIndex === index ? 'active' : ''}`}
-                    onMouseEnter={() => setActiveIndex(index)}
-                    onMouseLeave={() => setActiveIndex(-1)}
-                    onClick={() => {
-                      if (onSelectNovelty) {
-                        onSelectNovelty(item.name);
-                      }
-                    }}
-                    style={{
-                      borderLeftColor: item.color,
-                      opacity:
-                        activeIndex !== -1 && activeIndex !== index ? 0.4 : 1
-                    }}
-                  >
-                    <div className="novelty-info">
-                      <span className="novelty-name">{item.name}</span>
-                      <span className="novelty-meta">
-                        Avg: {item.average} m³
-                      </span>
-                    </div>
-                    <div
-                      className="novelty-badge"
-                      style={{
-                        backgroundColor: `${item.color}20`,
-                        color: item.color
-                      }}
-                    >
-                      {item.value}
-                    </div>
-                  </div>
-                </UITooltip>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      tooltipFormatter={tooltipFormatter}
+      legendTooltipText="Click para ver el detalle de las lecturas con novedad {name}"
+    />
   );
 };
