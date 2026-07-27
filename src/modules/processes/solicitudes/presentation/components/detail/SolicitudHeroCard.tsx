@@ -61,6 +61,7 @@ export const SolicitudHeroCard: React.FC<SolicitudHeroCardProps> = ({
             >
               {statusConfig.label}
             </h3>
+            Hola Mario
           </div>
         </div>
 

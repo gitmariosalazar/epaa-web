@@ -138,18 +138,27 @@ export const IncidentsListPage: React.FC = () => {
       style: { width: '110px' }
     },
     {
-      header: 'ESTADO OT',
+      header: 'ESTADO OT1',
       accessor: (item) => (
         item.currentOrderState ? (
           <div
             className="incident-actions-cell-state">
-            <ColorChip
-              label={item.currentOrderState.replace(/_/g, ' ')}
-              color={getWorkOrderStatusColor(item.currentOrderState || '')}
-              variant="soft"
-              size="xs"
-              borderRadius={5}
-            />
+            <div className='incident-row'>
+              <ColorChip
+                label={item.currentOrderState.replace(/_/g, ' ')}
+                color={getWorkOrderStatusColor(item.currentOrderState || '')}
+                variant="soft"
+                size="xs"
+                borderRadius={5}
+              />
+              <ColorChip
+                label={item.orderCode}
+                color={item.currentOrderState === 'COMPLETADA' ? 'green' : 'amber'}
+                variant="ghost"
+                size="xs"
+                borderRadius={5}
+              />
+            </div>
             {
               item.orderCode !== null && (
                 <Tooltip content={`Ver Orden de Trabajo`} themeColor='accent' followCursor={false}>

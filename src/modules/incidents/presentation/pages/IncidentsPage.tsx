@@ -35,7 +35,7 @@ import {
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
 import '../styles/Incidents.css';
 import '../components/Map/IncidentMap.css';
@@ -115,8 +115,11 @@ export const IncidentsPage: React.FC = () => {
   const [selectedIncident, setSelectedIncident] =
     useState<IncidentDetailRowResponse | null>(null);
 
-  const [focusedIncident, setFocusedIncident] =
-    useState<IncidentDetailRowResponse | null>(null);
+  const [focusedIncidentId, setFocusedIncidentId] = useState<string | null>(null);
+  const focusedIncident = useMemo(
+    () => incidents.find((i) => i.incidentId === focusedIncidentId) || null,
+    [incidents, focusedIncidentId]
+  );
   const [addWorkOrderIncident, setAddWorkOrderIncident] =
     useState<IncidentDetailRowResponse | null>(null);
 
@@ -216,21 +219,30 @@ export const IncidentsPage: React.FC = () => {
       style: { width: '110px' }
     },
     {
-      header: 'ESTADO OT',
+      header: 'ESTADO OT1',
       accessor: (item) => (
         item.currentOrderState ? (
           <div
             className="incident-actions-cell-state">
-            <ColorChip
-              label={item.currentOrderState.replace(/_/g, ' ')}
-              color={getWorkOrderStatusColor(item.currentOrderState || '')}
-              variant="soft"
-              size="xs"
-              borderRadius={5}
-            />
+            <div className='incident-row'>
+              <ColorChip
+                label={item.currentOrderState.replace(/_/g, ' ')}
+                color={getWorkOrderStatusColor(item.currentOrderState || '')}
+                variant="soft"
+                size="xs"
+                borderRadius={5}
+              />
+              <ColorChip
+                label={item.orderCode}
+                color={'amber'}
+                variant="ghost"
+                size="xs"
+                borderRadius={5}
+              />
+            </div>
             {
               item.orderCode !== null && (
-                <Tooltip content={`Ver Orden de Trabajo`} themeColor='accent' followCursor={false}>
+                <Tooltip content={`Ver Orden de Trabajo Nro. : ${item.orderCode}`} themeColor='accent' followCursor={false}>
                   <Button
                     onClick={() => navigate(`/work-orders/search?code=${item.orderCode}`)}
                     size='xs'
@@ -374,8 +386,10 @@ export const IncidentsPage: React.FC = () => {
           <IncidentMapFeature
             incidents={incidents}
             selectedIncident={focusedIncident} // ← Usar focused para highlight
-            onSelect={setFocusedIncident} // ← Solo focus + highlight
+            onSelect={(incident) => setFocusedIncidentId(incident.incidentId)} // ← Solo focus + highlight
             onViewDetail={(incident) => setSelectedIncident(incident)} // ← Modal
+            onResolve={(id) => setResolveIncidentId(id)}
+            onAddWorkOrder={(incident) => setAddWorkOrderIncident(incident)}
           />
         </div>
       );

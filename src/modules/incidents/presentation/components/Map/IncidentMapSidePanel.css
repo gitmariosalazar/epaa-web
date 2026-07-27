@@ -82,6 +82,29 @@
   opacity: 1;
 }
 
+.incident-action-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.card-incidents-actions-left {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-incidents-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
 /* Número grande */
 .incident-stat-pill span {
   font-size: 1.35rem;

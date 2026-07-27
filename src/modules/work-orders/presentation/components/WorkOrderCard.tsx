@@ -229,7 +229,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, sty
           <div className="wo-expand__group">
             <span className="wo-expand__label">
               <ShieldCheck size={10} style={{ display: 'inline', marginRight: 3 }} />
-              SLA
+              SLA1
             </span>
             <span className="wo-expand__value">
               Límite: <strong style={{ color: slaColor }}>{formatSlaHoras(orden.slaHoras)}</strong>

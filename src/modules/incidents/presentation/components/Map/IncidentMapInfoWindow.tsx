@@ -1,10 +1,9 @@
-import React, { memo, useCallback, useState, useEffect } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   AlertTriangle,
   Calendar,
   MapPin,
   Tag,
-  ExternalLink,
   X
 } from 'lucide-react';
 import type { IncidentDetailRowResponse } from '../../../domain/schemas/dtos/response/view_incident.response';
@@ -15,18 +14,14 @@ import {
 } from './IncidentMapInstantTooltip';
 import { ConverDate } from '@/shared/utils/datetime/ConverDate';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { SearchableSelect, type SearchableSelectOption } from '@/shared/presentation/components/Input/SearchableSelect';
-import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
-
-// UseCases and Repositories for Clean Architecture
-import { FindTechniciansUseCase } from '@/modules/users/application/usecases/FindTechniciansUseCase';
-import { UserRepositoryImpl } from '@/modules/users/infrastructure/repositories/UserRepositoryImpl';
-import { CreateWorkOrderFromIncidentUseCase } from '@/modules/work-orders/application/usecases/CreateWorkOrderFromIncidentUseCase';
-import { ProcessWorkOrderRepositoryImpl } from '@/modules/work-orders/infrastructure/repositories/ProcessWorkOrderRepositoryImpl';
 
 // Styles
 import './IncidentMapInfoWindow.css';
 import { Alert } from '@/shared/presentation/components/Alert';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { MdFactCheck, MdNoteAdd } from 'react-icons/md';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { FaListUl } from 'react-icons/fa';
 
 interface IncidentMapInfoWindowProps {
   incident: IncidentDetailRowResponse;
@@ -35,6 +30,8 @@ interface IncidentMapInfoWindowProps {
   onViewDetail?: (incident: IncidentDetailRowResponse) => void;
   onViewOrder: (orderCode: string) => void;
 
+  onResolve?: (incidentId: string) => void;
+  onAddWorkOrder?: (incident: IncidentDetailRowResponse) => void;
 }
 
 /**
@@ -43,7 +40,15 @@ interface IncidentMapInfoWindowProps {
  * ISP: recibe solo los datos que necesita, sin el contexto entero.
  */
 export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
-  ({ incident, theme, onClose, onViewDetail, onViewOrder }) => {
+  ({
+    incident,
+    theme,
+    onClose,
+    onViewDetail,
+    onViewOrder,
+    onResolve,
+    onAddWorkOrder
+  }) => {
     const pCfg = PRIORITY_CONFIG[incident.currentPriority] ?? DEFAULT_CONFIG;
     const sCfg = STATUS_CONFIG[incident.status] ?? {
       color: '#6b7280',
@@ -64,80 +69,6 @@ export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
       [onClose, stopEventPropagation]
     );
 
-    const handleViewDetail = useCallback(
-      (ev: React.MouseEvent) => {
-        stopEventPropagation(ev);
-        onViewDetail?.(incident);
-      },
-      [incident, onViewDetail, stopEventPropagation]
-    );
-
-
-    const [loading, setLoading] = useState(false);
-    const [technicianId, setTechnicianId] = useState('');
-    const [employees, setEmployees] = useState<SearchableSelectOption[]>([]);
-    const [loadingEmployees, setLoadingEmployees] = useState(false);
-
-    useEffect(() => {
-      let mounted = true;
-      setLoadingEmployees(true);
-
-      const repository = new UserRepositoryImpl();
-      const useCase = new FindTechniciansUseCase(repository);
-
-      useCase.execute('INSPECTOR')
-        .then((list) => {
-          if (!mounted) return;
-          const opts: SearchableSelectOption[] = (list || [])
-            .filter((emp: any) => emp != null)
-            .map((emp: any) => {
-              const firstName = emp.firstName ?? emp.first_name ?? emp.nombres ?? '';
-              const lastName = emp.lastName ?? emp.last_name ?? emp.apellidos ?? '';
-              const fullName = emp.fullName ?? emp.full_name ?? `${firstName} ${lastName}`.trim();
-              const id = emp.userId ?? emp.user_id ?? emp.employeeId ?? emp.employee_id ?? emp.id;
-              return {
-                value: String(id ?? ''),
-                label: fullName || id || '(sin nombre)'
-              } as SearchableSelectOption;
-            })
-            .filter(opt => opt.value !== '');
-          setEmployees(opts);
-        })
-        .catch(() => {
-          if (mounted) setEmployees([]);
-        })
-        .finally(() => {
-          if (mounted) setLoadingEmployees(false);
-        });
-
-      return () => { mounted = false; };
-    }, []);
-
-    const handleCreateWorkOrder = useCallback(
-      async (ev: React.MouseEvent) => {
-        stopEventPropagation(ev);
-        setLoading(true);
-        try {
-          const repository = new ProcessWorkOrderRepositoryImpl();
-          const useCase = new CreateWorkOrderFromIncidentUseCase(repository);
-
-          await useCase.execute({
-            incidentCode: incident.incidentCode,
-            userIdAssignee: technicianId || null,
-          });
-
-          MessageToastCustom('success', 'OT Creada', `Se creó la OT para el incidente ${incident.incidentCode}`);
-          onClose(); // Cerrar el popup tras crear la OT exitosamente
-        } catch (error: any) {
-          MessageToastCustom('error', 'Error', error.message || 'No se pudo generar la orden de trabajo');
-        } finally {
-          setLoading(false);
-        }
-      },
-      [incident, technicianId, stopEventPropagation, onClose]
-    );
-
-    const canCreateOrder: boolean = technicianId !== '' && !loading;
     return (
       <div className={`premium-popup ${isDark ? 'dark' : ''}`}>
         <button
@@ -157,7 +88,8 @@ export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
               INFORMACIÓN BÁSICA
             </span>
             <h3 className="incident-popup-titlebar-title">
-              Incidente ID: <span className='text-secondary'>{incident.incidentCode}</span>
+              Incidente ID:{' '}
+              <span className="text-secondary">{incident.incidentCode}</span>
             </h3>
           </div>
 
@@ -240,83 +172,123 @@ export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
             </p>
           )}
 
-          {/* Action */}
-          {onViewDetail && (
-            <div
-              onMouseDown={stopEventPropagation}
-              onPointerDown={stopEventPropagation}
-              onClick={stopEventPropagation}
-            >
-              <Button
-                className="incident-popup-action"
-                style={{
-                  background: `linear-gradient(135deg, ${pCfg.color}dd, ${pCfg.color}aa)`,
-                  boxShadow: `0 4px 12px ${pCfg.glow}`
-                }}
-                onClick={handleViewDetail}
-              >
-                <ExternalLink size={13} />
-                Ver Detalle
-              </Button>
-            </div>
-          )}
-
           {
-            incident.status !== 'RESUELTO' && incident.status === 'REPORTADO' && (
-              <div className="incident-work-order-form">
-
-                <Alert
-                  type='info'
-                  size='small'
-                  className='heartbeat-alert'
-                  dismissible={false}
-                  message="El reporte no tiene una orden de trabajo, por favor asigne un técnico inspector"
-                />
-                <label htmlFor="employee-select">Técnico Inspector *</label>
-                <SearchableSelect
-                  value={technicianId}
-                  onChange={v => setTechnicianId(String(v))}
-                  options={employees}
-                  placeholder={loadingEmployees ? 'Cargando técnicos...' : 'Buscar técnico...'}
-                  disabled={loadingEmployees}
-                  size="compact"
-                />
-                { /* Button for add work order from inciden selected*/}
-                <Button
-                  className="incident-popup-action"
-                  onClick={handleCreateWorkOrder}
-                  disabled={!canCreateOrder}
-                >
-                  <ExternalLink size={13} />
-                  {loading ? 'Generando...' : 'Generar Orden de Trabajo'}
-                </Button>
-              </div>
+            incident.orderCode === null && (
+              <Alert
+                type='warning'
+                size='small'
+                className='heartbeat-alert'
+                dismissible={false}
+                message="El reporte no tiene una orden de trabajo, por favor asigne un técnico inspector"
+              />
             )
           }
+
           {
             incident.orderCode !== null && (
               <div className="incident-work-order-form">
                 <Alert
-                  type='success'
+                  type='info'
                   size='small'
                   dismissible={false}
                   message={`El incidente tiene una orden de trabajo: ${incident.orderCode}`}
                 />
-                {/* Button for add work order from inciden selected*/}
-                <Button
-                  className="incident-popup-action"
-                  onClick={() => onViewOrder(incident.orderCode!)}
-                  disabled={loading}
-                  size='compact'
-                >
-                  <ExternalLink size={13} />
-                  {loading ? 'Generando...' : 'Ver Orden de Trabajo'}
-                </Button>
               </div>
             )
           }
-        </div>
 
+          {/* Action */}
+          <div className="incident-action-buttons" style={{ position: 'relative', zIndex: 10 }}>
+            <div className="card-incidents-actions-left">
+              {
+                incident.orderCode && (
+                  <Tooltip
+                    themeColor="warning"
+                    content="Ver Orden de Trabajo"
+                    position="bottom"
+                    followCursor={false}
+                  >
+                    <ColorChip
+                      label={incident.orderCode}
+                      color={incident.currentOrderState === 'COMPLETADA' ? 'green' : 'amber'}
+                      variant="ghost"
+                      size="xs"
+                      borderRadius={5}
+                      onClick={() => onViewOrder(incident.orderCode!)}
+                    />
+                  </Tooltip>
+                )
+              }
+              {incident.currentOrderState == 'COMPLETADA' && incident.status != 'RESUELTO' && (
+                <Tooltip
+                  themeColor="warning"
+                  content="Resolver Incidente"
+                  position="bottom"
+                  followCursor={false}
+                >
+                  <Button
+                    variant="dashed"
+                    color="amber"
+                    size="xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onResolve?.(incident.incidentId);
+                    }}
+                    leftIcon={<MdFactCheck size={16} />}
+                    circle
+                  >
+                  </Button>
+                </Tooltip>
+              )}
+              {
+                !incident.orderCode && incident.status != 'RESUELTO' && incident.status !== 'FALSO_REPORTE' && (
+                  <Tooltip
+                    themeColor="warning"
+                    content="Agregar Orden de Trabajo"
+                    position="bottom"
+                    followCursor={false}
+                  >
+                    <Button
+                      variant="dashed"
+                      color="green"
+                      size="xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddWorkOrder?.(incident);
+                      }}
+                      leftIcon={<MdNoteAdd size={16} />}
+                      circle
+                    >
+                    </Button>
+                  </Tooltip>
+                )
+              }
+            </div>
+            {/* Botones de Acción right */}
+            <div className="card-incidents-actions">
+              <Tooltip
+                themeColor="warning"
+                content="Ver detalles del incidente reportado"
+                position="bottom"
+                followCursor={false}
+              >
+                <Button
+                  variant="dashed"
+                  size="xs"
+                  leftIcon={<FaListUl size={12} />}
+                  circle
+
+                  onClick={(e) => {
+                    e.stopPropagation(); // ← Muy importante
+                    onViewDetail?.(incident);
+                  }}
+                >
+                </Button>
+              </Tooltip>
+            </div>
+          </div>
+
+        </div>
       </div>
     );
   }

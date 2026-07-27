@@ -30,12 +30,12 @@ const getEstadoIcon = (codigo: string): React.ReactNode => {
 };
 
 export const WorkOrderHeroCard: React.FC<WorkOrderHeroCardProps> = ({ orden, updatedStr }) => {
-  const estadoConfig    = getEstadoOrdenConfig(orden.estado || '');
+  const estadoConfig = getEstadoOrdenConfig(orden.estado || '');
   const prioridadConfig = getPrioridadConfig(orden.prioridad || '');
-  const cumpleSla       = orden.cumpleSla ?? false;
-  const horasRestantes  = parseFloat(orden.horasRestantesSla as any) || 0;
-  const diasEnProceso   = parseInt(orden.diasEnProceso as any, 10) || 0;
-  const slaColor        = getSlaColor(cumpleSla, horasRestantes);
+  const cumpleSla = orden.cumpleSla ?? false;
+  const horasRestantes = parseFloat(orden.horasRestantesSla as any) || 0;
+  const diasEnProceso = parseInt(orden.diasEnProceso as any, 10) || 0;
+  const slaColor = getSlaColor(cumpleSla, horasRestantes);
 
   return (
     <Card className="wo-detail-card wo-detail-card--hero">
@@ -63,6 +63,12 @@ export const WorkOrderHeroCard: React.FC<WorkOrderHeroCardProps> = ({ orden, upd
             </h3>
             <span className="wo-detail-hero-status__code">{orden.codigoOrden}</span>
           </div>
+
+          <div className="wo-detail-hero-code-origin">
+            <span className="wo-detail-hero-code-origin__label">Código de Origen</span>
+            <span className="wo-detail-hero-code-origin__value">{orden.codigoEntidadOrigen || 'ORDEN - SIN ORIGEN'}</span>
+          </div>
+
         </div>
 
         {/* Stats row */}

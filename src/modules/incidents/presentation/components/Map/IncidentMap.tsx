@@ -31,8 +31,9 @@ export interface IncidentMapProps {
   center?: { lat: number; lng: number };
   /** Zoom inicial */
   zoom?: number;
-  /** Callback al hacer click en "Ver Detalle" del InfoWindow */
   onViewDetail?: (incident: IncidentDetailRowResponse) => void;
+  onResolve?: (incidentId: string) => void;
+  onAddWorkOrder?: (incident: IncidentDetailRowResponse) => void;
   /** Callback al mover la cámara (para sincronizar con estado del ViewModel) */
   onCameraChange?: (center: { lat: number; lng: number }, zoom: number) => void;
   /** Map ID requerido para AdvancedMarker */
@@ -53,6 +54,8 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
   center,
   zoom = 13,
   onViewDetail,
+  onResolve,
+  onAddWorkOrder,
   onCameraChange,
   mapId
 }) => {
@@ -216,6 +219,8 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
                 theme={theme}
                 onClose={handleInfoWindowClose}
                 onViewDetail={onViewDetail}
+                onResolve={onResolve}
+                onAddWorkOrder={onAddWorkOrder}
                 onViewOrder={(code) => navigate(`/work-orders/search?code=${code}`)}
               />
             </InfoWindow>

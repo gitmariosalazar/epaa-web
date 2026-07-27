@@ -158,6 +158,15 @@
   justify-content: space-around;
 }
 
+.incident-row {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
 .form-group label {
   font-size: 0.8125rem;
   font-weight: 500;

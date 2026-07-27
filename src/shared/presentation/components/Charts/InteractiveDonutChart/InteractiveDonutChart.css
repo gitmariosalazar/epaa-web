@@ -16,7 +16,7 @@
 
 .chart-legend-item {
   padding: 12px;
-  background-color: var(--bg-secondary);
+  background-color: var(--background);
   border-radius: 8px;
   display: flex;
   justify-content: space-between;
@@ -32,6 +32,11 @@
   transform: translateX(5px);
 }
 
+.chart-legend-item:hover {
+  border-left-color: var(--text-primary);
+  background-color: var(--background);
+}
+
 .legend-info {
   display: flex;
   flex-direction: column;
@@ -40,6 +45,7 @@
 .legend-name {
   font-weight: 500;
   color: var(--text-primary);
+  font-size: 12px;
 }
 
 .legend-meta {

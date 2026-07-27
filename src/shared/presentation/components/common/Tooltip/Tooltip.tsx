@@ -110,7 +110,6 @@ const resolveTooltipStyles = (
     border,
     '--tooltip-arrow-color': arrowColor,
     '--tooltip-arrow-border-color': arrowBorderColor,
-    backdropFilter: isTransparent ? 'blur(12px)' : 'blur(8px)',
   } as React.CSSProperties;
 };
 
@@ -231,7 +230,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         arrowTop = `${calculatedArrowY}px`;
       }
 
-      setCoords({ top: t + window.scrollY, left: l + window.scrollX, arrowLeft, arrowTop });
+      setCoords({ top: t, left: l, arrowLeft, arrowTop });
       setActualPosition(newActualPosition);
     }
   }, [isVisible, position, followCursor, mouseCoords]);
@@ -278,7 +277,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
             ref={tooltipRef}
             className={`tooltip-box tooltip-${actualPosition} tooltip-visible`}
             style={{
-              position: 'absolute',
+              position: 'fixed',
               top: coords.top,
               left: coords.left,
               opacity: 1,

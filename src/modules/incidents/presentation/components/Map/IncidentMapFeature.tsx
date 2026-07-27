@@ -14,8 +14,9 @@ export interface IncidentMapFeatureProps {
   selectedIncident: IncidentDetailRowResponse | null;
   /** Called when user selects an incident on map or side panel */
   onSelect: (incident: IncidentDetailRowResponse) => void;
-  /** Called when user clicks "Ver Detalle" in the InfoWindow popup */
   onViewDetail?: (incident: IncidentDetailRowResponse) => void;
+  onResolve?: (incidentId: string) => void;
+  onAddWorkOrder?: (incident: IncidentDetailRowResponse) => void;
 }
 
 /**
@@ -31,7 +32,9 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
   incidents,
   selectedIncident,
   onSelect,
-  onViewDetail
+  onViewDetail,
+  onResolve,
+  onAddWorkOrder
 }) => {
   const { centerLocationIncident, loading, error } =
     useCenterLocationIncident();
@@ -106,6 +109,8 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
           onSelect={onSelect}
           collapsed={isSidebarCollapsed}
           onViewDetail={onViewDetail}
+          onResolve={onResolve}
+          onAddWorkOrder={onAddWorkOrder}
           onToggle={() => setIsSidebarCollapsed((c) => !c)}
         />
 
@@ -118,6 +123,8 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
             zoom={mapZoom}
             mapId={mapId}
             onViewDetail={onViewDetail}
+            onResolve={onResolve}
+            onAddWorkOrder={onAddWorkOrder}
             onCameraChange={(center, zoom) => {
               latestCameraRef.current = {
                 center: {

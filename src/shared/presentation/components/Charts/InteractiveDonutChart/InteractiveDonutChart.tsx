@@ -248,6 +248,7 @@ export const InteractiveDonutChart: React.FC<InteractiveDonutChartProps> = ({
                     <UITooltip
                       key={item.id}
                       themeColor="info"
+                      followCursor={false}
                       content={<div><p>{legendTooltipText.replace('{name}', item.name)}</p></div>}
                     >
                       {legendContent}

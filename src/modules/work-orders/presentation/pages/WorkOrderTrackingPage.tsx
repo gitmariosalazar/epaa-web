@@ -118,10 +118,10 @@ export const WorkOrderTrackingPage: React.FC = () => {
     );
   }
 
-  const estadoConfig    = getEstadoOrdenConfig(tracking.estadoCodigo);
+  const estadoConfig = getEstadoOrdenConfig(tracking.estadoCodigo);
   const prioridadConfig = getPrioridadConfig(tracking.prioridad);
   // OrdenTrabajoTracking no tiene horasRestantesSla; usamos slaVencido como indicador
-  const slaColor        = getSlaColor(!tracking.slaVencido, tracking.slaVencido ? 0 : tracking.slaHoras);
+  const slaColor = getSlaColor(!tracking.slaVencido, tracking.slaVencido ? 0 : tracking.slaHoras);
 
   // Historial filtrado por búsqueda
   const historialFiltrado = (tracking.historial ?? []).filter((h) => {
@@ -163,7 +163,7 @@ export const WorkOrderTrackingPage: React.FC = () => {
           className="wo-tracking-estado"
           style={{ borderColor: estadoConfig.color, background: estadoConfig.bg }}
         >
-          <div className="wo-tracking-estado__label">Estado actual</div>
+          <div className="wo-tracking-estado__label">Estado actual</div>Hola Mario
           <div
             className="wo-tracking-estado__value"
             style={{ color: estadoConfig.color }}
