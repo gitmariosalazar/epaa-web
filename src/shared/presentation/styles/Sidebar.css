@@ -6,7 +6,7 @@
    ────────────────────────────────────────────────────────────────────────────── */
 
 .sidebar {
-  width: 280px;
+  width: 250px;
   height: 100%;
   background-color: var(--surface);
   border-right: 1px solid var(--surface-hover);
@@ -20,7 +20,7 @@
 }
 
 .sidebar--collapsed {
-  width: 72px;
+  width: 60px;
   /* overflow:visible lets MUI Portal menus (Menu/Popover) escape the bounds.
      They render at document.body level so this is just visual safety. */
   overflow: visible;

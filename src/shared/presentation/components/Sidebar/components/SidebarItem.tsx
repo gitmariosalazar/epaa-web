@@ -51,7 +51,7 @@ interface FlyoutMenuItemProps {
 
 const NavIcon: React.FC<{ icon: NavItem['icon']; size?: number }> = ({
   icon,
-  size = 18
+  size = 16
 }) => {
   if (!icon) return null;
   if (
@@ -379,24 +379,25 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         <ListItemButton
           onClick={() => setIsExpanded((prev) => !prev)}
           sx={{
-            px: 1.5,
-            py: 0.875,
-            pl: level > 0 ? 1.5 + level * 0.5 : 1.5,
+            minHeight: 32,
+            px: 1.25,
+            py: 0.5,
+            pl: level > 0 ? 1.25 + level * 0.75 : 1.25,
             color: isActiveParent ? 'primary.main' : 'text.secondary',
             bgcolor:
               isActiveParent && !isExpanded ? 'action.selected' : 'transparent',
             '&:hover': { color: 'text.primary' }
           }}
         >
-          <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
-            <NavIcon icon={item.icon} />
+          <ListItemIcon sx={{ minWidth: 28, color: 'inherit' }}>
+            <NavIcon icon={item.icon} size={level > 0 ? 14 : 16} />
           </ListItemIcon>
           <ListItemText
             primary={item.label}
             slotProps={{
               primary: {
                 sx: {
-                  fontSize: level > 0 ? '0.875rem' : '0.9375rem',
+                  fontSize: level > 0 ? '0.8125rem' : '0.875rem',
                   fontWeight: 500,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -426,8 +427,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           <List
             disablePadding
             sx={{
-              ml: level === 0 ? 2.5 : 1.5,
-              pl: 1,
+              ml: level === 0 ? 2.25 : 1.5,
+              pl: 0.5,
               borderLeft: `1px solid ${muiTheme.palette.divider}`
             }}
           >
@@ -457,9 +458,10 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         <ListItemButton
           selected={isActive}
           sx={{
-            px: 1.5,
-            py: 0.75,
-            pl: level > 0 ? 1.5 + level * 0.5 : 1.5,
+            minHeight: 32,
+            px: 1.25,
+            py: 0.4,
+            pl: level > 0 ? 1.25 + level * 0.75 : 1.25,
             color: 'text.secondary',
             '&:hover': { color: 'text.primary' },
             '&.Mui-selected': {
@@ -467,20 +469,20 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
               bgcolor: 'action.selected',
               borderLeft: '3px solid',
               borderLeftColor: 'primary.main',
-              pl: `calc(${level > 0 ? 1.5 + level * 0.5 : 1.5}rem - 3px)`
+              pl: `calc(${level > 0 ? 1.25 + level * 0.75 : 1.25}rem - 3px)`
             },
             '&.Mui-selected:hover': { bgcolor: 'action.selected' }
           }}
         >
-          <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
-            <NavIcon icon={item.icon} />
+          <ListItemIcon sx={{ minWidth: 28, color: 'inherit' }}>
+            <NavIcon icon={item.icon} size={level > 0 ? 14 : 16} />
           </ListItemIcon>
           <ListItemText
             primary={item.label}
             slotProps={{
               primary: {
                 sx: {
-                  fontSize: level > 0 ? '0.875rem' : '0.9375rem',
+                  fontSize: level > 0 ? '0.8125rem' : '0.875rem',
                   fontWeight: 500,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',

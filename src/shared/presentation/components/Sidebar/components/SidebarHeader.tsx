@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, IconButton, Tooltip, Typography } from '@mui/material';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
+import { FaList } from 'react-icons/fa';
 
 interface SidebarHeaderProps {
   isCollapsed: boolean;
@@ -51,7 +52,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
           '&:hover': { color: 'text.primary', bgcolor: 'action.hover' }
         }}
       >
-        {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+        {isCollapsed ? <FaList size={20} /> : <ChevronLeft size={20} />}
       </IconButton>
     </Tooltip>
   </Box>
