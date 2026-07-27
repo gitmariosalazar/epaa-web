@@ -142,7 +142,7 @@ export const SolicitudDocumentPreviewModal: React.FC<
 
     const { download, isDownloading } = useDocumentDownload();
 
-    const isPdf = previewMimeType === 'application/pdf';
+    const isPdf = previewMimeType?.includes('pdf') ?? false;
     const isImage = previewMimeType?.startsWith('image/') ?? false;
 
     const tipoLabel =

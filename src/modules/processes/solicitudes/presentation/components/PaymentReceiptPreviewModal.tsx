@@ -93,7 +93,7 @@ export const PaymentReceiptPreviewModal: React.FC<PaymentReceiptPreviewModalProp
 
   const { download, isDownloading } = useDocumentDownload();
 
-  const isPdf = (localFile ? localFile.type === 'application/pdf' : previewMimeType === 'application/pdf');
+  const isPdf = (localFile ? localFile.type.includes('pdf') : previewMimeType?.includes('pdf') ?? false);
   const isImage = (localFile ? localFile.type.startsWith('image/') : previewMimeType?.startsWith('image/') ?? false);
 
   const activePreviewUrl = localPreviewUrl || previewBlobUrl;
