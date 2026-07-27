@@ -66,7 +66,7 @@ const WorkOrderMaterialsCardInner: React.FC<WorkOrderMaterialsCardProps> = ({
     setMaterialId(val);
     const selected = state.inventories.find(inv => inv.inventoryId === val);
     if (selected) {
-      setMaterialCost(String(selected.avgCostValue || 0));
+      setMaterialCost(Number(selected.avgCostValue || 0).toFixed(2));
     } else {
       setMaterialCost('');
     }
