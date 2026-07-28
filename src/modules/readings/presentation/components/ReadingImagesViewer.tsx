@@ -6,12 +6,17 @@ import {
   Calendar,
   Camera,
   Droplet,
-  AlertTriangle
+  AlertTriangle,
+  Download,
+  Loader2,
+  ImageOff
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import type { ReadingImages } from '../../domain/models/ReadingImages';
+import { useFilePreview } from '@/shared/files/presentation/hooks/useFilePreview';
+import { useFileDownload } from '@/shared/files/presentation/hooks/useFileDownload';
 import '../styles/ReadingImagesViewer.css';
 
 interface ReadingImagesViewerProps {
@@ -30,6 +35,11 @@ export const ReadingImagesViewer: React.FC<ReadingImagesViewerProps> = ({
   const [isZoomed, setIsZoomed] = useState(false);
 
   const images = readingData?.images || [];
+  const currentFilename = images[currentImageIndex];
+
+  // Use shared hooks for file preview and download
+  const { blobUrl, loading, error } = useFilePreview('readings', currentFilename);
+  const { download, isDownloading } = useFileDownload();
 
   // Reset index and zoom when newly opened
   useEffect(() => {
@@ -58,6 +68,13 @@ export const ReadingImagesViewer: React.FC<ReadingImagesViewerProps> = ({
     setIsZoomed((prev) => !prev);
   };
 
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (currentFilename) {
+      await download('readings', currentFilename);
+    }
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -67,6 +84,20 @@ export const ReadingImagesViewer: React.FC<ReadingImagesViewerProps> = ({
       }}
       title={t('readings.photoEvidence', 'Evidencias Fotográficas')}
       size="lg"
+      headerActions={
+        blobUrl ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownload}
+            disabled={isDownloading}
+            aria-label="Descargar imagen"
+          >
+            {isDownloading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+            <span style={{ marginLeft: '6px' }}>Descargar</span>
+          </Button>
+        ) : undefined
+      }
     >
       <div className="reading-images-viewer-layout">
         <div className="reading-images-viewer">
@@ -89,14 +120,30 @@ export const ReadingImagesViewer: React.FC<ReadingImagesViewerProps> = ({
             key={currentImageIndex}
             onClick={isZoomed ? toggleZoom : undefined}
           >
-            <img
-              src={images[currentImageIndex]}
-              alt={`Evidencia ampliada ${currentImageIndex + 1}`}
-              className={`reading-images-viewer__image reading-images-viewer__image--clickable ${
-                isZoomed ? 'reading-images-viewer__image--zoomed' : ''
-              }`}
-              onClick={!isZoomed ? toggleZoom : undefined}
-            />
+            {loading && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-secondary)' }}>
+                <Loader2 size={40} className="animate-spin" style={{ marginBottom: '1rem', color: 'var(--accent)' }} />
+                <span>Cargando imagen...</span>
+              </div>
+            )}
+
+            {!loading && (error || !blobUrl) && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--error)' }}>
+                <ImageOff size={48} style={{ marginBottom: '1rem', opacity: 0.7 }} />
+                <span>{error || 'Error al cargar la imagen'}</span>
+              </div>
+            )}
+
+            {!loading && blobUrl && (
+              <img
+                src={blobUrl}
+                alt={`Evidencia ampliada ${currentImageIndex + 1}`}
+                className={`reading-images-viewer__image reading-images-viewer__image--clickable ${
+                  isZoomed ? 'reading-images-viewer__image--zoomed' : ''
+                }`}
+                onClick={!isZoomed ? toggleZoom : undefined}
+              />
+            )}
           </div>
 
           {images.length > 1 && (

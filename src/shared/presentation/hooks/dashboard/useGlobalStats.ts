@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { GlobalStatsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
+import type { StatCardItem } from '@/shared/presentation/components/Stats/StatsGrid';
 import {
   Activity,
   Droplet,
@@ -16,7 +17,7 @@ interface UseGlobalStatsProps {
 }
 
 export const useGlobalStats = ({ stats }: UseGlobalStatsProps) => {
-  const cards = useMemo(() => {
+  const cards = useMemo((): StatCardItem[] => {
     if (!stats) return [];
 
     return [
@@ -25,56 +26,56 @@ export const useGlobalStats = ({ stats }: UseGlobalStatsProps) => {
         value: stats.totalReadings,
         icon: FileText,
         desc: 'Lecturas asociadas este mes',
-        color: 'icon-blue'
+        color: 'blue'
       },
       {
         title: 'Promedio de Lecturas/Día',
         value: Number(stats.averageReadingsPerDay).toFixed(2),
         icon: Activity,
         desc: 'Promedio de lecturas procesadas diariamente',
-        color: 'icon-green'
+        color: 'green'
       },
       {
         title: 'Consumo Total',
         value: `${Number(stats.totalConsumption).toFixed(2)} m³`,
         icon: Droplet,
         desc: 'Volumen de consumo de agua',
-        color: 'icon-cyan'
+        color: 'cyan'
       },
       {
         title: 'Ingreso Total',
         value: `$${Number(stats.totalReadingValue).toFixed(2)}`,
         icon: TrendingUp,
         desc: 'Valor total de la lectura calculada',
-        color: 'icon-yellow'
+        color: 'yellow'
       },
       {
         title: 'Tasa Alcantarillado',
         value: `$${Number(stats.totalSewerRate).toFixed(2)}`,
         icon: AlertCircle,
         desc: 'Total de la tasa de alcantarillado cobrada',
-        color: 'icon-indigo'
+        color: 'indigo'
       },
       {
         title: 'Sectores Activos',
         value: stats.uniqueSectors,
         icon: MapPin,
         desc: 'Sectores únicos monitoreados',
-        color: 'icon-red'
+        color: 'red'
       },
       {
         title: 'Acometidas Completadas',
         value: stats.uniqueConnections,
         icon: MdCable,
         desc: 'Acometidas únicas',
-        color: 'icon-green'
+        color: 'green'
       },
       {
         title: 'Total de Acometidas',
         value: stats.totalConnections,
         icon: TbListNumbers,
         desc: 'Total de acometidas',
-        color: 'icon-purple'
+        color: 'purple'
       }
     ];
   }, [stats]);
