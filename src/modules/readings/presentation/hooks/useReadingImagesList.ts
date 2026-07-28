@@ -42,10 +42,14 @@ export const useReadingImagesList = () => {
         setReadingImages(result || []);
       } catch (err: any) {
         console.error('Error fetching reading images', err);
-        setError(
-          err.response?.data?.message ||
-            'Ocurrió un error al cargar las imágenes de lecturas.'
-        );
+        if (err?.status === 404) {
+          setError(null);
+        } else {
+          setError(
+            err?.status ||
+              'Ocurrió un error al cargar las imágenes de lecturas.'
+          );
+        }
         setReadingImages([]);
       } finally {
         setIsLoading(false);
