@@ -24,7 +24,6 @@ export const ReadingCreateInfoForm: React.FC<PropTypes> = ({
   const readingInfoSelected = info[0];
   const previousReadingInfoSelected = info[1];
 
-  console.log('readingInfoSelected', readingInfoSelected);
   return (
     <div className="cr-reading-grid">
       <div className="cr-reading-col">

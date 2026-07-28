@@ -41,7 +41,6 @@ export const useReadingImagesList = () => {
 
         setReadingImages(result || []);
       } catch (err: any) {
-        console.error('Error fetching reading images', err);
         if (err?.status === 404) {
           setError(null);
         } else {

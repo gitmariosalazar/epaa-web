@@ -26,6 +26,8 @@ export const useUpdateReading = () => {
       setIsLoadingInfo(true);
       setIsLoadingHistory(true);
       setError(null);
+      setReadingInfo([]);
+      setReadingHistory([]);
 
       try {
         const [infoResultSettled, historyResultSettled] =
@@ -42,10 +44,14 @@ export const useUpdateReading = () => {
         } else {
           setReadingInfo([]);
           if (infoResultSettled.status === 'rejected') {
-            console.error('Error fetching info:', infoResultSettled.reason);
+            console.error(
+              'Error fetching info:',
+              infoResultSettled.reason?.response
+            );
 
-            const errorData = infoResultSettled.reason?.response?.data;
+            const errorData = infoResultSettled.reason?.data;
             let errorMessage = 'Error al obtener la información de lectura.';
+            let statusCode = infoResultSettled.reason?.status;
 
             if (errorData?.message) {
               errorMessage = Array.isArray(errorData.message)
@@ -55,10 +61,23 @@ export const useUpdateReading = () => {
               errorMessage = infoResultSettled.reason.message;
             }
 
-            setError(errorMessage);
-            MessageToastCustom('error', errorMessage, 'Error', {
-              position: 'top-right'
-            });
+            if (statusCode === 404) {
+              setError(null);
+              MessageToastCustom(
+                'error',
+                `No se encontraron datos para el acometida con clave catastral ${cadastralKey.toUpperCase()}.`,
+                'Error',
+                {
+                  position: 'top-right'
+                }
+              );
+              return;
+            } else {
+              setError(errorMessage);
+              MessageToastCustom('error', errorMessage, 'Error', {
+                position: 'top-right'
+              });
+            }
           } else {
             setError('No se encontraron datos para la clave catastral proporcionada.');
             MessageToastCustom(

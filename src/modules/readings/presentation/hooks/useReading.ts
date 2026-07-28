@@ -55,6 +55,8 @@ export const useReading = () => {
       setIsLoadingInfo(true);
       setIsLoadingHistory(true);
       setError(null);
+      setReadingInfo([]);
+      setReadingHistory([]);
 
       try {
         // Ejecución concurrente pero tolerante a fallos independientes
@@ -74,11 +76,15 @@ export const useReading = () => {
         } else {
           setReadingInfo([]);
           if (infoResultSettled.status === 'rejected') {
-            console.error('Error fetching info:', infoResultSettled.reason);
+            console.error(
+              'Error fetching info1:',
+              infoResultSettled.reason?.response
+            );
 
             // Extraemos el mensaje de forma segura
-            const errorData = infoResultSettled.reason?.response?.data;
+            const errorData = infoResultSettled.reason?.data;
             let errorMessage = 'Error al obtener la información de lectura.';
+            let statusCode = infoResultSettled.reason?.status;
 
             if (errorData?.message) {
               errorMessage = Array.isArray(errorData.message)
@@ -87,11 +93,29 @@ export const useReading = () => {
             } else if (infoResultSettled.reason?.message) {
               errorMessage = infoResultSettled.reason.message;
             }
-            setError(errorMessage);
 
-            MessageToastCustom('error', errorMessage, 'Error', {
-              position: 'top-right'
-            });
+            console.log('errorMessage', errorMessage);
+
+            if (statusCode === 404) {
+              console.log('statusCode', statusCode);
+
+              setError(null);
+              MessageToastCustom(
+                'error',
+                `No se encontraron datos para el acometida con clave catastral ${cadastralKey.toUpperCase()}.`,
+                'Error',
+                {
+                  position: 'top-right'
+                }
+              );
+              return;
+            } else {
+              setError(errorMessage);
+
+              MessageToastCustom('error', errorMessage, 'Error', {
+                position: 'top-right'
+              });
+            }
           } else {
             setError(
               'No se encontraron datos para la clave catastral proporcionada.'

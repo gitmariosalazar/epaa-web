@@ -23,6 +23,8 @@ import { PreviousMonthWarningModal } from '../components/PreviousMonthWarningMod
 import { checkReadingIsCurrentMonth } from '../../application/usecases/CheckReadingMonthUseCase';
 import { Alert } from '@/shared/presentation/components/Alert';
 import '../styles/create-reading.css';
+import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 
 export interface UpdateReadingPageProps {
   initialCadastralKey?: string;
@@ -221,9 +223,7 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
           method="update"
         />
 
-        {error && !currentReadingInfoForRequest && (
-          <Alert type="error" title="Búsqueda sin resultados" message={error} />
-        )}
+
 
         {/* ── Estado de la conexión ─────────────────────────────────────────── */}
         {currentReadingInfoForRequest &&
@@ -337,6 +337,42 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
               </div>
             </div>
           )}
+
+
+
+        {/* Mensajes de Estado (Búsqueda Inicial, Sin Resultados, Error) */}
+        {
+          isLoadingInfo && (
+            <div className='reading-images-loading'>
+              <CircularProgress
+                label="Buscando..."
+              />
+            </div>
+          )
+        }
+        {!currentReadingInfoForRequest && !isLoadingInfo && (
+          <div style={{ marginTop: '1rem' }}>
+            {error ? (
+              <Alert
+                type="error"
+                title="Error en la búsqueda"
+                message={error}
+              />
+            ) : cadastralKey.trim().length > 0 ? (
+              <EmptyState
+                variant='warning'
+                message="No se encontraron resultados"
+                description={`No se han encontrado datos para el predio con clave catastral "${cadastralKey.toUpperCase()}".`}
+              />
+            ) : (
+              <Alert
+                type="info"
+                title="Buscar Conexión"
+                message="Ingrese la clave catastral en la barra superior y presione buscar para cargar los datos."
+              />
+            )}
+          </div>
+        )}
 
         {currentReadingInfoForRequest &&
           currentReadingInfoForRequest.permitReading && (

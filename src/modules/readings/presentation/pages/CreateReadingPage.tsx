@@ -22,6 +22,8 @@ import {
 import type { CreateReadingRequest } from '../../domain/dto/request/CreateReadingRequest';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 import { Alert } from '@/shared/presentation/components/Alert';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 
 export interface CreateReadingPageProps {
   initialCadastralKey?: string;
@@ -307,15 +309,45 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
           </div>
         )}
 
-        {readingInfoForRequest?.permitReading && (
-          <>
-            {error && !readingInfoForRequest && (
+        {/* Mensajes de Estado (Búsqueda Inicial, Sin Resultados, Error) */}
+        {
+          isLoadingInfo && (
+            <div className='reading-images-loading'>
+              <CircularProgress
+                label="Buscando..."
+              />
+            </div>
+          )
+        }
+        {!readingInfoForRequest && !isLoadingInfo && (
+          <div style={{ marginTop: '1rem' }}>
+            {error ? (
               <Alert
                 type="error"
-                title="Búsqueda sin resultados"
+                title="Error en la búsqueda"
                 message={error}
               />
+            ) : cadastralKeyInput.trim().length > 0 ? (
+              <EmptyState
+                variant='warning'
+                message="No se encontraron resultados"
+                description={`No se han encontrado datos para el predio con clave catastral "${cadastralKeyInput.toUpperCase()}".`}
+              />
+            ) : (
+              <Alert
+                type="info"
+                title="Buscar Conexión"
+                message="Ingrese la clave catastral en la barra superior y presione buscar para cargar los datos."
+              />
             )}
+          </div>
+        )}
+
+
+
+        {readingInfoForRequest?.permitReading && (
+          <>
+
 
             {readingInfoForRequest && (
               <>
