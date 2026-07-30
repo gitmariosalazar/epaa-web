@@ -159,8 +159,8 @@ const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
   const userRoles = rawRoles.filter(Boolean).flatMap((r: any) => {
     const name = typeof r === 'object' && r.name ? r.name : String(r);
     const upper = name.toUpperCase();
-    console.log(userRoles)
-    // Mapeamos 'ADMINISTRADOR' a 'ADMIN' para compatibilidad con allowedRoles={['ADMIN']}
+    
+    // Mapeamos 'SUPER ADMINISTRADOR' para compatibilidad
     if (upper === 'SUPER ADMINISTRADOR') {
       return ['SUPER ADMINISTRADOR', 'ADMINISTRADOR'];
     }

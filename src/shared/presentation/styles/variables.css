@@ -43,6 +43,7 @@
   --error: #ef4444; /* rojo */
   --warning: #f59e0b; /* ámbar */
   --info: #3b82f6; /* azul */
+  --danger: #ef4444; /* rojo */
 
   /* Colores base */
   --green: #22c55e;
@@ -53,6 +54,7 @@
   --purple: #8b5cf6;
   --pink: #ec4899;
   --magenta: #d946ef;
+  --gray: #64748b;
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -146,4 +148,24 @@
   --table-row-hover: #1e293b; /* Slate 800 */
   --table-row-striped: #020617; /* Slate 950 - Darker alternate */
   --table-border: #1e293b; /* Slate 800 */
+
+  /* Agua Potable (Water) - Dark Mode */
+  --water-background: #0f172a; /* Slate 900 base */
+  --water-background-hover: #1e293b; /* Slate 800 */
+  --water-border: 1px solid #38bdf8; /* Sky 400 */
+  --water-border-hover: 1px solid #38bdf8; /* Sky 400 */
+  --water-icon: #38bdf8; /* Sky 400 */
+  --water-icon-hover: #00b3ff; /* Sky 400 */
+  --water-gradient: linear-gradient(145deg, #0f172a, rgba(2, 132, 199, 0.2));
+  --water-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+
+  /* Alcantarillado (Sewer) - Dark Mode */
+  --sewer-background: #0f172a; /* Slate 900 base */
+  --sewer-background-hover: #1e293b; /* Slate 800 */
+  --sewer-border: 1px solid #fb923c; /* Orange 400 */
+  --sewer-border-hover: 1px solid #fb923c; /* Orange 400 */
+  --sewer-icon: #fb923c; /* Orange 400 */
+  --sewer-icon-hover: #ff7300; /* Orange 400 */
+  --sewer-gradient: linear-gradient(145deg, #0f172a, rgba(234, 88, 12, 0.15));
+  --sewer-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
 }
