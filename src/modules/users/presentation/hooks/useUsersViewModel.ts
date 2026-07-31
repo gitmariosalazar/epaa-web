@@ -23,7 +23,8 @@ export const useUsersViewModel = () => {
     getUserDetailUseCase,
     getCustomerByIdentificationUseCase,
     existsByUsernameUseCase,
-    assignRoleToUserUseCase
+    assignRoleToUserUseCase,
+    findByUsernameOrEmailUseCase
   } = useUsersContext();
 
   // State
@@ -52,6 +53,8 @@ export const useUsersViewModel = () => {
   const [isAutoFilling, setIsAutoFilling] = useState(false);
   const [autoFillMessage, setAutoFillMessage] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form State — organizado por pasos del wizard
   const initialFormData: UserFormData = {
@@ -120,7 +123,7 @@ export const useUsersViewModel = () => {
       | React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
       | { target: { name: string; value: any; type?: string } }
   ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const resetForm = () => {
@@ -128,6 +131,8 @@ export const useUsersViewModel = () => {
     setSelectedUser(null);
     setCurrentStep(0);
     setAutoFillMessage(null);
+    setValidationError(null);
+    setIsSubmitting(false);
   };
 
   /**
@@ -148,7 +153,27 @@ export const useUsersViewModel = () => {
 
     setIsAutoFilling(true);
     setAutoFillMessage(null);
+    setValidationError(null);
 
+    // 1. Verificar si el usuario ya existe en el sistema de usuarios usando FindByUsernameOrEmailUseCase
+    try {
+      const existingUser = await findByUsernameOrEmailUseCase.execute(trimmed, trimmed);
+      if (existingUser) {
+        setValidationError(`El usuario con cédula ${trimmed} ya se encuentra registrado en el sistema.`);
+        setAutoFillMessage(null);
+        setFormData({
+          ...initialFormData,
+          idCard: trimmed
+        });
+        setIsAutoFilling(false);
+        return; // Detener flujo si ya existe
+      }
+    } catch (error) {
+      // Si lanza error (ej. 404), significa que no existe en usuarios y podemos continuar.
+      console.log('[UsersViewModel] User does not exist, proceeding to customer lookup');
+    }
+
+    // 2. Si no existe, buscamos en Customers para pre-llenar los datos
     try {
       const customer =
         await getCustomerByIdentificationUseCase.execute(trimmed);
@@ -194,7 +219,7 @@ export const useUsersViewModel = () => {
           idCard: trimmed
         });
         setAutoFillMessage(
-          'No se encontró un cliente con esta cédula. Completa los datos manualmente.'
+          'No se encontró información del cliente. Completa los datos manualmente.'
         );
       }
     } catch (error) {
@@ -205,7 +230,7 @@ export const useUsersViewModel = () => {
         idCard: trimmed
       });
       setAutoFillMessage(
-        'No se encontró un cliente con esta cédula. Completa los datos manualmente.'
+        'No se encontró información del cliente. Completa los datos manualmente.'
       );
     } finally {
       setIsAutoFilling(false);
@@ -221,6 +246,7 @@ export const useUsersViewModel = () => {
    */
   const handleCreate = async () => {
     try {
+      setIsSubmitting(true);
       // Validación: contraseñas
       if (formData.password !== formData.confirmPassword) {
         alert('Las contraseñas no coinciden');
@@ -278,6 +304,8 @@ export const useUsersViewModel = () => {
       MessageToastCustom('error', errorMessage, 'Error', {
         position: 'top-right'
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -315,6 +343,7 @@ export const useUsersViewModel = () => {
 
   const handleUpdate = async () => {
     try {
+      setIsSubmitting(true);
       if (formData.password !== formData.confirmPassword) {
         alert("Passwords don't match"); // Replace with toast later
         return;
@@ -368,6 +397,8 @@ export const useUsersViewModel = () => {
       MessageToastCustom('error', errorMessage, 'Error', {
         position: 'top-right'
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -543,6 +574,7 @@ export const useUsersViewModel = () => {
     handleIdCardLookup,
     validationError,
     setValidationError,
+    isSubmitting,
 
     // Actions
     handleCreate,

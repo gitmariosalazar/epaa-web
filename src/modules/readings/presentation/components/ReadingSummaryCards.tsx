@@ -14,12 +14,14 @@ interface PropTypes {
   info: ReadingInfo[];
   currentReadingInput?: number | '';
   method: 'create' | 'update';
+  permitCreate?: boolean;
 }
 
 export const ReadingSummaryCards: React.FC<PropTypes> = ({
   info,
   currentReadingInput,
-  method
+  method,
+  permitCreate
 }) => {
   const { t } = useTranslation();
 
@@ -41,11 +43,19 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
   const previousVal =
     method === 'create'
       ? Number(
-          currentReadingInfoSelected?.currentReading !== null
-            ? currentReadingInfoSelected?.currentReading
-            : currentReadingInfoSelected?.previousReading
-        ) || 0
+        currentReadingInfoSelected?.currentReading !== null
+          ? currentReadingInfoSelected?.currentReading
+          : currentReadingInfoSelected?.previousReading
+      ) || 0
       : Number(currentReadingInfoSelected?.previousReading) || 0;
+
+  const valueOfReadingForCreate: string =
+    method === 'create' && permitCreate
+      ? `$ 0.00`
+      : `$ ${currentReadingInfoSelected?.readingValue}`;
+
+  const valueOfReadingForUpdate: string =
+    method === 'update' ? `$ ${currentReadingInfoSelected?.readingValue}` : '$ 0.00';
 
   const currentConsumption =
     currentVal !== null ? currentVal - previousVal : null;
@@ -131,10 +141,10 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
                 {t('readings.summaryCards.date')}{' '}
                 {previousReadingInfoSelected?.previousReadingDate
                   ? dateService.formatToLocaleString(
-                      `${previousReadingInfoSelected.previousReadingDate}`
-                    ) +
-                    ' ' +
-                    (previousReadingInfoSelected?.readingTime || '')
+                    `${previousReadingInfoSelected.previousReadingDate}`
+                  ) +
+                  ' ' +
+                  (previousReadingInfoSelected?.readingTime || '')
                   : '---'}
               </div>
             </div>
@@ -163,10 +173,10 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
                 {t('readings.summaryCards.date')}{' '}
                 {currentReadingInfoSelected?.previousReadingDate
                   ? dateService.formatToLocaleString(
-                      `${currentReadingInfoSelected.previousReadingDate}`
-                    ) +
-                    ' ' +
-                    (currentReadingInfoSelected?.readingTime || '')
+                    `${currentReadingInfoSelected.previousReadingDate}`
+                  ) +
+                  ' ' +
+                  (currentReadingInfoSelected?.readingTime || '')
                   : '---'}
               </div>
             </div>
@@ -185,6 +195,13 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
                   ? `${currentConsumption.toFixed(2)} m³`
                   : '0.00 m³'
               }
+              status={visuals.chipStatus}
+              variant="soft"
+              size="lg"
+              borderRadius="10px"
+            />
+            <ColorChip
+              label={method === 'create' ? valueOfReadingForCreate : valueOfReadingForUpdate}
               status={visuals.chipStatus}
               variant="soft"
               size="lg"

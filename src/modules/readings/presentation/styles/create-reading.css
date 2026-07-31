@@ -68,10 +68,11 @@ h2 {
 .cr-card-body {
   padding: 12px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   flex: 1;
+  gap: 10px;
 }
 
 .cr-card-value,

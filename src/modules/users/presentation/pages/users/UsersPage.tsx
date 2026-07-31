@@ -80,6 +80,7 @@ const UsersLayout: React.FC = () => {
     handleIdCardLookup,
     validationError,
     setValidationError,
+    isSubmitting,
 
     // Actions
     handleCreate,
@@ -340,19 +341,10 @@ const UsersLayout: React.FC = () => {
         size="lg"
         footer={
           <div style={{ width: '100%' }}>
-            {validationError && (
-              <div style={{ marginBottom: '12px' }}>
-                <Alert
-                  type="error"
-                  message={validationError}
-                  dismissible
-                  onClose={() => setValidationError(null)}
-                />
-              </div>
-            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
               <Button
                 variant="outline"
+                disabled={isSubmitting}
                 onClick={() => {
                   setValidationError(null);
                   if (currentStep > 0) setCurrentStep(currentStep - 1);
@@ -362,6 +354,7 @@ const UsersLayout: React.FC = () => {
                 Atrás
               </Button>
               <Button
+                isLoading={isSubmitting}
                 onClick={() => {
                   const error = validateCurrentStep();
                   if (error) {
@@ -416,6 +409,16 @@ const UsersLayout: React.FC = () => {
             isAutoFilling={isAutoFilling}
             autoFillMessage={autoFillMessage}
           />
+          {validationError && (
+            <div style={{ marginBottom: '12px', marginTop: '12px' }}>
+              <Alert
+                type="error"
+                message={validationError}
+                dismissible
+                onClose={() => setValidationError(null)}
+              />
+            </div>
+          )}
         </div>
       </Modal>
 
@@ -427,20 +430,10 @@ const UsersLayout: React.FC = () => {
         size="lg"
         footer={
           <div style={{ width: '100%' }}>
-            {validationError && (
-              <div style={{ marginBottom: '12px' }}>
-                <Alert
-                  type="error"
-                  message={validationError}
-                  dismissible
-                  onClose={() => setValidationError(null)}
-                />
-              </div>
-            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
               <Button
                 variant="outline"
-                disabled={currentStep === 0}
+                disabled={currentStep === 0 || isSubmitting}
                 onClick={() => {
                   setValidationError(null);
                   if (currentStep > 0) setCurrentStep(currentStep - 1);
@@ -449,6 +442,7 @@ const UsersLayout: React.FC = () => {
                 Atrás
               </Button>
               <Button
+                isLoading={isSubmitting}
                 onClick={() => {
                   const error = validateCurrentStep();
                   if (error) {
@@ -473,8 +467,8 @@ const UsersLayout: React.FC = () => {
               <React.Fragment key={step}>
                 <div
                   className={`users-wizard__step-item${idx === currentStep
-                      ? ' users-wizard__step-item--active'
-                      : ''
+                    ? ' users-wizard__step-item--active'
+                    : ''
                     }${idx < currentStep ? ' users-wizard__step-item--completed' : ''}`}
                 >
                   <div className="users-wizard__step-number">
@@ -485,8 +479,8 @@ const UsersLayout: React.FC = () => {
                 {idx < steps.length - 1 && (
                   <div
                     className={`users-wizard__step-connector${idx < currentStep
-                        ? ' users-wizard__step-connector--active'
-                        : ''
+                      ? ' users-wizard__step-connector--active'
+                      : ''
                       }`}
                   />
                 )}
@@ -500,6 +494,17 @@ const UsersLayout: React.FC = () => {
             isEditMode={true}
             isCreateMode={false}
           />
+
+          {validationError && (
+            <div style={{ marginBottom: '12px' }}>
+              <Alert
+                type="error"
+                message={validationError}
+                dismissible
+                onClose={() => setValidationError(null)}
+              />
+            </div>
+          )}
         </div>
       </Modal>
 

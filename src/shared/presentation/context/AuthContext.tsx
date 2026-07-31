@@ -14,15 +14,15 @@ import type {
 import { SessionExpirationDialog } from '@/shared/presentation/components/Auth/SessionExpirationDialog';
 import { LoginUseCase } from '@/modules/auth/application/usecases/LoginUseCase';
 import { LogoutUseCase } from '@/modules/auth/application/usecases/LogoutUseCase';
-import { RefreshTokenUseCase } from '@/modules/auth/application/usecases/RefreshTokenUseCase';
 import {
   VerifyUserUseCase,
   UserNotFoundError,
-  UserInactiveError,
+  UserInactiveError
 } from '@/modules/auth/application/usecases/VerifyUserUseCase';
 import { AuthRepositoryImpl } from '@/modules/auth/infrastructure/repositories/AuthRepositoryImpl';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 import { localStorageService } from '@/shared/infrastructure/storage/LocalStorageService';
+import { tokenRefreshCoordinator } from '@/shared/infrastructure/services/TokenRefreshCoordinator';
 import {
   getTokenExpirationMs,
   isTokenExpired
@@ -72,7 +72,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const authRepository = new AuthRepositoryImpl();
   const loginUseCase = new LoginUseCase(authRepository);
   const logoutUseCase = new LogoutUseCase(authRepository);
-  const refreshTokenUseCase = new RefreshTokenUseCase(authRepository);
   const verifyUserUseCase = new VerifyUserUseCase(authRepository);
 
   /**
@@ -92,7 +91,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const session = await refreshTokenUseCase.execute();
+      // Shared coordinator: if the axios 401 interceptor is already
+      // refreshing, this awaits that same in-flight request instead of
+      // racing it with a second /auth/refresh call.
+      const session = await tokenRefreshCoordinator.refresh();
       // persistSession will also reschedule the timer for the new token
       persistSession(session);
     } catch {
@@ -118,7 +120,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const expMs = getTokenExpirationMs(accessToken);
       if (expMs === null) {
         // Token has no `exp` claim — fall back to reactive (401) approach
-        console.warn('[AuthContext] Token has no `exp` claim; proactive refresh disabled.');
+        console.warn(
+          '[AuthContext] Token has no `exp` claim; proactive refresh disabled.'
+        );
         return;
       }
 
@@ -126,7 +130,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (delay <= 0) {
         // Token is already expired or about to expire — attempt refresh immediately
-        console.info('[AuthContext] Token already expired or within buffer — refreshing now.');
+        console.info(
+          '[AuthContext] Token already expired or within buffer — refreshing now.'
+        );
         attemptSilentRefresh();
         return;
       }
@@ -204,7 +210,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Use `username` as the primary identifier; fall back to `email`
     const identifier = parsedUser.username ?? parsedUser.email;
     if (!identifier) {
-      console.warn('[AuthContext] No identifier found in stored user — clearing session.');
+      console.warn(
+        '[AuthContext] No identifier found in stored user — clearing session.'
+      );
       clearSession();
       return false;
     }
@@ -216,13 +224,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return true;
     } catch (error) {
       if (error instanceof UserNotFoundError) {
-        console.warn('[AuthContext] SECURITY: User no longer exists — invalidating session.');
+        console.warn(
+          '[AuthContext] SECURITY: User no longer exists — invalidating session.'
+        );
       } else if (error instanceof UserInactiveError) {
-        console.warn('[AuthContext] SECURITY: User account is inactive — invalidating session.');
+        console.warn(
+          '[AuthContext] SECURITY: User account is inactive — invalidating session.'
+        );
       } else {
         // Network failure, timeout, 5xx, or unexpected error.
         // FAIL-CLOSED: revoke the local session to prevent stale access.
-        console.error('[AuthContext] Verify call failed — failing closed for security.', error);
+        console.error(
+          '[AuthContext] Verify call failed — failing closed for security.',
+          error
+        );
       }
       clearSession();
       window.location.href = '/login';
@@ -302,7 +317,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const handleExtendSession = async () => {
     setIsExtendingSession(true);
     try {
-      const session = await refreshTokenUseCase.execute();
+      const session = await tokenRefreshCoordinator.refresh();
       persistSession(session);
       setIsSessionExpired(false);
     } catch {
@@ -327,7 +342,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         updateUserSession,
         verifySessionIntegrity,
         isLoading,
-        isVerifying,
+        isVerifying
       }}
     >
       {children}

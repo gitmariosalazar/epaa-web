@@ -355,6 +355,7 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
                   info={readingInfo}
                   currentReadingInput={currentReadingInput}
                   method="create"
+                  permitCreate={readingInfoForRequest.hasCurrentReading}
                 />
 
                 <ReadingCreateInfoForm

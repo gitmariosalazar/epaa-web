@@ -295,7 +295,8 @@ export const en = {
         consumption: 'Consumption (m³)',
         observation: 'Observation',
         none: 'None',
-        title: 'Recent Readings History'
+        title: 'Recent Readings History',
+        readingValue: 'Reading Value'
       },
       additionalInfo: {
         viewMore: 'View Additional Information',

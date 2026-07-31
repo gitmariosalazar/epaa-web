@@ -99,7 +99,7 @@ const ProtectedRoute = () => {
     if (!user) return false;
 
     // Imprimimos el usuario para depuración, como pediste
-    console.log('[ProtectedRoute] Usuario actual con token:', user);
+    //console.log('[ProtectedRoute] Usuario actual con token:', user);
 
     const rawRoles = Array.isArray(user.roles) ? user.roles : [user.roles];
     return rawRoles.filter(Boolean).some((r: any) => {
@@ -159,7 +159,7 @@ const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
   const userRoles = rawRoles.filter(Boolean).flatMap((r: any) => {
     const name = typeof r === 'object' && r.name ? r.name : String(r);
     const upper = name.toUpperCase();
-    
+
     // Mapeamos 'SUPER ADMINISTRADOR' para compatibilidad
     if (upper === 'SUPER ADMINISTRADOR') {
       return ['SUPER ADMINISTRADOR', 'ADMINISTRADOR'];

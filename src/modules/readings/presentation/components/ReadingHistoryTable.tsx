@@ -70,7 +70,23 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
                 color: color
               }}
             >
-              {row.consumption}
+              {`${row.consumption} m³`}
+            </span>
+          );
+        }
+      },
+      {
+        header: t('readings.historyTable.readingValue', 'Valor'),
+        accessor: (row) => {
+          const color: string = getNoveltyColor(row.observation);
+          return (
+            <span
+              style={{
+                fontWeight: 600,
+                color: color
+              }}
+            >
+              {`$ ${row.readingValue}`}
             </span>
           );
         }
