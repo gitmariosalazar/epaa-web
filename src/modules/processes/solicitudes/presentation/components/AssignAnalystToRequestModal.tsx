@@ -8,7 +8,6 @@ import {
   Calendar,
   MapPin,
   AlignLeft,
-  Network,
   User,
   Mail,
   Phone
@@ -252,7 +251,9 @@ const IncidentSummaryInfo: React.FC<{
                 Usuario Solicitante
               </span>
               <span style={{ fontWeight: 600, color: 'var(--text)' }}>
-                {solicitud.datosAdicionales.nombres + ' ' + solicitud.datosAdicionales.apellidos}
+                {solicitud.datosAdicionales.nombres +
+                  ' ' +
+                  solicitud.datosAdicionales.apellidos}
               </span>
             </div>
           </div>

@@ -98,7 +98,6 @@ import {
 import '../styles/SolicitudDetailPage.css';
 import { GetOrdenesTrabajoBysSolicitudIdUseCase } from '../../application/usecases/GetOrdenesTrabajoBysSolicitudIdUseCase';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
-import { maskString } from '@/shared/utils/text/maskString';
 import { GiMatterStates } from 'react-icons/gi';
 import { AssignAnalystToSolicitudModal } from '../components/AssignAnalystToRequestModal';
 
@@ -567,12 +566,12 @@ export const SolicitudDetailPage: React.FC = () => {
   // ── Derived data ───────────────────────────────────────────────────────────
   const fechaStr = solicitud.fechaSolicitud
     ? new Date(solicitud.fechaSolicitud).toLocaleDateString('es-EC', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
     : '—';
 
   // Determine actual payment document logic
@@ -589,13 +588,13 @@ export const SolicitudDetailPage: React.FC = () => {
   const paymentDocument: DocumentoAdjuntoResponse | null =
     solicitud.urlComprobante
       ? {
-        id: '',
-        tipodocumento: 'COMPROBANTE_PAGO_INSPECCION',
-        url:
-          getPreviewUrl(solicitud.urlComprobante) || solicitud.urlComprobante,
-        estadoValidacion: 'PENDIENTE',
-        observacion: null
-      }
+          id: '',
+          tipodocumento: 'COMPROBANTE_PAGO_INSPECCION',
+          url:
+            getPreviewUrl(solicitud.urlComprobante) || solicitud.urlComprobante,
+          estadoValidacion: 'PENDIENTE',
+          observacion: null
+        }
       : null;
 
   console.log(solicitud);
@@ -628,7 +627,7 @@ export const SolicitudDetailPage: React.FC = () => {
               </p>
               {solicitud.analistaUsername ? (
                 <ColorChip
-                  label={(solicitud.analistaUsername)}
+                  label={solicitud.analistaUsername}
                   variant="ghost"
                   size="sm"
                   color="green"
@@ -709,123 +708,123 @@ export const SolicitudDetailPage: React.FC = () => {
             {/* Fase 4.5 / 5: Confirmar pago — abre el modal con preview + formulario */}
             {(solicitud.estado === 'FACTURA_INSPECCION_EMITIDA' ||
               solicitud.estado === 'PAGO_PENDIENTE') && (
-                <>
-                  <PhaseActionBtn
-                    color="#10b981"
-                    bg="rgba(16,185,129,0.1)"
-                    icon={<CreditCard size={18} />}
-                    label={
-                      solicitud.urlComprobante
-                        ? 'Validar y Confirmar Pago'
-                        : 'Subir y Confirmar Pago'
-                    }
-                    description={
-                      solicitud.urlComprobante
-                        ? 'Revise el comprobante del cliente y registre la confirmación del pago'
-                        : 'Suba el comprobante de pago entregado por el cliente y confirme el pago en un solo paso'
-                    }
-                    onClick={() => setReceiptModalOpen(true)}
-                  />
-                  {/* Info básica de la factura debajo del botón */}
-                  <div className="sol-detail-payment-info-card">
-                    <div className="sol-detail-payment-info-card__grid">
-                      {solicitud.numeroFactura && (
-                        <div className="sol-detail-payment-info-card__item">
-                          <span className="sol-detail-payment-info-card__label">
-                            N° Factura
-                          </span>
-                          <span className="sol-detail-payment-info-card__value">
-                            {solicitud.numeroFactura}
-                          </span>
-                        </div>
-                      )}
+              <>
+                <PhaseActionBtn
+                  color="#10b981"
+                  bg="rgba(16,185,129,0.1)"
+                  icon={<CreditCard size={18} />}
+                  label={
+                    solicitud.urlComprobante
+                      ? 'Validar y Confirmar Pago'
+                      : 'Subir y Confirmar Pago'
+                  }
+                  description={
+                    solicitud.urlComprobante
+                      ? 'Revise el comprobante del cliente y registre la confirmación del pago'
+                      : 'Suba el comprobante de pago entregado por el cliente y confirme el pago en un solo paso'
+                  }
+                  onClick={() => setReceiptModalOpen(true)}
+                />
+                {/* Info básica de la factura debajo del botón */}
+                <div className="sol-detail-payment-info-card">
+                  <div className="sol-detail-payment-info-card__grid">
+                    {solicitud.numeroFactura && (
                       <div className="sol-detail-payment-info-card__item">
                         <span className="sol-detail-payment-info-card__label">
-                          Concepto
+                          N° Factura
                         </span>
                         <span className="sol-detail-payment-info-card__value">
-                          Inspección Técnica de Acometida
+                          {solicitud.numeroFactura}
                         </span>
                       </div>
-                      {solicitud.montofactura != null && (
-                        <div className="sol-detail-payment-info-card__item">
-                          <span className="sol-detail-payment-info-card__label">
-                            Monto
-                          </span>
-                          <span className="sol-detail-payment-info-card__value sol-detail-payment-info-card__value--accent">
-                            ${solicitud.montofactura.toFixed(2)}
-                          </span>
-                        </div>
-                      )}
-                      {solicitud.fechaVencimiento && (
-                        <div className="sol-detail-payment-info-card__item">
-                          <span className="sol-detail-payment-info-card__label">
-                            Vence
-                          </span>
-                          <span className="sol-detail-payment-info-card__value">
-                            {new Date(
-                              solicitud.fechaVencimiento
-                            ).toLocaleDateString('es-EC', {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric'
-                            })}
-                          </span>
-                        </div>
-                      )}
-                      {solicitud.estadoPago && (
-                        <div className="sol-detail-payment-info-card__item">
-                          <span className="sol-detail-payment-info-card__label">
-                            Estado
-                          </span>
-                          <span className="sol-detail-payment-info-card__value">
-                            {solicitud.estadoPago}
-                          </span>
-                        </div>
-                      )}
-                      {solicitud.urlComprobante ? (
-                        <div className="sol-detail-payment-info-card__item sol-detail-payment-info-card__item--full">
-                          <span className="sol-detail-payment-info-card__label">
-                            Comprobante
-                          </span>
-                          <span
-                            className="sol-detail-payment-info-card__value"
-                            style={{ color: '#10b981' }}
-                          >
-                            ✓ Subido por el cliente
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="sol-detail-payment-info-card__item sol-detail-payment-info-card__item--full">
-                          <span className="sol-detail-payment-info-card__label">
-                            Comprobante
-                          </span>
-                          <span
-                            className="sol-detail-payment-info-card__value"
-                            style={{
-                              color: '#f59e0b',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem',
-                              flexWrap: 'wrap'
-                            }}
-                          >
-                            ⚠ Pendiente de subir
-                            <Button
-                              size="xs"
-                              variant="outline"
-                              color="primary"
-                              onClick={() => setReceiptModalOpen(true)}
-                            >
-                              Subir por el cliente
-                            </Button>
-                          </span>
-                        </div>
-                      )}
+                    )}
+                    <div className="sol-detail-payment-info-card__item">
+                      <span className="sol-detail-payment-info-card__label">
+                        Concepto
+                      </span>
+                      <span className="sol-detail-payment-info-card__value">
+                        Inspección Técnica de Acometida
+                      </span>
                     </div>
+                    {solicitud.montofactura != null && (
+                      <div className="sol-detail-payment-info-card__item">
+                        <span className="sol-detail-payment-info-card__label">
+                          Monto
+                        </span>
+                        <span className="sol-detail-payment-info-card__value sol-detail-payment-info-card__value--accent">
+                          ${solicitud.montofactura.toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                    {solicitud.fechaVencimiento && (
+                      <div className="sol-detail-payment-info-card__item">
+                        <span className="sol-detail-payment-info-card__label">
+                          Vence
+                        </span>
+                        <span className="sol-detail-payment-info-card__value">
+                          {new Date(
+                            solicitud.fechaVencimiento
+                          ).toLocaleDateString('es-EC', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                    )}
+                    {solicitud.estadoPago && (
+                      <div className="sol-detail-payment-info-card__item">
+                        <span className="sol-detail-payment-info-card__label">
+                          Estado
+                        </span>
+                        <span className="sol-detail-payment-info-card__value">
+                          {solicitud.estadoPago}
+                        </span>
+                      </div>
+                    )}
+                    {solicitud.urlComprobante ? (
+                      <div className="sol-detail-payment-info-card__item sol-detail-payment-info-card__item--full">
+                        <span className="sol-detail-payment-info-card__label">
+                          Comprobante
+                        </span>
+                        <span
+                          className="sol-detail-payment-info-card__value"
+                          style={{ color: '#10b981' }}
+                        >
+                          ✓ Subido por el cliente
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="sol-detail-payment-info-card__item sol-detail-payment-info-card__item--full">
+                        <span className="sol-detail-payment-info-card__label">
+                          Comprobante
+                        </span>
+                        <span
+                          className="sol-detail-payment-info-card__value"
+                          style={{
+                            color: '#f59e0b',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            flexWrap: 'wrap'
+                          }}
+                        >
+                          ⚠ Pendiente de subir
+                          <Button
+                            size="xs"
+                            variant="outline"
+                            color="primary"
+                            onClick={() => setReceiptModalOpen(true)}
+                          >
+                            Subir por el cliente
+                          </Button>
+                        </span>
+                      </div>
+                    )}
                   </div>
-                </>
-              )}
+                </div>
+              </>
+            )}
 
             {/* Fase 6: Emitir OT de inspección */}
             {solicitud.estado === 'PAGO_CONFIRMADO' && (
@@ -874,15 +873,15 @@ export const SolicitudDetailPage: React.FC = () => {
             {(solicitud.estado === 'INFORME_EN_REVISION' ||
               (solicitud.estado === 'INSPECCION_EN_PROCESO' &&
                 solicitud.informeId)) && (
-                <PhaseActionBtn
-                  color="#06b6d4"
-                  bg="rgba(6,182,212,0.1)"
-                  icon={<ShieldCheck size={18} />}
-                  label="Emitir Dictamen — Aprobar o Rechazar Informe"
-                  description="Revisar el informe técnico y emitir la resolución de aprobación o rechazo"
-                  onClick={() => setApproveReportOpen(true)}
-                />
-              )}
+              <PhaseActionBtn
+                color="#06b6d4"
+                bg="rgba(6,182,212,0.1)"
+                icon={<ShieldCheck size={18} />}
+                label="Emitir Dictamen — Aprobar o Rechazar Informe"
+                description="Revisar el informe técnico y emitir la resolución de aprobación o rechazo"
+                onClick={() => setApproveReportOpen(true)}
+              />
+            )}
 
             {/* Fase 10: Generar contrato */}
             {solicitud.estado === 'INFORME_APROBADO' && (
@@ -937,15 +936,15 @@ export const SolicitudDetailPage: React.FC = () => {
             {/* Fase 14: Registro catastral */}
             {(solicitud.estado === 'INSTALACION_COMPLETADA' ||
               solicitud.estado === 'REGISTRO_CATASTRAL_PENDIENTE') && (
-                <PhaseActionBtn
-                  color="#10b981"
-                  bg="rgba(16,185,129,0.1)"
-                  icon={<Zap size={18} />}
-                  label="Registro Catastral y Activación del Suministro"
-                  description="Registrar la clave catastral y activar el suministro de agua en el sistema"
-                  onClick={() => setRegisterCadastralOpen(true)}
-                />
-              )}
+              <PhaseActionBtn
+                color="#10b981"
+                bg="rgba(16,185,129,0.1)"
+                icon={<Zap size={18} />}
+                label="Registro Catastral y Activación del Suministro"
+                description="Registrar la clave catastral y activar el suministro de agua en el sistema"
+                onClick={() => setRegisterCadastralOpen(true)}
+              />
+            )}
           </div>
 
           {/* ══ PANEL INFORME (cuando aplica) ══ */}
