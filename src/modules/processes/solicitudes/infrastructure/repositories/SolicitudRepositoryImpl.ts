@@ -596,6 +596,26 @@ export class SolicitudRepositoryImpl implements SolicitudRepository {
       return false;
     }
   }
+
+  async assignAnalystToRequest(
+    solicitudId: string,
+    analystId: string
+  ): Promise<boolean> {
+    try {
+      const response = await this.client.put<any>(
+        `/requests/${solicitudId}/assign-analyst`,
+        { analystId }
+      );
+      return (
+        response.status_code === 200 ||
+        response.status_code === 201 ||
+        !!response.data
+      );
+    } catch (error) {
+      console.error('Error in assignAnalystToRequest:', error);
+      return false;
+    }
+  }
 }
 
 // ─── Helper interno ───────────────────────────────────────────────────────────

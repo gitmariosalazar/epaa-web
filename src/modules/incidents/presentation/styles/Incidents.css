@@ -88,7 +88,9 @@
 }
 
 .incident-detail-modal {
+  min-width: 550px;
   max-width: 950px;
+  width: 100%;
 }
 
 .incident-modal-header {

@@ -104,6 +104,11 @@ export interface SolicitudRepository {
     invoiceId: string,
     file: File
   ): Promise<boolean>;
+
+  assignAnalystToRequest(
+    solicitudId: string,
+    analystId: string
+  ): Promise<boolean>;
 }
 
 // ─── DTOs ────────────────────────────────────────────────────────────────────
