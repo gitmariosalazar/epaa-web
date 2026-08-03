@@ -53,11 +53,35 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
       },
       {
         header: t('readings.historyTable.prevReading'),
-        accessor: 'previousReading'
+        accessor: (row: ReadingHistory) => {
+          const color: string = getNoveltyColor(row.observation);
+          return (
+            <span
+              style={{
+                fontWeight: 600,
+                color: color
+              }}
+            >
+              {`${row.previousReading ?? 'N/A'}`}
+            </span>
+          );
+        }
       },
       {
         header: t('readings.historyTable.currReading'),
-        accessor: 'currentReading'
+        accessor: (row: ReadingHistory) => {
+          const color: string = getNoveltyColor(row.observation);
+          return (
+            <span
+              style={{
+                fontWeight: 600,
+                color: color
+              }}
+            >
+              {`${row.currentReading ?? 'N/A'}`}
+            </span>
+          );
+        }
       },
       {
         header: t('readings.historyTable.consumption'),
@@ -70,7 +94,7 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
                 color: color
               }}
             >
-              {`${row.consumption} m³`}
+              {`${row.consumption ?? 'N/A'} m³`}
             </span>
           );
         }
@@ -86,7 +110,7 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
                 color: color
               }}
             >
-              {`$ ${row.readingValue}`}
+              {`$ ${row.readingValue ?? 'N/A'}`}
             </span>
           );
         }
@@ -95,10 +119,26 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
         header: t('readings.historyTable.observation'),
         accessor: (row) => {
           const color: string = getNoveltyColor(row.observation);
-          return (
+          return row.observation ? (
+            row.observation ? (
+              <ColorChip
+                color={color}
+                label={row.observation}
+                size="xs"
+                variant="outline"
+              />
+            ) : (
+              <ColorChip
+                color={'red'}
+                label="Indeterminado"
+                size="xs"
+                variant="outline"
+              />
+            )
+          ) : (
             <ColorChip
-              color={color}
-              label={row.observation}
+              color={'red'}
+              label="Indeterminado"
               size="xs"
               variant="outline"
             />
