@@ -32,7 +32,7 @@ export const useUsersViewModel = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [limit] = useState(10);
+  const [limit] = useState(100);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Modals State

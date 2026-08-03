@@ -128,7 +128,7 @@ const UsersLayout: React.FC = () => {
               return (
                 <ColorChip
                   key={roleKey}
-                  status='info'
+                  status="info"
                   label={roleName}
                   borderRadius={5}
                   size="xs"
@@ -259,18 +259,16 @@ const UsersLayout: React.FC = () => {
   return (
     <PageLayout
       className="users-page"
-
       filters={
         <div className="entry-filters">
           <div className="entry-filter-group entry-filter-group--search">
-
             <div className="entry-filter-input-wrapper">
               <Input
                 type="text"
                 placeholder="Search users..."
                 value={searchTerm}
                 leftIcon={<Search size={18} />}
-                size='small'
+                size="small"
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
@@ -279,12 +277,11 @@ const UsersLayout: React.FC = () => {
             className="entry-filter-group trash-report-filter-right"
             style={{ flex: '0 1 auto', width: 'auto' }}
           >
-
             <Button
               variant="outline"
               onClick={refresh}
               leftIcon={<RefreshCw size={16} />}
-              size='compact'
+              size="compact"
               style={{ height: '30px' }}
             >
               Refresh
@@ -295,10 +292,10 @@ const UsersLayout: React.FC = () => {
                 setIsCreateOpen(true);
               }}
               leftIcon={<Plus size={14} />}
-              size='compact'
+              size="compact"
               style={{ height: '30px' }}
-              variant='dashed'
-              color='green'
+              variant="dashed"
+              color="green"
             >
               New User
             </Button>
@@ -320,7 +317,7 @@ const UsersLayout: React.FC = () => {
           columns={columns}
           isLoading={isLoading}
           pagination={true}
-          pageSize={10}
+          pageSize={15}
           emptyState={
             <EmptyState
               message="No se encontraron usuarios"
@@ -341,7 +338,13 @@ const UsersLayout: React.FC = () => {
         size="lg"
         footer={
           <div style={{ width: '100%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                width: '100%'
+              }}
+            >
               <Button
                 variant="outline"
                 disabled={isSubmitting}
@@ -367,7 +370,9 @@ const UsersLayout: React.FC = () => {
                   else handleCreate();
                 }}
               >
-                {currentStep === steps.length - 1 ? 'Crear Empleado' : 'Siguiente'}
+                {currentStep === steps.length - 1
+                  ? 'Crear Empleado'
+                  : 'Siguiente'}
               </Button>
             </div>
           </div>
@@ -379,8 +384,8 @@ const UsersLayout: React.FC = () => {
               <React.Fragment key={step}>
                 <div
                   className={`users-wizard__step-item${idx === currentStep
-                    ? ' users-wizard__step-item--active'
-                    : ''
+                      ? ' users-wizard__step-item--active'
+                      : ''
                     }${idx < currentStep ? ' users-wizard__step-item--completed' : ''}`}
                 >
                   <div className="users-wizard__step-number">
@@ -391,8 +396,8 @@ const UsersLayout: React.FC = () => {
                 {idx < steps.length - 1 && (
                   <div
                     className={`users-wizard__step-connector${idx < currentStep
-                      ? ' users-wizard__step-connector--active'
-                      : ''
+                        ? ' users-wizard__step-connector--active'
+                        : ''
                       }`}
                   />
                 )}
@@ -430,7 +435,13 @@ const UsersLayout: React.FC = () => {
         size="lg"
         footer={
           <div style={{ width: '100%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                width: '100%'
+              }}
+            >
               <Button
                 variant="outline"
                 disabled={currentStep === 0 || isSubmitting}
@@ -455,7 +466,9 @@ const UsersLayout: React.FC = () => {
                   else handleUpdate();
                 }}
               >
-                {currentStep === steps.length - 1 ? 'Guardar Cambios' : 'Siguiente'}
+                {currentStep === steps.length - 1
+                  ? 'Guardar Cambios'
+                  : 'Siguiente'}
               </Button>
             </div>
           </div>
@@ -467,8 +480,8 @@ const UsersLayout: React.FC = () => {
               <React.Fragment key={step}>
                 <div
                   className={`users-wizard__step-item${idx === currentStep
-                    ? ' users-wizard__step-item--active'
-                    : ''
+                      ? ' users-wizard__step-item--active'
+                      : ''
                     }${idx < currentStep ? ' users-wizard__step-item--completed' : ''}`}
                 >
                   <div className="users-wizard__step-number">
@@ -479,8 +492,8 @@ const UsersLayout: React.FC = () => {
                 {idx < steps.length - 1 && (
                   <div
                     className={`users-wizard__step-connector${idx < currentStep
-                      ? ' users-wizard__step-connector--active'
-                      : ''
+                        ? ' users-wizard__step-connector--active'
+                        : ''
                       }`}
                   />
                 )}
