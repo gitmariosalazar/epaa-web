@@ -14,6 +14,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import '@/modules/readings/presentation/styles/create-reading.css';
 import { ConnectionStateChip } from '@/shared/presentation/components/chip/ConnectionStateChip';
 import { GrStatusUnknown } from 'react-icons/gr';
 import type { ReadingInfo } from '@/modules/readings/domain/models/ReadingInfoResponse';
