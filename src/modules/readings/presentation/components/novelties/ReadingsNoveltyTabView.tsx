@@ -25,6 +25,7 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
 
   const [month, setMonth] = useState(currentMonthStr);
   const [sector, setSector] = useState('');
+  const [userId, setUserId] = useState('');
   const [novelty, setNovelty] = useState<string>(NoveltyType.NORMAL);
 
   const { readingNovelties, loading, error, fetchNoveltyReadings } =
@@ -41,7 +42,7 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
   const loadingProgress = useSimulatedProgress(loading);
 
   const handleFetch = () => {
-    fetchNoveltyReadings(novelty, month, sector ? Number(sector) : undefined);
+    fetchNoveltyReadings(novelty, month, sector ? Number(sector) : undefined, userId);
   };
 
   return (
@@ -56,6 +57,8 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
           onSectorChange={setSector}
           novelty={novelty}
           onNoveltyChange={setNovelty}
+          userId={userId}
+          onUserIdChange={setUserId}
           onFetch={handleFetch}
           isLoading={loading}
           searchTerm={searchTerm}

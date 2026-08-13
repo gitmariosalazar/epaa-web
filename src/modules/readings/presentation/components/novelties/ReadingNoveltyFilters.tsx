@@ -11,6 +11,8 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TbChartPieFilled } from 'react-icons/tb';
 import { RiMenuSearchLine } from 'react-icons/ri';
+import { User } from 'lucide-react';
+import { useUsersViewModel } from '@/modules/users/presentation/hooks/useUsersViewModel';
 
 export interface ReadingNoveltyFiltersProps {
   novelty: string;
@@ -23,6 +25,8 @@ export interface ReadingNoveltyFiltersProps {
   isLoading: boolean;
   /** Optional extra action rendered beside the Consultar button (e.g. Initialize Period) */
   extraAction?: ReactNode;
+  userId?: string;
+  onUserIdChange?: (val: string) => void;
   onSearchChange?: (val: string) => void;
   searchTerm?: string;
   onNoveltySearchChange?: (val: string) => void;
@@ -39,6 +43,8 @@ export const ReadingNoveltyFilters: React.FC<ReadingNoveltyFiltersProps> = ({
   onFetch,
   isLoading,
   extraAction,
+  userId,
+  onUserIdChange,
   onSearchChange,
   searchTerm,
   onNoveltySearchChange,
@@ -48,6 +54,13 @@ export const ReadingNoveltyFilters: React.FC<ReadingNoveltyFiltersProps> = ({
 
   // Business rule: allow fetching if not loading and both month and novelty are selected
   const canFetch = !isLoading && Boolean(month) && Boolean(novelty);
+
+  const { users } = useUsersViewModel();
+  const readersUsers = users.filter((user) =>
+    user.roles.find(
+      (role) => role.name.includes('LECTURISTA')
+    )
+  );
 
   const options = Object.entries(NoveltyTypeLabelMap).map(([value, label]) => ({
     value,
@@ -101,6 +114,28 @@ export const ReadingNoveltyFilters: React.FC<ReadingNoveltyFiltersProps> = ({
             leftIcon={<RiMenuSearchLine size={18} />}
           />
         </div>
+
+        {onUserIdChange && (
+          <div className="filter-group">
+            <label className="filter-label">
+              {t('readingData.filters.userId', 'Usuario ID')}
+            </label>
+            <Select
+              size="compact"
+              width={180}
+              value={userId || ''}
+              options={[
+                { value: '', label: 'Todos los usuarios' },
+                ...readersUsers.map((user) => ({
+                  value: user.cardId ?? '',
+                  label: `${user.firstName} ${user.lastName}`
+                }))
+              ]}
+              onChange={(e) => onUserIdChange(e.target.value)}
+              leftIcon={<User size={18} />}
+            />
+          </div>
+        )}
 
         <div className="filter-group">
           <Button

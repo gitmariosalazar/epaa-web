@@ -7,12 +7,13 @@ import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { Edit2, Plus, Trash2, Search, Check, X, SearchX } from 'lucide-react';
+import { Plus, Trash2, Search, Check, X, SearchX } from 'lucide-react';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import '@/shared/presentation/styles/Table.css';
 import '@/modules/accounting/presentation/styles/entry-data/EntryDataFilters.css';
 import '@/shared/presentation/styles/Permission.css';
 import { usePermissionsViewModel } from '../../hooks/usePermissionsViewModel';
+import { FaEdit } from 'react-icons/fa';
 
 export const PermissionsPage: React.FC = () => {
   const {
@@ -59,14 +60,14 @@ export const PermissionsPage: React.FC = () => {
     {
       header: 'Actions',
       accessor: (perm) => (
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
           <Button
             size="sm"
             variant="ghost"
             circle
             onClick={() => openEdit(perm)}
           >
-            <Edit2 size={16} />
+            <FaEdit size={13} />
           </Button>
           <Button
             size="sm"
@@ -75,7 +76,7 @@ export const PermissionsPage: React.FC = () => {
             style={{ color: 'var(--error)' }}
             onClick={() => handleDelete(perm.permissionId)}
           >
-            <Trash2 size={16} />
+            <Trash2 size={13} />
           </Button>
         </div>
       )
@@ -124,7 +125,7 @@ export const PermissionsPage: React.FC = () => {
           columns={columns}
           isLoading={isLoading}
           pagination={true}
-          pageSize={10}
+          pageSize={15}
           emptyState={
             <EmptyState
               message="No se encontraron permisos"

@@ -90,6 +90,7 @@ import { CreateIncidentPage } from '@/modules/incidents/presentation/pages/Creat
 
 import UnAuthorizedPage from '@/shared/presentation/components/unauthorized/UnAuthorizedPage';
 import { CircularProgress } from './shared/presentation/components/CircularProgress';
+import type { RolOrPermission } from './shared/utils/interfaces/RolOrPermission';
 
 const ProtectedRoute = () => {
   const { token, user, isLoading, isVerifying, logout } = useAuth();
@@ -101,9 +102,9 @@ const ProtectedRoute = () => {
     // Imprimimos el usuario para depuración, como pediste
     //console.log('[ProtectedRoute] Usuario actual con token:', user);
 
-    const rawRoles = Array.isArray(user.roles) ? user.roles : [user.roles];
-    return rawRoles.filter(Boolean).some((r: any) => {
-      const roleName = typeof r === 'object' && r.name ? r.name : String(r);
+    const rawRoles: RolOrPermission[] = user?.roles;
+    return rawRoles.filter(Boolean).some((r) => {
+      const roleName: string = r.name ? r.name : String(r);
       const upper = roleName.toUpperCase();
       return (
         upper === 'WEB_USUARIO' ||

@@ -12,21 +12,25 @@ export class TakenReadingConnectionUseCase {
 
   async executeGetTakenReadingsByMonth(
     dateMonth: string,
-    sector?: number
+    sector?: number,
+    userId?: string
   ): Promise<TakenReadingConnection[]> {
     return this.takenReadingConnectionRepository.getTakenReadingsByMonth(
       dateMonth,
-      sector
+      sector,
+      userId
     );
   }
 
   async executeGetTakenReadingEstimatesOrAverage(
     month: string,
-    sector?: number
+    sector?: number,
+    userId?: string
   ): Promise<TakenReadingConnection[]> {
     return this.takenReadingConnectionRepository.getTakenReadingEstimatesOrAverage(
       month,
-      sector
+      sector,
+      userId
     );
   }
 }

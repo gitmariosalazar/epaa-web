@@ -159,7 +159,7 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
         columns={columns}
         isLoading={isLoading}
         pagination
-        pageSize={7}
+        pageSize={5}
         emptyState={
           <EmptyState
             message="No se encontraron lecturas"

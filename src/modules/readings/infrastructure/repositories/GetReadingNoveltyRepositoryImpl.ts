@@ -14,7 +14,8 @@ export class GetReadingNoveltyRepositoryImpl implements GetReadingNoveltyReposit
   async getReadingByNovelty(
     dateMonth: string,
     novelty?: string,
-    sector?: number
+    sector?: number,
+    userId?: string
   ): Promise<ReadingNovelty[]> {
     // http://192.168.0.111:3005/Readings/get-reading-by-novelty/NORMAL/2026-05?sector=12'
     let url = `/Readings/get-reading-by-novelty/${dateMonth}`;
@@ -25,6 +26,9 @@ export class GetReadingNoveltyRepositoryImpl implements GetReadingNoveltyReposit
     }
     if (sector !== undefined && sector !== null) {
       params.append('sector', sector.toString());
+    }
+    if (userId) {
+      params.append('userId', userId);
     }
 
     const queryString = params.toString();

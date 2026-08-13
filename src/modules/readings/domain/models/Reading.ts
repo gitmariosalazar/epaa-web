@@ -52,4 +52,9 @@ export interface TakenReadingConnection {
   distanceMeters?: number | null;
   isInsideAllowedRadius?: boolean | null;
   distanceLineGeoJSON?: any | null;
+  readingCode?: string | null;
+  userCreatedId?: string | null;
+  userCreatedName?: string | null;
+  userUpdatedId?: string | null;
+  userUpdatedName?: string | null;
 }

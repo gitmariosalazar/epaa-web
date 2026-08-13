@@ -11,13 +11,19 @@ export const useReadingNovelty = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchNoveltyReadings = useCallback(
-    async (novelty: string, dateMonth: string, sector?: number) => {
+    async (
+      novelty: string,
+      dateMonth: string,
+      sector?: number,
+      userId?: string
+    ) => {
       try {
         setLoading(true);
         const result = await getReadingNoveltyUseCase.execute(
           dateMonth,
           novelty === 'TODAS' ? '' : novelty,
-          sector
+          sector,
+          userId ? userId : undefined
         );
         setReadingNovelties(result);
       } catch (err: any) {

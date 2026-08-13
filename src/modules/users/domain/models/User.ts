@@ -1,3 +1,5 @@
+import type { RolOrPermission } from '@/shared/utils/interfaces/RolOrPermission';
+
 export interface User {
   userId: string;
   username: string;
@@ -7,6 +9,7 @@ export interface User {
   dateOfBirth?: Date;
   sexId?: number;
   idCard?: string;
+  cardId?: string;
   citizenId?: string;
   positionId?: number;
   contractTypeId?: number;
@@ -22,8 +25,8 @@ export interface User {
   internalEmail?: string;
   photoUrl?: string;
   createdBy?: string;
-  roles: { id: number; name: string }[];
-  permissions: { id: number; name: string }[];
+  roles: RolOrPermission[];
+  permissions: RolOrPermission[];
   isActive: boolean;
   registeredAt: Date;
   lastLogin?: Date | null;

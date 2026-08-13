@@ -3,11 +3,13 @@ import type { TakenReadingConnection } from '../models/Reading';
 export interface TakenReadingConnectionRepository {
   getTakenReadingsByMonth(
     dateMonth: string,
-    sector?: number
+    sector?: number,
+    userId?: string
   ): Promise<TakenReadingConnection[]>;
 
   getTakenReadingEstimatesOrAverage(
     month: string,
-    sector?: number
+    sector?: number,
+    userId?: string
   ): Promise<TakenReadingConnection[]>;
 }

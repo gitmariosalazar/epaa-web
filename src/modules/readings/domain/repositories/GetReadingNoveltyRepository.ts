@@ -4,6 +4,7 @@ export interface GetReadingNoveltyRepository {
   getReadingByNovelty(
     dateMonth: string,
     novelty?: string,
-    sector?: number
+    sector?: number,
+    userId?: string
   ): Promise<ReadingNovelty[]>;
 }

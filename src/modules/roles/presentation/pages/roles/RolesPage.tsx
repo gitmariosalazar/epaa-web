@@ -8,7 +8,6 @@ import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { Edit2 } from 'lucide-react';
 import { RolesFilters } from '../../components/RolesFilters';
 import '@/shared/presentation/styles/Table.css';
 import '@/modules/accounting/presentation/styles/entry-data/EntryDataFilters.css';
@@ -19,6 +18,7 @@ import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useTranslation } from 'react-i18next';
 import { truncateText } from '@/shared/utils/text/truncate-text';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { FaEdit } from 'react-icons/fa';
 
 export const RolesPage: React.FC = () => {
   const {
@@ -66,65 +66,67 @@ export const RolesPage: React.FC = () => {
     },
     {
       header: 'Actions',
-      accessor: (role) => (
-        <div
-          style={{
-            display: 'flex',
-            gap: '8px',
-            justifyContent: 'flex-end',
-            alignItems: 'center'
-          }}
-        >
-          <Tooltip content="Add Permission" followCursor={false}>
+      accessor: ((role: Role) => {
+        const iconSize: number = 13;
+        return (
+          <div
+            style={{
+              display: 'flex',
+              gap: '8px',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <Tooltip content="Add Permission" followCursor={false}>
 
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => openPermissions(role)}
-              circle
-              style={{ color: 'var(--success)' }}
-            >
-              <MdAdd size={16} />
-            </Button>
-          </Tooltip>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => openPermissions(role)}
+                circle
+                style={{ color: 'var(--success)' }}
+              >
+                <MdAdd size={iconSize} />
+              </Button>
+            </Tooltip>
 
-          <Tooltip content="Edit Role" followCursor={false}>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => openEdit(role)}
-              circle
-              style={{ color: 'var(--blue)' }}
-            >
-              <Edit2 size={16} />
-            </Button>
-          </Tooltip>
+            <Tooltip content="Edit Role" followCursor={false}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => openEdit(role)}
+                circle
+                style={{ color: 'var(--blue)' }}
+              >
+                <FaEdit size={iconSize} />
+              </Button>
+            </Tooltip>
 
-          <Tooltip content="View Permissions" followCursor={false}>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => openPermissions(role)}
-              circle
-              style={{ color: 'var(--orange)' }}
-            >
-              <MdLockOpen size={16} />
-            </Button>
-          </Tooltip>
+            <Tooltip content="View Permissions" followCursor={false}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => openPermissions(role)}
+                circle
+                style={{ color: 'var(--orange)' }}
+              >
+                <MdLockOpen size={iconSize} />
+              </Button>
+            </Tooltip>
 
-          <Tooltip content="Remove Role" followCursor={false}>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => handleDelete(role)}
-              circle
-              style={{ color: 'var(--error)' }}
-            >
-              <MdClose size={16} />
-            </Button>
-          </Tooltip>
-        </div>
-      )
+            <Tooltip content="Remove Role" followCursor={false}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => handleDelete(role)}
+                circle
+                style={{ color: 'var(--error)' }}
+              >
+                <MdClose size={iconSize} />
+              </Button>
+            </Tooltip>
+          </div>)
+      })
     }
   ];
 
@@ -157,7 +159,7 @@ export const RolesPage: React.FC = () => {
           columns={columns}
           isLoading={loading}
           pagination={true}
-          pageSize={10}
+          pageSize={15}
           emptyState={
             <EmptyState
               message="No se encontraron roles"

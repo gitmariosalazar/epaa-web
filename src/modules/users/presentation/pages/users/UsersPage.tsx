@@ -36,6 +36,7 @@ import { Alert } from '@/shared/presentation/components/Alert/Alert';
 import { BiSolidErrorAlt } from 'react-icons/bi';
 import { MdSecurity } from 'react-icons/md';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import type { RolOrPermission } from '@/shared/utils/interfaces/RolOrPermission';
 
 const UsersLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -121,10 +122,9 @@ const UsersLayout: React.FC = () => {
       accessor: (user: User) => (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
           {user.roles && user.roles.length > 0 ? (
-            user.roles.map((role) => {
-              const roleName = typeof role === 'string' ? role : role.name;
-              const roleKey =
-                typeof role === 'string' ? role : role.id || roleName;
+            user.roles.map((role: RolOrPermission) => {
+              const roleName: string = role.name;
+              const roleKey: number = role.id;
               return (
                 <ColorChip
                   key={roleKey}
@@ -177,82 +177,85 @@ const UsersLayout: React.FC = () => {
     },
     {
       header: 'Actions',
-      accessor: (user: User) => (
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <Tooltip content="Ver detalles" position="top" followCursor={false}>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => handleView(user)}
-              circle
-            >
-              <Eye size={16} />
-            </Button>
-          </Tooltip>
+      accessor: (user: User) => {
+        const iconSize: number = 13;
+        return (
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
+            <Tooltip content="Ver detalles" position="top" followCursor={false}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => handleView(user)}
+                circle
+              >
+                <Eye size={iconSize} />
+              </Button>
+            </Tooltip>
 
-          <Tooltip content="Gestionar" position="top" followCursor={false}>
-            <Button
-              size="sm"
-              variant="ghost"
-              circle
-              onClick={() => navigate(`/users/${user.username}`)}
-            >
-              <Settings size={16} />
-            </Button>
-          </Tooltip>
-          <Tooltip content="Editar" position="top" followCursor={false}>
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={user.username === 'root'}
-              className={
-                user.username === 'root'
-                  ? `disabled:opacity-50 disabled:cursor-not-allowed`
-                  : ''
-              }
-              circle
-              onClick={() => openEdit(user)}
-            >
-              <Edit2 size={16} />
-            </Button>
-          </Tooltip>
+            <Tooltip content="Gestionar" position="top" followCursor={false}>
+              <Button
+                size="sm"
+                variant="ghost"
+                circle
+                onClick={() => navigate(`/users/${user.username}`)}
+              >
+                <Settings size={iconSize} />
+              </Button>
+            </Tooltip>
+            <Tooltip content="Editar" position="top" followCursor={false}>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={user.username === 'root'}
+                className={
+                  user.username === 'root'
+                    ? `disabled:opacity-50 disabled:cursor-not-allowed`
+                    : ''
+                }
+                circle
+                onClick={() => openEdit(user)}
+              >
+                <Edit2 size={iconSize} />
+              </Button>
+            </Tooltip>
 
-          <Tooltip content="Eliminar" position="top" followCursor={false}>
-            <Button
-              size="sm"
-              variant="ghost"
-              style={{ color: 'var(--error)' }}
-              disabled={user.username === 'root'}
-              className={
-                user.username === 'root'
-                  ? `disabled:opacity-50 disabled:cursor-not-allowed`
-                  : ''
-              }
-              onClick={() => {
-                setSelectedUser(user);
-                setIsDeleteOpen(true);
-              }}
-              title="Delete User"
-              circle
-            >
-              <Trash2 size={16} />
-            </Button>
-          </Tooltip>
-          <Tooltip content="Asignar rol" position="top" followCursor={false}>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                setSelectedUser(user);
-                setIsAssignRoleOpen(true);
-              }}
-              circle
-            >
-              <MdSecurity size={16} />
-            </Button>
-          </Tooltip>
-        </div>
-      )
+            <Tooltip content="Eliminar" position="top" followCursor={false}>
+              <Button
+                size="sm"
+                variant="ghost"
+                style={{ color: 'var(--error)' }}
+                disabled={user.username === 'root'}
+                className={
+                  user.username === 'root'
+                    ? `disabled:opacity-50 disabled:cursor-not-allowed`
+                    : ''
+                }
+                onClick={() => {
+                  setSelectedUser(user);
+                  setIsDeleteOpen(true);
+                }}
+                title="Delete User"
+                circle
+              >
+                <Trash2 size={iconSize} />
+              </Button>
+            </Tooltip>
+            <Tooltip content="Asignar rol" position="top" followCursor={false}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setSelectedUser(user);
+                  setIsAssignRoleOpen(true);
+                }}
+                circle
+              >
+                <MdSecurity size={iconSize} />
+              </Button>
+            </Tooltip>
+          </div>
+        )
+      }
     }
   ];
 
@@ -384,8 +387,8 @@ const UsersLayout: React.FC = () => {
               <React.Fragment key={step}>
                 <div
                   className={`users-wizard__step-item${idx === currentStep
-                      ? ' users-wizard__step-item--active'
-                      : ''
+                    ? ' users-wizard__step-item--active'
+                    : ''
                     }${idx < currentStep ? ' users-wizard__step-item--completed' : ''}`}
                 >
                   <div className="users-wizard__step-number">
@@ -396,8 +399,8 @@ const UsersLayout: React.FC = () => {
                 {idx < steps.length - 1 && (
                   <div
                     className={`users-wizard__step-connector${idx < currentStep
-                        ? ' users-wizard__step-connector--active'
-                        : ''
+                      ? ' users-wizard__step-connector--active'
+                      : ''
                       }`}
                   />
                 )}
@@ -480,8 +483,8 @@ const UsersLayout: React.FC = () => {
               <React.Fragment key={step}>
                 <div
                   className={`users-wizard__step-item${idx === currentStep
-                      ? ' users-wizard__step-item--active'
-                      : ''
+                    ? ' users-wizard__step-item--active'
+                    : ''
                     }${idx < currentStep ? ' users-wizard__step-item--completed' : ''}`}
                 >
                   <div className="users-wizard__step-number">
@@ -492,8 +495,8 @@ const UsersLayout: React.FC = () => {
                 {idx < steps.length - 1 && (
                   <div
                     className={`users-wizard__step-connector${idx < currentStep
-                        ? ' users-wizard__step-connector--active'
-                        : ''
+                      ? ' users-wizard__step-connector--active'
+                      : ''
                       }`}
                   />
                 )}

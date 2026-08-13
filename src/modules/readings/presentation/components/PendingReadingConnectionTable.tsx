@@ -11,6 +11,8 @@ import { Eye } from 'lucide-react';
 import { IoAdd, IoInformationCircleOutline } from 'react-icons/io5';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { truncateText } from '@/shared/utils/text/truncate-text';
+import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
 
 interface PropTypes {
   data: PendingReadingConnection[];
@@ -50,10 +52,23 @@ export const PendingReadingConnectionTable: React.FC<PropTypes> = ({
       },
       { header: t('readings.columns.sector'), accessor: 'sector' },
       { header: t('readings.columns.account'), accessor: 'account' },
-      { header: t('readings.columns.address'), accessor: 'address' },
+      {
+        header: t('readings.columns.address'),
+        accessor: (r) => (
+          <Tooltip
+            content={`${r.address}, Sector: ${r.sector}`}
+            themeColor="info"
+            position="top"
+            followCursor={false}
+          >
+            <span>{truncateText(`${r.address}, Sector: ${r.sector}`, 32)}</span>
+          </Tooltip>
+        )
+      },
       {
         header: t('readings.columns.average'),
-        accessor: (r) => `${r.averageConsumption} m³`
+        accessor: (r) =>
+          `${NumberFormatter.format(r.averageConsumption, 2)} m³`
       },
       {
         header: t('common.actions', 'Acciones'),
@@ -63,7 +78,7 @@ export const PendingReadingConnectionTable: React.FC<PropTypes> = ({
               themeColor="info"
               content={t('common.viewDetails', 'Ver Detalles')}
             >
-              <Button size="sm" variant="ghost" onClick={() => {}} circle>
+              <Button size="sm" variant="ghost" onClick={() => { }} circle>
                 <Eye size={16} />
               </Button>
             </Tooltip>
@@ -100,7 +115,7 @@ export const PendingReadingConnectionTable: React.FC<PropTypes> = ({
         columns={columns}
         isLoading={isLoading}
         pagination
-        pageSize={10}
+        pageSize={15}
         emptyState={
           <EmptyState
             message="No se encontraron lecturas pendientes"

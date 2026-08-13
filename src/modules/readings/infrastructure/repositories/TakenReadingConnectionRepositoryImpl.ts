@@ -13,10 +13,16 @@ export class TakenReadingConnectionRepositoryImpl implements TakenReadingConnect
 
   async getTakenReadingsByMonth(
     dateMonth: string,
-    sector?: number
+    sector?: number,
+    userId?: string
   ): Promise<TakenReadingConnection[]> {
-    const params = [dateMonth, sector].filter((p) => p !== undefined).join('/');
-    const path = `/Readings/get-taken-readings-by-month/${params}`;
+    let path = `/Readings/get-taken-readings-by-month/${dateMonth}`;
+    if (sector !== undefined) {
+      path += `/${sector}`;
+    }
+    if (userId !== undefined) {
+      path += `?userId=${userId}`;
+    }
 
     const response =
       await this.client.get<ApiResponse<TakenReadingConnection[]>>(path);
@@ -25,10 +31,16 @@ export class TakenReadingConnectionRepositoryImpl implements TakenReadingConnect
 
   async getTakenReadingEstimatesOrAverage(
     month: string,
-    sector?: number
+    sector?: number,
+    userId?: string
   ): Promise<TakenReadingConnection[]> {
-    const params = [month, sector].filter((p) => p !== undefined).join('/');
-    const path = `/Readings/get-taken-reading-estimates-or-average/${params}`;
+    let path = `/Readings/get-taken-reading-estimates-or-average/${month}`;
+    if (sector !== undefined) {
+      path += `/${sector}`;
+    }
+    if (userId !== undefined) {
+      path += `?userId=${userId}`;
+    }
 
     const response =
       await this.client.get<ApiResponse<TakenReadingConnection[]>>(path);

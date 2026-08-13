@@ -43,10 +43,12 @@ export const useReadingsList = () => {
     async (
       activeTab: string,
       monthIso: string,
-      sectorToFetch?: string | number
+      sectorToFetch?: string | number,
+      userId?: string
     ) => {
       const formattedDate = monthIso;
       const sectorPayload = sectorToFetch ? Number(sectorToFetch) : undefined;
+      const userIdPayload = userId ? userId : undefined;
 
       setIsLoading(true);
       setError(null);
@@ -64,7 +66,8 @@ export const useReadingsList = () => {
           const completed =
             await getTakenReadingsByMonthUseCase.executeGetTakenReadingsByMonth(
               formattedDate,
-              sectorPayload
+              sectorPayload,
+              userIdPayload
             );
           setCompletedReadings(completed || []);
         }
@@ -73,7 +76,8 @@ export const useReadingsList = () => {
           const estimated =
             await getTakenReadingEstimatesOrAverageUseCase.executeGetTakenReadingEstimatesOrAverage(
               formattedDate,
-              sectorPayload
+              sectorPayload,
+              userIdPayload
             );
           setEstimatedReadings(estimated || []);
         }

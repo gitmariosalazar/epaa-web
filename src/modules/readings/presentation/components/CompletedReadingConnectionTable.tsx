@@ -13,13 +13,14 @@ import { Eye } from 'lucide-react';
 import { FaEdit, FaCheckCircle, FaHome } from 'react-icons/fa';
 import { MdMyLocation } from 'react-icons/md';
 import { IoIosCloseCircle } from 'react-icons/io';
-import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { IoInformationCircleOutline } from 'react-icons/io5';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { FaLocationCrosshairs } from 'react-icons/fa6';
 import { ReadingLocationModal } from './draw-map/ReadingLocationModal';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
+import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
 
 interface PropTypes {
   data: TakenReadingConnection[];
@@ -34,7 +35,8 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
 }) => {
   const { t } = useTranslation();
 
-  const [selectedReading, setSelectedReading] = useState<TakenReadingConnection | null>(null);
+  const [selectedReading, setSelectedReading] =
+    useState<TakenReadingConnection | null>(null);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
   const handleOpenMap = (reading: TakenReadingConnection) => {
@@ -71,13 +73,122 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
           r.readingDate ? dateService.formatToLocaleString(r.readingDate) : '-'
       },
       {
-        header: t('readings.columns.prevReading'),
-        accessor: 'previousReading'
+        header: t('readings.columns.readings', 'Lecturas'),
+        accessor: (item: TakenReadingConnection) => {
+          return (
+            <>
+              <div className="readings-taken-content">
+                <span className='readings-taken-info'>
+                  {' '}
+                  <p>Ant.:</p>
+                  <ColorChip
+                    label={`${NumberFormatter.format(item.previousReading, 2)}`}
+                    size="xs"
+                    variant="ghost"
+                  ></ColorChip>
+                </span>
+                <span className='readings-taken-info'>
+                  {' '}
+                  <p>Act.:</p>
+                  <ColorChip
+                    label={`${NumberFormatter.format(item.currentReading, 2)}`}
+                    size="xs"
+                    variant="ghost"
+                  ></ColorChip>
+                </span>
+              </div>
+            </>
+          );
+        }
       },
-      { header: t('readings.columns.currReading'), accessor: 'currentReading' },
       {
         header: t('readings.columns.consumption'),
-        accessor: (r) => `${r.calculatedConsumption} m³`
+        accessor: (r) => `${NumberFormatter.format(r.calculatedConsumption, 2)} m³`
+      },
+      {
+        header: t('readings.columns.readingCode', 'Código'),
+        accessor: (r) => r.readingCode || '-'
+      },
+      {
+        header: t('readings.columns.userCreatedName', 'Creado por'),
+        accessor: (r: TakenReadingConnection) => (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Tooltip
+              content={r.userCreatedName}
+              themeColor="info"
+              followCursor={false}
+            >
+              <div className="flex items-center gap-2">
+                <ColorChip
+                  label={`@${r.userCreatedId}`}
+                  color="var(--text-secondary)"
+                  size="xs"
+                  variant="ghost"
+                />
+                <div
+                  style={{
+                    fontSize: '0.85em',
+                    color: 'var(--text-secondary)',
+                    marginLeft: '12px'
+                  }}
+                >
+                  {r.readingDate
+                    ? dateService.formatToLocaleString(r.readingDate)
+                    : '-'}
+                </div>
+              </div>
+            </Tooltip>
+          </div>
+        )
+      },
+      {
+        header: t('readings.columns.userUpdatedName', 'Actualizado por'),
+        accessor: (r: TakenReadingConnection) => (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {r.userUpdatedId ? (
+              <Tooltip
+                content={r.userUpdatedName}
+                themeColor="info"
+                followCursor={false}
+              >
+                <div className="flex items-center gap-2">
+                  <ColorChip
+                    label={`@${r.userUpdatedId}`}
+                    color="var(--text-secondary)"
+                    size="xs"
+                    variant="ghost"
+                  />
+                  <div
+                    style={{
+                      fontSize: '0.85em',
+                      color: 'var(--text-secondary)',
+                      marginLeft: '12px'
+                    }}
+                  >
+                    {r.readingDate
+                      ? dateService.formatToLocaleString(r.readingDate)
+                      : '-'}
+                  </div>
+                </div>
+              </Tooltip>
+            ) : (
+              <div
+                style={{
+                  fontSize: '0.85em',
+                  color: 'var(--text-secondary)',
+                  marginLeft: '12px'
+                }}
+              >
+                <ColorChip
+                  label="Sin actualizar"
+                  color="var(--text-secondary)"
+                  size="xs"
+                  variant="ghost"
+                />
+              </div>
+            )}
+          </div>
+        )
       },
       {
         header: t('readings.columns.novelty'),
@@ -100,15 +211,21 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
           return (
             <div className="reading-info-container">
               <div className="reading-info-graphic">
-                <Tooltip content="Lugar de Acometida" themeColor="info" followCursor={false}>
-                  <div className="reading-info-home-icon" >
+                <Tooltip
+                  content="Lugar de Acometida"
+                  themeColor="info"
+                  followCursor={false}
+                >
+                  <div className="reading-info-home-icon">
                     <FaHome size={16} />
                   </div>
                 </Tooltip>
 
                 <div className="reading-info-distance-container">
                   <span className="reading-info-distance-text">
-                    {r.distanceMeters != null ? `${r.distanceMeters.toFixed(2)} m` : '-'}
+                    {r.distanceMeters != null
+                      ? `${r.distanceMeters.toFixed(2)} m`
+                      : '-'}
                   </span>
                   <div className="reading-info-distance-line">
                     <div className="reading-info-distance-tick left" />
@@ -116,7 +233,11 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
                   </div>
                 </div>
 
-                <Tooltip content="Punto de Lectura" themeColor="info" followCursor={false}>
+                <Tooltip
+                  content="Punto de Lectura"
+                  themeColor="info"
+                  followCursor={false}
+                >
                   <div className="reading-info-location-icon">
                     <MdMyLocation size={16} />
                   </div>
@@ -125,16 +246,26 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
 
               {r.isInsideAllowedRadius != null && (
                 <ColorChip
-                  label={r.isInsideAllowedRadius ? 'Dentro del radio' : 'Fuera del radio'}
+                  label={
+                    r.isInsideAllowedRadius
+                      ? 'Dentro del radio'
+                      : 'Fuera del radio'
+                  }
                   color={r.isInsideAllowedRadius ? '#10b981' : '#ef4444'}
                   size="xs"
                   borderRadius={6}
                   variant="soft"
-                  icon={r.isInsideAllowedRadius ? <FaCheckCircle /> : <IoIosCloseCircle />}
+                  icon={
+                    r.isInsideAllowedRadius ? (
+                      <FaCheckCircle />
+                    ) : (
+                      <IoIosCloseCircle />
+                    )
+                  }
                 />
               )}
             </div>
-          )
+          );
         }
       },
       {
@@ -150,7 +281,11 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
                 <Eye size={16} />
               </Button>
             </Tooltip>
-            <Tooltip themeColor="warning" followCursor={false} content={t('common.edit', 'Editar')}>
+            <Tooltip
+              themeColor="warning"
+              followCursor={false}
+              content={t('common.edit', 'Editar')}
+            >
               <Button
                 size="sm"
                 variant="ghost"
@@ -163,7 +298,11 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
                 <FaEdit size={16} />
               </Button>
             </Tooltip>
-            <Tooltip themeColor="cyan" followCursor={false} content={t('common.viewLocation', 'Ver Ubicación de la Lectura')}>
+            <Tooltip
+              themeColor="cyan"
+              followCursor={false}
+              content={t('common.viewLocation', 'Ver Ubicación de la Lectura')}
+            >
               <Button
                 size="sm"
                 variant="ghost"
@@ -191,7 +330,7 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
         columns={columns}
         isLoading={isLoading}
         pagination
-        pageSize={10}
+        pageSize={15}
         emptyState={
           <EmptyState
             message="No se encontraron lecturas completadas."

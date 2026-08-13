@@ -6,6 +6,9 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import { TbChartPieFilled } from 'react-icons/tb';
 import { Input } from '@/shared/presentation/components/Input/Input';
+import { User } from 'lucide-react';
+import { useUsersViewModel } from '@/modules/users/presentation/hooks/useUsersViewModel';
+import { Select } from '@/shared/presentation/components/Input/Select';
 
 // ── Tab type ──────────────────────────────────────────────────────────────────
 export type ReadingDataTab =
@@ -21,6 +24,7 @@ const SHOW: Record<
   {
     month: boolean;
     sector: boolean;
+    userId?: boolean;
   }
 > = {
   pending: {
@@ -29,19 +33,23 @@ const SHOW: Record<
   },
   completed: {
     month: true,
-    sector: true
+    sector: true,
+    userId: true
   },
   estimated: {
     month: true,
-    sector: true
+    sector: true,
+    userId: true
   },
   all: {
     month: true,
-    sector: true
+    sector: true,
+    userId: true
   },
   novelties: {
     month: true,
-    sector: true
+    sector: true,
+    userId: true
   }
 };
 
@@ -57,6 +65,10 @@ export interface ReadingDataFiltersProps {
   sector: string;
   onSectorChange: (val: string) => void;
 
+  // UserId
+  userId?: string;
+  onUserIdChange?: (val: string) => void;
+
   // Fetch Action
   onFetch: () => void;
   isLoading: boolean;
@@ -71,6 +83,8 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
   onMonthChange,
   sector,
   onSectorChange,
+  userId,
+  onUserIdChange,
   onFetch,
   isLoading,
   extraAction
@@ -80,6 +94,14 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
   // Business rule: allow fetching if not loading and month is selected
   const canFetch = !isLoading && Boolean(month);
   const show = SHOW[activeTab];
+
+  const { users } = useUsersViewModel();
+
+  const readersUsers = users.filter((user) =>
+    user.roles.find(
+      (role) => role.name.includes('LECTURISTA')
+    )
+  );
 
   return (
     <div className="entry-filters">
@@ -116,6 +138,30 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
                 value={sector}
                 onChange={(e) => onSectorChange(e.target.value)}
                 leftIcon={<TbChartPieFilled size={18} />}
+              />
+            </div>
+          </div>
+        )}
+
+        {show.userId && onUserIdChange && (
+          <div className="filter-group">
+            <label className="filter-label">
+              {t('readingData.filters.userId', 'Usuario ID')}
+            </label>
+            <div className="filter-input-wrapper">
+              <Select
+                size="compact"
+                width={180}
+                value={userId || ''}
+                options={[
+                  { value: '', label: 'Todos los usuarios' },
+                  ...readersUsers.map((user) => ({
+                    value: user.cardId ?? '',
+                    label: `${user.firstName} ${user.lastName}`
+                  }))
+                ]}
+                onChange={(e) => onUserIdChange(e.target.value)}
+                leftIcon={<User size={18} />}
               />
             </div>
           </div>

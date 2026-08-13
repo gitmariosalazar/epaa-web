@@ -11,12 +11,14 @@ export class GetReadingNoveltyUseCase {
   async execute(
     dateMonth: string,
     novelty?: string,
-    sector?: number
+    sector?: number,
+    userId?: string
   ): Promise<ReadingNovelty[]> {
     return this.getReadingNoveltyRepository.getReadingByNovelty(
       dateMonth,
       novelty,
-      sector
+      sector,
+      userId
     );
   }
 }

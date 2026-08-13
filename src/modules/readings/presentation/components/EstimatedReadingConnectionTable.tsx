@@ -15,6 +15,7 @@ import { IoInformationCircleOutline } from 'react-icons/io5';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
 
 interface PropTypes {
   data: TakenReadingConnection[];
@@ -58,13 +59,38 @@ export const EstimatedReadingConnectionTable: React.FC<PropTypes> = ({
           r.readingDate ? dateService.formatToLocaleString(r.readingDate) : '-'
       },
       {
-        header: t('readings.columns.prevReading'),
-        accessor: 'previousReading'
+        header: t('readings.columns.readings', 'Lecturas'),
+        accessor: (item: TakenReadingConnection) => {
+          return (
+            <>
+              <div className="readings-taken-content">
+                <span className="readings-taken-info">
+                  {' '}
+                  <p>Ant.:</p>
+                  <ColorChip
+                    label={`${NumberFormatter.format(item.previousReading, 2)}`}
+                    size="xs"
+                    variant="ghost"
+                  ></ColorChip>
+                </span>
+                <span className="readings-taken-info">
+                  {' '}
+                  <p>Act.:</p>
+                  <ColorChip
+                    label={`${NumberFormatter.format(item.currentReading, 2)}`}
+                    size="xs"
+                    variant="ghost"
+                  ></ColorChip>
+                </span>
+              </div>
+            </>
+          );
+        }
       },
-      { header: t('readings.columns.currReading'), accessor: 'currentReading' },
       {
         header: t('readings.columns.consumption'),
-        accessor: (r) => `${r.calculatedConsumption} m³`
+        accessor: (r) =>
+          `${NumberFormatter.format(r.calculatedConsumption, 2)} m³`
       },
       {
         header: t('readings.columns.novelty'),
@@ -82,6 +108,87 @@ export const EstimatedReadingConnectionTable: React.FC<PropTypes> = ({
         }
       },
       {
+        header: t('readings.columns.userCreatedName', 'Creado por'),
+        accessor: (r: TakenReadingConnection) => (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Tooltip
+              content={r.userCreatedName}
+              themeColor="info"
+              followCursor={false}
+            >
+              <div className="flex items-center gap-2">
+                <ColorChip
+                  label={`@${r.userCreatedId}`}
+                  color="var(--text-secondary)"
+                  size="xs"
+                  variant="ghost"
+                />
+                <div
+                  style={{
+                    fontSize: '0.85em',
+                    color: 'var(--text-secondary)',
+                    marginLeft: '12px'
+                  }}
+                >
+                  {r.readingDate
+                    ? dateService.formatToLocaleString(r.readingDate)
+                    : '-'}
+                </div>
+              </div>
+            </Tooltip>
+          </div>
+        )
+      },
+      {
+        header: t('readings.columns.userUpdatedName', 'Actualizado por'),
+        accessor: (r: TakenReadingConnection) => (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {r.userUpdatedId ? (
+              <Tooltip
+                content={r.userUpdatedName}
+                themeColor="info"
+                followCursor={false}
+              >
+                <div className="flex items-center gap-2">
+                  <ColorChip
+                    label={`@${r.userUpdatedId}`}
+                    color="var(--text-secondary)"
+                    size="xs"
+                    variant="ghost"
+                  />
+                  <div
+                    style={{
+                      fontSize: '0.85em',
+                      color: 'var(--text-secondary)',
+                      marginLeft: '12px'
+                    }}
+                  >
+                    {r.readingDate
+                      ? dateService.formatToLocaleString(r.readingDate)
+                      : '-'}
+                  </div>
+                </div>
+              </Tooltip>
+            ) : (
+              <div
+                style={{
+                  fontSize: '0.85em',
+                  color: 'var(--text-secondary)',
+                  marginLeft: '12px'
+                }}
+              >
+                <ColorChip
+                  label="Sin actualizar"
+                  color="var(--text-secondary)"
+                  size="xs"
+                  variant="ghost"
+                />
+              </div>
+            )}
+          </div>
+        )
+      },
+      {
         header: t('common.actions', 'Acciones'),
         accessor: (reading) => (
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -89,7 +196,7 @@ export const EstimatedReadingConnectionTable: React.FC<PropTypes> = ({
               themeColor="info"
               content={t('common.viewDetails', 'Ver Detalles')}
             >
-              <Button size="sm" variant="ghost" onClick={() => {}} circle>
+              <Button size="sm" variant="ghost" onClick={() => { }} circle>
                 <Eye size={16} />
               </Button>
             </Tooltip>
@@ -123,7 +230,7 @@ export const EstimatedReadingConnectionTable: React.FC<PropTypes> = ({
         columns={columns}
         isLoading={isLoading}
         pagination
-        pageSize={10}
+        pageSize={15}
         emptyState={
           <EmptyState
             message="No se encontraron lecturas estimadas."

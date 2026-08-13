@@ -32,6 +32,9 @@ import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip
 import { ConverDateTimeToText } from '@/shared/utils/datetime/ConverDate';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { FaFileContract, FaUserShield } from 'react-icons/fa';
+import type { RolOrPermission } from '@/shared/utils/interfaces/RolOrPermission';
+
+type LocalRole = RolOrPermission & { active: boolean };
 
 // Mock component for roles table (will be implemented fully later)
 const UserRolesTable = ({ user }: { user: User }) => {
@@ -39,7 +42,7 @@ const UserRolesTable = ({ user }: { user: User }) => {
   const [error, setError] = useState<string | null>(null);
 
   // Local state for roles to handle UI toggles immediately
-  const [localRoles, setLocalRoles] = useState<any[]>([]);
+  const [localRoles, setLocalRoles] = useState<LocalRole[]>([]);
   const [isAssignRoleOpen, setIsAssignRoleOpen] = useState(false);
 
   const { getProfileUseCase, assignRoleToUserUseCase } = useUsersContext();
@@ -55,8 +58,10 @@ const UserRolesTable = ({ user }: { user: User }) => {
       // In a real app, 'active' might come from the backend or be implied by presence in the list
       if (userData?.roles) {
         setLocalRoles(
-          userData.roles.map((r) => ({
-            ...(typeof r === 'string' ? { id: r, name: r } : r),
+          userData.roles.map((r: RolOrPermission) => ({
+            id: r.id,
+            name: r.name,
+            description: r.description,
             active: true // Default to true since they are assigned
           }))
         );
@@ -73,10 +78,10 @@ const UserRolesTable = ({ user }: { user: User }) => {
     fetchUser();
   }, [fetchUser]);
 
-  const toggleRoleStatus = (roleId: string | number) => {
+  const toggleRoleStatus = (roleIdentifier: number | string) => {
     setLocalRoles((prev) =>
-      prev.map((role) =>
-        role.id === roleId || role.name === roleId
+      prev.map((role: LocalRole) =>
+        (role.id || role.name) === roleIdentifier
           ? { ...role, active: !role.active }
           : role
       )

@@ -11,6 +11,7 @@ import {
 } from '@/shared/presentation/components/Table/Table';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
+import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
 import { Eye } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -151,31 +152,134 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
       id: 'readingDate'
     },
     {
-      header: t('readingsNovelty.previousReadingValue', 'Lectura Anterior'),
-      accessor: (item) => item.previousReading,
-      id: 'previousReadingValue'
+      header: t('readings.columns.readings', 'Lecturas'),
+      accessor: (item: ReadingNovelty) => {
+        return (
+          <>
+            <div className="readings-taken-content">
+              <span className="readings-taken-info">
+                {' '}
+                <p>Ant.:</p>
+                <ColorChip
+                  label={`${NumberFormatter.format(item.previousReading, 2)}`}
+                  size="xs"
+                  variant="ghost"
+                ></ColorChip>
+              </span>
+              <span className="readings-taken-info">
+                {' '}
+                <p>Act.:</p>
+                <ColorChip
+                  label={`${NumberFormatter.format(item.currentReading, 2)}`}
+                  size="xs"
+                  variant="ghost"
+                ></ColorChip>
+              </span>
+            </div>
+          </>
+        );
+      }
     },
     {
-      header: t('readingsNovelty.readingValue', 'Lectura Actual'),
-      accessor: (item) => item.currentReading,
-      id: 'currentReadingValue'
+      header: t('readings.columns.consumption'),
+      accessor: (r) =>
+        `${NumberFormatter.format(r.calculatedConsumption, 2)} m³`
     },
     {
-      header: t('readingsNovelty.novelty', 'Novedad'),
-      accessor: (item) => {
-        const color = getNoveltyColor(item.novelty || 'NOT_READ');
+      header: t('readings.columns.novelty'),
+      accessor: (r) => {
+        const color = getNoveltyColor(r.novelty || 'NOT_READ');
         return (
           <ColorChip
-            label={item.novelty || '-'}
+            label={r.novelty || '-'}
             color={color}
-            size="xs"
+            size="sm"
             borderRadius="10px"
             variant="soft"
           />
         );
-      },
-      id: 'novelty',
-      isColumnVisible: true
+      }
+    },
+    {
+      header: t('readings.columns.userCreatedName', 'Creado por'),
+      accessor: (r: ReadingNovelty) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Tooltip
+            content={r.userCreatedName}
+            themeColor="info"
+            followCursor={false}
+          >
+            <div className="flex items-center gap-2">
+              <ColorChip
+                label={`@${r.userCreatedId}`}
+                color="var(--text-secondary)"
+                size="xs"
+                variant="ghost"
+              />
+              <div
+                style={{
+                  fontSize: '0.85em',
+                  color: 'var(--text-secondary)',
+                  marginLeft: '12px'
+                }}
+              >
+                {r.readingDate
+                  ? dateService.formatToLocaleString(r.readingDate)
+                  : '-'}
+              </div>
+            </div>
+          </Tooltip>
+        </div>
+      )
+    },
+    {
+      header: t('readings.columns.userUpdatedName', 'Actualizado por'),
+      accessor: (r: ReadingNovelty) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {r.userUpdatedId ? (
+            <Tooltip
+              content={r.userUpdatedName}
+              themeColor="info"
+              followCursor={false}
+            >
+              <div className="flex items-center gap-2">
+                <ColorChip
+                  label={`@${r.userUpdatedId}`}
+                  color="var(--text-secondary)"
+                  size="xs"
+                  variant="ghost"
+                />
+                <div
+                  style={{
+                    fontSize: '0.85em',
+                    color: 'var(--text-secondary)',
+                    marginLeft: '12px'
+                  }}
+                >
+                  {r.readingDate
+                    ? dateService.formatToLocaleString(r.readingDate)
+                    : '-'}
+                </div>
+              </div>
+            </Tooltip>
+          ) : (
+            <div
+              style={{
+                fontSize: '0.85em',
+                color: 'var(--text-secondary)',
+                marginLeft: '12px'
+              }}
+            >
+              <ColorChip
+                label="Sin actualizar"
+                color="var(--text-secondary)"
+                size="xs"
+                variant="ghost"
+              />
+            </div>
+          )}
+        </div>
+      )
     },
     {
       header: t('common.actions', 'Acciones'),
@@ -190,7 +294,7 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
               </>
             }
           >
-            <Button size="sm" variant="ghost" onClick={() => {}} circle>
+            <Button size="sm" variant="ghost" onClick={() => { }} circle>
               <Eye size={16} />
             </Button>
           </Tooltip>
@@ -198,7 +302,7 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => {}}
+              onClick={() => { }}
               color="warning"
               circle
             >
@@ -208,7 +312,7 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
         </div>
       ),
       id: 'actions',
-      isColumnVisible: false
+      isColumnVisible: true
     }
   ];
 

@@ -75,3 +75,14 @@
   display: flex;
   gap: 8px;
 }
+
+.readings-taken-info {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  text-align: center;
+}
+
+.readings-taken-info p {
+  margin-top: -4px;
+}

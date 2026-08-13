@@ -23,4 +23,9 @@ export interface ReadingNovelty {
   noveltyTypeName: string | null;
   noveltyTypeDescription: string | null;
   images: string[];
+  readingCode?: string | null;
+  userCreatedId?: string | null;
+  userCreatedName?: string | null;
+  userUpdatedId?: string | null;
+  userUpdatedName?: string | null;
 }

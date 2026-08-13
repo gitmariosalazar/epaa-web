@@ -58,7 +58,7 @@ export const AllReadingsTable: React.FC<PropTypes> = ({ data, isLoading }) => {
         columns={columns}
         isLoading={isLoading}
         pagination
-        pageSize={10}
+        pageSize={15}
         emptyState={
           <EmptyState
             message="No se encontraron lecturas"

@@ -7,7 +7,6 @@ import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { Edit2 } from 'lucide-react';
 import '@/shared/presentation/styles/Table.css';
 import '@/modules/accounting/presentation/styles/entry-data/EntryDataFilters.css';
 import '@/shared/presentation/styles/Roles.css';
@@ -18,6 +17,12 @@ import { Select } from '@/shared/presentation/components/Input/Select';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { TbUserDollar } from 'react-icons/tb';
+import { FaUserGear } from 'react-icons/fa6';
+import { FaEdit, FaUserShield } from 'react-icons/fa';
+import { RiUserForbidFill } from 'react-icons/ri';
+import { truncateText } from '@/shared/utils/text/truncate-text';
 
 export const PositionsPage: React.FC = () => {
   const {
@@ -40,7 +45,6 @@ export const PositionsPage: React.FC = () => {
   });
 
   const { t } = useTranslation();
-
   const handleSave = async () => {
     try {
       if (selectedPosition) {
@@ -91,8 +95,38 @@ export const PositionsPage: React.FC = () => {
   const columns: Column<Position>[] = [
     { header: 'ID', accessor: 'positionId' },
     { header: 'Name', accessor: 'name' },
-    { header: 'Nivel Jerárquico', accessor: (p) => p.levelJerarchy === 1 ? 'Gerencia' : p.levelJerarchy === 2 ? 'Jefatura' : 'Operativo' },
-    { header: 'Description', accessor: 'description' },
+    {
+      header: 'Nivel Jerárquico',
+      accessor: (p: Position) => {
+        switch (p.levelJerarchy) {
+          case 1: return (
+            <ColorChip color='red' label='Gerente General' size='xs' icon={<FaUserShield />} />
+          );
+          case 2: return (
+            <ColorChip color='orange' label='Director Técnico' size='xs' icon={<FaUserGear />} />
+          );
+          case 3: return (
+            <ColorChip color='yellow' label='Jefe Administrativo Financiero' size='xs' icon={<TbUserDollar />} />
+          );
+          case 4: return (
+            <ColorChip color='blue' label='Analista de Contabilidad' size='xs' icon={<TbUserDollar />} />
+          );
+          default: return (
+            <ColorChip color='gray' label='Sin Nivel' size='xs' icon={<RiUserForbidFill />} />
+          );
+        }
+      }
+    },
+    {
+      header: 'Description',
+      accessor: ((p: Position) => {
+        return (
+          <Tooltip content={p.description} followCursor={false} themeColor='info'>
+            <span >{truncateText(p.description, 50)}</span>
+          </Tooltip>
+        )
+      })
+    },
     {
       header: 'Active',
       accessor: (pos) => (
@@ -114,31 +148,31 @@ export const PositionsPage: React.FC = () => {
           style={{
             display: 'flex',
             gap: '8px',
-            justifyContent: 'flex-end',
+            justifyContent: 'center',
             alignItems: 'center'
           }}
         >
           <Tooltip content="Edit Position" followCursor={false}>
             <Button
-              size="sm"
+              size="xs"
               variant="ghost"
               onClick={() => openEdit(pos)}
               circle
               style={{ color: 'var(--blue)' }}
             >
-              <Edit2 size={16} />
+              <FaEdit size={13} />
             </Button>
           </Tooltip>
 
           <Tooltip content={pos.isActive ? "Disable Position" : "Enable Position"} followCursor={false}>
             <Button
-              size="sm"
+              size="xs"
               variant="ghost"
               onClick={() => handleDisable(pos)}
               circle
               style={{ color: pos.isActive ? 'var(--error)' : 'var(--success)' }}
             >
-              <MdClose size={16} />
+              <MdClose size={13} />
             </Button>
           </Tooltip>
         </div>
@@ -178,7 +212,7 @@ export const PositionsPage: React.FC = () => {
           columns={columns}
           isLoading={isLoading}
           pagination={true}
-          pageSize={10}
+          pageSize={15}
           emptyState={
             <EmptyState
               message="No se encontraron cargos"

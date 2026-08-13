@@ -68,6 +68,7 @@ export const ReadingsListPage: React.FC = () => {
   const currentMonthStr = dateService.getCurrentMonthString();
   const [month, setMonth] = useState(currentMonthStr);
   const [sector, setSector] = useState('');
+  const [userId, setUserId] = useState('');
 
   const {
     pendingReadings,
@@ -83,6 +84,7 @@ export const ReadingsListPage: React.FC = () => {
 
   useEffect(() => {
     setSector('');
+    setUserId('');
     clearAll();
   }, [activeTab]);
 
@@ -124,7 +126,7 @@ export const ReadingsListPage: React.FC = () => {
 
   const handleModalSuccess = () => {
     closeModal();
-    fetchReadings(activeTab as any, month, sector);
+    fetchReadings(activeTab as any, month, sector, userId);
   };
 
   if (activeTab === 'novelties') {
@@ -158,7 +160,9 @@ export const ReadingsListPage: React.FC = () => {
           onMonthChange={setMonth}
           sector={sector}
           onSectorChange={setSector}
-          onFetch={() => fetchReadings(activeTab as any, month, sector)}
+          userId={userId}
+          onUserIdChange={setUserId}
+          onFetch={() => fetchReadings(activeTab as any, month, sector, userId)}
           isLoading={isLoading}
         />
       }
@@ -222,7 +226,9 @@ export const ReadingsListPage: React.FC = () => {
       <Modal
         isOpen={!!modalState?.isOpen}
         onClose={closeModal}
-        title=""
+        title={
+          modalState?.mode === 'create' ? 'Nueva Lectura' : 'Editar Lectura'
+        }
         size="full"
       >
         <div style={{ padding: '0px 10px', height: '100%' }}>
