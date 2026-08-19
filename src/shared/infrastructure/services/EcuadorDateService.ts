@@ -66,10 +66,10 @@ export class EcuadorDateService implements IDateService {
       if (isNaN(d.getTime())) {
         return String(date || '');
       }
-      
+
       const baseOptions: Intl.DateTimeFormatOptions = {
         timeZone: this.timeZone,
-        hour12: false,
+        hour12: false
       };
 
       if (!options || Object.keys(options).length === 0) {
@@ -168,6 +168,17 @@ export class EcuadorDateService implements IDateService {
     const month = monthFormatter.format(d).toUpperCase();
 
     return `${year}-${month}`;
+  }
+
+  getEcuadorDateString(): string {
+    const d = new Date();
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: this.timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    return formatter.format(d);
   }
 }
 

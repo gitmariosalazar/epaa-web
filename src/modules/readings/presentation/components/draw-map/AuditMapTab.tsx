@@ -11,13 +11,14 @@ import { useUsersContext } from '@/modules/users/presentation/context/UsersConte
 import { FaUserCircle } from 'react-icons/fa';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import type { RolOrPermission } from '@/shared/utils/interfaces/RolOrPermission';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 export const AuditMapTab: React.FC = () => {
   const { t } = useTranslation();
   const { geojsonData, isLoading, error, fetchMapData, clearMapData } = useAuditMap();
   const { getUsersUseCase } = useUsersContext();
 
-  const [date, setDate] = useState<string>(new Date().toISOString().substring(0, 10));
+  const [date, setDate] = useState<string>(dateService.getEcuadorDateString());
   const [userId, setUserId] = useState<string>('');
 
   // Users state
