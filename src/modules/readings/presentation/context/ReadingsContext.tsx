@@ -20,6 +20,8 @@ import { GetAuditByMonthUseCase } from '../../application/usecases/audit/GetAudi
 import { GetAuditBySectorAndMonthUseCase } from '../../application/usecases/audit/GetAuditBySectorAndMonthUseCase';
 import { CloseAuditSectorUseCase } from '../../application/usecases/audit/CloseAuditSectorUseCase';
 import { GetAuditHistoryBySectorUseCase } from '../../application/usecases/audit/GetAuditHistoryBySectorUseCase';
+import { GetMapGeojsonByDayAndByUserUseCase } from '../../application/usecases/GetMapGeojsonByDayAndByUserUseCase';
+import { GetMapGeojsonByDayAndByUserImpl } from '../../infrastructure/repositories/GetMapGeojsonByDayAndByUserImpl';
 
 interface ReadingsContextType {
   getReadingInfoUseCase: GetReadingInfoUseCase;
@@ -36,6 +38,7 @@ interface ReadingsContextType {
   getAuditBySectorAndMonthUseCase: GetAuditBySectorAndMonthUseCase;
   closeAuditSectorUseCase: CloseAuditSectorUseCase;
   getAuditHistoryBySectorUseCase: GetAuditHistoryBySectorUseCase;
+  getMapGeojsonByDayAndByUserUseCase: GetMapGeojsonByDayAndByUserUseCase;
 }
 
 const ReadingsContext = createContext<ReadingsContextType | null>(null);
@@ -54,6 +57,7 @@ export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
   const readingImagesRepository = new ReadingImagesRepositoryImpl();
   const updateReadingRepository = new UpdateReadingRepositoryImpl();
   const readingAuditRepository = new ReadingAuditRepositoryImpl();
+  const getMapGeojsonByDayAndByUserRepository = new GetMapGeojsonByDayAndByUserImpl();
 
   // Use Cases
   const getTakenReadingEstimatesOrAverageUseCase =
@@ -95,6 +99,9 @@ export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
   const getAuditHistoryBySectorUseCase = new GetAuditHistoryBySectorUseCase(
     readingAuditRepository
   );
+  const getMapGeojsonByDayAndByUserUseCase = new GetMapGeojsonByDayAndByUserUseCase(
+    getMapGeojsonByDayAndByUserRepository
+  );
 
   const value = {
     getReadingInfoUseCase,
@@ -110,7 +117,8 @@ export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
     getAuditByMonthUseCase,
     getAuditBySectorAndMonthUseCase,
     closeAuditSectorUseCase,
-    getAuditHistoryBySectorUseCase
+    getAuditHistoryBySectorUseCase,
+    getMapGeojsonByDayAndByUserUseCase
   };
 
   return (

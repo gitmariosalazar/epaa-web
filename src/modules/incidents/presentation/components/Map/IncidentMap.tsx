@@ -91,7 +91,7 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
       };
       map.panTo(targetCenter);
       setInfoWindowShown(true);
-      if (map.getZoom() < 17) {
+      if ((map.getZoom() ?? 0) < 17) {
         map.setZoom(17);
       }
     }

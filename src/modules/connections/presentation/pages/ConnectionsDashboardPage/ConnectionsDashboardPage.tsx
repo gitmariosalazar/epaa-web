@@ -60,7 +60,7 @@ const MapController: React.FC<{
       lat: Number(selectedPin.latitude),
       lng: Number(selectedPin.longitude)
     });
-    if (map.getZoom() < 16) {
+    if ((map.getZoom() ?? 0) < 16) {
       map.setZoom(16);
     }
   }, [map, selectedPin]);

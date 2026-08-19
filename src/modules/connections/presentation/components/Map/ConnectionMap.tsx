@@ -87,7 +87,7 @@ export const ConnectionMap: React.FC<ConnectionMapProps> = ({
         lng: Number(selectedConnection.longitude)
       });
       setInfoWindowShown(true);
-      if (map.getZoom() < 17) map.setZoom(17);
+      if ((map.getZoom() ?? 0) < 17) map.setZoom(17);
     }
   }, [map, selectedConnection]);
 
@@ -190,7 +190,7 @@ export const ConnectionMap: React.FC<ConnectionMapProps> = ({
               lat: Number(conn.latitude),
               lng: Number(conn.longitude)
             }}
-            anchor={AdvancedMarkerAnchorPoint.CENTER}
+            anchorPoint={AdvancedMarkerAnchorPoint.CENTER}
             zIndex={
               selectedConnection?.connectionId === conn.connectionId ? 10000 : 1
             }

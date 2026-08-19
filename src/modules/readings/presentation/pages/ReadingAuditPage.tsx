@@ -14,15 +14,16 @@ import { Input } from '@/shared/presentation/components/Input/Input';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { TbChartPieFilled } from 'react-icons/tb';
-import { FaList } from 'react-icons/fa';
+import { FaList, FaMap } from 'react-icons/fa';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 import { AuditReadingsTable } from '../components/AuditReadingsTable';
 import { AuditHistoryTable } from '../components/AuditHistoryTable';
 import { useAuditReadings } from '../hooks/useAuditReadings';
+import { AuditMapTab } from '../components/draw-map/AuditMapTab';
 
 // ── Tab type (OCP: add new tabs here without changing any component logic) ────
-type AuditTab = 'summary' | 'history';
+type AuditTab = 'summary' | 'history' | 'map';
 
 // ── Client-side status filter ─────────────────────────────────────────────────
 type StatusFilter = 'all' | 'complete' | 'pending';
@@ -50,6 +51,11 @@ export const ReadingAuditPage: React.FC = () => {
         id: 'history',
         label: t('readings.audit.tabHistory', 'Historial por Sector'),
         icon: <History size={16} />
+      },
+      {
+        id: 'map',
+        label: t('readings.audit.tabMap', 'Mapa'),
+        icon: <FaMap size={16} />
       }
     ],
     [t]
@@ -181,6 +187,7 @@ export const ReadingAuditPage: React.FC = () => {
         />
       }
       filters={
+        activeTab !== 'map' && (
         <div className="entry-filters">
           <div className="filter-section-left">
             {/* ── MES (solo en summary — API param) ── */}
@@ -212,9 +219,9 @@ export const ReadingAuditPage: React.FC = () => {
                     activeTab === 'history'
                       ? t('readings.audit.sectorRequired', 'Nro. de sector')
                       : t(
-                          'readingData.filters.sectorPlaceholder',
-                          'Todos los sectores'
-                        )
+                        'readingData.filters.sectorPlaceholder',
+                        'Todos los sectores'
+                      )
                   }
                   value={sector}
                   onChange={(e) => setSector(e.target.value)}
@@ -311,8 +318,8 @@ export const ReadingAuditPage: React.FC = () => {
                           .map((r) =>
                             r.readingMonth
                               ? new Date(r.readingMonth)
-                                  .toISOString()
-                                  .substring(0, 7)
+                                .toISOString()
+                                .substring(0, 7)
                               : ''
                           )
                           .filter(Boolean)
@@ -381,6 +388,7 @@ export const ReadingAuditPage: React.FC = () => {
             </div>
           </div>
         </div>
+        )
       }
     >
       {error ? (
@@ -420,6 +428,7 @@ export const ReadingAuditPage: React.FC = () => {
               isLoading={isHistoryLoading}
             />
           )}
+          {activeTab === 'map' && <AuditMapTab />}
         </>
       )}
     </PageLayout>
