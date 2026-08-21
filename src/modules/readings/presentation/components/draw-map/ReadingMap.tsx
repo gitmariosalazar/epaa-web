@@ -1,46 +1,83 @@
-import React, { useEffect, useState } from 'react';
-import { Map, useMap, AdvancedMarker, InfoWindow } from '@vis.gl/react-google-maps';
-import '@/modules/readings/presentation/styles/ReadingMap.css';
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useMemo
+} from 'react';
+import {
+  Map,
+  InfoWindow,
+  useMap,
+  AdvancedMarker,
+  AdvancedMarkerAnchorPoint
+} from '@vis.gl/react-google-maps';
 import { ReadingMapMarker } from './ReadingMapMarker';
+import { ReadingMapInfoWindow } from './ReadingMapInfoWindow';
 import { useTheme } from '@/shared/presentation/context/ThemeContext';
 import { FALLBACK_CENTER_ANTONIO_ANTE } from '@/shared/utils/types/IGeolocationData';
-import { Divider } from '@/shared/presentation/components/divider/Divider';
-import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
-import { FaCheckCircle, FaHome } from 'react-icons/fa';
-import { IoIosCloseCircle } from 'react-icons/io';
-import { MdMyLocation } from 'react-icons/md';
+import type { TakenReadingConnection } from '../../../domain/models/Reading';
+import '@/modules/readings/presentation/styles/ReadingMap.css';
 
+// ── Props ─────────────────────────────────────────────────────────────────────
 export interface ReadingMapProps {
+  /** Lectura a mostrar en el mapa */
+  reading?: TakenReadingConnection | null;
+  /** Ubicación donde se capturó la lectura (GPS del lecturista) */
   locationCapture?: { lat: number; lng: number } | null;
+  /** Ubicación del punto de conexión/acometida */
   locationConnection?: { lat: number; lng: number } | null;
+  /** Distancia en metros entre los dos puntos */
   distanceMeters?: number | null;
+  /** Si la captura está dentro del radio permitido */
   isInsideAllowedRadius?: boolean | null;
+  /** GeoJSON de la línea de distancia */
   distanceLineGeoJSON?: any | null;
+  /** Map ID para AdvancedMarker */
   mapId?: string;
-  reading?: any;
+  /** Callback al cambiar la cámara */
+  onCameraChange?: (center: { lat: number; lng: number }, zoom: number) => void;
+  /** Callback al ver detalle de la lectura */
+  onViewDetail?: (reading: TakenReadingConnection) => void;
 }
 
-/**
- * Componente que renderiza el mapa para las lecturas.
- * SRP: Solo se encarga de dibujar el mapa, los marcadores y la línea GeoJSON.
- */
+// ─────────────────────────────────────────────────────────────────────────────
+// ReadingMap — componente principal del mapa
+// SRP: coordina el mapa, los marcadores, el InfoWindow y la línea GeoJSON.
+// Toda la lógica de datos viene del padre (modal o feature).
+// OCP: extensible mediante props.
+// DIP: depende de interfaces (props), no de implementaciones concretas.
+// ─────────────────────────────────────────────────────────────────────────────
 export const ReadingMap: React.FC<ReadingMapProps> = ({
+  reading,
   locationCapture,
   locationConnection,
   distanceMeters,
   isInsideAllowedRadius,
   distanceLineGeoJSON,
   mapId = 'reading-map',
-  reading
+  onCameraChange,
+  onViewDetail
 }) => {
   const { theme } = useTheme();
   const map = useMap();
+  const lastCameraRef = useRef<{ lat: number; lng: number; zoom: number } | null>(null);
+
   const [geoJsonAdded, setGeoJsonAdded] = useState(false);
   const [activeMarker, setActiveMarker] = useState<'capture' | 'connection' | null>(null);
+  const [infoWindowShown, setInfoWindowShown] = useState(false);
+  const [hoveredMarker, setHoveredMarker] = useState<'capture' | 'connection' | null>(null);
 
-  // Center logic
-  const defaultCenter = locationCapture || locationConnection || FALLBACK_CENTER_ANTONIO_ANTE;
+  const HOVER_TOOLTIP_MIN_ZOOM = 14;
+  const [currentZoom, setCurrentZoom] = useState(16);
 
+  // Center logic: prefer capture → connection → fallback
+  const defaultCenter = useMemo(
+    () => locationCapture ?? locationConnection ?? FALLBACK_CENTER_ANTONIO_ANTE,
+    [locationCapture, locationConnection]
+  );
+
+  // ── GeoJSON line + fit bounds ───────────────────────────────────────────────
   useEffect(() => {
     if (!map) return;
 
@@ -75,6 +112,24 @@ export const ReadingMap: React.FC<ReadingMapProps> = ({
     }
   }, [map, locationCapture, locationConnection, distanceLineGeoJSON, isInsideAllowedRadius, geoJsonAdded]);
 
+  // ── Hide hover tooltip when zoomed out ─────────────────────────────────────
+  useEffect(() => {
+    if (currentZoom < HOVER_TOOLTIP_MIN_ZOOM && hoveredMarker) {
+      setHoveredMarker(null);
+    }
+  }, [currentZoom, hoveredMarker]);
+
+  const handleMarkerClick = useCallback((type: 'capture' | 'connection') => {
+    setHoveredMarker(null);
+    setActiveMarker(type);
+    setInfoWindowShown(true);
+  }, []);
+
+  const handleInfoWindowClose = useCallback(() => {
+    setInfoWindowShown(false);
+    setActiveMarker(null);
+  }, []);
+
   return (
     <div className="reading-map-container">
       <Map
@@ -84,112 +139,150 @@ export const ReadingMap: React.FC<ReadingMapProps> = ({
         mapId={mapId}
         gestureHandling="greedy"
         disableDefaultUI={false}
+        mapTypeControl={true}
+        fullscreenControl={true}
+        onCameraChanged={(ev) => {
+          const newZoom = ev.detail.zoom;
+          if (newZoom !== currentZoom) setCurrentZoom(newZoom);
+
+          if (!onCameraChange) return;
+          const lat = Number(ev.detail.center.lat);
+          const lng = Number(ev.detail.center.lng);
+          const last = lastCameraRef.current;
+          if (
+            !last ||
+            last.zoom !== newZoom ||
+            Math.abs(last.lat - lat) > 0.00015 ||
+            Math.abs(last.lng - lng) > 0.00015
+          ) {
+            lastCameraRef.current = { lat, lng, zoom: newZoom };
+            onCameraChange(ev.detail.center, newZoom);
+          }
+        }}
+        style={{ width: '100%', height: '100%' }}
       >
+        {/* ── Marker: Punto de Conexión ──────────────────────────────────────── */}
         {locationConnection && (
           <AdvancedMarker
             position={locationConnection}
-            title="Punto de Conexión"
-            zIndex={1}
-            onClick={() => setActiveMarker('connection')}
+            zIndex={activeMarker === 'connection' ? 30000 : hoveredMarker === 'connection' ? 25000 : 1}
+            anchorPoint={AdvancedMarkerAnchorPoint.CENTER}
+            onMouseEnter={() => {
+              if (currentZoom >= HOVER_TOOLTIP_MIN_ZOOM) setHoveredMarker('connection');
+            }}
+            onMouseLeave={() => setHoveredMarker(null)}
           >
-            <ReadingMapMarker type="connection" />
+            <ReadingMapMarker
+              type="connection"
+              reading={reading ?? undefined}
+              isHovered={hoveredMarker === 'connection'}
+              isSelected={activeMarker === 'connection'}
+              onClick={() => handleMarkerClick('connection')}
+            />
           </AdvancedMarker>
         )}
 
+        {/* ── Marker: Punto de Captura ───────────────────────────────────────── */}
         {locationCapture && (
           <AdvancedMarker
             position={locationCapture}
-            title="Punto de Captura (Lectura)"
-            zIndex={2}
-            onClick={() => setActiveMarker('capture')}
+            zIndex={activeMarker === 'capture' ? 30000 : hoveredMarker === 'capture' ? 25000 : 2}
+            anchorPoint={AdvancedMarkerAnchorPoint.CENTER}
+            onMouseEnter={() => {
+              if (currentZoom >= HOVER_TOOLTIP_MIN_ZOOM) setHoveredMarker('capture');
+            }}
+            onMouseLeave={() => setHoveredMarker(null)}
           >
-            <ReadingMapMarker type="capture" />
+            <ReadingMapMarker
+              type="capture"
+              reading={reading ?? undefined}
+              isHovered={hoveredMarker === 'capture'}
+              isSelected={activeMarker === 'capture'}
+              onClick={() => handleMarkerClick('capture')}
+            />
           </AdvancedMarker>
         )}
 
-        {/* InfoWindow for Connection */}
-        {activeMarker === 'connection' && locationConnection && (
+        {/* ── InfoWindow: Popup al click ─────────────────────────────────────── */}
+        {activeMarker === 'connection' && infoWindowShown && locationConnection && reading && (
           <InfoWindow
             position={locationConnection}
-            onCloseClick={() => setActiveMarker(null)}
             pixelOffset={[0, -28]}
+            onCloseClick={handleInfoWindowClose}
+            maxWidth={340}
+            disableAutoPan={false}
           >
-            <div className="reading-map-info-window">
-              <h4 className="reading-map-info-title">Ubicación de Acometida</h4>
-              <div className="reading-map-info-body">
-                <div className="reading-map-info-row"><strong>Medidor:</strong> {reading?.meterNumber || 'N/A'}</div>
-                <div><strong>Dirección:</strong> {reading?.address || 'N/A'}</div>
-              </div>
-            </div>
+            <ReadingMapInfoWindow
+              reading={reading}
+              markerType="connection"
+              theme={theme}
+              onClose={handleInfoWindowClose}
+              onViewDetail={onViewDetail}
+            />
           </InfoWindow>
         )}
 
-        {/* InfoWindow for Capture */}
-        {activeMarker === 'capture' && locationCapture && (
+        {activeMarker === 'capture' && infoWindowShown && locationCapture && reading && (
           <InfoWindow
             position={locationCapture}
-            onCloseClick={() => setActiveMarker(null)}
             pixelOffset={[0, -28]}
+            onCloseClick={handleInfoWindowClose}
+            maxWidth={340}
+            disableAutoPan={false}
           >
-            <div className="reading-map-info-window">
-              <h4 className="reading-map-info-title">Punto de Lectura</h4>
-              <div className="reading-map-info-body">
-                <div className="reading-map-info-row"><strong>Fecha:</strong> {reading?.readingDate ? new Date(reading.readingDate).toLocaleString() : 'N/A'}</div>
-                <div><strong>Distancia:</strong> {distanceMeters != null ? `${distanceMeters.toFixed(2)} m` : 'N/A'}</div>
-              </div>
-            </div>
+            <ReadingMapInfoWindow
+              reading={reading}
+              markerType="capture"
+              theme={theme}
+              onClose={handleInfoWindowClose}
+              onViewDetail={onViewDetail}
+            />
           </InfoWindow>
         )}
       </Map>
 
-      {/* Legend / Info Box */}
-      {(distanceMeters != null) && (
+      {/* ── Leyenda flotante ────────────────────────────────────────────────── */}
+      {distanceMeters != null && (
         <div className="reading-map-legend-box">
           <div className="reading-map-legend-title">
-            Distancia: {distanceMeters.toFixed(2)} m
+            <span
+              className="reading-map-legend-distance-value"
+              style={{ color: isInsideAllowedRadius ? '#10b981' : '#ef4444' }}
+            >
+              {distanceMeters.toFixed(2)} m
+            </span>
+            <span className="reading-map-legend-distance-label">distancia</span>
           </div>
+
           {isInsideAllowedRadius != null && (
-            <ColorChip
-              label={isInsideAllowedRadius ? 'Dentro del radio permitido' : 'Fuera del radio permitido'}
-              color={isInsideAllowedRadius ? '#10b981' : '#ef4444'}
-              variant="soft"
-              size="xs"
-              icon={isInsideAllowedRadius ? <FaCheckCircle /> : <IoIosCloseCircle />}
-              borderRadius={6}
-            />
+            <div
+              className="reading-map-legend-status-badge"
+              style={{
+                background: isInsideAllowedRadius ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
+                border: `1px solid ${isInsideAllowedRadius ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.35)'}`,
+                color: isInsideAllowedRadius ? '#10b981' : '#ef4444'
+              }}
+            >
+              {isInsideAllowedRadius ? '✓ Dentro del radio' : '✗ Fuera del radio'}
+            </div>
           )}
 
-          <Divider />
+          <div className="reading-map-legend-divider" />
 
-          <div className="reading-map-legend-row">
-            <span>Información de leyendas</span>
-          </div>
-
-          { /** Legend about reading type */}
-          <div className="reading-map-legend-row">
-            <div className={`reading-map-legend-status ${isInsideAllowedRadius ? 'inside' : 'outside'}`}>
-              <ColorChip
-                label={'Lugar de Acometida'}
-                color={'#10b981'}
-                variant="ghost"
-                size="xs"
-                icon={<FaHome />}
-                borderRadius={6}
+          <div className="reading-map-legend-items">
+            <div className="reading-map-legend-item">
+              <span
+                className="reading-map-legend-dot"
+                style={{ background: '#10b981' }}
               />
+              <span>Acometida</span>
             </div>
-          </div>
-
-          { /** Legend about novelty */}
-          <div className="reading-map-legend-row">
-            <div className={`reading-map-legend-status ${isInsideAllowedRadius ? 'inside' : 'outside'}`}>
-              <ColorChip
-                label={'Punto de Lectura'}
-                color={'#3b82f6'}
-                variant="ghost"
-                size="xs"
-                icon={<MdMyLocation />}
-                borderRadius={6}
+            <div className="reading-map-legend-item">
+              <span
+                className="reading-map-legend-dot"
+                style={{ background: '#3b82f6' }}
               />
+              <span>Lectura</span>
             </div>
           </div>
         </div>

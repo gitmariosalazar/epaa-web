@@ -1,3 +1,8 @@
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* READING MAP — Markers, Tooltip, InfoWindow & Legend                         */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Marker container ────────────────────────────────────────────────────── */
 .reading-marker-container {
   position: relative;
   display: flex;
@@ -10,10 +15,16 @@
   pointer-events: auto !important;
 }
 
-.reading-marker-container:hover {
+.reading-marker-container:hover,
+.reading-marker-container.is-hovered {
   transform: scale(1.2);
 }
 
+.reading-marker-container.is-selected {
+  transform: scale(1.3);
+}
+
+/* Marker core */
 .reading-marker-core {
   position: absolute;
   inset: 4px;
@@ -31,12 +42,21 @@
   z-index: 2;
 }
 
-.reading-marker-container:hover .reading-marker-core {
+.reading-marker-container:hover .reading-marker-core,
+.reading-marker-container.is-hovered .reading-marker-core {
   box-shadow:
     0 0 0 3px rgba(255, 255, 255, 0.4),
     0 6px 20px var(--marker-glow, rgba(0, 0, 0, 0.4));
 }
 
+.reading-marker-container.is-selected .reading-marker-core {
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.5),
+    0 0 0 5px var(--marker-color, #6b7280),
+    0 8px 24px var(--marker-glow, rgba(0, 0, 0, 0.5));
+}
+
+/* Pulsing rings */
 .reading-marker-pulse-ring {
   position: absolute;
   inset: 0;
@@ -65,7 +85,329 @@
   }
 }
 
-/* Layout containers */
+/* ── Instant hover tooltip ───────────────────────────────────────────────── */
+.reading-map-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface, #1e2130);
+  border: 1px solid var(--tooltip-color, #6b7280);
+  border-radius: 8px;
+  padding: 7px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 9999;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  animation: tooltip-pop 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes tooltip-pop {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.85) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1) translateY(0);
+  }
+}
+
+.reading-map-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--tooltip-color, #6b7280);
+}
+
+.reading-map-tooltip-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.reading-map-tooltip-text {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-main, #e2e8f0);
+  letter-spacing: 0.01em;
+}
+
+.reading-map-tooltip-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reading-map-tooltip-meter {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.reading-map-tooltip-status {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── InfoWindow popup ────────────────────────────────────────────────────── */
+.reading-popup {
+  position: relative;
+  background: var(--surface, #ffffff);
+  border-radius: 12px;
+  min-width: 260px;
+  max-width: 320px;
+  overflow: hidden;
+  font-family: inherit;
+}
+
+.reading-popup.dark {
+  background: #1e2130;
+  color: #e2e8f0;
+}
+
+.reading-popup-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: var(--surface-hover, rgba(0, 0, 0, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary, #6b7280);
+  transition: all 0.15s ease;
+  z-index: 10;
+}
+
+.reading-popup-close:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.reading-popup-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Title bar */
+.reading-popup-titlebar {
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  padding-bottom: 8px;
+  margin-bottom: 2px;
+}
+
+.reading-popup-titlebar-label {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted, #9ca3af);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.reading-popup-titlebar-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-main, #111827);
+}
+
+.reading-popup-text-secondary {
+  color: #3b82f6;
+}
+
+/* Header */
+.reading-popup-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.reading-popup-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.reading-popup-title-block {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reading-popup-id {
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--text-secondary, #6b7280);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.reading-popup-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-main, #111827);
+  line-height: 1.3;
+}
+
+.reading-popup-category {
+  font-size: 0.6875rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+/* Badges */
+.reading-popup-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.reading-popup-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+/* Info rows */
+.reading-popup-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.reading-popup-info-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.reading-popup-info-row svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+/* Reading values */
+.reading-popup-values {
+  background: var(--surface-hover, rgba(0, 0, 0, 0.04));
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.reading-popup-value-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reading-popup-value-label {
+  font-size: 0.6875rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.reading-popup-value {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-main, #111827);
+}
+
+.reading-popup-value-highlight {
+  color: #3b82f6;
+  font-size: 0.8125rem;
+}
+
+/* Client */
+.reading-popup-client {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.reading-popup-client-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-main, #111827);
+}
+
+.reading-popup-client-key {
+  font-size: 0.625rem;
+  color: var(--text-secondary, #6b7280);
+  font-family: monospace;
+}
+
+/* Novelty */
+.reading-popup-novelty {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #6b7280);
+  font-style: italic;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 6px;
+  padding: 5px 8px;
+}
+
+/* Actions */
+.reading-popup-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.reading-popup-action-btn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 7px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  background: var(--surface-hover, rgba(0, 0, 0, 0.04));
+  color: var(--text-secondary, #6b7280);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.reading-popup-action-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #3b82f6;
+}
+
+/* ── Map container ───────────────────────────────────────────────────────── */
 .reading-map-container {
   width: 100%;
   height: 400px;
@@ -74,7 +416,87 @@
   position: relative;
 }
 
-/* InfoWindow styles */
+/* Full-height variant (used inside ReadingMapFeature) */
+.reading-map-view-wrapper .reading-map-container {
+  height: 100%;
+  border-radius: 0;
+}
+
+/* ── Leyenda flotante ────────────────────────────────────────────────────── */
+.reading-map-legend-box {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  background: var(--surface, #ffffff);
+  padding: 12px 16px;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-color, #e5e7eb);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+  min-width: 160px;
+}
+
+.reading-map-legend-title {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.reading-map-legend-distance-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.reading-map-legend-distance-label {
+  font-size: 0.6875rem;
+  color: var(--text-secondary, #6b7280);
+  font-weight: 500;
+}
+
+.reading-map-legend-status-badge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 0.02em;
+}
+
+.reading-map-legend-divider {
+  height: 1px;
+  background: var(--border-color, #e5e7eb);
+}
+
+.reading-map-legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.reading-map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.reading-map-legend-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── InfoWindow default browser frame override ───────────────────────────── */
 .reading-map-info-window {
   padding: 8px 12px;
   min-width: 180px;
@@ -100,55 +522,7 @@
   margin-bottom: 2px;
 }
 
-/* Legend Box styles */
-.reading-map-legend-box {
-  position: absolute;
-  bottom: 24px;
-  left: 24px;
-  background-color: var(--surface);
-  padding: 12px 16px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  z-index: 10;
-}
-
-.reading-map-legend-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.reading-map-legend-status {
-  font-size: 0.8rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.reading-map-legend-status.inside {
-  color: #10b981;
-}
-
-.reading-map-legend-status.outside {
-  color: #ef4444;
-}
-
-.reading-map-legend-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.reading-map-legend-dot.inside {
-  background-color: #10b981;
-}
-
-.reading-map-legend-dot.outside {
-  background-color: #ef4444;
+/* ── Audit Map specific ──────────────────────────────────────────────────── */
+.audit-map-hover-marker {
+  pointer-events: none !important;
 }

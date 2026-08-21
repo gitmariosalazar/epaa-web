@@ -6,7 +6,7 @@ import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePick
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { useAuditMap } from '../../hooks/useAuditMap';
-import { AuditGeojsonMap } from './AuditGeojsonMap';
+import { AuditMapFeature } from './AuditMapFeature';
 import { useUsersContext } from '@/modules/users/presentation/context/UsersContext';
 import { FaUserCircle } from 'react-icons/fa';
 import { APIProvider } from '@vis.gl/react-google-maps';
@@ -84,6 +84,7 @@ export const AuditMapTab: React.FC = () => {
                   value={userId}
                   onChange={(e) => setUserId(e.target.value)}
                   disabled={loadingUsers}
+                  width={'350px'}
                 >
                   <option value="">{t('common.all', 'Todos los usuarios')}</option>
                   {users.map((u) => (
@@ -127,7 +128,7 @@ export const AuditMapTab: React.FC = () => {
               />
             </div>
           ) : (
-            <AuditGeojsonMap geojsonData={geojsonData} />
+            <AuditMapFeature geojsonData={geojsonData} />
           )}
         </div>
       </div>

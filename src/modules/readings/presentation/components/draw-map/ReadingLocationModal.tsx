@@ -7,6 +7,7 @@ import { ReadingMap } from './ReadingMap';
 import type { TakenReadingConnection } from '../../../domain/models/Reading';
 import { Alert } from '@/shared/presentation/components/Alert';
 import { TiWarning } from 'react-icons/ti';
+import { ConverDateTime } from '@/shared/utils/datetime/ConverDate';
 
 interface ReadingLocationModalProps {
   isOpen: boolean;
@@ -52,7 +53,7 @@ export const ReadingLocationModal: React.FC<ReadingLocationModalProps> = ({
           <div>
             <span className="reading-location-modal-info-label">{t('readings.columns.readingDate', 'Fecha')}:</span>
             <br />
-            {reading.readingDate ? new Date(reading.readingDate).toLocaleString() : 'N/A'}
+            {reading.readingDate ? ConverDateTime(reading.readingDate) : '-'}
           </div>
         </div>
 

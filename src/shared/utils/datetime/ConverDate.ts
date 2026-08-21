@@ -9,8 +9,14 @@ export const ConverDate = (date: string | Date | null | undefined): string => {
   if (!date) return '-';
 
   let dateObj: Date;
-
-  if (typeof date === 'string') {
+  if (Array.isArray(date)) {
+    const [year, month, day, hour = 0, minute = 0, second = 0] = date;
+    dateObj = new Date(year, month - 1, day, hour, minute, second);
+  } else if (typeof date === 'string') {
+    // Si es solo una hora, retornarla directamente
+    if (/^\d{2}:\d{2}(:\d{2})?$/.test(date.trim())) {
+      return date;
+    }
     // Handle YYYY-MM-DD pattern to avoid timezone shifts
     if (/^\d{4}-\d{2}-\d{2}/.test(date)) {
       // Split by 'T' or space to get the date part
@@ -23,10 +29,10 @@ export const ConverDate = (date: string | Date | null | undefined): string => {
     }
     dateObj = new Date(date);
   } else {
-    dateObj = date;
+    dateObj = date as Date;
   }
 
-  if (isNaN(dateObj.getTime())) return '-';
+  if (!dateObj || isNaN((dateObj as any)?.getTime?.() ?? NaN)) return '-';
 
   const day = String(dateObj.getDate()).padStart(2, '0');
   const month = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -42,11 +48,23 @@ export const ConverDate = (date: string | Date | null | undefined): string => {
  * @param includeSeconds - Whether to include seconds (DD-MM-YYYY HH:mm:ss)
  * @returns Formatted date and time string or '-' if invalid
  */
-export const ConverDateTime = (date: string | Date | null | undefined, includeSeconds: boolean = false): string => {
+export const ConverDateTime = (date: string | Date | any[] | null | undefined, includeSeconds: boolean = false): string => {
   if (!date) return '-';
 
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(dateObj.getTime())) return '-';
+  let dateObj: Date;
+  if (Array.isArray(date)) {
+    const [year, month, day, hour = 0, minute = 0, second = 0] = date;
+    dateObj = new Date(year, month - 1, day, hour, minute, second);
+  } else if (typeof date === 'string') {
+    if (/^\d{2}:\d{2}(:\d{2})?$/.test(date.trim())) {
+      return date;
+    }
+    dateObj = new Date(date);
+  } else {
+    dateObj = date as Date;
+  }
+
+  if (!dateObj || isNaN((dateObj as any)?.getTime?.() ?? NaN)) return '-';
 
   const day = String(dateObj.getDate()).padStart(2, '0');
   const month = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -72,8 +90,13 @@ export const ConverDateToText = (date: string | Date | null | undefined): string
   if (!date) return '-';
 
   let dateObj: Date;
-
-  if (typeof date === 'string') {
+  if (Array.isArray(date)) {
+    const [year, month, day, hour = 0, minute = 0, second = 0] = date;
+    dateObj = new Date(year, month - 1, day, hour, minute, second);
+  } else if (typeof date === 'string') {
+    if (/^\d{2}:\d{2}(:\d{2})?$/.test(date.trim())) {
+      return date;
+    }
     // Para evitar desfases de zona horaria con fechas "YYYY-MM-DD" sin hora
     if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       const [year, month, day] = date.split('-');
@@ -82,10 +105,10 @@ export const ConverDateToText = (date: string | Date | null | undefined): string
       dateObj = new Date(date);
     }
   } else {
-    dateObj = date;
+    dateObj = date as Date;
   }
 
-  if (isNaN(dateObj.getTime())) return '-';
+  if (!dateObj || isNaN((dateObj as any)?.getTime?.() ?? NaN)) return '-';
 
   const months = [
     'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
@@ -108,8 +131,20 @@ export const ConverDateToText = (date: string | Date | null | undefined): string
 export const ConverDateTimeToText = (date: string | Date | null | undefined): string => {
   if (!date) return '-';
 
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(dateObj.getTime())) return '-';
+  let dateObj: Date;
+  if (Array.isArray(date)) {
+    const [year, month, day, hour = 0, minute = 0, second = 0] = date;
+    dateObj = new Date(year, month - 1, day, hour, minute, second);
+  } else if (typeof date === 'string') {
+    if (/^\d{2}:\d{2}(:\d{2})?$/.test(date.trim())) {
+      return date;
+    }
+    dateObj = new Date(date);
+  } else {
+    dateObj = date as Date;
+  }
+
+  if (!dateObj || isNaN((dateObj as any)?.getTime?.() ?? NaN)) return '-';
 
   const months = [
     'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
