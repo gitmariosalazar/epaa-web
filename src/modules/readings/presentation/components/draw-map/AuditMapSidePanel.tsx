@@ -307,17 +307,17 @@ export const AuditMapSidePanel: React.FC<AuditMapSidePanelProps> = ({
                           icon={<GiPathDistance size={16} />}
                         />
                       </Tooltip>
-                      {captureProps.hora_lectura && (
+                      {captureProps.fecha_lectura && (
                         <Tooltip
-                          content={`Hora de lectura: ${captureProps.hora_lectura}`}
+                          content={`Fecha de lectura: ${captureProps.fecha_lectura}`}
                           position="top"
                           variant="soft"
                           followCursor={false}
                         >
                           <span className="audit-item-time">
-                            {ConverDateTime(captureProps.hora_lectura).split(
+                            {ConverDateTime(captureProps.fecha_lectura).split(
                               ' '
-                            )[1] || captureProps.hora_lectura}
+                            )[1] || captureProps.fecha_lectura}
                           </span>
                         </Tooltip>
                       )}

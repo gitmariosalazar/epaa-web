@@ -9,6 +9,7 @@ export interface RouteMapProperties {
   clave_catastral?: string;
   acometida_id?: string;
   numero_medidor?: string;
+  fecha_lectura?: string;
   hora_lectura?: string;
   novedad?: string;
   orden_visita?: number;

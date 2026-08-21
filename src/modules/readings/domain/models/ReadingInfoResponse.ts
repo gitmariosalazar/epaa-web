@@ -12,6 +12,7 @@ export interface ReadingInfo {
   readingId: number;
   previousReadingDate: Date | null;
   readingTime: Date | null;
+  readingDate: string | null;
   cadastralKey: string;
   cardId: string;
   clientName: string;

@@ -81,10 +81,10 @@ export const AuditMapInfoWindow: React.FC<AuditMapInfoWindowProps> = memo(
           </div>
 
           <div className="reading-popup-values">
-            {props.hora_lectura && (
+            {props.fecha_lectura && (
               <div className="reading-popup-value-row">
                 <span className="reading-popup-value-label">Hora:</span>
-                <span className="reading-popup-value">{ConverDateTime(props.hora_lectura)}</span>
+                <span className="reading-popup-value">{ConverDateTime(props.fecha_lectura)}</span>
               </div>
             )}
             {props.usuario_lectura && (

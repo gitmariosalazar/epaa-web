@@ -38,7 +38,7 @@ export const AuditGeojsonMap: React.FC<AuditGeojsonMapProps> = ({
   const [hoveredPosition, setHoveredPosition] = useState<{ lat: number, lng: number } | null>(null);
   const [hoveredProps, setHoveredProps] = useState<any>(null);
   const [hoveredMarkerIdx, setHoveredMarkerIdx] = useState<number | null>(null);
-  const [extraReadingInfo, setExtraReadingInfo] = useState<{ clientName: string, address: string, readingTime: Date | null } | null>(null);
+  const [extraReadingInfo, setExtraReadingInfo] = useState<{ clientName: string, address: string, readingDate: string | null } | null>(null);
 
   // Ref for debounce timeout
   const hoverTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -144,7 +144,7 @@ export const AuditGeojsonMap: React.FC<AuditGeojsonMapProps> = ({
             setExtraReadingInfo({
               clientName: info.clientName,
               address: info.address,
-              readingTime: info.readingTime
+              readingDate: info.readingDate
             });
           }
         }).catch(err => {
@@ -194,9 +194,9 @@ export const AuditGeojsonMap: React.FC<AuditGeojsonMapProps> = ({
       meterNumber: selectedFeature.properties.numero_medidor || 'N/A',
       clientName: extraReadingInfo?.clientName || 'N/A',
       address: extraReadingInfo?.address || 'N/A',
-      readingDate: extraReadingInfo?.readingTime
-        ? extraReadingInfo.readingTime.toString()
-        : selectedFeature.properties.hora_lectura || undefined,
+      readingDate: extraReadingInfo?.readingDate
+        ? extraReadingInfo.readingDate
+        : selectedFeature.properties.fecha_lectura || undefined,
       locationCapture: captureGeom ? { lat: captureGeom[1], lng: captureGeom[0] } : null,
       locationConnection: connectionGeom ? { lat: connectionGeom[1], lng: connectionGeom[0] } : null,
       distanceMeters,
