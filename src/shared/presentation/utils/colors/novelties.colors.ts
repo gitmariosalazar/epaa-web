@@ -1,24 +1,31 @@
 export const NOVELTY_COLORS: Record<string, string> = {
-  NORMAL: '#059669', // Verde Esmeralda (Éxito / Todo OK)
+  NORMAL: '#10b981', // Verde Esmeralda (Éxito / Todo OK)
 
-  CONSUMO_BAJO: '#f59e0b', // Ámbar/Amarillo (Precaución leve)
-  ALERTA_CONSUMO_BAJO: '#d97706', // Naranja Oscuro (Atención, sub-consumo crítico)
+  // Sub-consumos (Tonos Ámbar/Amarillo)
+  CONSUMO_BAJO: '#f59e0b',
+  ALERTA_CONSUMO_BAJO: '#d97706',
 
-  CONSUMO_ALTO: '#ca8a04', // Amarillo Oscuro / Mostaza
-  ALERTA_CONSUMO_ALTO: '#dc2626', // Rojo Vivo (Alerta fuerte)
-  CONSUMO_EXCESIVO: '#7f1d1d', // Rojo Oscuro / Vino (Emergencia por fuga)
+  // Sobre-consumos (Tonos Naranja a Rojo)
+  CONSUMO_ALTO: '#f97316', // Naranja
+  ALERTA_CONSUMO_ALTO: '#ea580c', // Naranja intenso
+  CONSUMO_EXCESIVO: '#dc2626', // Rojo fuerte (Fuga o daño)
 
-  LECTURA_INVALIDA: '#7c3aed', // Morado Intenso (Error de lógica/sistema)
-  LECTURA_INICIAL: '#db2777', // Rosado Fucsia (Estado administrativo nuevo)
-
-  SIN_LECTURA: '#4b5563', // Gris Oscuro (Neutro, no se pudo medir)
-  DEFAULT: '#6b7280' // Gris Medio
+  // Estados del sistema
+  LECTURA_INVALIDA: '#be123c', // Carmesí/Rosa oscuro (Claramente un error, sin ser el rojo de consumo)
+  LECTURA_INICIAL: '#0ea5e9', // Azul cielo (Informativo, estado nuevo/neutral)
+  
+  SIN_LECTURA: '#64748b', // Gris Pizarra
+  DEFAULT: '#94a3b8'
 };
 
 export const getNoveltyColor = (noveltyName: string): string => {
   if (!noveltyName) return NOVELTY_COLORS.DEFAULT;
 
-  const normalizedKey = noveltyName.toUpperCase().replace(/\s+/g, '_');
+  const normalizedKey = noveltyName
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '_');
 
   return (
     NOVELTY_COLORS[normalizedKey] ||

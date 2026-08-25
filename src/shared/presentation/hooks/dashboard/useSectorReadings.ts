@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { TakenReadingConnectionUseCase } from '@/modules/readings/application/usecases/TakenReadingConnectionUseCase';
 import { PendingReadingConnectionUseCase } from '@/modules/readings/application/usecases/PendingReadingConnectionUseCase';
 import { TakenReadingConnectionRepositoryImpl } from '@/modules/readings/infrastructure/repositories/TakenReadingConnectionRepositoryImpl';
@@ -34,38 +34,38 @@ export const useSectorReadings = (
     []
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (sector === null || !month || !type) {
-        setData([]);
-        return;
-      }
+  const fetchData = useCallback(async () => {
+    if (sector === null || !month || !type) {
+      setData([]);
+      return;
+    }
 
-      setLoading(true);
-      try {
-        if (type === 'completed') {
-          const result = await takenUseCase.executeGetTakenReadingsByMonth(
-            month,
-            sector
-          );
-          setData(result);
-        } else if (type === 'missing') {
-          const result = await pendingUseCase.execute(month, sector);
-          setData(result);
-        }
-      } catch (error) {
-        console.error(
-          `Error fetching ${type} readings for sector ${sector}`,
-          error
+    setLoading(true);
+    try {
+      if (type === 'completed') {
+        const result = await takenUseCase.executeGetTakenReadingsByMonth(
+          month,
+          sector
         );
-        setData([]);
-      } finally {
-        setLoading(false);
+        setData(result);
+      } else if (type === 'missing') {
+        const result = await pendingUseCase.execute(month, sector);
+        setData(result);
       }
-    };
-
-    fetchData();
+    } catch (error) {
+      console.error(
+        `Error fetching ${type} readings for sector ${sector}`,
+        error
+      );
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
   }, [sector, month, type, takenUseCase, pendingUseCase]);
 
-  return { data, loading };
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, loading, refetch: fetchData };
 };

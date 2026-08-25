@@ -12,6 +12,14 @@ import {
 import { useTranslation } from 'react-i18next';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { NoveltyType } from '@/shared/utils/types/novelties-type';
+import { Modal } from '@/shared/presentation/components/Modal/Modal';
+import { CreateReadingPage } from '../../pages';
+import { UpdateReadingPage } from '../../pages/UpdateReadingPage';
+interface ModalState {
+  isOpen: boolean;
+  mode: 'create' | 'update';
+  cadastralKey: string;
+}
 
 interface ReadingsNoveltyTabViewProps {
   header: React.ReactNode;
@@ -27,9 +35,12 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
   const [sector, setSector] = useState('');
   const [userId, setUserId] = useState('');
   const [novelty, setNovelty] = useState<string>(NoveltyType.NORMAL);
+  const [modalState, setModalState] = useState<ModalState | null>(null);
+
 
   const { readingNovelties, loading, error, fetchNoveltyReadings } =
     useReadingNovelty();
+
 
   const {
     searchTerm,
@@ -43,6 +54,22 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
 
   const handleFetch = () => {
     fetchNoveltyReadings(novelty, month, sector ? Number(sector) : undefined, userId);
+  };
+
+  const handleTableAction = (
+    mode: 'create' | 'update',
+    cadastralKey: string
+  ) => {
+    setModalState({ isOpen: true, mode, cadastralKey });
+  };
+
+  const closeModal = () => {
+    setModalState(null);
+  };
+
+  const handleModalSuccess = () => {
+    closeModal();
+    handleFetch()
   };
 
   return (
@@ -101,8 +128,36 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
           month={month}
           novelty={novelty}
           sector={sector}
+          onAction={handleTableAction}
         />
       )}
+
+      {/* MODAL DE CREACIÓN / EDICIÓN */}
+      <Modal
+        isOpen={!!modalState?.isOpen}
+        onClose={closeModal}
+        title={
+          modalState?.mode === 'create' ? 'Nueva Lectura' : 'Editar Lectura'
+        }
+        size="full"
+      >
+        <div style={{ padding: '0px 10px', height: '100%' }}>
+          {modalState?.mode === 'create' && (
+            <CreateReadingPage
+              initialCadastralKey={modalState?.cadastralKey}
+              onSuccess={handleModalSuccess}
+              onCancel={closeModal}
+            />
+          )}
+          {modalState?.mode === 'update' && (
+            <UpdateReadingPage
+              initialCadastralKey={modalState?.cadastralKey}
+              onSuccess={handleModalSuccess}
+              onCancel={closeModal}
+            />
+          )}
+        </div>
+      </Modal>
     </PageLayout>
   );
 };

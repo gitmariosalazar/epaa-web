@@ -5,6 +5,14 @@ import {
   Table,
   type Column
 } from '@/shared/presentation/components/Table/Table';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { FaEdit } from 'react-icons/fa';
+import { Plus } from 'lucide-react';
+import { ReadingsProvider } from '@/modules/readings/presentation/context/ReadingsContext';
+import { CreateReadingPage } from '@/modules/readings/presentation/pages';
+import { UpdateReadingPage } from '@/modules/readings/presentation/pages/UpdateReadingPage';
+import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { useSectorReadings } from '@/shared/presentation/hooks/dashboard/useSectorReadings';
 import type {
   PendingReadingConnection,
@@ -19,6 +27,7 @@ import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { CircularProgress, useSimulatedProgress } from '@/shared/presentation/components/CircularProgress';
 
 interface SectorReadingsModalProps {
   isOpen: boolean;
@@ -36,12 +45,29 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
   type
 }) => {
   const { t } = useTranslation();
-  const { data, loading } = useSectorReadings(sector, month, type);
+  const { data, loading, refetch } = useSectorReadings(sector, month, type);
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState('');
   const [noveltyFilter, setNoveltyFilter] =
     useState<FilterCriteria['noveltyFilter']>('ALL');
+
+  const [readingModalState, setReadingModalState] = useState<{
+    isOpen: boolean;
+    mode: 'create' | 'update';
+    cadastralKey: string;
+  } | null>(null);
+
+  const handleAction = (mode: 'create' | 'update', cadastralKey: string) => {
+    setReadingModalState({ isOpen: true, mode, cadastralKey });
+  };
+
+  const handleModalSuccess = () => {
+    setReadingModalState(null);
+    refetch(); // Recargar datos
+  };
+
+  const loadingProgress = useSimulatedProgress(loading);
 
   // Column definitions for Table
   const completedColumns: Column<TakenReadingConnection>[] = useMemo(
@@ -101,7 +127,24 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
           );
         }
       },
-      { header: t('Medidor'), accessor: 'meterNumber' }
+      { header: t('Medidor'), accessor: 'meterNumber' },
+      {
+        header: t('common.actions', 'Acciones'),
+        accessor: (row) => (
+          <Tooltip themeColor="warning" content={t('common.edit', 'Editar')}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleAction('update', row.cadastralKey)}
+              color="warning"
+              circle
+            >
+              <FaEdit size={16} />
+            </Button>
+          </Tooltip>
+        ),
+        id: 'actions'
+      }
     ],
     [t]
   );
@@ -135,7 +178,24 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
         },
         isNumeric: true
       },
-      { header: t('Tarifa'), accessor: 'rateName' }
+      { header: t('Tarifa'), accessor: 'rateName' },
+      {
+        header: t('common.actions', 'Acciones'),
+        accessor: (row) => (
+          <Tooltip themeColor="success" content={t('common.create', 'Registrar Lectura')}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleAction('create', row.cadastralKey)}
+              color="success"
+              circle
+            >
+              <Plus size={16} />
+            </Button>
+          </Tooltip>
+        ),
+        id: 'actions'
+      }
     ],
     [t]
   );
@@ -264,38 +324,89 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
         </div>
 
         <div className="sector-readings-modal-body">
-          <div className="sector-readings-table-wrapper">
-            <Table
-              // @ts-ignore
-              data={filteredData}
-              // @ts-ignore
-              columns={type === 'completed' ? completedColumns : missingColumns}
-              isLoading={loading}
-              pagination={true}
-              pageSize={20}
-              onExportPdf={() => setShowPdfPreview(true)}
-              emptyState={
-                <EmptyState
-                  message={t(
-                    'common.noResults',
-                    'No se encontraron resultados'
-                  )}
-                  icon={IoInformationCircleOutline}
-                  description={t(
-                    'common.noResultsDescription',
-                    'Intenta ajustar los filtros de búsqueda para ver los resultados.'
-                  )}
-                  minHeight="300px"
-                  variant="info"
-                />
-              }
-            />
-          </div>
+          {loading ? (
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                marginTop: '2rem',
+                width: '100%',
+                height: '100%',
+                alignItems: 'center'
+              }}
+            >
+              <CircularProgress
+                progress={loadingProgress}
+                size={112}
+                strokeWidth={9}
+                label={t('common.loading', 'Cargando datos...')}
+              />
+            </div>
+          ) : (
+            <div className="sector-readings-table-wrapper">
+              <Table
+                // @ts-ignore
+                data={filteredData}
+                // @ts-ignore
+                columns={type === 'completed' ? completedColumns : missingColumns}
+                isLoading={false}
+                pagination={true}
+                pageSize={20}
+                onExportPdf={() => setShowPdfPreview(true)}
+                emptyState={
+                  <EmptyState
+                    message={t(
+                      'common.noResults',
+                      'No se encontraron resultados'
+                    )}
+                    icon={IoInformationCircleOutline}
+                    description={t(
+                      'common.noResultsDescription',
+                      'Intenta ajustar los filtros de búsqueda para ver los resultados.'
+                    )}
+                    minHeight="300px"
+                    variant="info"
+                  />
+                }
+              />
+            </div>
+          )}
         </div>
       </div>
 
       {/* PDF Modal Preview */}
       {PdfPreviewModal}
+
+      {/* Modal de Creación/Edición de Lectura */}
+      <Modal
+        isOpen={!!readingModalState?.isOpen}
+        onClose={() => setReadingModalState(null)}
+        title={
+          readingModalState?.mode === 'create'
+            ? 'Nueva Lectura'
+            : 'Editar Lectura'
+        }
+        size="full"
+      >
+        <ReadingsProvider>
+          <div style={{ padding: '0px 10px', height: '100%' }}>
+            {readingModalState?.mode === 'create' && (
+              <CreateReadingPage
+                initialCadastralKey={readingModalState?.cadastralKey}
+                onSuccess={handleModalSuccess}
+                onCancel={() => setReadingModalState(null)}
+              />
+            )}
+            {readingModalState?.mode === 'update' && (
+              <UpdateReadingPage
+                initialCadastralKey={readingModalState?.cadastralKey}
+                onSuccess={handleModalSuccess}
+                onCancel={() => setReadingModalState(null)}
+              />
+            )}
+          </div>
+        </ReadingsProvider>
+      </Modal>
     </div>
   );
 };

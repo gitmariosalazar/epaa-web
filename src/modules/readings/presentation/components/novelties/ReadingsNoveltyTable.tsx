@@ -28,6 +28,7 @@ interface ReadingsNoveltyTableProps {
   month: string;
   novelty: string;
   sector: string;
+  onAction?: (mode: 'create' | 'update', cadastralKey: string) => void;
 }
 
 export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
@@ -37,7 +38,8 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
   sortConfig,
   error,
   month,
-  sector
+  sector,
+  onAction
 }) => {
   const { t } = useTranslation();
 
@@ -302,7 +304,9 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => { }}
+              onClick={() => {
+                onAction && onAction?.('update', reading.cadastralKey);
+              }}
               color="warning"
               circle
             >

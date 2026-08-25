@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { ReadingsNoveltyTable } from '@/modules/readings/presentation/components/novelties/ReadingsNoveltyTable';
 import { useReadingNovelty } from '@/modules/readings/presentation/hooks/useReadingNovelty';
-import { ReadingNoveltyProvider } from '@/modules/readings/presentation/context/ReadingNoveltyContext';
+import { ReadingsProvider } from '@/modules/readings/presentation/context/ReadingsContext';
 //import { useTranslation } from 'react-i18next';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { Calendar, Search } from 'lucide-react';
@@ -12,6 +12,9 @@ import { Input } from '@/shared/presentation/components/Input/Input';
 
 import { useReadingNoveltySearch } from '@/modules/readings/presentation/hooks/useReadingNoveltySearch';
 import { ConvertMonth } from '@/shared/utils/datetime/Converts';
+import { CreateReadingPage } from '@/modules/readings/presentation/pages';
+import { UpdateReadingPage } from '@/modules/readings/presentation/pages/UpdateReadingPage';
+import { ReadingNoveltyProvider } from '@/modules/readings/presentation/context/ReadingNoveltyContext';
 
 interface NoveltyStatsModalContentProps {
   isOpen: boolean;
@@ -40,6 +43,27 @@ const NoveltyStatsModalContent: React.FC<NoveltyStatsModalContentProps> = ({
     novelty
   );
 
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    mode: 'create' | 'update';
+    cadastralKey: string;
+  } | null>(null);
+
+  const handleTableAction = (mode: 'create' | 'update', cadastralKey: string) => {
+    setModalState({ isOpen: true, mode, cadastralKey });
+  };
+
+  const closeModal = () => {
+    setModalState(null);
+  };
+
+  const handleModalSuccess = () => {
+    closeModal();
+    if (novelty && month) {
+      fetchNoveltyReadings(novelty, month);
+    }
+  };
+
   useEffect(() => {
     if (isOpen && novelty && month) {
       fetchNoveltyReadings(novelty, month);
@@ -57,6 +81,7 @@ const NoveltyStatsModalContent: React.FC<NoveltyStatsModalContentProps> = ({
   ]);
 
   const modalTitle = `Detalle de novedades de lectura`;
+  console.log(novelty);
 
   return (
     <Modal
@@ -115,8 +140,36 @@ const NoveltyStatsModalContent: React.FC<NoveltyStatsModalContentProps> = ({
           month={month}
           novelty={novelty}
           sector=""
+          onAction={handleTableAction}
         />
       </div>
+
+      {/* MODAL DE EDICIÓN / CREACIÓN */}
+      <Modal
+        isOpen={!!modalState?.isOpen}
+        onClose={closeModal}
+        title={
+          modalState?.mode === 'create' ? 'Nueva Lectura' : 'Editar Lectura'
+        }
+        size="full"
+      >
+        <div style={{ padding: '0px 10px', height: '100%' }}>
+          {modalState?.mode === 'create' && (
+            <CreateReadingPage
+              initialCadastralKey={modalState?.cadastralKey}
+              onSuccess={handleModalSuccess}
+              onCancel={closeModal}
+            />
+          )}
+          {modalState?.mode === 'update' && (
+            <UpdateReadingPage
+              initialCadastralKey={modalState?.cadastralKey}
+              onSuccess={handleModalSuccess}
+              onCancel={closeModal}
+            />
+          )}
+        </div>
+      </Modal>
     </Modal>
   );
 };
@@ -127,8 +180,10 @@ export const NoveltyStatsModal: React.FC<NoveltyStatsModalContentProps> = (
   if (!props.isOpen) return null;
 
   return (
-    <ReadingNoveltyProvider>
-      <NoveltyStatsModalContent {...props} />
-    </ReadingNoveltyProvider>
+    <ReadingsProvider>
+      <ReadingNoveltyProvider>
+        <NoveltyStatsModalContent {...props} />
+      </ReadingNoveltyProvider>
+    </ReadingsProvider>
   );
 };
