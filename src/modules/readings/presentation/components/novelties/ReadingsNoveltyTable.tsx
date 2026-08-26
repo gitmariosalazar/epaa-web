@@ -12,7 +12,7 @@ import {
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
 import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
-import { Eye } from 'lucide-react';
+import { FileText, MapPin } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
@@ -31,6 +31,8 @@ interface ReadingsNoveltyTableProps {
   novelty: string;
   sector: string;
   onAction?: (mode: 'create' | 'update', cadastralKey: string) => void;
+  onViewDetails?: (cadastralKey: string, readingDate: Date | null) => void;
+
 }
 
 export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
@@ -41,7 +43,8 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
   error,
   month,
   sector,
-  onAction
+  onAction,
+  onViewDetails
 }) => {
   const { t } = useTranslation();
   const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(null);
@@ -294,16 +297,29 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
             themeColor="info"
             content={
               <>
-                <div> Ver Detalles </div>
+                <div> Ver Detalles de la Lectura </div>
                 <div> Lectura ID: {reading.readingId} </div>
               </>
             }
           >
-            <Button size="sm" variant="ghost" onClick={() => setDetailCadastralKey(reading.cadastralKey)} circle>
-              <Eye size={16} />
+            <Button size="sm" variant="ghost" onClick={() => onViewDetails && onViewDetails(reading.cadastralKey, reading.readingDate)} circle>
+              <FileText size={16} />
             </Button>
           </Tooltip>
-          <Tooltip followCursor={false} themeColor="warning" content={t('common.edit', 'Editar')}>
+          <Tooltip followCursor={false}
+            themeColor="cyan"
+            content={
+              <>
+                <div> Ver Información de la Acometida </div>
+                <div> Acometida ID: {reading.cadastralKey} </div>
+              </>
+            }
+          >
+            <Button color="cyan" size="sm" variant="ghost" onClick={() => setDetailCadastralKey(reading.cadastralKey)} circle>
+              <MapPin size={16} />
+            </Button>
+          </Tooltip>
+          <Tooltip followCursor={false} themeColor="warning" content={t('common.edit', 'Editar Lectura')}>
             <Button
               size="sm"
               variant="ghost"

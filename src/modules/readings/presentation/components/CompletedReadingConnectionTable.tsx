@@ -9,7 +9,7 @@ import type { TakenReadingConnection } from '../../domain/models/Reading';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { Eye } from 'lucide-react';
+import { FileText, MapPin } from 'lucide-react';
 import { FaEdit, FaCheckCircle, FaHome } from 'react-icons/fa';
 import { MdMyLocation } from 'react-icons/md';
 import { IoIosCloseCircle } from 'react-icons/io';
@@ -27,13 +27,15 @@ interface PropTypes {
   isLoading: boolean;
   onAction?: (mode: 'create' | 'update', cadastralKey: string) => void;
   onViewDetails?: (cadastralKey: string, readingDate: Date | null) => void;
+  onViewConnectionDetails?: (cadastralKey: string) => void;
 }
 
 export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
   data,
   isLoading,
   onAction,
-  onViewDetails
+  onViewDetails,
+  onViewConnectionDetails
 }) => {
   const { t } = useTranslation();
 
@@ -275,12 +277,21 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
         accessor: (reading) => (
           <div className="reading-table-actions">
             <Tooltip
+              themeColor="cyan"
+              followCursor={false}
+              content="Ver Detalles de la Acometida"
+            >
+              <Button size="sm" variant="ghost" color="cyan" onClick={() => onViewConnectionDetails && onViewConnectionDetails(reading.cadastralKey)} circle>
+                <MapPin size={16} />
+              </Button>
+            </Tooltip>
+            <Tooltip
               themeColor="info"
               followCursor={false}
-              content={t('common.viewDetails', 'Ver Detalles')}
+              content={t('common.viewDetails', 'Ver Detalles de Lectura')}
             >
               <Button size="sm" variant="ghost" onClick={() => onViewDetails && onViewDetails(reading.cadastralKey, reading.readingDate)} circle>
-                <Eye size={16} />
+                <FileText size={16} />
               </Button>
             </Tooltip>
             <Tooltip

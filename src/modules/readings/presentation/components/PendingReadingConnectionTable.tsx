@@ -7,7 +7,7 @@ import {
 import type { PendingReadingConnection } from '../../domain/models/Reading';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { Eye } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { IoAdd, IoInformationCircleOutline } from 'react-icons/io5';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
@@ -18,12 +18,14 @@ interface PropTypes {
   data: PendingReadingConnection[];
   isLoading: boolean;
   onAction?: (mode: 'create' | 'update', cadastralKey: string) => void;
+  onViewConnectionDetails?: (cadastralKey: string) => void;
 }
 
 export const PendingReadingConnectionTable: React.FC<PropTypes> = ({
   data,
   isLoading,
-  onAction
+  onAction,
+  onViewConnectionDetails
 }) => {
   const { t } = useTranslation();
 
@@ -75,14 +77,6 @@ export const PendingReadingConnectionTable: React.FC<PropTypes> = ({
         accessor: (reading) => (
           <div style={{ display: 'flex', gap: '8px' }}>
             <Tooltip
-              themeColor="info"
-              content={t('common.viewDetails', 'Ver Detalles')}
-            >
-              <Button size="sm" variant="ghost" onClick={() => { }} circle>
-                <Eye size={16} />
-              </Button>
-            </Tooltip>
-            <Tooltip
               themeColor="success"
               content={t('common.add', 'Agregar Lectura')}
             >
@@ -96,6 +90,18 @@ export const PendingReadingConnectionTable: React.FC<PropTypes> = ({
                 circle
               >
                 <IoAdd size={16} />
+              </Button>
+            </Tooltip>
+
+            <Tooltip followCursor={false} themeColor="cyan" content="Ver Detalles de la Acometida">
+              <Button
+                size="sm"
+                variant="ghost"
+                color="cyan"
+                onClick={() => onViewConnectionDetails && onViewConnectionDetails(reading.cadastralKey)}
+                circle
+              >
+                <MapPin size={16} />
               </Button>
             </Tooltip>
           </div>

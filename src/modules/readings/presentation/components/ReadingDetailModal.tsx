@@ -46,7 +46,6 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
   const { readingDetail, isLoading, error } = useReadingDetailViewModel(cadastralKey, yearAndMonth);
   const loadingProgress = useSimulatedProgress(isLoading);
 
-  console.log(readingDetail)
 
   return (
     <Modal
@@ -263,7 +262,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
               {readingDetail.images && readingDetail.images.length > 0 ? (
                 <div className="reading-detail-images">
                   {readingDetail.images.map((img) => (
-                    <EvidenceFiles 
+                    <EvidenceFiles
                       key={img.id}
                       fileId={img.id}
                       filePath={img.path}

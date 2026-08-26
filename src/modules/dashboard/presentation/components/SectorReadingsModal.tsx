@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Eye, X } from 'lucide-react';
+import { Eye, FileText, MapPin, X } from 'lucide-react';
 import {
   Table,
   type Column
@@ -30,6 +30,7 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { CircularProgress, useSimulatedProgress } from '@/shared/presentation/components/CircularProgress';
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
+import { ReadingDetailModal } from '@/modules/readings/presentation/components/ReadingDetailModal';
 
 interface SectorReadingsModalProps {
   isOpen: boolean;
@@ -61,6 +62,24 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
     mode: 'create' | 'update';
     cadastralKey: string;
   } | null>(null);
+
+  // Detail Modal State for Readings
+  const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
+    isOpen: false,
+    cadastralKey: null,
+    yearAndMonth: null,
+  });
+
+  const handleViewDetails = (cadastralKey: string, readingDate: Date | null) => {
+    let yearAndMonth = month;
+    if (readingDate) {
+      const d = new Date(readingDate);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      yearAndMonth = `${y}-${m}`;
+    }
+    setDetailModalState({ isOpen: true, cadastralKey, yearAndMonth });
+  };
 
   const handleAction = (mode: 'create' | 'update', cadastralKey: string) => {
     setReadingModalState({ isOpen: true, mode, cadastralKey });
@@ -148,16 +167,30 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
               </Button>
             </Tooltip>
             <Tooltip followCursor={false}
+              themeColor="cyan"
+              content={
+                <>
+                  <div> Ver Detalles de la Acometida </div>
+                  <div> Acometida ID: {row.cadastralKey} </div>
+                </>
+              }
+            >
+              <Button color="cyan" size="sm" variant="ghost" onClick={() => setDetailCadastralKey(row.cadastralKey)} circle>
+                <MapPin size={16} />
+              </Button>
+            </Tooltip>
+
+            <Tooltip followCursor={false}
               themeColor="info"
               content={
                 <>
-                  <div> Ver Detalles </div>
+                  <div> Ver Detalles de la Lectura </div>
                   <div> Lectura ID: {row.readingId} </div>
                 </>
               }
             >
-              <Button size="sm" variant="ghost" onClick={() => setDetailCadastralKey(row.cadastralKey)} circle>
-                <Eye size={16} />
+              <Button size="sm" variant="ghost" onClick={() => handleViewDetails(row.cadastralKey, row.readingDate)} circle>
+                <FileText size={16} />
               </Button>
             </Tooltip>
 
@@ -407,6 +440,16 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
 
       {/* PDF Modal Preview */}
       {PdfPreviewModal}
+
+
+      <ReadingsProvider>
+        <ReadingDetailModal
+          isOpen={detailModalState.isOpen}
+          onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+          cadastralKey={detailModalState.cadastralKey}
+          yearAndMonth={detailModalState.yearAndMonth}
+        />
+      </ReadingsProvider>
 
       {/* Modal de Creación/Edición de Lectura */}
       <Modal

@@ -74,7 +74,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem 1.5rem !important;
+  padding: 0.35rem 0.5rem !important;
   border-bottom: 1px solid var(--border-color);
   border-top-left-radius: 1rem;
   border-top-right-radius: 1rem;
@@ -87,32 +87,109 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
   flex-shrink: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(249, 115, 22, 0.12),
+    rgba(249, 115, 22, 0.03)
+  );
 }
 
-.modal-header--teal { background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(6, 182, 212, 0.03)); border-bottom-color: rgba(6, 182, 212, 0.2); }
-.modal-header--teal .modal-header-icon { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+.modal-header-icon-default {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(249, 115, 22, 0.12),
+    rgba(249, 115, 22, 0.03)
+  );
+  border-bottom-color: rgba(249, 115, 22, 0.4);
+}
 
-.modal-header--indigo { background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(99, 102, 241, 0.03)); border-bottom-color: rgba(99, 102, 241, 0.2); }
-.modal-header--indigo .modal-header-icon { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+.modal-header--orange .modal-header-icon {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+}
 
-.modal-header--purple { background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(139, 92, 246, 0.03)); border-bottom-color: rgba(139, 92, 246, 0.2); }
-.modal-header--purple .modal-header-icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.modal-header--teal {
+  background: linear-gradient(
+    135deg,
+    rgba(6, 182, 212, 0.12),
+    rgba(6, 182, 212, 0.03)
+  );
+  border-bottom-color: rgba(6, 182, 212, 0.2);
+}
+.modal-header--teal .modal-header-icon {
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+}
 
-.modal-header--pink { background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(236, 72, 153, 0.03)); border-bottom-color: rgba(236, 72, 153, 0.2); }
-.modal-header--pink .modal-header-icon { background: linear-gradient(135deg, #ec4899, #db2777); }
+.modal-header--indigo {
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.12),
+    rgba(99, 102, 241, 0.03)
+  );
+  border-bottom-color: rgba(99, 102, 241, 0.2);
+}
+.modal-header--indigo .modal-header-icon {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+}
 
-.modal-header--green { background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.03)); border-bottom-color: rgba(16, 185, 129, 0.2); }
-.modal-header--green .modal-header-icon { background: linear-gradient(135deg, #10b981, #059669); }
+.modal-header--purple {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.12),
+    rgba(139, 92, 246, 0.03)
+  );
+  border-bottom-color: rgba(139, 92, 246, 0.2);
+}
+.modal-header--purple .modal-header-icon {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
 
-.modal-header--orange { background: linear-gradient(135deg, rgba(249, 115, 22, 0.12), rgba(249, 115, 22, 0.03)); border-bottom-color: rgba(249, 115, 22, 0.2); }
-.modal-header--orange .modal-header-icon { background: linear-gradient(135deg, #f97316, #ea580c); }
+.modal-header--pink {
+  background: linear-gradient(
+    135deg,
+    rgba(236, 72, 153, 0.12),
+    rgba(236, 72, 153, 0.03)
+  );
+  border-bottom-color: rgba(236, 72, 153, 0.2);
+}
+.modal-header--pink .modal-header-icon {
+  background: linear-gradient(135deg, #ec4899, #db2777);
+}
+
+.modal-header--green {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.12),
+    rgba(16, 185, 129, 0.03)
+  );
+  border-bottom-color: rgba(16, 185, 129, 0.2);
+}
+.modal-header--green .modal-header-icon {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.modal-header--orange {
+  background: linear-gradient(
+    135deg,
+    rgba(249, 115, 22, 0.12),
+    rgba(249, 115, 22, 0.03)
+  );
+  border-bottom-color: rgba(249, 115, 22, 0.2);
+}
+.modal-header--orange .modal-header-icon {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+}
 
 .modal-header h2,
 .modal-title {
-  font-size: 1.25rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-main);
   margin: 0;
@@ -127,7 +204,7 @@
 
 .modal-description {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.75rem !important;
   color: var(--text-secondary);
 }
 

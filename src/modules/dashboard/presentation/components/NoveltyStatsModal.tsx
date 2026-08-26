@@ -15,6 +15,7 @@ import { ConvertMonth } from '@/shared/utils/datetime/Converts';
 import { CreateReadingPage } from '@/modules/readings/presentation/pages';
 import { UpdateReadingPage } from '@/modules/readings/presentation/pages/UpdateReadingPage';
 import { ReadingNoveltyProvider } from '@/modules/readings/presentation/context/ReadingNoveltyContext';
+import { ReadingDetailModal } from '@/modules/readings/presentation/components/ReadingDetailModal';
 
 interface NoveltyStatsModalContentProps {
   isOpen: boolean;
@@ -29,6 +30,24 @@ const NoveltyStatsModalContent: React.FC<NoveltyStatsModalContentProps> = ({
   month,
   novelty
 }) => {
+
+
+  const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
+    isOpen: false,
+    cadastralKey: null,
+    yearAndMonth: null,
+  });
+
+  const handleViewDetails = (cadastralKey: string, readingDate: Date | null) => {
+    let yearAndMonth = month;
+    if (readingDate) {
+      const d = new Date(readingDate);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      yearAndMonth = `${y}-${m}`;
+    }
+    setDetailModalState({ isOpen: true, cadastralKey, yearAndMonth });
+  };
   //const { t } = useTranslation();
   const {
     readingNovelties,
@@ -141,6 +160,8 @@ const NoveltyStatsModalContent: React.FC<NoveltyStatsModalContentProps> = ({
           novelty={novelty}
           sector=""
           onAction={handleTableAction}
+          onViewDetails={handleViewDetails}
+
         />
       </div>
 
@@ -170,6 +191,14 @@ const NoveltyStatsModalContent: React.FC<NoveltyStatsModalContentProps> = ({
           )}
         </div>
       </Modal>
+      <ReadingsProvider>
+        <ReadingDetailModal
+          isOpen={detailModalState.isOpen}
+          onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+          cadastralKey={detailModalState.cadastralKey}
+          yearAndMonth={detailModalState.yearAndMonth}
+        />
+      </ReadingsProvider>
     </Modal>
   );
 };

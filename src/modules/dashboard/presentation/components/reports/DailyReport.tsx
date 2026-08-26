@@ -21,19 +21,28 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import type { ExportColumn } from './ReportPreviewModal';
 import { truncateText } from '@/shared/utils/text/truncate-text';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { FaEdit } from 'react-icons/fa';
+import { MapPin, FileText } from 'lucide-react';
 
 interface DailyReportProps {
   showToolbar?: boolean;
   showTable?: boolean;
   externalDate?: string;
   onDateChange?: (date: string) => void;
+  onAction?: (mode: 'create' | 'update', cadastralKey: string) => void;
+  onViewConnectionDetails?: (cadastralKey: string) => void;
+  onViewReadingDetails?: (cadastralKey: string, readingDate: Date | null) => void;
 }
 
 export const DailyReport: React.FC<DailyReportProps> = ({
   showToolbar = true,
   showTable = true,
   externalDate,
-  onDateChange
+  onDateChange,
+  onAction,
+  onViewConnectionDetails,
+  onViewReadingDetails
 }) => {
   const { t } = useTranslation();
 
@@ -334,6 +343,53 @@ export const DailyReport: React.FC<DailyReportProps> = ({
             />
           );
         }
+      },
+      {
+        header: t('common.actions', 'Acciones'),
+        accessor: (row) => (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Tooltip themeColor="warning" content={t('common.edit', 'Editar')}>
+              <Button
+                size="sm"
+                variant="ghost"
+                color="warning"
+                onClick={() =>
+                  onAction && onAction('update', row.cadastralKey)
+                }
+                circle
+              >
+                <FaEdit size={16} />
+              </Button>
+            </Tooltip>
+
+            <Tooltip followCursor={false} themeColor="cyan" content="Ver Detalles de la Acometida">
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                color="cyan" 
+                onClick={() => onViewConnectionDetails && onViewConnectionDetails(row.cadastralKey)} 
+                circle
+              >
+                <MapPin size={16} />
+              </Button>
+            </Tooltip>
+
+            <Tooltip
+              themeColor="info"
+              followCursor={false}
+              content={t('common.viewDetails', 'Ver Detalles de Lectura')}
+            >
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                onClick={() => onViewReadingDetails && onViewReadingDetails(row.cadastralKey, new Date(date))} 
+                circle
+              >
+                <FileText size={16} />
+              </Button>
+            </Tooltip>
+          </div>
+        )
       }
     ],
     [t]

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ImageIcon, AlertCircle, Droplet } from 'lucide-react';
+import { ImageIcon, AlertCircle, Droplet, MapPin, FileText } from 'lucide-react';
 
 import { ReadingImagesFilters } from '../components/ReadingImagesFilters';
 import { useReadingImagesList } from '../hooks/useReadingImagesList';
@@ -19,6 +19,15 @@ import '../styles/ReadingImagesPage.css';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { FaEdit } from 'react-icons/fa';
+
+import { Modal } from '@/shared/presentation/components/Modal/Modal';
+import { CreateReadingPage } from './CreateReadingPage';
+import { UpdateReadingPage } from './UpdateReadingPage';
+import { ReadingDetailModal } from '../components/ReadingDetailModal';
+import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
 
 export const ReadingImagesPage: React.FC = () => {
   const { t } = useTranslation();
@@ -30,6 +39,31 @@ export const ReadingImagesPage: React.FC = () => {
   const [selectedReading, setSelectedReading] = useState<ReadingImages | null>(
     null
   );
+
+  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(null);
+
+
+
+  const [readingModalState, setReadingModalState] = useState<{
+    isOpen: boolean;
+    mode: 'create' | 'update';
+    cadastralKey: string;
+  } | null>(null);
+
+  // Detail Modal State for Readings
+  const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
+    isOpen: false,
+    cadastralKey: null,
+    yearAndMonth: null,
+  });
+
+  const handleViewDetails = (cadastralKey: string, yearAndMonth: string) => {
+    setDetailModalState({ isOpen: true, cadastralKey, yearAndMonth });
+  };
+
+  const handleAction = (mode: 'create' | 'update', cadastralKey: string) => {
+    setReadingModalState({ isOpen: true, mode, cadastralKey });
+  };
 
   const handleFetch = (filters: {
     monthIso?: string;
@@ -93,6 +127,53 @@ export const ReadingImagesPage: React.FC = () => {
           )}
         </div>
       )
+    },
+    {
+      header: t('common.actions', 'Acciones'),
+      accessor: (row) => (
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Tooltip followCursor={false} themeColor="warning" content={t('common.edit', 'Editar')}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleAction('update', row.cadastralKey)}
+              color="warning"
+              circle
+            >
+              <FaEdit size={16} />
+            </Button>
+          </Tooltip>
+          <Tooltip followCursor={false}
+            themeColor="cyan"
+            content={
+              <>
+                <div> Ver Detalles de la Acometida </div>
+                <div> Acometida ID: {row.cadastralKey} </div>
+              </>
+            }
+          >
+            <Button color="cyan" size="sm" variant="ghost" onClick={() => setDetailCadastralKey(row.cadastralKey)} circle>
+              <MapPin size={16} />
+            </Button>
+          </Tooltip>
+
+          <Tooltip followCursor={false}
+            themeColor="info"
+            content={
+              <>
+                <div> Ver Detalles de la Lectura </div>
+                <div> Lectura ID: {row.readingId} </div>
+              </>
+            }
+          >
+            <Button size="sm" variant="ghost" onClick={() => handleViewDetails(row.cadastralKey, row.readingMonth)} circle>
+              <FileText size={16} />
+            </Button>
+          </Tooltip>
+
+        </div>
+      ),
+      id: 'actions'
     }
   ];
 
@@ -147,6 +228,52 @@ export const ReadingImagesPage: React.FC = () => {
         onClose={() => setSelectedReading(null)}
         readingData={selectedReading}
       />
+
+      {/* Connection Detail Modal */}
+      <ConnectionProvider>
+        <ConnectionDetailModal
+          isOpen={detailCadastralKey !== null}
+          onClose={() => setDetailCadastralKey(null)}
+          cadastralKey={detailCadastralKey}
+        />
+      </ConnectionProvider>
+
+      {/* Reading Detail Modal (No extra provider needed as page is already under ReadingsProvider) */}
+      <ReadingDetailModal
+        isOpen={detailModalState.isOpen}
+        onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+        cadastralKey={detailModalState.cadastralKey}
+        yearAndMonth={detailModalState.yearAndMonth}
+      />
+
+      {/* Modal de Creación/Edición de Lectura */}
+      <Modal
+        isOpen={!!readingModalState?.isOpen}
+        onClose={() => setReadingModalState(null)}
+        title={
+          readingModalState?.mode === 'create'
+            ? 'Nueva Lectura'
+            : 'Editar Lectura'
+        }
+        size="full"
+      >
+        <div style={{ padding: '0px 10px', height: '100%' }}>
+          {readingModalState?.mode === 'create' && (
+            <CreateReadingPage
+              initialCadastralKey={readingModalState?.cadastralKey}
+              onSuccess={() => setReadingModalState(null)}
+              onCancel={() => setReadingModalState(null)}
+            />
+          )}
+          {readingModalState?.mode === 'update' && (
+            <UpdateReadingPage
+              initialCadastralKey={readingModalState?.cadastralKey}
+              onSuccess={() => setReadingModalState(null)}
+              onCancel={() => setReadingModalState(null)}
+            />
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

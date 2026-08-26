@@ -8,11 +8,12 @@ import type { TakenReadingConnection } from '../../domain/models/Reading';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { Eye } from 'lucide-react';
 import { FaEdit } from 'react-icons/fa';
-import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { MapPin, FileText } from 'lucide-react';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { truncateText } from '@/shared/utils/text/truncate-text';
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
@@ -21,12 +22,16 @@ interface PropTypes {
   data: TakenReadingConnection[];
   isLoading: boolean;
   onAction?: (mode: 'create' | 'update', cadastralKey: string) => void;
+  onViewConnectionDetails?: (cadastralKey: string) => void;
+  onViewDetails?: (cadastralKey: string, readingDate: Date | null) => void;
 }
 
 export const EstimatedReadingConnectionTable: React.FC<PropTypes> = ({
   data,
   isLoading,
-  onAction
+  onAction,
+  onViewConnectionDetails,
+  onViewDetails
 }) => {
   const { t } = useTranslation();
 
@@ -51,6 +56,21 @@ export const EstimatedReadingConnectionTable: React.FC<PropTypes> = ({
               </div>
             </div>
           </div>
+        )
+      },
+      { header: t('readings.columns.sector'), accessor: 'sector' },
+      { header: t('readings.columns.account'), accessor: 'account' },
+      {
+        header: t('readings.columns.address'),
+        accessor: (r) => (
+          <Tooltip
+            content={`${r.address}, Sector: ${r.sector}`}
+            themeColor="info"
+            position="top"
+            followCursor={false}
+          >
+            <span>{truncateText(`${r.address}, Sector: ${r.sector}`, 32)}</span>
+          </Tooltip>
         )
       },
       {
@@ -193,14 +213,9 @@ export const EstimatedReadingConnectionTable: React.FC<PropTypes> = ({
         accessor: (reading) => (
           <div style={{ display: 'flex', gap: '8px' }}>
             <Tooltip
-              themeColor="info"
-              content={t('common.viewDetails', 'Ver Detalles')}
+              themeColor="warning"
+              content={t('common.edit', 'Editar')}
             >
-              <Button size="sm" variant="ghost" onClick={() => { }} circle>
-                <Eye size={16} />
-              </Button>
-            </Tooltip>
-            <Tooltip themeColor="warning" content={t('common.edit', 'Editar')}>
               <Button
                 size="sm"
                 variant="ghost"
@@ -211,6 +226,28 @@ export const EstimatedReadingConnectionTable: React.FC<PropTypes> = ({
                 circle
               >
                 <FaEdit size={16} />
+              </Button>
+            </Tooltip>
+
+            <Tooltip followCursor={false} themeColor="cyan" content="Ver Detalles de la Acometida">
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                color="cyan" 
+                onClick={() => onViewConnectionDetails && onViewConnectionDetails(reading.cadastralKey)} 
+                circle
+              >
+                <MapPin size={16} />
+              </Button>
+            </Tooltip>
+
+            <Tooltip
+              themeColor="info"
+              followCursor={false}
+              content={t('common.viewDetails', 'Ver Detalles de Lectura')}
+            >
+              <Button size="sm" variant="ghost" onClick={() => onViewDetails && onViewDetails(reading.cadastralKey, reading.readingDate)} circle>
+                <FileText size={16} />
               </Button>
             </Tooltip>
           </div>

@@ -15,6 +15,8 @@ import { NoveltyType } from '@/shared/utils/types/novelties-type';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { CreateReadingPage } from '../../pages';
 import { UpdateReadingPage } from '../../pages/UpdateReadingPage';
+import { ReadingDetailModal } from '../ReadingDetailModal';
+import { ReadingsProvider } from '../../context/ReadingsContext';
 interface ModalState {
   isOpen: boolean;
   mode: 'create' | 'update';
@@ -36,6 +38,24 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
   const [userId, setUserId] = useState('');
   const [novelty, setNovelty] = useState<string>(NoveltyType.NORMAL);
   const [modalState, setModalState] = useState<ModalState | null>(null);
+
+
+  const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
+    isOpen: false,
+    cadastralKey: null,
+    yearAndMonth: null,
+  });
+
+  const handleViewDetails = (cadastralKey: string, readingDate: Date | null) => {
+    let yearAndMonth = month;
+    if (readingDate) {
+      const d = new Date(readingDate);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      yearAndMonth = `${y}-${m}`;
+    }
+    setDetailModalState({ isOpen: true, cadastralKey, yearAndMonth });
+  };
 
 
   const { readingNovelties, loading, error, fetchNoveltyReadings } =
@@ -129,6 +149,7 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
           novelty={novelty}
           sector={sector}
           onAction={handleTableAction}
+          onViewDetails={handleViewDetails}
         />
       )}
 
@@ -158,6 +179,15 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
           )}
         </div>
       </Modal>
+
+      <ReadingsProvider>
+        <ReadingDetailModal
+          isOpen={detailModalState.isOpen}
+          onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+          cadastralKey={detailModalState.cadastralKey}
+          yearAndMonth={detailModalState.yearAndMonth}
+        />
+      </ReadingsProvider>
     </PageLayout>
   );
 };

@@ -236,6 +236,7 @@ export const EvidenceFiles: React.FC<EvidenceFilesProps> = ({
             content="Descargar archivo"
             position="top"
             style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10, width: 'auto', height: 'auto', flex: 'none' }}
+            followCursor={false}
           >
             <button
               type="button"

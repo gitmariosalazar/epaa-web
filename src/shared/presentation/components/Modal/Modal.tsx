@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import '@/shared/presentation/styles/Modal.css';
 import { Tooltip } from '../common/Tooltip/Tooltip';
 import { Button } from '../Button/Button';
+import { BsWindow } from 'react-icons/bs';
 
 interface ModalProps {
   isOpen: boolean;
@@ -60,9 +61,13 @@ export const Modal: React.FC<ModalProps> = ({
       <div className={`modal-content modal--${size}`} ref={modalRef}>
         <div className={`modal-header ${headerColor !== 'default' ? `modal-header--${headerColor}` : ''}`}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
-            {icon && (
+            {icon ? (
               <div className="modal-header-icon">
                 {icon}
+              </div>
+            ) : (
+              <div className="modal-header-icon-default">
+                <BsWindow size={24} />
               </div>
             )}
             <div className="modal-header-content">

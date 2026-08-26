@@ -27,6 +27,8 @@ import { UpdateReadingPage } from './UpdateReadingPage';
 import { BsPatchQuestionFill } from 'react-icons/bs';
 import { ReadingsNoveltyTabView } from '../components/novelties/ReadingsNoveltyTabView';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
+import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
 
 interface ModalState {
   isOpen: boolean;
@@ -77,6 +79,9 @@ export const ReadingsListPage: React.FC = () => {
     cadastralKey: null,
     yearAndMonth: null,
   });
+
+  // Detail Modal State for Connection
+  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(null);
 
   const handleViewDetails = (cadastralKey: string, readingDate: Date | null) => {
     let yearAndMonth = month;
@@ -235,6 +240,7 @@ export const ReadingsListPage: React.FC = () => {
               data={filteredPending}
               isLoading={isLoading}
               onAction={handleTableAction}
+              onViewConnectionDetails={(key) => setDetailCadastralKey(key)}
             />
           )}
 
@@ -244,6 +250,7 @@ export const ReadingsListPage: React.FC = () => {
               isLoading={isLoading}
               onAction={handleTableAction}
               onViewDetails={handleViewDetails}
+              onViewConnectionDetails={(key) => setDetailCadastralKey(key)}
             />
           )}
 
@@ -252,11 +259,19 @@ export const ReadingsListPage: React.FC = () => {
               data={filteredEstimated}
               isLoading={isLoading}
               onAction={handleTableAction}
+              onViewDetails={handleViewDetails}
+              onViewConnectionDetails={(key) => setDetailCadastralKey(key)}
             />
           )}
 
           {activeTab === 'all' && (
-            <AllReadingsTable data={filteredAll} isLoading={isLoading} />
+            <AllReadingsTable 
+              data={filteredAll} 
+              isLoading={isLoading} 
+              onAction={handleTableAction}
+              onViewReadingDetails={handleViewDetails}
+              onViewConnectionDetails={(key) => setDetailCadastralKey(key)}
+            />
           )}
         </>
       )}
@@ -288,12 +303,20 @@ export const ReadingsListPage: React.FC = () => {
         </div>
       </Modal>
 
-      <ReadingDetailModal
-        isOpen={detailModalState.isOpen}
-        onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
-        cadastralKey={detailModalState.cadastralKey}
-        yearAndMonth={detailModalState.yearAndMonth}
-      />
-    </PageLayout>
+        <ReadingDetailModal
+          isOpen={detailModalState.isOpen}
+          onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+          cadastralKey={detailModalState.cadastralKey}
+          yearAndMonth={detailModalState.yearAndMonth}
+        />
+
+        <ConnectionProvider>
+          <ConnectionDetailModal
+            isOpen={detailCadastralKey !== null}
+            onClose={() => setDetailCadastralKey(null)}
+            cadastralKey={detailCadastralKey}
+          />
+        </ConnectionProvider>
+      </PageLayout>
   );
 };
