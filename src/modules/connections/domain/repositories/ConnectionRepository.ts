@@ -1,6 +1,7 @@
 import type {
   Connection,
   ConnectionAndPropertyResponse,
+  ConnectionWithoutProperty,
   ConnectionWithProperty,
   Rate
 } from '../models/Connection';
@@ -46,6 +47,11 @@ export interface ConnectionRepository {
   findConnectionAndPropertyByCadastralKeyOrCardId(
     searchValue: string
   ): Promise<ConnectionAndPropertyResponse[]>;
+  findAllConnectionsWithProperty(params: {
+    limit: number;
+    offset: number;
+    query?: string;
+  }): Promise<ConnectionWithoutProperty[]>;
 }
 
 export interface CreateConnectionRequest {

@@ -21,92 +21,7 @@ import { getConnectionStateChip } from '../utils/connectionStateChip';
 import { BsTable } from 'react-icons/bs';
 import { GiHexagonalNut } from 'react-icons/gi';
 
-// ── DetailModal (lightweight inline modal for viewing a connection) ────────────
-interface ConnectionDetailModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  connection: Connection | null;
-}
-
-const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
-  isOpen,
-  onClose,
-  connection
-}) => {
-  const { t } = useTranslation();
-  if (!isOpen || !connection) return null;
-
-  const detailRows = [
-    {
-      label: t('connections.table.connectionId'),
-      value: connection.connectionId
-    },
-    { label: t('connections.table.clientId'), value: connection.clientId },
-    {
-      label: t('connections.table.meterNumber'),
-      value: connection.connectionMeterNumber
-    },
-    {
-      label: t('connections.table.cadastralKey'),
-      value: connection.connectionCadastralKey
-    },
-    {
-      label: t('connections.table.contractNumber'),
-      value: connection.connectionContractNumber
-    },
-    {
-      label: t('connections.wizard.clientSelection.address'),
-      value: connection.connectionAddress
-    },
-    {
-      label: t('connections.table.rate'),
-      value: connection.connectionRateName
-    },
-    {
-      label: t('connections.table.sector'),
-      value: connection.connectionSector
-    },
-    { label: t('connections.table.zone'), value: connection.connectionZone },
-    {
-      label: t('connections.table.people'),
-      value: connection.connectionPeopleNumber
-    },
-    { label: t('connections.table.latitude'), value: connection.latitude },
-    { label: t('connections.table.longitude'), value: connection.longitude },
-    {
-      label: t('connections.table.altitude'),
-      value: connection.connectionAltitude
-    },
-    {
-      label: t('connections.table.installationDate'),
-      value: connection.connectionInstallationDate
-        ? new Date(connection.connectionInstallationDate).toLocaleDateString()
-        : '-'
-    }
-  ];
-
-  return (
-    <div className="conn-detail-overlay" onClick={onClose}>
-      <div className="conn-detail-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="conn-detail-header">
-          <h3>{t('connections.table.detailsTitle')}</h3>
-          <Button variant="ghost" size="sm" circle onClick={onClose}>
-            <X size={16} />
-          </Button>
-        </div>
-        <div className="conn-detail-body">
-          {detailRows.map(({ label, value }) => (
-            <div key={label} className="conn-detail-row">
-              <span className="conn-detail-label">{label}</span>
-              <span className="conn-detail-value">{value || '-'}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
+import { ConnectionDetailModal } from './ConnectionDetailModal';
 // ── Props ──────────────────────────────────────────────────────────────────────
 interface ConnectionsTableProps {
   data: Connection[];
@@ -481,7 +396,7 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
       <ConnectionDetailModal
         isOpen={selectedConnection !== null}
         onClose={() => setSelectedConnection(null)}
-        connection={selectedConnection}
+        cadastralKey={selectedConnection?.connectionCadastralKey || null}
       />
       {PdfPreviewModal}
     </div>

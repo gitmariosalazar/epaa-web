@@ -131,7 +131,7 @@ export const CompaniesPage: React.FC = () => {
           columns={companyColumns}
           isLoading={companyVM.isLoading}
           pagination={true}
-          pageSize={10}
+          pageSize={15}
           emptyState={
             <EmptyState
               message={t('common.noResults', 'No se encontraron resultados')}

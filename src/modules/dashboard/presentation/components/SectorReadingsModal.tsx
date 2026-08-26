@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
+import { Eye, X } from 'lucide-react';
 import {
   Table,
   type Column
@@ -28,6 +28,8 @@ import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { CircularProgress, useSimulatedProgress } from '@/shared/presentation/components/CircularProgress';
+import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
 
 interface SectorReadingsModalProps {
   isOpen: boolean;
@@ -46,6 +48,8 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const { data, loading, refetch } = useSectorReadings(sector, month, type);
+  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(null);
+
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -131,17 +135,33 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
       {
         header: t('common.actions', 'Acciones'),
         accessor: (row) => (
-          <Tooltip themeColor="warning" content={t('common.edit', 'Editar')}>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => handleAction('update', row.cadastralKey)}
-              color="warning"
-              circle
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Tooltip followCursor={false} themeColor="warning" content={t('common.edit', 'Editar')}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => handleAction('update', row.cadastralKey)}
+                color="warning"
+                circle
+              >
+                <FaEdit size={16} />
+              </Button>
+            </Tooltip>
+            <Tooltip followCursor={false}
+              themeColor="info"
+              content={
+                <>
+                  <div> Ver Detalles </div>
+                  <div> Lectura ID: {row.readingId} </div>
+                </>
+              }
             >
-              <FaEdit size={16} />
-            </Button>
-          </Tooltip>
+              <Button size="sm" variant="ghost" onClick={() => setDetailCadastralKey(row.cadastralKey)} circle>
+                <Eye size={16} />
+              </Button>
+            </Tooltip>
+
+          </div>
         ),
         id: 'actions'
       }
@@ -182,17 +202,28 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
       {
         header: t('common.actions', 'Acciones'),
         accessor: (row) => (
-          <Tooltip themeColor="success" content={t('common.create', 'Registrar Lectura')}>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => handleAction('create', row.cadastralKey)}
-              color="success"
-              circle
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Tooltip followCursor={false} themeColor="success" content={t('common.create', 'Registrar Lectura')}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => handleAction('create', row.cadastralKey)}
+                color="success"
+                circle
+              >
+                <Plus size={16} />
+              </Button>
+            </Tooltip>
+
+            <Tooltip followCursor={false}
+              themeColor="info"
+              content={t('common.details', 'Ver Detalles')}
             >
-              <Plus size={16} />
-            </Button>
-          </Tooltip>
+              <Button size="sm" variant="ghost" onClick={() => setDetailCadastralKey(row.cadastralKey)} circle>
+                <Eye size={16} />
+              </Button>
+            </Tooltip>
+          </div>
         ),
         id: 'actions'
       }
@@ -407,6 +438,13 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
           </div>
         </ReadingsProvider>
       </Modal>
+      <ConnectionProvider>
+        <ConnectionDetailModal
+          isOpen={detailCadastralKey !== null}
+          onClose={() => setDetailCadastralKey(null)}
+          cadastralKey={detailCadastralKey}
+        />
+      </ConnectionProvider>
     </div>
   );
 };

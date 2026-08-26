@@ -1,5 +1,5 @@
-import React, { memo, useCallback } from 'react';
-import { MdLocationOn, MdPerson, MdCategory } from 'react-icons/md';
+import React, { memo, useCallback, useState } from 'react';
+import { MdLocationOn, MdPerson, MdCategory, MdEdit } from 'react-icons/md';
 import { IoCloseCircle } from 'react-icons/io5';
 import type { Connection } from '../../../domain/models/Connection';
 import { TbAlertTriangle } from 'react-icons/tb';
@@ -10,6 +10,7 @@ import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { IoMdEye } from 'react-icons/io';
 import './MapInfoWindow.css';
+import { ConnectionDetailModal } from '../ConnectionDetailModal';
 
 interface MapInfoWindowProps {
   connection: Connection;
@@ -29,6 +30,10 @@ export const MapInfoWindow: React.FC<MapInfoWindowProps> = memo(
     onViewIncidentsOnTable,
     onViewIncidentsOnMap
   }) => {
+
+    const [selectedConnection, setSelectedConnection] =
+      useState<Connection | null>(null);
+
     const stopEventPropagation = useCallback((ev: React.SyntheticEvent) => {
       ev.stopPropagation();
     }, []);
@@ -68,9 +73,8 @@ export const MapInfoWindow: React.FC<MapInfoWindowProps> = memo(
     return (
       <div className={`premium-popup ${theme === 'dark' ? 'dark' : ''}`}>
         <div
-          className={`premium-popup-header-status ${
-            connection.connectionStatus ? 'status-active' : 'status-inactive'
-          }`}
+          className={`premium-popup-header-status ${connection.connectionStatus ? 'status-active' : 'status-inactive'
+            }`}
         />
 
         <button
@@ -190,8 +194,8 @@ export const MapInfoWindow: React.FC<MapInfoWindowProps> = memo(
                 <Tooltip
                   themeColor="warning"
                   content={t(
-                    'connections.table.incidentsCount',
-                    `Ver detalles de la acometida`
+                    'connections.incidents.viewTable',
+                    `Ver tabla de incidencias`
                   )}
                   position="bottom"
                   followCursor={false}
@@ -203,7 +207,7 @@ export const MapInfoWindow: React.FC<MapInfoWindowProps> = memo(
                     leftIcon={<IoMdEye size={20} />}
                     onClick={handleViewIncidentsTable}
                   >
-                    Ver Detalles
+                    Ver Incidencias
                   </Button>
                 </Tooltip>
 
@@ -233,17 +237,41 @@ export const MapInfoWindow: React.FC<MapInfoWindowProps> = memo(
 
           <div
             className="popup-actions-centered"
+            style={{ display: 'flex', gap: '10px', marginTop: '10px', justifyContent: 'center', flexWrap: 'wrap' }}
             onMouseDown={stopEventPropagation}
             onPointerDown={stopEventPropagation}
           >
             <Button
               className="premium-action-btn"
-              onClick={handleEdit}
+              onClick={(e) => {
+                stopEventPropagation(e);
+                setSelectedConnection(connection);
+              }}
               leftIcon={<IoMdEye />}
+              size="sm"
             >
-              Ver Detalle de Acometida
+              Detalles
+            </Button>
+            <Button
+              className="premium-action-btn"
+              onClick={handleEdit}
+              leftIcon={<MdEdit />}
+              size="sm"
+            >
+              Editar
             </Button>
           </div>
+        </div>
+        <div
+          onClick={stopEventPropagation}
+          onMouseDown={stopEventPropagation}
+          onPointerDown={stopEventPropagation}
+        >
+          <ConnectionDetailModal
+            isOpen={selectedConnection !== null}
+            onClose={() => setSelectedConnection(null)}
+            cadastralKey={selectedConnection?.connectionCadastralKey || null}
+          />
         </div>
       </div>
     );

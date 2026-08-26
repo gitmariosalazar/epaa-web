@@ -359,7 +359,7 @@ export const DailyReport: React.FC<DailyReportProps> = ({
           columns={columns}
           isLoading={loading}
           pagination={true}
-          pageSize={10}
+          pageSize={15}
           emptyState={
             hasSearched ? (
               <EmptyState

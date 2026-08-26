@@ -2,6 +2,7 @@ import type { HttpClientInterface } from '@/shared/infrastructure/api/interfaces
 import type {
   Connection,
   ConnectionAndPropertyResponse,
+  ConnectionWithoutProperty,
   ConnectionWithProperty,
   Rate
 } from '../../domain/models/Connection';
@@ -149,6 +150,23 @@ export class ConnectionRepositoryImpl implements ConnectionRepository {
     >(
       `/connections/find-connection-by-cadastral-key-or-card-id/${searchValue}`
     );
+    return response.data.data;
+  }
+
+  async findAllConnectionsWithProperty(params: {
+    limit: number;
+    offset: number;
+    query?: string;
+  }): Promise<ConnectionWithoutProperty[]> {
+    const response = await this.client.get<
+      ApiResponse<ConnectionWithoutProperty[]>
+    >('/connections/get-all-connections-with-property', {
+      params: {
+        limit: params.limit,
+        offset: params.offset,
+        ...(params.query ? { query: params.query } : {})
+      }
+    });
     return response.data.data;
   }
 }

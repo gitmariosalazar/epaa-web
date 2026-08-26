@@ -39,6 +39,7 @@ interface ReadingsContextType {
   closeAuditSectorUseCase: CloseAuditSectorUseCase;
   getAuditHistoryBySectorUseCase: GetAuditHistoryBySectorUseCase;
   getMapGeojsonByDayAndByUserUseCase: GetMapGeojsonByDayAndByUserUseCase;
+
 }
 
 const ReadingsContext = createContext<ReadingsContextType | null>(null);

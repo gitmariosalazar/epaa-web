@@ -26,12 +26,14 @@ interface PropTypes {
   data: TakenReadingConnection[];
   isLoading: boolean;
   onAction?: (mode: 'create' | 'update', cadastralKey: string) => void;
+  onViewDetails?: (cadastralKey: string, readingDate: Date | null) => void;
 }
 
 export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
   data,
   isLoading,
-  onAction
+  onAction,
+  onViewDetails
 }) => {
   const { t } = useTranslation();
 
@@ -277,7 +279,7 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
               followCursor={false}
               content={t('common.viewDetails', 'Ver Detalles')}
             >
-              <Button size="sm" variant="ghost" onClick={() => { }} circle>
+              <Button size="sm" variant="ghost" onClick={() => onViewDetails && onViewDetails(reading.cadastralKey, reading.readingDate)} circle>
                 <Eye size={16} />
               </Button>
             </Tooltip>

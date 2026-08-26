@@ -85,6 +85,56 @@ export interface ConnectionWithProperty {
   properties: Property[];
 }
 
+export interface ConnectionWithoutProperty {
+  // Connection Data
+  connectionId: string;
+  clientId: string;
+  connectionRateId: string;
+  connectionRateName: string;
+  connectionMeterNumber: string | null;
+  connectionSector: string | null;
+  connectionAccount: string | null;
+  connectionCadastralKey: string | null;
+  connectionContractNumber: string | null;
+  connectionSewerage: boolean | null;
+  connectionStatus: string | null; // nombre from cat_estados_acometida
+  connectionStateId: number | null; // estado_id FK
+  connectionIsReadable: boolean | null; // permite_lectura
+  connectionAddress: string | null;
+  connectionInstallationDate: string | Date | null;
+  connectionPeopleNumber: number | null;
+  connectionZone: string | null;
+  connectionCoordinates: string | null;
+  connectionReference: string | null;
+  connectionMetadata: Record<string, any> | null;
+  connectionAltitude: number | null;
+  connectionPrecision: number | null;
+  connectionGeolocationDate: string | Date | null;
+  connectionGeometricZone: string | null;
+  propertyCadastralKey: string | null;
+  zoneId: number;
+  zoneCode: string;
+  zoneName: string;
+  incidents: number; // Total incidents associated with the connection
+  connectionType: string | null;
+  connectionTypeName: string | null;
+  // Client Data
+  company: Company | null;
+  person: Client | null;
+  lastReadings: LastReading[] | null;
+  historyMeters?: HistoryMeters[] | null;
+}
+
+export interface HistoryMeters {
+  cadastralKey: string;
+  previousMeter: string | null;
+  newMeter: string | null;
+  installationDate: string | Date | null;
+  uninstallationDate: string | Date | null;
+  status: string | null;
+  observation: string | null;
+}
+
 export interface Client {
   address: string;
   country: string;

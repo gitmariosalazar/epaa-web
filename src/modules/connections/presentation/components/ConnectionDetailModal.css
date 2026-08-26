@@ -1,0 +1,228 @@
+/* ConnectionDetailModal.css */
+
+.connection-modal-body {
+  height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.connection-loading-state,
+.connection-error-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.connection-error-state {
+  flex-direction: column;
+  color: var(--error);
+  gap: 10px;
+}
+
+.connection-content-layout {
+  display: flex;
+  height: 100%;
+  gap: 20px;
+}
+
+/* Sidebar Navigation */
+.connection-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-right: 1px solid var(--border-color);
+  transition: width 0.3s ease, padding 0.3s ease;
+  overflow: hidden;
+  z-index: 10;
+  background-color: var(--bg-primary);
+}
+
+.connection-sidebar.expanded {
+  width: 230px;
+  padding-right: 15px;
+}
+
+.connection-sidebar.collapsed {
+  width: 50px;
+  padding-right: 5px;
+}
+
+.connection-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.connection-sidebar.collapsed .connection-nav-item {
+  justify-content: center;
+}
+
+.connection-sidebar.expanded .connection-nav-item {
+  justify-content: flex-start;
+}
+
+.connection-nav-item.active {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.connection-nav-item.inactive {
+  background-color: transparent;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.connection-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+}
+
+.connection-nav-label {
+  transition: opacity 0.3s ease, width 0.3s ease;
+  overflow: hidden;
+}
+
+.connection-sidebar.expanded .connection-nav-label {
+  opacity: 1;
+  width: auto;
+}
+
+.connection-sidebar.collapsed .connection-nav-label {
+  opacity: 0;
+  width: 0;
+}
+
+/* Scrollable Content */
+.connection-scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 10px;
+  padding-bottom: 40px;
+}
+
+/* Shared Section Card */
+.connection-section-card {
+  padding: 20px;
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.connection-section-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+}
+.connection-section-title-mb {
+  margin-bottom: 15px;
+}
+
+.connection-empty-state {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.connection-empty-icon {
+  opacity: 0.2;
+  margin-bottom: 10px;
+}
+
+/* General Section */
+.connection-general-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.connection-info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.connection-data-grid {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.connection-data-label {
+  color: var(--text-secondary);
+  font-weight: bold;
+}
+
+.connection-data-coords {
+  font-size: 0.85em;
+  font-family: monospace;
+}
+
+/* Client Section */
+.connection-client-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.connection-client-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.connection-client-name {
+  margin: 0 0 5px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.connection-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.connection-contact-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.connection-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+}
+
+/* Tables Section */
+.connection-table-section {
+  overflow-x: auto;
+}
+
+.connection-observation-cell {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,4 +1,7 @@
-import type { ReadingInfo } from '../../domain/models/ReadingInfoResponse';
+import type {
+  ReadingDetailed,
+  ReadingInfo
+} from '../../domain/models/ReadingInfoResponse';
 import type { ReadingInfoRepository } from '../../domain/repositories/ReadingInfoRepository';
 
 export class GetReadingInfoUseCase {
@@ -10,5 +13,15 @@ export class GetReadingInfoUseCase {
 
   async execute(cadastralKey: string): Promise<ReadingInfo[]> {
     return this.readingInfoRepository.getReadingInfo(cadastralKey);
+  }
+
+  async getDetailedReadingInfoByCadastralKey(
+    cadastralKey: string,
+    yearAndMonth: string
+  ): Promise<ReadingDetailed | null> {
+    return this.readingInfoRepository.getDetailedReadingInfoByCadastralKey(
+      cadastralKey,
+      yearAndMonth
+    );
   }
 }

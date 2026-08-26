@@ -191,6 +191,7 @@ export const useConnectionsViewModel = () => {
     useState<Connection | null>(null);
   const [rates, setRates] = useState<Rate[]>([]);
   const [activeStep, setActiveStep] = useState(0);
+  const [mapModalConnection, setMapModalConnection] = useState<Connection | null>(null);
 
   // Client selection info
   const [foundClient, setFoundClient] = useState<ClientData | null>(null);
@@ -984,7 +985,8 @@ export const useConnectionsViewModel = () => {
       pendingClientData,
       isClientExisting,
       clientType,
-      formData
+      formData,
+      mapModalConnection
     },
     actions: {
       handleFetch,
@@ -1012,6 +1014,8 @@ export const useConnectionsViewModel = () => {
       setFormData,
       openEdit,
       openDelete,
+      openMapModal: (conn: Connection) => setMapModalConnection(conn),
+      closeMapModal: () => setMapModalConnection(null),
       handleDelete,
       resetForm,
       searchClient,

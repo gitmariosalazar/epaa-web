@@ -158,7 +158,7 @@ export const GeneralCustomersPage: React.FC = () => {
           columns={columns}
           isLoading={viewModel.isLoading}
           pagination={true}
-          pageSize={10}
+          pageSize={15}
           emptyState={
             <EmptyState
               message={t('common.noResults', 'No se encontraron resultados')}

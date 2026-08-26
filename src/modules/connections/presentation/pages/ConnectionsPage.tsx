@@ -12,6 +12,7 @@ import { CreateConnectionWizard } from '../components/CreateConnectionWizard';
 import { ConnectionsTable } from '../components/ConnectionsTable';
 import { ConnectionsFilters } from '../components/ConnectionsFilters';
 import { ConnectionMapFeature } from '../components/Map/ConnectionMapFeature';
+import { ConnectionMapModal } from '../components/Map/ConnectionMapModal';
 import { Tabs } from '@/shared/presentation/components/Tabs';
 import type { TabItem } from '@/shared/presentation/components/Tabs';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
@@ -147,10 +148,7 @@ export const ConnectionsPage = () => {
         sortConfig={state.sortConfig}
         onEndReached={actions.loadMore}
         hasMore={state.hasMore}
-        onViewOnMap={(conn) => {
-          actions.setSelectedConnection(conn);
-          actions.setViewMode('map');
-        }}
+        onViewOnMap={(conn) => actions.openMapModal(conn)}
         onViewIncidentsOnTable={(connectionId) =>
           navigate(
             `/incidents?connectionId=${encodeURIComponent(connectionId)}`
@@ -255,6 +253,21 @@ export const ConnectionsPage = () => {
           )}
         </p>
       </Modal>
+
+      {/* ── Map Modal ── */}
+      <ConnectionMapModal
+        isOpen={state.mapModalConnection !== null}
+        onClose={actions.closeMapModal}
+        connection={state.mapModalConnection}
+        onEdit={(conn) => {
+          actions.closeMapModal();
+          actions.openEdit(conn);
+        }}
+        onViewIncidentsOnTable={(connectionId) => {
+          actions.closeMapModal();
+          navigate(`/incidents?connectionId=${encodeURIComponent(connectionId)}`);
+        }}
+      />
     </PageLayout>
   );
 };

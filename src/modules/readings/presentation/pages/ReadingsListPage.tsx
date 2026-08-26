@@ -26,6 +26,7 @@ import { CreateReadingPage } from './CreateReadingPage';
 import { UpdateReadingPage } from './UpdateReadingPage';
 import { BsPatchQuestionFill } from 'react-icons/bs';
 import { ReadingsNoveltyTabView } from '../components/novelties/ReadingsNoveltyTabView';
+import { ReadingDetailModal } from '../components/ReadingDetailModal';
 
 interface ModalState {
   isOpen: boolean;
@@ -69,6 +70,23 @@ export const ReadingsListPage: React.FC = () => {
   const [month, setMonth] = useState(currentMonthStr);
   const [sector, setSector] = useState('');
   const [userId, setUserId] = useState('');
+
+  const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
+    isOpen: false,
+    cadastralKey: null,
+    yearAndMonth: null,
+  });
+
+  const handleViewDetails = (cadastralKey: string, readingDate: Date | null) => {
+    let yearAndMonth = month;
+    if (readingDate) {
+       const d = new Date(readingDate);
+       const y = d.getFullYear();
+       const m = String(d.getMonth() + 1).padStart(2, '0');
+       yearAndMonth = `${y}-${m}`;
+    }
+    setDetailModalState({ isOpen: true, cadastralKey, yearAndMonth });
+  };
 
   const {
     pendingReadings,
@@ -205,6 +223,7 @@ export const ReadingsListPage: React.FC = () => {
               data={filteredCompleted}
               isLoading={isLoading}
               onAction={handleTableAction}
+              onViewDetails={handleViewDetails}
             />
           )}
 
@@ -248,6 +267,13 @@ export const ReadingsListPage: React.FC = () => {
           )}
         </div>
       </Modal>
+
+      <ReadingDetailModal
+        isOpen={detailModalState.isOpen}
+        onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+        cadastralKey={detailModalState.cadastralKey}
+        yearAndMonth={detailModalState.yearAndMonth}
+      />
     </PageLayout>
   );
 };

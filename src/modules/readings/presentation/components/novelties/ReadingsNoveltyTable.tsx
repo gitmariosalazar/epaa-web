@@ -13,7 +13,9 @@ import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
 import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
 import { Eye } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
 import { useTranslation } from 'react-i18next';
 import { FaEdit } from 'react-icons/fa';
 import { IoInformationCircleOutline } from 'react-icons/io5';
@@ -42,6 +44,7 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
   onAction
 }) => {
   const { t } = useTranslation();
+  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(null);
 
   const columns: Column<ReadingNovelty>[] = [
     {
@@ -287,7 +290,7 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
       header: t('common.actions', 'Acciones'),
       accessor: (reading) => (
         <div style={{ display: 'flex', gap: '8px' }}>
-          <Tooltip
+          <Tooltip followCursor={false}
             themeColor="info"
             content={
               <>
@@ -296,11 +299,11 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
               </>
             }
           >
-            <Button size="sm" variant="ghost" onClick={() => { }} circle>
+            <Button size="sm" variant="ghost" onClick={() => setDetailCadastralKey(reading.cadastralKey)} circle>
               <Eye size={16} />
             </Button>
           </Tooltip>
-          <Tooltip themeColor="warning" content={t('common.edit', 'Editar')}>
+          <Tooltip followCursor={false} themeColor="warning" content={t('common.edit', 'Editar')}>
             <Button
               size="sm"
               variant="ghost"
@@ -455,6 +458,13 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
         }
       />
       {PdfPreviewModal}
+      <ConnectionProvider>
+        <ConnectionDetailModal
+          isOpen={detailCadastralKey !== null}
+          onClose={() => setDetailCadastralKey(null)}
+          cadastralKey={detailCadastralKey}
+        />
+      </ConnectionProvider>
     </div>
   );
 };

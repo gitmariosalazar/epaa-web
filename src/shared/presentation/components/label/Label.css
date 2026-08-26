@@ -1,0 +1,136 @@
+/* Label component styles */
+.label-component {
+  display: inline-flex;
+  align-items: center;
+  text-align: center;
+  gap: 0.375rem;
+  font-family: inherit;
+  margin-bottom: 2px;
+  transition: color var(--transition-fast);
+  line-height: 1;
+}
+
+.label__text {
+  display: inline-flex;
+  align-items: center;
+  text-align: start;
+  line-height: 1;
+  width: 100%;
+  margin-top: 3px;
+}
+
+.label__required-mark {
+  color: var(--error);
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+.label__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.label__icon svg {
+  display: block;
+}
+
+/* Colors / Variants */
+.label--default {
+  color: var(--text-muted);
+}
+
+.label--primary {
+  color: var(--primary);
+}
+
+.label--secondary {
+  color: var(--secondary);
+}
+
+.label--error {
+  color: var(--error);
+}
+
+.label--success {
+  color: var(--success);
+}
+
+.label--warning {
+  color: var(--warning);
+}
+
+.label--info {
+  color: var(--info);
+}
+
+.label--text-main {
+  color: var(--text-main);
+}
+
+/* Weights */
+.label--weight-normal {
+  font-weight: 400;
+}
+
+.label--weight-medium {
+  font-weight: 500;
+}
+
+.label--weight-semibold {
+  font-weight: 600;
+}
+
+.label--weight-bold {
+  font-weight: 700;
+}
+
+/* Sizes (Matching Input component sizes) */
+.label--small {
+  font-size: 0.6rem;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+.label--small .label__icon {
+  font-size: 0.65rem;
+}
+
+.label--compact {
+  font-size: 0.675rem;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+.label--compact .label__icon {
+  font-size: 0.75rem;
+}
+
+.label--medium {
+  font-size: 0.75rem;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+.label--medium .label__icon {
+  font-size: 0.875rem;
+}
+
+.label--large {
+  font-size: 0.875rem;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+.label--large .label__icon {
+  font-size: 1rem;
+}
+
+/* Info Icon Tooltip Simulation */
+.label__info-icon {
+  color: var(--text-muted);
+  cursor: help;
+  transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.label__info-icon:hover {
+  color: var(--text-main);
+}

@@ -132,7 +132,7 @@ export const NaturalPersonsPage: React.FC = () => {
           columns={customerColumns}
           isLoading={customerVM.isLoading}
           pagination={true}
-          pageSize={10}
+          pageSize={15}
           emptyState={
             <EmptyState
               message={t('common.noResults', 'No se encontraron resultados')}
