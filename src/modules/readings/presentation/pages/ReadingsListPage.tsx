@@ -70,6 +70,7 @@ export const ReadingsListPage: React.FC = () => {
   const [month, setMonth] = useState(currentMonthStr);
   const [sector, setSector] = useState('');
   const [userId, setUserId] = useState('');
+  const [globalSearch, setGlobalSearch] = useState('');
 
   const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
     isOpen: false,
@@ -103,25 +104,42 @@ export const ReadingsListPage: React.FC = () => {
   useEffect(() => {
     setSector('');
     setUserId('');
+    setGlobalSearch('');
     clearAll();
   }, [activeTab]);
 
-  const filterBySector = <T extends { sector: number | string }>(list: T[]) => {
-    if (!sector) return list;
-    return list.filter((item) => String(item.sector).includes(sector));
+  const filterData = <T extends { sector: number | string; cadastralKey?: string; clientName?: string; meterNumber?: string }>(list: T[]) => {
+    let filtered = list;
+    
+    // Filter by sector
+    if (sector) {
+      filtered = filtered.filter((item) => String(item.sector).includes(sector));
+    }
+    
+    // Filter by global search
+    if (globalSearch) {
+      const lowerSearch = globalSearch.toLowerCase();
+      filtered = filtered.filter((item) => 
+        (item.cadastralKey && String(item.cadastralKey).toLowerCase().includes(lowerSearch)) ||
+        (item.clientName && String(item.clientName).toLowerCase().includes(lowerSearch)) ||
+        (item.meterNumber && String(item.meterNumber).toLowerCase().includes(lowerSearch))
+      );
+    }
+    
+    return filtered;
   };
 
   const filteredPending = useMemo(
-    () => filterBySector(pendingReadings),
-    [pendingReadings, sector]
+    () => filterData(pendingReadings),
+    [pendingReadings, sector, globalSearch]
   );
   const filteredCompleted = useMemo(
-    () => filterBySector(completedReadings),
-    [completedReadings, sector]
+    () => filterData(completedReadings),
+    [completedReadings, sector, globalSearch]
   );
   const filteredEstimated = useMemo(
-    () => filterBySector(estimatedReadings),
-    [estimatedReadings, sector]
+    () => filterData(estimatedReadings),
+    [estimatedReadings, sector, globalSearch]
   );
 
   const filteredAll = useMemo(() => {
@@ -182,6 +200,8 @@ export const ReadingsListPage: React.FC = () => {
           onUserIdChange={setUserId}
           onFetch={() => fetchReadings(activeTab as any, month, sector, userId)}
           isLoading={isLoading}
+          search={globalSearch}
+          onSearchChange={setGlobalSearch}
         />
       }
     >

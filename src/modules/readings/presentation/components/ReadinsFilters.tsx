@@ -74,6 +74,10 @@ export interface ReadingDataFiltersProps {
   isLoading: boolean;
   /** Optional extra action rendered beside the Consultar button (e.g. Initialize Period) */
   extraAction?: ReactNode;
+
+  // Search
+  search: string;
+  onSearchChange: (val: string) => void;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -87,7 +91,9 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
   onUserIdChange,
   onFetch,
   isLoading,
-  extraAction
+  extraAction,
+  search,
+  onSearchChange
 }) => {
   const { t } = useTranslation();
 
@@ -181,6 +187,24 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
             {isLoading ? t('common.loading') : t('common.fetch')}
           </Button>
           {extraAction}
+        </div>
+      </div>
+
+      {/* ── RIGHT: Global Search ── */}
+      <div className="filter-section-right" style={{ marginLeft: 'auto' }}>
+        <div className="filter-group">
+          <label className="filter-label">
+            {t('common.search', 'Buscar')}
+          </label>
+          <div className="filter-input-wrapper">
+            <Input
+              size="compact"
+              placeholder={t('common.searchPlaceholder', 'Buscar...')}
+              value={search}
+              onChange={(e) => onSearchChange(e.target.value)}
+              leftIcon={<Search size={18} />}
+            />
+          </div>
         </div>
       </div>
     </div>

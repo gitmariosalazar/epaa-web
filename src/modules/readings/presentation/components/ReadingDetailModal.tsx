@@ -27,6 +27,7 @@ import {
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
 import { TbCurrencyDollarCanadian } from 'react-icons/tb';
 import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
+import { EvidenceFiles } from '@/shared/files/presentation/components/EvidenceFiles/EvidenceFile';
 
 interface ReadingDetailModalProps {
   isOpen: boolean;
@@ -262,9 +263,13 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
               {readingDetail.images && readingDetail.images.length > 0 ? (
                 <div className="reading-detail-images">
                   {readingDetail.images.map((img) => (
-                    <div key={img.id} className="reading-detail-image-card">
-                      <img src={img.path} alt={`Foto novedad: ${img.novelty}`} />
-                    </div>
+                    <EvidenceFiles 
+                      key={img.id}
+                      fileId={img.id}
+                      filePath={img.path}
+                      category="readings"
+                      type={img.novelty}
+                    />
                   ))}
                 </div>
               ) : (
