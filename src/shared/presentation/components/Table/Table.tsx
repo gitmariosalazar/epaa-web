@@ -681,6 +681,7 @@ export const Table = <T extends { [key: string]: any }>({
             {totalPages >= 1 && (
               <>
                 <Tooltip
+                  followCursor={false}
                   content={t('common.pagination.first', 'Primera página')}
                 >
                   <button
@@ -691,7 +692,9 @@ export const Table = <T extends { [key: string]: any }>({
                     <ChevronsLeft size={16} strokeWidth={2.5} />
                   </button>
                 </Tooltip>
-                <Tooltip content={t('common.pagination.previous', 'Anterior')}>
+                <Tooltip
+                  followCursor={false}
+                  content={t('common.pagination.previous', 'Anterior')}>
                   <button
                     onClick={handlePrev}
                     disabled={currentPage === 1}
@@ -707,7 +710,9 @@ export const Table = <T extends { [key: string]: any }>({
                   }) ||
                     `${currentPage} / ${hasMore ? totalPages + '+' : totalPages}`}
                 </span>
-                <Tooltip content={t('common.pagination.next', 'Siguiente')}>
+                <Tooltip
+                  followCursor={false}
+                  content={t('common.pagination.next', 'Siguiente')}>
                   <button
                     onClick={handleNext}
                     disabled={currentPage >= totalPages && !hasMore}
@@ -716,7 +721,9 @@ export const Table = <T extends { [key: string]: any }>({
                     <ChevronRight size={16} strokeWidth={2.5} />
                   </button>
                 </Tooltip>
-                <Tooltip content={t('common.pagination.last', 'Última página')}>
+                <Tooltip
+                  followCursor={false}
+                  content={t('common.pagination.last', 'Última página')}>
                   <button
                     onClick={() => {
                       if (totalPages > 0) setCurrentPage(totalPages);

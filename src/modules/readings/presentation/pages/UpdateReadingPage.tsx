@@ -25,6 +25,7 @@ import { Alert } from '@/shared/presentation/components/Alert';
 import '../styles/create-reading.css';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { ReadingDetailModal } from '../components/ReadingDetailModal';
 
 export interface UpdateReadingPageProps {
   initialCadastralKey?: string;
@@ -188,7 +189,33 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
     if (onCancel) onCancel();
   };
 
+  const [detailModalState, setDetailModalState] = useState<{
+    isOpen: boolean;
+    cadastralKey: string | null;
+    yearAndMonth: string | null;
+  }>({
+    isOpen: false,
+    cadastralKey: null,
+    yearAndMonth: null
+  });
 
+  const handleViewDetails = (
+    cadastralKey: string,
+    readingDate: Date | null
+  ) => {
+    // Tomamos por defecto el monthReading que viene del backend
+    let yearAndMonth = readingInfo[0]?.monthReading || '';
+
+    // Verificamos que readingDate exista Y que sea una fecha VÁLIDA (!isNaN)
+    if (readingDate && !isNaN(readingDate.getTime())) {
+      const d = new Date(readingDate);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      yearAndMonth = `${y}-${m}`;
+    }
+
+    setDetailModalState({ isOpen: true, cadastralKey, yearAndMonth });
+  };
 
   return (
     <div className="cr-container">
@@ -221,9 +248,8 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
           isSubmitting={isSubmitting}
           readingInfo={currentReadingInfoForRequest}
           method="update"
+          onViewLastReading={handleViewDetails}
         />
-
-
 
         {/* ── Estado de la conexión ─────────────────────────────────────────── */}
         {currentReadingInfoForRequest &&
@@ -338,18 +364,12 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
             </div>
           )}
 
-
-
         {/* Mensajes de Estado (Búsqueda Inicial, Sin Resultados, Error) */}
-        {
-          isLoadingInfo && (
-            <div className='reading-images-loading'>
-              <CircularProgress
-                label="Buscando..."
-              />
-            </div>
-          )
-        }
+        {isLoadingInfo && (
+          <div className="reading-images-loading">
+            <CircularProgress label="Buscando..." />
+          </div>
+        )}
         {!currentReadingInfoForRequest && !isLoadingInfo && (
           <div style={{ marginTop: '1rem' }}>
             {error ? (
@@ -360,7 +380,7 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
               />
             ) : cadastralKey.trim().length > 0 ? (
               <EmptyState
-                variant='warning'
+                variant="warning"
                 message="No se encontraron resultados"
                 description={`No se han encontrado datos para el predio con clave catastral "${cadastralKey.toUpperCase()}".`}
               />
@@ -419,6 +439,15 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
           onContinue={() => setIsPreviousMonthModalOpen(false)}
         />
       )}
+
+      <ReadingDetailModal
+        isOpen={detailModalState.isOpen}
+        onClose={() =>
+          setDetailModalState((prev) => ({ ...prev, isOpen: false }))
+        }
+        cadastralKey={detailModalState.cadastralKey}
+        yearAndMonth={detailModalState.yearAndMonth}
+      />
 
       {/* ── Modal de confirmación ─────────────────────────────────────────── */}
       {currentReadingInfoForRequest && (

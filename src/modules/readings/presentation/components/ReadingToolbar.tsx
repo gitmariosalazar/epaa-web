@@ -1,11 +1,12 @@
 import React from 'react';
-import { FaSave, FaTimes, FaSearch } from 'react-icons/fa';
+import { FaSave, FaTimes, FaSearch, FaEye } from 'react-icons/fa';
 import { InputCadastralKey } from '@/shared/presentation/components/Input/InputCadastralKey';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import type { ReadingInfo } from '../../domain/models/ReadingInfoResponse';
 import { GrClear } from 'react-icons/gr';
 import { FaSchoolLock } from 'react-icons/fa6';
 import { useTranslation } from 'react-i18next';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 interface ReadingToolbarProps {
   cadastralKeyInput: string;
@@ -17,6 +18,7 @@ interface ReadingToolbarProps {
   isSubmitting: boolean;
   readingInfo: ReadingInfo | null;
   method: 'create' | 'update';
+  onViewLastReading?: (cadastralKey: string, readingDate: Date | null) => void;
 }
 
 export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
@@ -28,7 +30,8 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
   isLoadingInfo,
   isSubmitting,
   readingInfo,
-  method
+  method,
+  onViewLastReading
 }) => {
   const { t } = useTranslation();
   return (
@@ -108,6 +111,26 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
         >
           Limpiar
         </Button>
+        <Tooltip
+          content={'Ver detalle de la ultima lectura realizada'}
+          followCursor={false}
+        >
+          <Button
+            className="cr-action-btn"
+            color="primary"
+            onClick={() =>
+              onViewLastReading &&
+              onViewLastReading(
+                readingInfo?.cadastralKey!,
+                new Date(readingInfo?.readingDate!)
+              )
+            }
+            disabled={!readingInfo}
+            leftIcon={<FaEye />}
+            size="sm"
+            circle
+          ></Button>
+        </Tooltip>
       </div>
     </div>
   );

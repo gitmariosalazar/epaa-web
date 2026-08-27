@@ -24,6 +24,7 @@ import { MessageToastCustom } from '@/shared/presentation/components/toast/Custo
 import { Alert } from '@/shared/presentation/components/Alert';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
+import { ReadingDetailModal } from '../components/ReadingDetailModal';
 
 export interface CreateReadingPageProps {
   initialCadastralKey?: string;
@@ -108,6 +109,7 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
       );
       return;
     }
+
     setCurrentReadingInput('');
     setObservationInput('');
     fetchReadingData(cadastralKeyInput.trim());
@@ -167,6 +169,30 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
 
   // ── Render ────────────────────────────────────────────────────────────────
 
+
+
+
+  const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
+    isOpen: false,
+    cadastralKey: null,
+    yearAndMonth: null,
+  });
+
+  const handleViewDetails = (cadastralKey: string, readingDate: Date | null) => {
+    // Tomamos por defecto el monthReading que viene del backend
+    let yearAndMonth = readingInfo[0]?.monthReading || '';
+
+    // Verificamos que readingDate exista Y que sea una fecha VÁLIDA (!isNaN)
+    if (readingDate && !isNaN(readingDate.getTime())) {
+      const d = new Date(readingDate);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      yearAndMonth = `${y}-${m}`;
+    }
+
+    setDetailModalState({ isOpen: true, cadastralKey, yearAndMonth });
+  };
+
   return (
     <div className="cr-container">
       <div className="cr-content-wrapper">
@@ -198,6 +224,7 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
           isSubmitting={isSubmitting}
           readingInfo={readingInfoForRequest}
           method="create"
+          onViewLastReading={handleViewDetails}
         />
 
         {/* ── Estado de la conexión ─────────────────────────────────────────── */}
@@ -383,6 +410,14 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
           <AdditionalInfoAccordion info={readingInfoForRequest} />
         </>
       </div>
+
+      <ReadingDetailModal
+        isOpen={detailModalState.isOpen}
+        onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+        cadastralKey={detailModalState.cadastralKey}
+        yearAndMonth={detailModalState.yearAndMonth}
+      />
+
 
       {/* ── Modal de confirmación ─────────────────────────────────────────── */}
       {readingInfoForRequest && (
