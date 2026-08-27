@@ -238,7 +238,7 @@ export const IncidentsListPage: React.FC = () => {
   return (
     <>
       <PageLayout
-        className="payments-page"
+        className="reading-images-page"
         filters={
           <IncidentFilters
             searchQuery={filters.search}

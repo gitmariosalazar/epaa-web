@@ -46,7 +46,7 @@ export const IncidentsMapPage: React.FC = () => {
   return (
     <>
       <PageLayout
-        className="incident-map-page"
+        className="reading-images-page"
         filters={
           <IncidentFilters
             searchQuery={filters.search}

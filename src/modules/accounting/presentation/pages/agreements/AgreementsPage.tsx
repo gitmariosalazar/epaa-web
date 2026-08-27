@@ -187,7 +187,7 @@ export const AgreementsPage: React.FC = () => {
 
   return (
     <PageLayout
-      className="payments-page"
+      className="reading-images-page"
       header={
         <Tabs
           tabs={AGREEMENTS_TABS}

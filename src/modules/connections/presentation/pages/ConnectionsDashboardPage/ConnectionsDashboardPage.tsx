@@ -396,7 +396,10 @@ export const ConnectionsDashboardPage: React.FC = () => {
   );
 
   return (
-    <PageLayout header={headerContent} className={styles.dashboardContainer}>
+    <PageLayout
+      header={headerContent}
+      className={styles.dashboardContainer + ' ' + 'reading-images-page'}
+    >
       {activeTab === 'update' && (
         <div className={styles.tabContent}>
           {/* KPIs Update */}
@@ -1003,13 +1006,13 @@ export const ConnectionsDashboardPage: React.FC = () => {
                       defaultCenter={
                         liveData.length > 0
                           ? {
-                              lat: Number(liveData[0].latitude),
-                              lng: Number(liveData[0].longitude)
-                            }
+                            lat: Number(liveData[0].latitude),
+                            lng: Number(liveData[0].longitude)
+                          }
                           : {
-                              lat: FALLBACK_CENTER_ANTONIO_ANTE.lat,
-                              lng: FALLBACK_CENTER_ANTONIO_ANTE.lng
-                            }
+                            lat: FALLBACK_CENTER_ANTONIO_ANTE.lat,
+                            lng: FALLBACK_CENTER_ANTONIO_ANTE.lng
+                          }
                       }
                       defaultZoom={13}
                       gestureHandling="greedy"

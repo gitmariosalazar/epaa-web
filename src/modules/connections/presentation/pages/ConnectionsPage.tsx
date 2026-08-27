@@ -165,7 +165,7 @@ export const ConnectionsPage = () => {
 
   return (
     <PageLayout
-      className="connections-page"
+      className="reading-images-page"
       header={
         <div className="connections-tabs-row">
           <Tabs

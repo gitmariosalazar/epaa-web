@@ -53,7 +53,7 @@ export const EntryDataPage: React.FC = () => {
 
   return (
     <PageLayout
-      className="entry-data-page"
+      className="reading-images-page"
       header={
         <Tabs
           tabs={translatedTabs}

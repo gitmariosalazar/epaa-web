@@ -462,7 +462,7 @@ export const IncidentsPage: React.FC = () => {
   return (
     <>
       <PageLayout
-        className="incidents-page"
+        className="reading-images-page"
         header={
           /* ── Tabs row (igual que connections-tabs-row) ── */
           <div className="incidents-tabs-row">

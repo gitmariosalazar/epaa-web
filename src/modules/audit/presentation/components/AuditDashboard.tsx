@@ -73,7 +73,7 @@ export const AuditDashboard: React.FC = () => {
 
   return (
     <PageLayout
-      className="connections-page-content"
+      className="reading-images-page"
       header={headerContent}
       filters={
         <AuditFilters

@@ -60,7 +60,7 @@ export const GeneralCollectionPage: React.FC = () => {
 
   return (
     <PageLayout
-      className="payments-page"
+      className="reading-images-page"
       header={
         <Tabs
           tabs={COLLECTION_TABS}

@@ -252,7 +252,7 @@ export const OverduePaymentsPage: React.FC = () => {
 
   return (
     <PageLayout
-      className="overdue-payments-page"
+      className="reading-images-page"
       header={
         <div>
           <Tabs
@@ -266,8 +266,8 @@ export const OverduePaymentsPage: React.FC = () => {
     >
       <div
         className={`overdue-payments-content ${activeTab === 'dashboard_global' || activeTab === 'dashboard_anual'
-            ? 'overdue-payments-content--dashboard'
-            : 'overdue-payments-content--table'
+          ? 'overdue-payments-content--dashboard'
+          : 'overdue-payments-content--table'
           }`}
       >
         {renderContent()}

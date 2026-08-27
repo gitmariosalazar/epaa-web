@@ -22,7 +22,7 @@ const PENDING_BILLS_TABS: TabItem<PendingBillsTab>[] = [
 
 export const PendingBillsPage: React.FC = () => {
   const { t } = useTranslation();
-  
+
   // Local UI State
   const [activeTab, setActiveTab] = useState<PendingBillsTab>('pending');
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,7 +48,7 @@ export const PendingBillsPage: React.FC = () => {
 
   return (
     <PageLayout
-      className="payments-page"
+      className="reading-images-page"
       header={
         <Tabs
           tabs={translatedTabs}
@@ -99,7 +99,7 @@ export const PendingBillsPage: React.FC = () => {
             />
           </div>
         ) : (
-          <ClientPendingBillsList 
+          <ClientPendingBillsList
             groups={groupedBills}
             isLoading={isLoading}
           />

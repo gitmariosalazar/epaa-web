@@ -81,7 +81,7 @@ export const NaturalPersonsPage: React.FC = () => {
 
   return (
     <PageLayout
-      className="users-page"
+      className="reading-images-page"
       header={
         <div
           style={{
