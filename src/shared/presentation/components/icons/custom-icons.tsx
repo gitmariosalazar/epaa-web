@@ -1,7 +1,7 @@
 import React from 'react';
 import { DollarSign, Clock, CheckCircle } from 'lucide-react';
 import './CustomIcons.css';
-import { FaFileInvoice, FaLaptopCode } from 'react-icons/fa';
+import { FaFileAlt, FaFileInvoice, FaLaptopCode } from 'react-icons/fa';
 import { BiDollar } from 'react-icons/bi';
 import { FaArrowDownWideShort, FaArrowUpWideShort } from 'react-icons/fa6';
 import { FcUnlock } from 'react-icons/fc';
@@ -35,9 +35,9 @@ export const CustomIcon = ({
 
   const renderSecondaryIcon = React.isValidElement(secondaryIcon)
     ? React.cloneElement(secondaryIcon as React.ReactElement<any>, {
-        size: subIconSize,
-        strokeWidth: 2
-      })
+      size: subIconSize,
+      strokeWidth: 2
+    })
     : secondaryIcon || <Clock size={subIconSize} strokeWidth={2} />;
 
   return (
@@ -84,6 +84,19 @@ export const IconPayments = ({ size = 18 }: { size?: number }) => (
     mainIcon={<DollarSign size={size} strokeWidth={2} />}
     secondaryIcon={<CheckCircle size={size} strokeWidth={2} />}
     iconColorSecondary="var(--success)"
+    iconColorSecondaryHover="var(--accent)"
+    iconColorBorder="var(--border-color)"
+    iconColorBorderHover="var(--accent)"
+  />
+);
+
+// Comprobantes
+export const IconPendingBills = ({ size = 18 }: { size?: number }) => (
+  <CustomIcon
+    size={size}
+    mainIcon={<FaFileAlt size={size} strokeWidth={2} />}
+    secondaryIcon={<BiDollar size={size} strokeWidth={2} />}
+    iconColorSecondary="var(--error)"
     iconColorSecondaryHover="var(--accent)"
     iconColorBorder="var(--border-color)"
     iconColorBorderHover="var(--accent)"

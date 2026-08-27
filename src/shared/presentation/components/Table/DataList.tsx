@@ -6,11 +6,9 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  ArrowUp,
-  ArrowDown,
-  ArrowUpDown,
   SearchX,
-  X
+  X,
+  ArrowUpDown
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../Button/Button';
@@ -27,7 +25,6 @@ import { applyTableFilters } from './utils/filterUtils';
 import { TableFilterModal } from './TableFilterModal';
 import { TableSortModal } from './TableSortModal';
 
-
 export interface Column<T> {
   header: string;
   accessor: keyof T | ((item: T) => React.ReactNode);
@@ -41,26 +38,11 @@ export interface Column<T> {
   filterValueGetter?: (item: T) => any;
 }
 
-export interface SummaryRow {
-  label: string;
-  value: string | number;
-  highlight?: boolean;
-  percentage?: string;
-}
-
-export type RowColor = 'success' | 'warning' | 'error' | 'info' | 'neutral';
-
-interface TotalRow {
-  label: string;
-  value: string | number;
-  highlight?: boolean;
-  percentage?: string;
-  columnId?: string;
-}
-
-interface TableProps<T> {
+export interface DataListProps<T> {
   data: T[];
   columns: Column<T>[];
+  renderItem: (item: T, index: number, visibleColumns: Column<T>[]) => React.ReactNode;
+  gridClassName?: string;
   isLoading?: boolean;
   loadingState?: React.ReactNode;
   containerClassName?: string;
@@ -70,14 +52,10 @@ interface TableProps<T> {
   emptyState?: React.ReactNode;
   sortConfig?: { key: keyof T | string; direction: 'asc' | 'desc' } | null;
   onSort?: (key: keyof T | string, direction: 'asc' | 'desc') => void;
-  summaryRows?: SummaryRow[];
-  totalRows?: TotalRow[];
   width?: '100' | '70' | '50' | 'auto';
   fullHeight?: boolean;
   onExportPdf?: () => void;
   onExportExcel?: () => void;
-  getRowColor?: (item: T) => RowColor | undefined;
-  getRowClassName?: (item: T) => string | undefined;
   onEndReached?: () => void;
   hasMore?: boolean;
   showColumnModal?: boolean;
@@ -89,9 +67,11 @@ interface TableProps<T> {
   disableLocalFiltering?: boolean;
 }
 
-export const Table = <T extends { [key: string]: any }>({
+export const DataList = <T extends { [key: string]: any }>({
   data,
   columns,
+  renderItem,
+  gridClassName = '',
   isLoading,
   loadingState,
   containerClassName = '',
@@ -101,14 +81,10 @@ export const Table = <T extends { [key: string]: any }>({
   emptyState,
   sortConfig,
   onSort,
-  summaryRows = [],
-  totalRows = [],
   width = '100',
   fullHeight = true,
   onExportPdf,
   onExportExcel,
-  getRowColor,
-  getRowClassName,
   onEndReached,
   hasMore,
   showColumnModal = true,
@@ -118,7 +94,7 @@ export const Table = <T extends { [key: string]: any }>({
   filterModel,
   onFilterModelChange,
   disableLocalFiltering = false
-}: TableProps<T>) => {
+}: DataListProps<T>) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = React.useState(1);
   const [currentLimit, setCurrentLimit] = React.useState(pageSize);
@@ -138,12 +114,10 @@ export const Table = <T extends { [key: string]: any }>({
   );
   const [isColumnModalOpen, setIsColumnModalOpen] = React.useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = React.useState(false);
-  const [filterAnchorEl, setFilterAnchorEl] = React.useState<HTMLElement | null>(null);
-  const [internalFilters, setInternalFilters] = React.useState<FilterModel[]>([]);
-
-
   const [isSortModalOpen, setIsSortModalOpen] = React.useState(false);
   const [sortAnchorEl, setSortAnchorEl] = React.useState<HTMLElement | null>(null);
+  const [filterAnchorEl, setFilterAnchorEl] = React.useState<HTMLElement | null>(null);
+  const [internalFilters, setInternalFilters] = React.useState<FilterModel[]>([]);
 
   const filters = filterModel !== undefined ? filterModel : internalFilters;
 
@@ -215,19 +189,7 @@ export const Table = <T extends { [key: string]: any }>({
     }
   }, [processedData, currentLimit, currentPage]);
 
-  const handleSort = (key: keyof T | string) => {
-    if (!onSort) return;
 
-    let direction: 'asc' | 'desc' = 'asc';
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === 'asc'
-    ) {
-      direction = 'desc';
-    }
-    onSort(key, direction);
-  };
 
   const observerTarget = React.useRef(null);
 
@@ -267,296 +229,42 @@ export const Table = <T extends { [key: string]: any }>({
 
   return (
     <div
-      className={`table-container table--w-${width} ${fullHeight ? 'table--full-height' : ''
+      className={`table-container-data-list table--w-${width} ${fullHeight ? 'table--full-height' : ''
         } ${containerClassName}`}
       style={containerStyle}
     >
-      <div className="table-body-wrapper">
-        <table className="table custom-table">
-          <thead>
-            <tr>
-              {visibleColumns.map((col, index) => {
-                const isSortable = col.sortable;
-                const sortKey =
-                  col.sortKey ||
-                  col.id ||
-                  (typeof col.accessor === 'string' ? col.accessor : undefined);
-                const isSorted = sortConfig?.key === sortKey;
+      <div className="table-body-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-                return (
-                  <th
-                    key={index}
-                    className={`table-column-header ${col.className}`}
-                    style={{
-                      ...col.style,
-                      cursor: isSortable ? 'pointer' : 'default',
-                      userSelect: 'none'
-                    }}
-                    onClick={() => isSortable && sortKey && handleSort(sortKey)}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}
-                    >
-                      {col.header}
-                      {isSortable && (
-                        <span
-                          style={{
-                            display: 'inline-flex',
-                            opacity: isSorted ? 1 : 0.3
-                          }}
-                        >
-                          {isSorted ? (
-                            sortConfig?.direction === 'asc' ? (
-                              <ArrowUp size={14} strokeWidth={2.5} />
-                            ) : (
-                              <ArrowDown size={14} strokeWidth={2.5} />
-                            )
-                          ) : (
-                            <ArrowUpDown size={14} strokeWidth={2} />
-                          )}
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.length > 0 ? (
-              paginatedData.map((item, rowIndex) => {
-                const rowColor = getRowColor ? getRowColor(item) : undefined;
-                const customClassName = getRowClassName
-                  ? getRowClassName(item)
-                  : '';
-                const rowClassName = `table-row ${rowColor ? `table-row--${rowColor}` : ''
-                  } ${customClassName}`.trim();
 
-                return (
-                  <tr key={rowIndex} className={rowClassName}>
-                    {visibleColumns.map((col, colIndex) => (
-                      <td
-                        key={colIndex}
-                        className={col.className}
-                        style={{
-                          ...col.style,
-                          textAlign: col.isNumeric ? 'right' : 'inherit'
-                        }}
-                      >
-                        {typeof col.accessor === 'function'
-                          ? col.accessor(item)
-                          : item[col.accessor]}
-                      </td>
-                    ))}
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td
-                  colSpan={visibleColumns.length}
-                  className="empty-state-cell"
-                >
-                  {isLoading
-                    ? loadingState || (
-                      <div
-                        className="table-loader"
-                        style={{ padding: '2rem' }}
-                      >
-                        <div className="spinner"></div>
-                        {t('common.table.loading')}
-                      </div>
-                    )
-                    : emptyState || (
-                      <div className="default-empty-state">
-                        <EmptyState
-                          message={t('common.table.noData')}
-                          icon={SearchX}
-                          minHeight="300px"
-                        />
-                      </div>
-                    )}
-                </td>
-              </tr>
-            )}
-            {processedData && processedData.length > 0 && (
-              <tr
-                className="table-row--spacer"
-                style={{ height: '100%', background: 'transparent' }}
-              >
-                <td
-                  colSpan={visibleColumns.length}
-                  style={{
-                    padding: 0,
-                    border: 'none',
-                    background: 'transparent'
-                  }}
-                ></td>
-              </tr>
-            )}
-            {onEndReached && hasMore && !pagination && (
-              <tr ref={observerTarget} style={{ height: '20px' }}>
-                <td
-                  colSpan={visibleColumns.length}
-                  style={{
-                    textAlign: 'center',
-                    padding: '10px',
-                    color: 'var(--text-muted)'
-                  }}
-                >
-                  {isLoading ? (
-                    <CircularProgress
-                      label={t('common.loading', 'Loading...')}
-                    />
-                  ) : (
-                    t('common.loading', 'Loading...')
-                  )}
-                </td>
-              </tr>
-            )}
-          </tbody>
-          {totalRows.length > 0 && (
-            <tfoot>
-              <tr>
-                {visibleColumns.map((col, colIndex) => {
-                  // Find if there's a total row that somewhat matches the column or is exactly the very first column for "Total"
-                  let totalContent: React.ReactNode = null;
-                  let className = col.className || '';
-                  let matchingTotal: TotalRow | undefined = undefined;
-
-                  if (colIndex === 0) {
-                    totalContent = 'Total';
-                    className += ' total-label';
-                  } else {
-                    // Very simple matching heuristic: if the column isNumeric, find the corresponding total row
-                    // In a perfect architecture, `totalRows` would map directly by accessor/key. This is a visual approximation.
-                    const headerLower =
-                      typeof col.header === 'string'
-                        ? col.header.toLowerCase()
-                        : '';
-                    const colId = col.id;
-                    const colAccessor =
-                      typeof col.accessor === 'string' ? col.accessor : '';
-
-                    matchingTotal =
-                      totalRows.find(
-                        (r) => r.columnId && colId && r.columnId === colId
-                      ) ||
-                      totalRows.find(
-                        (r) =>
-                          r.columnId &&
-                          colAccessor &&
-                          r.columnId === colAccessor
-                      ) ||
-                      totalRows.find((r) => r.label === col.header) ||
-                      totalRows.find(
-                        (r) => r.label.toLowerCase() === headerLower
-                      ) ||
-                      totalRows.find(
-                        (r) =>
-                          r.label.toLowerCase().includes(headerLower) ||
-                          (col.accessor === 'transactionsCount' &&
-                            r.label.includes('FACTURAS')) ||
-                          (col.accessor === 'totalTransactions' &&
-                            r.label.includes('FACTURAS')) ||
-                          (headerLower &&
-                            r.label
-                              .toLowerCase()
-                              .includes(
-                                headerLower.replace('total', '').trim()
-                              ))
-                      );
-
-                    if (matchingTotal) {
-                      totalContent =
-                        typeof matchingTotal.value === 'number'
-                          ? new Intl.NumberFormat('en-US', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                          }).format(matchingTotal.value)
-                          : matchingTotal.value;
-                      if (matchingTotal.percentage) {
-                        totalContent = (
-                          <div
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'flex-end'
-                            }}
-                          >
-                            <span>{totalContent}</span>
-                            <span
-                              style={{
-                                fontSize: '0.7em',
-                                color: 'var(--text-muted)'
-                              }}
-                            >
-                              {matchingTotal.percentage}
-                            </span>
-                          </div>
-                        );
-                      }
-                    }
-                  }
-
-                  const isHighlighted = matchingTotal?.highlight;
-                  const cellClassName =
-                    `${className} ${isHighlighted ? 'total-cell--highlight' : ''}`.trim();
-
-                  return (
-                    <td
-                      key={colIndex}
-                      className={cellClassName}
-                      style={{
-                        ...col.style,
-                        textAlign: colIndex === 0 ? 'left' : 'right',
-                        fontWeight: 'bold'
-                      }}
-                    >
-                      {totalContent}
-                    </td>
-                  );
-                })}
-              </tr>
-            </tfoot>
+        <div className={`data-list-grid ${gridClassName}`}>
+          {paginatedData.length > 0 ? (
+            paginatedData.map((item, rowIndex) => (
+              <React.Fragment key={rowIndex}>
+                {renderItem(item, rowIndex, visibleColumns)}
+              </React.Fragment>
+            ))
+          ) : (
+            <div className="empty-state-cell" style={{ gridColumn: '1 / -1', minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {isLoading ? loadingState || (
+                <div className="table-loader">
+                  <div className="spinner"></div>
+                  {t('common.table.loading')}
+                </div>
+              ) : emptyState || (
+                <div className="default-empty-state">
+                  <EmptyState message={t('common.table.noData')} icon={SearchX} minHeight="300px" />
+                </div>
+              )}
+            </div>
           )}
-        </table>
-      </div>
 
-      {summaryRows.length > 0 && (
-        <div className="table-summary-block">
-          <div className="table-summary-content">
-            {summaryRows.map((row, idx) => (
-              <div
-                key={idx}
-                className={`table-summary-row ${row.highlight ? 'table-summary-row--highlight' : ''
-                  }`}
-              >
-                <div className="table-summary-label">
-                  <span>{row.label}</span>
-                  {row.percentage && (
-                    <span className="table-summary-percentage">
-                      {row.percentage}
-                    </span>
-                  )}
-                </div>
-                <div className="table-summary-value">
-                  {typeof row.value === 'number'
-                    ? new Intl.NumberFormat('en-US', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    }).format(row.value)
-                    : row.value}
-                </div>
-              </div>
-            ))}
-          </div>
+          {onEndReached && hasMore && !pagination && (
+            <div ref={observerTarget} style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '10px', color: 'var(--text-muted)' }}>
+              {isLoading ? <CircularProgress label={t('common.loading', 'Loading...')} /> : t('common.loading', 'Loading...')}
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {pagination && (
         <div
@@ -942,18 +650,18 @@ export const Table = <T extends { [key: string]: any }>({
         </div>
       </Modal>
 
-      <TableFilterModal
-        isOpen={isFilterModalOpen}
-        onClose={() => {
-          setIsFilterModalOpen(false);
-          setFilterAnchorEl(null);
-        }}
-        columns={columns}
-        initialFilters={filters}
-        onApply={handleFilterChange}
-        getColumnKey={getColumnKey}
-        anchorElement={filterAnchorEl}
-      />
+      {isFilterModalOpen && (
+        <TableFilterModal
+          isOpen={isFilterModalOpen}
+          onClose={() => setIsFilterModalOpen(false)}
+          columns={columns}
+          initialFilters={filters}
+          onApply={handleFilterChange}
+          anchorElement={filterAnchorEl}
+          getColumnKey={getColumnKey}
+        />
+      )}
+
       {isSortModalOpen && (
         <TableSortModal
           isOpen={isSortModalOpen}

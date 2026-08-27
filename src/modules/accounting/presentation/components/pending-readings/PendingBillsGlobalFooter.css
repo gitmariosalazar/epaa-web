@@ -1,0 +1,108 @@
+/* PendingBillsGlobalFooter.css — prefijo `pbgf-` */
+
+/* ── Contenedor ──────────────────────────────────────────────────────────── */
+.pbgf-wrap {
+  padding: 0.75rem 1rem;
+  background: var(--surface-alt, rgba(15, 76, 117, 0.06));
+  border-top: 2px solid var(--border-color, #e2e8f0);
+}
+
+/* ── Título ──────────────────────────────────────────────────────────────── */
+.pbgf-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-secondary, #64748b);
+  margin-bottom: 0.6rem;
+}
+
+.pbgf-title-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  flex-shrink: 0;
+}
+
+/* ── Fila de chips ───────────────────────────────────────────────────────── */
+.pbgf-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+/* ── Chip individual ─────────────────────────────────────────────────────── */
+.pbgf-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1 1 150px;
+  min-width: 130px;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pbgf-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+}
+
+/* Chip destacado */
+.pbgf-chip--hl {
+  flex: 1 1 180px;
+  border-width: 1.5px;
+}
+
+.pbgf-chip--hl .pbgf-chip-value {
+  font-size: 0.95rem;
+}
+
+/* ── Ícono ───────────────────────────────────────────────────────────────── */
+.pbgf-chip-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Cuerpo de texto ─────────────────────────────────────────────────────── */
+.pbgf-chip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.pbgf-chip-label {
+  font-size: 0.57rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary, #64748b);
+  white-space: nowrap;
+}
+
+.pbgf-chip-value {
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .pbgf-chip {
+    flex: 1 1 calc(50% - 0.45rem);
+  }
+}

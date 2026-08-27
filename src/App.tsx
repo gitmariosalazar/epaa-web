@@ -56,6 +56,7 @@ import { GeneralCollectionProvider } from '@/modules/accounting/presentation/con
 import { GeneralCollectionPage } from '@/modules/accounting/presentation/pages/general-collection/GeneralCollectionPage';
 import { AgreementsProvider } from '@/modules/accounting/presentation/context/agreements/AgreementsContext';
 import { AgreementsPage } from '@/modules/accounting/presentation/pages/agreements/AgreementsPage';
+import { PendingBillsPage } from '@/modules/accounting/presentation/pages/pending-bills/PendingBillsPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -312,6 +313,14 @@ function App() {
                       <AgreementsProvider>
                         <AgreementsPage />
                       </AgreementsProvider>
+                    }
+                  />
+                  <Route
+                    path="/accounting/payment-receipts"
+                    element={
+                      <PaymentsProvider>
+                        <PendingBillsPage />
+                      </PaymentsProvider>
                     }
                   />
                   <Route

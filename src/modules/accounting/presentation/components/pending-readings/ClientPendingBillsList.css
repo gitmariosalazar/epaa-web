@@ -1,0 +1,253 @@
+.client-pending-bills-container {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
+.client-pending-bills-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.pending-bill-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.pending-bill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: var(--table-header-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.clave-text,
+.address-text {
+  font-weight: 500;
+  color: var(--text);
+  font-size: var(--font-size-sm);
+}
+
+.icon-blue {
+  color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.15);
+  padding: 0.1rem;
+  border-radius: 4px;
+}
+.icon-gray {
+  color: #6b7280;
+  background-color: rgba(107, 114, 128, 0.15);
+  padding: 0.1rem;
+  border-radius: 4px;
+}
+.icon-brown {
+  color: #8b5a2b;
+  background-color: rgba(139, 90, 43, 0.15);
+  padding: 0.1rem;
+  border-radius: 4px;
+}
+.icon-teal {
+  color: #14b8a6;
+  background-color: rgba(20, 184, 166, 0.15);
+  padding: 0.1rem;
+  border-radius: 4px;
+}
+.ml-4 {
+  margin-left: 1rem;
+}
+
+.rate-badge {
+  background-color: #38bdf8;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.pending-bill-section {
+  padding: 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--background);
+}
+
+.section-title h4 {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.custom-table th {
+  text-align: left;
+  font-weight: 600;
+  background-color: var(--table-header-bg);
+  color: var(--text);
+}
+
+.custom-table tfoot td {
+  background-color: var(--table-footer-bg);
+  color: var(--text);
+}
+
+.custom-table tfoot .text-lg {
+  font-size: 1.05rem;
+}
+
+.period-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.period-month {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.period-readings {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.period-due {
+  font-size: 0.75rem;
+}
+
+.text-error {
+  color: #ef4444;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+  padding-right: 10px;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm) !important;
+}
+
+.text-total {
+  color: var(--accent) !important;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+.font-bold {
+  font-weight: 700;
+}
+.text-sm {
+  font-size: 0.75rem;
+}
+
+/* Summary Footer */
+.pending-bill-summary {
+  background-color: #1a5c8a;
+  color: white;
+  padding: 1.25rem;
+}
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.9;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.summary-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.summary-card.highlight {
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.summary-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.summary-card-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.summary-card-sub {
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .header-left {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .ml-4 {
+    margin-left: 0;
+    margin-top: 0.25rem;
+  }
+}

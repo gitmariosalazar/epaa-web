@@ -9,6 +9,7 @@ export interface PendingReading {
   cadastralKey: string;
   address: string;
   rate: string;
+  interestValue: number;
 
   // ── Período de Facturación e Ingresos ──────────────────────────────────────
   month: string;

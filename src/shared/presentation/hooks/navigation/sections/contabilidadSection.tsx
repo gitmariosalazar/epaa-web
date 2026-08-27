@@ -3,7 +3,8 @@ import {
   IconAccounting,
   IconIncomes,
   IconOverduePayments,
-  IconPayments
+  IconPayments,
+  IconPendingBills
 } from '@/shared/presentation/components/icons/custom-icons';
 import type { NavSection } from '@/shared/domain/models/Navigation';
 
@@ -39,7 +40,12 @@ export const getContabilidadSection = (): NavSection => ({
           icon: <IconPayments size={18} />,
           label: 'Convenios',
           to: '/accounting/agreements'
-        }
+        },
+        {
+          icon: <IconPendingBills size={18} />,
+          label: 'Consulta de Comprobantes',
+          to: '/accounting/payment-receipts'
+        },
       ]
     }
   ]
