@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useReadingsContext } from '../context/ReadingsContext';
 import type { ReadingImages } from '../../domain/models/ReadingImages';
+import { FilterReadingImagesUseCase } from '../../application/usecases/FilterReadingImagesUseCase';
 
 export const useReadingImagesList = () => {
   const { readingImagesUseCase } = useReadingsContext();
@@ -13,11 +14,13 @@ export const useReadingImagesList = () => {
     async ({
       month,
       sector,
-      cadastralKey
+      cadastralKey,
+      novelty
     }: {
       month?: string;
       sector?: string | number;
       cadastralKey?: string;
+      novelty?: string;
     }) => {
       setIsLoading(true);
       setError(null);
@@ -37,6 +40,11 @@ export const useReadingImagesList = () => {
           result = await readingImagesUseCase.executeFindByMonth(month);
         } else {
           result = await readingImagesUseCase.executeFindAll();
+        }
+
+        if (novelty) {
+          const filterUseCase = new FilterReadingImagesUseCase();
+          result = filterUseCase.execute(result, { novelty });
         }
 
         setReadingImages(result || []);

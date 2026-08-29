@@ -21,6 +21,7 @@ interface ReadingImagesFiltersProps {
     monthIso?: string;
     sector?: string;
     cadastralKey?: string;
+    novelty?: string;
   }) => void;
 }
 
@@ -36,12 +37,13 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
   const [month, setMonth] = useState(currentMonthStr);
   const [sector, setSector] = useState('');
   const [cadastralKey, setCadastralKey] = useState('');
+  const [novelty, setNovelty] = useState('');
 
   const handleSearch = () => {
     if (mode === 'month_sector') {
-      onFetch({ monthIso: month, sector });
+      onFetch({ monthIso: month, sector, novelty });
     } else {
-      onFetch({ cadastralKey });
+      onFetch({ cadastralKey, novelty });
     }
   };
 
@@ -105,19 +107,62 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
                 />
               </div>
             </div>
+
+            <div className="filter-group">
+              <label className="filter-label">
+                {t('readings.filters.noveltyOptional', 'NOVEDAD (OPCIONAL)')}
+              </label>
+              <div className="filter-input-wrapper">
+                <Select
+                  size="compact"
+                  value={novelty}
+                  onChange={(e) => setNovelty(e.target.value)}
+                >
+                  <option value="">Todas</option>
+                  <option value="ALERTA CONSUMO BAJO">Alerta Consumo Bajo</option>
+                  <option value="LECTURA INVÁLIDA">Lectura Inválida</option>
+                  <option value="ALERTA CONSUMO ALTO">Alerta Consumo Alto</option>
+                  <option value="NORMAL">Normal</option>
+                  <option value="CONSUMO EXCESIVO">Consumo Excesivo</option>
+                  <option value="SIN LECTURA">Sin Lectura</option>
+                </Select>
+              </div>
+            </div>
           </>
         ) : (
-          <div className="filter-group">
-            <label className="filter-label">
-              {t('common.cadastralKey', 'Clave Catastral')}
-            </label>
-            <div className="filter-input-wrapper">
-              <InputCadastralKey
-                placeholder="Ej: 1-125 o 40-5"
-                size="compact"
-                value={cadastralKey}
-                onChange={(val) => setCadastralKey(val)}
-              />
+          <div className="filter-group" style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ flex: 1 }}>
+              <label className="filter-label">
+                {t('common.cadastralKey', 'Clave Catastral')}
+              </label>
+              <div className="filter-input-wrapper">
+                <InputCadastralKey
+                  placeholder="Ej: 1-125 o 40-5"
+                  size="compact"
+                  value={cadastralKey}
+                  onChange={(val) => setCadastralKey(val)}
+                />
+              </div>
+            </div>
+            <div style={{ flex: 1 }}>
+              <label className="filter-label">
+                {t('readings.filters.noveltyOptional', 'NOVEDAD (OPCIONAL)')}
+              </label>
+              <div className="filter-input-wrapper">
+                <Select
+                  size="compact"
+                  value={novelty}
+                  onChange={(e) => setNovelty(e.target.value)}
+                >
+                  <option value="">Todas</option>
+                  <option value="ALERTA CONSUMO BAJO">Alerta Consumo Bajo</option>
+                  <option value="LECTURA INVÁLIDA">Lectura Inválida</option>
+                  <option value="ALERTA CONSUMO ALTO">Alerta Consumo Alto</option>
+                  <option value="NORMAL">Normal</option>
+                  <option value="CONSUMO EXCESIVO">Consumo Excesivo</option>
+                  <option value="SIN LECTURA">Sin Lectura</option>
+                </Select>
+              </div>
             </div>
           </div>
         )}

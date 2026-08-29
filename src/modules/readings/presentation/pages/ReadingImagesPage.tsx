@@ -69,11 +69,13 @@ export const ReadingImagesPage: React.FC = () => {
     monthIso?: string;
     sector?: string;
     cadastralKey?: string;
+    novelty?: string;
   }) => {
     fetchImages({
       month: filters.monthIso,
       sector: filters.sector,
-      cadastralKey: filters.cadastralKey
+      cadastralKey: filters.cadastralKey,
+      novelty: filters.novelty
     });
   };
 

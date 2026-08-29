@@ -288,6 +288,12 @@ export const CreateIncidentPage: React.FC = () => {
     clearData();
   };
 
+  // Filter categories to only show incident types different from 1, 2 and 8
+  const meterIncidentCategories = categories
+    .filter((category) => category.categoryId !== 1 && category.categoryId !== 2)
+    .flatMap((category) => category.incidentTypes);
+
+  console.log('meterIncidentCategories', meterIncidentCategories);
   // Find the selected incident type object
   const selectedIncidentTypeObj = categories
     .flatMap((category) =>
@@ -298,6 +304,8 @@ export const CreateIncidentPage: React.FC = () => {
       }))
     )
     .find((t) => String(t.typeCode) === incidentTypeId);
+
+  console.log('selectedIncidentTypeObj', selectedIncidentTypeObj);
 
   // Geolocation and uploader state & refs
   const [isLocating, setIsLocating] = useState(false);
@@ -809,7 +817,7 @@ export const CreateIncidentPage: React.FC = () => {
         size="lg"
       >
         <div className="incident-categories-modal-body">
-          {categories.map((category) => {
+          {categories.filter(c => c.categoryId !== 8).map((category) => {
             const details = getCategoryDetails(category.categoryName);
             return (
               <div key={category.categoryName} className="category-section">
