@@ -17,7 +17,7 @@ import '../styles/Incidents.css';
 import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { truncateText } from '@/shared/utils/text/truncate-text';
-import { getPriorityColor, getStatusColor, getWorkOrderStatusColor } from '@/shared/presentation/utils/colors/status-color';
+import { getPriorityColor, getStatusColor, getWorkOrderStatusColor } from '@/shared/presentation/utils/colors/status-colors';
 import { FaTools } from 'react-icons/fa';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 

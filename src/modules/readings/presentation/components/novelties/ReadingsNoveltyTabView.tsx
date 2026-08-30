@@ -14,7 +14,7 @@ import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { NoveltyType } from '@/shared/utils/types/novelties-type';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { CreateReadingPage } from '../../pages';
-import { UpdateReadingPage } from '../../pages/UpdateReadingPage';
+import { UpdateReadingWithImagesPage } from '../../pages/UpdateReadingWithImagesPage';
 import { ReadingDetailModal } from '../ReadingDetailModal';
 import { ReadingsProvider } from '../../context/ReadingsContext';
 interface ModalState {
@@ -171,7 +171,7 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
             />
           )}
           {modalState?.mode === 'update' && (
-            <UpdateReadingPage
+            <UpdateReadingWithImagesPage
               initialCadastralKey={modalState?.cadastralKey}
               onSuccess={handleModalSuccess}
               onCancel={closeModal}

@@ -92,6 +92,7 @@ import { CreateIncidentPage } from '@/modules/incidents/presentation/pages/Creat
 import UnAuthorizedPage from '@/shared/presentation/components/unauthorized/UnAuthorizedPage';
 import { CircularProgress } from './shared/presentation/components/CircularProgress';
 import type { RolOrPermission } from './shared/utils/interfaces/RolOrPermission';
+import { ReadingReports } from './modules/readings/presentation/pages/ReadingReports';
 
 const ProtectedRoute = () => {
   const { token, user, isLoading, isVerifying, logout } = useAuth();
@@ -333,6 +334,7 @@ function App() {
                           <Route path="images" element={<ReadingImagesPage />} />
                           <Route path="update" element={<UpdateReadingPage />} />
                           <Route path="audit" element={<ReadingAuditPage />} />
+                          <Route path="report" element={<ReadingReports />} />
                           {/* Other reading routes can be added here */}
                         </Routes>
                       </ReadingsProvider>

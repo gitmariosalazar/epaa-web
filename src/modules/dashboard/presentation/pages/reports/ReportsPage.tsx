@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { ReadingDetailModal } from '@/modules/readings/presentation/components/ReadingDetailModal';
 import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
 import { CreateReadingPage } from '@/modules/readings/presentation/pages';
-import { UpdateReadingPage } from '@/modules/readings/presentation/pages/UpdateReadingPage';
+import { UpdateReadingWithImagesPage } from '@/modules/readings/presentation/pages/UpdateReadingWithImagesPage';
 import { ReadingsProvider } from '@/modules/readings/presentation/context/ReadingsContext';
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
@@ -42,10 +42,10 @@ export const ReportsPage = () => {
   const handleViewReadingDetails = (cadastralKey: string, readingDate: Date | null) => {
     let yearAndMonth = null;
     if (readingDate) {
-       const d = new Date(readingDate);
-       const y = d.getFullYear();
-       const m = String(d.getMonth() + 1).padStart(2, '0');
-       yearAndMonth = `${y}-${m}`;
+      const d = new Date(readingDate);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      yearAndMonth = `${y}-${m}`;
     }
     setDetailModalState({ isOpen: true, cadastralKey, yearAndMonth });
   };
@@ -179,7 +179,7 @@ export const ReportsPage = () => {
               />
             )}
             {readingModalState?.mode === 'update' && (
-              <UpdateReadingPage
+              <UpdateReadingWithImagesPage
                 initialCadastralKey={readingModalState?.cadastralKey}
                 onSuccess={() => setReadingModalState(null)}
                 onCancel={() => setReadingModalState(null)}

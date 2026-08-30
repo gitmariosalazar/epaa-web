@@ -24,7 +24,7 @@ import { FaEdit } from 'react-icons/fa';
 
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { CreateReadingPage } from './CreateReadingPage';
-import { UpdateReadingPage } from './UpdateReadingPage';
+import { UpdateReadingWithImagesPage } from './UpdateReadingWithImagesPage';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
@@ -268,7 +268,7 @@ export const ReadingImagesPage: React.FC = () => {
             />
           )}
           {readingModalState?.mode === 'update' && (
-            <UpdateReadingPage
+            <UpdateReadingWithImagesPage
               initialCadastralKey={readingModalState?.cadastralKey}
               onSuccess={() => setReadingModalState(null)}
               onCancel={() => setReadingModalState(null)}

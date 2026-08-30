@@ -87,6 +87,8 @@ export interface TabPanelProps {
   children: React.ReactNode;
   /** Optional className for the panel container */
   className?: string;
+  /** Optional inline styles for the panel container */
+  style?: React.CSSProperties;
 }
 
 /**
@@ -97,7 +99,8 @@ export const TabPanel: React.FC<TabPanelProps> = ({
   tabId,
   activeTab,
   children,
-  className = ''
+  className = '',
+  style
 }) => {
   const isActive = tabId === activeTab;
   return (
@@ -106,6 +109,7 @@ export const TabPanel: React.FC<TabPanelProps> = ({
       id={`tabpanel-${tabId}`}
       aria-labelledby={`tab-${tabId}`}
       className={`tabs__panel ${isActive ? 'tabs__panel--active' : ''} ${className}`.trim()}
+      style={style}
     >
       {children}
     </div>

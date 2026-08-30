@@ -25,6 +25,11 @@ interface ReadingImagesViewerProps {
   readingData: ReadingImages | null;
 }
 
+const extractFilename = (filePath?: string): string => {
+  if (!filePath) return '';
+  return filePath.split('/').pop() ?? filePath;
+};
+
 export const ReadingImagesViewer: React.FC<ReadingImagesViewerProps> = ({
   isOpen,
   onClose,
@@ -35,7 +40,7 @@ export const ReadingImagesViewer: React.FC<ReadingImagesViewerProps> = ({
   const [isZoomed, setIsZoomed] = useState(false);
 
   const images = readingData?.images || [];
-  const currentFilename = images[currentImageIndex];
+  const currentFilename = extractFilename(images[currentImageIndex]);
 
   // Use shared hooks for file preview and download
   const { blobUrl, loading, error } = useFilePreview('readings', currentFilename);

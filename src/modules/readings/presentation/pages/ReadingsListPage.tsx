@@ -23,7 +23,7 @@ import { CompletedReadingConnectionTable } from '../components/CompletedReadingC
 import { EstimatedReadingConnectionTable } from '../components/EstimatedReadingConnectionTable';
 import { AllReadingsTable } from '../components/AllReadingsTable';
 import { CreateReadingPage } from './CreateReadingPage';
-import { UpdateReadingPage } from './UpdateReadingPage';
+import { UpdateReadingWithImagesPage } from './UpdateReadingWithImagesPage';
 import { BsPatchQuestionFill } from 'react-icons/bs';
 import { ReadingsNoveltyTabView } from '../components/novelties/ReadingsNoveltyTabView';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
@@ -86,10 +86,10 @@ export const ReadingsListPage: React.FC = () => {
   const handleViewDetails = (cadastralKey: string, readingDate: Date | null) => {
     let yearAndMonth = month;
     if (readingDate) {
-       const d = new Date(readingDate);
-       const y = d.getFullYear();
-       const m = String(d.getMonth() + 1).padStart(2, '0');
-       yearAndMonth = `${y}-${m}`;
+      const d = new Date(readingDate);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      yearAndMonth = `${y}-${m}`;
     }
     setDetailModalState({ isOpen: true, cadastralKey, yearAndMonth });
   };
@@ -115,22 +115,22 @@ export const ReadingsListPage: React.FC = () => {
 
   const filterData = <T extends { sector: number | string; cadastralKey?: string; clientName?: string; meterNumber?: string }>(list: T[]) => {
     let filtered = list;
-    
+
     // Filter by sector
     if (sector) {
       filtered = filtered.filter((item) => String(item.sector).includes(sector));
     }
-    
+
     // Filter by global search
     if (globalSearch) {
       const lowerSearch = globalSearch.toLowerCase();
-      filtered = filtered.filter((item) => 
+      filtered = filtered.filter((item) =>
         (item.cadastralKey && String(item.cadastralKey).toLowerCase().includes(lowerSearch)) ||
         (item.clientName && String(item.clientName).toLowerCase().includes(lowerSearch)) ||
         (item.meterNumber && String(item.meterNumber).toLowerCase().includes(lowerSearch))
       );
     }
-    
+
     return filtered;
   };
 
@@ -265,9 +265,9 @@ export const ReadingsListPage: React.FC = () => {
           )}
 
           {activeTab === 'all' && (
-            <AllReadingsTable 
-              data={filteredAll} 
-              isLoading={isLoading} 
+            <AllReadingsTable
+              data={filteredAll}
+              isLoading={isLoading}
               onAction={handleTableAction}
               onViewReadingDetails={handleViewDetails}
               onViewConnectionDetails={(key) => setDetailCadastralKey(key)}
@@ -294,7 +294,7 @@ export const ReadingsListPage: React.FC = () => {
             />
           )}
           {modalState?.mode === 'update' && (
-            <UpdateReadingPage
+            <UpdateReadingWithImagesPage
               initialCadastralKey={modalState?.cadastralKey}
               onSuccess={handleModalSuccess}
               onCancel={closeModal}
@@ -303,20 +303,20 @@ export const ReadingsListPage: React.FC = () => {
         </div>
       </Modal>
 
-        <ReadingDetailModal
-          isOpen={detailModalState.isOpen}
-          onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
-          cadastralKey={detailModalState.cadastralKey}
-          yearAndMonth={detailModalState.yearAndMonth}
-        />
+      <ReadingDetailModal
+        isOpen={detailModalState.isOpen}
+        onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+        cadastralKey={detailModalState.cadastralKey}
+        yearAndMonth={detailModalState.yearAndMonth}
+      />
 
-        <ConnectionProvider>
-          <ConnectionDetailModal
-            isOpen={detailCadastralKey !== null}
-            onClose={() => setDetailCadastralKey(null)}
-            cadastralKey={detailCadastralKey}
-          />
-        </ConnectionProvider>
-      </PageLayout>
+      <ConnectionProvider>
+        <ConnectionDetailModal
+          isOpen={detailCadastralKey !== null}
+          onClose={() => setDetailCadastralKey(null)}
+          cadastralKey={detailCadastralKey}
+        />
+      </ConnectionProvider>
+    </PageLayout>
   );
 };

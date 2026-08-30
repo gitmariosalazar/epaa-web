@@ -33,10 +33,28 @@ h2 {
 
 /* Summary Cards */
 .cr-summary-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
   gap: 8px;
   margin-top: -10px;
+  padding-bottom: 8px; /* To prevent scrollbar from hiding content */
+}
+
+.cr-summary-cards::-webkit-scrollbar {
+  height: 6px;
+}
+.cr-summary-cards::-webkit-scrollbar-track {
+  background: transparent;
+}
+.cr-summary-cards::-webkit-scrollbar-thumb {
+  background: var(--border-color, #334155);
+  border-radius: 4px;
+}
+
+.cr-summary-cards > .cr-card {
+  flex: 1 0 220px;
+  min-width: 220px;
 }
 
 .cr-card {

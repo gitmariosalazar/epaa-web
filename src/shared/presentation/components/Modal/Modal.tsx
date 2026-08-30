@@ -6,7 +6,7 @@ import { Tooltip } from '../common/Tooltip/Tooltip';
 import { Button } from '../Button/Button';
 import { BsWindow } from 'react-icons/bs';
 
-interface ModalProps {
+export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string | React.ReactNode;

@@ -1,5 +1,5 @@
 import { TbClock24 } from 'react-icons/tb';
-import { MdAssignmentAdd } from 'react-icons/md';
+import { MdAssignmentAdd, MdReport } from 'react-icons/md';
 import { IoMdPhotos } from 'react-icons/io';
 import { TiThList } from 'react-icons/ti';
 import { FaEdit } from 'react-icons/fa';
@@ -38,6 +38,11 @@ export const getLecturasSection = (): NavSection => ({
           icon: <ClipboardList size={18} />,
           label: 'Auditoría de Lecturas',
           to: '/readings/audit'
+        },
+        {
+          icon: <MdReport size={18} />,
+          label: 'Reportes de Lecturas',
+          to: '/readings/report'
         }
       ]
     }

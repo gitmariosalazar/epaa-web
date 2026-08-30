@@ -1,13 +1,16 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
-import { useIncidentsViewModel } from '../hooks/useIncidentsViewModel';
-import type { IncidentTab } from '../hooks/useIncidentsViewModel';
-import { ResolveIncidentModal } from '../components/ResolveIncidentModal';
-import { AddWorkOrderModal } from '../components/AddWorkOrderModal';
-import { IncidentDetailModal } from '../components/IncidentDetailModal';
-import { IncidentFilters } from '../components/IncidentFilters';
-import { IncidentMapFeature } from '../components/Map/IncidentMapFeature';
+import { useReadingReportsViewModel } from '../hooks/useReadingReportsViewModel';
+import type { IncidentTab } from '../hooks/useReadingReportsViewModel';
+import { ResolveReadingReportModal } from '../components/ReadingReports/ResolveReadingReportModal';
+import { AddWorkOrderReadingReportModal } from '../components/ReadingReports/AddWorkOrderReadingReportModal';
+import { ReadingReportDetailModal } from '../components/ReadingReports/ReadingReportDetailModal';
+import { ReadingReportsFilters } from '../components/ReadingReportsFilters';
+import { ReadingReportMapFeature } from '@/modules/readings/presentation/components/ReadingReports/Map/ReadingReportMapFeature';
+import { Modal } from '@/shared/presentation/components/Modal/Modal';
+import { CreateReadingPage } from './CreateReadingPage';
+import { UpdateReadingWithImagesPage } from './UpdateReadingWithImagesPage';
 import {
   Table,
   type Column
@@ -29,6 +32,8 @@ import {
   Navigation,
   Repeat,
   Plus,
+  MapPin,
+  FileText,
 } from 'lucide-react';
 import {
   CircularProgress,
@@ -36,41 +41,46 @@ import {
 } from '@/shared/presentation/components/CircularProgress';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { useState, useMemo } from 'react';
-import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
-import '../styles/Incidents.css';
-import '../components/Map/IncidentMap.css';
+import type { IncidentDetailRowResponse } from '../../../incidents/domain/schemas/dtos/response/view_incident.response';
+import '../styles/ReadingReports.css';
+import '../components/ReadingReports/Map/ReadingReportMap.css';
 import { truncateText } from '@/shared/utils/text/truncate-text';
-import { getPriorityColor, getStatusColor, getWorkOrderStatusColor } from '@/shared/presentation/utils/colors/status-colors';
-import { FaTools } from 'react-icons/fa';
+import { getMeterConditionColor, getPhysicalStateColor, getPriorityColor, getStatusColor, getWorkOrderStatusColor } from '@/shared/presentation/utils/colors/status-colors';
+import { FaEdit, FaTools } from 'react-icons/fa';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 /**
- * IncidentsPage — Página principal de incidentes con tabs (Lista | Mapa).
+ * ReadingReports — Página principal de incidentes con tabs (Lista | Mapa).
  *
  * Arquitectura Clean Architecture + MVVM:
  *  - View: este componente (solo renderiza, sin lógica de negocio)
- *  - ViewModel: useIncidentsViewModel()
+ *  - ViewModel: useReadingReportsViewModel()
  *  - Patrón espejo de ConnectionsPage (tabs + filters + content)
  */
 
 const INCIDENT_TABS: TabItem<IncidentTab>[] = [
   {
     id: 'list',
-    label: 'Lista de Incidentes',
+    label: 'Lista de Reportes de Lecturas',
     icon: <List size={16} />
   },
   {
     id: 'map',
-    label: 'Mapa de Incidentes',
+    label: 'Mapa de Reportes de Lecturas',
     icon: <Map size={16} />
   }
 ];
 
-export const IncidentsPage: React.FC = () => {
-  const vm = useIncidentsViewModel();
+import { IncidentProvider } from '../../../incidents/presentation/context/IncidentContext';
+import { useTranslation } from 'react-i18next';
+import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
+import { ReadingDetailModal } from '../components/ReadingDetailModal';
+
+const ReadingReportsContent: React.FC = () => {
+  const vm = useReadingReportsViewModel();
   const {
     incidents,
-    categories,
     isLoading,
     error,
     filters,
@@ -86,6 +96,8 @@ export const IncidentsPage: React.FC = () => {
 
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
 
   // ── Detectar ruta activa para sincronizar el tab (igual que ConnectionsPage) ──
   useEffect(() => {
@@ -99,11 +111,6 @@ export const IncidentsPage: React.FC = () => {
   // ── Sincronizar navegación cuando el usuario hace clic en un tab ──
   const handleTabClick = (tab: IncidentTab) => {
     handleTabChange(tab);
-    if (tab === 'map') {
-      navigate('/incidents/map');
-    } else {
-      navigate('/incidents/list');
-    }
   };
 
   const progress = useSimulatedProgress(isLoading);
@@ -122,6 +129,33 @@ export const IncidentsPage: React.FC = () => {
   );
   const [addWorkOrderIncident, setAddWorkOrderIncident] =
     useState<IncidentDetailRowResponse | null>(null);
+
+  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(null);
+
+
+
+
+  const [readingModalState, setReadingModalState] = useState<{
+    isOpen: boolean;
+    mode: 'create' | 'update';
+    cadastralKey: string;
+  } | null>(null);
+
+  // Detail Modal State for Readings
+  const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
+    isOpen: false,
+    cadastralKey: null,
+    yearAndMonth: null,
+  });
+
+  const handleViewDetails = (cadastralKey: string, yearAndMonth: string) => {
+    setDetailModalState({ isOpen: true, cadastralKey, yearAndMonth });
+  };
+
+  const handleAction = (mode: 'create' | 'update', cadastralKey: string) => {
+    setReadingModalState({ isOpen: true, mode, cadastralKey });
+  };
+
 
 
 
@@ -142,6 +176,60 @@ export const IncidentsPage: React.FC = () => {
       header: 'CONEXION',
       accessor: (item) => <span>{item.connectionId || '-'}</span>,
       id: 'connectionId',
+      style: { width: '110px' }
+    },
+    {
+      header: 'CONDICIÓN/ESTADO',
+      accessor: (item) => {
+        const meter = getMeterConditionColor(item.meterCondition || '');
+        const physical = getPhysicalStateColor(item.physicalState || '');
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="geo-status-bar-table">
+                <div className="geo-status-bar__item">
+                  <Tooltip content={
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span className="geo-status-bar__label">Condicion del medidor: {meter.label}</span>
+                    </div>
+                  }
+                    followCursor={false}
+                    themeColor={meter.color}
+                    position='top'>
+
+                    <ColorChip
+                      label={meter.label}
+                      color={meter.color}
+                      icon={meter.icon}
+                      size='xs'
+                    />
+                  </Tooltip>
+                </div>
+                <div className="geo-status-bar__item">
+                  <Tooltip content={
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span className="geo-status-bar__label">Estado físico del medidor: {physical.label}</span>
+                    </div>
+                  }
+                    followCursor={false}
+                    themeColor={physical.color}
+                    position='top'>
+
+                    <ColorChip
+                      label={physical.label}
+                      color={physical.color}
+                      icon={physical.icon}
+                      size='xs'
+                    />
+                  </Tooltip>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      },
+      id: 'connectionState',
       style: { width: '110px' }
     },
     {
@@ -312,6 +400,44 @@ export const IncidentsPage: React.FC = () => {
               </Button>
             )
           }
+          <Tooltip followCursor={false} themeColor="warning" content={t('common.edit', 'Editar')}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleAction('update', item.connectionId!)}
+              color="warning"
+              circle
+            >
+              <FaEdit size={16} />
+            </Button>
+          </Tooltip>
+          <Tooltip followCursor={false}
+            themeColor="cyan"
+            content={
+              <>
+                <div> Ver Detalles de la Acometida </div>
+                <div> Acometida ID: {item.connectionId} </div>
+              </>
+            }
+          >
+            <Button color="cyan" size="sm" variant="ghost" onClick={() => setDetailCadastralKey(item.connectionId)} circle>
+              <MapPin size={16} />
+            </Button>
+          </Tooltip>
+
+          <Tooltip followCursor={false}
+            themeColor="info"
+            content={
+              <>
+                <div> Ver Detalles de la Lectura </div>
+                <div> Lectura ID: {item.readingId} </div>
+              </>
+            }
+          >
+            <Button size="sm" variant="ghost" onClick={() => handleViewDetails(item.connectionId!, item.reportDate)} circle>
+              <FileText size={16} />
+            </Button>
+          </Tooltip>
         </div>
       ),
       id: 'actions',
@@ -383,7 +509,7 @@ export const IncidentsPage: React.FC = () => {
       return (
         <div className="incident-map-page-content">
           {ConnectionBanner}
-          <IncidentMapFeature
+          <ReadingReportMapFeature
             incidents={incidents}
             selectedIncident={focusedIncident} // ← Usar focused para highlight
             onSelect={(incident) => setFocusedIncidentId(incident.incidentId)} // ← Solo focus + highlight
@@ -471,19 +597,23 @@ export const IncidentsPage: React.FC = () => {
               activeTab={activeTab}
               onTabChange={handleTabClick}
             />
+            {
+              /*
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <Button
                 leftIcon={<ShieldAlert size={16} />}
                 size="compact"
                 onClick={() => navigate('/incidents/create')}
               >
-                Reportar Incidente
+                Reportar Lectura
               </Button>
             </div>
+              */
+            }
           </div>
         }
         filters={
-          <IncidentFilters
+          <ReadingReportsFilters
             searchQuery={filters.search}
             onSearchQueryChange={(val) => handleFilterChange({ search: val })}
             searchField={filters.searchField}
@@ -492,9 +622,6 @@ export const IncidentsPage: React.FC = () => {
             onStatusChange={(val) => handleFilterChange({ status: val })}
             selectedPriority={filters.priority}
             onPriorityChange={(val) => handleFilterChange({ priority: val })}
-            selectedCategoryId={filters.categoryId}
-            onCategoryIdChange={(val) => handleFilterChange({ categoryId: val })}
-            categories={categories}
             onConsultar={handleConsultar}
             onReportIncident={() => navigate('/incidents/create')}
             isLoading={isLoading}
@@ -507,7 +634,7 @@ export const IncidentsPage: React.FC = () => {
 
       {/* ── Modales ── */}
       {resolveIncidentId !== null && (
-        <ResolveIncidentModal
+        <ResolveReadingReportModal
           isOpen={true}
           onClose={() => setResolveIncidentId(null)}
           incidentId={resolveIncidentId}
@@ -515,15 +642,33 @@ export const IncidentsPage: React.FC = () => {
       )}
 
       {selectedIncident !== null && (
-        <IncidentDetailModal
+        <ReadingReportDetailModal
           isOpen={true}
           onClose={() => setSelectedIncident(null)}
           incident={selectedIncident}
         />
       )}
 
-      {addWorkOrderIncident !== null && (
-        <AddWorkOrderModal
+      {/* Connection Detail Modal */}
+      <ConnectionProvider>
+        <ConnectionDetailModal
+          isOpen={detailCadastralKey !== null}
+          onClose={() => setDetailCadastralKey(null)}
+          cadastralKey={detailCadastralKey}
+        />
+      </ConnectionProvider>
+
+      {/* Reading Detail Modal (No extra provider needed as page is already under ReadingsProvider) */}
+      <ReadingDetailModal
+        isOpen={detailModalState.isOpen}
+        onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+        cadastralKey={detailModalState.cadastralKey}
+        yearAndMonth={detailModalState.yearAndMonth}
+      />
+
+
+    {addWorkOrderIncident !== null && (
+        <AddWorkOrderReadingReportModal
           isOpen={true}
           onClose={() => setAddWorkOrderIncident(null)}
           incident={addWorkOrderIncident}
@@ -533,6 +678,45 @@ export const IncidentsPage: React.FC = () => {
           }}
         />
       )}
+
+      {/* Modal de Creación/Edición de Lectura */}
+      <Modal
+        isOpen={!!readingModalState?.isOpen}
+        onClose={() => setReadingModalState(null)}
+        title={
+          readingModalState?.mode === 'create'
+            ? 'Nueva Lectura'
+            : 'Editar Lectura'
+        }
+        size="full"
+      >
+        <div style={{ padding: '0px 10px', height: '100%' }}>
+          {readingModalState?.mode === 'create' && (
+            <CreateReadingPage
+              initialCadastralKey={readingModalState?.cadastralKey}
+              onSuccess={() => setReadingModalState(null)}
+              onCancel={() => setReadingModalState(null)}
+            />
+          )}
+          {readingModalState?.mode === 'update' && (
+            <UpdateReadingWithImagesPage
+              initialCadastralKey={readingModalState?.cadastralKey}
+              onSuccess={() => setReadingModalState(null)}
+              onCancel={() => setReadingModalState(null)}
+            />
+          )}
+        </div>
+      </Modal>
     </>
   );
 };
+
+
+export const ReadingReports: React.FC = () => {
+  return (
+    <IncidentProvider>
+      <ReadingReportsContent />
+    </IncidentProvider>
+  );
+};
+

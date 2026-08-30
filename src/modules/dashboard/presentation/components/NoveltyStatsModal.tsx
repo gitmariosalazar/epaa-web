@@ -13,7 +13,7 @@ import { Input } from '@/shared/presentation/components/Input/Input';
 import { useReadingNoveltySearch } from '@/modules/readings/presentation/hooks/useReadingNoveltySearch';
 import { ConvertMonth } from '@/shared/utils/datetime/Converts';
 import { CreateReadingPage } from '@/modules/readings/presentation/pages';
-import { UpdateReadingPage } from '@/modules/readings/presentation/pages/UpdateReadingPage';
+import { UpdateReadingWithImagesPage } from '@/modules/readings/presentation/pages/UpdateReadingWithImagesPage';
 import { ReadingNoveltyProvider } from '@/modules/readings/presentation/context/ReadingNoveltyContext';
 import { ReadingDetailModal } from '@/modules/readings/presentation/components/ReadingDetailModal';
 
@@ -183,7 +183,7 @@ const NoveltyStatsModalContent: React.FC<NoveltyStatsModalContentProps> = ({
             />
           )}
           {modalState?.mode === 'update' && (
-            <UpdateReadingPage
+            <UpdateReadingWithImagesPage
               initialCadastralKey={modalState?.cadastralKey}
               onSuccess={handleModalSuccess}
               onCancel={closeModal}

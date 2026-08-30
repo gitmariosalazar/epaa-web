@@ -11,7 +11,7 @@ import { FaEdit } from 'react-icons/fa';
 import { Plus } from 'lucide-react';
 import { ReadingsProvider } from '@/modules/readings/presentation/context/ReadingsContext';
 import { CreateReadingPage } from '@/modules/readings/presentation/pages';
-import { UpdateReadingPage } from '@/modules/readings/presentation/pages/UpdateReadingPage';
+import { UpdateReadingWithImagesPage } from '@/modules/readings/presentation/pages/UpdateReadingWithImagesPage';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { useSectorReadings } from '@/shared/presentation/hooks/dashboard/useSectorReadings';
 import type {
@@ -472,7 +472,7 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
               />
             )}
             {readingModalState?.mode === 'update' && (
-              <UpdateReadingPage
+              <UpdateReadingWithImagesPage
                 initialCadastralKey={readingModalState?.cadastralKey}
                 onSuccess={handleModalSuccess}
                 onCancel={() => setReadingModalState(null)}
