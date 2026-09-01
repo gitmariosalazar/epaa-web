@@ -1,7 +1,11 @@
 import type { AuthRepository } from '@/modules/auth/domain/repositories/AuthRepository';
 
 export class UnlockModuleUseCase {
-  constructor(private readonly authRepository: AuthRepository) {}
+  private readonly authRepository: AuthRepository;
+
+  constructor(authRepository: AuthRepository) {
+    this.authRepository = authRepository;
+  }
 
   /**
    * Executes the module unlock process by sending the user's PIN to the backend.

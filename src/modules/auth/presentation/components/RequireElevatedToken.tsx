@@ -135,7 +135,7 @@ export const RequireElevatedToken: React.FC<RequireElevatedTokenProps> = ({
           <Button 
             type="submit" 
             fullWidth 
-            loading={isSubmitting}
+            isLoading={isSubmitting}
             disabled={isSubmitting || !pin}
           >
             Desbloquear Módulo

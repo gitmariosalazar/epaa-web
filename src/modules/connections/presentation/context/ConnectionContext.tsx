@@ -24,6 +24,7 @@ import { UpdateCompanyUseCase } from '@/modules/customers/application/usecases/U
 import { GetLiveUpdateMapConnectionsUseCase } from '../../application/usecases/GetLiveUpdateMapConnectionsUseCase';
 import { FindConnectionAndPropertyByCadastralKeyOrCardIdUseCase } from '../../application/usecases/FindConnectionAndPropertyByCadastralKeyOrCardIdUseCase';
 import { FindAllConnectionsWithPropertyUseCase } from '../../application/usecases/FindAllConnectionsWithPropertyUseCase';
+import { ChangeMeterUseCase } from '../../application/usecases/ChangeMeterUseCase';
 
 interface ConnectionContextType {
   getConnectionsUseCase: GetConnectionsUseCase;
@@ -43,6 +44,7 @@ interface ConnectionContextType {
   getLiveUpdateMapConnectionsUseCase: GetLiveUpdateMapConnectionsUseCase;
   findConnectionAndPropertyByCadastralKeyOrCardIdUseCase: FindConnectionAndPropertyByCadastralKeyOrCardIdUseCase;
   findAllConnectionsWithPropertyUseCase: FindAllConnectionsWithPropertyUseCase;
+  changeMeterUseCase: ChangeMeterUseCase;
 }
 
 const ConnectionContext = createContext<ConnectionContextType | null>(null);
@@ -95,7 +97,8 @@ export const ConnectionProvider: React.FC<{ children: ReactNode }> = ({
           connectionRepository
         ),
       findAllConnectionsWithPropertyUseCase:
-        new FindAllConnectionsWithPropertyUseCase(connectionRepository)
+        new FindAllConnectionsWithPropertyUseCase(connectionRepository),
+      changeMeterUseCase: new ChangeMeterUseCase(connectionRepository)
     };
   }, [connectionRepository, customerRepository, companyRepository]);
 

@@ -33,4 +33,7 @@ export interface LecturasReconciliationRepository {
   getDiscrepanciesDetail(
     params: ConsultarDetalleAuditoriaParams
   ): Promise<DetalleAuditoriaResponse>;
+
+  migrateLecturas(months?: string[]): Promise<any>;
+  compareLecturas(months?: string[]): Promise<any>;
 }

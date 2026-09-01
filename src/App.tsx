@@ -96,6 +96,7 @@ import { ReadingReports } from './modules/readings/presentation/pages/ReadingRep
 import { ReadingsWithErrors } from './modules/readings/presentation/pages/ReadingsWithErrors';
 import { RequireElevatedToken } from './modules/auth/presentation/components/RequireElevatedToken';
 import { UpdateSpecialReadingPage } from './modules/readings/presentation/pages/UpdateSpecialReadingPage';
+import { ReadingsReconciliationPage } from './modules/readings/presentation/pages';
 
 const ProtectedRoute = () => {
   const { token, user, isLoading, isVerifying, logout } = useAuth();
@@ -351,6 +352,14 @@ function App() {
                             element={
                               <RequireElevatedToken fallbackMessage="La actualización avanzada de lecturas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
                                 <UpdateSpecialReadingPage />
+                              </RequireElevatedToken>
+                            }
+                          />
+                          <Route
+                            path="reconciliation"
+                            element={
+                              <RequireElevatedToken fallbackMessage="La sincronización de lecturas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                <ReadingsReconciliationPage />
                               </RequireElevatedToken>
                             }
                           />

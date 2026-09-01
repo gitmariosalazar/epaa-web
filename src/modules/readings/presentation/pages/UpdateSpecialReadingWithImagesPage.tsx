@@ -6,7 +6,7 @@ import '../styles/UpdateReadingWithImagesPage.css';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { PopoverModal } from '@/shared/presentation/components/PopoverModal';
 import { ReadingInfoPopoverContent } from '../components/ReadingInfoPopoverContent';
-import { FaList, FaCamera } from 'react-icons/fa';
+import { FaList, FaCamera, FaEdit } from 'react-icons/fa';
 import { Tabs, TabPanel } from '@/shared/presentation/components/Tabs/Tabs';
 import { ReadingDetailTabContent } from '../components/ReadingDetailTabContent';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
@@ -17,6 +17,8 @@ import { UpdateSpecialReadingPage, type UpdateReadingPageProps } from './UpdateS
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { BsPatchQuestionFill } from 'react-icons/bs';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ChangeMeterPage } from '@/modules/connections/presentation/pages/ChangeMeterPage';
 
 const extractFilename = (filePath: string): string => {
   return filePath.split('/').pop() ?? filePath;
@@ -62,15 +64,24 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'images' | 'details'>('images');
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenDetailInfo, setIsOpenDetailInfo] = useState(false);
+  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const handleOpen = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOpenDetailInfo = (e: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(e.currentTarget);
-    setIsOpen(true);
+    setIsOpenDetailInfo(true);
   };
-  const handleClose = () => {
-    setIsOpen(false);
+  const handleCloseDetailInfo = () => {
+    setIsOpenDetailInfo(false);
+  };
+
+  const handleOpenUpdateMeterNumberModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(e.currentTarget);
+    setOpenUpdateMeterNumberModal(true);
+  };
+  const handleCloseUpdateMeterNumberModal = () => {
+    setOpenUpdateMeterNumberModal(false);
   };
 
   useEffect(() => {
@@ -192,18 +203,34 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
                         />
                       </div>
                     </div>
-                    <div className='urw-footer-actions'>
+                    <div className='urw-footer-actions-left'>
                       <Tooltip
                         content={'Ver información de la lectura'}
                         followCursor={false}
                       >
                         <Button
-                          onClick={handleOpen}
+                          onClick={handleOpenDetailInfo}
                           variant='outline'
                           circle
                           size='sm'
                         >
                           <FaList size={16} />
+                        </Button>
+                      </Tooltip>
+                    </div>
+                    <div className='urw-footer-actions-right'>
+                      <Tooltip
+                        content={'Actualizar Número de medidor'}
+                        followCursor={false}
+                      >
+                        <Button
+                          onClick={handleOpenUpdateMeterNumberModal}
+                          variant='outline'
+                          circle
+                          color='orange'
+                          size='sm'
+                        >
+                          <FaEdit size={16} />
                         </Button>
                       </Tooltip>
                     </div>
@@ -248,8 +275,8 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
       </div>
 
       <PopoverModal
-        isOpen={isOpen}
-        onClose={handleClose}
+        isOpen={isOpenDetailInfo}
+        onClose={handleCloseDetailInfo}
         anchorElement={anchorEl}
         title="Información de la lectura"
       >
@@ -261,6 +288,22 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
               : `${currentItem.data.readingYear}-${String(currentItem.data.readingMonth).padStart(2, '0')}`}
           />
         )}
+      </PopoverModal>
+
+
+      <PopoverModal
+        isOpen={openUpdateMeterNumberModal}
+        onClose={handleCloseUpdateMeterNumberModal}
+        anchorElement={anchorEl}
+        title="Actualizar número de medidor"
+      >
+        <ConnectionProvider>
+          <ChangeMeterPage
+            cadastralKeyProp={initialCadastralKey}
+            onSuccess={handleCloseUpdateMeterNumberModal}
+            onCancel={handleCloseUpdateMeterNumberModal}
+          />
+        </ConnectionProvider>
       </PopoverModal>
 
     </div>

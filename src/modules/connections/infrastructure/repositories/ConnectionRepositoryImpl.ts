@@ -17,6 +17,7 @@ import type {
 } from '../../domain/models/DashboardStats';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
+import type { ChangeMeterRequest } from '../../domain/models/MeterChange';
 
 export class ConnectionRepositoryImpl implements ConnectionRepository {
   private readonly client: HttpClientInterface;
@@ -168,5 +169,30 @@ export class ConnectionRepositoryImpl implements ConnectionRepository {
       }
     });
     return response.data.data;
+  }
+
+  async changeMeter(request: ChangeMeterRequest): Promise<void> {
+    const formData = new FormData();
+    formData.append('changeDetail', JSON.stringify(request.changeDetail));
+    
+    if (request.imageDescriptions) {
+      formData.append('imageDescriptions', JSON.stringify(request.imageDescriptions));
+    }
+    
+    if (request.images) {
+      request.images.forEach((file) => {
+        formData.append('images', file);
+      });
+    }
+
+    await this.client.post<ApiResponse<void>>(
+      `/connection-gateway/change-meter/${request.connectionId}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
   }
 }

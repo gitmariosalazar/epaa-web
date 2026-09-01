@@ -136,11 +136,24 @@
   padding: 10px;
 }
 
-.urw-footer-actions {
+.urw-footer-actions-left {
   margin-top: -1rem;
   position: absolute;
   bottom: 14px;
   left: 20px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.urw-footer-actions-right {
+  margin-top: -1rem;
+  position: absolute;
+  bottom: 14px;
+  right: 20px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
 }
 
 .urw-footer-grid {

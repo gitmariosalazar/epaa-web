@@ -3,7 +3,7 @@ import { MdAssignmentAdd, MdReport, MdAdminPanelSettings, MdOutlineContentPasteS
 import { IoMdPhotos } from 'react-icons/io';
 import { TiThList } from 'react-icons/ti';
 import { FaEdit } from 'react-icons/fa';
-import { ClipboardList } from 'lucide-react';
+import { ClipboardList, LucideCalendarSync } from 'lucide-react';
 import type { NavSection } from '@/shared/domain/models/Navigation';
 import { RiListCheck3 } from 'react-icons/ri';
 
@@ -70,6 +70,11 @@ export const getLecturasSection = (): NavSection => ({
               icon: <FaEdit size={18} />,
               label: 'Actualización Avanzada',
               to: '/readings/advanced-update'
+            },
+            {
+              icon: <LucideCalendarSync size={18} />,
+              label: 'Sincronización de Lecturas',
+              to: '/readings/reconciliation'
             }
           ]
         }

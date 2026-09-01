@@ -1,7 +1,3 @@
-import type {
-  ReconciliationPeriod,
-  ResumenAuditoriaResponse
-} from '../../../domain/models/lecturas-reconciliation';
 import type { LecturasReconciliationRepository } from '../../../domain/repositories/lecturas-reconciliation.repository';
 
 export class CompareLecturasUseCase {
@@ -11,9 +7,7 @@ export class CompareLecturasUseCase {
     this.readingsReconciliationRepository = readingsReconciliationRepository;
   }
 
-  async execute(
-    params: ReconciliationPeriod
-  ): Promise<ResumenAuditoriaResponse> {
-    return this.readingsReconciliationRepository.getReconciliationKpis(params);
+  async execute(months?: string[]): Promise<any> {
+    return this.readingsReconciliationRepository.compareLecturas(months);
   }
 }
