@@ -54,5 +54,13 @@ export class AuthRepositoryImpl implements AuthRepository {
     );
     return response.data.data;
   }
+
+  async unlockModule(userId: string, pin: string): Promise<{ elevated_token: string }> {
+    const response = await this.client.post<ApiResponse<{ elevated_token: string }>>(
+      '/auth/unlock-module',
+      { userId, pin }
+    );
+    return response.data.data;
+  }
 }
 

@@ -28,7 +28,8 @@ export const DashBoardProgressReadings: React.FC<
     (acc, item) => {
       return {
         expectedTotal: acc.expectedTotal + item.expectedTotal,
-        completed: acc.completed + item.completedTotal,
+        // Usar la fórmula basada en las pendientes para evitar lecturas duplicadas/fantasmas de la base de datos
+        completed: acc.completed + (item.expectedTotal - item.pendingTotal),
         pendings: acc.pendings + item.pendingTotal,
         advanced: acc.advanced + item.progressPercentage
       };
@@ -36,10 +37,15 @@ export const DashBoardProgressReadings: React.FC<
     { expectedTotal: 0, completed: 0, pendings: 0, advanced: 0 }
   );
 
-  const totalPercentage =
+  let totalPercentage =
     totalData.expectedTotal > 0
       ? (totalData.completed / totalData.expectedTotal) * 100
       : 0;
+      
+  // Asegurar que visualmente nunca sobrepase el 100%
+  if (totalPercentage > 100) {
+    totalPercentage = 100;
+  }
 
   if (loading) {
     return (

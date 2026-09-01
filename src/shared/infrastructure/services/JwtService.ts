@@ -14,7 +14,7 @@ interface JwtPayload {
  * Decodes the payload of a JWT token.
  * Returns null if the token is malformed.
  */
-function decodeJwtPayload(token: string): JwtPayload | null {
+export function decodeJwtPayload(token: string): JwtPayload | null {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return null;

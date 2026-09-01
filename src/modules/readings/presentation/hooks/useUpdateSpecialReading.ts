@@ -1,0 +1,164 @@
+import type { UpdateSpecialReadingRequest } from '../../domain/dto/request/UpdateSpecialReadingRequest';
+import { useReadingsContext } from '../context/ReadingsContext';
+import { useCallback, useState } from 'react';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
+
+import type { ReadingInfo } from '../../domain/models/ReadingInfoResponse';
+import type { ReadingHistory } from '../../domain/models/ReadingHistory';
+
+export const useUpdateSpecialReading = () => {
+  // Dependencies
+  const {
+    updateSpecialReadingUseCase,
+    getReadingInfoUseCase,
+    getReadingHistoryUseCase
+  } = useReadingsContext();
+
+  const [isLoadingInfo, setIsLoadingInfo] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [readingInfo, setReadingInfo] = useState<ReadingInfo[]>([]);
+  const [readingHistory, setReadingHistory] = useState<ReadingHistory[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchReadingData = useCallback(
+    async (cadastralKey: string) => {
+      setIsLoadingInfo(true);
+      setIsLoadingHistory(true);
+      setError(null);
+      setReadingInfo([]);
+      setReadingHistory([]);
+
+      try {
+        const [infoResultSettled, historyResultSettled] =
+          await Promise.allSettled([
+            getReadingInfoUseCase.execute(cadastralKey),
+            getReadingHistoryUseCase.execute(cadastralKey, 15, 0)
+          ]);
+
+        if (
+          infoResultSettled.status === 'fulfilled' &&
+          infoResultSettled.value
+        ) {
+          setReadingInfo(infoResultSettled.value);
+        } else {
+          setReadingInfo([]);
+          if (infoResultSettled.status === 'rejected') {
+            console.error(
+              'Error fetching info:',
+              infoResultSettled.reason?.response
+            );
+
+            const errorData = infoResultSettled.reason?.data;
+            let errorMessage = 'Error al obtener la información de lectura.';
+            let statusCode = infoResultSettled.reason?.status;
+
+            if (errorData?.message) {
+              errorMessage = Array.isArray(errorData.message)
+                ? errorData.message[0]
+                : errorData.message;
+            } else if (infoResultSettled.reason?.message) {
+              errorMessage = infoResultSettled.reason.message;
+            }
+
+            if (statusCode === 404) {
+              setError(null);
+              MessageToastCustom(
+                'error',
+                `No se encontraron datos para el acometida con clave catastral ${cadastralKey.toUpperCase()}.`,
+                'Error',
+                {
+                  position: 'top-right'
+                }
+              );
+              return;
+            } else {
+              setError(errorMessage);
+              MessageToastCustom('error', errorMessage, 'Error', {
+                position: 'top-right'
+              });
+            }
+          } else {
+            setError('No se encontraron datos para la clave catastral proporcionada.');
+            MessageToastCustom(
+              'warning',
+              'No se encontraron datos para la clave catastral proporcionada.',
+              'Atención',
+              { position: 'top-right' }
+            );
+          }
+        }
+
+        // Procesar Historial
+        if (
+          historyResultSettled.status === 'fulfilled' &&
+          historyResultSettled.value
+        ) {
+          setReadingHistory(historyResultSettled.value);
+        } else {
+          setReadingHistory([]);
+          if (historyResultSettled.status === 'rejected') {
+            console.error(
+              'Error fetching history:',
+              historyResultSettled.reason
+            );
+          }
+        }
+      } finally {
+        setIsLoadingInfo(false);
+        setIsLoadingHistory(false);
+      }
+    },
+    [getReadingInfoUseCase, getReadingHistoryUseCase]
+  );
+
+  const clearData = useCallback(() => {
+    setReadingInfo([]);
+    setReadingHistory([]);
+    setError(null);
+  }, []);
+
+  const submitUpdateSpecialReading = useCallback(
+    async (readingId: number, request: UpdateSpecialReadingRequest) => {
+      setIsSubmitting(true);
+      try {
+        const result = await updateSpecialReadingUseCase.execute(readingId, request);
+        return result;
+      } catch (error: any) {
+        console.error('Error updating reading:', error);
+
+        const errorData = error?.response?.data;
+        let errorMessage = 'Error al actualizar la lectura.';
+
+        if (errorData?.message) {
+          errorMessage = Array.isArray(errorData.message)
+            ? errorData.message[0]
+            : errorData.message;
+        } else if (error?.message) {
+          errorMessage = error.message;
+        }
+
+        MessageToastCustom('error', errorMessage, 'Error', {
+          position: 'top-right'
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [updateSpecialReadingUseCase]
+  );
+
+  return {
+    isLoadingInfo,
+    isLoadingHistory,
+    readingInfo,
+    readingHistory,
+    isSubmitting,
+    error,
+    fetchReadingData,
+    submitUpdateSpecialReading,
+    clearData
+  };
+};
+
+export default useUpdateSpecialReading;

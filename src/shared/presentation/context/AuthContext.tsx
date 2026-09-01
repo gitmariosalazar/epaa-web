@@ -14,6 +14,7 @@ import type {
 import { SessionExpirationDialog } from '@/shared/presentation/components/Auth/SessionExpirationDialog';
 import { LoginUseCase } from '@/modules/auth/application/usecases/LoginUseCase';
 import { LogoutUseCase } from '@/modules/auth/application/usecases/LogoutUseCase';
+import { UnlockModuleUseCase } from '@/modules/auth/application/usecases/UnlockModuleUseCase';
 import {
   VerifyUserUseCase,
   UserNotFoundError,
@@ -24,6 +25,7 @@ import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 import { localStorageService } from '@/shared/infrastructure/storage/LocalStorageService';
 import { tokenRefreshCoordinator } from '@/shared/infrastructure/services/TokenRefreshCoordinator';
 import {
+  decodeJwtPayload,
   getTokenExpirationMs,
   isTokenExpired
 } from '@/shared/infrastructure/services/JwtService';
@@ -36,6 +38,7 @@ interface AuthContextType {
   token: string | null;
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
+  unlockModule: (pin: string) => Promise<void>;
   updateUserSession: (user: AuthSession['user']) => void;
   /**
    * Re-runs the backend verify check for the current session.
@@ -47,6 +50,7 @@ interface AuthContextType {
   isLoading: boolean;
   /** True while the initial POST /auth/verify call is in-flight on startup. */
   isVerifying: boolean;
+  isModuleSpecialUnlocked: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -73,6 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const loginUseCase = new LoginUseCase(authRepository);
   const logoutUseCase = new LogoutUseCase(authRepository);
   const verifyUserUseCase = new VerifyUserUseCase(authRepository);
+  const unlockModuleUseCase = new UnlockModuleUseCase(authRepository);
 
   /**
    * Attempts a silent token refresh when the proactive timer fires.
@@ -302,6 +307,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     persistSession(session);
   };
 
+  const unlockModule = async (pin: string) => {
+    if (!user) throw new Error('User not authenticated');
+    
+    // Calls backend which sets the new session and returns the new token
+    const { elevated_token } = await unlockModuleUseCase.execute(user.userId, pin);
+    
+    if (elevated_token) {
+      const payload = decodeJwtPayload(elevated_token);
+      
+      const updatedUser = {
+        ...user,
+        module_special_unlocked: payload?.module_special_unlocked === true
+      };
+      
+      // Update local storage and context
+      const newSession: AuthSession = {
+        accessToken: elevated_token,
+        refreshToken: localStorageService.getItem('refreshToken') || '', // keep current refresh token
+        user: updatedUser
+      };
+      
+      persistSession(newSession);
+    }
+  };
+
   const logout = async () => {
     try {
       await logoutUseCase.execute();
@@ -339,10 +369,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         token,
         login,
         logout,
+        unlockModule,
         updateUserSession,
         verifySessionIntegrity,
         isLoading,
-        isVerifying
+        isVerifying,
+        isModuleSpecialUnlocked: user?.module_special_unlocked ?? false
       }}
     >
       {children}

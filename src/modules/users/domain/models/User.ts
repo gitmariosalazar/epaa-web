@@ -35,4 +35,5 @@ export interface User {
   observations?: string | null;
   positionName?: string;
   contractTypeName?: string;
+  module_special_unlocked?: boolean;
 }

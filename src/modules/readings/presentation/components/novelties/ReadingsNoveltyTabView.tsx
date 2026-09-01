@@ -17,18 +17,22 @@ import { CreateReadingPage } from '../../pages';
 import { UpdateReadingWithImagesPage } from '../../pages/UpdateReadingWithImagesPage';
 import { ReadingDetailModal } from '../ReadingDetailModal';
 import { ReadingsProvider } from '../../context/ReadingsContext';
+import { UpdateSpecialReadingWithImagesPage } from '../../pages/UpdateSpecialReadingWithImagesPage';
 interface ModalState {
   isOpen: boolean;
   mode: 'create' | 'update';
+  security?: 'protected' | 'public';
   cadastralKey: string;
 }
 
 interface ReadingsNoveltyTabViewProps {
   header: React.ReactNode;
+  forceSpecialUpdateModal?: boolean;
 }
 
 const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
-  header
+  header,
+  forceSpecialUpdateModal
 }) => {
   const { t } = useTranslation();
   const currentMonthStr = dateService.getCurrentMonthString();
@@ -78,9 +82,10 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
 
   const handleTableAction = (
     mode: 'create' | 'update',
-    cadastralKey: string
+    cadastralKey: string,
+    security?: 'protected' | 'public'
   ) => {
-    setModalState({ isOpen: true, mode, cadastralKey });
+    setModalState({ isOpen: true, mode, cadastralKey, security });
   };
 
   const closeModal = () => {
@@ -170,8 +175,15 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
               onCancel={closeModal}
             />
           )}
-          {modalState?.mode === 'update' && (
+          {modalState?.mode === 'update' && !forceSpecialUpdateModal && modalState?.security !== 'protected' && (
             <UpdateReadingWithImagesPage
+              initialCadastralKey={modalState?.cadastralKey}
+              onSuccess={handleModalSuccess}
+              onCancel={closeModal}
+            />
+          )}
+          {modalState?.mode === 'update' && (forceSpecialUpdateModal || modalState?.security === 'protected') && (
+            <UpdateSpecialReadingWithImagesPage
               initialCadastralKey={modalState?.cadastralKey}
               onSuccess={handleModalSuccess}
               onCancel={closeModal}

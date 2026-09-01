@@ -93,6 +93,9 @@ import UnAuthorizedPage from '@/shared/presentation/components/unauthorized/UnAu
 import { CircularProgress } from './shared/presentation/components/CircularProgress';
 import type { RolOrPermission } from './shared/utils/interfaces/RolOrPermission';
 import { ReadingReports } from './modules/readings/presentation/pages/ReadingReports';
+import { ReadingsWithErrors } from './modules/readings/presentation/pages/ReadingsWithErrors';
+import { RequireElevatedToken } from './modules/auth/presentation/components/RequireElevatedToken';
+import { UpdateSpecialReadingPage } from './modules/readings/presentation/pages/UpdateSpecialReadingPage';
 
 const ProtectedRoute = () => {
   const { token, user, isLoading, isVerifying, logout } = useAuth();
@@ -335,6 +338,24 @@ function App() {
                           <Route path="update" element={<UpdateReadingPage />} />
                           <Route path="audit" element={<ReadingAuditPage />} />
                           <Route path="report" element={<ReadingReports />} />
+                          <Route
+                            path="report-errors"
+                            element={
+                              <RequireElevatedToken fallbackMessage="El acceso a los Errores de Lectura requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                <ReadingsWithErrors />
+                              </RequireElevatedToken>
+                            }
+                          />
+                          <Route
+                            path="advanced-update"
+                            element={
+                              <RequireElevatedToken fallbackMessage="La actualización avanzada de lecturas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                <UpdateSpecialReadingPage />
+                              </RequireElevatedToken>
+                            }
+                          />
+
+
                           {/* Other reading routes can be added here */}
                         </Routes>
                       </ReadingsProvider>

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { UpdateReadingPage, type UpdateReadingPageProps } from './UpdateReadingPage';
 import { useReadingImagesList } from '../hooks/useReadingImagesList';
 import { useFilePreview } from '@/shared/files/presentation/hooks/useFilePreview';
 import { Loader2, ImageOff, ChevronLeft, ChevronRight, Calendar, Droplet, AlertTriangle } from 'lucide-react';
@@ -14,6 +13,7 @@ import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip
 import { MdCable } from 'react-icons/md';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
+import { UpdateSpecialReadingPage, type UpdateReadingPageProps } from './UpdateSpecialReadingPage';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { BsPatchQuestionFill } from 'react-icons/bs';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
@@ -53,7 +53,7 @@ const ImagePreview: React.FC<{ filename: string }> = ({ filename }) => {
   );
 };
 
-export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
+export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
   initialCadastralKey,
   onSuccess,
   onCancel,
@@ -240,7 +240,7 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
 
       {/* Right Pane: Edit Form */}
       <div className="urw-form-pane">
-        <UpdateReadingPage
+        <UpdateSpecialReadingPage
           initialCadastralKey={initialCadastralKey}
           onSuccess={onSuccess}
           onCancel={onCancel}

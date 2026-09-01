@@ -14,4 +14,9 @@ export interface AuthRepository {
    * and is active in the backend, regardless of local session state.
    */
   verifyUser(payload: VerifyUserRequest): Promise<VerifyUserResult>;
+  
+  /**
+   * Elevates the session token using a security PIN.
+   */
+  unlockModule(userId: string, pin: string): Promise<{ elevated_token: string }>;
 }

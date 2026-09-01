@@ -13,6 +13,8 @@ import { ReadingImagesUseCase } from '../../application/usecases/ReadingImagesUs
 import { ReadingImagesRepositoryImpl } from '../../infrastructure/repositories/ReadingImagesRepositoryImpl';
 import { UpdateReadingUseCase } from '../../application/usecases/UpdateReadingUseCase';
 import { UpdateReadingRepositoryImpl } from '../../infrastructure/repositories/UpdateReadingRepositoryImpl';
+import { UpdateSpecialReadingUseCase } from '../../application/usecases/UpdateSpecialReadingUseCase';
+import { UpdateSpecialReadingRepositoryImpl } from '../../infrastructure/repositories/UpdateSpecialReadingRepositoryImpl';
 // ── Audit ────────────────────────────────────────────────────────────────────
 import { ReadingAuditRepositoryImpl } from '../../infrastructure/repositories/ReadingAuditRepositoryImpl';
 import { InitializeMonthlyAuditUseCase } from '../../application/usecases/audit/InitializeMonthlyAuditUseCase';
@@ -32,6 +34,7 @@ interface ReadingsContextType {
   getTakenReadingsByMonthUseCase: TakenReadingConnectionUseCase;
   readingImagesUseCase: ReadingImagesUseCase;
   updateReadingUseCase: UpdateReadingUseCase;
+  updateSpecialReadingUseCase: UpdateSpecialReadingUseCase;
   // Audit use cases
   initializeMonthlyAuditUseCase: InitializeMonthlyAuditUseCase;
   getAuditByMonthUseCase: GetAuditByMonthUseCase;
@@ -59,6 +62,7 @@ export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
   const updateReadingRepository = new UpdateReadingRepositoryImpl();
   const readingAuditRepository = new ReadingAuditRepositoryImpl();
   const getMapGeojsonByDayAndByUserRepository = new GetMapGeojsonByDayAndByUserImpl();
+  const updateSpecialReadingRepository = new UpdateSpecialReadingRepositoryImpl();
 
   // Use Cases
   const getTakenReadingEstimatesOrAverageUseCase =
@@ -83,6 +87,9 @@ export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
   );
   const updateReadingUseCase = new UpdateReadingUseCase(
     updateReadingRepository
+  );
+  const updateSpecialReadingUseCase = new UpdateSpecialReadingUseCase(
+    updateSpecialReadingRepository
   );
   // Audit use cases
   const initializeMonthlyAuditUseCase = new InitializeMonthlyAuditUseCase(
@@ -113,6 +120,7 @@ export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
     getTakenReadingsByMonthUseCase,
     readingImagesUseCase,
     updateReadingUseCase,
+    updateSpecialReadingUseCase,
     // Audit
     initializeMonthlyAuditUseCase,
     getAuditByMonthUseCase,
