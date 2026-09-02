@@ -249,15 +249,16 @@ const ReadingsReconciliationContent: React.FC = () => {
 export const ReadingsReconciliationPage: React.FC = () => {
   const currentHour = dateService.getCurrentDate().getHours();
 
-  const hourEnabled = 17;
+  const startHourEnabled = 17; // 5:00 PM 
+  const endHourEnabled = 5; // 5:00 AM
 
-  if (currentHour < hourEnabled) {
+  if (currentHour < startHourEnabled && currentHour > endHourEnabled) {
     return (
       <PageLayout className="reconciliation-page">
         <EmptyState
           icon={Clock}
           message="Acceso Restringido por Horario"
-          description={`Esta página solo está disponible a partir de las ${hourEnabled}:00 (Hora de Ecuador) para no afectar el rendimiento de la base de datos de producción.`}
+          description={`Esta página solo está disponible entre las ${startHourEnabled}:00 y las ${endHourEnabled}:00 (Hora de Ecuador) para no afectar el rendimiento de la base de datos de producción.`}
           variant="warning"
           minHeight="60vh"
         />
