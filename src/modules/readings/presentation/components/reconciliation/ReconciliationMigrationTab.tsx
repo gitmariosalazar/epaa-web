@@ -5,6 +5,8 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { StatsGrid, type StatCardItem } from '@/shared/presentation/components/Stats/StatsGrid';
 import { Card } from '@/shared/presentation/components/Card/Card';
+import { BsDatabaseFillGear } from 'react-icons/bs';
+import { Alert } from '@/shared/presentation/components/Alert';
 
 interface Props {
   migrationResult: any;
@@ -138,8 +140,11 @@ export const ReconciliationMigrationTab: React.FC<Props> = ({
           height: '400px',
           color: 'var(--text-secondary)'
         }}>
-          <Database size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+          <BsDatabaseFillGear size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
           <p>Presiona "Migrar Datos" o "Comparar" en la parte superior derecha para comenzar.</p>
+          <div className='info-migration'>
+            <Alert title='Información Importante' message='Para que la migración y comparación sea exitosa, procure realizar cuando ya no se esten registrando nuevas lecturas para evitar inconsistencias en los datos' type={"info"} dismissible={false} size='medium' />
+          </div>
         </div>
       )}
     </div>

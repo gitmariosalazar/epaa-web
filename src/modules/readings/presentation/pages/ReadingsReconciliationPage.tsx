@@ -208,7 +208,7 @@ const ReadingsReconciliationContent: React.FC = () => {
                 <Button
                   onClick={vm.handleCompare}
                   isLoading={vm.isComparing}
-                  disabled={vm.isMigrating || vm.isComparing}
+                  disabled={true}
                   variant="outline"
                   size="compact"
                   leftIcon={!vm.isComparing && <Play size={14} />}
