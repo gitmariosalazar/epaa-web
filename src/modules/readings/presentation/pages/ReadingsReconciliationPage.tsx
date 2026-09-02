@@ -15,7 +15,7 @@ import { ReadingsReconciliationProvider } from '../context/ReadingsReconciliatio
 import { ReconciliationMigrationTab } from '../components/reconciliation/ReconciliationMigrationTab';
 import { ReconciliationSummaryTab } from '../components/reconciliation/ReconciliationSummaryTab';
 import { ReconciliationDiscrepanciesTab } from '../components/reconciliation/ReconciliationDiscrepanciesTab';
-import { ReconciliationBasicSummaryTab } from '../components/reconciliation/ReconciliationBasicSummaryTab';
+
 import { ReconciliationDuplicatesTab } from '../components/reconciliation/ReconciliationDuplicatesTab';
 import { ReconciliationBasicMismatchesTab } from '../components/reconciliation/ReconciliationBasicMismatchesTab';
 
@@ -35,19 +35,15 @@ const ReadingsReconciliationContent: React.FC = () => {
     },
     {
       id: 'kpis',
-      label: t('readings.reconciliation.tabSummary', 'KPIs Detallados'),
+      label: t('readings.reconciliation.tabSummary', 'Resumen Estadístico'),
       icon: <BarChart2 size={16} />
     },
     {
       id: 'discrepancies',
-      label: t('readings.reconciliation.tabDiscrepancies', 'Grilla Discrepancias'),
+      label: t('readings.reconciliation.tabDiscrepancies', 'Lista de Diferencias'),
       icon: <AlertCircle size={16} />
     },
-    {
-      id: 'basic-summary',
-      label: t('readings.reconciliation.tabBasicSummary', 'Resumen Básico'),
-      icon: <BarChart2 size={16} />
-    },
+
     {
       id: 'duplicates',
       label: t('readings.reconciliation.tabDuplicates', 'Duplicados'),
@@ -55,7 +51,7 @@ const ReadingsReconciliationContent: React.FC = () => {
     },
     {
       id: 'basic-mismatches',
-      label: t('readings.reconciliation.tabBasicMismatches', 'Discrepancias Básicas'),
+      label: t('readings.reconciliation.tabBasicMismatches', 'Diferencias Básicas'),
       icon: <AlertCircle size={16} />
     }
   ], [t]);
@@ -80,8 +76,12 @@ const ReadingsReconciliationContent: React.FC = () => {
         return (
           <ReconciliationSummaryTab
             kpiData={vm.kpiData}
+            basicSummaryData={vm.basicSummaryData}
             isLoading={vm.isLoading}
-            onRefresh={vm.fetchKpis}
+            onRefresh={() => {
+              vm.fetchKpis();
+              vm.fetchBasicSummary();
+            }}
           />
         );
       case 'discrepancies':
@@ -92,14 +92,7 @@ const ReadingsReconciliationContent: React.FC = () => {
             onRefresh={vm.fetchDiscrepancies}
           />
         );
-      case 'basic-summary':
-        return (
-          <ReconciliationBasicSummaryTab
-            summaryData={vm.basicSummaryData}
-            isLoading={vm.isLoading}
-            onRefresh={vm.fetchBasicSummary}
-          />
-        );
+
       case 'duplicates':
         return (
           <ReconciliationDuplicatesTab
@@ -145,11 +138,10 @@ const ReadingsReconciliationContent: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.25rem' }}>
               {vm.activeTab === 'migration' ? 'Migración de Datos' :
-                vm.activeTab === 'kpis' ? 'KPIs Detallados del Período' :
-                  vm.activeTab === 'discrepancies' ? 'Detalle de Discrepancias' :
-                    vm.activeTab === 'basic-summary' ? 'Resumen Básico' :
+                vm.activeTab === 'kpis' ? 'Resumen Estadístico del Período' :
+                  vm.activeTab === 'discrepancies' ? 'Lista de Diferencias' :
                       vm.activeTab === 'duplicates' ? 'Registros Duplicados' :
-                        'Discrepancias Básicas'}
+                        'Diferencias Básicas'}
             </h3>
             <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
               {vm.activeTab === 'migration' ? 'Proceso de migración y comparación' : 'Auditoría de consistencia de datos entre PostgreSQL y SQL Server'}

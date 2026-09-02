@@ -146,7 +146,7 @@ export const useReadingsReconciliationViewModel = () => {
 
   // Automatic fetches based on tab switching
   const handleFetchData = useCallback(() => {
-    if (activeTab === 'kpis') fetchKpis();
+    if (activeTab === 'kpis') { fetchKpis(); fetchBasicSummary(); }
     if (activeTab === 'discrepancies') fetchDiscrepancies();
     if (activeTab === 'basic-summary') fetchBasicSummary();
     if (activeTab === 'duplicates') fetchDuplicates();
