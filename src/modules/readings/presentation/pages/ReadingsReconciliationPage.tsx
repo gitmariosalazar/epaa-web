@@ -249,10 +249,10 @@ const ReadingsReconciliationContent: React.FC = () => {
 export const ReadingsReconciliationPage: React.FC = () => {
   const currentHour = dateService.getCurrentDate().getHours();
 
-  const startHourEnabled = 17; // 5:00 PM 
+  const startHourEnabled = 20; // 6:00 PM 
   const endHourEnabled = 5; // 5:00 AM
 
-  if (currentHour < startHourEnabled && currentHour > endHourEnabled) {
+  if (currentHour >= endHourEnabled && currentHour < startHourEnabled) {
     return (
       <PageLayout className="reconciliation-page">
         <EmptyState
