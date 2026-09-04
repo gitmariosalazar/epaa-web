@@ -11,7 +11,9 @@ export const useReadingsReconciliation = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const executeWithErrorHandling = async <T>(action: () => Promise<T>): Promise<T | null> => {
+  const executeWithErrorHandling = async <T>(
+    action: () => Promise<T>
+  ): Promise<T | null> => {
     setIsLoading(true);
     setError(null);
     try {
@@ -25,33 +27,77 @@ export const useReadingsReconciliation = () => {
     }
   };
 
-  const migrateLecturas = useCallback((months?: string[]) => {
-    return executeWithErrorHandling(() => context.migrateLecturasUseCase.execute(months));
-  }, [context]);
+  const migrateLecturas = useCallback(
+    (months?: string[]) => {
+      return executeWithErrorHandling(() =>
+        context.migrateLecturasUseCase.execute(months)
+      );
+    },
+    [context]
+  );
 
-  const compareLecturas = useCallback((months?: string[]) => {
-    return executeWithErrorHandling(() => context.compareLecturasUseCase.execute(months));
-  }, [context]);
+  const compareLecturas = useCallback(
+    (months?: string[]) => {
+      return executeWithErrorHandling(() =>
+        context.compareLecturasUseCase.execute(months)
+      );
+    },
+    [context]
+  );
 
-  const getSummary = useCallback((period: ReconciliationPeriod) => {
-    return executeWithErrorHandling(() => context.getReconciliationSummaryUseCase.execute(period));
-  }, [context]);
+  const getSummary = useCallback(
+    (period: ReconciliationPeriod) => {
+      return executeWithErrorHandling(() =>
+        context.getReconciliationSummaryUseCase.execute(period)
+      );
+    },
+    [context]
+  );
 
-  const getDuplicates = useCallback((period: ReconciliationPeriod) => {
-    return executeWithErrorHandling(() => context.getReconciliationDuplicatesUseCase.execute(period));
-  }, [context]);
+  const getDuplicates = useCallback(
+    (period: ReconciliationPeriod) => {
+      return executeWithErrorHandling(() =>
+        context.getReconciliationDuplicatesUseCase.execute(period)
+      );
+    },
+    [context]
+  );
 
-  const getMismatches = useCallback((period: ReconciliationPeriod) => {
-    return executeWithErrorHandling(() => context.getReconciliationMismatchesUseCase.execute(period));
-  }, [context]);
+  const getMismatches = useCallback(
+    (period: ReconciliationPeriod) => {
+      return executeWithErrorHandling(() =>
+        context.getReconciliationMismatchesUseCase.execute(period)
+      );
+    },
+    [context]
+  );
 
-  const getKpis = useCallback((period: ReconciliationPeriod) => {
-    return executeWithErrorHandling(() => context.getReconciliationKpisUseCase.execute(period));
-  }, [context]);
+  const getKpis = useCallback(
+    (period: ReconciliationPeriod) => {
+      return executeWithErrorHandling(() =>
+        context.getReconciliationKpisUseCase.execute(period)
+      );
+    },
+    [context]
+  );
 
-  const getDiscrepanciesDetail = useCallback((params: ConsultarDetalleAuditoriaParams) => {
-    return executeWithErrorHandling(() => context.getDiscrepanciesDetailUseCase.execute(params));
-  }, [context]);
+  const getDiscrepanciesDetail = useCallback(
+    (params: ConsultarDetalleAuditoriaParams) => {
+      return executeWithErrorHandling(() =>
+        context.getDiscrepanciesDetailUseCase.execute(params)
+      );
+    },
+    [context]
+  );
+
+  const getDashboardKpisByPeriod = useCallback(
+    (year: number, month: string) => {
+      return executeWithErrorHandling(() =>
+        context.getDashboardKpisByPeriodUseCase.execute(year, month)
+      );
+    },
+    [context]
+  );
 
   const clearError = useCallback(() => setError(null), []);
 
@@ -65,6 +111,7 @@ export const useReadingsReconciliation = () => {
     getDuplicates,
     getMismatches,
     getKpis,
-    getDiscrepanciesDetail
+    getDiscrepanciesDetail,
+    getDashboardKpisByPeriod
   };
 };

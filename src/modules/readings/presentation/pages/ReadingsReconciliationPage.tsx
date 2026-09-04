@@ -18,6 +18,7 @@ import { ReconciliationDiscrepanciesTab } from '../components/reconciliation/Rec
 
 import { ReconciliationDuplicatesTab } from '../components/reconciliation/ReconciliationDuplicatesTab';
 import { ReconciliationBasicMismatchesTab } from '../components/reconciliation/ReconciliationBasicMismatchesTab';
+import { DashboardKpisByPeriodTab } from '../components/reconciliation/DashboardKpisByPeriodTab';
 
 import type { AuditoriaFiltroType } from '../../domain/models/lecturas-reconciliation';
 import '../styles/ReadingsReconciliation.css';
@@ -44,6 +45,11 @@ const ReadingsReconciliationContent: React.FC = () => {
       icon: <AlertCircle size={16} />
     },
 
+    {
+      id: 'dashboard-kpis',
+      label: t('readings.reconciliation.tabDashboardKpis', 'Dashboard KPIs'),
+      icon: <BarChart2 size={16} />
+    },
     {
       id: 'duplicates',
       label: t('readings.reconciliation.tabDuplicates', 'Duplicados'),
@@ -109,6 +115,14 @@ const ReadingsReconciliationContent: React.FC = () => {
             onRefresh={vm.fetchBasicMismatches}
           />
         );
+      case 'dashboard-kpis':
+        return (
+          <DashboardKpisByPeriodTab
+            data={vm.dashboardKpisData}
+            isLoading={vm.isLoading}
+            onRefresh={vm.fetchDashboardKpis}
+          />
+        );
       default:
         return null;
     }
@@ -141,10 +155,13 @@ const ReadingsReconciliationContent: React.FC = () => {
                 vm.activeTab === 'kpis' ? 'Resumen Estadístico del Período' :
                   vm.activeTab === 'discrepancies' ? 'Lista de Diferencias' :
                       vm.activeTab === 'duplicates' ? 'Registros Duplicados' :
+                        vm.activeTab === 'dashboard-kpis' ? 'Dashboard de KPIs por Periodo' :
                         'Diferencias Básicas'}
             </h3>
             <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-              {vm.activeTab === 'migration' ? 'Proceso de migración y comparación' : 'Auditoría de consistencia de datos entre PostgreSQL y SQL Server'}
+              {vm.activeTab === 'migration' ? 'Proceso de migración y comparación' :
+               vm.activeTab === 'dashboard-kpis' ? 'Análisis avanzado de KPIs de lectura (Siempre busca datos pasados)' :
+               'Auditoría de consistencia de datos entre PostgreSQL y SQL Server'}
             </p>
           </div>
 
@@ -153,13 +170,46 @@ const ReadingsReconciliationContent: React.FC = () => {
               <label className="reconciliation-filter-label">
                 {t('readingData.filters.month', 'Mes de Operación')}
               </label>
-              <div style={{ width: '200px' }}>
-                <DatePicker
-                  size="compact"
-                  view="month"
-                  value={vm.selectedMonth}
-                  onChange={(val: string) => vm.setSelectedMonth(val.substring(0, 7))}
-                />
+              <div style={{ width: vm.activeTab === 'dashboard-kpis' ? '250px' : '200px' }}>
+                {vm.activeTab === 'dashboard-kpis' ? (
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <Select
+                      size="compact"
+                      value={vm.dashboardSelectedMonth.split('-')[1]}
+                      onChange={(e) => vm.setDashboardSelectedMonth(`${vm.dashboardSelectedMonth.split('-')[0]}-${e.target.value}`)}
+                    >
+                      <option value="01">ENERO</option>
+                      <option value="02">FEBRERO</option>
+                      <option value="03">MARZO</option>
+                      <option value="04">ABRIL</option>
+                      <option value="05">MAYO</option>
+                      <option value="06">JUNIO</option>
+                      <option value="07">JULIO</option>
+                      <option value="08">AGOSTO</option>
+                      <option value="09">SEPTIEMBRE</option>
+                      <option value="10">OCTUBRE</option>
+                      <option value="11">NOVIEMBRE</option>
+                      <option value="12">DICIEMBRE</option>
+                    </Select>
+                    <Select
+                      size="compact"
+                      value={vm.dashboardSelectedMonth.split('-')[0]}
+                      onChange={(e) => vm.setDashboardSelectedMonth(`${e.target.value}-${vm.dashboardSelectedMonth.split('-')[1]}`)}
+                    >
+                      {Array.from({ length: 5 }).map((_, i) => {
+                        const year = (new Date().getFullYear() - i).toString();
+                        return <option key={year} value={year}>{year}</option>;
+                      })}
+                    </Select>
+                  </div>
+                ) : (
+                  <DatePicker
+                    size="compact"
+                    view="month"
+                    value={vm.selectedMonth}
+                    onChange={(val: string) => vm.setSelectedMonth(val.substring(0, 7))}
+                  />
+                )}
               </div>
             </div>
 

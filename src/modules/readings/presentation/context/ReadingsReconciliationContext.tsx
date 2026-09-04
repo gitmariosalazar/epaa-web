@@ -7,6 +7,8 @@ import { GetReconciliationSummaryUseCase } from '../../application/usecases/read
 import { GetDiscrepanciesDetailUseCase } from '../../application/usecases/readings-reconciliation.ts/getDiscrepanciesDetail.use-case';
 import { GetReconciliationKpisUseCase } from '../../application/usecases/readings-reconciliation.ts/getReconciliationKpis.use-case';
 import { MigrateLecturasUseCase } from '../../application/usecases/readings-reconciliation.ts/migrate-lecturas.usecase';
+import { GetDashboardKpisByPeriodUseCase } from '../../application/usecases/GetDashboardKpisByPeriodUseCase';
+import { GetDashboardKpisByPeriodRepositoryImpl } from '../../infrastructure/repositories/GetDashboardKpisByPeriodRepositoryImpl';
 
 interface ReadingsReconciliationContextType {
   compareLecturasUseCase: CompareLecturasUseCase;
@@ -16,12 +18,15 @@ interface ReadingsReconciliationContextType {
   getDiscrepanciesDetailUseCase: GetDiscrepanciesDetailUseCase;
   getReconciliationKpisUseCase: GetReconciliationKpisUseCase;
   migrateLecturasUseCase: MigrateLecturasUseCase;
+  getDashboardKpisByPeriodUseCase: GetDashboardKpisByPeriodUseCase;
+
 }
 
 const ReadingsReconciliationContext = createContext<ReadingsReconciliationContextType | null>(null);
 
 export const ReadingsReconciliationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const repository = new LecturasReconciliationRepositoryImpl();
+  const getDashboardKpisByPeriodRepository = new GetDashboardKpisByPeriodRepositoryImpl();
 
   const value = {
     compareLecturasUseCase: new CompareLecturasUseCase(repository),
@@ -30,7 +35,8 @@ export const ReadingsReconciliationProvider: React.FC<{ children: ReactNode }> =
     getReconciliationSummaryUseCase: new GetReconciliationSummaryUseCase(repository),
     getDiscrepanciesDetailUseCase: new GetDiscrepanciesDetailUseCase(repository),
     getReconciliationKpisUseCase: new GetReconciliationKpisUseCase(repository),
-    migrateLecturasUseCase: new MigrateLecturasUseCase(repository)
+    migrateLecturasUseCase: new MigrateLecturasUseCase(repository),
+    getDashboardKpisByPeriodUseCase: new GetDashboardKpisByPeriodUseCase(getDashboardKpisByPeriodRepository)
   };
 
   return (
