@@ -157,9 +157,6 @@ const ReadingReportsContent: React.FC = () => {
   };
 
 
-
-
-
   // ── Columnas de la tabla ──────────────────────────────────────────────────
   const columns: Column<IncidentDetailRowResponse>[] = [
     {
@@ -568,6 +565,13 @@ const ReadingReportsContent: React.FC = () => {
             pageSize={pageSize}
             onEndReached={() => { }}
             hasMore={false}
+            getRowColor={(item) => {
+              if (item.updatedStatus === true) {
+                return 'success';
+              } else {
+                return 'error';
+              }
+            }}
             emptyState={
               <div className="incidents-empty-state">
                 <ShieldAlert size={48} className="empty-icon" />
@@ -667,14 +671,14 @@ const ReadingReportsContent: React.FC = () => {
       />
 
 
-    {addWorkOrderIncident !== null && (
+      {addWorkOrderIncident !== null && (
         <AddWorkOrderReadingReportModal
           isOpen={true}
           onClose={() => setAddWorkOrderIncident(null)}
           incident={addWorkOrderIncident}
           onSubmit={() => {
             setAddWorkOrderIncident(null);
-            refresh();
+            handleConsultar();
           }}
         />
       )}
@@ -694,14 +698,20 @@ const ReadingReportsContent: React.FC = () => {
           {readingModalState?.mode === 'create' && (
             <CreateReadingPage
               initialCadastralKey={readingModalState?.cadastralKey}
-              onSuccess={() => setReadingModalState(null)}
+              onSuccess={() => {
+                setReadingModalState(null);
+                handleConsultar();
+              }}
               onCancel={() => setReadingModalState(null)}
             />
           )}
           {readingModalState?.mode === 'update' && (
             <UpdateReadingWithImagesPage
               initialCadastralKey={readingModalState?.cadastralKey}
-              onSuccess={() => setReadingModalState(null)}
+              onSuccess={() => {
+                setReadingModalState(null);
+                handleConsultar();
+              }}
               onCancel={() => setReadingModalState(null)}
             />
           )}

@@ -145,4 +145,5 @@ export interface IncidentDetailRowResponse {
   updatedAt: string; // ISO 8601 Date string
   previousOrderState: string | null;
   currentOrderState: string | null;
+  updatedStatus?: boolean;
 }

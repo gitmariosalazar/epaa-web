@@ -65,17 +65,35 @@ export const ReadingImagesPage: React.FC = () => {
     setReadingModalState({ isOpen: true, mode, cadastralKey });
   };
 
+  const [currentFilters, setCurrentFilters] = useState<{
+    monthIso?: string;
+    sector?: string;
+    cadastralKey?: string;
+    novelty?: string;
+  }>({});
+
   const handleFetch = (filters: {
     monthIso?: string;
     sector?: string;
     cadastralKey?: string;
     novelty?: string;
   }) => {
+    setCurrentFilters(filters);
     fetchImages({
       month: filters.monthIso,
       sector: filters.sector,
       cadastralKey: filters.cadastralKey,
       novelty: filters.novelty
+    });
+  };
+
+  const handleModalSuccess = () => {
+    setReadingModalState(null);
+    fetchImages({
+      month: currentFilters.monthIso,
+      sector: currentFilters.sector,
+      cadastralKey: currentFilters.cadastralKey,
+      novelty: currentFilters.novelty
     });
   };
 
@@ -269,14 +287,14 @@ export const ReadingImagesPage: React.FC = () => {
           {readingModalState?.mode === 'create' && (
             <CreateReadingPage
               initialCadastralKey={readingModalState?.cadastralKey}
-              onSuccess={() => setReadingModalState(null)}
+              onSuccess={handleModalSuccess}
               onCancel={() => setReadingModalState(null)}
             />
           )}
           {readingModalState?.mode === 'update' && (
             <UpdateReadingWithImagesPage
               initialCadastralKey={readingModalState?.cadastralKey}
-              onSuccess={() => setReadingModalState(null)}
+              onSuccess={handleModalSuccess}
               onCancel={() => setReadingModalState(null)}
             />
           )}
