@@ -212,6 +212,12 @@ export const ReadingImagesPage: React.FC = () => {
             isLoading={isLoading}
             pagination
             pageSize={15}
+            getRowColor={(row) => {
+              if (row.updatedStatus === false) {
+                return 'error';
+              }
+              return 'success';
+            }}
             emptyState={
               <EmptyState
                 message="No se encontraron imágenes de lecturas."

@@ -10,14 +10,15 @@
 
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
   gap: 6px;
-  padding: 6px 10px;
   border-radius: 9999px; /* Pill shape is standard for chips */
 
   font-family: inherit;
   font-size: 0.875rem; /* 14px */
   font-weight: bold !important;
-  line-height: 1;
+  line-height: normal;
   white-space: nowrap;
 
   background-color: var(--chip-bg);
@@ -55,25 +56,25 @@
 
 /* --- Sizes --- */
 .color-chip--xs {
-  padding: 2px 6px;
+  padding: 0 8px;
   font-size: 0.7rem;
-  height: 20px;
+  height: 22px;
 }
 
 .color-chip--sm {
-  padding: 4px 8px;
+  padding: 0 10px;
   font-size: 0.75rem;
-  height: 24px;
+  height: 26px;
 }
 
 .color-chip--md {
-  padding: 6px 12px;
+  padding: 0 12px;
   font-size: 0.875rem;
   height: 32px;
 }
 
 .color-chip--lg {
-  padding: 8px 16px;
+  padding: 0 16px;
   font-size: 1rem;
   height: 40px;
 }
@@ -141,4 +142,5 @@
   width: 1.2em;
   height: 1.2em;
   display: block;
+  flex-shrink: 0;
 }

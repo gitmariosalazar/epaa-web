@@ -63,6 +63,7 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
   const { readingImages, fetchImages, isLoading } = useReadingImagesList();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'images' | 'details'>('images');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [isOpenDetailInfo, setIsOpenDetailInfo] = useState(false);
   const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] = useState(false);
@@ -83,12 +84,16 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
   const handleCloseUpdateMeterNumberModal = () => {
     setOpenUpdateMeterNumberModal(false);
   };
+  const handleSuccessUpdateMeterNumberModal = () => {
+    setOpenUpdateMeterNumberModal(false);
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   useEffect(() => {
     if (initialCadastralKey) {
       fetchImages({ cadastralKey: initialCadastralKey });
     }
-  }, [initialCadastralKey, fetchImages]);
+  }, [initialCadastralKey, fetchImages, refreshTrigger]);
 
   // Flatten images from the API response but keep their reading data context
   const imageItems = readingImages.flatMap((ri) =>
@@ -271,6 +276,7 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
           initialCadastralKey={initialCadastralKey}
           onSuccess={onSuccess}
           onCancel={onCancel}
+          refreshTrigger={refreshTrigger}
         />
       </div>
 
@@ -299,7 +305,7 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
         <ConnectionProvider>
           <ChangeMeterPage
             cadastralKeyProp={initialCadastralKey}
-            onSuccess={handleCloseUpdateMeterNumberModal}
+            onSuccess={handleSuccessUpdateMeterNumberModal}
             onCancel={handleCloseUpdateMeterNumberModal}
           />
         </ConnectionProvider>

@@ -31,12 +31,14 @@ export interface UpdateReadingPageProps {
   initialCadastralKey?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
+  refreshTrigger?: number;
 }
 
 export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
   initialCadastralKey,
   onSuccess,
-  onCancel
+  onCancel,
+  refreshTrigger
 }) => {
   const {
     readingInfo,
@@ -72,7 +74,7 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
       setCadastralKey(keyToLoad as string);
       fetchReadingData(keyToLoad as string);
     }
-  }, [initialCadastralKey, location.state?.cadastralKey]);
+  }, [initialCadastralKey, location.state?.cadastralKey, refreshTrigger]);
 
   // ── Pre-cargar datos y verificar mes de la lectura ───────────────────────
   useEffect(() => {

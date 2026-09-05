@@ -57,4 +57,5 @@ export interface TakenReadingConnection {
   userCreatedName?: string | null;
   userUpdatedId?: string | null;
   userUpdatedName?: string | null;
+  updatedStatus?: boolean | null;
 }

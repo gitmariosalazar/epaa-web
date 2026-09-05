@@ -21,6 +21,7 @@ import { ReadingLocationModal } from './draw-map/ReadingLocationModal';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
+import { BsSpeedometer } from 'react-icons/bs';
 
 interface PropTypes {
   data: TakenReadingConnection[];
@@ -53,7 +54,28 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
       { header: t('readings.columns.cadastralKey'), accessor: 'cadastralKey' },
       {
         header: t('readings.columns.meter'),
-        accessor: (r) => r.meterNumber || t('readings.columns.noMeter')
+        accessor: (r) => {
+          return (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <ColorChip
+                  label={`${r.meterNumber}`}
+                  size="sm"
+                  variant="ghost"
+                  icon={<BsSpeedometer />}
+                  color="var(--text-secondary)"
+                />
+                <ColorChip
+                  label={`${r.updatedStatus ? 'Actualizado' : 'No actualizado'}`}
+                  size="xs"
+                  variant="soft"
+                  icon={r.updatedStatus ? <FaCheckCircle /> : <IoIosCloseCircle />}
+                  color={r.updatedStatus ? 'green' : 'red'}
+                />
+              </div>
+            </div>
+          )
+        }
       },
       {
         header: t('readings.columns.client'),
@@ -341,6 +363,12 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
       <Table<TakenReadingConnection>
         data={data}
         columns={columns}
+        getRowColor={(row) => {
+          if (row.updatedStatus == true) {
+            return 'success';
+          }
+          return 'error';
+        }}
         isLoading={isLoading}
         pagination
         pageSize={15}

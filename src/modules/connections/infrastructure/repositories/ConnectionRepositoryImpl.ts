@@ -174,11 +174,14 @@ export class ConnectionRepositoryImpl implements ConnectionRepository {
   async changeMeter(request: ChangeMeterRequest): Promise<void> {
     const formData = new FormData();
     formData.append('changeDetail', JSON.stringify(request.changeDetail));
-    
+
     if (request.imageDescriptions) {
-      formData.append('imageDescriptions', JSON.stringify(request.imageDescriptions));
+      formData.append(
+        'imageDescriptions',
+        JSON.stringify(request.imageDescriptions)
+      );
     }
-    
+
     if (request.images) {
       request.images.forEach((file) => {
         formData.append('images', file);
@@ -186,12 +189,12 @@ export class ConnectionRepositoryImpl implements ConnectionRepository {
     }
 
     await this.client.post<ApiResponse<void>>(
-      `/connection-gateway/change-meter/${request.connectionId}`,
+      `/connections/change-meter/${request.connectionId}`,
       formData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+          'Content-Type': 'multipart/form-data'
+        }
       }
     );
   }
