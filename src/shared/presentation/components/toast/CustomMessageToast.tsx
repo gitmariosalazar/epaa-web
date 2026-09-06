@@ -16,7 +16,7 @@ type CustomToastProps = {
 
 const CustomToast = ({ title, icon, message }: CustomToastProps) => {
   let IconComponent;
-  
+
   // Definición de colores según el tipo para el icono
   const colors = {
     success: '#22c55e',
@@ -73,7 +73,7 @@ const MessageToastCustom = (
   title: string,
   options: ToastOptions = {}
 ) => {
-  const { position = 'top-right', duration = 5000 } = options;
+  const { position = 'bottom-right', duration = 5000 } = options;
 
   toast(
     <CustomToast title={title} icon={theme} message={message} />,
