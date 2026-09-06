@@ -104,6 +104,54 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
 
   const IMAGES_COLUMNS: Column<ReadingImages>[] = [
     { header: 'CLAVE CATASTRAL', accessor: 'cadastralKey' },
+
+    {
+      header: t('common.actions', 'Acciones'),
+      accessor: (row) => (
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Tooltip followCursor={false} themeColor="warning" content={t('common.edit', 'Editar')}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleAction('update', row.cadastralKey)}
+              color="warning"
+              circle
+            >
+              <FaEdit size={16} />
+            </Button>
+          </Tooltip>
+          <Tooltip followCursor={false}
+            themeColor="cyan"
+            content={
+              <>
+                <div> Ver Detalles de la Acometida </div>
+                <div> Acometida ID: {row.cadastralKey} </div>
+              </>
+            }
+          >
+            <Button color="cyan" size="sm" variant="ghost" onClick={() => setDetailCadastralKey(row.cadastralKey)} circle>
+              <MapPin size={16} />
+            </Button>
+          </Tooltip>
+
+          <Tooltip followCursor={false}
+            themeColor="info"
+            content={
+              <>
+                <div> Ver Detalles de la Lectura </div>
+                <div> Lectura ID: {row.readingId} </div>
+              </>
+            }
+          >
+            <Button size="sm" variant="ghost" onClick={() => handleViewDetails(row.cadastralKey, row.readingMonth)} circle>
+              <FileText size={16} />
+            </Button>
+          </Tooltip>
+
+        </div>
+      ),
+      id: 'actions'
+    },
     { header: 'MES', accessor: 'readingMonthName' },
     { header: 'AÑO', accessor: 'readingYear' },
     { header: 'LECT. ANTERIOR', accessor: 'previewsReading' },
@@ -152,53 +200,6 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
           )}
         </div>
       )
-    },
-    {
-      header: t('common.actions', 'Acciones'),
-      accessor: (row) => (
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <Tooltip followCursor={false} themeColor="warning" content={t('common.edit', 'Editar')}>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => handleAction('update', row.cadastralKey)}
-              color="warning"
-              circle
-            >
-              <FaEdit size={16} />
-            </Button>
-          </Tooltip>
-          <Tooltip followCursor={false}
-            themeColor="cyan"
-            content={
-              <>
-                <div> Ver Detalles de la Acometida </div>
-                <div> Acometida ID: {row.cadastralKey} </div>
-              </>
-            }
-          >
-            <Button color="cyan" size="sm" variant="ghost" onClick={() => setDetailCadastralKey(row.cadastralKey)} circle>
-              <MapPin size={16} />
-            </Button>
-          </Tooltip>
-
-          <Tooltip followCursor={false}
-            themeColor="info"
-            content={
-              <>
-                <div> Ver Detalles de la Lectura </div>
-                <div> Lectura ID: {row.readingId} </div>
-              </>
-            }
-          >
-            <Button size="sm" variant="ghost" onClick={() => handleViewDetails(row.cadastralKey, row.readingMonth)} circle>
-              <FileText size={16} />
-            </Button>
-          </Tooltip>
-
-        </div>
-      ),
-      id: 'actions'
     }
   ];
 
