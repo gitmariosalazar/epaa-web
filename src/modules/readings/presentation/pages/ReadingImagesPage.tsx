@@ -26,6 +26,7 @@ import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { CreateReadingPage } from './CreateReadingPage';
 import { UpdateReadingWithImagesPage } from './UpdateReadingWithImagesPage';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
+import { ReadingAdjustmentHistoryPopover } from '../components/ReadingAdjustmentHistoryPopover';
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
 import { UpdateSpecialReadingWithImagesPage } from './UpdateSpecialReadingWithImagesPage';
@@ -152,6 +153,7 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
             </Button>
           </Tooltip>
 
+          <ReadingAdjustmentHistoryPopover readingId={row.readingId} />
         </div>
       ),
       id: 'actions'

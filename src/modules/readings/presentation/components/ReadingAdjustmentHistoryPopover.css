@@ -1,0 +1,16 @@
+.title-adjusted {
+  font-weight: 500;
+  font-size: medium;
+  color: var(--text-primary);
+}
+
+.subtitle-adjusted {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.subtitle-adjusted span {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 14px;
+}

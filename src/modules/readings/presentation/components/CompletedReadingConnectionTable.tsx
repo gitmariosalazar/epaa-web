@@ -22,6 +22,7 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
 import { BsSpeedometer } from 'react-icons/bs';
+import { ReadingAdjustmentHistoryPopover } from './ReadingAdjustmentHistoryPopover';
 
 interface PropTypes {
   data: TakenReadingConnection[];
@@ -172,31 +173,41 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
         accessor: (r: TakenReadingConnection) => (
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {r.userUpdatedId ? (
-              <Tooltip
-                content={r.userUpdatedName}
-                themeColor="info"
-                followCursor={false}
-              >
-                <div className="flex items-center gap-2">
-                  <ColorChip
-                    label={`@${r.userUpdatedId}`}
-                    color="var(--text-secondary)"
-                    size="xs"
-                    variant="ghost"
-                  />
-                  <div
-                    style={{
-                      fontSize: '0.85em',
-                      color: 'var(--text-secondary)',
-                      marginLeft: '12px'
-                    }}
-                  >
-                    {r.readingDate
-                      ? dateService.formatToLocaleString(r.readingDate)
-                      : '-'}
+              <ReadingAdjustmentHistoryPopover
+                readingId={Number(r.readingId)}
+                cadastralKey={r.cadastralKey}
+                yearAndMonth={r.readingDate ? `${new Date(r.readingDate).getFullYear()}-${String(new Date(r.readingDate).getMonth() + 1).padStart(2, '0')}` : null}
+                customTrigger={
+                  <div style={{ display: 'inline-block', cursor: 'pointer' }}>
+                    <Tooltip
+                      content={r.userUpdatedName}
+                      themeColor="info"
+                      followCursor={false}
+                    >
+                      <div className="flex items-center gap-2" >
+                        <ColorChip
+                          label={`@${r.userUpdatedId}`}
+                          color="var(--text-secondary)"
+                          size="xs"
+                          variant="ghost"
+                          className='cursor-pointer'
+                        />
+                        <div
+                          style={{
+                            fontSize: '0.85em',
+                            color: 'var(--text-secondary)',
+                            marginLeft: '12px'
+                          }}
+                        >
+                          {r.readingDate
+                            ? dateService.formatToLocaleString(r.readingDate)
+                            : '-'}
+                        </div>
+                      </div>
+                    </Tooltip>
                   </div>
-                </div>
-              </Tooltip>
+                }
+              />
             ) : (
               <div
                 style={{

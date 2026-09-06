@@ -8,6 +8,8 @@ import '../styles/ChangeMeterPage.css';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 import { useConnectionsContext } from '../context/ConnectionContext';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { Save, X } from 'lucide-react';
+import { BsSpeedometer } from 'react-icons/bs';
 
 export interface ChangeMeterPageProps {
   cadastralKeyProp?: string;
@@ -134,13 +136,18 @@ export const ChangeMeterPage: React.FC<ChangeMeterPageProps> = ({ cadastralKeyPr
                 value={newMedidor}
                 onChange={(e) => setNewMedidor(e.target.value)}
                 required
+                leftIcon={<BsSpeedometer size={16} />}
               />
               <div className="change-meter-actions">
-                <Button type="button" variant="outline" onClick={handleCancelClick}>
+                <Button type="button" variant="dashed" onClick={handleCancelClick}
+                  color='error' leftIcon={<X size={16} />}
+                >
                   Cancelar
                 </Button>
-                <Button type="submit" isLoading={isLoading} disabled={isLoading || !connectionId}>
-                  Registrar Cambio
+                <Button type="submit" isLoading={isLoading} disabled={isLoading || !connectionId}
+                  color='success' leftIcon={<Save size={16} />}
+                >
+                  Guardar
                 </Button>
               </div>
             </div>

@@ -31,11 +31,13 @@ import './ReadingDetailModal.css'; // Reusing the same styles
 interface ReadingDetailTabContentProps {
   cadastralKey: string | null;
   yearAndMonth: string | null;
+  hidePhotosAndObservations?: boolean;
 }
 
 export const ReadingDetailTabContent: React.FC<ReadingDetailTabContentProps> = ({
   cadastralKey,
-  yearAndMonth
+  yearAndMonth,
+  hidePhotosAndObservations = false
 }) => {
   const { t } = useTranslation();
   const { readingDetail, isLoading, error } = useReadingDetailViewModel(cadastralKey, yearAndMonth);
@@ -156,40 +158,43 @@ export const ReadingDetailTabContent: React.FC<ReadingDetailTabContentProps> = (
         </div>
       </div>
 
-      {/* Fotografías */}
-      <div className="reading-detail-section">
-        <h4>
-          <FaCamera /> {t('readings.details.photos', 'Fotografías de la Lectura')}
-        </h4>
-        {readingDetail.images && readingDetail.images.length > 0 ? (
-          <div className="reading-detail-images">
-            {readingDetail.images.map((img) => (
-              <EvidenceFiles key={img.id} fileId={img.id} filePath={img.path} category="readings" type={img.novelty} />
-            ))}
-          </div>
-        ) : (
-          <span className="reading-detail-empty">No se registraron fotografías para esta lectura.</span>
-        )}
-      </div>
-
-      {/* Observaciones */}
-      <div className="reading-detail-section">
-        <h4>
-          <FaClipboardList /> {t('readings.details.observations', 'Observaciones / Notas')}
-        </h4>
-        {readingDetail.observations && readingDetail.observations.length > 0 ? (
-          <div className="reading-detail-observations">
-            {readingDetail.observations.map((obs) => (
-              <div key={obs.id} className="reading-detail-obs-card">
-                <h5>{obs.title}</h5>
-                <p>{obs.observation}</p>
+      {/* Fotografías y Observaciones Condicionales */}
+      {!hidePhotosAndObservations && (
+        <>
+          <div className="reading-detail-section">
+            <h4>
+              <FaCamera /> {t('readings.details.photos', 'Fotografías de la Lectura')}
+            </h4>
+            {readingDetail.images && readingDetail.images.length > 0 ? (
+              <div className="reading-detail-images">
+                {readingDetail.images.map((img) => (
+                  <EvidenceFiles key={img.id} fileId={img.id} filePath={img.path} category="readings" type={img.novelty} />
+                ))}
               </div>
-            ))}
+            ) : (
+              <span className="reading-detail-empty">No se registraron fotografías para esta lectura.</span>
+            )}
           </div>
-        ) : (
-          <span className="reading-detail-empty">No hay observaciones adicionales.</span>
-        )}
-      </div>
+
+          <div className="reading-detail-section">
+            <h4>
+              <FaClipboardList /> {t('readings.details.observations', 'Observaciones / Notas')}
+            </h4>
+            {readingDetail.observations && readingDetail.observations.length > 0 ? (
+              <div className="reading-detail-observations">
+                {readingDetail.observations.map((obs) => (
+                  <div key={obs.id} className="reading-detail-obs-card">
+                    <h5>{obs.title}</h5>
+                    <p>{obs.observation}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <span className="reading-detail-empty">No hay observaciones adicionales.</span>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };

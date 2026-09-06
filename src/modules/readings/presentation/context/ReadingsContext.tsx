@@ -24,6 +24,8 @@ import { CloseAuditSectorUseCase } from '../../application/usecases/audit/CloseA
 import { GetAuditHistoryBySectorUseCase } from '../../application/usecases/audit/GetAuditHistoryBySectorUseCase';
 import { GetMapGeojsonByDayAndByUserUseCase } from '../../application/usecases/GetMapGeojsonByDayAndByUserUseCase';
 import { GetMapGeojsonByDayAndByUserImpl } from '../../infrastructure/repositories/GetMapGeojsonByDayAndByUserImpl';
+import { GetReadingAdjustmentHistoryByReadingIdUseCase } from '../../application/usecases/GetReadingAdjustmentHistoryByReadingIdUseCase';
+import { GetReadingAdjustmentHistoryByReadingIdRepositoryImpl } from '../../infrastructure/repositories/GetReadingAdjustmentHistoryByReadingIdRepositoryImpl';
 
 interface ReadingsContextType {
   getReadingInfoUseCase: GetReadingInfoUseCase;
@@ -42,7 +44,7 @@ interface ReadingsContextType {
   closeAuditSectorUseCase: CloseAuditSectorUseCase;
   getAuditHistoryBySectorUseCase: GetAuditHistoryBySectorUseCase;
   getMapGeojsonByDayAndByUserUseCase: GetMapGeojsonByDayAndByUserUseCase;
-
+  getReadingAdjustmentHistoryByReadingIdUseCase: GetReadingAdjustmentHistoryByReadingIdUseCase;
 }
 
 const ReadingsContext = createContext<ReadingsContextType | null>(null);
@@ -63,6 +65,7 @@ export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
   const readingAuditRepository = new ReadingAuditRepositoryImpl();
   const getMapGeojsonByDayAndByUserRepository = new GetMapGeojsonByDayAndByUserImpl();
   const updateSpecialReadingRepository = new UpdateSpecialReadingRepositoryImpl();
+  const getReadingAdjustmentHistoryByReadingIdRepository = new GetReadingAdjustmentHistoryByReadingIdRepositoryImpl();
 
   // Use Cases
   const getTakenReadingEstimatesOrAverageUseCase =
@@ -111,6 +114,10 @@ export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
     getMapGeojsonByDayAndByUserRepository
   );
 
+  const getReadingAdjustmentHistoryByReadingIdUseCase = new GetReadingAdjustmentHistoryByReadingIdUseCase(
+    getReadingAdjustmentHistoryByReadingIdRepository
+  );
+
   const value = {
     getReadingInfoUseCase,
     getReadingHistoryUseCase,
@@ -127,7 +134,8 @@ export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
     getAuditBySectorAndMonthUseCase,
     closeAuditSectorUseCase,
     getAuditHistoryBySectorUseCase,
-    getMapGeojsonByDayAndByUserUseCase
+    getMapGeojsonByDayAndByUserUseCase,
+    getReadingAdjustmentHistoryByReadingIdUseCase
   };
 
   return (

@@ -59,3 +59,26 @@ export interface TakenReadingConnection {
   userUpdatedName?: string | null;
   updatedStatus?: boolean | null;
 }
+
+export interface HistorialAjusteLectura {
+  ajusteId: string;
+  lecturaId: number;
+  tipoAjusteId: number;
+  usuarioId: string;
+  fechaSolicitud: string;
+  lecturaAnteriorPrevia: number;
+  lecturaActualPrevia: number;
+  consumoPrevio: number;
+  lecturaAnteriorNueva: number;
+  lecturaActualNueva: number;
+  consumoNuevo: number;
+  justificacion: string;
+  evidenciaUrl: string | null;
+  estadoAprobacion: string;
+  fechaAprobacion: string | null;
+  observacionAprobacion: string | null;
+  createdAt: string;
+
+  tipoAjuste: string;
+  descripcionTipoAjuste: string;
+}

@@ -86,3 +86,12 @@
 .readings-taken-info p {
   margin-top: -4px;
 }
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-pointer:hover {
+  color: var(--primary) !important;
+  cursor: pointer !important;
+}
