@@ -75,6 +75,7 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
     sector?: string;
     cadastralKey?: string;
     novelty?: string;
+    updatedStatus?: string;
   }>({});
 
   const handleFetch = (filters: {
@@ -82,13 +83,15 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
     sector?: string;
     cadastralKey?: string;
     novelty?: string;
+    updatedStatus?: string;
   }) => {
     setCurrentFilters(filters);
     fetchImages({
       month: filters.monthIso,
       sector: filters.sector,
       cadastralKey: filters.cadastralKey,
-      novelty: filters.novelty
+      novelty: filters.novelty,
+      updatedStatus: filters.updatedStatus
     });
   };
 
@@ -98,7 +101,8 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
       month: currentFilters.monthIso,
       sector: currentFilters.sector,
       cadastralKey: currentFilters.cadastralKey,
-      novelty: currentFilters.novelty
+      novelty: currentFilters.novelty,
+      updatedStatus: currentFilters.updatedStatus
     });
   };
 

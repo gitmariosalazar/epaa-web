@@ -22,6 +22,7 @@ interface ReadingImagesFiltersProps {
     sector?: string;
     cadastralKey?: string;
     novelty?: string;
+    updatedStatus?: string;
   }) => void;
 }
 
@@ -38,12 +39,13 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
   const [sector, setSector] = useState('');
   const [cadastralKey, setCadastralKey] = useState('');
   const [novelty, setNovelty] = useState('');
+  const [updatedStatus, setUpdatedStatus] = useState('');
 
   const handleSearch = () => {
     if (mode === 'month_sector') {
-      onFetch({ monthIso: month, sector, novelty });
+      onFetch({ monthIso: month, sector, novelty, updatedStatus });
     } else {
-      onFetch({ cadastralKey, novelty });
+      onFetch({ cadastralKey, novelty, updatedStatus });
     }
   };
 
@@ -128,6 +130,23 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
                 </Select>
               </div>
             </div>
+
+            <div className="filter-group">
+              <label className="filter-label">
+                ESTADO (OPCIONAL)
+              </label>
+              <div className="filter-input-wrapper">
+                <Select
+                  size="compact"
+                  value={updatedStatus}
+                  onChange={(e) => setUpdatedStatus(e.target.value)}
+                >
+                  <option value="">Todos</option>
+                  <option value="updated">Actualizadas</option>
+                  <option value="not_updated">No Actualizadas</option>
+                </Select>
+              </div>
+            </div>
           </>
         ) : (
           <div className="filter-group" style={{ display: 'flex', gap: '12px' }}>
@@ -161,6 +180,22 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
                   <option value="NORMAL">Normal</option>
                   <option value="CONSUMO EXCESIVO">Consumo Excesivo</option>
                   <option value="SIN LECTURA">Sin Lectura</option>
+                </Select>
+              </div>
+            </div>
+            <div style={{ flex: 1 }}>
+              <label className="filter-label">
+                ESTADO (OPCIONAL)
+              </label>
+              <div className="filter-input-wrapper">
+                <Select
+                  size="compact"
+                  value={updatedStatus}
+                  onChange={(e) => setUpdatedStatus(e.target.value)}
+                >
+                  <option value="">Todos</option>
+                  <option value="updated">Actualizadas</option>
+                  <option value="not_updated">No Actualizadas</option>
                 </Select>
               </div>
             </div>

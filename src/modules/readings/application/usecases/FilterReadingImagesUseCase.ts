@@ -2,6 +2,7 @@ import type { ReadingImages } from '../../domain/models/ReadingImages';
 
 export interface ReadingImagesFilterCriteria {
   novelty?: string;
+  updatedStatus?: string;
 }
 
 export interface IReadingImagesFilterStrategy {
@@ -19,12 +20,31 @@ export class NoveltyReadingImagesStrategy implements IReadingImagesFilterStrateg
   }
 }
 
+export class UpdatedStatusReadingImagesStrategy implements IReadingImagesFilterStrategy {
+  isSatisfiedBy(item: ReadingImages, criteria: ReadingImagesFilterCriteria): boolean {
+    if (!criteria.updatedStatus) {
+      return true;
+    }
+
+    if (criteria.updatedStatus === 'updated') {
+      return item.updatedStatus === true;
+    }
+
+    if (criteria.updatedStatus === 'not_updated') {
+      return item.updatedStatus === false;
+    }
+
+    return true;
+  }
+}
+
 export class FilterReadingImagesUseCase {
   private strategies: IReadingImagesFilterStrategy[];
 
   constructor(strategies?: IReadingImagesFilterStrategy[]) {
     this.strategies = strategies || [
-      new NoveltyReadingImagesStrategy()
+      new NoveltyReadingImagesStrategy(),
+      new UpdatedStatusReadingImagesStrategy()
     ];
   }
 

@@ -15,12 +15,14 @@ export const useReadingImagesList = () => {
       month,
       sector,
       cadastralKey,
-      novelty
+      novelty,
+      updatedStatus
     }: {
       month?: string;
       sector?: string | number;
       cadastralKey?: string;
       novelty?: string;
+      updatedStatus?: string;
     }) => {
       setIsLoading(true);
       setError(null);
@@ -42,9 +44,9 @@ export const useReadingImagesList = () => {
           result = await readingImagesUseCase.executeFindAll();
         }
 
-        if (novelty) {
+        if (novelty || updatedStatus) {
           const filterUseCase = new FilterReadingImagesUseCase();
-          result = filterUseCase.execute(result, { novelty });
+          result = filterUseCase.execute(result, { novelty, updatedStatus });
         }
 
         setReadingImages(result || []);
