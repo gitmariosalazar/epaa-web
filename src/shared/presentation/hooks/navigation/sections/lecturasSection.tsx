@@ -75,6 +75,11 @@ export const getLecturasSection = (): NavSection => ({
               icon: <LucideCalendarSync size={18} />,
               label: 'Sincronización de Lecturas',
               to: '/readings/reconciliation'
+            },
+            {
+              icon: <LucideCalendarSync size={18} />,
+              label: 'Imagenes de Lecturas',
+              to: '/readings/reading-images'
             }
           ]
         }

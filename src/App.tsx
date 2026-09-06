@@ -363,6 +363,14 @@ function App() {
                               </RequireElevatedToken>
                             }
                           />
+                          <Route
+                            path="reading-images"
+                            element={
+                              <RequireElevatedToken fallbackMessage="La sincronización de lecturas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                <ReadingImagesPage isPublic={false} />
+                              </RequireElevatedToken>
+                            }
+                          />
 
 
                           {/* Other reading routes can be added here */}

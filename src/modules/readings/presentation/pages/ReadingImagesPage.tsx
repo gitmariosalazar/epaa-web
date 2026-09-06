@@ -28,8 +28,13 @@ import { UpdateReadingWithImagesPage } from './UpdateReadingWithImagesPage';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
+import { UpdateSpecialReadingWithImagesPage } from './UpdateSpecialReadingWithImagesPage';
 
-export const ReadingImagesPage: React.FC = () => {
+interface ReadingImagesPageProps {
+  isPublic?: boolean;
+}
+
+export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic = true }) => {
   const { t } = useTranslation();
   const { readingImages, isLoading, error, fetchImages } =
     useReadingImagesList();
@@ -291,8 +296,16 @@ export const ReadingImagesPage: React.FC = () => {
               onCancel={() => setReadingModalState(null)}
             />
           )}
-          {readingModalState?.mode === 'update' && (
+          {readingModalState?.mode === 'update' && isPublic && (
             <UpdateReadingWithImagesPage
+              initialCadastralKey={readingModalState?.cadastralKey}
+              onSuccess={handleModalSuccess}
+              onCancel={() => setReadingModalState(null)}
+            />
+          )}
+
+          {readingModalState?.mode === 'update' && !isPublic && (
+            <UpdateSpecialReadingWithImagesPage
               initialCadastralKey={readingModalState?.cadastralKey}
               onSuccess={handleModalSuccess}
               onCancel={() => setReadingModalState(null)}
