@@ -176,7 +176,7 @@
 }
 
 .table tbody tr:hover:not(.table-row--spacer) {
-  background-color: var(--tb-row-hover);
+  background-color: var(--tb-row-hover) !important;
 }
 
 .table td {
