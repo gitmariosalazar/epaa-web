@@ -30,7 +30,10 @@ import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip
 export const IncidentsListPage: React.FC = () => {
   const {
     incidents,
+    totalCount,
     categories,
+    page,
+    setPage,
     pageSize,
     isLoading,
     error,
@@ -306,6 +309,10 @@ export const IncidentsListPage: React.FC = () => {
             }
             pagination={true}
             pageSize={pageSize}
+            serverSidePagination={true}
+            totalRecords={totalCount}
+            currentPage={page}
+            onPageChange={setPage}
             onEndReached={() => { }}
             hasMore={false}
             emptyState={

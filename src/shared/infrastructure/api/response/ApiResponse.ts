@@ -4,4 +4,5 @@ export type ApiResponse<T> = {
   message: string[];
   url: string;
   data: T;
+  totalCount?: number;
 };

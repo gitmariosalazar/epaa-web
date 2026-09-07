@@ -67,6 +67,7 @@ const sortFn = (
 export const useIncidentsViewModel = () => {
   const {
     incidents,
+    totalCount,
     categories,
     isLoading,
     error,
@@ -103,7 +104,7 @@ export const useIncidentsViewModel = () => {
 
   const [sortBy, setSortBy] = useState<IncidentSortKey>('fecha_desc');
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(15);
+  const [pageSize, setPageSize] = useState(50);
 
   // ── Carga inicial según el modo ──────────────────────────────────────────
   useEffect(() => {
@@ -112,15 +113,33 @@ export const useIncidentsViewModel = () => {
       loadActiveByConnection(connectionIdFromUrl);
     } else {
       // Modo "todos": carga usando filtros normales
-      loadIncidents({
-        status: filters.status || null,
-        priority: filters.priority || null,
-        categoryId: filters.categoryId ? Number(filters.categoryId) : null,
-        connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
-        sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
-        reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
-        reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null)
-      });
+      loadIncidents(
+        {
+          status: filters.status || null,
+          priority: filters.priority || null,
+          categoryId: filters.categoryId ? Number(filters.categoryId) : null,
+          connectionId:
+            filters.searchField === 'connectionId'
+              ? filters.search
+              : filters.searchField === 'all' && filters.search.includes('-')
+                ? filters.search
+                : null,
+          sector:
+            filters.searchField === 'sector'
+              ? filters.search
+              : filters.sector || null,
+          reference:
+            filters.searchField === 'reference'
+              ? filters.search
+              : filters.reference || null,
+          reportDate:
+            filters.searchField === 'reportDate' && filters.search
+              ? new Date(filters.search + 'T00:00:00')
+              : filters.reportDate || null
+        },
+        pageSize,
+        (page - 1) * pageSize
+      );
     }
     // Solo se ejecuta una vez al montar (o si cambia el connectionId de la URL)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -155,33 +174,69 @@ export const useIncidentsViewModel = () => {
 
     const delay = filters.search && !filters.search.includes('-') ? 300 : 0;
     const timer = setTimeout(() => {
-      loadIncidentsRef.current({
-        status: filters.status || null,
-        priority: filters.priority || null,
-        categoryId: filters.categoryId ? Number(filters.categoryId) : null,
-        connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
-        sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
-        reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
-        reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null)
-      });
+      loadIncidentsRef.current(
+        {
+          status: filters.status || null,
+          priority: filters.priority || null,
+          categoryId: filters.categoryId ? Number(filters.categoryId) : null,
+          connectionId:
+            filters.searchField === 'connectionId'
+              ? filters.search
+              : filters.searchField === 'all' && filters.search.includes('-')
+                ? filters.search
+                : null,
+          sector:
+            filters.searchField === 'sector'
+              ? filters.search
+              : filters.sector || null,
+          reference:
+            filters.searchField === 'reference'
+              ? filters.search
+              : filters.reference || null,
+          reportDate:
+            filters.searchField === 'reportDate' && filters.search
+              ? new Date(filters.search + 'T00:00:00')
+              : filters.reportDate || null
+        },
+        pageSize,
+        (page - 1) * pageSize
+      );
     }, delay);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, connectionMode]);
+  }, [filters, page, pageSize, connectionMode]);
 
   /** Botón Consultar: recarga manualmente con los filtros actuales. */
   const handleConsultar = useCallback(() => {
     setConnectionMode(false);
     setSearchParams({});
-    loadIncidents({
-      status: filters.status || null,
-      priority: filters.priority || null,
-      categoryId: filters.categoryId ? Number(filters.categoryId) : null,
-      connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
-      sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
-      reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
-      reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null)
-    });
+    loadIncidents(
+      {
+        status: filters.status || null,
+        priority: filters.priority || null,
+        categoryId: filters.categoryId ? Number(filters.categoryId) : null,
+        connectionId:
+          filters.searchField === 'connectionId'
+            ? filters.search
+            : filters.searchField === 'all' && filters.search.includes('-')
+              ? filters.search
+              : null,
+        sector:
+          filters.searchField === 'sector'
+            ? filters.search
+            : filters.sector || null,
+        reference:
+          filters.searchField === 'reference'
+            ? filters.search
+            : filters.reference || null,
+        reportDate:
+          filters.searchField === 'reportDate' && filters.search
+            ? new Date(filters.search + 'T00:00:00')
+            : filters.reportDate || null
+      },
+      pageSize,
+      0
+    ); // Always fetch page 1 for initial manual search
     setPage(1);
   }, [filters, loadIncidents, setSearchParams]);
 
@@ -211,14 +266,13 @@ export const useIncidentsViewModel = () => {
   }, [incidents, sortBy]);
 
   const paginated = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredSorted.slice(start, start + pageSize);
-  }, [filteredSorted, page, pageSize]);
+    return filteredSorted;
+  }, [filteredSorted]);
 
   return {
     // ── List state ─────────────────────────────────────────────────────────
     incidents: filteredSorted,
-    totalCount: filteredSorted.length,
+    totalCount: connectionMode ? filteredSorted.length : totalCount, // if connectionMode, it loads all active, so use length
     categories,
     paginated,
     page,

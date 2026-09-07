@@ -9,17 +9,25 @@ export class SearchIncidentsUseCase {
     this.incidentRepository = incidentRepository;
   }
 
-  async execute(filters: {
-    connectionId?: string | null;
-    status?: string | null;
-    priority?: string | null;
-    categoryId?: number | null;
-    sector?: string | null;
-    reference?: string | null;
-    reportDate?: Date | null;
-  }): Promise<ApiResponse<IncidentDetailRowResponse[]>> {
+  async execute(
+    filters: {
+      connectionId?: string | null;
+      status?: string | null;
+      priority?: string | null;
+      categoryId?: number | null;
+      sector?: string | null;
+      reference?: string | null;
+      reportDate?: Date | null;
+    },
+    limit?: number,
+    offset?: number
+  ): Promise<ApiResponse<IncidentDetailRowResponse[]>> {
     try {
-      const incidents = await this.incidentRepository.findIncidents(filters);
+      const incidents = await this.incidentRepository.findIncidents(
+        filters,
+        limit,
+        offset
+      );
       return incidents;
     } catch (error) {
       throw error;

@@ -70,7 +70,10 @@ export const IncidentsPage: React.FC = () => {
   const vm = useIncidentsViewModel();
   const {
     incidents,
+    totalCount,
     categories,
+    page,
+    setPage,
     isLoading,
     error,
     filters,
@@ -383,14 +386,22 @@ export const IncidentsPage: React.FC = () => {
       return (
         <div className="incident-map-page-content">
           {ConnectionBanner}
-          <IncidentMapFeature
-            incidents={incidents}
-            selectedIncident={focusedIncident} // ← Usar focused para highlight
-            onSelect={(incident) => setFocusedIncidentId(incident.incidentId)} // ← Solo focus + highlight
-            onViewDetail={(incident) => setSelectedIncident(incident)} // ← Modal
-            onResolve={(id) => setResolveIncidentId(id)}
-            onAddWorkOrder={(incident) => setAddWorkOrderIncident(incident)}
-          />
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            <IncidentMapFeature
+              incidents={incidents}
+              selectedIncident={focusedIncident} // ← Usar focused para highlight
+              onSelect={(incident) => setFocusedIncidentId(incident.incidentId)} // ← Solo focus + highlight
+              onViewDetail={(incident) => setSelectedIncident(incident)} // ← Modal
+              onResolve={(id) => setResolveIncidentId(id)}
+              onAddWorkOrder={(incident) => setAddWorkOrderIncident(incident)}
+              page={page}
+              pageSize={pageSize}
+              totalCount={totalCount}
+              hasMore={page * pageSize < totalCount}
+              onPageChange={setPage}
+              isLoading={isLoading}
+            />
+          </div>
         </div>
       );
     }
@@ -440,6 +451,10 @@ export const IncidentsPage: React.FC = () => {
             }
             pagination={true}
             pageSize={pageSize}
+            serverSidePagination={true}
+            totalRecords={totalCount}
+            currentPage={page}
+            onPageChange={setPage}
             onEndReached={() => { }}
             hasMore={false}
             emptyState={

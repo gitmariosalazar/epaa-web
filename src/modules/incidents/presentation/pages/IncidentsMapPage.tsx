@@ -21,6 +21,10 @@ import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/respon
 export const IncidentsMapPage: React.FC = () => {
   const {
     incidents,
+    totalCount,
+    page,
+    setPage,
+    pageSize,
     categories,
     isLoading,
     filters,
@@ -88,12 +92,20 @@ export const IncidentsMapPage: React.FC = () => {
             </div>
           )}
 
-          <IncidentMapFeature
-            incidents={incidents}
-            selectedIncident={focusedIncident} // ← Cambiado
-            onSelect={handleFocusOnMap} // ← Solo focus
-            onViewDetail={handleViewDetail}
-          />
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            <IncidentMapFeature
+              incidents={incidents}
+              selectedIncident={focusedIncident} // ← Cambiado
+              onSelect={handleFocusOnMap} // ← Solo focus
+              onViewDetail={handleViewDetail}
+              page={page}
+              pageSize={pageSize}
+              totalCount={totalCount}
+              hasMore={page * pageSize < totalCount}
+              onPageChange={setPage}
+              isLoading={isLoading}
+            />
+          </div>
         </div>
       </PageLayout>
 

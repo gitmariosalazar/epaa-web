@@ -17,6 +17,12 @@ export interface IncidentMapFeatureProps {
   onViewDetail?: (incident: IncidentDetailRowResponse) => void;
   onResolve?: (incidentId: string) => void;
   onAddWorkOrder?: (incident: IncidentDetailRowResponse) => void;
+  page?: number;
+  pageSize?: number;
+  totalCount?: number;
+  hasMore?: boolean;
+  onPageChange?: (page: number) => void;
+  isLoading?: boolean;
 }
 
 /**
@@ -34,7 +40,13 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
   onSelect,
   onViewDetail,
   onResolve,
-  onAddWorkOrder
+  onAddWorkOrder,
+  page,
+  pageSize,
+  totalCount,
+  hasMore,
+  onPageChange,
+  isLoading
 }) => {
   const { centerLocationIncident, loading, error } =
     useCenterLocationIncident();
@@ -112,6 +124,12 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
           onResolve={onResolve}
           onAddWorkOrder={onAddWorkOrder}
           onToggle={() => setIsSidebarCollapsed((c) => !c)}
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          hasMore={hasMore}
+          onPageChange={onPageChange}
+          isLoading={isLoading}
         />
 
         <div className="incident-map-view-wrapper">

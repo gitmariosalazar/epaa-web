@@ -190,5 +190,22 @@
   transform: scale(1.015);
   box-shadow:
     0 0 0 4px rgba(var(--primary-rgb), 0.4),
-    0 20px 40px -8px rgba(var(--primary-rgb), 0.35) !important;
+}
+
+.side-panel-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 4px;
+  margin: 10px 0px 0px 0px;
+}
+
+.side-panel-page-info {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
 }

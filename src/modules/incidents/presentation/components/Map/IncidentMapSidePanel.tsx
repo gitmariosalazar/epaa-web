@@ -1,4 +1,4 @@
-import React, { } from 'react';
+import React, { useState, useMemo } from 'react';
 import { AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { IncidentDetailRowResponse } from '../../../domain/schemas/dtos/response/view_incident.response';
 import {
@@ -16,6 +16,8 @@ import { truncateText } from '@/shared/utils/text/truncate-text';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { FaListUl } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { Input } from '@/shared/presentation/components/Input/Input';
+import { IoSearch } from 'react-icons/io5';
 
 interface IncidentMapSidePanelProps {
   incidents: IncidentDetailRowResponse[];
@@ -26,6 +28,12 @@ interface IncidentMapSidePanelProps {
   onAddWorkOrder?: (incident: IncidentDetailRowResponse) => void;
   collapsed: boolean;
   onToggle: () => void;
+  page?: number;
+  pageSize?: number;
+  totalCount?: number;
+  hasMore?: boolean;
+  onPageChange?: (page: number) => void;
+  isLoading?: boolean;
 }
 
 /**
@@ -41,10 +49,29 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
   onResolve,
   onAddWorkOrder,
   collapsed,
-  onToggle
+  onToggle,
+  page,
+  pageSize,
+  totalCount,
+  hasMore,
+  onPageChange,
+  isLoading
 }) => {
-  const withCoords = incidents.filter((i) => i.latitude && i.longitude);
-  const withoutCoords = incidents.filter((i) => !i.latitude || !i.longitude);
+  const [search, setSearch] = useState('');
+
+  const filteredIncidents = useMemo(() => {
+    if (!search.trim()) return incidents;
+    const lowerSearch = search.toLowerCase();
+    return incidents.filter(
+      (incident) =>
+        (incident.incidentCode || '').toLowerCase().includes(lowerSearch) ||
+        (incident.connectionId || '').toLowerCase().includes(lowerSearch) ||
+        (incident.referenceAddress || '').toLowerCase().includes(lowerSearch)
+    );
+  }, [incidents, search]);
+
+  const withCoords = filteredIncidents.filter((i) => i.latitude && i.longitude);
+  const withoutCoords = filteredIncidents.filter((i) => !i.latitude || !i.longitude);
 
   const navigate = useNavigate();
 
@@ -69,7 +96,7 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                 Incidentes Reportados
               </span>
               <span className="incident-side-panel-count">
-                {incidents.length}
+                {totalCount}
               </span>
             </div>
 
@@ -97,6 +124,54 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                 <label>Críticos</label>
               </div>
             </div>
+
+            {/* Pagination */}
+            {page !== undefined && pageSize !== undefined && totalCount !== undefined && onPageChange && (
+              <header className="map-side-panel-header">
+                <div className="panel-header-top">
+                  <h2 className="panel-title">Incidentes</h2>
+                  <span className="panel-count">
+                    {totalCount} REGISTROS
+                  </span>
+                </div>
+                <Input
+                  type="text"
+                  placeholder="Buscar por clave,dirección..."
+                  className="premium-search-input"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  leftIcon={<IoSearch />}
+                />
+                <div className="side-panel-pagination">
+                  <Button
+                    type="button"
+                    variant="dashed"
+                    onClick={() => onPageChange(page - 1)}
+                    disabled={page <= 1 || isLoading}
+                    size="xs"
+                    leftIcon={<ChevronLeft size={12} />}
+                  >
+                    Anterior
+                  </Button>
+
+                  <span className="side-panel-page-info">
+                    {totalCount === 0 ? 0 : (page - 1) * pageSize + 1}-{Math.min(page * pageSize, totalCount)} de {totalCount}
+                  </span>
+
+                  <Button
+                    type="button"
+                    onClick={() => onPageChange(page + 1)}
+                    disabled={!hasMore || isLoading}
+                    variant="dashed"
+                    size="xs"
+                    rightIcon={<ChevronRight size={12} />}
+                  >
+                    Siguiente
+                  </Button>
+                </div>
+              </header>
+
+            )}
           </div>
 
           {/* List */}

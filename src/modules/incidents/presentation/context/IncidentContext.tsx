@@ -16,6 +16,7 @@ import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/respon
 
 interface IncidentContextType {
   incidents: IncidentDetailRowResponse[];
+  totalCount: number;
   categories: IncidentCategoryResponse[];
   isLoading: boolean;
   error: string | null;
@@ -27,7 +28,7 @@ interface IncidentContextType {
     sector?: string | null;
     reference?: string | null;
     reportDate?: Date | null;
-  }) => Promise<void>;
+  }, limit?: number, offset?: number) => Promise<void>;
   loadCategories: () => Promise<void>;
   createIncident: (request: CreateIncidentRequest) => Promise<ApiResponse<IncidentResponse> | null>;
   resolveIncident: (request: ResolveIncidentRequest) => Promise<ApiResponse<IncidentResponse> | null>;
@@ -40,6 +41,7 @@ const IncidentContext = createContext<IncidentContextType | undefined>(undefined
 
 export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [incidents, setIncidents] = useState<IncidentDetailRowResponse[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
   const [categories, setCategories] = useState<IncidentCategoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,12 +64,13 @@ export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }
       sector?: string | null;
       reference?: string | null;
       reportDate?: Date | null;
-    } = {}) => {
+    } = {}, limit?: number, offset?: number) => {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await searchIncidentsUseCase.execute(filters);
+        const response = await searchIncidentsUseCase.execute(filters, limit, offset);
         setIncidents(response.data || []);
+        setTotalCount(response.totalCount || 0);
       } catch (err: any) {
         console.error('Error loading incidents:', err);
         setError(err.message || 'Error al cargar los incidentes del servidor.');
@@ -177,6 +180,7 @@ export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }
   const value = useMemo(
     () => ({
       incidents,
+      totalCount,
       categories,
       isLoading,
       error,
@@ -188,7 +192,7 @@ export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }
       loadActiveByConnection,
       refresh,
     }),
-    [incidents, categories, isLoading, error, loadIncidents, loadCategories, createIncident, resolveIncident, loadByConnection, loadActiveByConnection, refresh]
+    [incidents, totalCount, categories, isLoading, error, loadIncidents, loadCategories, createIncident, resolveIncident, loadByConnection, loadActiveByConnection, refresh]
   );
 
   return (

@@ -23,14 +23,18 @@ export interface InterfaceIncidentRepository {
   findById(
     incidentId: string
   ): Promise<ApiResponse<IncidentDetailRowResponse> | null>;
-  findIncidents(filters: {
-    connectionId?: string | null;
-    status?: string | null;
-    priority?: string | null;
-    categoryId?: number | null;
-    sector?: string | null;
-    reference?: string | null;
-    reportDate?: Date | null;
-  }): Promise<ApiResponse<IncidentDetailRowResponse[]>>;
+  findIncidents(
+    filters: {
+      connectionId?: string | null;
+      status?: string | null;
+      priority?: string | null;
+      categoryId?: number | null;
+      sector?: string | null;
+      reference?: string | null;
+      reportDate?: Date | null;
+    },
+    limit?: number | null,
+    offset?: number | null
+  ): Promise<ApiResponse<IncidentDetailRowResponse[]>>;
   findIncidentCategories(): Promise<ApiResponse<IncidentCategoryResponse[]>>;
 }

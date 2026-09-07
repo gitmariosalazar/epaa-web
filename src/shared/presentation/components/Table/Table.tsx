@@ -87,6 +87,10 @@ interface TableProps<T> {
   filterModel?: FilterModel[];
   onFilterModelChange?: (model: FilterModel[]) => void;
   disableLocalFiltering?: boolean;
+  serverSidePagination?: boolean;
+  totalRecords?: number;
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
 }
 
 export const Table = <T extends { [key: string]: any }>({
@@ -117,10 +121,24 @@ export const Table = <T extends { [key: string]: any }>({
   showFilters = true,
   filterModel,
   onFilterModelChange,
-  disableLocalFiltering = false
+  disableLocalFiltering = false,
+  serverSidePagination = false,
+  totalRecords = 0,
+  currentPage: externalCurrentPage,
+  onPageChange
 }: TableProps<T>) => {
   const { t } = useTranslation();
-  const [currentPage, setCurrentPage] = React.useState(1);
+  const [localCurrentPage, setLocalCurrentPage] = React.useState(1);
+  const activeCurrentPage = serverSidePagination && externalCurrentPage !== undefined ? externalCurrentPage : localCurrentPage;
+  const setCurrentPage = (pageUpdater: number | ((p: number) => number)) => {
+    const newPage = typeof pageUpdater === 'function' ? pageUpdater(activeCurrentPage) : pageUpdater;
+    if (!serverSidePagination) {
+      setLocalCurrentPage(newPage);
+    }
+    if (onPageChange) {
+      onPageChange(newPage);
+    }
+  };
   const [currentLimit, setCurrentLimit] = React.useState(pageSize);
   const [hiddenColumnKeys, setHiddenColumnKeys] = React.useState<Set<string>>(
     () => {
@@ -208,12 +226,13 @@ export const Table = <T extends { [key: string]: any }>({
 
   // Adjust page when data changes (e.g. new search or data refresh)
   React.useEffect(() => {
+    if (serverSidePagination) return;
     const totalPages = Math.ceil(processedData.length / currentLimit);
     // Only reset if current page is out of bounds
-    if (currentPage > totalPages && totalPages > 0) {
+    if (activeCurrentPage > totalPages && totalPages > 0) {
       setCurrentPage(1);
     }
-  }, [processedData, currentLimit, currentPage]);
+  }, [processedData, currentLimit, activeCurrentPage, serverSidePagination]);
 
   const handleSort = (key: keyof T | string) => {
     if (!onSort) return;
@@ -246,22 +265,23 @@ export const Table = <T extends { [key: string]: any }>({
   }, [onEndReached, hasMore]);
 
   const hasExports = !!(onExportExcel || onExportPdf);
-  const totalPages = Math.ceil(processedData.length / currentLimit);
-  const paginatedData = pagination
-    ? processedData.slice((currentPage - 1) * currentLimit, currentPage * currentLimit)
+  const actualTotalRecords = serverSidePagination ? totalRecords : processedData.length;
+  const totalPages = Math.ceil(actualTotalRecords / currentLimit);
+  const paginatedData = pagination && !serverSidePagination
+    ? processedData.slice((activeCurrentPage - 1) * currentLimit, activeCurrentPage * currentLimit)
     : processedData;
 
-  const handlePrev = () => setCurrentPage((p) => Math.max(1, p - 1));
+  const handlePrev = () => setCurrentPage((p: number) => Math.max(1, p - 1));
   const handleNext = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage((p) => p + 1);
+    if (activeCurrentPage < totalPages) {
+      setCurrentPage((p: number) => p + 1);
       // Opcional: si nos estamos acercando, pre-fetchear
-      if (currentPage === totalPages - 1 && hasMore && onEndReached) {
+      if (activeCurrentPage === totalPages - 1 && hasMore && onEndReached) {
         onEndReached();
       }
     } else if (hasMore && onEndReached) {
       onEndReached();
-      setCurrentPage((p) => p + 1);
+      setCurrentPage((p: number) => p + 1);
     }
   };
 
@@ -635,8 +655,8 @@ export const Table = <T extends { [key: string]: any }>({
             {showTotalRecords && (
               <span className="table-pagination-records">
                 {t('common.table.totalRecords', {
-                  count: processedData.length,
-                  defaultValue: `Total: ${processedData.length}${hasMore ? '+' : ''}`
+                  count: actualTotalRecords,
+                  defaultValue: `Total: ${actualTotalRecords}${hasMore ? '+' : ''}`
                 })}
               </span>
             )}
@@ -686,7 +706,7 @@ export const Table = <T extends { [key: string]: any }>({
                 >
                   <button
                     onClick={() => setCurrentPage(1)}
-                    disabled={currentPage === 1}
+                    disabled={activeCurrentPage === 1}
                     className="pagination-btn"
                   >
                     <ChevronsLeft size={16} strokeWidth={2.5} />
@@ -697,7 +717,7 @@ export const Table = <T extends { [key: string]: any }>({
                   content={t('common.pagination.previous', 'Anterior')}>
                   <button
                     onClick={handlePrev}
-                    disabled={currentPage === 1}
+                    disabled={activeCurrentPage === 1}
                     className="pagination-btn"
                   >
                     <ChevronLeft size={16} strokeWidth={2.5} />
@@ -705,17 +725,17 @@ export const Table = <T extends { [key: string]: any }>({
                 </Tooltip>
                 <span className="table-pagination-page-text">
                   {t('common.pagination.page', {
-                    current: currentPage,
+                    current: activeCurrentPage,
                     total: hasMore ? `${totalPages}+` : totalPages
                   }) ||
-                    `${currentPage} / ${hasMore ? totalPages + '+' : totalPages}`}
+                    `${activeCurrentPage} / ${hasMore ? totalPages + '+' : totalPages}`}
                 </span>
                 <Tooltip
                   followCursor={false}
                   content={t('common.pagination.next', 'Siguiente')}>
                   <button
                     onClick={handleNext}
-                    disabled={currentPage >= totalPages && !hasMore}
+                    disabled={activeCurrentPage >= totalPages && !hasMore}
                     className="pagination-btn"
                   >
                     <ChevronRight size={16} strokeWidth={2.5} />
@@ -728,7 +748,7 @@ export const Table = <T extends { [key: string]: any }>({
                     onClick={() => {
                       if (totalPages > 0) setCurrentPage(totalPages);
                     }}
-                    disabled={currentPage >= totalPages || hasMore}
+                    disabled={activeCurrentPage >= totalPages || hasMore}
                     className="pagination-btn"
                   >
                     <ChevronsRight size={16} strokeWidth={2.5} />
