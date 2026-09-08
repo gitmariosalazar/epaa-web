@@ -46,16 +46,16 @@ export const ReconciliationDiscrepanciesTab: React.FC<Props> = ({
       id: 'mes_lectura'
     },
     {
-      header: 'Lectura Anterior (PG | AP)',
+      header: 'Lect. Ant. (PostgreSQL | SQL Server)',
       accessor: (item) => (
-        <span>{item.pg_lectura_anterior} | {item.ap_lectura_anterior ?? '-'}</span>
+        <span>{item.pg_lectura_anterior} &nbsp;|&nbsp; {item.ap_lectura_anterior ?? 'Sin Valor'}</span>
       ),
       id: 'lectura_anterior'
     },
     {
-      header: 'Lectura Actual (PG | AP)',
+      header: 'Lect. Act. (PostgreSQL | SQL Server)',
       accessor: (item) => (
-        <span>{item.pg_lectura_actual} | {item.ap_lectura_actual ?? '-'}</span>
+        <span>{item.pg_lectura_actual} &nbsp;|&nbsp; {item.ap_lectura_actual ?? 'Sin Valor'}</span>
       ),
       id: 'lectura_actual'
     },

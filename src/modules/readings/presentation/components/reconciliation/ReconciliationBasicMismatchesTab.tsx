@@ -36,16 +36,16 @@ export const ReconciliationBasicMismatchesTab: React.FC<Props> = ({
       id: 'mesLectura'
     },
     {
-      header: 'Lectura Anterior (PG | AP)',
+      header: 'Lect. Ant. (PostgreSQL | SQL Server)',
       accessor: (item) => (
-        <span>{item.postgresLecturaAnterior} | {item.legacyLecturaAnterior ?? '-'}</span>
+        <span>{item.postgresLecturaAnterior} &nbsp;|&nbsp; {item.legacyLecturaAnterior ?? 'Sin Valor'}</span>
       ),
       id: 'lecturaAnterior'
     },
     {
-      header: 'Lectura Actual (PG | AP)',
+      header: 'Lect. Act. (PostgreSQL | SQL Server)',
       accessor: (item) => (
-        <span>{item.postgresLecturaActual} | {item.legacyLecturaActual ?? '-'}</span>
+        <span>{item.postgresLecturaActual} &nbsp;|&nbsp; {item.legacyLecturaActual ?? 'Sin Valor'}</span>
       ),
       id: 'lecturaActual'
     },
