@@ -43,4 +43,22 @@ export class ReadingImagesRepositoryImpl implements ReadingImagesRepository {
     );
     return response.data.data;
   }
+  async findReadingImagesByFilter(filter: {
+    month?: string;
+    cadastralKey?: string;
+    sector?: number;
+    date?: string;
+  }): Promise<ReadingImages[]> {
+    const params = new URLSearchParams();
+    if (filter.month) params.append('month', filter.month);
+    if (filter.cadastralKey) params.append('cadastralKey', filter.cadastralKey);
+    if (filter.sector !== undefined) params.append('sector', filter.sector.toString());
+    if (filter.date) params.append('date', filter.date);
+
+    const queryString = params.toString();
+    const url = `/ReadingImages/find-reading-images-by-filter${queryString ? `?${queryString}` : ''}`;
+
+    const response = await this.client.get<ApiResponse<ReadingImages[]>>(url);
+    return response.data.data;
+  }
 }

@@ -26,6 +26,7 @@ import { GetMapGeojsonByDayAndByUserUseCase } from '../../application/usecases/G
 import { GetMapGeojsonByDayAndByUserImpl } from '../../infrastructure/repositories/GetMapGeojsonByDayAndByUserImpl';
 import { GetReadingAdjustmentHistoryByReadingIdUseCase } from '../../application/usecases/GetReadingAdjustmentHistoryByReadingIdUseCase';
 import { GetReadingAdjustmentHistoryByReadingIdRepositoryImpl } from '../../infrastructure/repositories/GetReadingAdjustmentHistoryByReadingIdRepositoryImpl';
+import { FindReadingImagesByFilterUseCase } from '../../application/usecases/FindReadingImagesByFilterUseCase';
 
 interface ReadingsContextType {
   getReadingInfoUseCase: GetReadingInfoUseCase;
@@ -45,6 +46,7 @@ interface ReadingsContextType {
   getAuditHistoryBySectorUseCase: GetAuditHistoryBySectorUseCase;
   getMapGeojsonByDayAndByUserUseCase: GetMapGeojsonByDayAndByUserUseCase;
   getReadingAdjustmentHistoryByReadingIdUseCase: GetReadingAdjustmentHistoryByReadingIdUseCase;
+  findReadingImagesByFilterUseCase: FindReadingImagesByFilterUseCase;
 }
 
 const ReadingsContext = createContext<ReadingsContextType | null>(null);
@@ -86,6 +88,9 @@ export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
     pendingReadingConnectionRepository
   );
   const readingImagesUseCase = new ReadingImagesUseCase(
+    readingImagesRepository
+  );
+  const findReadingImagesByFilterUseCase = new FindReadingImagesByFilterUseCase(
     readingImagesRepository
   );
   const updateReadingUseCase = new UpdateReadingUseCase(
@@ -135,7 +140,8 @@ export const ReadingsProvider: React.FC<{ children: ReactNode }> = ({
     closeAuditSectorUseCase,
     getAuditHistoryBySectorUseCase,
     getMapGeojsonByDayAndByUserUseCase,
-    getReadingAdjustmentHistoryByReadingIdUseCase
+    getReadingAdjustmentHistoryByReadingIdUseCase,
+    findReadingImagesByFilterUseCase
   };
 
   return (

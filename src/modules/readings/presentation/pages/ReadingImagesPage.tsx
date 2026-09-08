@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ImageIcon, AlertCircle, Droplet, MapPin, FileText } from 'lucide-react';
 
 import { ReadingImagesFilters } from '../components/ReadingImagesFilters';
-import { useReadingImagesList } from '../hooks/useReadingImagesList';
+import { useFindReadingImagesByFilter } from '../hooks/useFindReadingImagesByFilter';
 import {
   Table,
   type Column
@@ -37,8 +37,8 @@ interface ReadingImagesPageProps {
 
 export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic = true }) => {
   const { t } = useTranslation();
-  const { readingImages, isLoading, error, fetchImages } =
-    useReadingImagesList();
+  const { readingImages, isLoading, error, fetchImagesByFilter: fetchImages } =
+    useFindReadingImagesByFilter();
   const loadingProgress = useSimulatedProgress(isLoading);
 
   // State for the image viewer
@@ -75,6 +75,7 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
     monthIso?: string;
     sector?: string;
     cadastralKey?: string;
+    date?: string;
     novelty?: string;
     updatedStatus?: string;
   }>({});
@@ -83,6 +84,7 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
     monthIso?: string;
     sector?: string;
     cadastralKey?: string;
+    date?: string;
     novelty?: string;
     updatedStatus?: string;
   }) => {
@@ -91,6 +93,7 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
       month: filters.monthIso,
       sector: filters.sector,
       cadastralKey: filters.cadastralKey,
+      date: filters.date,
       novelty: filters.novelty,
       updatedStatus: filters.updatedStatus
     });
@@ -102,6 +105,7 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
       month: currentFilters.monthIso,
       sector: currentFilters.sector,
       cadastralKey: currentFilters.cadastralKey,
+      date: currentFilters.date,
       novelty: currentFilters.novelty,
       updatedStatus: currentFilters.updatedStatus
     });

@@ -10,4 +10,10 @@ export interface ReadingImagesRepository {
     cadastralKey: string
   ): Promise<ReadingImages[]>;
   findAllReadingImages(): Promise<ReadingImages[]>;
+  findReadingImagesByFilter(filter: {
+    month?: string;
+    cadastralKey?: string;
+    sector?: number;
+    date?: string;
+  }): Promise<ReadingImages[]>;
 }

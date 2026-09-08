@@ -13,7 +13,7 @@ import { Input } from '@/shared/presentation/components/Input/Input';
 
 import { Select } from '@/shared/presentation/components/Input/Select';
 
-export type SearchMode = 'month_sector' | 'cadastral_key';
+export type SearchMode = 'month_sector' | 'cadastral_key' | 'date';
 
 interface ReadingImagesFiltersProps {
   isLoading: boolean;
@@ -21,6 +21,7 @@ interface ReadingImagesFiltersProps {
     monthIso?: string;
     sector?: string;
     cadastralKey?: string;
+    date?: string;
     novelty?: string;
     updatedStatus?: string;
   }) => void;
@@ -38,20 +39,26 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
   const [month, setMonth] = useState(currentMonthStr);
   const [sector, setSector] = useState('');
   const [cadastralKey, setCadastralKey] = useState('');
+  const [date, setDate] = useState('');
   const [novelty, setNovelty] = useState('');
   const [updatedStatus, setUpdatedStatus] = useState('');
 
   const handleSearch = () => {
     if (mode === 'month_sector') {
       onFetch({ monthIso: month, sector, novelty, updatedStatus });
-    } else {
+    } else if (mode === 'cadastral_key') {
       onFetch({ cadastralKey, novelty, updatedStatus });
+    } else if (mode === 'date') {
+      onFetch({ date, novelty, updatedStatus });
     }
   };
 
   const canFetch =
     !isLoading &&
-    (mode === 'month_sector' ? Boolean(month) : Boolean(cadastralKey));
+    (mode === 'month_sector' ||
+      mode === 'date' ||
+      Boolean(month) ||
+      Boolean(cadastralKey));
 
   return (
     <div className="entry-filters">
@@ -73,6 +80,9 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
               </option>
               <option value="cadastral_key">
                 {t('readings.filters.cadastralKey')}
+              </option>
+              <option value="date">
+                {t('readings.filters.date', 'Fecha')}
               </option>
             </Select>
           </div>
@@ -148,9 +158,9 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
               </div>
             </div>
           </>
-        ) : (
-          <div className="filter-group" style={{ display: 'flex', gap: '12px' }}>
-            <div style={{ flex: 1 }}>
+        ) : mode === 'cadastral_key' ? (
+          <>
+            <div className="filter-group">
               <label className="filter-label">
                 {t('common.cadastralKey', 'Clave Catastral')}
               </label>
@@ -163,7 +173,7 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
                 />
               </div>
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="filter-group">
               <label className="filter-label">
                 {t('readings.filters.noveltyOptional', 'NOVEDAD (OPCIONAL)')}
               </label>
@@ -183,7 +193,7 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
                 </Select>
               </div>
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="filter-group">
               <label className="filter-label">
                 ESTADO (OPCIONAL)
               </label>
@@ -199,7 +209,58 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
                 </Select>
               </div>
             </div>
-          </div>
+          </>
+        ) : (
+          <>
+            <div className="filter-group">
+              <label className="filter-label">
+                {t('readings.filters.date', 'Fecha')}
+              </label>
+              <div className="filter-input-wrapper">
+                <DatePicker
+                  size="compact"
+                  value={date}
+                  onChange={(val: string) => setDate(val)}
+                />
+              </div>
+            </div>
+            <div className="filter-group">
+              <label className="filter-label">
+                {t('readings.filters.noveltyOptional', 'NOVEDAD (OPCIONAL)')}
+              </label>
+              <div className="filter-input-wrapper">
+                <Select
+                  size="compact"
+                  value={novelty}
+                  onChange={(e) => setNovelty(e.target.value)}
+                >
+                  <option value="">Todas</option>
+                  <option value="ALERTA CONSUMO BAJO">Alerta Consumo Bajo</option>
+                  <option value="LECTURA INVÁLIDA">Lectura Inválida</option>
+                  <option value="ALERTA CONSUMO ALTO">Alerta Consumo Alto</option>
+                  <option value="NORMAL">Normal</option>
+                  <option value="CONSUMO EXCESIVO">Consumo Excesivo</option>
+                  <option value="SIN LECTURA">Sin Lectura</option>
+                </Select>
+              </div>
+            </div>
+            <div className="filter-group">
+              <label className="filter-label">
+                ESTADO (OPCIONAL)
+              </label>
+              <div className="filter-input-wrapper">
+                <Select
+                  size="compact"
+                  value={updatedStatus}
+                  onChange={(e) => setUpdatedStatus(e.target.value)}
+                >
+                  <option value="">Todos</option>
+                  <option value="updated">Actualizadas</option>
+                  <option value="not_updated">No Actualizadas</option>
+                </Select>
+              </div>
+            </div>
+          </>
         )}
 
         {/* Botón Consultar */}
