@@ -26,6 +26,16 @@ export class GlobalErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    const isChunkLoadError =
+      error.name === 'ChunkLoadError' ||
+      error.message.includes('Failed to fetch dynamically imported module');
+
+    if (isChunkLoadError) {
+      console.warn('ChunkLoadError detected, reloading page to fetch new chunks...');
+      window.location.reload();
+      return;
+    }
+
     console.error('Uncaught error in React Tree:', error, errorInfo);
     this.setState({ errorInfo });
     // In a real application, you might want to log this error to an error reporting service like Sentry

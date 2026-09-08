@@ -59,6 +59,7 @@ import { AgreementsPage } from '@/modules/accounting/presentation/pages/agreemen
 import { PendingBillsPage } from '@/modules/accounting/presentation/pages/pending-bills/PendingBillsPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { VersionChecker } from '@/shared/presentation/components/VersionChecker/VersionChecker';
 
 // Notifications Module
 import { NotificationsPage } from '@/modules/notifications/presentation/pages/NotificationsPage';
@@ -200,6 +201,7 @@ function App() {
           pauseOnHover
           theme="colored"
         />
+        <VersionChecker />
         <UsersProvider>
           <BrowserRouter>
             <Routes>
