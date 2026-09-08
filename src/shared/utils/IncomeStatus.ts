@@ -1,4 +1,4 @@
-export type TypeIncomeStatus = 'P' | 'A' | 'B' | '0' | null | undefined;
+export type TypeIncomeStatus = 'P' | 'A' | 'B' | '0' | null | undefined | '';
 
 export const getLabelIncomeStatus = (status: TypeIncomeStatus): string => {
   switch (status) {
@@ -13,6 +13,8 @@ export const getLabelIncomeStatus = (status: TypeIncomeStatus): string => {
     case null:
       return 'Pendiente';
     case undefined:
+      return 'Pendiente';
+    case '':
       return 'Pendiente';
     default:
       return 'Pendiente';
@@ -41,6 +43,8 @@ export const getColorIncomeStatus = (
     case null:
       return 'error';
     case undefined:
+      return 'error';
+    case '':
       return 'error';
     default:
       return 'warning';

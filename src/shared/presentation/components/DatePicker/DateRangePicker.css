@@ -366,3 +366,32 @@
     flex-direction: column;
   }
 }
+
+/* Month Mode Styles */
+.date-range-picker-month-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 0.5rem 0;
+}
+
+.date-range-picker-cell--month {
+  aspect-ratio: auto;
+  padding: 0.75rem 0.5rem;
+  border-radius: 0.5rem;
+  text-transform: capitalize;
+}
+
+/* Disabled Styles */
+.date-range-picker-cell--disabled {
+  opacity: 0.3;
+  cursor: not-allowed !important;
+  background-color: transparent !important;
+  color: var(--text-muted) !important;
+}
+
+.date-range-picker-cell--disabled:hover {
+  transform: none !important;
+  background-color: transparent !important;
+  z-index: 1 !important;
+}

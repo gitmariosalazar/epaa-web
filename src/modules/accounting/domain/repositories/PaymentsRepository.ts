@@ -36,4 +36,12 @@ export interface PaymentsRepository {
   findOverdueSummary(): Promise<OverdueSummary | null>;
   findYearlyOverdueSummary(): Promise<YearlyOverdueSummary[]>;
   findMonthlyDebtSummary(): Promise<MonthlyDebtSummary[]>;
+
+  findHistoryInvoicesByCadastralKeyOrCardId(
+    searchValue: string,
+    period: {
+      startDate: string;
+      endDate: string;
+    }
+  ): Promise<PendingReading[]>;
 }

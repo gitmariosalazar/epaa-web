@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+//  Version checking hook - Checks for a new version of the app every 5 minutes
 
-export const useVersionCheck = (intervalMs = 5 * 60 * 1000) => {
+export const useVersionCheck = (intervalMs = 10 * 1000) => {
   const [hasNewVersion, setHasNewVersion] = useState(false);
   const [initialVersion, setInitialVersion] = useState<string | null>(null);
 
@@ -8,11 +9,14 @@ export const useVersionCheck = (intervalMs = 5 * 60 * 1000) => {
     const fetchVersion = async () => {
       try {
         // Añadimos un timestamp para evitar la caché del navegador
-        const response = await fetch(`/version.json?t=${new Date().getTime()}`, {
-          cache: 'no-store'
-        });
+        const response = await fetch(
+          `/version.json?t=${new Date().getTime()}`,
+          {
+            cache: 'no-store'
+          }
+        );
         if (!response.ok) return;
-        
+
         const data = await response.json();
         const serverVersion = data.version;
 

@@ -11,6 +11,7 @@ import type {
   YearlyOverdueSummary
 } from '../../domain/models/OverdueReading';
 import type { PendingReading } from '../../domain/models/PendingReading';
+import type { DateRangeParams } from '../../domain/dto/params/DataEntryParams';
 
 export class PaymentsRepositoryImpl implements PaymentsRepository {
   private readonly client: HttpClientInterface;
@@ -94,6 +95,23 @@ export class PaymentsRepositoryImpl implements PaymentsRepository {
   async findMonthlyDebtSummary(): Promise<MonthlyDebtSummary[]> {
     const response = await this.client.get<ApiResponse<MonthlyDebtSummary[]>>(
       `/accounting/find-monthly-debt-summary`
+    );
+    return this.handleResponse(response.data);
+  }
+
+  async findHistoryInvoicesByCadastralKeyOrCardId(
+    searchValue: string,
+    period: DateRangeParams
+  ): Promise<PendingReading[]> {
+    const response = await this.client.get<ApiResponse<PendingReading[]>>(
+      `/accounting/find-history-invoices`,
+      {
+        params: {
+          cardId: searchValue,
+          startDate: period.startDate,
+          endDate: period.endDate
+        }
+      }
     );
     return this.handleResponse(response.data);
   }

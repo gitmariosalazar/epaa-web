@@ -1,33 +1,78 @@
-import React, { useEffect, useRef } from 'react';
-import { toast } from 'react-toastify';
+import React, { useState } from 'react';
 import { useVersionCheck } from '../../hooks/useVersionCheck';
+import { Hourglass, RefreshCcw, Rocket, X } from 'lucide-react';
+import './VersionChecker.css';
+import { Button } from '../Button/Button';
+import { Tooltip } from '../common/Tooltip/Tooltip';
 
 export const VersionChecker: React.FC = () => {
   const { hasNewVersion } = useVersionCheck();
-  const toastShownRef = useRef(false);
 
-  useEffect(() => {
-    if (hasNewVersion && !toastShownRef.current) {
-      toastShownRef.current = true;
-      toast.info(
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <strong>¡Nueva versión disponible!</strong>
-          <span style={{ fontSize: '0.85rem' }}>
-            Hemos actualizado la plataforma. Haz clic aquí para recargar y aplicar los cambios.
-          </span>
-        </div>,
-        {
-          position: 'top-center',
-          autoClose: false, // Make it persistent until clicked
-          closeOnClick: true,
-          draggable: false,
-          theme: 'colored',
-          icon: <span>🚀</span>,
-          onClick: () => window.location.reload()
-        }
-      );
-    }
-  }, [hasNewVersion]);
+  // Estado local para manejar cuando el usuario decide actualizar "Más tarde"
+  const [isDismissed, setIsDismissed] = useState(false);
 
-  return null; // Component is invisible
+  // Principio de Responsabilidad Única: El componente decide si se renderiza
+  // basándose estrictamente en el estado de la versión y del usuario.
+  if (!hasNewVersion || isDismissed) {
+    return null;
+  }
+
+  const handleUpdate = () => {
+    window.location.reload();
+  };
+
+  const handleDismiss = () => {
+    setIsDismissed(true);
+  };
+
+  return (
+    <div className="update-notification" role="alert" aria-live="assertive">
+      <div className="update-icon">
+        <Rocket size={22} strokeWidth={2} />
+      </div>
+
+      <div className="update-body">
+        <h4 className="update-title">Nueva versión disponible</h4>
+        <p className="update-desc">
+          Hemos actualizado la plataforma con nuevas funciones y mejoras de
+          rendimiento.
+        </p>
+
+        <div className="update-actions">
+          <Button
+            onClick={handleUpdate}
+            variant="dashed"
+            size="xs"
+            color="success"
+            leftIcon={<RefreshCcw size={18} />}
+          >
+            Actualizar ahora
+          </Button>
+          <Button
+            onClick={handleDismiss}
+            size="xs"
+            color="red"
+            variant="dashed"
+            leftIcon={<Hourglass size={12} />}
+          >
+            Más tarde
+          </Button>
+        </div>
+      </div>
+
+      <Tooltip content="Descartar por ahora" followCursor={false}>
+        <Button
+          onClick={handleDismiss}
+          iconOnly
+          size='xs'
+          color='red'
+          variant='dashed'
+          circle
+          leftIcon={
+            <X size={18} />
+          }
+        />
+      </Tooltip>
+    </div>
+  );
 };

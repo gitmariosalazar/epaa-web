@@ -7,8 +7,11 @@ import {
   useSimulatedProgress
 } from '@/shared/presentation/components/CircularProgress';
 import { PendingBillsFilters } from '../../components/pending-bills/PendingBillsFilters';
+import { HistoryInvoicesFilters } from '../../components/pending-bills/HistoryInvoicesFilters';
 import { ClientPendingBillsList } from '../../components/pending-readings/ClientPendingBillsList';
+import { ClientHistoryInvoicesTable } from '../../components/pending-readings/ClientHistoryInvoicesTable';
 import { useClientPendingBills } from '../../hooks/pending-readings/useClientPendingBills';
+import { useClientHistoryInvoices } from '../../hooks/pending-readings/useClientHistoryInvoices';
 import { SearchX, Info, FileText, Clock } from 'lucide-react';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Tabs, type TabItem } from '@/shared/presentation/components/Tabs';
@@ -31,20 +34,26 @@ export const PendingBillsPage: React.FC = () => {
   // Translate labels at render time
   const translatedTabs: TabItem<PendingBillsTab>[] = [
     { ...PENDING_BILLS_TABS[0], label: t('accounting.tabs.pending', 'Facturas Pendientes') },
-    { ...PENDING_BILLS_TABS[1], label: t('accounting.tabs.history', 'Historial (Próximamente)') }
+    { ...PENDING_BILLS_TABS[1], label: t('accounting.tabs.history', 'Historial de Pagos') }
   ];
 
-  // ViewModel / Hook
-  const { isLoading, error, groupedBills, fetchPendingBills } = useClientPendingBills();
-  const loadingProgress = useSimulatedProgress(isLoading);
+  // ViewModels
+  const pendingBillsModel = useClientPendingBills();
+  const historyInvoicesModel = useClientHistoryInvoices();
 
   const handleFetch = async () => {
     if (!searchQuery.trim()) return;
     setHasSearched(true);
     if (activeTab === 'pending') {
-      await fetchPendingBills(searchQuery.trim());
+      await pendingBillsModel.fetchPendingBills(searchQuery.trim());
+    } else {
+      await historyInvoicesModel.fetchHistoryInvoices(searchQuery.trim());
     }
   };
+
+  const isLoading = activeTab === 'pending' ? pendingBillsModel.isLoading : historyInvoicesModel.isLoading;
+  const error = activeTab === 'pending' ? pendingBillsModel.error : historyInvoicesModel.error;
+  const loadingProgress = useSimulatedProgress(isLoading);
 
   return (
     <PageLayout
@@ -57,12 +66,23 @@ export const PendingBillsPage: React.FC = () => {
         />
       }
       filters={
-        <PendingBillsFilters
-          searchQuery={searchQuery}
-          onSearchQueryChange={setSearchQuery}
-          onFetch={handleFetch}
-          isLoading={isLoading}
-        />
+        activeTab === 'pending' ? (
+          <PendingBillsFilters
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            onFetch={handleFetch}
+            isLoading={isLoading}
+          />
+        ) : (
+          <HistoryInvoicesFilters
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            dateRange={historyInvoicesModel.dateRange}
+            onDateRangeChange={historyInvoicesModel.setDateRange}
+            onFetch={handleFetch}
+            isLoading={isLoading}
+          />
+        )
       }
     >
       {error ? (
@@ -80,7 +100,7 @@ export const PendingBillsPage: React.FC = () => {
           />
         </div>
       ) : activeTab === 'pending' ? (
-        hasSearched && groupedBills.length === 0 ? (
+        hasSearched && pendingBillsModel.groupedBills.length === 0 ? (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <EmptyState
               message="No se encontraron facturas pendientes"
@@ -89,7 +109,7 @@ export const PendingBillsPage: React.FC = () => {
               variant="warning"
             />
           </div>
-        ) : !hasSearched && groupedBills.length === 0 ? (
+        ) : !hasSearched && pendingBillsModel.groupedBills.length === 0 ? (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <EmptyState
               message="Consulta de Comprobantes"
@@ -100,19 +120,35 @@ export const PendingBillsPage: React.FC = () => {
           </div>
         ) : (
           <ClientPendingBillsList
-            groups={groupedBills}
+            groups={pendingBillsModel.groupedBills}
             isLoading={isLoading}
           />
         )
       ) : (
-        <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <EmptyState
-            message="Próximamente"
-            description="Esta consulta estará disponible muy pronto para que puedas ir agregando más opciones."
-            icon={Info}
-            variant="info"
+        hasSearched && historyInvoicesModel.groupedInvoices.length === 0 ? (
+          <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <EmptyState
+              message="No se encontró historial"
+              description={`No hay pagos registrados para la búsqueda: "${searchQuery}" en el periodo seleccionado.`}
+              icon={SearchX}
+              variant="warning"
+            />
+          </div>
+        ) : !hasSearched && historyInvoicesModel.groupedInvoices.length === 0 ? (
+          <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <EmptyState
+              message="Historial de Pagos"
+              description="Ingresa una cédula, RUC o clave catastral y selecciona un rango de fechas para buscar los pagos realizados."
+              icon={Info}
+              variant="info"
+            />
+          </div>
+        ) : (
+          <ClientHistoryInvoicesTable
+            groups={historyInvoicesModel.groupedInvoices}
+            isLoading={isLoading}
           />
-        </div>
+        )
       )}
     </PageLayout>
   );

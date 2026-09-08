@@ -1,0 +1,118 @@
+.require-token-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 400px;
+  padding: 2rem;
+  background-color: var(--background);
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  margin: 1rem;
+}
+
+/* Subtle animated background gradient */
+.require-token-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
+  animation: spinSlow 30s linear infinite;
+  z-index: 0;
+}
+
+@keyframes spinSlow {
+  100% { transform: rotate(360deg); }
+}
+
+.require-token-card {
+  position: relative;
+  z-index: 1;
+  background-color: var(--surface);
+  padding: 3rem;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(12px);
+  animation: slideUpFade 0.4s ease-out;
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.require-token-icon-wrapper {
+  display: inline-flex;
+  padding: 1.25rem;
+  background-color: rgba(245, 158, 11, 0.15); /* Soft amber */
+  color: #f59e0b; /* Amber */
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.require-token-card:hover .require-token-icon-wrapper {
+  transform: scale(1.05);
+}
+
+.require-token-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.5px;
+}
+
+.require-token-subtitle {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.require-token-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: rgba(239, 68, 68, 0.1); /* Soft red */
+  color: var(--error);
+  border-radius: var(--radius-sm);
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  text-align: left;
+  border-left: 3px solid var(--error);
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+.require-token-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  text-align: left;
+}
+
+.require-token-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 3rem;
+}

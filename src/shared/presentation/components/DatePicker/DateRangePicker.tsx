@@ -16,6 +16,8 @@ interface DateRangePickerProps {
   onChange: (start: string, end: string) => void;
   disabled?: boolean;
   size?: 'xs' | 'small' | 'compact' | 'medium' | 'large';
+  mode?: 'date' | 'month';
+  maxDate?: string;
 }
 
 export const DateRangePicker: React.FC<DateRangePickerProps> = ({
@@ -23,11 +25,14 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   endDate,
   onChange,
   disabled = false,
-  size = 'medium'
+  size = 'medium',
+  mode = 'date',
+  maxDate
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [hoverDate, setHoverDate] = useState<string>('');
 
   const [currentMonth, setCurrentMonth] = useState(() =>
     startDate ? new Date(startDate + 'T00:00:00') : dateService.getCurrentDate()
@@ -113,23 +118,41 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
     for (let i = 1; i <= daysInMonth; i++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-      const isStart = tempStart === dateStr;
-      const isEnd = tempEnd === dateStr;
-      const isInRange =
-        tempStart && tempEnd && dateStr > tempStart && dateStr < tempEnd;
+
+      let currentEnd = tempEnd;
+      if (!tempEnd && tempStart && hoverDate) {
+        currentEnd = hoverDate;
+      }
+
+      let actualStart = tempStart;
+      let actualEnd = currentEnd;
+
+      if (actualStart && actualEnd && actualEnd < actualStart) {
+        actualStart = currentEnd;
+        actualEnd = tempStart;
+      }
+
+      const isStart = actualStart === dateStr;
+      const isEnd = actualEnd === dateStr;
+      const isInRange = actualStart && actualEnd && dateStr > actualStart && dateStr < actualEnd;
       const isToday = today === dateStr;
+      const isAfterMax = maxDate ? dateStr > maxDate : false;
 
       days.push(
         <button
           key={i}
           type="button"
+          disabled={isAfterMax}
           className={`date-range-picker-cell 
             ${isStart ? 'date-range-picker-cell--selected date-range-picker-cell--range-start' : ''} 
             ${isEnd ? 'date-range-picker-cell--selected date-range-picker-cell--range-end' : ''} 
             ${isInRange ? 'date-range-picker-cell--in-range' : ''}
             ${isToday ? 'date-range-picker-cell--today' : ''}
+            ${isAfterMax ? 'date-range-picker-cell--disabled' : ''}
           `}
-          onClick={() => handleDateClick(dateStr)}
+          onClick={() => !isAfterMax && handleDateClick(dateStr)}
+          onMouseEnter={() => !isAfterMax && setHoverDate(dateStr)}
+          onMouseLeave={() => setHoverDate('')}
         >
           {i}
         </button>
@@ -138,19 +161,87 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
     return days;
   };
 
-  const nextMonth = () =>
-    setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1)
-    );
-  const prevMonth = () =>
-    setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1)
-    );
+  const handleMonthClick = (year: number, monthIndex: number) => {
+    const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-01`;
+    handleDateClick(dateStr);
+  };
 
-  const secondMonth = useMemo(
-    () => new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1),
-    [currentMonth]
-  );
+  const renderMonthsCalendar = (monthDate: Date) => {
+    const year = monthDate.getFullYear();
+    const today = dateService.getCurrentDateString();
+    const currentTodayMonthStr = today.substring(0, 7);
+    const startMonthStr = tempStart ? tempStart.substring(0, 7) : '';
+    const endMonthStr = tempEnd ? tempEnd.substring(0, 7) : '';
+
+    return monthNames.map((monthName, index) => {
+      const cellMonthStr = `${year}-${String(index + 1).padStart(2, '0')}`;
+      const hoverMonthStr = hoverDate ? hoverDate.substring(0, 7) : '';
+
+      let currentEndStr = endMonthStr;
+      if (!tempEnd && tempStart && hoverMonthStr) {
+        currentEndStr = hoverMonthStr;
+      }
+
+      let actualStartStr = startMonthStr;
+      let actualEndStr = currentEndStr;
+
+      if (actualStartStr && actualEndStr && actualEndStr < actualStartStr) {
+        actualStartStr = currentEndStr;
+        actualEndStr = startMonthStr;
+      }
+
+      const isStart = actualStartStr === cellMonthStr;
+      const isEnd = actualEndStr === cellMonthStr;
+      const isInRange = actualStartStr && actualEndStr && cellMonthStr > actualStartStr && cellMonthStr < actualEndStr;
+      const isToday = currentTodayMonthStr === cellMonthStr;
+      
+      const maxMonthStr = maxDate ? maxDate.substring(0, 7) : null;
+      const isAfterMax = maxMonthStr ? cellMonthStr > maxMonthStr : false;
+
+      return (
+        <button
+          key={index}
+          type="button"
+          disabled={isAfterMax}
+          className={`date-range-picker-cell date-range-picker-cell--month
+            ${isStart ? 'date-range-picker-cell--selected date-range-picker-cell--range-start' : ''} 
+            ${isEnd ? 'date-range-picker-cell--selected date-range-picker-cell--range-end' : ''} 
+            ${isInRange ? 'date-range-picker-cell--in-range' : ''}
+            ${isToday ? 'date-range-picker-cell--today' : ''}
+            ${isAfterMax ? 'date-range-picker-cell--disabled' : ''}
+          `}
+          onClick={() => !isAfterMax && handleMonthClick(year, index)}
+          onMouseEnter={() => !isAfterMax && setHoverDate(`${cellMonthStr}-01`)}
+          onMouseLeave={() => setHoverDate('')}
+        >
+          {monthName.substring(0, 3)}
+        </button>
+      );
+    });
+  };
+
+  const nextMonth = () => {
+    if (mode === 'month') {
+      setCurrentMonth(new Date(currentMonth.getFullYear() + 1, currentMonth.getMonth(), 1));
+    } else {
+      setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    }
+  };
+
+  const prevMonth = () => {
+    if (mode === 'month') {
+      setCurrentMonth(new Date(currentMonth.getFullYear() - 1, currentMonth.getMonth(), 1));
+    } else {
+      setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    }
+  };
+
+  const secondMonth = useMemo(() => {
+    if (mode === 'month') {
+      return new Date(currentMonth.getFullYear() + 1, currentMonth.getMonth(), 1);
+    }
+    return new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+  }, [currentMonth, mode]);
 
   const isValidDate = (dateStr: string) => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
@@ -216,18 +307,19 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   <ChevronLeft size={18} />
                 </button>
                 <span className="date-range-picker-month-title">
-                  {monthNames[currentMonth.getMonth()]}{' '}
-                  {currentMonth.getFullYear()}
+                  {mode === 'month' ? currentMonth.getFullYear() : `${monthNames[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`}
                 </span>
                 <div style={{ width: 36 }} />
               </div>
-              <div className="date-range-picker-weekdays">
-                {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map((d, i) => (
-                  <span key={`${d}-${i}`}>{d}</span>
-                ))}
-              </div>
-              <div className="date-range-picker-grid">
-                {renderCalendar(currentMonth)}
+              {mode === 'date' && (
+                <div className="date-range-picker-weekdays">
+                  {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map((d, i) => (
+                    <span key={`${d}-${i}`}>{d}</span>
+                  ))}
+                </div>
+              )}
+              <div className={mode === 'month' ? 'date-range-picker-month-grid' : 'date-range-picker-grid'}>
+                {mode === 'month' ? renderMonthsCalendar(currentMonth) : renderCalendar(currentMonth)}
               </div>
             </div>
 
@@ -235,8 +327,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
               <div className="date-range-picker-header">
                 <div style={{ width: 36 }} />
                 <span className="date-range-picker-month-title">
-                  {monthNames[secondMonth.getMonth()]}{' '}
-                  {secondMonth.getFullYear()}
+                  {mode === 'month' ? secondMonth.getFullYear() : `${monthNames[secondMonth.getMonth()]} ${secondMonth.getFullYear()}`}
                 </span>
                 <button
                   type="button"
@@ -246,13 +337,15 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   <ChevronRight size={18} />
                 </button>
               </div>
-              <div className="date-range-picker-weekdays">
-                {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map((d, i) => (
-                  <span key={`${d}-${i}`}>{d}</span>
-                ))}
-              </div>
-              <div className="date-range-picker-grid">
-                {renderCalendar(secondMonth)}
+              {mode === 'date' && (
+                <div className="date-range-picker-weekdays">
+                  {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map((d, i) => (
+                    <span key={`${d}-${i}`}>{d}</span>
+                  ))}
+                </div>
+              )}
+              <div className={mode === 'month' ? 'date-range-picker-month-grid' : 'date-range-picker-grid'}>
+                {mode === 'month' ? renderMonthsCalendar(secondMonth) : renderCalendar(secondMonth)}
               </div>
             </div>
           </div>
@@ -271,6 +364,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     value={tempStart}
                     onChange={(e) => handleManualStartChange(e.target.value)}
                     placeholder="YYYY-MM-DD"
+                    readOnly={mode === 'month'}
                   />
                   <ArrowRight size={12} style={{ opacity: 0.5 }} />
                   <input
@@ -279,6 +373,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     value={tempEnd}
                     onChange={(e) => handleManualEndChange(e.target.value)}
                     placeholder="YYYY-MM-DD"
+                    readOnly={mode === 'month'}
                   />
                 </div>
               </div>

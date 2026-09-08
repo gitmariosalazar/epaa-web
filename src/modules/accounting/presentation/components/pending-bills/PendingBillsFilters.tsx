@@ -43,7 +43,7 @@ export const PendingBillsFilters: React.FC<PendingBillsFiltersProps> = ({
               value={searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              size="compact"
+              size="small"
               leftIcon={<Search size={18} />}
             />
           </div>
@@ -53,7 +53,7 @@ export const PendingBillsFilters: React.FC<PendingBillsFiltersProps> = ({
           <Button
             onClick={onFetch}
             disabled={!canFetch}
-            size="compact"
+            size="xs"
             isLoading={isLoading}
             leftIcon={<Search size={18} />}
           >
