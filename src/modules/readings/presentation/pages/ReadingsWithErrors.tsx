@@ -5,10 +5,6 @@ import { CheckCircle, Calculator, List } from 'lucide-react';
 import { Tabs } from '@/shared/presentation/components/Tabs';
 import type { TabItem } from '@/shared/presentation/components/Tabs';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
-import {
-  CircularProgress,
-  useSimulatedProgress
-} from '@/shared/presentation/components/CircularProgress';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 
 import {
@@ -26,8 +22,11 @@ import { ReadingsNoveltyTabView } from '../components/novelties/ReadingsNoveltyT
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
-import { BsPatchQuestionFill } from 'react-icons/bs';
+import { BsExclamationCircleFill, BsPatchQuestionFill } from 'react-icons/bs';
 import { UpdateSpecialReadingWithImagesPage } from './UpdateSpecialReadingWithImagesPage';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import { useReadingsRealtimeSync } from '../hooks/useReadingsRealtimeSync';
 
 
 interface ModalState {
@@ -99,8 +98,6 @@ export const ReadingsWithErrors: React.FC = () => {
     clearAll
   } = useReadingsList();
 
-  const loadingProgress = useSimulatedProgress(isLoading);
-
   useEffect(() => {
     setSector('');
     setUserId('');
@@ -155,6 +152,14 @@ export const ReadingsWithErrors: React.FC = () => {
     setModalState(null);
   };
 
+  useReadingsRealtimeSync({
+    activeTab,
+    month,
+    sector,
+    userId,
+    fetchReadings,
+  });
+
   const handleModalSuccess = () => {
     closeModal();
     fetchReadings(activeTab as any, month, sector, userId);
@@ -202,28 +207,13 @@ export const ReadingsWithErrors: React.FC = () => {
       }
     >
       {error ? (
-        <div
-          className="entry-data-error"
-          style={{ color: 'red', marginTop: '0rem' }}
-        >
-          <strong>Error: </strong> {error}
-        </div>
-      ) : isLoading ? (
-        <div
-          className="entry-data-loading"
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginTop: '0rem'
-          }}
-        >
-          <CircularProgress
-            progress={loadingProgress}
-            size={112}
-            strokeWidth={9}
-            label={t('common.loading', 'Cargando datos...')}
-          />
-        </div>
+        <EmptyState
+          message='No se pudieron cargar las lecturas'
+          description='Intenta de nuevo más tarde.'
+          variant='error'
+          actionButton={<Button title='Reintentar' onClick={() => fetchReadings(activeTab as any, month, sector, userId)} />}
+          icon={<BsExclamationCircleFill />}
+        />
       ) : (
         <>
           {activeTab === 'completed' && (

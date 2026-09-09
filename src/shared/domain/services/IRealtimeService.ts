@@ -5,29 +5,15 @@
 // ─ OCP  : agregar un evento = solo ampliar WsEventMap, sin tocar consumidores.
 // ─ ISP  : interfaz mínima — connect/disconnect/on. Nada más.
 
-// ── Payloads — deben coincidir exactamente con RealtimeService del backend ────
-
-export interface ReadingUpdatedPayload {
-  /** ID del sector afectado */
-  sectorId: number;
-  /** Mes en formato 'YYYY-MM' o 'YYYY-MM-DD' */
-  month: string;
-  type: 'created' | 'updated';
-}
-
-export interface AuditUpdatedPayload {
-  sectorId: number;
-  month: string;
-  type: 'closed' | 'progress_changed';
-}
-
-// ── Mapa de eventos tipado ────────────────────────────────────────────────────
-// Para añadir un nuevo evento: solo agregar una entrada aquí.
-// Todos los consumidores (hooks, contextos) lo heredan automáticamente.
-export type WsEventMap = {
-  'reading:updated': ReadingUpdatedPayload;
-  'audit:updated': AuditUpdatedPayload;
-};
+// ── Mapa de eventos tipado (Abierto a extensión) ─────────────────────────────
+// Usa Declaration Merging: cada módulo debe extender esta interfaz para
+// agregar sus propios eventos.
+// Ejemplo en un módulo externo:
+// declare module '@/shared/domain/services/IRealtimeService' {
+//   interface WsEventMap { 'mi:evento': MiPayload; }
+// }
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface WsEventMap {}
 
 // ── Interfaz pública del servicio ─────────────────────────────────────────────
 export interface IRealtimeService {

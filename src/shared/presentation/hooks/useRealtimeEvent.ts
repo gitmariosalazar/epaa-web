@@ -6,39 +6,37 @@
 // DIP : depende de IRealtimeService a través del singleton, no de socket.io.
 // OCP : soporta cualquier evento definido en WsEventMap sin modificación.
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { realtimeService } from '@/shared/infrastructure/services/WebSocketService';
 import type { WsEventMap } from '@/shared/domain/services/IRealtimeService';
 
 /**
  * Suscribe el `handler` al evento WebSocket `event`.
  * El cleanup ocurre automáticamente al desmontar el componente o al cambiar `event`.
- *
- * ⚠️ Envuelve el handler en `useCallback` en el componente llamador si necesitas
- *    que responda a cambios de estado (ver ejemplo 2).
- *
- * @example 1 — Handler estático
- * useRealtimeEvent('reading:updated', (payload) => {
- *   if (payload.month === currentMonth) refetch();
- * });
- *
- * @example 2 — Handler que depende de estado (estabilizado con useCallback)
- * const handleAudit = useCallback((payload: AuditUpdatedPayload) => {
- *   if (payload.sectorId === activeSector) refreshAudit();
- * }, [activeSector, refreshAudit]);
- * useRealtimeEvent('audit:updated', handleAudit);
+ * 
+ * NOTA: Utiliza el patrón `useRef` internamente, por lo que SIEMPRE tendrás 
+ * acceso al estado más reciente del componente sin sufrir "stale closures" y 
+ * sin reconectar el WebSocket innecesariamente.
  */
 export function useRealtimeEvent<K extends keyof WsEventMap>(
   event: K,
   handler: (payload: WsEventMap[K]) => void
 ): void {
-  // Estabilizamos la referencia del handler para que el efecto no se re-ejecute
-  // en cada render, incluso si el caller no usó useCallback.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const stableHandler = useCallback(handler, []);
+  // Guardamos la referencia más reciente del handler
+  const handlerRef = useRef(handler);
+
+  // Actualizamos la ref cada vez que el componente renderiza con un nuevo handler
+  useEffect(() => {
+    handlerRef.current = handler;
+  }, [handler]);
 
   useEffect(() => {
-    const unsubscribe = realtimeService.on(event, stableHandler);
+    // La función interna de suscripción siempre llamará a la versión más reciente
+    const subscriptionCallback = (payload: WsEventMap[K]) => {
+      handlerRef.current(payload);
+    };
+
+    const unsubscribe = realtimeService.on(event, subscriptionCallback);
     return unsubscribe;
-  }, [event, stableHandler]);
+  }, [event]);
 }

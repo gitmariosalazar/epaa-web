@@ -18,6 +18,7 @@ import { UpdateReadingWithImagesPage } from '../../pages/UpdateReadingWithImages
 import { ReadingDetailModal } from '../ReadingDetailModal';
 import { ReadingsProvider } from '../../context/ReadingsContext';
 import { UpdateSpecialReadingWithImagesPage } from '../../pages/UpdateSpecialReadingWithImagesPage';
+import { useReadingNoveltiesRealtimeSync } from '../../hooks/useReadingNoveltiesRealtimeSync';
 interface ModalState {
   isOpen: boolean;
   mode: 'create' | 'update';
@@ -79,6 +80,8 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
   const handleFetch = () => {
     fetchNoveltyReadings(novelty, month, sector ? Number(sector) : undefined, userId);
   };
+
+  useReadingNoveltiesRealtimeSync(month, sector, handleFetch);
 
   const handleTableAction = (
     mode: 'create' | 'update',

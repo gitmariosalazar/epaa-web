@@ -11,6 +11,4 @@ export { realtimeService, webSocketService } from '../WebSocketService';
 export type {
   IRealtimeService,
   WsEventMap,
-  ReadingUpdatedPayload,
-  AuditUpdatedPayload,
 } from '@/shared/domain/services/IRealtimeService';

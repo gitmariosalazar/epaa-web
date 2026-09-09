@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useLayoutEffect,
+  useEffect,
   useRef,
   useState
 } from 'react';
@@ -160,11 +161,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorageService.setItem('user', JSON.stringify(session.user));
     // Schedule proactive refresh for the new access token
     scheduleTokenRefresh(session.accessToken);
-    // ── Reconectar WebSocket con el token del usuario autenticado ──────────────
-    // disconnect() limpia el socket anterior (sin token o con token viejo)
-    // y connect() crea uno nuevo autenticado.
-    realtimeService.disconnect();
-    realtimeService.connect(environments.API_URL, session.accessToken);
   };
 
   const clearSession = () => {
@@ -173,11 +169,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       clearTimeout(refreshTimerRef.current);
       refreshTimerRef.current = null;
     }
-    // ── Desconectar WebSocket limpiamente ANTES de limpiar la sesión ─────────
-    // disconnect() detiene la reconexion automática de socket.io.
-    // Sin esto, el socket se reconectaría sin token mostrando
-    // "Client connected without authentication".
-    realtimeService.disconnect();
     setToken(null);
     setUser(null);
     localStorageService.removeItem('token');
@@ -252,6 +243,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ── Sincronización Reactiva del WebSocket ──────────────────────────────────
+  // Si hay token, conectamos el socket. Si se borra el token (logout o expiración), lo desconectamos.
+  useEffect(() => {
+    if (token) {
+      realtimeService.disconnect();
+      realtimeService.connect(environments.API_URL, token);
+    } else {
+      realtimeService.disconnect();
+    }
+  }, [token]);
 
   useLayoutEffect(() => {
     // SECURITY: Initialize activity tracking

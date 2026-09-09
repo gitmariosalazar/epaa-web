@@ -44,14 +44,14 @@ export const VersionChecker: React.FC = () => {
             variant="dashed"
             size="xs"
             color="success"
-            leftIcon={<RefreshCcw size={18} />}
+            leftIcon={<RefreshCcw size={12} />}
           >
             Actualizar ahora
           </Button>
           <Button
             onClick={handleDismiss}
             size="xs"
-            color="red"
+            color="amber"
             variant="dashed"
             leftIcon={<Hourglass size={12} />}
           >

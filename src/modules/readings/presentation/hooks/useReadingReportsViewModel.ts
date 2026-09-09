@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useIncidentContext } from '../../../incidents/presentation/context/IncidentContext';
+import { useRealtimeEvent } from '@/shared/presentation/hooks/useRealtimeEvent';
 import type { IncidentDetailRowResponse } from '../../../incidents/domain/schemas/dtos/response/view_incident.response';
 
 export type IncidentSortKey =
@@ -142,6 +143,19 @@ export const useReadingReportsViewModel = () => {
     },
     [connectionMode, setSearchParams]
   );
+
+  // ── Sincronización en Tiempo Real (WebSockets) ──────────────────────────
+  useRealtimeEvent('connection.created', () => {
+    setTimeout(() => refresh(), 1500);
+  });
+
+  useRealtimeEvent('connection.updated', () => {
+    setTimeout(() => refresh(), 1500);
+  });
+
+  useRealtimeEvent('reading:updated', () => {
+    setTimeout(() => refresh(), 1500);
+  });
 
   // Ref estable para loadIncidents — evita loop isLoading → useEffect → fetch
   const loadIncidentsRef = useRef(loadIncidents);

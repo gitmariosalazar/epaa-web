@@ -24,6 +24,7 @@ import type {
 import type { AuditSector } from '@/modules/readings/domain/models/ReadingAudit';
 import { GetAuditByMonthUseCase } from '@/modules/readings/application/usecases/audit/GetAuditByMonthUseCase';
 import { ReadingAuditRepositoryImpl } from '@/modules/readings/infrastructure/repositories/ReadingAuditRepositoryImpl';
+import '@/modules/readings/domain/events/ReadingWsEvents';
 
 export const useDashboardController = () => {
   const [currentMonth, setCurrentMonth] = useState<string>(

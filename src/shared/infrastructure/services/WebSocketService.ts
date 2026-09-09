@@ -13,8 +13,7 @@ import { io, Socket } from 'socket.io-client';
 import type { IRealtimeService, WsEventMap } from '@/shared/domain/services/IRealtimeService';
 
 // Re-exportamos desde dominio para que los consumers solo necesiten un import.
-export type { IRealtimeService, WsEventMap, ReadingUpdatedPayload, AuditUpdatedPayload }
-  from '@/shared/domain/services/IRealtimeService';
+export type { IRealtimeService, WsEventMap } from '@/shared/domain/services/IRealtimeService';
 
 // ── Implementación interna (no se exporta la clase, solo el singleton) ────────
 type AnyHandler = (payload: unknown) => void;

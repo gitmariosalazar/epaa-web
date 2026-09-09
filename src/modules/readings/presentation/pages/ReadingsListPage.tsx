@@ -5,10 +5,6 @@ import { Clock, CheckCircle, Calculator, List } from 'lucide-react';
 import { Tabs } from '@/shared/presentation/components/Tabs';
 import type { TabItem } from '@/shared/presentation/components/Tabs';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
-import {
-  CircularProgress,
-  useSimulatedProgress
-} from '@/shared/presentation/components/CircularProgress';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 
 import {
@@ -17,18 +13,23 @@ import {
 } from '../components/ReadinsFilters';
 import { useReadingsList } from '../hooks/useReadingsList';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import '@/modules/connections/domain/events/ConnectionWsEvents';
+import '@/modules/readings/domain/events/ReadingWsEvents';
 
 import { PendingReadingConnectionTable } from '../components/PendingReadingConnectionTable';
 import { CompletedReadingConnectionTable } from '../components/CompletedReadingConnectionTable';
 import { EstimatedReadingConnectionTable } from '../components/EstimatedReadingConnectionTable';
 import { AllReadingsTable } from '../components/AllReadingsTable';
 import { CreateReadingPage } from './CreateReadingPage';
-import { UpdateReadingWithImagesPage } from './UpdateReadingWithImagesPage';
-import { BsPatchQuestionFill } from 'react-icons/bs';
+import { BsExclamationCircleFill, BsPatchQuestionFill } from 'react-icons/bs';
 import { ReadingsNoveltyTabView } from '../components/novelties/ReadingsNoveltyTabView';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import { useReadingsRealtimeSync } from '../hooks/useReadingsRealtimeSync';
+import { UpdateReadingWithImagesPage } from './UpdateReadingWithImagesPage';
 
 interface ModalState {
   isOpen: boolean;
@@ -104,7 +105,6 @@ export const ReadingsListPage: React.FC = () => {
     clearAll
   } = useReadingsList();
 
-  const loadingProgress = useSimulatedProgress(isLoading);
 
   useEffect(() => {
     setSector('');
@@ -165,6 +165,17 @@ export const ReadingsListPage: React.FC = () => {
     setModalState(null);
   };
 
+
+
+  // ── WebSockets: Actualización INSTANTÁNEA ────────────────────────────────
+  useReadingsRealtimeSync({
+    activeTab,
+    month,
+    sector,
+    userId,
+    fetchReadings,
+  });
+
   const handleModalSuccess = () => {
     closeModal();
     fetchReadings(activeTab as any, month, sector, userId);
@@ -211,28 +222,13 @@ export const ReadingsListPage: React.FC = () => {
       }
     >
       {error ? (
-        <div
-          className="entry-data-error"
-          style={{ color: 'red', marginTop: '0rem' }}
-        >
-          <strong>Error: </strong> {error}
-        </div>
-      ) : isLoading ? (
-        <div
-          className="entry-data-loading"
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginTop: '0rem'
-          }}
-        >
-          <CircularProgress
-            progress={loadingProgress}
-            size={112}
-            strokeWidth={9}
-            label={t('common.loading', 'Cargando datos...')}
-          />
-        </div>
+        <EmptyState
+          message='No se pudieron cargar las lecturas'
+          description='Intenta de nuevo más tarde.'
+          variant='error'
+          actionButton={<Button title='Reintentar' onClick={() => fetchReadings(activeTab as any, month, sector, userId)} />}
+          icon={<BsExclamationCircleFill />}
+        />
       ) : (
         <>
           {activeTab === 'pending' && (

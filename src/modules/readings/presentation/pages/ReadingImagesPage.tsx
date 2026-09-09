@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ImageIcon, AlertCircle, Droplet, MapPin, FileText } from 'lucide-react';
+import { ImageIcon, Droplet, MapPin, FileText } from 'lucide-react';
 
 import { ReadingImagesFilters } from '../components/ReadingImagesFilters';
 import { useFindReadingImagesByFilter } from '../hooks/useFindReadingImagesByFilter';
@@ -9,10 +9,6 @@ import {
   type Column
 } from '@/shared/presentation/components/Table/Table';
 import type { ReadingImages } from '../../domain/models/ReadingImages';
-import {
-  CircularProgress,
-  useSimulatedProgress
-} from '@/shared/presentation/components/CircularProgress';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ReadingImagesViewer } from '../components/ReadingImagesViewer';
 import '../styles/ReadingImagesPage.css';
@@ -30,6 +26,9 @@ import { ReadingAdjustmentHistoryPopover } from '../components/ReadingAdjustment
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
 import { UpdateSpecialReadingWithImagesPage } from './UpdateSpecialReadingWithImagesPage';
+import { BsExclamationCircleFill } from 'react-icons/bs';
+import { useReadingImagesRealtimeSync } from '../hooks/useReadingImagesRealtimeSync';
+
 
 interface ReadingImagesPageProps {
   isPublic?: boolean;
@@ -39,7 +38,6 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
   const { t } = useTranslation();
   const { readingImages, isLoading, error, fetchImagesByFilter: fetchImages } =
     useFindReadingImagesByFilter();
-  const loadingProgress = useSimulatedProgress(isLoading);
 
   // State for the image viewer
   const [selectedReading, setSelectedReading] = useState<ReadingImages | null>(
@@ -98,6 +96,12 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
       updatedStatus: filters.updatedStatus
     });
   };
+
+  useReadingImagesRealtimeSync(
+    currentFilters.monthIso,
+    currentFilters.sector,
+    () => fetchImages(currentFilters)
+  );
 
   const handleModalSuccess = () => {
     setReadingModalState(null);
@@ -225,19 +229,13 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
       <ReadingImagesFilters isLoading={isLoading} onFetch={handleFetch} />
 
       {error ? (
-        <div className="reading-images-error">
-          <AlertCircle size={20} />
-          <span>{error}</span>
-        </div>
-      ) : isLoading ? (
-        <div className="reading-images-loading">
-          <CircularProgress
-            progress={loadingProgress}
-            size={90}
-            strokeWidth={8}
-            label={t('common.loading', 'Cargando datos...')}
-          />
-        </div>
+        <EmptyState
+          message='No se pudieron cargar las imágenes de las lecturas'
+          description='Intenta de nuevo más tarde.'
+          variant='error'
+          actionButton={<Button title='Reintentar' onClick={() => fetchImages(currentFilters)} />}
+          icon={<BsExclamationCircleFill />}
+        />
       ) : (
         <div className="fade-in-section">
           <Table<ReadingImages>

@@ -77,6 +77,7 @@ import { ConnectionProvider } from '@/modules/connections/presentation/context/C
 import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
 
+
 const ReadingReportsContent: React.FC = () => {
   const vm = useReadingReportsViewModel();
   const {
@@ -155,6 +156,8 @@ const ReadingReportsContent: React.FC = () => {
   const handleAction = (mode: 'create' | 'update', cadastralKey: string) => {
     setReadingModalState({ isOpen: true, mode, cadastralKey });
   };
+
+  // TODO: We will move realtime sync to the ViewModel hook (useReadingReportsViewModel.ts)
 
 
   // ── Columnas de la tabla ──────────────────────────────────────────────────
