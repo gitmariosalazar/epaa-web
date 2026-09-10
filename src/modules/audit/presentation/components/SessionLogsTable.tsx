@@ -22,6 +22,9 @@ import styles from '../styles/SessionLogsTable.module.css';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { MdPhoneIphone } from 'react-icons/md';
+import { useUserDetailViewModel } from '@/modules/users/presentation/hooks/useUserDetailViewModel';
+import '../styles/SessionLogsTable.css';
+
 
 export const SessionLogsTable: React.FC = () => {
   const { state, actions } = useAuditViewModel();
@@ -32,12 +35,19 @@ export const SessionLogsTable: React.FC = () => {
     null
   );
 
+  const [selectedUsername, setSelectedUsername] = useState<string | undefined>(undefined);
+
+
+  const { user: userDetails, loading: userLoading } = useUserDetailViewModel(selectedUsername);
+
+
   useEffect(() => {
     fetchSessionLogs({ limit: 100, offset: 0 });
   }, [fetchSessionLogs]);
 
   const handleViewDetails = (log: AuditSessionResponse) => {
     setSelectedLog(log);
+    setSelectedUsername(log.username);
     setIsModalOpen(true);
   };
 
@@ -112,6 +122,8 @@ export const SessionLogsTable: React.FC = () => {
     }
   ];
 
+  console.log(userDetails);
+
   return (
     <div
       className="conn-table-wrapper"
@@ -148,6 +160,37 @@ export const SessionLogsTable: React.FC = () => {
       >
         {selectedLog && (
           <div className={styles.detailsContainer}>
+            {/* Detalles adicionales del usuario */}
+            <div className={styles.infoCard}>
+              <div className={styles.cardHeader}>
+                <User size={16} /> <span>Detalles del Perfil</span>
+              </div>
+              {userLoading ? (
+                <span>Cargando perfil...</span>
+              ) : userDetails ? (
+                <div className='detail-user-info'>
+                  <span><strong>Email:</strong> {userDetails.email}</span>
+                  <span><strong>Usuario:</strong> {userDetails.username}</span>
+                  <span className='status-user-detail'><strong>Estado:</strong>
+                    <ColorChip
+                      color={userDetails.isActive ? 'var(--success, #10b981)' : 'var(--danger, #ef4444)'}
+                      label={userDetails.isActive ? 'Activo' : 'Inactivo'}
+                      variant="soft"
+                      size="xs"
+                      icon={userDetails.isActive ? <Activity size={12} /> : <LogOut size={12} />}
+                    />
+                  </span>
+                  <span><strong>Nombre:</strong> {userDetails.firstName + ' ' + userDetails.lastName}</span>
+                </div>
+              ) : (
+                <EmptyState
+                  message="No se pudo cargar el perfil del usuario"
+                  icon={IoInformationCircleOutline}
+                  variant="info"
+                />
+              )}
+            </div>
+
             {/* Header info cards */}
             <div className={styles.headerGrid}>
               <div className={styles.infoCard}>
@@ -172,8 +215,9 @@ export const SessionLogsTable: React.FC = () => {
                         : 'var(--success, #10b981)'
                   }
                   label={selectedLog.event}
-                  variant="solid"
-                  size="md"
+                  variant="soft"
+                  size="xs"
+                  icon={selectedLog.event === 'LOGIN_FAILED' ? <AlertTriangle size={12} /> : selectedLog.event === 'LOGOUT' ? <LogOut size={12} /> : <Activity size={12} />}
                 />
               </div>
 

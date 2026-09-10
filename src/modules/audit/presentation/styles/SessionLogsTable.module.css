@@ -1,7 +1,7 @@
 /* src/modules/audit/presentation/styles/SessionLogsTable.module.css */
 
 .userAgentLink {
-  font-size: 0.85em;
+  font-size: var(--font-size-sm);
   opacity: 0.8;
 }
 
@@ -13,7 +13,7 @@
 .detailsContainer {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.5rem;
   padding: 0.5rem 0;
 }
 
@@ -36,16 +36,16 @@
   gap: 0.5rem;
   color: var(--text-secondary);
   margin-bottom: 0.5rem;
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
 }
 
 .cardValue {
-  font-size: 1.1rem;
+  font-size: var(--font-size-sm);
   font-weight: 700;
 }
 
 .dateTimeValue {
-  font-size: 0.95rem;
+  font-size: var(--font-size-sm);
   font-weight: 700;
 }
 
@@ -84,19 +84,19 @@
 }
 
 .itemLabel {
-  font-size: 0.8rem;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
 
 .itemValue {
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: var(--font-size-sm);
   margin-top: 0.1rem;
 }
 
 .itemValueAgent {
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: var(--font-size-sm);
   word-break: break-word;
   opacity: 0.9;
   margin-top: 0.1rem;
@@ -120,19 +120,19 @@
 .failureTitle {
   color: #ef4444;
   margin: 0 0 0.25rem 0;
-  font-size: 0.95rem;
+  font-size: var(--font-size-sm);
 }
 
 .failureText {
   margin: 0;
   color: rgba(255, 255, 255, 0.9);
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
 }
 
 .metadataHeader {
   margin: 0 0 0.75rem 0;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -141,7 +141,7 @@
 /* Syntax Highlighter Custom Styles passed as objects usually, 
    but we can define the base container style here if needed */
 .syntaxContainer {
-  font-size: 0.85em;
+  font-size: var(--font-size-sm);
   max-height: 300px;
   overflow-y: auto;
 }

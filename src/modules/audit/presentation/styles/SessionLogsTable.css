@@ -1,0 +1,16 @@
+.detail-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  font-size: var(--font-size-sm);
+}
+
+.status-user-detail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: absolute;
+  right: 0;
+  top: -30px;
+}
