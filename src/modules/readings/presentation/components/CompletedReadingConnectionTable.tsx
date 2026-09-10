@@ -147,7 +147,7 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
             >
               <div className="flex items-center gap-2">
                 <ColorChip
-                  label={`@${r.userCreatedId}`}
+                  label={r.userCreatedId ? `@${r.userCreatedId}` : 'S/N'}
                   color="var(--text-secondary)"
                   size="xs"
                   variant="ghost"

@@ -85,6 +85,23 @@ export const useReading = () => {
             getReadingHistoryUseCase.execute(cadastralKey, 15, 0)
           ]);
 
+        // Procesar Historial Inmediatamente
+        if (
+          historyResultSettled.status === 'fulfilled' &&
+          historyResultSettled.value
+        ) {
+          setReadingHistory(historyResultSettled.value);
+        } else {
+          setReadingHistory([]);
+          if (historyResultSettled.status === 'rejected') {
+            console.error(
+              'Error fetching history:',
+              historyResultSettled.reason
+            );
+          }
+        }
+        setIsLoadingHistory(false); // Update immediately so table stops spinning!
+
         // Procesar Información Principal
         if (
           infoResultSettled.status === 'fulfilled' &&
@@ -191,25 +208,8 @@ export const useReading = () => {
             );
           }
         }
-
-        // Procesar Historial
-        if (
-          historyResultSettled.status === 'fulfilled' &&
-          historyResultSettled.value
-        ) {
-          setReadingHistory(historyResultSettled.value);
-        } else {
-          setReadingHistory([]);
-          if (historyResultSettled.status === 'rejected') {
-            console.error(
-              'Error fetching history:',
-              historyResultSettled.reason
-            );
-          }
-        }
       } finally {
         setIsLoadingInfo(false);
-        setIsLoadingHistory(false);
       }
     },
     [getReadingInfoUseCase, getReadingHistoryUseCase]

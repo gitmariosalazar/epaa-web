@@ -338,7 +338,7 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
 
         {/* Mensajes de Estado (Búsqueda Inicial, Sin Resultados, Error) */}
         {
-          isLoadingInfo && (
+          isLoadingInfo && !readingInfoForRequest && (
             <div className='reading-images-loading'>
               <CircularProgress
                 label="Buscando..."

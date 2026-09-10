@@ -370,7 +370,7 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
           )}
 
         {/* Mensajes de Estado (Búsqueda Inicial, Sin Resultados, Error) */}
-        {isLoadingInfo && (
+        {isLoadingInfo && !currentReadingInfoForRequest && (
           <div className="reading-images-loading">
             <CircularProgress label="Buscando..." />
           </div>
