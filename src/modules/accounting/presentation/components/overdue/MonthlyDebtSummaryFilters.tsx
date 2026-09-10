@@ -32,87 +32,87 @@ export const MonthlyDebtSummaryFilters: React.FC<
   hideYearFilter = false,
   hideMonthFilter = false
 }: MonthlyDebtSummaryFiltersProps) => {
-  const { t } = useTranslation();
+    const { t } = useTranslation();
 
-  return (
-    <div className="payment-filters">
-      <div className="filter-section-left">
-        {!hideYearFilter && (
-          <div className="filter-group">
-            <label className="filter-label">
-              {t('accounting.monthlyDebtSummary.year', 'Filter by year')}
-            </label>
-            <Select
-              value={selectedYear}
-              onChange={(e) => onYearChange(e.target.value)}
-              disabled={isLoading}
-              leftIcon={<CalendarIcon />}
-              size="compact"
-            >
-              {showAllOption && (
-                <option value="all">{t('common.all', 'Todos los años')}</option>
-              )}
-              {availableYears
-                .sort((a, b) => b - a)
-                .map((year) => (
-                  <option key={year} value={year.toString()}>
-                    {year}
+    return (
+      <div className="payment-filters">
+        <div className="filter-section-left">
+          {!hideYearFilter && (
+            <div className="filter-group">
+              <label className="filter-label">
+                {t('accounting.monthlyDebtSummary.year', 'Filter by year')}
+              </label>
+              <Select
+                value={selectedYear}
+                onChange={(e) => onYearChange(e.target.value)}
+                disabled={isLoading}
+                leftIcon={<CalendarIcon />}
+                size="small"
+              >
+                {showAllOption && (
+                  <option value="all">{t('common.all', 'Todos los años')}</option>
+                )}
+                {availableYears
+                  .sort((a, b) => b - a)
+                  .map((year) => (
+                    <option key={year} value={year.toString()}>
+                      {year}
+                    </option>
+                  ))}
+              </Select>
+            </div>
+          )}
+          {!hideMonthFilter && (
+            <div className="filter-group">
+              <label className="filter-label">
+                {t('accounting.monthlyDebtSummary.month', 'Filter by month')}
+              </label>
+              <Select
+                value={selectedMonth}
+                onChange={(e) => onMonthChange(e.target.value)}
+                disabled={isLoading}
+                leftIcon={<CalendarIcon />}
+                size="small"
+              >
+                {showAllOption && <option value="">Todos</option>}
+                {availableMonths.map((month) => (
+                  <option key={month} value={month}>
+                    {month}
                   </option>
                 ))}
-            </Select>
-          </div>
-        )}
-        {!hideMonthFilter && (
-          <div className="filter-group">
-            <label className="filter-label">
-              {t('accounting.monthlyDebtSummary.month', 'Filter by month')}
-            </label>
-            <Select
-              value={selectedMonth}
-              onChange={(e) => onMonthChange(e.target.value)}
-              disabled={isLoading}
-              leftIcon={<CalendarIcon />}
-              size="compact"
-            >
-              {showAllOption && <option value="">Todos</option>}
-              {availableMonths.map((month) => (
-                <option key={month} value={month}>
-                  {month}
-                </option>
-              ))}
-            </Select>
-          </div>
-        )}
-        {!hideYearFilter && selectedYear !== 'all' && (
-          <div className="filter-group">
-            <label className="filter-label" style={{ visibility: 'hidden' }}>
-              .
-            </label>
+              </Select>
+            </div>
+          )}
+          {!hideYearFilter && selectedYear !== 'all' && (
+            <div className="filter-group">
+              <label className="filter-label" style={{ visibility: 'hidden' }}>
+                .
+              </label>
+              <Button
+                onClick={() => onYearChange('all')}
+                size="xs"
+                variant="ghost"
+                leftIcon={<X size={16} />}
+              >
+                {t('common.clear', 'Limpiar')}
+              </Button>
+            </div>
+          )}
+        </div>
+        {onRefresh && (
+          <div className="filter-section-right">
             <Button
-              onClick={() => onYearChange('all')}
-              size="compact"
-              variant="ghost"
-              leftIcon={<X size={16} />}
+              onClick={onRefresh}
+              variant="outline"
+              color="gray"
+              size="xs"
+              isLoading={isLoading}
+              leftIcon={<RefreshCw size={16} />}
             >
-              {t('common.clear', 'Limpiar')}
+              {t('common.refresh', 'Refrescar')}
             </Button>
           </div>
         )}
       </div>
-      {onRefresh && (
-        <div className="filter-section-right">
-          <Button
-            onClick={onRefresh}
-            variant="outline"
-            color="gray"
-            size="compact"
-            isLoading={isLoading}
-            leftIcon={<RefreshCw size={16} />}
-          >
-            {t('common.refresh', 'Refrescar')}
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-};
+    );
+  };

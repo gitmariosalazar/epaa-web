@@ -28,7 +28,7 @@ const NotificationsInner: React.FC<{ userId: string }> = ({ userId }) => {
   useEffect(() => { refresh(userId); }, [userId, refresh]);
 
   const handleMarkAsRead = (id: string) => markAsRead(id, userId);
-  const handleMarkAll    = () => markAllAsRead(userId);
+  const handleMarkAll = () => markAllAsRead(userId);
 
   return (
     <div className="notif-page">
@@ -42,7 +42,7 @@ const NotificationsInner: React.FC<{ userId: string }> = ({ userId }) => {
         </div>
         <Button
           variant="outline"
-          size="compact"
+          size="small"
           leftIcon={<CheckCheck size={15} />}
           onClick={handleMarkAll}
           disabled={unreadCount === 0 || isLoading}

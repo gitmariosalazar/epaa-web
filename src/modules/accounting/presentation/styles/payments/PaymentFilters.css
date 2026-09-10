@@ -33,7 +33,6 @@
   margin-left: auto;
 }
 
-
 /* ── Individual group ────────────────────────────────────────────────── */
 .payment-filters .filter-group {
   display: flex;
@@ -51,7 +50,6 @@
 .payment-filters .filter-group--search {
   flex: 0 0 auto;
 }
-
 
 /* ── Label ───────────────────────────────────────────────────────────── */
 .payment-filters .filter-label {
@@ -92,5 +90,5 @@
 
 /* 
    REMOVED: Legacy height overrides.
-   Utilizing standardized 'compact' size (34px) from global components.
+   Utilizing standardized 'small' size (34px) from global components.
 */

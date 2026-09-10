@@ -74,7 +74,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
           <label className="conn-filter-label">{t('connections.filters.sector', 'Sector')}</label>
           <Input
             type="text"
-            size="compact"
+            size="small"
             placeholder={t('connections.filters.sectorPlaceholder', 'Ej: 1')}
             value={sectorInput}
             onChange={(e) => onSectorInputChange(e.target.value)}
@@ -89,7 +89,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
           <label className="conn-filter-label">{t('connections.filters.clientId', 'ID Cliente')}</label>
           <Input
             type="text"
-            size="compact"
+            size="small"
             placeholder={t(
               'connections.filters.clientIdPlaceholder',
               'Ej: 0912645821'
@@ -104,7 +104,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
       <div className="conn-filter-group conn-filter-group--btn">
         <Button
           variant="outline"
-          size="compact"
+          size="small"
           onClick={onFetch}
           disabled={!canFetch}
           isLoading={isLoading}
@@ -118,7 +118,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
         <label className="conn-filter-label">{t('common.search', 'Búsqueda Local')}</label>
         <Input
           type="text"
-          size="compact"
+          size="small"
           placeholder={t(
             'connections.filters.searchPlaceholder',
             'Buscar en resultados...'
@@ -132,7 +132,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
       <div className="conn-filter-group">
         <label className="conn-filter-label">{t('connections.filters.searchField', 'Campo')}</label>
         <Select
-          size="compact"
+          size="small"
           value={searchField}
           onChange={(e) => onSearchFieldChange(e.target.value)}
           leftIcon={<FaFilter size={18} />}
@@ -156,7 +156,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
       <div className="conn-filter-group">
         <label className="conn-filter-label">{t('connections.filters.status', 'Estado')}</label>
         <Select
-          size="compact"
+          size="small"
           value={selectedStatus}
           onChange={(e) => onStatusChange(e.target.value)}
           leftIcon={<FaCheck size={18} />}
@@ -177,7 +177,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
       <div className="conn-filter-group">
         <label className="conn-filter-label">{t('connections.filters.sewerage', 'Alcantarillado')}</label>
         <Select
-          size="compact"
+          size="small"
           value={selectedSewerage}
           onChange={(e) => onSewerageChange(e.target.value)}
           leftIcon={<FaList size={18} />}
@@ -198,7 +198,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
       <div className="conn-filter-group">
         <label className="conn-filter-label">{t('connections.filters.incidents', 'Incidentes')}</label>
         <Select
-          size="compact"
+          size="small"
           value={selectedIncidents}
           onChange={(e) => onIncidentsChange(e.target.value)}
           leftIcon={<AlertTriangle size={18} />}
@@ -215,11 +215,11 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
         </Select>
       </div>
 
-        {/* Coordinates filter */}
+      {/* Coordinates filter */}
       <div className="conn-filter-group">
         <label className="conn-filter-label">{t('connections.filters.coordinates', 'Coordenadas')}</label>
         <Select
-          size="compact"
+          size="small"
           value={selectedCoordinates}
           onChange={(e) => onCoordinatesChange(e.target.value)}
           leftIcon={<FaCheck size={18} />}

@@ -352,14 +352,14 @@ export const AdvancedReadingsReport: React.FC<AdvancedReadingsReportProps> = ({
         <div className="advanced-report-toolbar">
           {/* Unified Search Row */}
           <div className="advanced-toolbar-side">
-            <label className="toolbar-label-compact">Periodo</label>
+            <label className="toolbar-label-small">Periodo</label>
             <DatePicker
               view="month"
               value={month}
               onChange={(value) => setMonth(value)}
               disabled={loading}
               ref={pickerRef}
-              size="compact"
+              size="small"
             />
             <Button
               onClick={handleSearch}
@@ -375,7 +375,7 @@ export const AdvancedReadingsReport: React.FC<AdvancedReadingsReportProps> = ({
               <Search size={12} />
               <input
                 type="text"
-                className="toolbar-input-compact"
+                className="toolbar-input-small"
                 placeholder="Filter sector..."
                 maxLength={60}
                 value={resultSearchTerm}

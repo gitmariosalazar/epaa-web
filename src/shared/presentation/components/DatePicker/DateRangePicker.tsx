@@ -15,7 +15,7 @@ interface DateRangePickerProps {
   endDate: string;
   onChange: (start: string, end: string) => void;
   disabled?: boolean;
-  size?: 'xs' | 'small' | 'compact' | 'medium' | 'large';
+  size?: 'xs' | 'small' | 'small' | 'medium' | 'large';
   mode?: 'date' | 'month';
   maxDate?: string;
 }
@@ -194,7 +194,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
       const isEnd = actualEndStr === cellMonthStr;
       const isInRange = actualStartStr && actualEndStr && cellMonthStr > actualStartStr && cellMonthStr < actualEndStr;
       const isToday = currentTodayMonthStr === cellMonthStr;
-      
+
       const maxMonthStr = maxDate ? maxDate.substring(0, 7) : null;
       const isAfterMax = maxMonthStr ? cellMonthStr > maxMonthStr : false;
 

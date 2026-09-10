@@ -71,7 +71,7 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
           </label>
           <div className="filter-input-wrapper">
             <Select
-              size="compact"
+              size="small"
               value={mode}
               onChange={(e) => setMode(e.target.value as SearchMode)}
             >
@@ -97,7 +97,7 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
               </label>
               <div className="filter-input-wrapper">
                 <DatePicker
-                  size="compact"
+                  size="small"
                   view="month"
                   value={month ? `${month}` : ''}
                   onChange={(val: string) => setMonth(val.substring(0, 7))}
@@ -111,7 +111,7 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
               </label>
               <div className="filter-input-wrapper">
                 <Input
-                  size="compact"
+                  size="small"
                   placeholder={t('readings.filters.allSectors')}
                   value={sector}
                   onChange={(e) => setSector(e.target.value)}
@@ -126,7 +126,7 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
               </label>
               <div className="filter-input-wrapper">
                 <Select
-                  size="compact"
+                  size="small"
                   value={novelty}
                   onChange={(e) => setNovelty(e.target.value)}
                 >
@@ -147,7 +147,7 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
               </label>
               <div className="filter-input-wrapper">
                 <Select
-                  size="compact"
+                  size="small"
                   value={updatedStatus}
                   onChange={(e) => setUpdatedStatus(e.target.value)}
                 >
@@ -167,7 +167,7 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
               <div className="filter-input-wrapper">
                 <InputCadastralKey
                   placeholder="Ej: 1-125 o 40-5"
-                  size="compact"
+                  size="small"
                   value={cadastralKey}
                   onChange={(val) => setCadastralKey(val)}
                 />
@@ -179,7 +179,7 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
               </label>
               <div className="filter-input-wrapper">
                 <Select
-                  size="compact"
+                  size="small"
                   value={novelty}
                   onChange={(e) => setNovelty(e.target.value)}
                 >
@@ -199,7 +199,7 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
               </label>
               <div className="filter-input-wrapper">
                 <Select
-                  size="compact"
+                  size="small"
                   value={updatedStatus}
                   onChange={(e) => setUpdatedStatus(e.target.value)}
                 >
@@ -218,7 +218,7 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
               </label>
               <div className="filter-input-wrapper">
                 <DatePicker
-                  size="compact"
+                  size="small"
                   value={date}
                   onChange={(val: string) => setDate(val)}
                 />
@@ -230,7 +230,7 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
               </label>
               <div className="filter-input-wrapper">
                 <Select
-                  size="compact"
+                  size="small"
                   value={novelty}
                   onChange={(e) => setNovelty(e.target.value)}
                 >
@@ -250,7 +250,7 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
               </label>
               <div className="filter-input-wrapper">
                 <Select
-                  size="compact"
+                  size="small"
                   value={updatedStatus}
                   onChange={(e) => setUpdatedStatus(e.target.value)}
                 >
@@ -271,7 +271,8 @@ export const ReadingImagesFilters: React.FC<ReadingImagesFiltersProps> = ({
           <Button
             onClick={handleSearch}
             disabled={!canFetch}
-            size="compact"
+            size="xs"
+            variant='primary'
             isLoading={isLoading}
           >
             {!isLoading && <Search size={18} />}

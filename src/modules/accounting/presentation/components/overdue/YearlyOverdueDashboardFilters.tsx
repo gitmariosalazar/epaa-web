@@ -26,69 +26,69 @@ export const YearlyOverdueDashboardFilters: React.FC<
   showAllOption = true,
   hideYearFilter = false
 }) => {
-  const { t } = useTranslation();
+    const { t } = useTranslation();
 
-  return (
-    <div className="payment-filters">
-      {/* ── LEFT: Filters ── */}
-      <div className="filter-section-left">
-        {!hideYearFilter && (
-          <div className="filter-group">
-            <label className="filter-label">
-              {t('accounting.filters.year', 'Filtrar por Año')}
-            </label>
-            <div className="filter-input-wrapper">
-              <Select
-                value={selectedYear}
-                onChange={(e) => onYearChange(e.target.value)}
-                size="compact"
-                leftIcon={<Filter size={16} />}
-              >
-                {showAllOption && (
-                  <option value="all">{t('common.all', 'Todos los años')}</option>
-                )}
-                {availableYears
-                  .sort((a, b) => b - a)
-                  .map((year) => (
-                    <option key={year} value={year.toString()}>
-                      {year}
-                    </option>
-                  ))}
-              </Select>
+    return (
+      <div className="payment-filters">
+        {/* ── LEFT: Filters ── */}
+        <div className="filter-section-left">
+          {!hideYearFilter && (
+            <div className="filter-group">
+              <label className="filter-label">
+                {t('accounting.filters.year', 'Filtrar por Año')}
+              </label>
+              <div className="filter-input-wrapper">
+                <Select
+                  value={selectedYear}
+                  onChange={(e) => onYearChange(e.target.value)}
+                  size="small"
+                  leftIcon={<Filter size={16} />}
+                >
+                  {showAllOption && (
+                    <option value="all">{t('common.all', 'Todos los años')}</option>
+                  )}
+                  {availableYears
+                    .sort((a, b) => b - a)
+                    .map((year) => (
+                      <option key={year} value={year.toString()}>
+                        {year}
+                      </option>
+                    ))}
+                </Select>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {!hideYearFilter && selectedYear !== 'all' && (
-          <div className="filter-group">
-            <label className="filter-label" style={{ visibility: 'hidden' }}>.</label>
+          {!hideYearFilter && selectedYear !== 'all' && (
+            <div className="filter-group">
+              <label className="filter-label" style={{ visibility: 'hidden' }}>.</label>
+              <Button
+                onClick={() => onYearChange('all')}
+                size="xs"
+                variant="ghost"
+                leftIcon={<X size={16} />}
+              >
+                {t('common.clear', 'Limpiar')}
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* ── RIGHT: Actions ── */}
+        {onRefresh && (
+          <div className="filter-section-right">
             <Button
-              onClick={() => onYearChange('all')}
-              size="compact"
-              variant="ghost"
-              leftIcon={<X size={16} />}
+              onClick={onRefresh}
+              variant="outline"
+              color="gray"
+              size="xs"
+              isLoading={isLoading}
+              leftIcon={<RefreshCw size={16} />}
             >
-              {t('common.clear', 'Limpiar')}
+              {t('common.refresh', 'Refrescar')}
             </Button>
           </div>
         )}
       </div>
-
-      {/* ── RIGHT: Actions ── */}
-      {onRefresh && (
-        <div className="filter-section-right">
-          <Button
-            onClick={onRefresh}
-            variant="outline"
-            color="gray"
-            size="compact"
-            isLoading={isLoading}
-            leftIcon={<RefreshCw size={16} />}
-          >
-            {t('common.refresh', 'Refrescar')}
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-};
+    );
+  };

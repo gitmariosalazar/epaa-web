@@ -54,6 +54,7 @@ export const ReadingSpecialUpdateInfoForm: React.FC<PropTypes> = ({
           type="number"
           placeholder="0.00"
           value={previousReadingInput}
+          size='small'
           onChange={(e) =>
             setPreviousReadingInput(
               e.target.value === '' ? '' : Number(e.target.value)
@@ -66,6 +67,7 @@ export const ReadingSpecialUpdateInfoForm: React.FC<PropTypes> = ({
           type="number"
           placeholder="0.00"
           value={currentReadingInput}
+          size='small'
           onChange={(e) =>
             setCurrentReadingInput(
               e.target.value === '' ? '' : Number(e.target.value)
@@ -79,6 +81,7 @@ export const ReadingSpecialUpdateInfoForm: React.FC<PropTypes> = ({
           leftIcon={<FaTools color="var(--text-muted)" />}
           options={AJUSTE_OPTIONS}
           value={tipoAjusteId.toString()}
+          size='small'
           onChange={(e) => setTipoAjusteId(e.target.value ? Number(e.target.value) : '')}
         />
       </div>
@@ -91,6 +94,7 @@ export const ReadingSpecialUpdateInfoForm: React.FC<PropTypes> = ({
           placeholder="Ingrese una justificación detallada..."
           value={observationInput}
           onChange={(e) => setObservationInput(e.target.value)}
+          size='small'
         />
       </div>
     </div>

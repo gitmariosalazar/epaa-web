@@ -77,7 +77,7 @@ export const AllWorkOrderToolbar: React.FC<AllWorkOrderToolbarProps> = ({
         <Input
           id="wo-all-search-input"
           type="text"
-          size='compact'
+          size='small'
           placeholder="Buscar"
           value={filters.search}
           width={280}
@@ -88,7 +88,7 @@ export const AllWorkOrderToolbar: React.FC<AllWorkOrderToolbarProps> = ({
 
         {/* Filter by field */}
         <Select
-          size="compact"
+          size="small"
           value={filters.filterBy}
           onChange={e => onFilterChange({ filterBy: e.target.value })}
           aria-label="Filtrar por campo"
@@ -102,7 +102,7 @@ export const AllWorkOrderToolbar: React.FC<AllWorkOrderToolbarProps> = ({
 
         {/* Status filter */}
         <Select
-          size="compact"
+          size="small"
           value={filters.status}
           onChange={e => onFilterChange({ status: e.target.value })}
           aria-label="Estado"
@@ -116,7 +116,7 @@ export const AllWorkOrderToolbar: React.FC<AllWorkOrderToolbarProps> = ({
 
         {/* Priority filter */}
         <Select
-          size="compact"
+          size="small"
           value={filters.priority}
           onChange={e => onFilterChange({ priority: e.target.value })}
           aria-label="Prioridad"
@@ -130,7 +130,7 @@ export const AllWorkOrderToolbar: React.FC<AllWorkOrderToolbarProps> = ({
 
         {/* Origin filter */}
         <Select
-          size="compact"
+          size="small"
           value={filters.origin}
           onChange={e => onFilterChange({ origin: e.target.value })}
           aria-label="Origen"
@@ -144,7 +144,7 @@ export const AllWorkOrderToolbar: React.FC<AllWorkOrderToolbarProps> = ({
 
         {/* Sort */}
         <Select
-          size="compact"
+          size="small"
           value={sortBy}
           onChange={e => onSortChange(e.target.value as AllWorkOrderSortKey)}
           aria-label="Ordenar"

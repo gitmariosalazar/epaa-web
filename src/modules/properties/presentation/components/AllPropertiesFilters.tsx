@@ -34,7 +34,7 @@ export const AllPropertiesFilters: React.FC<AllPropertiesFiltersProps> = ({
           </label>
           <div className="filter-input-wrapper">
             <Select
-              size="compact"
+              size="small"
               value={searchBy}
               onChange={(e) => setSearchBy(e.target.value)}
               leftIcon={<Search size={18} />}
@@ -62,7 +62,7 @@ export const AllPropertiesFilters: React.FC<AllPropertiesFiltersProps> = ({
           <label className="filter-label">{t('common.search', 'SEARCH')}</label>
           <div className="filter-input-wrapper">
             <Input
-              size="compact"
+              size="small"
               placeholder={t('common.searchRecords', 'Search records...')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -76,7 +76,7 @@ export const AllPropertiesFilters: React.FC<AllPropertiesFiltersProps> = ({
       <div className="filter-section-right">
         <Button
           variant="outline"
-          size="compact"
+          size="xs"
           leftIcon={<RefreshCw size={16} />}
           onClick={onRefresh}
         >

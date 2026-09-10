@@ -88,7 +88,7 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
               {t('accounting.filters.date', 'Fecha de Pago')}
             </label>
             <div className="filter-input-wrapper">
-              <DatePicker value={date} onChange={onDateChange} size="compact" />
+              <DatePicker value={date} onChange={onDateChange} size="small" />
             </div>
           </div>
         )}
@@ -103,7 +103,7 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
               <Select
                 value={orderValue}
                 onChange={(e) => onOrderValueChange(e.target.value)}
-                size="compact"
+                size="small"
               >
                 <option value="">
                   {t('accounting.filters.selectOrder', 'Select order...')}
@@ -126,7 +126,7 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
             </label>
             <div className="filter-input-wrapper">
               <DateRangePicker
-                size="compact"
+                size="small"
                 startDate={initDate}
                 endDate={endDate}
                 onChange={(start, end) => {
@@ -143,7 +143,7 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
           <Button
             onClick={onFetch}
             disabled={!canFetch}
-            size="compact"
+            size="xs"
             isLoading={isLoading}
             leftIcon={<Search size={18} />}
           >
@@ -163,7 +163,7 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
               placeholder={t('common.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
-              size="compact"
+              size="small"
               leftIcon={<Search size={18} />}
             />
           </div>
@@ -177,7 +177,7 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
             <Select
               value={selectedUser}
               onChange={(e) => onUserChange(e.target.value)}
-              size="compact"
+              size="small"
               leftIcon={<User size={18} />}
             >
               <option value="">
@@ -200,7 +200,7 @@ export const PaymentFilters: React.FC<PaymentFiltersProps> = ({
             <Select
               value={selectedPaymentMethod}
               onChange={(e) => onPaymentMethodChange(e.target.value)}
-              size="compact"
+              size="small"
               leftIcon={<CreditCard size={18} />}
             >
               <option value="">

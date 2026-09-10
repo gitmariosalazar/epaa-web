@@ -26,9 +26,9 @@ export class CurrencyFormatter {
   }
 
   /**
-   * Formats a value into a compact currency string for charts (e.g., $1.2k).
+   * Formats a value into a small currency string for charts (e.g., $1.2k).
    * @param value The numerical value to format.
-   * @returns Formatted compact string.
+   * @returns Formatted small string.
    */
   static formatCompact(value: number | string | null | undefined): string {
     const num = Number(value || 0);

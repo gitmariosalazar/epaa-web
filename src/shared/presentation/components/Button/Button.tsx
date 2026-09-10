@@ -51,7 +51,7 @@ export type ButtonRounded = 'none' | 'sm' | 'md' | 'lg' | 'full';
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   color?: ButtonColor;
-  size?: 'xs' | 'sm' | 'compact' | 'md' | 'lg' | 'xl';
+  size?: 'xs' | 'sm' | 'small' | 'md' | 'lg' | 'xl';
   rounded?: ButtonRounded;
   fullWidth?: boolean;
   isLoading?: boolean;
@@ -85,7 +85,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((
 
   // Use explicit color if provided, otherwise derive from variant
   const nonSolidVariants = ['outline', 'ghost', 'dashed', 'link', 'subtle'];
-  
+
   const finalColor =
     color ||
     (nonSolidVariants.includes(variant)

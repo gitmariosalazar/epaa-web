@@ -77,27 +77,27 @@ export const ReadingDetailTabContent: React.FC<ReadingDetailTabContentProps> = (
         </h4>
         <div className="reading-detail-grid">
           <div className="reading-detail-item">
-            <Label text="Nombre" size="compact" variant="default" weight="semibold" leftIcon={<User size="1em" />} />
+            <Label text="Nombre" size="small" variant="default" weight="semibold" leftIcon={<User size="1em" />} />
             <span className="reading-detail-value">{readingDetail.clientName}</span>
           </div>
           <div className="reading-detail-item">
-            <Label text="Cédula / RUC" size="compact" variant="default" weight="semibold" leftIcon={<IdCard size="1em" />} />
+            <Label text="Cédula / RUC" size="small" variant="default" weight="semibold" leftIcon={<IdCard size="1em" />} />
             <span className="reading-detail-value">{readingDetail.cardId}</span>
           </div>
           <div className="reading-detail-item">
-            <Label text="Clave Catastral" size="compact" variant="default" weight="semibold" leftIcon={<MapPin size="1em" />} />
+            <Label text="Clave Catastral" size="small" variant="default" weight="semibold" leftIcon={<MapPin size="1em" />} />
             <span className="reading-detail-value">{readingDetail.cadastralKey}</span>
           </div>
           <div className="reading-detail-item">
-            <Label text="Dirección" size="compact" variant="default" weight="semibold" leftIcon={<Map size="1em" />} />
+            <Label text="Dirección" size="small" variant="default" weight="semibold" leftIcon={<Map size="1em" />} />
             <span className="reading-detail-value">{readingDetail.address || '-'}</span>
           </div>
           <div className="reading-detail-item">
-            <Label text="Medidor" size="compact" variant="default" weight="semibold" leftIcon={<Gauge size="1em" />} />
+            <Label text="Medidor" size="small" variant="default" weight="semibold" leftIcon={<Gauge size="1em" />} />
             <span className="reading-detail-value">{readingDetail.meterNumber || '-'}</span>
           </div>
           <div className="reading-detail-item">
-            <Label text="Tarifa" size="compact" variant="default" weight="semibold" leftIcon={<Coins size="1em" />} />
+            <Label text="Tarifa" size="small" variant="default" weight="semibold" leftIcon={<Coins size="1em" />} />
             <span className="reading-detail-value">{readingDetail.rateName}</span>
           </div>
         </div>
@@ -110,47 +110,47 @@ export const ReadingDetailTabContent: React.FC<ReadingDetailTabContentProps> = (
         </h4>
         <div className="reading-detail-grid">
           <div className="reading-detail-item">
-            <Label text="Mes de Lectura" size="compact" variant="default" weight="semibold" leftIcon={<CalendarDays size="1em" />} />
+            <Label text="Mes de Lectura" size="small" variant="default" weight="semibold" leftIcon={<CalendarDays size="1em" />} />
             <span className="reading-detail-value">
               <ColorChip label={`${readingDetail.readingMonth} (${readingDetail.readingMonthName})`} size="xs" variant="soft" color="info" />
             </span>
           </div>
           <div className="reading-detail-item">
-            <Label text="Fecha de Lectura" size="compact" variant="default" weight="semibold" leftIcon={<CalendarClock size="1em" />} />
+            <Label text="Fecha de Lectura" size="small" variant="default" weight="semibold" leftIcon={<CalendarClock size="1em" />} />
             <span className="reading-detail-value">
               {readingDetail.readingDate ? dateService.formatToLocaleString(new Date(readingDetail.readingDate)) : '-'}
             </span>
           </div>
           <div className="reading-detail-item">
-            <Label text="Hora de Lectura" size="compact" variant="default" weight="semibold" leftIcon={<Clock size="1em" />} />
+            <Label text="Hora de Lectura" size="small" variant="default" weight="semibold" leftIcon={<Clock size="1em" />} />
             <span className="reading-detail-value">
               {readingDetail.readingTime ? readingDetail.readingTime : '-'}
             </span>
           </div>
           <div className="reading-detail-item">
-            <Label text="Lectura Anterior" size="compact" variant="default" weight="semibold" leftIcon={<History size="1em" />} />
+            <Label text="Lectura Anterior" size="small" variant="default" weight="semibold" leftIcon={<History size="1em" />} />
             <span className="reading-detail-value">{NumberFormatter.format(readingDetail.previousReading, 2)}</span>
           </div>
           <div className="reading-detail-item">
-            <Label text="Lectura Actual" size="compact" variant="default" weight="semibold" leftIcon={<ClipboardCheck size="1em" />} />
+            <Label text="Lectura Actual" size="small" variant="default" weight="semibold" leftIcon={<ClipboardCheck size="1em" />} />
             <span className="reading-detail-value">
               {readingDetail.currentReading !== null ? NumberFormatter.format(readingDetail.currentReading, 2) : '-'}
             </span>
           </div>
           <div className="reading-detail-item">
-            <Label text="Consumo" size="compact" variant="default" weight="semibold" leftIcon={<Droplets size="1em" />} />
+            <Label text="Consumo" size="small" variant="default" weight="semibold" leftIcon={<Droplets size="1em" />} />
             <span className="reading-detail-value" style={{ color: 'var(--primary-color)', fontWeight: 600 }}>
               {NumberFormatter.format(readingDetail.consumption, 2)} m³
             </span>
           </div>
           <div className="reading-detail-item">
-            <Label text="Novedad" size="compact" variant="default" weight="semibold" leftIcon={<AlertTriangle size="1em" />} />
+            <Label text="Novedad" size="small" variant="default" weight="semibold" leftIcon={<AlertTriangle size="1em" />} />
             <span className="reading-detail-value">
               <ColorChip label={readingDetail.novelty || 'SIN NOVEDAD'} size="xs" variant="soft" color={getNoveltyColor(readingDetail.novelty)} />
             </span>
           </div>
           <div className="reading-detail-item">
-            <Label text="Valor Consumo" size="compact" variant="default" weight="semibold" leftIcon={<TbCurrencyDollarCanadian size="1em" />} />
+            <Label text="Valor Consumo" size="small" variant="default" weight="semibold" leftIcon={<TbCurrencyDollarCanadian size="1em" />} />
             <span className="reading-detail-value">
               {CurrencyFormatter.format(readingDetail.readingValue || 0)}
             </span>

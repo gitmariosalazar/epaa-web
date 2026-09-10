@@ -14,7 +14,7 @@ export interface InputCadastralKeyProps extends Omit<
   value?: string;
   onChange?: (value: string) => void;
   className?: string;
-  size?: 'small' | 'compact' | 'medium' | 'large';
+  size?: 'small' | 'small' | 'medium' | 'large';
   focused?: boolean;
 }
 
@@ -28,7 +28,7 @@ export const InputCadastralKey = forwardRef<
   ) => {
     // Internal state to manage the controlled input if an external value isn't strictly provided
     const [internalValue, setInternalValue] = useState(value || '');
-    
+
     const localRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {

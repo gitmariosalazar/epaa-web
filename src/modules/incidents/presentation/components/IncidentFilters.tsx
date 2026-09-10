@@ -81,7 +81,7 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
               placeholder={t('incidents.filters.searchPlaceholder', 'Buscar por descripción, dirección, ID...')}
               value={searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
-              size="compact"
+              size="small"
               leftIcon={<Search size={18} />}
             />
           </div>
@@ -91,7 +91,7 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
           <label className="filter-label">{t('incidents.filters.searchField', 'Buscar por')}</label>
           <Select
             className="conn-filter-group conn-filter-group--search-field"
-            size="compact"
+            size="small"
             value={searchField}
             onChange={(e) => onSearchFieldChange(e.target.value)}
             leftIcon={<FaFilter size={18} />}
@@ -111,14 +111,14 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
           {
             searchField === 'reportDate' ? (
               <DatePicker
-                size="compact"
+                size="small"
                 value={searchQuery}
                 onChange={(val) => onSearchQueryChange(val)}
               />
             ) : (
               <Input
                 type={'text'}
-                size="compact"
+                size="small"
                 placeholder={searchField === 'reportDate' ? t('common.reportDate', 'Fecha de reporte') : searchField === 'sector' ? t('common.sector', 'Sector') : searchField === 'reference' ? t('common.reference', 'Referencia') : searchField === 'connectionId' ? t('common.connectionId', 'ID Acometida') : t('common.searchPlaceholder', 'Buscar por descripción, dirección, ID...')}
                 value={searchQuery}
                 onChange={(e) => onSearchQueryChange(e.target.value)}
@@ -134,7 +134,7 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
             <Select
               value={selectedStatus}
               onChange={(e) => onStatusChange(e.target.value)}
-              size="compact"
+              size="small"
               leftIcon={<AlertCircle size={18} />}
             >
               <option value="">{t('incidents.filters.allStatuses', 'Todos los Estados')}</option>
@@ -153,7 +153,7 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
             <Select
               value={selectedPriority}
               onChange={(e) => onPriorityChange(e.target.value)}
-              size="compact"
+              size="small"
               leftIcon={<ShieldAlert size={18} />}
             >
               <option value="">{t('incidents.filters.allPriorities', 'Todas las Prioridades')}</option>
@@ -172,7 +172,7 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
             <Select
               value={selectedCategoryId?.toString() ?? ''}
               onChange={(e) => onCategoryIdChange(Number(e.target.value))}
-              size="compact"
+              size="small"
               leftIcon={<MdCategory size={18} />}
             >
               <option value="">{t('incidents.filters.allCategories', 'Todas las Categorías')}</option>
@@ -190,7 +190,7 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
         </div>
         <Button
           variant="outline"
-          size="compact"
+          size="small"
           onClick={onConsultar}
           isLoading={isLoading}
           leftIcon={<RefreshCw size={16} />}

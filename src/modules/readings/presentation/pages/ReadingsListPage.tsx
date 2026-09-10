@@ -292,6 +292,7 @@ export const ReadingsListPage: React.FC = () => {
           {modalState?.mode === 'update' && (
             <UpdateReadingWithImagesPage
               initialCadastralKey={modalState?.cadastralKey}
+              initialMonth={month}
               onSuccess={handleModalSuccess}
               onCancel={closeModal}
             />

@@ -155,7 +155,7 @@ export const DailyStatsTable = ({ data, loading }: DailyStatsProps) => {
             value={searchTerm}
             onChange={handleSearchChange}
             leftIcon={<Search size={16} />}
-            size="compact"
+            size="small"
           />
         </div>
       </div>

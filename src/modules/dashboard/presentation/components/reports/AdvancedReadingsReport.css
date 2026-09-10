@@ -33,7 +33,7 @@
   justify-content: flex-end;
 }
 
-.toolbar-label-compact {
+.toolbar-label-small {
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-secondary);
@@ -42,7 +42,7 @@
   white-space: nowrap;
 }
 
-.toolbar-input-compact {
+.toolbar-input-small {
   height: 32px;
   background: var(--surface-hover);
   border: 1px solid var(--border-color);
@@ -53,7 +53,7 @@
   transition: all 0.2s;
 }
 
-.toolbar-input-compact:focus {
+.toolbar-input-small:focus {
   border-color: var(--accent);
   background: var(--surface);
   outline: none;

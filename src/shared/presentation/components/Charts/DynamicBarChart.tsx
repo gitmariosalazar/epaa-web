@@ -42,7 +42,7 @@ export interface DynamicBarChartProps<T> {
 
   /**
    * Formatter specifically for the label that appears on or inside the bar.
-   * Usually a compact format like "$45k" to avoid overflows.
+   * Usually a small format like "$45k" to avoid overflows.
    */
   labelFormatter?: (value: any) => string;
 
@@ -92,7 +92,7 @@ export function DynamicBarChart<T extends object>({
         content={
           customLabel
             ? (props: any) =>
-                customLabel({ ...props, payload: data[props.index] })
+              customLabel({ ...props, payload: data[props.index] })
             : undefined
         }
         fill={labelColor}

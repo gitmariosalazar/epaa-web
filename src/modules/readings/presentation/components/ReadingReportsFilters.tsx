@@ -73,7 +73,7 @@ export const ReadingReportsFilters: React.FC<ReadingReportsFiltersProps> = ({
               placeholder={t('incidents.filters.searchPlaceholder', 'Buscar por descripción, dirección, ID...')}
               value={searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
-              size="compact"
+              size="small"
               leftIcon={<Search size={18} />}
             />
           </div>
@@ -83,7 +83,7 @@ export const ReadingReportsFilters: React.FC<ReadingReportsFiltersProps> = ({
           <label className="filter-label">{t('incidents.filters.searchField', 'Buscar por')}</label>
           <Select
             className="conn-filter-group conn-filter-group--search-field"
-            size="compact"
+            size="small"
             value={searchField}
             onChange={(e) => onSearchFieldChange(e.target.value)}
             leftIcon={<FaFilter size={18} />}
@@ -103,14 +103,14 @@ export const ReadingReportsFilters: React.FC<ReadingReportsFiltersProps> = ({
           {
             searchField === 'reportDate' ? (
               <DatePicker
-                size="compact"
+                size="small"
                 value={searchQuery}
                 onChange={(val) => onSearchQueryChange(val)}
               />
             ) : (
               <Input
                 type={'text'}
-                size="compact"
+                size="small"
                 placeholder={searchField === 'reportDate' ? t('common.reportDate', 'Fecha de reporte') : searchField === 'sector' ? t('common.sector', 'Sector') : searchField === 'reference' ? t('common.reference', 'Referencia') : searchField === 'connectionId' ? t('common.connectionId', 'ID Acometida') : t('common.searchPlaceholder', 'Buscar por descripción, dirección, ID...')}
                 value={searchQuery}
                 onChange={(e) => onSearchQueryChange(e.target.value)}
@@ -126,7 +126,7 @@ export const ReadingReportsFilters: React.FC<ReadingReportsFiltersProps> = ({
             <Select
               value={selectedStatus}
               onChange={(e) => onStatusChange(e.target.value)}
-              size="compact"
+              size="small"
               leftIcon={<AlertCircle size={18} />}
             >
               <option value="">{t('incidents.filters.allStatuses', 'Todos los Estados')}</option>
@@ -145,7 +145,7 @@ export const ReadingReportsFilters: React.FC<ReadingReportsFiltersProps> = ({
             <Select
               value={selectedPriority}
               onChange={(e) => onPriorityChange(e.target.value)}
-              size="compact"
+              size="small"
               leftIcon={<ShieldAlert size={18} />}
             >
               <option value="">{t('incidents.filters.allPriorities', 'Todas las Prioridades')}</option>
@@ -159,7 +159,7 @@ export const ReadingReportsFilters: React.FC<ReadingReportsFiltersProps> = ({
 
         <Button
           variant="outline"
-          size="compact"
+          size="xs"
           onClick={onConsultar}
           isLoading={isLoading}
           leftIcon={<RefreshCw size={16} />}

@@ -373,7 +373,7 @@ const WorkOrderMaterialsCardInner: React.FC<WorkOrderMaterialsCardProps> = ({
                     options={inventoryOptions}
                     placeholder={state.isLoading ? "Cargando inventario..." : "Buscar material..."}
                     disabled={isLoading || state.isLoading}
-                    size="compact"
+                    size="small"
                   />
                 </div>
                 <div className="wo-modal-field" style={{ margin: 0 }}>

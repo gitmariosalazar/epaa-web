@@ -72,7 +72,7 @@ export const OverduePaymentDetailModal: React.FC<OverduePaymentDetailModalProps>
       <div className="conn-detail-modal" onClick={(e) => e.stopPropagation()}>
         <div className="conn-detail-header">
           <h3>{t('accounting.overdue.detailTitle', 'Detalle de Mora')}</h3>
-          <Button variant="ghost" size="sm" circle onClick={onClose}>
+          <Button variant="ghost" size="xs" circle onClick={onClose}>
             <X size={16} />
           </Button>
         </div>
@@ -95,6 +95,7 @@ export const OverduePaymentDetailModal: React.FC<OverduePaymentDetailModalProps>
 
           <div className="conn-detail-actions">
             <Button
+              size="xs"
               variant="outline"
               fullWidth
               className="btn-view-pending"

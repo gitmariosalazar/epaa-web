@@ -30,7 +30,7 @@ export const ByOwnerFilters: React.FC<ByOwnerFiltersProps> = ({
           </label>
           <div className="filter-input-wrapper">
             <Input
-              size="compact"
+              size="small"
               placeholder={t(
                 'properties.filters.clientIdPlaceholder',
                 'Ej: 1000472694'
@@ -50,7 +50,7 @@ export const ByOwnerFilters: React.FC<ByOwnerFiltersProps> = ({
 
         <Button
           onClick={onFetch}
-          size="compact"
+          size="xs"
           disabled={isLoading || !clientId}
           leftIcon={isLoading ? undefined : <Search size={16} />}
           isLoading={isLoading}

@@ -69,7 +69,7 @@ export const OverduePaymentFilters: React.FC<OverduePaymentFiltersProps> = ({
             <Select
               value={searchField}
               onChange={(e) => setSearchField(e.target.value)}
-              size="compact"
+              size="small"
               leftIcon={<FaFilter size={18} />}
             >
               {SEARCH_FIELDS.map((f) => (
@@ -91,7 +91,7 @@ export const OverduePaymentFilters: React.FC<OverduePaymentFiltersProps> = ({
               <Select
                 value={searchOperator}
                 onChange={(e) => setSearchOperator(e.target.value)}
-                size="compact"
+                size="small"
               >
                 <option value="=">Igual a</option>
                 <option value=">">Mayor a</option>
@@ -113,7 +113,7 @@ export const OverduePaymentFilters: React.FC<OverduePaymentFiltersProps> = ({
               placeholder={t('common.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              size="compact"
+              size="small"
               leftIcon={<Search size={16} />}
             />
           </div>
@@ -127,7 +127,7 @@ export const OverduePaymentFilters: React.FC<OverduePaymentFiltersProps> = ({
             </label>
             <Button
               onClick={handleClearSearch}
-              size="compact"
+              size="xs"
               variant="ghost"
               leftIcon={<X size={16} />}
             >
@@ -142,7 +142,7 @@ export const OverduePaymentFilters: React.FC<OverduePaymentFiltersProps> = ({
         <div className="filter-section-right">
           <Button
             onClick={onRefresh}
-            size="compact"
+            size="xs"
             variant="outline"
             color="gray"
             isLoading={isLoading}

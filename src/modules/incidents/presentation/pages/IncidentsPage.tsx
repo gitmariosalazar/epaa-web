@@ -489,7 +489,7 @@ export const IncidentsPage: React.FC = () => {
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <Button
                 leftIcon={<ShieldAlert size={16} />}
-                size="compact"
+                size="small"
                 onClick={() => navigate('/incidents/create')}
               >
                 Reportar Incidente

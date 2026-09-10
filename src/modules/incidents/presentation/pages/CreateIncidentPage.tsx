@@ -605,7 +605,7 @@ export const CreateIncidentPage: React.FC = () => {
                 label="Prioridad *"
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as any)}
-                size="compact"
+                size="small"
               >
                 <option value="BAJA">Baja</option>
                 <option value="MEDIA">Media</option>
@@ -619,7 +619,7 @@ export const CreateIncidentPage: React.FC = () => {
                 label="Origen del Reporte *"
                 value={reportOrigin}
                 onChange={(e) => setReportOrigin(e.target.value as any)}
-                size="compact"
+                size="small"
               >
                 <option value="WEB_USUARIO">Web de Usuario</option>
                 <option value="LECTURISTA">Lecturista</option>
@@ -637,7 +637,7 @@ export const CreateIncidentPage: React.FC = () => {
               onChange={(e) => setReportDescription(e.target.value)}
               placeholder="Describa el problema detalladamente..."
               required
-              size="compact"
+              size="small"
             />
           </div>
 
@@ -648,7 +648,7 @@ export const CreateIncidentPage: React.FC = () => {
               value={referenceAddress}
               onChange={(e) => setReferenceAddress(e.target.value)}
               placeholder="Ej. Calle 10 de Agosto y Av. América"
-              size="compact"
+              size="small"
             />
           </div>
 
@@ -661,7 +661,7 @@ export const CreateIncidentPage: React.FC = () => {
                 type="text"
                 value={latitude}
                 placeholder="No capturada"
-                size="compact"
+                size="small"
                 readOnly
                 disabled
               />
@@ -673,7 +673,7 @@ export const CreateIncidentPage: React.FC = () => {
                 type="text"
                 value={longitude}
                 placeholder="No capturada"
-                size="compact"
+                size="small"
                 readOnly
                 disabled
               />
@@ -701,7 +701,7 @@ export const CreateIncidentPage: React.FC = () => {
             <Button
               type="button"
               variant="dashed"
-              size="compact"
+              size="small"
               color='primary'
               onClick={handleGetLocation}
               isLoading={isLocating}
@@ -715,7 +715,7 @@ export const CreateIncidentPage: React.FC = () => {
               <Button
                 type="button"
                 variant="dashed"
-                size="compact"
+                size="small"
                 color='emerald'
                 disabled={!activeReadingInfo.connectionLocation}
                 onClick={() => {
@@ -735,7 +735,7 @@ export const CreateIncidentPage: React.FC = () => {
                 type="button"
                 variant="dashed"
                 color='indigo'
-                size="compact"
+                size="small"
                 onClick={() => setShowMap(!showMap)}
                 leftIcon={showMap ? <TbMapPinOff size={16} /> : <TbMapPin size={16} />}
                 style={{ flex: 1, justifyContent: 'center', minWidth: '200px' }}

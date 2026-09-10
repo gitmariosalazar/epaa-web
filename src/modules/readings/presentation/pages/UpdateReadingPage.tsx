@@ -29,6 +29,7 @@ import { ReadingDetailModal } from '../components/ReadingDetailModal';
 
 export interface UpdateReadingPageProps {
   initialCadastralKey?: string;
+  initialMonth?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
   refreshTrigger?: number;
@@ -36,12 +37,14 @@ export interface UpdateReadingPageProps {
 
 export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
   initialCadastralKey,
+  initialMonth,
   onSuccess,
   onCancel,
   refreshTrigger
 }) => {
   const {
     readingInfo,
+    readingInfoForUpdated,
     readingHistory,
     isLoadingInfo,
     isLoadingHistory,
@@ -72,14 +75,14 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
     const keyToLoad = initialCadastralKey || location.state?.cadastralKey;
     if (keyToLoad) {
       setCadastralKey(keyToLoad as string);
-      fetchReadingData(keyToLoad as string);
+      fetchReadingData(keyToLoad as string, initialMonth);
     }
-  }, [initialCadastralKey, location.state?.cadastralKey, refreshTrigger]);
+  }, [initialCadastralKey, initialMonth, location.state?.cadastralKey, refreshTrigger]);
 
   // ── Pre-cargar datos y verificar mes de la lectura ───────────────────────
   useEffect(() => {
-    if (readingInfo && readingInfo.length > 0) {
-      const info = readingInfo[0];
+    const info = readingInfoForUpdated.length > 0 ? readingInfoForUpdated[0] : (readingInfo && readingInfo.length > 0 ? readingInfo[0] : null);
+    if (info) {
       if (info.currentReading !== null && info.currentReading !== undefined) {
         setCurrentReadingInput(info.currentReading);
       } else {
@@ -91,9 +94,9 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
         setIsPreviousMonthModalOpen(true);
       }
     }
-  }, [readingInfo]);
+  }, [readingInfo, readingInfoForUpdated]);
 
-  const currentReadingInfoForRequest = readingInfo[0];
+  const currentReadingInfoForRequest = readingInfoForUpdated.length > 0 ? readingInfoForUpdated[0] : readingInfo[0];
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const buildRequest = (): UpdateReadingRequest => ({
@@ -118,7 +121,7 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
     setCurrentReadingId(null);
     setObservationInput('');
     setCurrentReadingInput('');
-    await fetchReadingData(cadastralKey);
+    await fetchReadingData(cadastralKey, initialMonth);
   };
 
   /**
@@ -136,8 +139,8 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
       return;
     }
 
-    // Auto-seleccionar la última lectura para actualizar si no hay una seleccionada
-    const latestReadingId = currentReadingId || readingHistory[0]?.readingId;
+    // Auto-seleccionar la lectura para actualizar si no hay una seleccionada
+    const latestReadingId = currentReadingId || currentReadingInfoForRequest?.readingId;
     if (!latestReadingId) {
       alert('No hay lectura previa en el historial para actualizar.');
       return;
@@ -379,17 +382,21 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
                 type="error"
                 title="Error en la búsqueda"
                 message={error}
+                size='small'
               />
             ) : cadastralKey.trim().length > 0 ? (
               <EmptyState
                 variant="warning"
+
                 message="No se encontraron resultados"
                 description={`No se han encontrado datos para el predio con clave catastral "${cadastralKey.toUpperCase()}".`}
+
               />
             ) : (
               <Alert
                 type="info"
                 title="Buscar Conexión"
+                size='small'
                 message="Ingrese la clave catastral en la barra superior y presione buscar para cargar los datos."
               />
             )}
@@ -406,7 +413,7 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
               />
 
               <ReadingUpdateInfoForm
-                info={readingInfo}
+                info={readingInfoForUpdated.length > 0 ? readingInfoForUpdated : readingInfo}
                 currentReadingInput={currentReadingInput}
                 setCurrentReadingInput={setCurrentReadingInput}
                 observationInput={observationInput}

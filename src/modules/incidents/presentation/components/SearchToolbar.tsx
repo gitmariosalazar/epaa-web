@@ -44,7 +44,7 @@ export const SearchToolbar: React.FC<SearchToolbarProps> = ({
           value={cadastralKeyInput}
           onChange={(val) => setCadastralKeyInput(val)}
           leftIcon={<FaSchoolLock />}
-          size="compact"
+          size="small"
           required={false}
         />
         <Button

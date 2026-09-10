@@ -21,7 +21,7 @@
   margin-bottom: 0; /* Align with new gap strategy */
 }
 
-/* Override shared Tabs component for "super compact" look */
+/* Override shared Tabs component for "super small" look */
 .overdue-payments-tabs-row .tabs {
   flex: 1;
 }
@@ -34,7 +34,7 @@
 }
 
 .overdue-payments-tabs-row .tabs__tab {
-  height: 38px !important; /* Even more compact */
+  height: 38px !important; /* Even more small */
   border-bottom: 2px solid transparent !important;
   margin-bottom: -2px !important;
   border-radius: 0.5rem 0.5rem 0 0 !important;

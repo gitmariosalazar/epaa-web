@@ -64,7 +64,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
           className={styles.filterGroup}
           label="Usuario ID / Username"
           type="text"
-          size="compact"
+          size="small"
           placeholder="Ej: 15..."
           value={userIdFilter || usernameFilter}
           onChange={(e) => {
@@ -85,7 +85,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
             {t('trashRateKPI.filters.dateRange', 'Rango de Fechas')}
           </label>
           <DateRangePicker
-            size="compact"
+            size="small"
             startDate={startDate}
             endDate={endDate}
             onChange={(start, end) => {
@@ -100,12 +100,11 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
           disabled={isLoading}
           size="xs"
           variant='dashed'
-          style={{ height: '26px !important' }}
 
           leftIcon={isLoading ? (
             <div className={styles.spinner} />
           ) : (
-            <Search size={18} />
+            <Search size={16} />
           )}
         >
           {isLoading ? t('common.loading') : t('common.fetch')}
@@ -117,7 +116,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
         <Select
           className={styles.filterGroup}
           label="Filtrar por"
-          size="compact"
+          size="small"
           value={searchField}
           onChange={(e) => onSearchFieldChange(e.target.value)}
           leftIcon={<Filter size={18} />}
@@ -132,7 +131,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
           className={`${styles.filterGroup} ${styles.filterGroupSearch}`}
           label={t('common.search')}
           type="text"
-          size="compact"
+          size="small"
           placeholder={t('common.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
@@ -143,7 +142,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
           <Select
             className={styles.filterGroup}
             label="Operación"
-            size="compact"
+            size="small"
             value={selectedOperation}
             onChange={(e) => onOperationChange(e.target.value)}
             leftIcon={<Database size={18} />}
@@ -157,7 +156,7 @@ export const AuditFilters: React.FC<AuditFiltersProps> = ({
           <Select
             className={styles.filterGroup}
             label="Evento"
-            size="compact"
+            size="small"
             value={selectedEvent}
             onChange={(e) => onEventChange(e.target.value)}
             leftIcon={<Activity size={18} />}

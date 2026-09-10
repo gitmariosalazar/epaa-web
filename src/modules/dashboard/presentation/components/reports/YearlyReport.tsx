@@ -371,14 +371,14 @@ export const YearlyReport: React.FC<YearlyReportProps> = ({
       {showToolbar && (
         <div className="yearly-report-toolbar">
           <div className="yearly-toolbar-side">
-            <label className="toolbar-label-compact">Año:</label>
+            <label className="toolbar-label-small">Año:</label>
             <div style={{ minWidth: '100px' }}>
               <DatePicker
                 view="year"
                 value={year.toString()}
                 onChange={(val: string) => setYear(Number(val))}
                 disabled={loading}
-                size="compact"
+                size="small"
               />
             </div>
             <Button

@@ -120,7 +120,7 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
             </label>
             <div className="filter-input-wrapper">
               <DatePicker
-                size="compact"
+                size="small"
                 view="month"
                 value={month}
                 onChange={(val: string) => onMonthChange(val.substring(0, 7))}
@@ -136,7 +136,7 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
             </label>
             <div className="filter-input-wrapper">
               <Input
-                size="compact"
+                size="small"
                 placeholder={t(
                   'readingData.filters.sectorPlaceholder',
                   'Todos los sectores'
@@ -156,7 +156,7 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
             </label>
             <div className="filter-input-wrapper">
               <Select
-                size="compact"
+                size="small"
                 width={180}
                 value={userId || ''}
                 options={[
@@ -180,7 +180,7 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
           <Button
             onClick={onFetch}
             disabled={!canFetch}
-            size="compact"
+            size="xs"
             isLoading={isLoading}
           >
             {!isLoading && <Search size={18} />}
@@ -198,7 +198,7 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
           </label>
           <div className="filter-input-wrapper">
             <Input
-              size="compact"
+              size="small"
               placeholder={t('common.searchPlaceholder', 'Buscar...')}
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}

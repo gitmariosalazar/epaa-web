@@ -84,7 +84,7 @@ export const FormAcometida: React.FC<FormAcometidaProps> = ({ data, onChange, er
           required
           value={data.tipo_uso || ''}
           onChange={update('tipo_uso')}
-          size="compact"
+          size="small"
           error={errors?.tipo_uso}
         >
           <option value="">Seleccione el tipo de uso...</option>
@@ -100,7 +100,7 @@ export const FormAcometida: React.FC<FormAcometidaProps> = ({ data, onChange, er
           required
           value={data.diametro_solicitado || ''}
           onChange={update('diametro_solicitado')}
-          size="compact"
+          size="small"
           error={errors?.diametro_solicitado}
         >
           <option value="">Seleccione el diámetro...</option>

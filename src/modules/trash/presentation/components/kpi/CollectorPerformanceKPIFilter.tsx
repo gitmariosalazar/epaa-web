@@ -23,43 +23,43 @@ export const CollectorPerformanceKPIFilter: React.FC<
   onFetch,
   isLoading
 }) => {
-  const { t } = useTranslation();
+    const { t } = useTranslation();
 
-  const handleRangeChange = (start: string, end: string) => {
-    onStartDateChange(start);
-    onEndDateChange(end);
-  };
+    const handleRangeChange = (start: string, end: string) => {
+      onStartDateChange(start);
+      onEndDateChange(end);
+    };
 
-  const canFetch = !isLoading && Boolean(startDate && endDate);
+    const canFetch = !isLoading && Boolean(startDate && endDate);
 
-  return (
-    <div className="collector-performance-filter">
-      <div className="filter-section-left">
-        <div className="filter-group filter-group--range">
-          <label className="filter-label">
-            {t('trashRateKPI.filters.dateRange', 'Rango de Fechas')}
-          </label>
-          <div className="filter-input-wrapper">
-            <DateRangePicker
-              size="compact"
-              startDate={startDate}
-              endDate={endDate}
-              onChange={handleRangeChange}
-              disabled={isLoading}
-            />
+    return (
+      <div className="collector-performance-filter">
+        <div className="filter-section-left">
+          <div className="filter-group filter-group--range">
+            <label className="filter-label">
+              {t('trashRateKPI.filters.dateRange', 'Rango de Fechas')}
+            </label>
+            <div className="filter-input-wrapper">
+              <DateRangePicker
+                size="small"
+                startDate={startDate}
+                endDate={endDate}
+                onChange={handleRangeChange}
+                disabled={isLoading}
+              />
+            </div>
           </div>
-        </div>
 
-        <Button
-          onClick={onFetch}
-          disabled={!canFetch}
-          size="compact"
-          isLoading={isLoading}
-        >
-          {!isLoading && <Search size={18} />}
-          {isLoading ? t('common.loading') : t('common.fetch')}
-        </Button>
+          <Button
+            onClick={onFetch}
+            disabled={!canFetch}
+            size="xs"
+            isLoading={isLoading}
+          >
+            {!isLoading && <Search size={18} />}
+            {isLoading ? t('common.loading') : t('common.fetch')}
+          </Button>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };

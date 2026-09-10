@@ -38,6 +38,7 @@ export const ReadingUpdateInfoForm: React.FC<PropTypes> = ({
           value={currentReadingInfo?.previousReading}
           readOnly
           disabled
+          size='small'
         />
         <Input
           label="Lectura Actual (Obligatorio)"
@@ -50,6 +51,7 @@ export const ReadingUpdateInfoForm: React.FC<PropTypes> = ({
               e.target.value === '' ? '' : Number(e.target.value)
             )
           }
+          size='small'
           focused
         />
       </div>
@@ -61,6 +63,7 @@ export const ReadingUpdateInfoForm: React.FC<PropTypes> = ({
           placeholder="Ingrese una descripción detallada..."
           value={observationInput}
           onChange={(e) => setObservationInput(e.target.value)}
+          size='small'
         />
       </div>
     </div>

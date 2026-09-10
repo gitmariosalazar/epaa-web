@@ -308,6 +308,7 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
           {readingModalState?.mode === 'update' && isPublic && (
             <UpdateReadingWithImagesPage
               initialCadastralKey={readingModalState?.cadastralKey}
+              initialMonth={currentFilters.monthIso}
               onSuccess={handleModalSuccess}
               onCancel={() => setReadingModalState(null)}
             />
@@ -316,6 +317,7 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
           {readingModalState?.mode === 'update' && !isPublic && (
             <UpdateSpecialReadingWithImagesPage
               initialCadastralKey={readingModalState?.cadastralKey}
+              initialMonth={currentFilters.monthIso}
               onSuccess={handleModalSuccess}
               onCancel={() => setReadingModalState(null)}
             />

@@ -8,7 +8,7 @@ export interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
   /** Whether the field is required (shows a red asterisk) */
   required?: boolean;
   /** The size of the label, matching the Input component */
-  size?: 'small' | 'compact' | 'medium' | 'large';
+  size?: 'small' | 'small' | 'medium' | 'large';
   /** The color variant of the label */
   variant?: 'default' | 'primary' | 'secondary' | 'error' | 'success' | 'warning' | 'info' | 'text-main';
   /** The font weight of the label */
@@ -48,14 +48,14 @@ export const Label: React.FC<LabelProps> = ({
   return (
     <label className={classes} {...props}>
       {leftIcon && <span className="label__icon label__icon--left">{leftIcon}</span>}
-      
+
       <span className="label__text">
         {content}
         {required && <span className="label__required-mark" aria-hidden="true">*</span>}
       </span>
 
       {rightIcon && <span className="label__icon label__icon--right">{rightIcon}</span>}
-      
+
       {info && (
         <span className="label__info-icon" title={info}>
           <Info size="1em" />

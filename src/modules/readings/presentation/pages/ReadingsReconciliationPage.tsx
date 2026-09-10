@@ -150,18 +150,18 @@ const ReadingsReconciliationContent: React.FC = () => {
       filters={
         <div className="reconciliation-filters" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '1rem', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.25rem' }}>
+            <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: 'var(--font-size-md)' }}>
               {vm.activeTab === 'migration' ? 'Migración de Datos' :
                 vm.activeTab === 'kpis' ? 'Resumen Estadístico del Período' :
                   vm.activeTab === 'discrepancies' ? 'Lista de Diferencias' :
-                      vm.activeTab === 'duplicates' ? 'Registros Duplicados' :
-                        vm.activeTab === 'dashboard-kpis' ? 'Dashboard de KPIs por Periodo' :
+                    vm.activeTab === 'duplicates' ? 'Registros Duplicados' :
+                      vm.activeTab === 'dashboard-kpis' ? 'Dashboard de KPIs por Periodo' :
                         'Diferencias Básicas'}
             </h3>
             <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
               {vm.activeTab === 'migration' ? 'Proceso de migración y comparación' :
-               vm.activeTab === 'dashboard-kpis' ? 'Análisis avanzado de KPIs de lectura (Siempre busca datos pasados)' :
-               'Auditoría de consistencia de datos entre PostgreSQL y SQL Server'}
+                vm.activeTab === 'dashboard-kpis' ? 'Análisis avanzado de KPIs de lectura (Siempre busca datos pasados)' :
+                  'Auditoría de consistencia de datos entre PostgreSQL y SQL Server'}
             </p>
           </div>
 
@@ -174,7 +174,7 @@ const ReadingsReconciliationContent: React.FC = () => {
                 {vm.activeTab === 'dashboard-kpis' ? (
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <Select
-                      size="compact"
+                      size="small"
                       value={vm.dashboardSelectedMonth.split('-')[1]}
                       onChange={(e) => vm.setDashboardSelectedMonth(`${vm.dashboardSelectedMonth.split('-')[0]}-${e.target.value}`)}
                     >
@@ -192,7 +192,7 @@ const ReadingsReconciliationContent: React.FC = () => {
                       <option value="12">DICIEMBRE</option>
                     </Select>
                     <Select
-                      size="compact"
+                      size="small"
                       value={vm.dashboardSelectedMonth.split('-')[0]}
                       onChange={(e) => vm.setDashboardSelectedMonth(`${e.target.value}-${vm.dashboardSelectedMonth.split('-')[1]}`)}
                     >
@@ -204,7 +204,7 @@ const ReadingsReconciliationContent: React.FC = () => {
                   </div>
                 ) : (
                   <DatePicker
-                    size="compact"
+                    size="small"
                     view="month"
                     value={vm.selectedMonth}
                     onChange={(val: string) => vm.setSelectedMonth(val.substring(0, 7))}
@@ -220,7 +220,7 @@ const ReadingsReconciliationContent: React.FC = () => {
                 </label>
                 <div style={{ width: '250px' }}>
                   <Select
-                    size="compact"
+                    size="small"
                     leftIcon={<FaList size={16} />}
                     value={vm.discrepancyFilter}
                     onChange={(e) => vm.setDiscrepancyFilter(e.target.value as AuditoriaFiltroType)}
@@ -241,9 +241,8 @@ const ReadingsReconciliationContent: React.FC = () => {
                   onClick={vm.handleMigrate}
                   isLoading={vm.isMigrating}
                   disabled={vm.isComparing || vm.isMigrating}
-                  size="compact"
+                  size="xs"
                   leftIcon={!vm.isMigrating && <Database size={14} />}
-                  style={{ height: '36px' }}
                 >
                   Migrar Datos
                 </Button>
@@ -251,10 +250,9 @@ const ReadingsReconciliationContent: React.FC = () => {
                   onClick={vm.handleCompare}
                   isLoading={vm.isComparing}
                   disabled={true}
-                  variant="outline"
-                  size="compact"
+                  variant="dashed"
+                  size="xs"
                   leftIcon={!vm.isComparing && <Play size={14} />}
-                  style={{ height: '36px' }}
                 >
                   Comparar
                 </Button>
@@ -262,10 +260,9 @@ const ReadingsReconciliationContent: React.FC = () => {
             ) : (
               <Button
                 onClick={vm.fetchAllData}
-                variant="outline"
-                size="compact"
+                variant="dashed"
+                size="xs"
                 leftIcon={!vm.isLoading && <RefreshCcw size={14} />}
-                style={{ height: '36px' }}
                 isLoading={vm.isLoading}
                 disabled={vm.isLoading}
               >

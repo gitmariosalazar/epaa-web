@@ -121,7 +121,7 @@ const NoveltyStatsModalContent: React.FC<NoveltyStatsModalContentProps> = ({
           <Input
             placeholder="Buscar Lectura"
             leftIcon={<Search size={16} />}
-            size="compact"
+            size="small"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

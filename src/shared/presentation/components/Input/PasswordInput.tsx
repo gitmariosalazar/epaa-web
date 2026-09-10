@@ -14,7 +14,7 @@ interface PasswordInputProps extends Omit<
   error?: string;
   showStrength?: boolean;
   valueToMatch?: string;
-  size?: 'small' | 'compact' | 'medium' | 'large';
+  size?: 'small' | 'small' | 'medium' | 'large';
   focused?: boolean;
 }
 

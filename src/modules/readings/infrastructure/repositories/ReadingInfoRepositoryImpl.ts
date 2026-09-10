@@ -31,4 +31,27 @@ export class ReadingInfoRepositoryImpl implements ReadingInfoRepository {
     );
     return response.data.data;
   }
+
+  async findReadingInfoForUpdated(
+    cadastralKey: string,
+    yearAndMonth?: string
+  ): Promise<ReadingInfo[]> {
+    // 1. La base de la URL con el parámetro de ruta (@Param)
+    let url = `/Readings/find-reading-for-updated/${cadastralKey}`;
+
+    // 2. Usamos URLSearchParams para los parámetros de consulta (@Query)
+    const params = new URLSearchParams();
+
+    if (yearAndMonth) {
+      params.append('yearAndMonth', yearAndMonth);
+    }
+
+    const queryString = params.toString();
+    if (queryString) {
+      url += `?${queryString}`;
+    }
+
+    const response = await this.client.get<ApiResponse<ReadingInfo[]>>(url);
+    return response.data.data;
+  }
 }

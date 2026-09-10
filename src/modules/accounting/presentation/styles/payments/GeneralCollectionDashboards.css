@@ -249,7 +249,7 @@
   gap: 12px;
 }
 
-.dashboard-trash-grid.compact {
+.dashboard-trash-grid.small {
   min-height: auto;
   flex: none;
 }
@@ -258,7 +258,7 @@
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
-.compact-table {
+.small-table {
   min-height: auto;
   flex: 1;
   display: flex;

@@ -24,4 +24,14 @@ export class GetReadingInfoUseCase {
       yearAndMonth
     );
   }
+
+  async findReadingInfoForUpdated(
+    cadastralKey: string,
+    yearAndMonth?: string
+  ): Promise<ReadingInfo[]> {
+    return this.readingInfoRepository.findReadingInfoForUpdated(
+      cadastralKey,
+      yearAndMonth
+    );
+  }
 }

@@ -188,206 +188,206 @@ export const ReadingAuditPage: React.FC = () => {
       }
       filters={
         activeTab !== 'map' && (
-        <div className="entry-filters">
-          <div className="filter-section-left">
-            {/* ── MES (solo en summary — API param) ── */}
-            {activeTab === 'summary' && (
-              <div className="filter-group">
-                <label className="filter-label">
-                  {t('readingData.filters.month', 'Mes')}
-                </label>
-                <div className="filter-input-wrapper">
-                  <DatePicker
-                    size="compact"
-                    view="month"
-                    value={month}
-                    onChange={(val: string) => setMonth(val.substring(0, 7))}
-                  />
+          <div className="entry-filters">
+            <div className="filter-section-left">
+              {/* ── MES (solo en summary — API param) ── */}
+              {activeTab === 'summary' && (
+                <div className="filter-group">
+                  <label className="filter-label">
+                    {t('readingData.filters.month', 'Mes')}
+                  </label>
+                  <div className="filter-input-wrapper">
+                    <DatePicker
+                      size="small"
+                      view="month"
+                      value={month}
+                      onChange={(val: string) => setMonth(val.substring(0, 7))}
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* ── SECTOR (API param — required for history, optional for summary) ── */}
-            <div className="filter-group">
-              <label className="filter-label">
-                {t('readingData.filters.sector', 'Sector')}
-              </label>
-              <div className="filter-input-wrapper">
-                <Input
-                  size="compact"
-                  placeholder={
-                    activeTab === 'history'
-                      ? t('readings.audit.sectorRequired', 'Nro. de sector')
-                      : t(
-                        'readingData.filters.sectorPlaceholder',
-                        'Todos los sectores'
-                      )
-                  }
-                  value={sector}
-                  onChange={(e) => setSector(e.target.value)}
-                  leftIcon={<TbChartPieFilled size={18} />}
-                />
-              </div>
-            </div>
-
-            {/* ── ÚLTIMOS N MESES (history API param) ── */}
-            {activeTab === 'history' && (
-              <div className="filter-group">
-                <label className="filter-label">
-                  {t('readings.audit.lastMonths', 'Últimos meses')}
-                </label>
-                <div className="filter-input-wrapper">
-                  <Input
-                    size="compact"
-                    placeholder="12"
-                    value={historyMonths}
-                    onChange={(e) => setHistoryMonths(e.target.value)}
-                    style={{ width: 80 }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* ── BUTTONS ── */}
-            <div className="filter-group">
-              <label className="filter-label" style={{ visibility: 'hidden' }}>
-                &nbsp;
-              </label>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <Button
-                  onClick={
-                    activeTab === 'summary'
-                      ? handleSummaryFetch
-                      : handleHistoryFetch
-                  }
-                  disabled={
-                    activeTab === 'summary'
-                      ? !canFetchSummary
-                      : !canFetchHistory
-                  }
-                  size="compact"
-                  isLoading={activeLoading}
-                >
-                  {!activeLoading && <Search size={18} />}
-                  {activeLoading ? t('common.loading') : t('common.fetch')}
-                </Button>
-
-                {activeTab === 'summary' && (
-                  <Button
-                    onClick={handleInitialize}
-                    disabled={true}
-                    size="compact"
-                    variant="dashed"
-                    isLoading={isInitializing}
-                    title={t(
-                      'readings.audit.initTooltip',
-                      'Genera las metas de lectura para el mes seleccionado'
-                    )}
-                  >
-                    {!isInitializing && <ClipboardList size={16} />}
-                    {isInitializing
-                      ? t('readings.audit.initializing', 'Inicializando...')
-                      : t('readings.audit.initialize', 'Inicializar período')}
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* ── RIGHT: client-side filters ── */}
-          <div className="filter-section-right">
-            {/* Mes filter (history only: months from fetched results) */}
-            {activeTab === 'history' && (
-              <div className="filter-group">
-                <label className="filter-label">
-                  {t('readings.audit.filterMonth', 'Mes')}
-                </label>
-                <div className="filter-input-wrapper">
-                  <Select
-                    size="compact"
-                    leftIcon={<FaList size={16} />}
-                    value={historyMonthFilter}
-                    onChange={(e) => setHistoryMonthFilter(e.target.value)}
-                  >
-                    <option value="">
-                      {t('readings.audit.allMonths', 'Todos los meses')}
-                    </option>
-                    {[
-                      ...new Set(
-                        historyData
-                          .map((r) =>
-                            r.readingMonth
-                              ? new Date(r.readingMonth)
-                                .toISOString()
-                                .substring(0, 7)
-                              : ''
-                          )
-                          .filter(Boolean)
-                      )
-                    ]
-                      .sort()
-                      .map((m) => (
-                        <option key={m} value={m}>
-                          {m}
-                        </option>
-                      ))}
-                  </Select>
-                </div>
-              </div>
-            )}
-
-            {/* Sector filter (summary only: refines already-fetched rows) */}
-            {activeTab === 'summary' && (
+              {/* ── SECTOR (API param — required for history, optional for summary) ── */}
               <div className="filter-group">
                 <label className="filter-label">
                   {t('readingData.filters.sector', 'Sector')}
                 </label>
                 <div className="filter-input-wrapper">
-                  <Select
-                    size="compact"
+                  <Input
+                    size="small"
+                    placeholder={
+                      activeTab === 'history'
+                        ? t('readings.audit.sectorRequired', 'Nro. de sector')
+                        : t(
+                          'readingData.filters.sectorPlaceholder',
+                          'Todos los sectores'
+                        )
+                    }
+                    value={sector}
+                    onChange={(e) => setSector(e.target.value)}
                     leftIcon={<TbChartPieFilled size={18} />}
-                    value={sectorFilter}
-                    onChange={(e) => setSectorFilter(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* ── ÚLTIMOS N MESES (history API param) ── */}
+              {activeTab === 'history' && (
+                <div className="filter-group">
+                  <label className="filter-label">
+                    {t('readings.audit.lastMonths', 'Últimos meses')}
+                  </label>
+                  <div className="filter-input-wrapper">
+                    <Input
+                      size="small"
+                      placeholder="12"
+                      value={historyMonths}
+                      onChange={(e) => setHistoryMonths(e.target.value)}
+                      style={{ width: 80 }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* ── BUTTONS ── */}
+              <div className="filter-group">
+                <label className="filter-label" style={{ visibility: 'hidden' }}>
+                  &nbsp;
+                </label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <Button
+                    onClick={
+                      activeTab === 'summary'
+                        ? handleSummaryFetch
+                        : handleHistoryFetch
+                    }
+                    disabled={
+                      activeTab === 'summary'
+                        ? !canFetchSummary
+                        : !canFetchHistory
+                    }
+                    size="xs"
+                    isLoading={activeLoading}
                   >
-                    <option value="">
-                      {t('readingData.filters.sectorPlaceholder', 'Todos')}
-                    </option>
-                    {[...new Set(auditData.map((r) => String(r.sectorId)))]
-                      .sort((a, b) => Number(a) - Number(b))
-                      .map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
+                    {!activeLoading && <Search size={18} />}
+                    {activeLoading ? t('common.loading') : t('common.fetch')}
+                  </Button>
+
+                  {activeTab === 'summary' && (
+                    <Button
+                      onClick={handleInitialize}
+                      disabled={true}
+                      size="xs"
+                      variant="dashed"
+                      isLoading={isInitializing}
+                      title={t(
+                        'readings.audit.initTooltip',
+                        'Genera las metas de lectura para el mes seleccionado'
+                      )}
+                    >
+                      {!isInitializing && <ClipboardList size={16} />}
+                      {isInitializing
+                        ? t('readings.audit.initializing', 'Inicializando...')
+                        : t('readings.audit.initialize', 'Inicializar período')}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ── RIGHT: client-side filters ── */}
+            <div className="filter-section-right">
+              {/* Mes filter (history only: months from fetched results) */}
+              {activeTab === 'history' && (
+                <div className="filter-group">
+                  <label className="filter-label">
+                    {t('readings.audit.filterMonth', 'Mes')}
+                  </label>
+                  <div className="filter-input-wrapper">
+                    <Select
+                      size="small"
+                      leftIcon={<FaList size={16} />}
+                      value={historyMonthFilter}
+                      onChange={(e) => setHistoryMonthFilter(e.target.value)}
+                    >
+                      <option value="">
+                        {t('readings.audit.allMonths', 'Todos los meses')}
+                      </option>
+                      {[
+                        ...new Set(
+                          historyData
+                            .map((r) =>
+                              r.readingMonth
+                                ? new Date(r.readingMonth)
+                                  .toISOString()
+                                  .substring(0, 7)
+                                : ''
+                            )
+                            .filter(Boolean)
+                        )
+                      ]
+                        .sort()
+                        .map((m) => (
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
+                        ))}
+                    </Select>
+                  </div>
+                </div>
+              )}
+
+              {/* Sector filter (summary only: refines already-fetched rows) */}
+              {activeTab === 'summary' && (
+                <div className="filter-group">
+                  <label className="filter-label">
+                    {t('readingData.filters.sector', 'Sector')}
+                  </label>
+                  <div className="filter-input-wrapper">
+                    <Select
+                      size="small"
+                      leftIcon={<TbChartPieFilled size={18} />}
+                      value={sectorFilter}
+                      onChange={(e) => setSectorFilter(e.target.value)}
+                    >
+                      <option value="">
+                        {t('readingData.filters.sectorPlaceholder', 'Todos')}
+                      </option>
+                      {[...new Set(auditData.map((r) => String(r.sectorId)))]
+                        .sort((a, b) => Number(a) - Number(b))
+                        .map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                    </Select>
+                  </div>
+                </div>
+              )}
+
+              {/* Estado filter (both tabs) */}
+              <div className="filter-group">
+                <label className="filter-label">
+                  {t('readings.audit.statusLabel', 'Estado')}
+                </label>
+                <div className="filter-input-wrapper">
+                  <Select
+                    size="small"
+                    leftIcon={<FaList size={16} />}
+                    value={statusFilter}
+                    onChange={(e) =>
+                      setStatusFilter(e.target.value as StatusFilter)
+                    }
+                  >
+                    {statusOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
                   </Select>
                 </div>
               </div>
-            )}
-
-            {/* Estado filter (both tabs) */}
-            <div className="filter-group">
-              <label className="filter-label">
-                {t('readings.audit.statusLabel', 'Estado')}
-              </label>
-              <div className="filter-input-wrapper">
-                <Select
-                  size="compact"
-                  leftIcon={<FaList size={16} />}
-                  value={statusFilter}
-                  onChange={(e) =>
-                    setStatusFilter(e.target.value as StatusFilter)
-                  }
-                >
-                  {statusOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </Select>
-              </div>
             </div>
           </div>
-        </div>
         )
       }
     >

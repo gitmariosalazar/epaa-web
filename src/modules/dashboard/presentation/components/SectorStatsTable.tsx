@@ -143,7 +143,7 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
             value={searchTerm}
             onChange={handleSearchChange}
             leftIcon={<Search size={16} />}
-            size="compact"
+            size="small"
           />
         </div>
       </div>

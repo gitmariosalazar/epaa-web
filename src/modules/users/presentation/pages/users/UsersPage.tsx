@@ -284,7 +284,7 @@ const UsersLayout: React.FC = () => {
               variant="outline"
               onClick={refresh}
               leftIcon={<RefreshCw size={16} />}
-              size="compact"
+              size="small"
               style={{ height: '30px' }}
             >
               Refresh
@@ -295,7 +295,7 @@ const UsersLayout: React.FC = () => {
                 setIsCreateOpen(true);
               }}
               leftIcon={<Plus size={14} />}
-              size="compact"
+              size="small"
               style={{ height: '30px' }}
               variant="dashed"
               color="green"

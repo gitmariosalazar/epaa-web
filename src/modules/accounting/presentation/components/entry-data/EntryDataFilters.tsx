@@ -135,7 +135,7 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
           </label>
           <div className="filter-input-wrapper">
             <DateRangePicker
-              size="compact"
+              size="small"
               startDate={startDate}
               endDate={endDate}
               onChange={(start, end) => {
@@ -150,7 +150,7 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
         <Button
           onClick={onFetch}
           disabled={!canFetch}
-          size="compact"
+          size="xs"
           isLoading={isLoading}
         >
           {!isLoading && <Search size={18} />}
@@ -167,7 +167,7 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 onSearchQueryChange(e.target.value)
               }
-              size="compact"
+              size="small"
               leftIcon={<Search size={16} />}
             />
           </div>
@@ -185,7 +185,7 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
               <Select
                 value={selectedCollector}
                 onChange={(e) => onCollectorChange(e.target.value)}
-                size="compact"
+                size="small"
                 leftIcon={<User size={18} />}
               >
                 <option value="">
@@ -210,7 +210,7 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
               <Select
                 value={selectedTitleCode}
                 onChange={(e) => onTitleCodeChange(e.target.value)}
-                size="compact"
+                size="small"
                 leftIcon={<VscSymbolString size={18} />}
               >
                 <option value="">
@@ -235,7 +235,7 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
               <Select
                 value={selectedPaymentMethod}
                 onChange={(e) => onPaymentMethodChange(e.target.value)}
-                size="compact"
+                size="small"
                 leftIcon={<FaFileInvoiceDollar size={18} />}
               >
                 <option value="">
@@ -260,7 +260,7 @@ export const EntryDataFilters: React.FC<EntryDataFiltersProps> = ({
               <Select
                 value={selectedStatus}
                 onChange={(e) => onStatusChange(e.target.value)}
-                size="compact"
+                size="small"
                 leftIcon={<FaList size={18} />}
               >
                 <option value="">

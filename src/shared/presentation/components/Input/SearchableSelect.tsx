@@ -16,7 +16,7 @@ interface SearchableSelectProps {
   placeholder?: string;
   error?: string;
   disabled?: boolean;
-  size?: 'small' | 'compact' | 'medium' | 'large';
+  size?: 'small' | 'small' | 'medium' | 'large';
   className?: string;
   focused?: boolean;
 }
@@ -33,7 +33,7 @@ export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelect
     const [searchTerm, setSearchTerm] = useState('');
     const [alignment, setAlignment] = useState<'bottom' | 'top'>('bottom');
     const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
-    
+
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const popoverRef = useRef<HTMLDivElement>(null);
@@ -41,13 +41,13 @@ export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelect
 
     // Find current label based on value
     const selectedOption = options.find(opt => opt.value === value);
-    
+
     useEffect(() => {
       if (focused && inputRef.current) {
         inputRef.current.focus();
       }
     }, [focused]);
-    
+
     useEffect(() => {
       if (isClearingRef.current) {
         if (value === '' || value === undefined || value === null) {
@@ -66,7 +66,7 @@ export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelect
         const spaceBottom = window.innerHeight - rect.bottom;
         const spaceTop = rect.top;
         const alignTop = spaceBottom < 250 && spaceTop > spaceBottom;
-        
+
         setPopoverStyle({
           position: 'fixed',
           top: alignTop ? 'auto' : rect.bottom + 4,
@@ -95,7 +95,7 @@ export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelect
       const handleClickOutside = (event: MouseEvent) => {
         const isClickInContainer = containerRef.current && containerRef.current.contains(event.target as Node);
         const isClickInPopover = popoverRef.current && popoverRef.current.contains(event.target as Node);
-        
+
         if (!isClickInContainer && !isClickInPopover) {
           setIsOpen(false);
         }
@@ -137,7 +137,7 @@ export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelect
       if (!isOpen && !isClearingRef.current) handleOpen();
     };
 
-    const filteredOptions = options.filter(opt => 
+    const filteredOptions = options.filter(opt =>
       opt.label.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -147,13 +147,13 @@ export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelect
       isClearingRef.current = true;
       onChange('');
       setSearchTerm('');
-      
+
       // Close dropdown if it's open
       setIsOpen(false);
-      
+
       // Do not auto-focus as it would reopen the popover
       if (document.activeElement === inputRef.current) {
-         inputRef.current?.blur();
+        inputRef.current?.blur();
       }
     };
 
@@ -167,12 +167,12 @@ export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelect
     };
 
     return (
-      <div 
+      <div
         className={`input-component searchable-select-container searchable-select--${size} ${isOpen ? 'searchable-select-container--open' : ''} ${className}`}
         ref={containerRef}
       >
         {label && <label className="input__label">{label}</label>}
-        
+
         <div className="searchable-select-trigger">
           <input
             ref={inputRef}
@@ -185,16 +185,16 @@ export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelect
             disabled={disabled}
             autoComplete="off"
           />
-          
+
           <div className="searchable-select-actions" style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', gap: '4px', zIndex: 10 }}>
             {searchTerm && !disabled && (
-              <button 
+              <button
                 type="button"
                 onPointerDown={handleClear}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}
                 title="Clear"
               >
-                <X size={size === 'small' || size === 'compact' ? 14 : 18} />
+                <X size={size === 'small' || size === 'medium' ? 14 : 18} />
               </button>
             )}
             <button
@@ -203,13 +203,13 @@ export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelect
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}
               title="Toggle"
             >
-              <ChevronDown size={size === 'small' || size === 'compact' ? 14 : 18} />
+              <ChevronDown size={size === 'small' || size === 'medium' ? 14 : 18} />
             </button>
           </div>
         </div>
 
         {isOpen && !disabled && createPortal(
-          <div 
+          <div
             ref={popoverRef}
             className={`searchable-select-popover ${alignment === 'top' ? 'searchable-select-popover--top-aligned' : ''}`}
             style={popoverStyle}
@@ -233,7 +233,7 @@ export const SearchableSelect = forwardRef<SearchableSelectRef, SearchableSelect
           </div>,
           document.body
         )}
-        
+
         {error && <span className="input__error">{error}</span>}
       </div>
     );

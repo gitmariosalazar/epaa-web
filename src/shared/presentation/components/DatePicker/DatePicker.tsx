@@ -15,7 +15,7 @@ interface DatePickerProps {
   onChange: (date: string) => void;
   disabled?: boolean;
   view?: 'date' | 'month' | 'year';
-  size?: 'xs' | 'small' | 'compact' | 'medium' | 'large';
+  size?: 'xs' | 'small' | 'small' | 'medium' | 'large';
 }
 
 export interface DatePickerRef {
@@ -401,13 +401,13 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
                 onChange={(e) => handleManualChange(e.target.value)}
                 onClick={(e) => e.stopPropagation()}
               />
-              <Button variant="ghost" size="sm" onClick={handleClear}>
+              <Button variant="ghost" size="xs" onClick={handleClear}>
                 {t('common.datePicker.clear')}
               </Button>
               <div className="datepicker-footer-actions">
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="xs"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsOpen(false);
@@ -417,7 +417,7 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
                 </Button>
                 <Button
                   variant="primary"
-                  size="sm"
+                  size="xs"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (manualValue) {

@@ -57,7 +57,7 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = memo(
               <div className="chart-card-header-button">
                 <Button
                   variant="ghost"
-                  size="compact"
+                  size="small"
                   onClick={() => {
                     if (onExport) {
                       onExport();

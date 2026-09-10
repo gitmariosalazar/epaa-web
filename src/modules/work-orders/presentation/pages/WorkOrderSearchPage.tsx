@@ -53,7 +53,7 @@ export const WorkOrderSearchPage: React.FC = () => {
               placeholder="Código OT — Ej: OT-2026-0000001"
               autoComplete="off"
               leftIcon={<Search size={14} />}
-              size="compact"
+              size="small"
             />
             <Button
               id="wo-process-search-btn"
@@ -61,7 +61,7 @@ export const WorkOrderSearchPage: React.FC = () => {
               variant="primary"
               leftIcon={<Search size={14} />}
               disabled={!searchInput.trim()}
-              size="compact"
+              size="small"
             >
               Buscar
             </Button>
@@ -69,7 +69,7 @@ export const WorkOrderSearchPage: React.FC = () => {
               <Button
                 variant="dashed"
                 color='warning'
-                size="compact"
+                size="small"
                 leftIcon={<X size={14} />}
                 onClick={handleClear}
               >

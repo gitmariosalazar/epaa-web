@@ -363,11 +363,11 @@ export const DailyReport: React.FC<DailyReportProps> = ({
             </Tooltip>
 
             <Tooltip followCursor={false} themeColor="cyan" content="Ver Detalles de la Acometida">
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                color="cyan" 
-                onClick={() => onViewConnectionDetails && onViewConnectionDetails(row.cadastralKey)} 
+              <Button
+                size="sm"
+                variant="ghost"
+                color="cyan"
+                onClick={() => onViewConnectionDetails && onViewConnectionDetails(row.cadastralKey)}
                 circle
               >
                 <MapPin size={16} />
@@ -379,10 +379,10 @@ export const DailyReport: React.FC<DailyReportProps> = ({
               followCursor={false}
               content={t('common.viewDetails', 'Ver Detalles de Lectura')}
             >
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                onClick={() => onViewReadingDetails && onViewReadingDetails(row.cadastralKey, new Date(date))} 
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onViewReadingDetails && onViewReadingDetails(row.cadastralKey, new Date(date))}
                 circle
               >
                 <FileText size={16} />
@@ -400,14 +400,14 @@ export const DailyReport: React.FC<DailyReportProps> = ({
       {showToolbar && (
         <div className="daily-report-toolbar">
           <div className="daily-toolbar-side">
-            <label className="toolbar-label-compact">Periodo</label>
+            <label className="toolbar-label-small">Periodo</label>
             <DatePicker
               view="date"
               value={date}
               onChange={(value) => setDate(value)}
               disabled={loading}
               ref={pickerRef}
-              size="compact"
+              size="small"
             />
             <Button
               onClick={() => handleSearch()}
@@ -424,7 +424,7 @@ export const DailyReport: React.FC<DailyReportProps> = ({
                 <Search size={12} />
                 <input
                   type="text"
-                  className="toolbar-input-compact"
+                  className="toolbar-input-small"
                   placeholder="Filter records..."
                   maxLength={60}
                   value={resultSearchTerm}

@@ -29,6 +29,7 @@ import { ReadingSpecialUpdateInfoForm } from '../components/ReadingSpecialUpdate
 
 export interface UpdateReadingPageProps {
   initialCadastralKey?: string;
+  initialMonth?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
   refreshTrigger?: number;
@@ -36,12 +37,14 @@ export interface UpdateReadingPageProps {
 
 export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
   initialCadastralKey,
+  initialMonth,
   onSuccess,
   onCancel,
   refreshTrigger
 }) => {
   const {
     readingInfo,
+    readingInfoForUpdated,
     readingHistory,
     isLoadingInfo,
     isLoadingHistory,
@@ -76,14 +79,14 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
     const keyToLoad = initialCadastralKey || location.state?.cadastralKey;
     if (keyToLoad) {
       setCadastralKey(keyToLoad as string);
-      fetchReadingData(keyToLoad as string);
+      fetchReadingData(keyToLoad as string, initialMonth);
     }
-  }, [initialCadastralKey, location.state?.cadastralKey, refreshTrigger]);
+  }, [initialCadastralKey, initialMonth, location.state?.cadastralKey, refreshTrigger]);
 
   // ── Pre-cargar datos y verificar mes de la lectura ───────────────────────
   useEffect(() => {
-    if (readingInfo && readingInfo.length > 0) {
-      const info = readingInfo[0];
+    const info = readingInfoForUpdated.length > 0 ? readingInfoForUpdated[0] : (readingInfo && readingInfo.length > 0 ? readingInfo[0] : null);
+    if (info) {
       if (info.currentReading !== null && info.currentReading !== undefined) {
         setCurrentReadingInput(info.currentReading);
       } else {
@@ -101,9 +104,9 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
         setIsPreviousMonthModalOpen(true);
       }
     }
-  }, [readingInfo]);
+  }, [readingInfo, readingInfoForUpdated]);
 
-  const currentReadingInfoForRequest = readingInfo[0];
+  const currentReadingInfoForRequest = readingInfoForUpdated.length > 0 ? readingInfoForUpdated[0] : readingInfo[0];
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const buildRequest = (): UpdateSpecialReadingRequest => ({
@@ -124,7 +127,7 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
     setObservationInput('');
     setCurrentReadingInput('');
     setPreviousReadingInput('');
-    await fetchReadingData(cadastralKey);
+    await fetchReadingData(cadastralKey, initialMonth);
   };
 
   /**
@@ -150,8 +153,8 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
       return;
     }
 
-    // Auto-seleccionar la última lectura para actualizar si no hay una seleccionada
-    const latestReadingId = currentReadingId || readingHistory[0]?.readingId;
+    // Auto-seleccionar la lectura para actualizar si no hay una seleccionada
+    const latestReadingId = currentReadingId || currentReadingInfoForRequest?.readingId;
     if (!latestReadingId) {
       alert('No hay lectura previa en el historial para actualizar.');
       return;
@@ -424,7 +427,7 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
               />
 
               <ReadingSpecialUpdateInfoForm
-                info={readingInfo}
+                info={readingInfoForUpdated.length > 0 ? readingInfoForUpdated : readingInfo}
                 currentReadingInput={currentReadingInput}
                 setCurrentReadingInput={setCurrentReadingInput}
                 previousReadingInput={previousReadingInput}

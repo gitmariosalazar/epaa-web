@@ -239,7 +239,7 @@ export const ClienteStep: React.FC<ClienteStepProps> = ({
             placeholder="Cédula, RUC o Clave Catastral (Ej: 1003938477 ó 14-293)"
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
-            size="compact"
+            size="small"
           />
           <Button type="button" onClick={handleSearch} disabled={isSearching}
             leftIcon={<Search size={14} />} size="sm">

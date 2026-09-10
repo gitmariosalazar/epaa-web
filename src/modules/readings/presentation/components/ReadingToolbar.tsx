@@ -50,7 +50,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
           value={cadastralKeyInput}
           onChange={(val) => setCadastralKeyInput(val)}
           leftIcon={<FaSchoolLock />}
-          size="compact"
+          size="small"
           required={true}
         />
         <Button
@@ -58,7 +58,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
           className="cr-search-btn"
           disabled={isLoadingInfo}
           leftIcon={<FaSearch />}
-          size="sm"
+          size="xs"
         >
           {isLoadingInfo ? t('common.searching') : t('common.search')}
         </Button>
@@ -76,7 +76,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
               : !readingInfo || !readingInfo?.permitReading || isSubmitting
           }
           leftIcon={<FaSave />}
-          size="sm"
+          size="xs"
         >
           {isSubmitting ? 'Guardando...' : 'Guardar'}
         </Button>
@@ -86,7 +86,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
           onClick={handleCancel}
           disabled={!readingInfo}
           leftIcon={<FaTimes />}
-          size="sm"
+          size="xs"
         >
           Cancelar
         </Button>
@@ -107,7 +107,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
           onClick={handleCancel}
           disabled={!readingInfo}
           leftIcon={<GrClear />}
-          size="sm"
+          size="xs"
         >
           Limpiar
         </Button>
@@ -127,7 +127,7 @@ export const ReadingToolbar: React.FC<ReadingToolbarProps> = ({
             }
             disabled={!readingInfo}
             leftIcon={<FaEye />}
-            size="sm"
+            size="xs"
             circle
           ></Button>
         </Tooltip>

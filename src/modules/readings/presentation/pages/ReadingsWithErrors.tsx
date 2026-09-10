@@ -268,6 +268,7 @@ export const ReadingsWithErrors: React.FC = () => {
           {modalState?.mode === 'update' && (
             <UpdateSpecialReadingWithImagesPage
               initialCadastralKey={modalState?.cadastralKey}
+              initialMonth={month}
               onSuccess={handleModalSuccess}
               onCancel={closeModal}
             />

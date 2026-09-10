@@ -91,7 +91,7 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
     }
 
     const selectedUser = users.find(u => u.userId === id);
-    const workerName = selectedUser 
+    const workerName = selectedUser
       ? `${selectedUser.firstName || ''} ${selectedUser.lastName || ''}`.trim() || id
       : id;
 
@@ -291,7 +291,7 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
                       label: user.firstName + ' ' + user.lastName + ' (' + user.positionName + ')'
                     }))}
                     label='Trabajador '
-                    size='compact'
+                    size='small'
                     value={workerId}
                     onChange={(value) => setWorkerId(String(value))}
                     disabled={isLoading}
@@ -308,7 +308,7 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
                         label: r.label
                       }))}
                     label='Rol'
-                    size='compact'
+                    size='small'
                     value={roleId ?? ''}
                     onChange={(value) => handleRoleChange(value ? Number(value) : null)}
                     disabled={isLoading}

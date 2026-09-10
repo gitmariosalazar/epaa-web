@@ -37,7 +37,7 @@ export const PositionsFilters: React.FC<PositionsFiltersProps> = ({
         <Button
           variant="outline"
           onClick={onRefresh}
-          size="compact"
+          size="small"
           style={{ height: '30px' }}
           leftIcon={<RefreshCw size={14} />}
         >
@@ -46,7 +46,7 @@ export const PositionsFilters: React.FC<PositionsFiltersProps> = ({
         <Button
           onClick={onCreateClick}
           leftIcon={<Plus size={14} />}
-          size="compact"
+          size="small"
           style={{ height: '30px' }}
           variant="dashed"
           color="green"

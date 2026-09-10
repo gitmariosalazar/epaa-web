@@ -181,6 +181,7 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
           {modalState?.mode === 'update' && !forceSpecialUpdateModal && modalState?.security !== 'protected' && (
             <UpdateReadingWithImagesPage
               initialCadastralKey={modalState?.cadastralKey}
+              initialMonth={month}
               onSuccess={handleModalSuccess}
               onCancel={closeModal}
             />
@@ -188,6 +189,7 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
           {modalState?.mode === 'update' && (forceSpecialUpdateModal || modalState?.security === 'protected') && (
             <UpdateSpecialReadingWithImagesPage
               initialCadastralKey={modalState?.cadastralKey}
+              initialMonth={month}
               onSuccess={handleModalSuccess}
               onCancel={closeModal}
             />

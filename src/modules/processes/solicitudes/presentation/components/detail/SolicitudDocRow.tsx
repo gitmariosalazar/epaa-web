@@ -80,7 +80,7 @@ export const SolicitudDocRow: React.FC<SolicitudDocRowProps> = ({
                 if (input) input.click();
               }}
               variant='dashed'
-              size='compact'
+              size='small'
             >
               {uploadingDocId === doc.id ? (
                 <Clock size={10} className="sol-detail-loading__spinner" />

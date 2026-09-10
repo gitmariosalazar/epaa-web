@@ -9,4 +9,8 @@ export interface ReadingInfoRepository {
     cadastralKey: string,
     yearAndMonth: string
   ): Promise<ReadingDetailed | null>;
+  findReadingInfoForUpdated(
+    cadastralKey: string,
+    yearAndMonth?: string
+  ): Promise<ReadingInfo[]>;
 }

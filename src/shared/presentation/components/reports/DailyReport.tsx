@@ -317,14 +317,14 @@ export const DailyReport: React.FC<DailyReportProps> = ({
       {showToolbar && (
         <div className="daily-report-toolbar">
           <div className="daily-toolbar-side">
-            <label className="toolbar-label-compact">Period</label>
+            <label className="toolbar-label-small">Period</label>
             <DatePicker
               view="date"
               value={date}
               onChange={(value) => setDate(value)}
               disabled={loading}
               ref={pickerRef}
-              size="compact"
+              size="small"
             />
             <Button
               onClick={() => handleSearch()}
@@ -341,7 +341,7 @@ export const DailyReport: React.FC<DailyReportProps> = ({
                 <Search size={12} />
                 <input
                   type="text"
-                  className="toolbar-input-compact"
+                  className="toolbar-input-small"
                   placeholder="Filter records..."
                   maxLength={60}
                   value={resultSearchTerm}

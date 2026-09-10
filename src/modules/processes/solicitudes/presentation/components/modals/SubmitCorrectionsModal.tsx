@@ -66,9 +66,9 @@ export const SubmitCorrectionsModal: React.FC<SubmitCorrectionsModalProps> = ({
           <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
             Cancelar
           </Button>
-          <Button 
-            onClick={handleSubmit} 
-            isLoading={isSubmitting} 
+          <Button
+            onClick={handleSubmit}
+            isLoading={isSubmitting}
             disabled={!isFormValid || isSubmitting}
           >
             Enviar Todas las Correcciones
@@ -96,7 +96,7 @@ export const SubmitCorrectionsModal: React.FC<SubmitCorrectionsModalProps> = ({
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {rejectedDocuments.map((doc) => (
-            <div 
+            <div
               key={doc.id}
               style={{
                 background: 'var(--surface-hover)',
@@ -116,8 +116,8 @@ export const SubmitCorrectionsModal: React.FC<SubmitCorrectionsModalProps> = ({
                   </span>
                 </div>
                 {doc.observacion && (
-                  <span style={{ 
-                    fontSize: '0.75rem', 
+                  <span style={{
+                    fontSize: '0.75rem',
                     color: 'var(--danger-color, #ef4444)',
                     background: 'rgba(239, 68, 68, 0.1)',
                     padding: '0.2rem 0.5rem',
@@ -143,7 +143,7 @@ export const SubmitCorrectionsModal: React.FC<SubmitCorrectionsModalProps> = ({
                   </span>
                   <Button
                     variant="ghost"
-                    size="compact"
+                    size="small"
                     color="error"
                     onClick={() => removeFile(doc.id)}
                     iconOnly

@@ -206,14 +206,14 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
       </div>
 
       <div className="wo-create-grid">
-        <Select label="Origen *" name="origin" value={form.origin} size="compact" onChange={field('origin')} required>
+        <Select label="Origen *" name="origin" value={form.origin} size="small" onChange={field('origin')} required>
           {ORIGINS.map(o => (<option key={o.value} value={o.value}>{o.label}</option>))}
         </Select>
-        <Select label="Tipo de Trabajo *" name="workTypeId" size="compact" value={String(form.workTypeId)}
+        <Select label="Tipo de Trabajo *" name="workTypeId" size="small" value={String(form.workTypeId)}
           onChange={e => onFormChange({ workTypeId: Number(e.target.value) })} error={errors?.workTypeId} required>
           {WORK_TYPES.map(t => (<option key={t.id} value={t.id}>{t.label}</option>))}
         </Select>
-        <Select label="Prioridad *" name="priorityId" size="compact" value={String(form.priorityId)}
+        <Select label="Prioridad *" name="priorityId" size="small" value={String(form.priorityId)}
           onChange={e => onFormChange({ priorityId: Number(e.target.value) })} error={errors?.priorityId} required>
           {PRIORITIES.map(p => (<option key={p.id} value={p.id}>{p.label}</option>))}
         </Select>
@@ -225,13 +225,13 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
         <h3>Ubicación</h3>
       </div>
 
-      <Input label="Dirección / Lugar del trabajo *" name="location" size="compact" value={form.location}
+      <Input label="Dirección / Lugar del trabajo *" name="location" size="small" value={form.location}
         onChange={field('location')} placeholder="Ej: Av. de los Shyris y Naciones Unidas"
         error={errors?.location} required />
 
       <div className="wo-create-grid" style={{ marginTop: '0.75rem' }}>
-        <Input label="Latitud" name="latitude" type="text" size="compact" value={form.latitude} placeholder="No capturada" readOnly disabled />
-        <Input label="Longitud" name="longitude" type="text" size="compact" value={form.longitude} placeholder="No capturada" readOnly disabled />
+        <Input label="Latitud" name="latitude" type="text" size="small" value={form.latitude} placeholder="No capturada" readOnly disabled />
+        <Input label="Longitud" name="longitude" type="text" size="small" value={form.longitude} placeholder="No capturada" readOnly disabled />
       </div>
 
 
@@ -246,7 +246,7 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
           type="button"
           variant="dashed"
           color='primary'
-          size="compact"
+          size="small"
           onClick={handleGetLocation}
           isLoading={isLocating}
           leftIcon={<MapPin size={16} />}
@@ -260,7 +260,7 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
             type="button"
             variant="dashed"
             color='emerald'
-            size="compact"
+            size="small"
             onClick={() => {
               onFormChange({ latitude: initialLocation.lat, longitude: initialLocation.lng });
               setShowMap(true);
@@ -277,7 +277,7 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
             type="button"
             variant="dashed"
             color='indigo'
-            size="compact"
+            size="small"
             onClick={() => setShowMap(!showMap)}
             leftIcon={showMap ? <TbMapPinOff size={16} /> : <TbMapPin size={16} />}
             style={{ flex: 1, justifyContent: 'center', minWidth: '200px' }}

@@ -5,17 +5,17 @@
  */
 import React, { useState } from 'react';
 import { SlidersHorizontal, X } from 'lucide-react';
-import { Tabs }   from '@/shared/presentation/components/Tabs/Tabs';
+import { Tabs } from '@/shared/presentation/components/Tabs/Tabs';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { Modal }  from '@/shared/presentation/components/Modal/Modal';
+import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import type { TabItem } from '@/shared/presentation/components/Tabs/Tabs';
 import type { NotificationTab, SortOrder, NotificationFilter } from '../../hooks/useNotifications';
 import './NotificationToolbar.css';
 
 // ── Tab definitions ─────────────────────────────────────────────────────────
 const TABS: TabItem<NotificationTab>[] = [
-  { id: 'all',    label: 'Todas' },
+  { id: 'all', label: 'Todas' },
   { id: 'unread', label: 'No leídas' },
 ];
 
@@ -27,33 +27,33 @@ const SORT_OPTIONS = [
 
 // ── Channel / Priority filter options ──────────────────────────────────────
 const CHANNEL_OPTIONS = [
-  { value: '',         label: 'Todos los canales' },
-  { value: 'IN_APP',   label: 'En la app' },
-  { value: 'EMAIL',    label: 'Email' },
-  { value: 'SMS',      label: 'SMS' },
-  { value: 'PUSH',     label: 'Push' },
+  { value: '', label: 'Todos los canales' },
+  { value: 'IN_APP', label: 'En la app' },
+  { value: 'EMAIL', label: 'Email' },
+  { value: 'SMS', label: 'SMS' },
+  { value: 'PUSH', label: 'Push' },
   { value: 'WHATSAPP', label: 'WhatsApp' },
 ];
 
 const PRIORITY_OPTIONS = [
-  { value: '',       label: 'Todas las prioridades' },
-  { value: 'LOW',    label: 'Baja' },
+  { value: '', label: 'Todas las prioridades' },
+  { value: 'LOW', label: 'Baja' },
   { value: 'NORMAL', label: 'Normal' },
-  { value: 'HIGH',   label: 'Alta' },
+  { value: 'HIGH', label: 'Alta' },
   { value: 'URGENT', label: 'Urgente' },
 ];
 
 // ── Component ───────────────────────────────────────────────────────────────
 export interface NotificationToolbarProps {
-  tab:               NotificationTab;
-  onTabChange:       (t: NotificationTab) => void;
-  unreadCount:       number;
-  sortOrder:         SortOrder;
-  onSortChange:      (s: SortOrder) => void;
-  filter:            NotificationFilter;
-  onFilterChange:    (f: NotificationFilter) => void;
+  tab: NotificationTab;
+  onTabChange: (t: NotificationTab) => void;
+  unreadCount: number;
+  sortOrder: SortOrder;
+  onSortChange: (s: SortOrder) => void;
+  filter: NotificationFilter;
+  onFilterChange: (f: NotificationFilter) => void;
   activeFilterCount: number;
-  onClearFilters:    () => void;
+  onClearFilters: () => void;
 }
 
 export const NotificationToolbar: React.FC<NotificationToolbarProps> = ({
@@ -68,7 +68,7 @@ export const NotificationToolbar: React.FC<NotificationToolbarProps> = ({
   // local draft while modal is open
   const [draft, setDraft] = useState<NotificationFilter>(filter);
 
-  const openFilter  = () => { setDraft(filter); setFilterOpen(true); };
+  const openFilter = () => { setDraft(filter); setFilterOpen(true); };
   const applyFilter = () => { onFilterChange(draft); setFilterOpen(false); };
   const resetFilter = () => { setDraft({ channel: '', priority: '' }); };
 
@@ -94,7 +94,7 @@ export const NotificationToolbar: React.FC<NotificationToolbarProps> = ({
         <div className="notif-toolbar__actions">
           {/* Sort — shared Select */}
           <Select
-            size="compact"
+            size="small"
             value={sortOrder}
             onChange={(e) => onSortChange(e.target.value as SortOrder)}
             options={SORT_OPTIONS}
@@ -105,7 +105,7 @@ export const NotificationToolbar: React.FC<NotificationToolbarProps> = ({
           {/* Filter button — shared Button with active indicator */}
           <Button
             variant={activeFilterCount > 0 ? 'primary' : 'outline'}
-            size="compact"
+            size="small"
             leftIcon={<SlidersHorizontal size={14} />}
             onClick={openFilter}
             aria-label="Abrir filtros"
@@ -117,7 +117,7 @@ export const NotificationToolbar: React.FC<NotificationToolbarProps> = ({
           {activeFilterCount > 0 && (
             <Button
               variant="ghost"
-              size="compact"
+              size="small"
               circle
               leftIcon={<X size={14} />}
               onClick={onClearFilters}

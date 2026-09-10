@@ -421,10 +421,10 @@ export const GeneralCollectionDashboard: React.FC<
       )}
       {sections.length > 0 && (
         <div
-          className={`payments-table-wrapper ${isCompact ? 'compact-table' : ''}`}
+          className={`payments-table-wrapper ${isCompact ? 'small-table' : ''}`}
         >
           <Table
-            key={`dashboard-sections-${isCompact ? 'compact' : 'full'}`}
+            key={`dashboard-sections-${isCompact ? 'small' : 'full'}`}
             data={sections}
             columns={columnsSections}
             isLoading={false}

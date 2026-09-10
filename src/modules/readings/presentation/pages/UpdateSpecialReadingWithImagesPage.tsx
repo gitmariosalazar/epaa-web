@@ -19,6 +19,9 @@ import { BsPatchQuestionFill } from 'react-icons/bs';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { ChangeMeterPage } from '@/modules/connections/presentation/pages/ChangeMeterPage';
+import { useReading } from '../hooks/useReading';
+import type { ReadingDetailed } from '../../domain/models/ReadingInfoResponse';
+import { truncateText } from '@/shared/utils/text/truncate-text';
 
 const extractFilename = (filePath: string): string => {
   return filePath.split('/').pop() ?? filePath;
@@ -39,10 +42,11 @@ const ImagePreview: React.FC<{ filename: string }> = ({ filename }) => {
 
   if (error || !blobUrl) {
     return (
-      <div className="urw-empty-state">
-        <ImageOff size={64} style={{ marginBottom: '8px' }} />
-        <p>No se pudo cargar la imagen</p>
-      </div>
+      <EmptyState
+        message="No se pudo cargar la imagen"
+        description="Por favor, recargue la página e intente nuevamente"
+        icon={<ImageOff size={64} style={{ marginBottom: '8px' }} />}
+      />
     );
   }
 
@@ -57,10 +61,12 @@ const ImagePreview: React.FC<{ filename: string }> = ({ filename }) => {
 
 export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
   initialCadastralKey,
+  initialMonth,
   onSuccess,
   onCancel,
 }) => {
   const { readingImages, fetchImages, isLoading } = useReadingImagesList();
+  const { readingDetailed, fetchReadingData } = useReading()
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'images' | 'details'>('images');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -92,8 +98,9 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
   useEffect(() => {
     if (initialCadastralKey) {
       fetchImages({ cadastralKey: initialCadastralKey });
+      fetchReadingData(initialCadastralKey, initialMonth);
     }
-  }, [initialCadastralKey, fetchImages, refreshTrigger]);
+  }, [initialCadastralKey, initialMonth, fetchImages, refreshTrigger]);
 
   // Flatten images from the API response but keep their reading data context
   const imageItems = readingImages.flatMap((ri) =>
@@ -109,6 +116,9 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
   };
 
   const currentItem = imageItems[currentImageIndex];
+  const displayData: ReadingDetailed = readingDetailed!;
+
+  console.log("currentItem", readingDetailed);
 
   return (
     <div className="urw-split-container">
@@ -158,96 +168,97 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
                       </>
                     )}
                   </div>
-
-                  <div className="urw-image-footer">
-                    <div className="urw-footer-grid">
-                      {/*Botones de accnoes abrir popovers con la informacion de la lectura*/}
-
-                      <div className="urw-footer-item">
-                        <span className="urw-footer-label">Período</span>
-                        <ColorChip
-                          label={`${currentItem.data.readingMonthName} ${currentItem.data.readingYear}`}
-                          size='xs'
-                          variant='soft'
-                          color='#0891b2'
-                          icon={<Calendar size='1em' />}
-                          borderRadius={5}
-                        />
-                      </div>
-                      <div className="urw-footer-item">
-                        <span className="urw-footer-label">Consumo</span>
-                        <ColorChip
-                          label={(currentItem.data.consumption || 0).toString()}
-                          size='xs'
-                          variant='soft'
-                          color={getNoveltyColor(currentItem.data.novelty)}
-                          icon={<Droplet size='1em' />}
-                          borderRadius={5}
-                        />
-                      </div>
-                      <div className="urw-footer-item">
-                        <span className="urw-footer-label">Novedad</span>
-                        <ColorChip
-                          label={currentItem.data.novelty || 'Ninguna'}
-                          size='xs'
-                          variant='soft'
-                          color={getNoveltyColor(currentItem.data.novelty)}
-                          icon={<AlertTriangle size='1em' />}
-                          borderRadius={5}
-                        />
-                      </div>
-                      <div className="urw-footer-item">
-                        <span className="urw-footer-label">Clave catastral</span>
-                        <ColorChip
-                          label={currentItem.data.cadastralKey}
-                          size='xs'
-                          variant='soft'
-                          color='#0868B2'
-                          icon={<MdCable size='1em' />}
-                          borderRadius={5}
-                        />
-                      </div>
-                    </div>
-                    <div className='urw-footer-actions-left'>
-                      <Tooltip
-                        content={'Ver información de la lectura'}
-                        followCursor={false}
-                      >
-                        <Button
-                          onClick={handleOpenDetailInfo}
-                          variant='outline'
-                          circle
-                          size='sm'
-                        >
-                          <FaList size={16} />
-                        </Button>
-                      </Tooltip>
-                    </div>
-                    <div className='urw-footer-actions-right'>
-                      <Tooltip
-                        content={'Actualizar Número de medidor'}
-                        followCursor={false}
-                      >
-                        <Button
-                          onClick={handleOpenUpdateMeterNumberModal}
-                          variant='outline'
-                          circle
-                          color='orange'
-                          size='sm'
-                        >
-                          <FaEdit size={16} />
-                        </Button>
-                      </Tooltip>
-                    </div>
-                  </div>
                 </>
               ) : (
-                <EmptyState
-                  description={isLoading ? 'Cargando...' : `No hay imágenes disponibles para la lectura con clave catastral ${initialCadastralKey}`}
-                  message="Sin imágenes"
-                  icon={<BsPatchQuestionFill size={48} style={{ marginBottom: '8px' }} />}
-                />
+                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px' }}>
+                  <EmptyState
+                    description={isLoading ? 'Cargando...' : `No hay imágenes disponibles para la lectura con clave catastral ${initialCadastralKey}`}
+                    message="Sin imágenes"
+                    icon={<BsPatchQuestionFill size={48} style={{ marginBottom: '8px' }} />}
+                  />
+                </div>
               )}
+              <div className="urw-image-footer">
+                <div className="urw-footer-grid">
+                  {/*Botones de accnoes abrir popovers con la informacion de la lectura*/}
+
+                  <div className="urw-footer-item">
+                    <span className="urw-footer-label">Período</span>
+                    <ColorChip
+                      label={`${displayData?.readingMonthName || ''}`}
+                      size='xs'
+                      variant='soft'
+                      color='#0891b2'
+                      icon={<Calendar size='1em' />}
+                      borderRadius={5}
+                    />
+                  </div>
+                  <div className="urw-footer-item">
+                    <span className="urw-footer-label">Consumo</span>
+                    <ColorChip
+                      label={(displayData?.currentReading! - displayData?.previousReading || 0).toString() + ' m³'}
+                      size='xs'
+                      variant='soft'
+                      color={getNoveltyColor(displayData?.novelty || '')}
+                      icon={<Droplet size='1em' />}
+                      borderRadius={5}
+                    />
+                  </div>
+                  <div className="urw-footer-item">
+                    <span className="urw-footer-label">Novedad</span>
+                    <ColorChip
+                      label={truncateText(displayData?.novelty!, 10) || 'Ninguna'}
+                      size='xs'
+                      variant='soft'
+                      color={getNoveltyColor(displayData?.novelty)}
+                      icon={<AlertTriangle size='1em' />}
+                      borderRadius={5}
+                    />
+                  </div>
+                  <div className="urw-footer-item">
+                    <span className="urw-footer-label">C. catastral</span>
+                    <ColorChip
+                      label={displayData?.cadastralKey || initialCadastralKey}
+                      size='xs'
+                      variant='soft'
+                      color='#0868B2'
+                      icon={<MdCable size='1em' />}
+                      borderRadius={5}
+                    />
+                  </div>
+                </div>
+                <div className='urw-footer-actions-left'>
+                  <Tooltip
+                    content={'Ver información de la lectura'}
+                    followCursor={false}
+                  >
+                    <Button
+                      onClick={handleOpenDetailInfo}
+                      variant='outline'
+                      circle
+                      size='sm'
+                    >
+                      <FaList size={16} />
+                    </Button>
+                  </Tooltip>
+                </div>
+                <div className='urw-footer-actions-right'>
+                  <Tooltip
+                    content={'Actualizar Número de medidor'}
+                    followCursor={false}
+                  >
+                    <Button
+                      onClick={handleOpenUpdateMeterNumberModal}
+                      variant='outline'
+                      circle
+                      color='orange'
+                      size='sm'
+                    >
+                      <FaEdit size={16} />
+                    </Button>
+                  </Tooltip>
+                </div>
+              </div>
             </div>
           </TabPanel>
 
@@ -256,11 +267,11 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
               <ReadingDetailTabContent
                 cadastralKey={initialCadastralKey || ''}
                 yearAndMonth={
-                  (currentItem?.data || readingImages[0])
-                    ? String((currentItem?.data || readingImages[0]).readingMonth).includes('-')
-                      ? String((currentItem?.data || readingImages[0]).readingMonth)
-                      : `${(currentItem?.data || readingImages[0]).readingYear}-${String((currentItem?.data || readingImages[0]).readingMonth).padStart(2, '0')}`
-                    : dateService.getCurrentMonthString()
+                  displayData
+                    ? String(displayData.readingMonth).includes('-')
+                      ? String(displayData.readingMonth)
+                      : `${displayData.readingMonth.split('-')[0]}-${String(displayData.readingMonth).padStart(2, '0')}`
+                    : (initialMonth || dateService.getCurrentMonthString())
                 }
               />
             </div>
@@ -274,6 +285,7 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
       <div className="urw-form-pane">
         <UpdateSpecialReadingPage
           initialCadastralKey={initialCadastralKey}
+          initialMonth={initialMonth}
           onSuccess={onSuccess}
           onCancel={onCancel}
           refreshTrigger={refreshTrigger}
@@ -286,14 +298,16 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
         anchorElement={anchorEl}
         title="Información de la lectura"
       >
-        {currentItem?.data && (
-          <ReadingInfoPopoverContent
-            cadastralKey={currentItem.data.cadastralKey}
-            yearAndMonth={String(currentItem.data.readingMonth).includes('-')
-              ? currentItem.data.readingMonth
-              : `${currentItem.data.readingYear}-${String(currentItem.data.readingMonth).padStart(2, '0')}`}
-          />
-        )}
+        <ReadingInfoPopoverContent
+          cadastralKey={displayData?.cadastralKey || initialCadastralKey || ''}
+          yearAndMonth={
+            displayData
+              ? String(displayData.readingMonth).includes('-')
+                ? String(displayData.readingMonth)
+                : `${displayData.readingMonth.split('-')[0]}-${String(displayData.readingMonth).padStart(2, '0')}`
+              : (initialMonth || dateService.getCurrentMonthString())
+          }
+        />
       </PopoverModal>
 
 

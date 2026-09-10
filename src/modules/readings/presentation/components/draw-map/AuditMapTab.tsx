@@ -67,7 +67,7 @@ export const AuditMapTab: React.FC = () => {
               <label className="filter-label">{t('readings.audit.mapDate', 'Fecha de Captura')}</label>
               <div className="filter-input-wrapper">
                 <DatePicker
-                  size="compact"
+                  size="small"
                   value={date}
                   onChange={(val: string) => setDate(val.substring(0, 10))}
                 />
@@ -79,7 +79,7 @@ export const AuditMapTab: React.FC = () => {
               <label className="filter-label">{t('readings.audit.mapUser', 'Usuario (Opcional)')}</label>
               <div className="filter-input">
                 <Select
-                  size="compact"
+                  size="small"
                   leftIcon={<FaUserCircle size={16} />}
                   value={userId}
                   onChange={(e) => setUserId(e.target.value)}
@@ -102,7 +102,7 @@ export const AuditMapTab: React.FC = () => {
               <Button
                 onClick={handleFetch}
                 disabled={!date || isLoading}
-                size="compact"
+                size="xs"
                 isLoading={isLoading}
               >
                 {!isLoading && <Search size={18} />}

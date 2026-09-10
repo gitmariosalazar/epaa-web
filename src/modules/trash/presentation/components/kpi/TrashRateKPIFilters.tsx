@@ -77,7 +77,7 @@ export const TrashRateKPIFilters: React.FC<TrashRateKPIFiltersProps> = ({
           </label>
           <div className="trash-report-filter-input-wrapper">
             <DatePicker
-              size="compact"
+              size="small"
               view="month"
               value={currentMonthValue}
               onChange={handleMonthChange}
@@ -89,7 +89,7 @@ export const TrashRateKPIFilters: React.FC<TrashRateKPIFiltersProps> = ({
         <Button
           onClick={onFetch}
           disabled={!canFetch}
-          size="compact"
+          size="xs"
           isLoading={isLoading}
         >
           {!isLoading && <Search size={18} />}
@@ -106,7 +106,7 @@ export const TrashRateKPIFilters: React.FC<TrashRateKPIFiltersProps> = ({
             </label>
             <div className="trash-report-filter-input-wrapper">
               <Select
-                size="compact"
+                size="small"
                 value={selectedCategoryIndex}
                 onChange={(e) => onCategoryChange(Number(e.target.value))}
                 disabled={isLoading}

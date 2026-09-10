@@ -9,7 +9,7 @@ interface InputProps extends Omit<
   error?: string;
   info?: string;
   leftIcon?: React.ReactNode;
-  size?: 'small' | 'compact' | 'medium' | 'large';
+  size?: 'small' | 'small' | 'medium' | 'large';
   focused?: boolean;
   /** Sets the width of the input container. */
   width?: string | number;

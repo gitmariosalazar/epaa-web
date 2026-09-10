@@ -176,7 +176,7 @@ export const ConnectionsPage = () => {
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <Button
               leftIcon={<Plus size={18} />}
-              size="compact"
+              size="small"
               onClick={() => {
                 actions.resetForm();
                 actions.setIsFormOpen(true);

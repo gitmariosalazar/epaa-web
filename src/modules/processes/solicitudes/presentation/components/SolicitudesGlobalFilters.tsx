@@ -47,68 +47,68 @@ export const SolicitudesGlobalFilters: React.FC<
     { value: 'activo', label: 'Activo' }
   ]
 }) => {
-  return (
-    <div className="layout-filters" style={{ justifyContent: 'flex-end' }}>
-      {/* ── RIGHT: Local search + filters ── */}
-      <div className="layout-filter-section-right">
-        <div className="filter-group">
-          <label className="filter-label">FILTRAR POR</label>
-          <div className="filter-input-wrapper">
-            <Select
-              value={filters.filterBy}
-              onChange={(e) => onChange({ filterBy: e.target.value })}
-              size="compact"
-              leftIcon={<Filter size={18} />}
+    return (
+      <div className="layout-filters" style={{ justifyContent: 'flex-end' }}>
+        {/* ── RIGHT: Local search + filters ── */}
+        <div className="layout-filter-section-right">
+          <div className="filter-group">
+            <label className="filter-label">FILTRAR POR</label>
+            <div className="filter-input-wrapper">
+              <Select
+                value={filters.filterBy}
+                onChange={(e) => onChange({ filterBy: e.target.value })}
+                size="small"
+                leftIcon={<Filter size={18} />}
+              >
+                <option value="">Todos los campos</option>
+                <option value="codigo">Código</option>
+                <option value="direccion">Dirección</option>
+              </Select>
+            </div>
+          </div>
+
+          <div className="filter-group">
+            <label className="filter-label">BUSCAR</label>
+            <div className="filter-input-wrapper">
+              <Input
+                type="text"
+                placeholder="Buscar registros..."
+                value={filters.search}
+                onChange={(e) => onChange({ search: e.target.value })}
+                size="small"
+                leftIcon={<Search size={18} />}
+              />
+            </div>
+          </div>
+
+          <div className="filter-group">
+            <label className="filter-label">EVENTO</label>
+            <div className="filter-input-wrapper">
+              <Select
+                value={filters.event}
+                onChange={(e) => onChange({ event: e.target.value })}
+                size="small"
+                leftIcon={<Activity size={18} />}
+              >
+                <option value="">Todos los eventos</option>
+                {eventOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </Select>
+            </div>
+          </div>
+
+          {onRefresh && (
+            <Button
+              variant="outline"
+              leftIcon={<RefreshCw size={15} />}
+              onClick={onRefresh}
+              id="btn-refrescar-solicitudes"
             >
-              <option value="">Todos los campos</option>
-              <option value="codigo">Código</option>
-              <option value="direccion">Dirección</option>
-            </Select>
-          </div>
+              Actualizar
+            </Button>
+          )}
         </div>
-
-        <div className="filter-group">
-          <label className="filter-label">BUSCAR</label>
-          <div className="filter-input-wrapper">
-            <Input
-              type="text"
-              placeholder="Buscar registros..."
-              value={filters.search}
-              onChange={(e) => onChange({ search: e.target.value })}
-              size="compact"
-              leftIcon={<Search size={18} />}
-            />
-          </div>
-        </div>
-
-        <div className="filter-group">
-          <label className="filter-label">EVENTO</label>
-          <div className="filter-input-wrapper">
-            <Select
-              value={filters.event}
-              onChange={(e) => onChange({ event: e.target.value })}
-              size="compact"
-              leftIcon={<Activity size={18} />}
-            >
-              <option value="">Todos los eventos</option>
-              {eventOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </Select>
-          </div>
-        </div>
-
-        {onRefresh && (
-          <Button
-            variant="outline"
-            leftIcon={<RefreshCw size={15} />}
-            onClick={onRefresh}
-            id="btn-refrescar-solicitudes"
-          >
-            Actualizar
-          </Button>
-        )}
       </div>
-    </div>
-  );
-};
+    );
+  };

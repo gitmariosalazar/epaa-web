@@ -12,9 +12,9 @@ import { XCircle, Clock, DollarSign, FileText, AlertCircle } from 'lucide-react'
 import { SupportContactCard } from '@/modules/tramites/presentation/components/SupportContactCard';
 import '@/shared/presentation/components/TramiteRequisitosList/TramiteProcedurePage.css';
 
-const repo    = new SuspensionRepositoryImpl();
+const repo = new SuspensionRepositoryImpl();
 const useCase = new GetSuspensionRequisitosUseCase(repo);
-const COLOR   = '#ef4444';
+const COLOR = '#ef4444';
 
 export const SuspensionPage: React.FC = () => {
   const [data, setData] = useState<Suspension | null>(null);
@@ -86,7 +86,7 @@ export const SuspensionPage: React.FC = () => {
                 </p>
               </div>
             </div>
-            <div className="tp-support-compact"><SupportContactCard /></div>
+            <div className="tp-support-small"><SupportContactCard /></div>
           </div>
 
         </div>

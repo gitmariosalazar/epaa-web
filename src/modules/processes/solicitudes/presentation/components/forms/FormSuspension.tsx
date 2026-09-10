@@ -38,14 +38,14 @@ export const FormSuspension: React.FC<FormSuspensionProps> = ({ data, onChange, 
           required
           value={data.tipo_suspension || ''}
           onChange={update('tipo_suspension')}
-          size="compact"
+          size="small"
           error={errors?.tipo_suspension}
         >
           <option value="">Seleccione el tipo...</option>
           <option value="temporal">Temporal</option>
           <option value="definitiva">Definitiva</option>
         </Select>
-        
+
         {data.tipo_suspension === 'temporal' && (
           <Input
             id="sol-tiempo"

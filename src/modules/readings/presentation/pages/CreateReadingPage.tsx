@@ -353,6 +353,7 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
                 type="error"
                 title="Error en la búsqueda"
                 message={error}
+                size='small'
               />
             ) : cadastralKeyInput.trim().length > 0 ? (
               <EmptyState

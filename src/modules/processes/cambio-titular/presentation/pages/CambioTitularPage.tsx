@@ -12,9 +12,9 @@ import { Users, Clock, DollarSign, FileText, AlertCircle } from 'lucide-react';
 import { SupportContactCard } from '@/modules/tramites/presentation/components/SupportContactCard';
 import '@/shared/presentation/components/TramiteRequisitosList/TramiteProcedurePage.css';
 
-const repo    = new CambioTitularRepositoryImpl();
+const repo = new CambioTitularRepositoryImpl();
 const useCase = new GetCambioTitularRequisitosUseCase(repo);
-const COLOR   = '#f59e0b';
+const COLOR = '#f59e0b';
 
 export const CambioTitularPage: React.FC = () => {
   const [data, setData] = useState<CambioTitular | null>(null);
@@ -86,7 +86,7 @@ export const CambioTitularPage: React.FC = () => {
                 </p>
               </div>
             </div>
-            <div className="tp-support-compact"><SupportContactCard /></div>
+            <div className="tp-support-small"><SupportContactCard /></div>
           </div>
 
         </div>

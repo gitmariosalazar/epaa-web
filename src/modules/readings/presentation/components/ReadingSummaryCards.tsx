@@ -70,20 +70,23 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
     averageConsumption
   );
 
+  const iconSize: number = 16;
+  const colorChipSize = 'md';
+
   return (
     <>
       <div className="cr-summary-cards">
         <Card className="cr-card cr-card-connection">
           <div className="cr-card-header">
             <span>{t('readings.summaryCards.connectionId')}</span>
-            <FaPlug className="cr-icon-green" size={20} />
+            <FaPlug className="cr-icon-green" size={iconSize} />
           </div>
           <div className="cr-card-body">
             <ColorChip
               label={currentReadingInfoSelected?.cadastralKey || '---'}
               status="info"
               variant="soft"
-              size="lg"
+              size={colorChipSize}
               borderRadius="10px"
             />
           </div>
@@ -97,7 +100,7 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
         <Card className="cr-card cr-card-average">
           <div className="cr-card-header">
             <span>{t('readings.summaryCards.avgConsumption')}</span>
-            <FaTint className="cr-icon-blue" size={20} />
+            <FaTint className="cr-icon-blue" size={iconSize} />
           </div>
           <div className="cr-card-body">
             <ColorChip
@@ -108,7 +111,7 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
               }
               status="info"
               variant="soft"
-              size="lg"
+              size={colorChipSize}
               borderRadius="10px"
             />
           </div>
@@ -121,7 +124,7 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
           <Card className="cr-card cr-card-average">
             <div className="cr-card-header">
               <span>{t('readings.summaryCards.prevConsumption')}</span>
-              <FaHistory className="cr-icon-gray" size={20} />
+              <FaHistory className="cr-icon-gray" size={iconSize} />
             </div>
             <div className="cr-card-body">
               <ColorChip
@@ -132,7 +135,7 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
                 }
                 status="info"
                 variant="soft"
-                size="lg"
+                size={colorChipSize}
                 borderRadius="10px"
               />
             </div>
@@ -153,7 +156,7 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
           <Card className="cr-card cr-card-average">
             <div className="cr-card-header">
               <span>{t('readings.summaryCards.prevConsumption')}</span>
-              <FaHistory className="cr-icon-gray" size={20} />
+              <FaHistory className="cr-icon-gray" size={iconSize} />
             </div>
             <div className="cr-card-body">
               <ColorChip
@@ -164,7 +167,7 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
                 }
                 status="info"
                 variant="soft"
-                size="lg"
+                size={colorChipSize}
                 borderRadius="10px"
               />
             </div>
@@ -186,7 +189,7 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
         <Card className="cr-card cr-card-average">
           <div className="cr-card-header">
             <span>{t('readings.summaryCards.currentConsumption')}</span>
-            <visuals.Icon className={visuals.iconClass} size={20} />
+            <visuals.Icon className={visuals.iconClass} size={iconSize} />
           </div>
           <div className="cr-card-body">
             <ColorChip
@@ -197,14 +200,14 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
               }
               status={visuals.chipStatus}
               variant="soft"
-              size="lg"
+              size={colorChipSize}
               borderRadius="10px"
             />
             <ColorChip
               label={method === 'create' ? valueOfReadingForCreate : valueOfReadingForUpdate}
               status={visuals.chipStatus}
               variant="soft"
-              size="lg"
+              size={colorChipSize}
               borderRadius="10px"
             />
           </div>
@@ -219,33 +222,34 @@ export const ReadingSummaryCards: React.FC<PropTypes> = ({
           </div>
         </Card>
       </div>
-      <div>
-        {method === 'create' ? (
-          <>
-            {!currentReadingInfoSelected?.hasCurrentReading ? (
-              <Alert
-                key={`info-${currentReadingInfoSelected?.cadastralKey}-${alertKey}`}
-                type="info"
-                message={`La lectura para este mes ya se ha registrado (Fecha: ${ConverDate(currentReadingInfoSelected?.previousReadingDate)} - ${currentReadingInfoSelected?.readingTime || ''}). No se puede registrar otra lectura dentro del mismo mes.`}
-              />
-            ) : (
-              <Alert
-                key={`warn-${currentReadingInfoSelected?.cadastralKey}-${alertKey}`}
-                type="warning"
-                message="La lectura para este mes no se ha registrado. Por favor, registre la lectura."
-              />
-            )}
-          </>
-        ) : (
-          <>
+      {method === 'create' ? (
+        <div className='cr-alert-warning'>
+          {!currentReadingInfoSelected?.hasCurrentReading ? (
+            <Alert
+              key={`info-${currentReadingInfoSelected?.cadastralKey}-${alertKey}`}
+              type="info"
+              message={`La lectura para este mes ya se ha registrado (Fecha: ${ConverDate(currentReadingInfoSelected?.previousReadingDate)} - ${currentReadingInfoSelected?.readingTime || ''}). No se puede registrar otra lectura dentro del mismo mes.`}
+              size='small'
+            />
+          ) : (
             <Alert
               key={`warn-${currentReadingInfoSelected?.cadastralKey}-${alertKey}`}
               type="warning"
-              message={`Para realizar la actualizacion, asegurese de que la lectura actual sea correcta y no haya sido facturada.`}
+              message="La lectura para este mes no se ha registrado. Por favor, registre la lectura."
+              size='small'
             />
-          </>
-        )}
-      </div>
+          )}
+        </div>
+      ) : (
+        <div className='cr-alert-warning'>
+          <Alert
+            key={`warn-${currentReadingInfoSelected?.cadastralKey}-${alertKey}`}
+            type="warning"
+            message={`Para realizar la actualizacion, asegurese de que la lectura actual sea correcta y no haya sido facturada.`}
+            size='small'
+          />
+        </div>
+      )}
     </>
   );
 };

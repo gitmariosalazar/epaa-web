@@ -230,7 +230,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
               position="top"
             >
               <Button
-                size="sm"
+                size="xs"
                 variant="ghost"
                 onClick={() => setSelectedItem(row)}
                 circle
@@ -257,7 +257,7 @@ export const OverduePaymentsTable: React.FC<OverduePaymentsTableProps> = ({
                       className="menu-button-wrapper"
                     >
                       <Button
-                        size="sm"
+                        size="xs"
                         variant="ghost"
                         className="menu-toggle-btn btn-view-pending-list"
                         onClick={(e) => handleMenuToggle(e, row)}

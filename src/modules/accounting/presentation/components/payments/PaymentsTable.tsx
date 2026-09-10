@@ -127,7 +127,7 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
             <Button
               onClick={() => setSelectedPayment(item)}
               variant="ghost"
-              size="sm"
+              size="xs"
               color="sky"
               circle
             >

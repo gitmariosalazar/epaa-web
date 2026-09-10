@@ -1,5 +1,5 @@
 .cr-container {
-  padding: 5px;
+  padding: 2px;
   background: var(--background, linear-gradient(135deg, #74a1f5, #9ec4f5));
   min-height: 100%;
   height: 100%;
@@ -22,7 +22,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
 }
 
 h2 {
@@ -36,9 +36,7 @@ h2 {
   display: flex;
   flex-wrap: nowrap;
   overflow-x: auto;
-  gap: 8px;
-  margin-top: -10px;
-  padding-bottom: 8px; /* To prevent scrollbar from hiding content */
+  gap: 5px;
 }
 
 .cr-summary-cards::-webkit-scrollbar {
@@ -74,13 +72,14 @@ h2 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.95rem;
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--text-secondary);
   padding: 6px 12px;
   background: var(--surface-hover);
   border-bottom: 2px solid var(--border-color);
   border-radius: var(--radius-sm) var(--radius-sm);
+  margin: -6px !important;
 }
 
 .cr-card-body {
@@ -91,6 +90,12 @@ h2 {
   justify-content: center;
   flex: 1;
   gap: 10px;
+}
+
+.cr-card-footer {
+  margin: -6px !important;
+  padding: 6px 12px;
+  margin-bottom: -10px !important;
 }
 
 .cr-card-value,
@@ -221,11 +226,16 @@ h2 {
   grid-template-columns: 1fr 1fr;
   gap: 15px;
   align-items: stretch;
-  margin-top: -10px;
   border-radius: var(--radius-sm);
   padding: 8px;
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
+}
+
+.cr-alert-warning {
+  margin-bottom: -12px;
+  border-radius: var(--radius-sm);
+  margin-top: 3px;
 }
 
 @media (max-width: 768px) {
@@ -442,10 +452,8 @@ h2 {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
   background: var(--surface);
-  padding: 12px 20px;
+  padding: 6px 8px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
@@ -547,17 +555,18 @@ h2 {
 .cr-page-title {
   color: var(--text-main);
   margin: 0;
+  font-size: var(--font-size-sm);
 }
 
 .cr-client-badge {
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
   background: var(--surface-hover);
-  padding: 6px 12px;
+  padding: 3px 6px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
   line-height: 1.4;
@@ -570,11 +579,13 @@ h2 {
 .cr-client-id {
   font-weight: var(--font-weight-semibold);
   color: var(--text-main);
+  font-size: var(--font-size-sm);
 }
 
 .cr-client-name {
   font-weight: var(--font-weight-bold);
   color: var(--text-main);
+  font-size: var(--font-size-sm);
 }
 
 .cr-history-wrapper {

@@ -2,7 +2,10 @@ import { useState, useCallback } from 'react';
 import { useReadingsContext } from '../context/ReadingsContext';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
-import type { ReadingInfo } from '../../domain/models/ReadingInfoResponse';
+import type {
+  ReadingDetailed,
+  ReadingInfo
+} from '../../domain/models/ReadingInfoResponse';
 import type { ReadingHistory } from '../../domain/models/ReadingHistory';
 import type { CreateReadingRequest } from '../../domain/dto/request/CreateReadingRequest';
 import type {
@@ -22,6 +25,8 @@ export const useReading = () => {
 
   const [isLoadingInfo, setIsLoadingInfo] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [isLoadingDetailedReading, setIsLoadingDetailedReading] =
+    useState(false);
   const [isLoadingPendingReadings, setIsLoadingPendingReadings] =
     useState(false);
   const [isLoadingTakenReadings, setIsLoadingTakenReadings] = useState(false);
@@ -33,6 +38,11 @@ export const useReading = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [readingInfo, setReadingInfo] = useState<ReadingInfo[]>([]);
+  const [readingInfoForUpdated, setReadingInfoForUpdated] = useState<
+    ReadingInfo[]
+  >([]);
+  const [readingDetailed, setReadingDetailed] =
+    useState<ReadingDetailed | null>(null);
   const [readingHistory, setReadingHistory] = useState<ReadingHistory[]>([]);
   const [pendingReadings, setPendingReadings] = useState<
     PendingReadingConnection[]
@@ -49,7 +59,7 @@ export const useReading = () => {
    * asegurando que una falla externa no rompa esta funcionalidad central (SRP).
    */
   const fetchReadingData = useCallback(
-    async (cadastralKey: string) => {
+    async (cadastralKey: string, initialMonth?: string) => {
       if (!cadastralKey) return;
 
       setIsLoadingInfo(true);
@@ -57,12 +67,21 @@ export const useReading = () => {
       setError(null);
       setReadingInfo([]);
       setReadingHistory([]);
+      setReadingDetailed(null);
+      setReadingInfoForUpdated([]);
 
       try {
+        const infoPromise = initialMonth
+          ? getReadingInfoUseCase.findReadingInfoForUpdated(
+              cadastralKey,
+              initialMonth
+            )
+          : getReadingInfoUseCase.execute(cadastralKey);
+
         // Ejecución concurrente pero tolerante a fallos independientes
         const [infoResultSettled, historyResultSettled] =
           await Promise.allSettled([
-            getReadingInfoUseCase.execute(cadastralKey),
+            infoPromise,
             getReadingHistoryUseCase.execute(cadastralKey, 15, 0)
           ]);
 
@@ -72,7 +91,51 @@ export const useReading = () => {
           infoResultSettled.value &&
           infoResultSettled.value.length > 0
         ) {
-          setReadingInfo(infoResultSettled.value);
+          const infoValue = infoResultSettled.value;
+          setReadingInfo(infoValue);
+
+          if (initialMonth) {
+            setReadingInfoForUpdated(infoValue);
+            try {
+              const detailedResult =
+                await getReadingInfoUseCase.getDetailedReadingInfoByCadastralKey(
+                  cadastralKey,
+                  initialMonth
+                );
+              setReadingDetailed(detailedResult);
+            } catch (err) {
+              console.error('Error fetching detailed info:', err);
+            }
+          } else {
+            // Extraer información detallada si se tiene el mes
+            const yearAndMonth = infoValue[0]?.monthReading;
+            if (yearAndMonth) {
+              try {
+                const detailedResult =
+                  await getReadingInfoUseCase.getDetailedReadingInfoByCadastralKey(
+                    cadastralKey,
+                    yearAndMonth
+                  );
+                console.log('detailedResult', detailedResult);
+                const infoForUpdatedResult =
+                  await getReadingInfoUseCase.findReadingInfoForUpdated(
+                    cadastralKey,
+                    yearAndMonth
+                  );
+                console.log('infoForUpdatedResult', infoForUpdatedResult);
+
+                if (infoForUpdatedResult) {
+                  setReadingInfoForUpdated(infoForUpdatedResult);
+                } else {
+                  setReadingInfoForUpdated([]);
+                }
+
+                setReadingDetailed(detailedResult);
+              } catch (err) {
+                console.error('Error fetching detailed info:', err);
+              }
+            }
+          }
         } else {
           setReadingInfo([]);
           if (infoResultSettled.status === 'rejected') {
@@ -220,6 +283,29 @@ export const useReading = () => {
     [getTakenReadingEstimatesOrAverageUseCase]
   );
 
+  /**
+   * Obtiene la información detallada de una lectura (SRP - Separado).
+   */
+  const fetchDetailedReadingData = useCallback(
+    async (cadastralKey: string, yearAndMonth: string) => {
+      setIsLoadingDetailedReading(true);
+      try {
+        const result: ReadingDetailed | null =
+          await getReadingInfoUseCase.getDetailedReadingInfoByCadastralKey(
+            cadastralKey,
+            yearAndMonth
+          );
+        setReadingDetailed(result!);
+      } catch (error: any) {
+        console.error('Error fetching detailed reading:', error);
+        setReadingDetailed(null);
+      } finally {
+        setIsLoadingDetailedReading(false);
+      }
+    },
+    [getReadingInfoUseCase]
+  );
+
   const clearData = useCallback(() => {
     setReadingInfo([]);
     setReadingHistory([]);
@@ -227,6 +313,7 @@ export const useReading = () => {
     setTakenReadings([]);
     setError(null);
     setTakenReadingsEstimatesOrAverage([]);
+    setReadingDetailed(null);
   }, []);
 
   const clearPendingReadings = useCallback(() => {
@@ -275,11 +362,15 @@ export const useReading = () => {
 
   return {
     readingInfo,
+    readingInfoForUpdated,
+    readingDetailed,
     readingHistory,
     isLoadingInfo,
+    isLoadingDetailedReading,
     isLoadingHistory,
     isSubmitting,
     fetchReadingData,
+    fetchDetailedReadingData,
     fetchPendingReadingsData,
     fetchTakenReadingsData,
     fetchTakenReadingsEstimatesOrAverageData,

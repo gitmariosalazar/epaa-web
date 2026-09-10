@@ -18,11 +18,12 @@ export const useUpdateReading = () => {
   const [isLoadingHistory, setIsLoadingHistory] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [readingInfo, setReadingInfo] = useState<ReadingInfo[]>([]);
+  const [readingInfoForUpdated, setReadingInfoForUpdated] = useState<ReadingInfo[]>([]);
   const [readingHistory, setReadingHistory] = useState<ReadingHistory[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const fetchReadingData = useCallback(
-    async (cadastralKey: string) => {
+    async (cadastralKey: string, initialMonth?: string) => {
       setIsLoadingInfo(true);
       setIsLoadingHistory(true);
       setError(null);
@@ -30,9 +31,13 @@ export const useUpdateReading = () => {
       setReadingHistory([]);
 
       try {
+        const infoPromise = initialMonth
+          ? getReadingInfoUseCase.findReadingInfoForUpdated(cadastralKey, initialMonth)
+          : getReadingInfoUseCase.execute(cadastralKey);
+
         const [infoResultSettled, historyResultSettled] =
           await Promise.allSettled([
-            getReadingInfoUseCase.execute(cadastralKey),
+            infoPromise,
             getReadingHistoryUseCase.execute(cadastralKey, 15, 0)
           ]);
 
@@ -40,7 +45,31 @@ export const useUpdateReading = () => {
           infoResultSettled.status === 'fulfilled' &&
           infoResultSettled.value
         ) {
-          setReadingInfo(infoResultSettled.value);
+          const infoValue = infoResultSettled.value;
+          setReadingInfo(infoValue);
+
+          if (initialMonth) {
+            setReadingInfoForUpdated(infoValue);
+          } else {
+            const yearAndMonth = infoValue[0]?.monthReading;
+            if (yearAndMonth) {
+              try {
+                const infoForUpdatedResult =
+                  await getReadingInfoUseCase.findReadingInfoForUpdated(
+                    cadastralKey,
+                    yearAndMonth
+                  );
+                if (infoForUpdatedResult) {
+                  setReadingInfoForUpdated(infoForUpdatedResult);
+                } else {
+                  setReadingInfoForUpdated([]);
+                }
+              } catch (err) {
+                console.error('Error fetching infoForUpdated:', err);
+                setReadingInfoForUpdated([]);
+              }
+            }
+          }
         } else {
           setReadingInfo([]);
           if (infoResultSettled.status === 'rejected') {
@@ -114,6 +143,7 @@ export const useUpdateReading = () => {
 
   const clearData = useCallback(() => {
     setReadingInfo([]);
+    setReadingInfoForUpdated([]);
     setReadingHistory([]);
     setError(null);
   }, []);
@@ -152,6 +182,7 @@ export const useUpdateReading = () => {
     isLoadingInfo,
     isLoadingHistory,
     readingInfo,
+    readingInfoForUpdated,
     readingHistory,
     isSubmitting,
     error,

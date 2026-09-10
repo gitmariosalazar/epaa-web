@@ -23,7 +23,7 @@ interface SelectProps extends Omit<
   rightIcon?: React.ReactNode | null;
   children?: React.ReactNode;
   options?: { value: string | number; label: string }[];
-  size?: 'small' | 'compact' | 'medium' | 'large';
+  size?: 'small' | 'small' | 'medium' | 'large';
   focused?: boolean;
   /** Sets the width of the select container. */
   width?: string | number;

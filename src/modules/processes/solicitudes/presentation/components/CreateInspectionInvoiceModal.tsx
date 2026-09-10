@@ -116,7 +116,7 @@ export const CreateInspectionInvoiceModal: React.FC<
             onClick={onClose}
             aria-label="Cerrar"
             circle
-            size='compact'
+            size='small'
             color='error'
           >
             <X size={18} />
@@ -152,7 +152,7 @@ export const CreateInspectionInvoiceModal: React.FC<
                   disabled={isSaving}
                   required
                   autoFocus
-                  size='compact'
+                  size='small'
                 />
               </div>
             </div>
@@ -171,7 +171,7 @@ export const CreateInspectionInvoiceModal: React.FC<
                     id="amount"
                     step="0.01"
                     min="0.01"
-                    size='compact'
+                    size='small'
                     value={amount}
                     onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
                     disabled={isSaving}
@@ -191,7 +191,7 @@ export const CreateInspectionInvoiceModal: React.FC<
                     value={expirationDate}
                     onChange={(dateStr) => setExpirationDate(dateStr)}
                     disabled={isSaving}
-                    size='compact'
+                    size='small'
                   />
                 </div>
               </div>

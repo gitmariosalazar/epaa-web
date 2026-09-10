@@ -40,7 +40,7 @@ export const PopoverModal: React.FC<PopoverModalProps> = ({
   ...modalProps
 }) => {
   const isControlled = controlledIsOpen !== undefined;
-  
+
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [internalAnchorElement, setInternalAnchorElement] = useState<HTMLElement | null>(null);
 
@@ -52,7 +52,7 @@ export const PopoverModal: React.FC<PopoverModalProps> = ({
       setInternalAnchorElement(e.currentTarget);
       setInternalIsOpen(true);
     }
-    
+
     // Ejecuta la función onClick original del trigger si existía
     if (trigger && trigger.props.onClick) {
       trigger.props.onClick(e);
@@ -72,8 +72,8 @@ export const PopoverModal: React.FC<PopoverModalProps> = ({
   }, [isControlled, controlledOnClose]);
 
   // Clonar el trigger para inyectarle el evento onClick
-  const clonedTrigger = trigger 
-    ? React.cloneElement(trigger, { onClick: handleOpen }) 
+  const clonedTrigger = trigger
+    ? React.cloneElement(trigger, { onClick: handleOpen })
     : null;
 
   return (

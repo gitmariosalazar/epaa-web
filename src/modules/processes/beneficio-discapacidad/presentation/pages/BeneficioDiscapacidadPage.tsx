@@ -12,9 +12,9 @@ import { Accessibility, Clock, DollarSign, FileText, AlertCircle } from 'lucide-
 import { SupportContactCard } from '@/modules/tramites/presentation/components/SupportContactCard';
 import '@/shared/presentation/components/TramiteRequisitosList/TramiteProcedurePage.css';
 
-const repo    = new BeneficioDiscapacidadRepositoryImpl();
+const repo = new BeneficioDiscapacidadRepositoryImpl();
 const useCase = new GetBeneficioDiscapacidadRequisitosUseCase(repo);
-const COLOR   = '#8b5cf6';
+const COLOR = '#8b5cf6';
 
 export const BeneficioDiscapacidadPage: React.FC = () => {
   const [data, setData] = useState<BeneficioDiscapacidad | null>(null);
@@ -86,7 +86,7 @@ export const BeneficioDiscapacidadPage: React.FC = () => {
                 </p>
               </div>
             </div>
-            <div className="tp-support-compact"><SupportContactCard /></div>
+            <div className="tp-support-small"><SupportContactCard /></div>
           </div>
 
         </div>

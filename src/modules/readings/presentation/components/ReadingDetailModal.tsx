@@ -84,7 +84,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                 <div className="reading-detail-item">
                   <Label
                     text="Nombre"
-                    size="compact"
+                    size="small"
                     variant="default"
                     weight="semibold"
                     leftIcon={<User size="1em" />}
@@ -95,7 +95,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                 <div className="reading-detail-item">
                   <Label
                     text="Cédula / RUC"
-                    size="compact"
+                    size="small"
                     variant="default"
                     weight="semibold"
                     leftIcon={<IdCard size="1em" />}
@@ -105,7 +105,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                 <div className="reading-detail-item">
                   <Label
                     text="Clave Catastral"
-                    size="compact"
+                    size="small"
                     variant="default"
                     weight="semibold"
                     leftIcon={<MapPin size="1em" />}
@@ -115,7 +115,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                 <div className="reading-detail-item">
                   <Label
                     text="Dirección"
-                    size="compact"
+                    size="small"
                     variant="default"
                     weight="semibold"
                     leftIcon={<Map size="1em" />}
@@ -125,7 +125,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                 <div className="reading-detail-item">
                   <Label
                     text="Medidor"
-                    size="compact"
+                    size="small"
                     variant="default"
                     weight="semibold"
                     leftIcon={<Gauge size="1em" />}
@@ -135,7 +135,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                 <div className="reading-detail-item">
                   <Label
                     text="Tarifa"
-                    size="compact"
+                    size="small"
                     variant="default"
                     weight="semibold"
                     leftIcon={<Coins size="1em" />}
@@ -154,7 +154,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                 <div className="reading-detail-item">
                   <Label
                     text="Mes de Lectura"
-                    size="compact"
+                    size="small"
                     variant="default"
                     weight="semibold"
                     leftIcon={<CalendarDays size="1em" />}
@@ -166,7 +166,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                 <div className="reading-detail-item">
                   <Label
                     text="Fecha de Lectura"
-                    size="compact"
+                    size="small"
                     variant="default"
                     weight="semibold"
                     leftIcon={<CalendarClock size="1em" />}
@@ -180,7 +180,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                 <div className="reading-detail-item">
                   <Label
                     text="Hora de Lectura"
-                    size="compact"
+                    size="small"
                     variant="default"
                     weight="semibold"
                     leftIcon={<Clock size="1em" />}
@@ -194,7 +194,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                 <div className="reading-detail-item">
                   <Label
                     text="Lectura Anterior"
-                    size="compact"
+                    size="small"
                     variant="default"
                     weight="semibold"
                     leftIcon={<History size="1em" />}
@@ -204,7 +204,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                 <div className="reading-detail-item">
                   <Label
                     text="Lectura Actual"
-                    size="compact"
+                    size="small"
                     variant="default"
                     weight="semibold"
                     leftIcon={<ClipboardCheck size="1em" />}
@@ -218,7 +218,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                 <div className="reading-detail-item">
                   <Label
                     text="Consumo"
-                    size="compact"
+                    size="small"
                     variant="default"
                     weight="semibold"
                     leftIcon={<Droplets size="1em" />}
@@ -230,7 +230,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                 <div className="reading-detail-item">
                   <Label
                     text="Novedad"
-                    size="compact"
+                    size="small"
                     variant="default"
                     weight="semibold"
                     leftIcon={<AlertTriangle size="1em" />}
@@ -242,7 +242,7 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                 <div className="reading-detail-item">
                   <Label
                     text="Valor Consumo"
-                    size="compact"
+                    size="small"
                     variant="default"
                     weight="semibold"
                     leftIcon={<TbCurrencyDollarCanadian size="1em" />}

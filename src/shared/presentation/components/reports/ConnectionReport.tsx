@@ -306,12 +306,12 @@ export const ConnectionReport: React.FC<ConnectionReportProps> = ({
         <div className="connection-report-toolbar">
           {/* Unified Search Row */}
           <div className="connection-toolbar-side">
-            <label className="toolbar-label-compact">Connection</label>
+            <label className="toolbar-label-small">Connection</label>
             <div>
               <InputCadastralKey
                 placeholder="Key (e.g. 1-1)"
                 maxLength={15}
-                size="compact"
+                size="small"
                 style={{ width: '100px' }}
                 value={cadastralKey}
                 onChange={(val) => setCadastralKey(val)}
@@ -321,7 +321,7 @@ export const ConnectionReport: React.FC<ConnectionReportProps> = ({
               <Select
                 value={limit}
                 onChange={(e) => setLimit(Number(e.target.value))}
-                size="compact"
+                size="small"
               >
                 <option value={5}>Last 5</option>
                 <option value={10}>Last 10</option>
@@ -346,7 +346,7 @@ export const ConnectionReport: React.FC<ConnectionReportProps> = ({
                 <Search size={12} />
                 <input
                   type="text"
-                  className="toolbar-input-compact"
+                  className="toolbar-input-small"
                   placeholder="Filter results..."
                   maxLength={60}
                   value={resultSearchTerm}

@@ -190,7 +190,7 @@ const buildTooltip = (payload: ChartDataItem) => (
 // KEY DESIGN:
 //   allItems      = rawMonthlyKpi  → charts ALWAYS show full Jan-Dec (never 1 bar)
 //   filteredItems = filtered kpi   → drives which year to jump to on filter change;
-//                                    also used for the compact KPI summary header
+//                                    also used for the small KPI summary header
 interface YearlyMonthsPaginatorProps {
   /** Raw (unfiltered) data — charts always show all months of a year */
   allItems: GeneralMonthlyKPIResponse[];

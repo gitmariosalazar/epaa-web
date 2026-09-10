@@ -61,7 +61,7 @@ export const SolicitudesToolbar: React.FC<ToolbarProps> = ({
 
       {/* Filter by field */}
       <Select
-        size="compact"
+        size="small"
         value={filterBy}
         onChange={(e) => onFilterByChange(e.target.value)}
         title="Filtrar por campo"
@@ -76,7 +76,7 @@ export const SolicitudesToolbar: React.FC<ToolbarProps> = ({
       {/* Status filter */}
       {!activeFilter && (
         <Select
-          size="compact"
+          size="small"
           value={event}
           onChange={(e) => onEventChange(e.target.value)}
           title="Filtrar por estado"
@@ -93,7 +93,7 @@ export const SolicitudesToolbar: React.FC<ToolbarProps> = ({
 
       {/* Sort by */}
       <Select
-        size="compact"
+        size="small"
         value={sortBy}
         onChange={(e) => onSortByChange(e.target.value)}
         title="Ordenar por"

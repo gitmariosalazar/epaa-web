@@ -76,7 +76,7 @@ export const ReadingNoveltyFilters: React.FC<ReadingNoveltyFiltersProps> = ({
           </label>
           <div className="filter-input-wrapper">
             <DatePicker
-              size="compact"
+              size="small"
               view="month"
               value={month}
               onChange={(val: string) => onMonthChange(val.substring(0, 7))}
@@ -93,7 +93,7 @@ export const ReadingNoveltyFilters: React.FC<ReadingNoveltyFiltersProps> = ({
             id="filterSector"
             value={sector}
             onChange={(e) => onSectorChange(e.target.value)}
-            size="compact"
+            size="small"
             leftIcon={<TbChartPieFilled size={18} />}
             placeholder="E.j 1"
             min={0}
@@ -110,7 +110,7 @@ export const ReadingNoveltyFilters: React.FC<ReadingNoveltyFiltersProps> = ({
             value={novelty}
             onChange={(e) => onNoveltyChange(e.target.value)}
             options={options}
-            size="compact"
+            size="small"
             leftIcon={<RiMenuSearchLine size={18} />}
           />
         </div>
@@ -121,7 +121,7 @@ export const ReadingNoveltyFilters: React.FC<ReadingNoveltyFiltersProps> = ({
               {t('readingData.filters.userId', 'Usuario ID')}
             </label>
             <Select
-              size="compact"
+              size="small"
               width={180}
               value={userId || ''}
               options={[
@@ -141,7 +141,7 @@ export const ReadingNoveltyFilters: React.FC<ReadingNoveltyFiltersProps> = ({
           <Button
             onClick={onFetch}
             disabled={!canFetch}
-            size="compact"
+            size="xs"
             isLoading={isLoading}
             leftIcon={<Search size={16} />}
           >
@@ -157,7 +157,7 @@ export const ReadingNoveltyFilters: React.FC<ReadingNoveltyFiltersProps> = ({
           <Input
             type="text"
             placeholder={t('common.search')}
-            size="compact"
+            size="small"
             leftIcon={<Search size={16} />}
             value={searchTerm}
             onChange={(e) => onSearchChange?.(e.target.value)}
@@ -174,7 +174,7 @@ export const ReadingNoveltyFilters: React.FC<ReadingNoveltyFiltersProps> = ({
               value={noveltySearchTerm}
               onChange={(e) => onNoveltySearchChange?.(e.target.value)}
               options={options}
-              size="compact"
+              size="small"
               leftIcon={<RiMenuSearchLine size={18} />}
             />
           </div>

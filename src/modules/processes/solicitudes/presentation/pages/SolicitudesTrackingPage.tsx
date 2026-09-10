@@ -50,7 +50,7 @@ const TrackingToolbar: React.FC<ToolbarProps> = ({
           type="text"
           placeholder="Buscar por código, dirección, estado..."
           value={search}
-          size='compact'
+          size='small'
           width={350}
           onChange={(e) => onSearchChange(e.target.value)}
           id="trk-search-input"

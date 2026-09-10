@@ -47,7 +47,7 @@ export const CustomerFilters: React.FC<CustomerFiltersProps> = ({
               </label>
               <div className="filter-input-wrapper">
                 <Select
-                  size="compact"
+                  size="small"
                   value={searchType}
                   onChange={(e) => onSearchTypeChange?.(e.target.value)}
                   leftIcon={<Search size={18} />}
@@ -67,7 +67,7 @@ export const CustomerFilters: React.FC<CustomerFiltersProps> = ({
           <label className="filter-label">{t('common.search', 'Search')}</label>
           <div className="filter-input-wrapper">
             <Input
-              size="compact"
+              size="small"
               placeholder={t('common.searchPlaceholder', 'Search records...')}
               value={searchTerm}
               onChange={(e) => onSearchTermChange(e.target.value)}
@@ -86,7 +86,7 @@ export const CustomerFilters: React.FC<CustomerFiltersProps> = ({
           <Button
             variant="outline"
             color="gray"
-            size="compact"
+            size="small"
             onClick={onRefresh}
             isLoading={isLoading}
             leftIcon={<RefreshCw size={16} />}

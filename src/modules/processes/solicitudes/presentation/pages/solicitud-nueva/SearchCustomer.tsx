@@ -50,7 +50,7 @@ export const SearchCustomer: React.FC<SearchCustomerProps> = ({
           name="identificationType"
           value={identificationType}
           onChange={(e) => setIdentificationType(e.target.value)}
-          size="compact"
+          size="small"
           leftIcon={<UserCheck size={14} />}
           width="130px"
         >
@@ -69,7 +69,7 @@ export const SearchCustomer: React.FC<SearchCustomerProps> = ({
           onKeyDown={handleKeyDown}
           required
           type="text"
-          size="compact"
+          size="small"
           leftIcon={<Hash size={14} />}
           className="search-customer__input"
           placeholder="Escribe la identificación..."

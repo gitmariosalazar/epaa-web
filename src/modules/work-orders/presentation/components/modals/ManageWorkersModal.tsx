@@ -206,7 +206,7 @@ export const ManageWorkersModal: React.FC<ManageWorkersModalProps> = ({
               options={employees}
               placeholder={loadingEmployees ? 'Cargando técnicos...' : 'Buscar técnico...'}
               disabled={loadingEmployees}
-              size="compact"
+              size="small"
             />
           </div>
 
@@ -249,7 +249,7 @@ export const ManageWorkersModal: React.FC<ManageWorkersModalProps> = ({
                 variant='secondary'
                 disabled={!workerId.trim() || isLoading}
                 leftIcon={<FaUserPlus size={14} />}
-                size='compact'
+                size='small'
               >
                 Agregar
               </Button>

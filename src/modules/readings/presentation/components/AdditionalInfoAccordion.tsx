@@ -26,7 +26,7 @@ interface PropTypes {
 
 export const AdditionalInfoAccordion: React.FC<PropTypes> = ({ info }) => {
   const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   if (!info) return null;
 

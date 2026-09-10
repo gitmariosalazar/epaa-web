@@ -53,12 +53,12 @@ export const WorkOrderProcessToolbar = ({
         />
       </div>
 
-      <Button size="compact" onClick={onLoadTracking} isLoading={isLoading}>
+      <Button size="small" onClick={onLoadTracking} isLoading={isLoading}>
         Tracking
       </Button>
 
       <Button
-        size="compact"
+        size="small"
         variant="outline"
         onClick={onLoadDetail}
         isLoading={isLoading}
@@ -67,7 +67,7 @@ export const WorkOrderProcessToolbar = ({
       </Button>
 
       <Button
-        size="compact"
+        size="small"
         variant="subtle"
         onClick={onLoadBySolicitud}
         isLoading={isLoading}

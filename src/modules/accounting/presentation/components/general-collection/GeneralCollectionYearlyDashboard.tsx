@@ -74,7 +74,7 @@ function YearPaginator({ items }: YearPaginatorProps) {
               disabled={safeIdx >= total - 1}
               onClick={() => setIdx((i) => Math.min(i + 1, total - 1))}
               variant="outline"
-              size="sm"
+              size="xs"
               circle
             >
               <FaArrowLeft size={16} />
@@ -90,7 +90,7 @@ function YearPaginator({ items }: YearPaginatorProps) {
               onClick={() => setIdx((i) => Math.max(i - 1, 0))}
               title="Año siguiente"
               variant="outline"
-              size="sm"
+              size="xs"
               circle
             >
               <FaArrowRight size={16} />

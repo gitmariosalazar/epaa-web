@@ -72,7 +72,7 @@ export const ReadingInfoPopoverContent: React.FC<ReadingInfoPopoverContentProps>
           <div className="reading-detail-item">
             <Label
               text="Mes de Lectura"
-              size="compact"
+              size="small"
               variant="default"
               weight="semibold"
               leftIcon={<CalendarDays size="1em" />}
@@ -84,7 +84,7 @@ export const ReadingInfoPopoverContent: React.FC<ReadingInfoPopoverContentProps>
           <div className="reading-detail-item">
             <Label
               text="Fecha de Lectura"
-              size="compact"
+              size="small"
               variant="default"
               weight="semibold"
               leftIcon={<CalendarClock size="1em" />}
@@ -98,7 +98,7 @@ export const ReadingInfoPopoverContent: React.FC<ReadingInfoPopoverContentProps>
           <div className="reading-detail-item">
             <Label
               text="Hora de Lectura"
-              size="compact"
+              size="small"
               variant="default"
               weight="semibold"
               leftIcon={<Clock size="1em" />}
@@ -112,7 +112,7 @@ export const ReadingInfoPopoverContent: React.FC<ReadingInfoPopoverContentProps>
           <div className="reading-detail-item">
             <Label
               text="Lectura Anterior"
-              size="compact"
+              size="small"
               variant="default"
               weight="semibold"
               leftIcon={<History size="1em" />}
@@ -122,7 +122,7 @@ export const ReadingInfoPopoverContent: React.FC<ReadingInfoPopoverContentProps>
           <div className="reading-detail-item">
             <Label
               text="Lectura Actual"
-              size="compact"
+              size="small"
               variant="default"
               weight="semibold"
               leftIcon={<ClipboardCheck size="1em" />}
@@ -136,7 +136,7 @@ export const ReadingInfoPopoverContent: React.FC<ReadingInfoPopoverContentProps>
           <div className="reading-detail-item">
             <Label
               text="Consumo"
-              size="compact"
+              size="small"
               variant="default"
               weight="semibold"
               leftIcon={<Droplets size="1em" />}
@@ -148,7 +148,7 @@ export const ReadingInfoPopoverContent: React.FC<ReadingInfoPopoverContentProps>
           <div className="reading-detail-item">
             <Label
               text="Novedad"
-              size="compact"
+              size="small"
               variant="default"
               weight="semibold"
               leftIcon={<AlertTriangle size="1em" />}
@@ -160,7 +160,7 @@ export const ReadingInfoPopoverContent: React.FC<ReadingInfoPopoverContentProps>
           <div className="reading-detail-item">
             <Label
               text="Valor Consumo"
-              size="compact"
+              size="small"
               variant="default"
               weight="semibold"
               leftIcon={<TbCurrencyDollarCanadian size="1em" />}
