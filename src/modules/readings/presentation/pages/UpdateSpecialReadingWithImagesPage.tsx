@@ -139,7 +139,7 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
             <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%', position: 'relative', overflowY: 'auto' }}>
               {isLoading ? (
                 <div className="urw-loading">
-                  <Loader2 className="animate-spin" size={48} style={{ color: 'white' }} />
+                  <Loader2 className="animate-spin" size={56} style={{ color: '#38bdf8', filter: 'drop-shadow(0 0 10px rgba(56,189,248,0.5))' }} />
                 </div>
               ) : imageItems.length > 0 ? (
                 <>
@@ -174,7 +174,7 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
                   <EmptyState
                     description={isLoading ? 'Cargando...' : `No hay imágenes disponibles para la lectura con clave catastral ${initialCadastralKey}`}
                     message="Sin imágenes"
-                    icon={<BsPatchQuestionFill size={48} style={{ marginBottom: '8px' }} />}
+                    icon={<BsPatchQuestionFill size={56} style={{ marginBottom: '12px', color: '#818cf8', filter: 'drop-shadow(0 0 10px rgba(129,140,248,0.4))' }} />}
                   />
                 </div>
               )}

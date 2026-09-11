@@ -12,6 +12,7 @@ import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { CgArrowLongRightL } from "react-icons/cg";
 import './ReadingAdjustmentHistoryPopover.css';
+import { ConverDateTime } from '@/shared/utils/datetime/ConverDate';
 
 interface ReadingAdjustmentHistoryPopoverProps {
   readingId: number;
@@ -31,7 +32,7 @@ export const ReadingAdjustmentHistoryPopover: React.FC<ReadingAdjustmentHistoryP
   const columns: Column<HistorialAjusteLectura>[] = [
     {
       header: 'FECHA DE AJUSTE',
-      accessor: (row) => new Date(row.createdAt).toLocaleString()
+      accessor: (row) => ConverDateTime(row.createdAt)
     },
     {
       header: 'JUSTIFICACIÓN',

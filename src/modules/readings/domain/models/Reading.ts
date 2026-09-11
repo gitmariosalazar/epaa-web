@@ -58,6 +58,7 @@ export interface TakenReadingConnection {
   userUpdatedId?: string | null;
   userUpdatedName?: string | null;
   updatedStatus?: boolean | null;
+  updaterUpdateDate?: Date | null;
 }
 
 export interface HistorialAjusteLectura {

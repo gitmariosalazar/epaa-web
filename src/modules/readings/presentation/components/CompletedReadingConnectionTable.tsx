@@ -23,6 +23,7 @@ import { IoInformationCircleOutline } from 'react-icons/io5';
 import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
 import { BsSpeedometer } from 'react-icons/bs';
 import { ReadingAdjustmentHistoryPopover } from './ReadingAdjustmentHistoryPopover';
+import { ConverDateTime } from '@/shared/utils/datetime/ConverDate';
 
 interface PropTypes {
   data: TakenReadingConnection[];
@@ -160,7 +161,7 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
                   }}
                 >
                   {r.readingDate
-                    ? dateService.formatToLocaleString(r.readingDate)
+                    ? ConverDateTime(r.readingDate)
                     : '-'}
                 </div>
               </div>
@@ -200,7 +201,7 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
                           }}
                         >
                           {r.readingDate
-                            ? dateService.formatToLocaleString(r.readingDate)
+                            ? ConverDateTime(r.updaterUpdateDate!)
                             : '-'}
                         </div>
                       </div>

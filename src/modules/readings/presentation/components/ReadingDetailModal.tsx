@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { useReadingDetailViewModel } from '../hooks/useReadingDetailViewModel';
 import { CircularProgress, useSimulatedProgress } from '@/shared/presentation/components/CircularProgress';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
-import { FaUser, FaCamera, FaClipboardList, FaTint, FaInfoCircle } from 'react-icons/fa';
+import { FaUser, FaCamera, FaClipboardList, FaTint, FaInfoCircle, FaList } from 'react-icons/fa';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
 import './ReadingDetailModal.css';
@@ -28,6 +28,9 @@ import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.co
 import { TbCurrencyDollarCanadian } from 'react-icons/tb';
 import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 import { EvidenceFiles } from '@/shared/files/presentation/components/EvidenceFiles/EvidenceFile';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import { UserReadingActionPopoverModal } from './UserReadingActionPopoverModal';
 
 interface ReadingDetailModalProps {
   isOpen: boolean;
@@ -45,7 +48,6 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
   const { t } = useTranslation();
   const { readingDetail, isLoading, error } = useReadingDetailViewModel(cadastralKey, yearAndMonth);
   const loadingProgress = useSimulatedProgress(isLoading);
-
 
   return (
     <Modal
@@ -147,6 +149,24 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
 
             {/* Detalles de la Lectura */}
             <div className="reading-detail-section">
+              <div className="view-user-actions">
+                <UserReadingActionPopoverModal
+                  userActions={readingDetail.userActions}
+                  trigger={
+                    <div style={{ display: 'inline-block' }}>
+                      <Tooltip followCursor={false} themeColor="info" content="Ver Cambios en la Lectura">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          circle
+                        >
+                          <FaList size={16} />
+                        </Button>
+                      </Tooltip>
+                    </div>
+                  }
+                />
+              </div>
               <h4>
                 <FaTint /> {t('readings.details.readingInfo', 'Datos de la Lectura')}
               </h4>

@@ -62,7 +62,7 @@
 
 .update-desc {
   margin: 0 0 14px 0;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--text-secondary); /* Adaptable description */
   line-height: 1.5;
 }

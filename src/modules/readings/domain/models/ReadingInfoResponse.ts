@@ -42,6 +42,21 @@ export interface ReadingInfo {
   readingLocation?: { lat: number; lng: number } | null;
 }
 
+export interface UserReadingActionAuditSqlResul {
+  username: string | null;
+  cardId: string | null;
+  action: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  justification: string | null;
+  previousReading: number | null;
+  newReading: number | null;
+  previousConsumption: number | null;
+  newConsumption: number | null;
+  approvalStatus: 'APROBADO' | 'RECHAZADO' | 'PENDIENTE' | string | null;
+  adjustmentDate: Date | null;
+}
+
 export interface ReadingDetailed {
   readingId: number;
   readingTime: string | null;
@@ -76,4 +91,5 @@ export interface ReadingDetailed {
   images?: { id: number; path: string; novelty: string }[];
   observations?: { id: number; title: string; observation: string }[];
   readingLocation?: { lat: number; lng: number } | null;
+  userActions?: UserReadingActionAuditSqlResul[];
 }

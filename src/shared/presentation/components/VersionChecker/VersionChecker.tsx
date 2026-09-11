@@ -32,10 +32,10 @@ export const VersionChecker: React.FC = () => {
       </div>
 
       <div className="update-body">
-        <h4 className="update-title">Nueva versión disponible</h4>
+        <h4 className="update-title">Nueva actualización disponible</h4>
         <p className="update-desc">
-          Hemos actualizado la plataforma con nuevas funciones y mejoras de
-          rendimiento.
+          Hay cambios recientes en el sistema, por favor recarga la página para aplicarlos.
+          Antes de recargar, guarda tus cambios pendientes y pulsa recargar para sincronizar la última versión.
         </p>
 
         <div className="update-actions">
