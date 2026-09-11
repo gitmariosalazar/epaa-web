@@ -61,6 +61,10 @@ export interface ReadingDataFiltersProps {
   month: string;
   onMonthChange: (val: string) => void;
 
+  // Date
+  date?: string;
+  onDateChange?: (val: string) => void;
+
   // Sector
   sector: string;
   onSectorChange: (val: string) => void;
@@ -85,6 +89,8 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
   activeTab,
   month,
   onMonthChange,
+  date,
+  onDateChange,
   sector,
   onSectorChange,
   userId,
@@ -96,6 +102,7 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
   onSearchChange
 }) => {
   const { t } = useTranslation();
+  const [dateFilterMode, setDateFilterMode] = React.useState<'month' | 'date'>('month');
 
   // Business rule: allow fetching if not loading and month is selected
   const canFetch = !isLoading && Boolean(month);
@@ -116,15 +123,45 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
         {show.month && (
           <div className="filter-group">
             <label className="filter-label">
-              {t('readingData.filters.month', 'Mes')}
+              {t('readingData.filters.period', 'Período')}
             </label>
-            <div className="filter-input-wrapper">
-              <DatePicker
+            <div className="filter-input-wrapper" style={{ display: 'flex', gap: '8px' }}>
+              <Select
                 size="small"
-                view="month"
-                value={month}
-                onChange={(val: string) => onMonthChange(val.substring(0, 7))}
+                width={120}
+                value={dateFilterMode}
+                onChange={(e) => {
+                  setDateFilterMode(e.target.value as 'month' | 'date');
+                  if (e.target.value === 'month' && onDateChange) {
+                    onDateChange('');
+                  }
+                }}
+                options={[
+                  { value: 'month', label: 'Por Mes' },
+                  { value: 'date', label: 'Por Fecha' }
+                ]}
               />
+              {dateFilterMode === 'month' ? (
+                <DatePicker
+                  size="small"
+                  view="month"
+                  value={month}
+                  onChange={(val: string) => {
+                    onMonthChange(val.substring(0, 7));
+                    if (onDateChange) onDateChange('');
+                  }}
+                />
+              ) : (
+                <DatePicker
+                  size="small"
+                  view="date"
+                  value={date || `${month}-01`}
+                  onChange={(val: string) => {
+                    if (onDateChange) onDateChange(val);
+                    onMonthChange(val.substring(0, 7));
+                  }}
+                />
+              )}
             </div>
           </div>
         )}

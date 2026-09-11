@@ -14,14 +14,21 @@ export class TakenReadingConnectionRepositoryImpl implements TakenReadingConnect
   async getTakenReadingsByMonth(
     dateMonth: string,
     sector?: number,
-    userId?: string
+    userId?: string,
+    date?: string
   ): Promise<TakenReadingConnection[]> {
     let path = `/Readings/get-taken-readings-by-month/${dateMonth}`;
     if (sector !== undefined) {
       path += `/${sector}`;
     }
-    if (userId !== undefined) {
-      path += `?userId=${userId}`;
+    
+    const params = new URLSearchParams();
+    if (userId) params.append('userId', userId);
+    if (date) params.append('date', date);
+    
+    const queryString = params.toString();
+    if (queryString) {
+      path += `?${queryString}`;
     }
 
     const response =
@@ -32,14 +39,21 @@ export class TakenReadingConnectionRepositoryImpl implements TakenReadingConnect
   async getTakenReadingEstimatesOrAverage(
     month: string,
     sector?: number,
-    userId?: string
+    userId?: string,
+    date?: string
   ): Promise<TakenReadingConnection[]> {
     let path = `/Readings/get-taken-reading-estimates-or-average/${month}`;
     if (sector !== undefined) {
       path += `/${sector}`;
     }
-    if (userId !== undefined) {
-      path += `?userId=${userId}`;
+
+    const params = new URLSearchParams();
+    if (userId) params.append('userId', userId);
+    if (date) params.append('date', date);
+
+    const queryString = params.toString();
+    if (queryString) {
+      path += `?${queryString}`;
     }
 
     const response =

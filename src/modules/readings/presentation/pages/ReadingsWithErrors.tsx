@@ -65,6 +65,7 @@ export const ReadingsWithErrors: React.FC = () => {
   const [modalState, setModalState] = useState<ModalState | null>(null);
   const currentMonthStr = dateService.getCurrentMonthString();
   const [month, setMonth] = useState(currentMonthStr);
+  const [date, setDate] = useState<string>('');
   const [sector, setSector] = useState('');
   const [userId, setUserId] = useState('');
   const [globalSearch, setGlobalSearch] = useState('');
@@ -101,6 +102,7 @@ export const ReadingsWithErrors: React.FC = () => {
   useEffect(() => {
     setSector('');
     setUserId('');
+    setDate('');
     setGlobalSearch('');
     clearAll();
   }, [activeTab]);
@@ -162,7 +164,7 @@ export const ReadingsWithErrors: React.FC = () => {
 
   const handleModalSuccess = () => {
     closeModal();
-    fetchReadings(activeTab as any, month, sector, userId);
+    fetchReadings(activeTab as any, month, sector, userId, date);
   };
 
   if (activeTab === 'novelties') {
@@ -195,11 +197,13 @@ export const ReadingsWithErrors: React.FC = () => {
           activeTab={activeTab as any}
           month={month}
           onMonthChange={setMonth}
+          date={date}
+          onDateChange={setDate}
           sector={sector}
           onSectorChange={setSector}
           userId={userId}
           onUserIdChange={setUserId}
-          onFetch={() => fetchReadings(activeTab as any, month, sector, userId)}
+          onFetch={() => fetchReadings(activeTab as any, month, sector, userId, date)}
           isLoading={isLoading}
           search={globalSearch}
           onSearchChange={setGlobalSearch}
@@ -211,7 +215,7 @@ export const ReadingsWithErrors: React.FC = () => {
           message='No se pudieron cargar las lecturas'
           description='Intenta de nuevo más tarde.'
           variant='error'
-          actionButton={<Button title='Reintentar' onClick={() => fetchReadings(activeTab as any, month, sector, userId)} />}
+          actionButton={<Button title='Reintentar' onClick={() => fetchReadings(activeTab as any, month, sector, userId, date)} />}
           icon={<BsExclamationCircleFill />}
         />
       ) : (

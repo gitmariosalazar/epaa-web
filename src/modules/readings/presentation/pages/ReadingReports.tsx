@@ -76,6 +76,7 @@ import { useTranslation } from 'react-i18next';
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
+import { ReadingAdjustmentHistoryPopover } from '../components/ReadingAdjustmentHistoryPopover';
 
 
 const ReadingReportsContent: React.FC = () => {
@@ -148,6 +149,13 @@ const ReadingReportsContent: React.FC = () => {
     cadastralKey: null,
     yearAndMonth: null,
   });
+
+  // History Popover State
+  const [historyModalState, setHistoryModalState] = useState<{ isOpen: boolean; readingId: number | null }>({
+    isOpen: false,
+    readingId: null
+  });
+
 
   const handleViewDetails = (cadastralKey: string, yearAndMonth: string) => {
     setDetailModalState({ isOpen: true, cadastralKey, yearAndMonth });
@@ -575,6 +583,59 @@ const ReadingReportsContent: React.FC = () => {
                 return 'error';
               }
             }}
+
+            contextMenuItems={(item: IncidentDetailRowResponse) => {
+              const items: any[] = [
+                {
+                  label: 'Ver detalles del incidente',
+                  icon: <Eye size={16} />,
+                  color: 'primary',
+                  onClick: () => setSelectedIncident(item),
+                }
+              ];
+
+              if (item.currentOrderState === 'COMPLETADA' && item.status !== 'RESUELTO') {
+                items.push({
+                  label: 'Resolver',
+                  icon: <Wrench size={16} />,
+                  color: 'warning',
+                  onClick: () => setResolveIncidentId(item.incidentId),
+                });
+              }
+
+              if (!item.orderCode && item.status !== 'RESUELTO' && item.status !== 'FALSO_REPORTE') {
+                items.push({
+                  label: 'Agregar OT',
+                  icon: <Plus size={16} />,
+                  color: 'success',
+                  onClick: () => setAddWorkOrderIncident(item),
+                });
+              }
+
+              items.push({
+                label: t('common.edit', 'Editar'),
+                icon: <FaEdit size={16} />,
+                color: 'warning',
+                onClick: () => handleAction('update', item.connectionId!),
+              });
+
+              items.push({
+                label: 'Ver Detalles de la Acometida',
+                icon: <MapPin size={16} />,
+                color: 'cyan',
+                onClick: () => setDetailCadastralKey(item.connectionId!),
+              });
+
+              items.push({
+                label: 'Ver Detalles de la Lectura',
+                icon: <FileText size={16} />,
+                color: 'info',
+                onClick: () => handleViewDetails(item.connectionId!, item.reportDate),
+              });
+
+
+              return items;
+            }}
             emptyState={
               <div className="incidents-empty-state">
                 <ShieldAlert size={48} className="empty-icon" />
@@ -720,6 +781,13 @@ const ReadingReportsContent: React.FC = () => {
           )}
         </div>
       </Modal>
+
+      {/* History Modal for Context Menu */}
+      <ReadingAdjustmentHistoryPopover
+        isOpen={historyModalState.isOpen}
+        onClose={() => setHistoryModalState({ isOpen: false, readingId: null })}
+        readingId={historyModalState.readingId}
+      />
     </>
   );
 };

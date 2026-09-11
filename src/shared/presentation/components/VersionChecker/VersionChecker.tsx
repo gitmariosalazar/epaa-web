@@ -46,7 +46,7 @@ export const VersionChecker: React.FC = () => {
             color="success"
             leftIcon={<RefreshCcw size={12} />}
           >
-            Actualizar ahora
+            Recargar ahora
           </Button>
           <Button
             onClick={handleDismiss}

@@ -16,7 +16,7 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
-import { FaEdit } from 'react-icons/fa';
+import { FaEdit, FaList } from 'react-icons/fa';
 
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { CreateReadingPage } from './CreateReadingPage';
@@ -59,6 +59,12 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
     isOpen: false,
     cadastralKey: null,
     yearAndMonth: null,
+  });
+
+  // History Popover State
+  const [historyModalState, setHistoryModalState] = useState<{ isOpen: boolean; readingId: number | null }>({
+    isOpen: false,
+    readingId: null
   });
 
   const handleViewDetails = (cadastralKey: string, yearAndMonth: string) => {
@@ -117,55 +123,6 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
 
   const IMAGES_COLUMNS: Column<ReadingImages>[] = [
     { header: 'CLAVE CATASTRAL', accessor: 'cadastralKey' },
-
-    {
-      header: t('common.actions', 'Acciones'),
-      accessor: (row) => (
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <Tooltip followCursor={false} themeColor="warning" content={t('common.edit', 'Editar')}>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => handleAction('update', row.cadastralKey)}
-              color="warning"
-              circle
-            >
-              <FaEdit size={16} />
-            </Button>
-          </Tooltip>
-          <Tooltip followCursor={false}
-            themeColor="cyan"
-            content={
-              <>
-                <div> Ver Detalles de la Acometida </div>
-                <div> Acometida ID: {row.cadastralKey} </div>
-              </>
-            }
-          >
-            <Button color="cyan" size="sm" variant="ghost" onClick={() => setDetailCadastralKey(row.cadastralKey)} circle>
-              <MapPin size={16} />
-            </Button>
-          </Tooltip>
-
-          <Tooltip followCursor={false}
-            themeColor="info"
-            content={
-              <>
-                <div> Ver Detalles de la Lectura </div>
-                <div> Lectura ID: {row.readingId} </div>
-              </>
-            }
-          >
-            <Button size="sm" variant="ghost" onClick={() => handleViewDetails(row.cadastralKey, row.readingMonth)} circle>
-              <FileText size={16} />
-            </Button>
-          </Tooltip>
-
-          <ReadingAdjustmentHistoryPopover readingId={row.readingId} />
-        </div>
-      ),
-      id: 'actions'
-    },
     { header: 'MES', accessor: 'readingMonthName' },
     { header: 'AÑO', accessor: 'readingYear' },
     { header: 'LECT. ANTERIOR', accessor: 'previewsReading' },
@@ -214,8 +171,61 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
           )}
         </div>
       )
-    }
+    },
+
+    {
+      header: t('common.actions', 'Acciones'),
+      accessor: (row) => (
+        <div className='reading-table-actions'>
+          <Tooltip followCursor={false} themeColor="warning" content={t('common.edit', 'Editar')}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleAction('update', row.cadastralKey)}
+              color="warning"
+              circle
+            >
+              <FaEdit size={16} />
+            </Button>
+          </Tooltip>
+          <Tooltip followCursor={false}
+            themeColor="cyan"
+            content={
+              <>
+                <div> Ver Detalles de la Acometida </div>
+                <div> Acometida ID: {row.cadastralKey} </div>
+              </>
+            }
+          >
+            <Button color="cyan" size="sm" variant="ghost" onClick={() => setDetailCadastralKey(row.cadastralKey)} circle>
+              <MapPin size={16} />
+            </Button>
+          </Tooltip>
+
+          <Tooltip followCursor={false}
+            themeColor="info"
+            content={
+              <>
+                <div> Ver Detalles de la Lectura </div>
+                <div> Lectura ID: {row.readingId} </div>
+              </>
+            }
+          >
+            <Button size="sm" variant="ghost" onClick={() => handleViewDetails(row.cadastralKey, row.readingMonth)} circle>
+              <FileText size={16} />
+            </Button>
+          </Tooltip>
+
+          <ReadingAdjustmentHistoryPopover readingId={row.readingId} />
+        </div>
+      ),
+      id: 'actions'
+    },
   ];
+
+  const handleOpenHistory = (readingId: number) => {
+    setHistoryModalState({ isOpen: true, readingId });
+  };
 
   return (
     <div className="reading-images-page">
@@ -244,6 +254,32 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
             isLoading={isLoading}
             pagination
             pageSize={15}
+            contextMenuItems={() => [
+              {
+                label: 'Ver Detalles de la Acometida',
+                icon: <MapPin size={16} />,
+                color: 'cyan',
+                onClick: (item) => setDetailCadastralKey(item.cadastralKey),
+              },
+              {
+                label: t('common.viewDetails', 'Ver Detalles de Lectura'),
+                icon: <FileText size={16} />,
+                color: 'info',
+                onClick: (item) => handleViewDetails(item.cadastralKey, item.readingMonth),
+              },
+              {
+                label: t('common.edit1', 'Editar Lectura'),
+                icon: <FaEdit size={16} />,
+                color: 'warning',
+                onClick: (item) => handleAction('update', item.cadastralKey),
+              },
+              {
+                label: 'Ver Registro Histórico de Ajustes',
+                icon: <FaList size={16} />,
+                color: 'info',
+                onClick: (item: ReadingImages) => handleOpenHistory(item.readingId),
+              }
+            ]}
             getRowColor={(row) => {
               if (row.updatedStatus === false) {
                 return 'error';
@@ -324,6 +360,13 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
           )}
         </div>
       </Modal>
+
+      {/* History Modal for Context Menu */}
+      <ReadingAdjustmentHistoryPopover
+        isOpen={historyModalState.isOpen}
+        onClose={() => setHistoryModalState({ isOpen: false, readingId: null })}
+        readingId={historyModalState.readingId}
+      />
     </div>
   );
 };

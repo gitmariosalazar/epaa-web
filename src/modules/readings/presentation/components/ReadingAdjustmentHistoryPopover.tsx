@@ -15,19 +15,29 @@ import './ReadingAdjustmentHistoryPopover.css';
 import { ConverDateTime } from '@/shared/utils/datetime/ConverDate';
 
 interface ReadingAdjustmentHistoryPopoverProps {
-  readingId: number;
+  readingId?: number | null;
   cadastralKey?: string | null;
   yearAndMonth?: string | null;
   customTrigger?: React.ReactElement<any>;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export const ReadingAdjustmentHistoryPopover: React.FC<ReadingAdjustmentHistoryPopoverProps> = ({ readingId, cadastralKey, yearAndMonth, customTrigger }) => {
+export const ReadingAdjustmentHistoryPopover: React.FC<ReadingAdjustmentHistoryPopoverProps> = ({ readingId, cadastralKey, yearAndMonth, customTrigger, isOpen, onClose }) => {
   const { data, isLoading, error, fetchHistory } = useReadingAdjustmentHistory();
   const loadingProgress = useSimulatedProgress(isLoading);
 
   const handleOpen = () => {
-    fetchHistory(readingId);
+    if (readingId) {
+      fetchHistory(readingId);
+    }
   };
+
+  React.useEffect(() => {
+    if (isOpen && readingId) {
+      fetchHistory(readingId);
+    }
+  }, [isOpen, readingId, fetchHistory]);
 
   const columns: Column<HistorialAjusteLectura>[] = [
     {
@@ -129,6 +139,8 @@ export const ReadingAdjustmentHistoryPopover: React.FC<ReadingAdjustmentHistoryP
   return (
     <PopoverModal
       title="Detalle de Lectura y Ajustes"
+      isOpen={isOpen}
+      onClose={onClose}
       trigger={
         customTrigger ? (
           React.cloneElement(customTrigger, {

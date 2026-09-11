@@ -378,25 +378,25 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
             label: 'Ver Detalles de la Acometida',
             icon: <MapPin size={16} />,
             color: 'cyan',
-            onClick: (item) => onViewConnectionDetails && onViewConnectionDetails(item.cadastralKey),
+            onClick: (item: TakenReadingConnection) => onViewConnectionDetails && onViewConnectionDetails(item.cadastralKey),
           },
           {
             label: t('common.viewDetails', 'Ver Detalles de Lectura'),
             icon: <FileText size={16} />,
             color: 'info',
-            onClick: (item) => onViewDetails && onViewDetails(item.cadastralKey, item.readingDate),
+            onClick: (item: TakenReadingConnection) => onViewDetails && onViewDetails(item.cadastralKey, item.readingDate),
           },
           {
             label: t('common.edit1', 'Editar Lectura'),
             icon: <FaEdit size={16} />,
             color: 'warning',
-            onClick: (item) => onAction && onAction('update', item.cadastralKey),
+            onClick: (item: TakenReadingConnection) => onAction && onAction('update', item.cadastralKey),
           },
           {
             label: t('common.viewLocation', 'Ver Ubicación de la Lectura'),
             icon: <FaLocationCrosshairs size={16} />,
             color: 'orange',
-            onClick: (item) => handleOpenMap(item),
+            onClick: (item: TakenReadingConnection) => handleOpenMap(item),
           }
         ]}
         getRowColor={(row) => {

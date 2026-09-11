@@ -4,12 +4,14 @@ export interface TakenReadingConnectionRepository {
   getTakenReadingsByMonth(
     dateMonth: string,
     sector?: number,
-    userId?: string
+    userId?: string,
+    date?: string
   ): Promise<TakenReadingConnection[]>;
 
   getTakenReadingEstimatesOrAverage(
     month: string,
     sector?: number,
-    userId?: string
+    userId?: string,
+    date?: string
   ): Promise<TakenReadingConnection[]>;
 }
