@@ -175,7 +175,8 @@
   background-color: var(--tb-row-stripe);
 }
 
-.table tbody tr:hover:not(.table-row--spacer) {
+.table tbody tr:hover:not(.table-row--spacer),
+.table tbody tr.table-row--active:not(.table-row--spacer) {
   background-color: var(--tb-row-hover) !important;
 }
 

@@ -26,6 +26,9 @@ import type { FilterModel } from './types/TableFilter';
 import { applyTableFilters } from './utils/filterUtils';
 import { TableFilterModal } from './TableFilterModal';
 import { TableSortModal } from './TableSortModal';
+import { TableContextMenu, type ContextMenuItem } from './TableContextMenu';
+
+export type { ContextMenuItem };
 
 
 export interface Column<T> {
@@ -91,6 +94,7 @@ interface TableProps<T> {
   totalRecords?: number;
   currentPage?: number;
   onPageChange?: (page: number) => void;
+  contextMenuItems?: ContextMenuItem<T>[] | ((item: T) => ContextMenuItem<T>[]);
 }
 
 export const Table = <T extends { [key: string]: any }>({
@@ -125,7 +129,8 @@ export const Table = <T extends { [key: string]: any }>({
   serverSidePagination = false,
   totalRecords = 0,
   currentPage: externalCurrentPage,
-  onPageChange
+  onPageChange,
+  contextMenuItems
 }: TableProps<T>) => {
   const { t } = useTranslation();
   const [localCurrentPage, setLocalCurrentPage] = React.useState(1);
@@ -162,6 +167,13 @@ export const Table = <T extends { [key: string]: any }>({
 
   const [isSortModalOpen, setIsSortModalOpen] = React.useState(false);
   const [sortAnchorEl, setSortAnchorEl] = React.useState<HTMLElement | null>(null);
+
+  const [contextMenuState, setContextMenuState] = React.useState<{
+    isOpen: boolean;
+    x: number;
+    y: number;
+    item: T | null;
+  }>({ isOpen: false, x: 0, y: 0, item: null });
 
   const filters = filterModel !== undefined ? filterModel : internalFilters;
 
@@ -353,11 +365,27 @@ export const Table = <T extends { [key: string]: any }>({
                 const customClassName = getRowClassName
                   ? getRowClassName(item)
                   : '';
+                const isRowActive = contextMenuState.isOpen && contextMenuState.item === item;
                 const rowClassName = `table-row ${rowColor ? `table-row--${rowColor}` : ''
-                  } ${customClassName}`.trim();
+                  } ${isRowActive ? 'table-row--active' : ''} ${customClassName}`.trim();
+
+                const handleContextMenu = (e: React.MouseEvent) => {
+                  if (!contextMenuItems) return;
+                  e.preventDefault();
+                  setContextMenuState({
+                    isOpen: true,
+                    x: e.clientX,
+                    y: e.clientY,
+                    item
+                  });
+                };
 
                 return (
-                  <tr key={rowIndex} className={rowClassName}>
+                  <tr 
+                    key={rowIndex} 
+                    className={rowClassName}
+                    onContextMenu={handleContextMenu}
+                  >
                     {visibleColumns.map((col, colIndex) => (
                       <td
                         key={colIndex}
@@ -992,6 +1020,19 @@ export const Table = <T extends { [key: string]: any }>({
           sortConfig={sortConfig || null}
           onSort={(key, dir) => onSort?.(key, dir)}
           anchorElement={sortAnchorEl}
+        />
+      )}
+
+      {contextMenuItems && (
+        <TableContextMenu<T>
+          isOpen={contextMenuState.isOpen}
+          x={contextMenuState.x}
+          y={contextMenuState.y}
+          item={contextMenuState.item}
+          menuItems={typeof contextMenuItems === 'function' && contextMenuState.item 
+            ? contextMenuItems(contextMenuState.item) 
+            : (contextMenuItems as ContextMenuItem<T>[])}
+          onClose={() => setContextMenuState(prev => ({ ...prev, isOpen: false }))}
         />
       )}
     </div>

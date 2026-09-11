@@ -107,7 +107,6 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
             <>
               <div className="readings-taken-content">
                 <span className='readings-taken-info'>
-                  {' '}
                   <p>Ant.:</p>
                   <ColorChip
                     label={`${NumberFormatter.format(item.previousReading, 2)}`}
@@ -116,7 +115,6 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
                   ></ColorChip>
                 </span>
                 <span className='readings-taken-info'>
-                  {' '}
                   <p>Act.:</p>
                   <ColorChip
                     label={`${NumberFormatter.format(item.currentReading, 2)}`}
@@ -346,7 +344,7 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
               </Button>
             </Tooltip>
             <Tooltip
-              themeColor="cyan"
+              themeColor="orange"
               followCursor={false}
               content={t('common.viewLocation', 'Ver Ubicación de la Lectura')}
             >
@@ -354,7 +352,7 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
                 size="sm"
                 variant="ghost"
                 onClick={() => handleOpenMap(reading)}
-                color="cyan"
+                color="orange"
                 circle
               >
                 <FaLocationCrosshairs size={16} />
@@ -375,6 +373,32 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
       <Table<TakenReadingConnection>
         data={data}
         columns={columns}
+        contextMenuItems={() => [
+          {
+            label: 'Ver Detalles de la Acometida',
+            icon: <MapPin size={16} />,
+            color: 'cyan',
+            onClick: (item) => onViewConnectionDetails && onViewConnectionDetails(item.cadastralKey),
+          },
+          {
+            label: t('common.viewDetails', 'Ver Detalles de Lectura'),
+            icon: <FileText size={16} />,
+            color: 'info',
+            onClick: (item) => onViewDetails && onViewDetails(item.cadastralKey, item.readingDate),
+          },
+          {
+            label: t('common.edit1', 'Editar Lectura'),
+            icon: <FaEdit size={16} />,
+            color: 'warning',
+            onClick: (item) => onAction && onAction('update', item.cadastralKey),
+          },
+          {
+            label: t('common.viewLocation', 'Ver Ubicación de la Lectura'),
+            icon: <FaLocationCrosshairs size={16} />,
+            color: 'orange',
+            onClick: (item) => handleOpenMap(item),
+          }
+        ]}
         getRowColor={(row) => {
           if (row.updatedStatus == true) {
             return 'success';

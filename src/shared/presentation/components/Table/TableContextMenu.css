@@ -1,0 +1,225 @@
+.table-context-menu {
+  position: fixed;
+  z-index: 9999;
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 8px 0;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: contextMenuFadeIn 0.15s ease-out forwards;
+}
+
+@keyframes contextMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.table-context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-main);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.table-context-menu-item:hover:not(:disabled) {
+  background-color: var(--surface-hover);
+  color: var(--accent);
+}
+
+.table-context-menu-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.table-context-menu-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.table-context-menu-item:hover:not(:disabled) .table-context-menu-item-icon {
+  color: var(--accent);
+}
+
+/* Specific color overrides */
+.table-context-menu-item--danger {
+  color: var(--danger);
+}
+.table-context-menu-item--danger:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+.table-context-menu-item--danger .table-context-menu-item-icon {
+  color: var(--danger);
+}
+.table-context-menu-item--danger:hover:not(:disabled) .table-context-menu-item-icon {
+  color: var(--danger);
+}
+
+.table-context-menu-item--warning {
+  color: var(--warning);
+}
+.table-context-menu-item--warning:hover:not(:disabled) {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+}
+.table-context-menu-item--warning .table-context-menu-item-icon {
+  color: var(--warning);
+}
+.table-context-menu-item--warning:hover:not(:disabled) .table-context-menu-item-icon {
+  color: var(--warning);
+}
+
+.table-context-menu-item--success {
+  color: var(--success);
+}
+.table-context-menu-item--success:hover:not(:disabled) {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+.table-context-menu-item--success .table-context-menu-item-icon {
+  color: var(--success);
+}
+.table-context-menu-item--success:hover:not(:disabled) .table-context-menu-item-icon {
+  color: var(--success);
+}
+
+.table-context-menu-item--info {
+  color: var(--accent);
+}
+.table-context-menu-item--info:hover:not(:disabled) {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--accent);
+}
+.table-context-menu-item--info .table-context-menu-item-icon {
+  color: var(--accent);
+}
+.table-context-menu-item--info:hover:not(:disabled) .table-context-menu-item-icon {
+  color: var(--accent);
+}
+
+.table-context-menu-item--primary {
+  color: var(--text-main);
+}
+.table-context-menu-item--primary:hover:not(:disabled) {
+  background-color: var(--surface-hover);
+  color: var(--text-main);
+}
+.table-context-menu-item--primary .table-context-menu-item-icon {
+  color: var(--text-secondary);
+}
+.table-context-menu-item--primary:hover:not(:disabled) .table-context-menu-item-icon {
+  color: var(--text-main);
+}
+
+.table-context-menu-item--secondary {
+  color: var(--text-secondary);
+}
+.table-context-menu-item--secondary:hover:not(:disabled) {
+  background-color: var(--surface-hover);
+  color: var(--text-main);
+}
+.table-context-menu-item--secondary .table-context-menu-item-icon {
+  color: var(--text-muted);
+}
+.table-context-menu-item--secondary:hover:not(:disabled) .table-context-menu-item-icon {
+  color: var(--text-main);
+}
+
+.table-context-menu-item--accent {
+  color: var(--accent);
+}
+.table-context-menu-item--accent:hover:not(:disabled) {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--accent-hover);
+}
+.table-context-menu-item--accent .table-context-menu-item-icon {
+  color: var(--accent);
+}
+.table-context-menu-item--accent:hover:not(:disabled) .table-context-menu-item-icon {
+  color: var(--accent-hover);
+}
+
+.table-context-menu-item--purple {
+  color: var(--purple, #8b5cf6);
+}
+.table-context-menu-item--purple:hover:not(:disabled) {
+  background-color: rgba(139, 92, 246, 0.1);
+  color: var(--purple, #8b5cf6);
+}
+.table-context-menu-item--purple .table-context-menu-item-icon {
+  color: var(--purple, #8b5cf6);
+}
+.table-context-menu-item--purple:hover:not(:disabled) .table-context-menu-item-icon {
+  color: var(--purple, #8b5cf6);
+}
+
+.table-context-menu-item--pink {
+  color: var(--pink, #ec4899);
+}
+.table-context-menu-item--pink:hover:not(:disabled) {
+  background-color: rgba(236, 72, 153, 0.1);
+  color: var(--pink, #ec4899);
+}
+.table-context-menu-item--pink .table-context-menu-item-icon {
+  color: var(--pink, #ec4899);
+}
+.table-context-menu-item--pink:hover:not(:disabled) .table-context-menu-item-icon {
+  color: var(--pink, #ec4899);
+}
+
+.table-context-menu-item--orange {
+  color: var(--orange, #f97316);
+}
+.table-context-menu-item--orange:hover:not(:disabled) {
+  background-color: rgba(249, 115, 22, 0.1);
+  color: var(--orange, #f97316);
+}
+.table-context-menu-item--orange .table-context-menu-item-icon {
+  color: var(--orange, #f97316);
+}
+.table-context-menu-item--orange:hover:not(:disabled) .table-context-menu-item-icon {
+  color: var(--orange, #f97316);
+}
+
+.table-context-menu-item--cyan {
+  color: #06b6d4;
+}
+.table-context-menu-item--cyan:hover:not(:disabled) {
+  background-color: rgba(6, 182, 212, 0.1);
+  color: #06b6d4;
+}
+.table-context-menu-item--cyan .table-context-menu-item-icon {
+  color: #06b6d4;
+}
+.table-context-menu-item--cyan:hover:not(:disabled) .table-context-menu-item-icon {
+  color: #06b6d4;
+}
+
+.table-context-menu-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 6px 0;
+}
