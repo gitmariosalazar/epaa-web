@@ -1,6 +1,5 @@
-import { TbClock24 } from 'react-icons/tb';
+import { TbClock24, TbPhotoSearch } from 'react-icons/tb';
 import { MdAssignmentAdd, MdReport, MdAdminPanelSettings, MdOutlineContentPasteSearch } from 'react-icons/md';
-import { IoMdPhotos } from 'react-icons/io';
 import { TiThList } from 'react-icons/ti';
 import { FaEdit } from 'react-icons/fa';
 import { ClipboardList, LucideCalendarSync } from 'lucide-react';
@@ -30,7 +29,7 @@ export const getLecturasSection = (): NavSection => ({
               to: '/readings/update'
             },
             {
-              icon: <IoMdPhotos size={18} />,
+              icon: <TbPhotoSearch size={18} />,
               label: 'Foto Lecturas',
               to: '/readings/images'
             }
@@ -77,7 +76,7 @@ export const getLecturasSection = (): NavSection => ({
               to: '/readings/reconciliation'
             },
             {
-              icon: <LucideCalendarSync size={18} />,
+              icon: <TbPhotoSearch size={18} />,
               label: 'Imagenes de Lecturas',
               to: '/readings/reading-images'
             }

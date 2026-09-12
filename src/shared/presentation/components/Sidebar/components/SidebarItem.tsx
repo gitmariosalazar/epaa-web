@@ -379,10 +379,13 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         <ListItemButton
           onClick={() => setIsExpanded((prev) => !prev)}
           sx={{
-            minHeight: 32,
-            px: 1.25,
-            py: 0.5,
-            pl: level > 0 ? 1.25 + level * 0.75 : 1.25,
+            minHeight: 28, // Reduced height
+            mx: 1, // Margin horizontal to reduce width
+            my: 0.25, // Slight vertical margin
+            borderRadius: 1.5, // Rounded corners
+            px: 0,
+            py: 0,
+            pl: level > 0 ? 1 + level * 0.1 : 1,
             color: isActiveParent ? 'primary.main' : 'text.secondary',
             bgcolor:
               isActiveParent && !isExpanded ? 'action.selected' : 'transparent',
@@ -458,18 +461,22 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         <ListItemButton
           selected={isActive}
           sx={{
-            minHeight: 32,
-            px: 1.25,
-            py: 0.4,
-            pl: level > 0 ? 1.25 + level * 0.75 : 1.25,
+            minHeight: 28, // Reduced height
+            mx: 1, // Margin horizontal to reduce width
+            my: 0.25, // Slight vertical margin
+            borderRadius: 1.5, // Rounded corners
+            px: 1,
+            py: 0.25,
+            pl: level > 0 ? 1 + level * 0.75 : 1,
             color: 'text.secondary',
             '&:hover': { color: 'text.primary' },
             '&.Mui-selected': {
               color: 'primary.main',
               bgcolor: 'action.selected',
+              // Keep the left border but make sure the padding compensates
               borderLeft: '3px solid',
               borderLeftColor: 'primary.main',
-              pl: `calc(${level > 0 ? 1.25 + level * 0.75 : 1.25}rem - 3px)`
+              pl: `calc(${level > 0 ? 1 + level * 0.75 : 1}rem - 3px)`
             },
             '&.Mui-selected:hover': { bgcolor: 'action.selected' }
           }}
