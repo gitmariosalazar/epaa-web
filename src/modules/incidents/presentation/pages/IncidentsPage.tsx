@@ -126,9 +126,6 @@ export const IncidentsPage: React.FC = () => {
   const [addWorkOrderIncident, setAddWorkOrderIncident] =
     useState<IncidentDetailRowResponse | null>(null);
 
-
-
-
   // ── Columnas de la tabla ──────────────────────────────────────────────────
   const columns: Column<IncidentDetailRowResponse>[] = [
     {
@@ -513,6 +510,8 @@ export const IncidentsPage: React.FC = () => {
             onConsultar={handleConsultar}
             onReportIncident={() => navigate('/incidents/create')}
             isLoading={isLoading}
+            reportRangeDate={filters.reportRangeDate || null}
+            onReportRangeDateChange={(start, end) => handleFilterChange({ reportRangeDate: { start, end } })}
           />
         }
       >

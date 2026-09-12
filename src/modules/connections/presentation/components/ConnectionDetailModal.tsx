@@ -260,7 +260,14 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
         <h3 className="connection-section-title connection-section-title-mb">
           <History size={18} /> Historial de Lecturas
         </h3>
-        <ReadingHistoryTable history={mappedReadings} isLoading={false} />
+        <ReadingHistoryTable
+          history={mappedReadings}
+          isLoading={false}
+          connectionInfo={{
+            cadastralKey: connectionData.connectionId ?? '',
+            meterNumber: connectionData.connectionMeterNumber ?? ''
+          }}
+        />
       </div>
     );
   };

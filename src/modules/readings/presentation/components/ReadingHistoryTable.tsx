@@ -9,15 +9,23 @@ import { useTranslation } from 'react-i18next';
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { IoInformationCircleOutline, IoTimeOutline } from 'react-icons/io5';
+import { IoInformationCircleOutline, IoSpeedometer, IoTimeOutline } from 'react-icons/io5';
+import '../styles/ReadingReportsFilters.css';
+import { MdCable } from 'react-icons/md';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 interface PropTypes {
   history: ReadingHistory[];
+  connectionInfo: {
+    cadastralKey: string;
+    meterNumber: string;
+  }
   isLoading: boolean;
 }
 
 export const ReadingHistoryTable: React.FC<PropTypes> = ({
   history,
+  connectionInfo,
   isLoading
 }) => {
   const { t } = useTranslation();
@@ -151,9 +159,37 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
 
   return (
     <div className="cr-table-container">
-      <h3 style={{ marginBottom: '5px', color: 'var(--text-primary)' }}>
-        {t('readings.historyTable.title')}
-      </h3>
+      <div className="cr-history-header">
+        <h3>
+          {t('readings.historyTable.title')}
+        </h3>
+        <div className="cr-history-header-info">
+          <Tooltip content={'Clave Catastral'} followCursor={false}
+            themeColor="yellow"
+          >
+            <ColorChip
+              label={connectionInfo.cadastralKey}
+              size="xs"
+              variant="outline"
+              color="yellow"
+              icon={<MdCable />}
+              borderRadius={8}
+            />
+          </Tooltip>
+          <Tooltip content='Numero de Medidor' followCursor={false}
+            themeColor="orange"
+          >
+            <ColorChip
+              label={connectionInfo.meterNumber}
+              size="xs"
+              variant="outline"
+              color="orange"
+              icon={<IoSpeedometer />}
+              borderRadius={8}
+            />
+          </Tooltip>
+        </div>
+      </div>
       <Table<ReadingHistory>
         data={history}
         columns={columns}

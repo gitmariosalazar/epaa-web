@@ -8,6 +8,7 @@ import '../../../incidents/presentation/styles/IncidentFilters.css';
 import { Divider } from '@/shared/presentation/components/divider/Divider';
 import { FaFilter } from 'react-icons/fa';
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
+import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
 
 interface ReadingReportsFiltersProps {
   searchQuery: string;
@@ -21,6 +22,8 @@ interface ReadingReportsFiltersProps {
   onConsultar: () => void;
   onReportIncident: () => void;
   isLoading: boolean;
+  reportRangeDate?: { start: string; end: string } | null;
+  onReportRangeDateChange?: (start: string, end: string) => void;
 }
 
 const SEARCH_FIELDS = [
@@ -44,6 +47,11 @@ const SEARCH_FIELDS = [
     value: 'reportDate',
     labelKey: 'common.reportDate',
     labelDefault: 'Fecha de reporte'
+  },
+  {
+    value: 'reportRangeDate',
+    labelKey: 'common.reportRangeDate',
+    labelDefault: 'Rango de fechas'
   }
 ];
 
@@ -57,7 +65,9 @@ export const ReadingReportsFilters: React.FC<ReadingReportsFiltersProps> = ({
   selectedPriority,
   onPriorityChange,
   onConsultar,
-  isLoading
+  isLoading,
+  reportRangeDate,
+  onReportRangeDateChange
 }) => {
   const { t } = useTranslation();
 
@@ -98,7 +108,12 @@ export const ReadingReportsFilters: React.FC<ReadingReportsFiltersProps> = ({
 
         <div className="filter-group">
           <label className="filter-label">{
-            searchField === 'reportDate' ? t('common.reportDate', 'Fecha de reporte') : searchField === 'sector' ? t('common.sector', 'Sector') : searchField === 'reference' ? t('common.reference', 'Referencia') : searchField === 'connectionId' ? t('common.connectionId', 'ID Acometida') : t('common.search', 'Búsqueda')
+            searchField === 'reportDate' ? t('common.reportDate', 'Fecha de reporte') : 
+            searchField === 'reportRangeDate' ? t('common.reportRangeDate', 'Rango de fechas') :
+            searchField === 'sector' ? t('common.sector', 'Sector') : 
+            searchField === 'reference' ? t('common.reference', 'Referencia') : 
+            searchField === 'connectionId' ? t('common.connectionId', 'ID Acometida') : 
+            t('common.search', 'Búsqueda')
           }</label>
           {
             searchField === 'reportDate' ? (
@@ -107,11 +122,20 @@ export const ReadingReportsFilters: React.FC<ReadingReportsFiltersProps> = ({
                 value={searchQuery}
                 onChange={(val) => onSearchQueryChange(val)}
               />
+            ) : searchField === 'reportRangeDate' ? (
+              <div>
+                <DateRangePicker
+                  size="small"
+                  startDate={reportRangeDate?.start || ''}
+                  endDate={reportRangeDate?.end || ''}
+                  onChange={(start, end) => onReportRangeDateChange?.(start, end)}
+                />
+              </div>
             ) : (
               <Input
                 type={'text'}
                 size="small"
-                placeholder={searchField === 'reportDate' ? t('common.reportDate', 'Fecha de reporte') : searchField === 'sector' ? t('common.sector', 'Sector') : searchField === 'reference' ? t('common.reference', 'Referencia') : searchField === 'connectionId' ? t('common.connectionId', 'ID Acometida') : t('common.searchPlaceholder', 'Buscar por descripción, dirección, ID...')}
+                placeholder={searchField === 'sector' ? t('common.sector', 'Sector') : searchField === 'reference' ? t('common.reference', 'Referencia') : searchField === 'connectionId' ? t('common.connectionId', 'ID Acometida') : t('common.searchPlaceholder', 'Buscar por descripción, dirección, ID...')}
                 value={searchQuery}
                 onChange={(e) => onSearchQueryChange(e.target.value)}
                 leftIcon={<Search size={18} />}

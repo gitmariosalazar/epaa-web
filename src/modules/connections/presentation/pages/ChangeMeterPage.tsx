@@ -12,7 +12,7 @@ import { Save, X } from 'lucide-react';
 import { BsSpeedometer } from 'react-icons/bs';
 
 export interface ChangeMeterPageProps {
-  cadastralKeyProp?: string;
+  cadastralKeyProp: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }

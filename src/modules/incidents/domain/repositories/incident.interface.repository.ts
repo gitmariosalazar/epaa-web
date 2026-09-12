@@ -32,6 +32,7 @@ export interface InterfaceIncidentRepository {
       sector?: string | null;
       reference?: string | null;
       reportDate?: Date | null;
+      reportRangeDate?: { start: Date; end: Date } | null;
     },
     limit?: number | null,
     offset?: number | null

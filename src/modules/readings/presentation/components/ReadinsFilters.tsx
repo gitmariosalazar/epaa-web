@@ -23,6 +23,7 @@ const SHOW: Record<
   ReadingDataTab,
   {
     month: boolean;
+    datePicker?: boolean;
     sector: boolean;
     userId?: boolean;
   }
@@ -33,6 +34,7 @@ const SHOW: Record<
   },
   completed: {
     month: true,
+    datePicker: true,
     sector: true,
     userId: true
   },
@@ -43,6 +45,7 @@ const SHOW: Record<
   },
   all: {
     month: true,
+    datePicker: false,
     sector: true,
     userId: true
   },
@@ -120,7 +123,23 @@ export const ReadingDataFilters: React.FC<ReadingDataFiltersProps> = ({
     <div className="entry-filters">
       {/* ── LEFT: Filters ── */}
       <div className="filter-section-left">
-        {show.month && (
+        {show.month && !show.datePicker && (
+          <div className="filter-group">
+            <label className="filter-label">
+              {t('readingData.filters.month', 'Mes')}
+            </label>
+            <div className="filter-input-wrapper">
+              <DatePicker
+                size="small"
+                view="month"
+                value={month}
+                onChange={(val: string) => onMonthChange(val.substring(0, 7))}
+              />
+            </div>
+          </div>
+        )}
+
+        {show.month && show.datePicker && (
           <div className="filter-group">
             <label className="filter-label">
               {t('readingData.filters.period', 'Período')}

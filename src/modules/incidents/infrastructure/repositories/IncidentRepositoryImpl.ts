@@ -151,13 +151,23 @@ export class IncidentRepositoryImpl implements InterfaceIncidentRepository {
       sector?: string | null;
       reference?: string | null;
       reportDate?: Date | null;
+      reportRangeDate?: { start: Date; end: Date } | null;
     },
     limit?: number | null,
     offset?: number | null
   ): Promise<ApiResponse<IncidentDetailRowResponse[]>> {
+    const { reportRangeDate, ...restFilters } = filters;
+    const params: any = { ...restFilters, limit, offset };
+
+    // Format dates to ISO strings (or YYYY-MM-DD) to send as top-level params
+    if (reportRangeDate) {
+      params.startDate = reportRangeDate.start.toISOString().split('T')[0];
+      params.endDate = reportRangeDate.end.toISOString().split('T')[0];
+    }
+
     const response = await this.client.get<
       ApiResponse<IncidentDetailRowResponse[]>
-    >('/incidents/search', { params: { ...filters, limit, offset } });
+    >('/incidents/search', { params });
     return response.data;
   }
 

@@ -26,6 +26,7 @@ export interface IncidentsFilterState {
   sector?: string | null;
   reference?: string | null;
   reportDate?: Date | null;
+  reportRangeDate?: { start: string; end: string } | null;
 }
 
 const sortFn = (
@@ -94,7 +95,8 @@ export const useReadingReportsViewModel = () => {
     categoryId: null,
     sector: null,
     reference: null,
-    reportDate: null
+    reportDate: null,
+    reportRangeDate: null
   });
 
   // ── Modo "por acometida": true cuando llegamos desde ConnectionsPage ──────
@@ -120,7 +122,14 @@ export const useReadingReportsViewModel = () => {
         connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
         sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
         reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
-        reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null)
+        reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null),
+        reportRangeDate:
+          filters.searchField === 'reportRangeDate' && filters.reportRangeDate?.start && filters.reportRangeDate?.end
+            ? {
+                start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
+                end: new Date(filters.reportRangeDate.end + 'T23:59:59')
+              }
+            : null
       });
     }
     // Solo se ejecuta una vez al montar (o si cambia el connectionId de la URL)
@@ -176,7 +185,14 @@ export const useReadingReportsViewModel = () => {
         connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
         sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
         reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
-        reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null)
+        reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null),
+        reportRangeDate:
+          filters.searchField === 'reportRangeDate' && filters.reportRangeDate?.start && filters.reportRangeDate?.end
+            ? {
+                start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
+                end: new Date(filters.reportRangeDate.end + 'T23:59:59')
+              }
+            : null
       });
     }, delay);
     return () => clearTimeout(timer);
@@ -194,7 +210,14 @@ export const useReadingReportsViewModel = () => {
       connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
       sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
       reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
-      reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null)
+      reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null),
+      reportRangeDate:
+        filters.searchField === 'reportRangeDate' && filters.reportRangeDate?.start && filters.reportRangeDate?.end
+          ? {
+              start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
+              end: new Date(filters.reportRangeDate.end + 'T23:59:59')
+            }
+          : null
     });
     setPage(1);
   }, [filters, loadIncidents, setSearchParams]);

@@ -28,6 +28,7 @@ interface IncidentContextType {
     sector?: string | null;
     reference?: string | null;
     reportDate?: Date | null;
+    reportRangeDate?: { start: Date; end: Date } | null;
   }, limit?: number, offset?: number) => Promise<void>;
   loadCategories: () => Promise<void>;
   createIncident: (request: CreateIncidentRequest) => Promise<ApiResponse<IncidentResponse> | null>;
@@ -64,6 +65,7 @@ export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }
       sector?: string | null;
       reference?: string | null;
       reportDate?: Date | null;
+      reportRangeDate?: { start: Date; end: Date } | null;
     } = {}, limit?: number, offset?: number) => {
       setIsLoading(true);
       setError(null);

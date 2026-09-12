@@ -11,7 +11,8 @@ export type IncidentSortKey =
   | 'connection'
   | 'sector'
   | 'reference'
-  | 'reportDate';
+  | 'reportDate'
+  | 'reportRangeDate';
 
 // ── Tab type (Open/Closed: add tabs here without touching logic) ─────────────
 export type IncidentTab = 'list' | 'map';
@@ -25,6 +26,7 @@ export interface IncidentsFilterState {
   sector?: string | null;
   reference?: string | null;
   reportDate?: Date | null;
+  reportRangeDate?: { start: string; end: string } | null;
 }
 
 const sortFn = (
@@ -94,7 +96,8 @@ export const useIncidentsViewModel = () => {
     categoryId: null,
     sector: null,
     reference: null,
-    reportDate: null
+    reportDate: null,
+    reportRangeDate: null
   });
 
   // ── Modo "por acometida": true cuando llegamos desde ConnectionsPage ──────
@@ -135,7 +138,14 @@ export const useIncidentsViewModel = () => {
           reportDate:
             filters.searchField === 'reportDate' && filters.search
               ? new Date(filters.search + 'T00:00:00')
-              : filters.reportDate || null
+              : filters.reportDate || null,
+          reportRangeDate:
+            filters.searchField === 'reportRangeDate' && filters.reportRangeDate?.start && filters.reportRangeDate?.end
+              ? {
+                  start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
+                  end: new Date(filters.reportRangeDate.end + 'T23:59:59')
+                }
+              : null
         },
         pageSize,
         (page - 1) * pageSize
@@ -196,7 +206,14 @@ export const useIncidentsViewModel = () => {
           reportDate:
             filters.searchField === 'reportDate' && filters.search
               ? new Date(filters.search + 'T00:00:00')
-              : filters.reportDate || null
+              : filters.reportDate || null,
+          reportRangeDate:
+            filters.searchField === 'reportRangeDate' && filters.reportRangeDate
+              ? {
+                  start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
+                  end: new Date(filters.reportRangeDate.end + 'T23:59:59')
+                }
+              : null
         },
         pageSize,
         (page - 1) * pageSize
@@ -232,7 +249,14 @@ export const useIncidentsViewModel = () => {
         reportDate:
           filters.searchField === 'reportDate' && filters.search
             ? new Date(filters.search + 'T00:00:00')
-            : filters.reportDate || null
+            : filters.reportDate || null,
+        reportRangeDate:
+          filters.searchField === 'reportRangeDate' && filters.reportRangeDate?.start && filters.reportRangeDate?.end
+            ? {
+                start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
+                end: new Date(filters.reportRangeDate.end + 'T23:59:59')
+              }
+            : null
       },
       pageSize,
       0

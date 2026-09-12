@@ -1,0 +1,17 @@
+.cr-history-header {
+  display: flex;
+  flex-direction: row !important;
+  flex: 0 0 auto !important;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+  width: 100%;
+}
+
+.cr-history-header-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

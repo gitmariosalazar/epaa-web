@@ -18,6 +18,7 @@ export class SearchIncidentsUseCase {
       sector?: string | null;
       reference?: string | null;
       reportDate?: Date | null;
+      reportRangeDate?: { start: Date; end: Date } | null;
     },
     limit?: number,
     offset?: number

@@ -403,6 +403,10 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
             <ReadingHistoryTable
               history={readingHistory}
               isLoading={isLoadingHistory}
+              connectionInfo={{
+                cadastralKey: readingInfoForRequest.cadastralKey,
+                meterNumber: readingInfoForRequest.meterNumber
+              }}
             />
           </div>
         )}

@@ -693,6 +693,8 @@ const ReadingReportsContent: React.FC = () => {
             onConsultar={handleConsultar}
             onReportIncident={() => navigate('/incidents/create')}
             isLoading={isLoading}
+            reportRangeDate={filters.reportRangeDate || null}
+            onReportRangeDateChange={(start, end) => handleFilterChange({ reportRangeDate: { start, end } })}
           />
         }
       >

@@ -319,7 +319,7 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
       >
         <ConnectionProvider>
           <ChangeMeterPage
-            cadastralKeyProp={initialCadastralKey}
+            cadastralKeyProp={initialCadastralKey!}
             onSuccess={handleSuccessUpdateMeterNumberModal}
             onCancel={handleCloseUpdateMeterNumberModal}
           />

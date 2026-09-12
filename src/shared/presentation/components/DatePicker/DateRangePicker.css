@@ -25,6 +25,10 @@
   box-shadow: var(--shadow-sm);
 }
 
+.date-range-picker-trigger span {
+  white-space: nowrap;
+}
+
 /* Size: XS / Small (28px height) */
 .date-range-picker-trigger.date-range-picker--xs,
 .date-range-picker-trigger.date-range-picker--small {
@@ -261,14 +265,14 @@
 }
 
 .date-range-picker-cell--in-range {
-  background-color: color-mix(in srgb, var(--accent) 8%, transparent);
+  background-color: color-mix(in srgb, var(--accent) 20%, transparent);
   color: var(--accent);
   font-weight: 600;
   border-radius: 0.5rem; /* Keep radius to match unselected cells */
 }
 
 .date-range-picker-cell--in-range:hover {
-  background-color: color-mix(in srgb, var(--accent) 20%, transparent);
+  background-color: color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .date-range-picker-cell--range-start {

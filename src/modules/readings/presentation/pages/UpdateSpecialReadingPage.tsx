@@ -444,6 +444,10 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
           <div className="cr-history-wrapper">
             <ReadingHistoryTable
               history={readingHistory}
+              connectionInfo={{
+                cadastralKey: currentReadingInfoForRequest.cadastralKey,
+                meterNumber: currentReadingInfoForRequest.meterNumber,
+              }}
               isLoading={isLoadingHistory}
             />
           </div>
