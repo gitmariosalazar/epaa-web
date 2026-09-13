@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useReadingDetailViewModel } from '../hooks/useReadingDetailViewModel';
 import { CircularProgress, useSimulatedProgress } from '@/shared/presentation/components/CircularProgress';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
-import { FaUser, FaCamera, FaClipboardList, FaTint } from 'react-icons/fa';
+import { FaUser, FaCamera, FaClipboardList, FaTint, FaEdit } from 'react-icons/fa';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
 import { Label } from '@/shared/presentation/components/label/Label';
@@ -20,13 +20,22 @@ import {
   ClipboardCheck,
   Droplets,
   AlertTriangle,
-  Clock
+  Clock,
+  Calendar,
+  Droplet
 } from 'lucide-react';
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
 import { TbCurrencyDollarCanadian } from 'react-icons/tb';
 import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 import { EvidenceFiles } from '@/shared/files/presentation/components/EvidenceFiles/EvidenceFile';
 import './ReadingDetailModal.css'; // Reusing the same styles
+import { PopoverModal } from '@/shared/presentation/components/PopoverModal';
+import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ChangeMeterPage } from '@/modules/connections/presentation/pages/ChangeMeterPage';
+import { truncateText } from '@/shared/utils/text/truncate-text';
+import { MdCable } from 'react-icons/md';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { Button } from '@/shared/presentation/components/Button/Button';
 
 interface ReadingDetailTabContentProps {
   cadastralKey: string | null;
@@ -40,8 +49,24 @@ export const ReadingDetailTabContent: React.FC<ReadingDetailTabContentProps> = (
   hidePhotosAndObservations = false
 }) => {
   const { t } = useTranslation();
-  const { readingDetail, isLoading, error } = useReadingDetailViewModel(cadastralKey, yearAndMonth);
+  const { readingDetail, isLoading, error, refetch } = useReadingDetailViewModel(cadastralKey, yearAndMonth);
   const loadingProgress = useSimulatedProgress(isLoading);
+
+  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+  const handleOpenUpdateMeterNumberModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(e.currentTarget);
+    setOpenUpdateMeterNumberModal(true);
+  };
+  const handleCloseUpdateMeterNumberModal = () => {
+    setOpenUpdateMeterNumberModal(false);
+  };
+  const handleSuccessUpdateMeterNumberModal = () => {
+    setOpenUpdateMeterNumberModal(false);
+    refetch();
+  };
+
 
   if (isLoading) {
     return (
@@ -193,8 +218,90 @@ export const ReadingDetailTabContent: React.FC<ReadingDetailTabContentProps> = (
               <span className="reading-detail-empty">No hay observaciones adicionales.</span>
             )}
           </div>
+
+          <div className="urw-detail-footer">
+            <div className="urw-footer-grid">
+              {/*Botones de accnoes abrir popovers con la informacion de la lectura*/}
+
+              <div className="urw-footer-item">
+                <span className="urw-footer-label">Período</span>
+                <ColorChip
+                  label={`${readingDetail?.readingMonthName || ''}`}
+                  size='xs'
+                  variant='soft'
+                  color='#0891b2'
+                  icon={<Calendar size='1em' />}
+                  borderRadius={5}
+                />
+              </div>
+              <div className="urw-footer-item">
+                <span className="urw-footer-label">Consumo</span>
+                <ColorChip
+                  label={(readingDetail?.currentReading! - readingDetail?.previousReading || 0).toString() + ' m³'}
+                  size='xs'
+                  variant='soft'
+                  color={getNoveltyColor(readingDetail?.novelty || '')}
+                  icon={<Droplet size='1em' />}
+                  borderRadius={5}
+                />
+              </div>
+              <div className="urw-footer-item">
+                <span className="urw-footer-label">Novedad</span>
+                <ColorChip
+                  label={truncateText(readingDetail?.novelty!, 10) || 'Ninguna'}
+                  size='xs'
+                  variant='soft'
+                  color={getNoveltyColor(readingDetail?.novelty)}
+                  icon={<AlertTriangle size='1em' />}
+                  borderRadius={5}
+                />
+              </div>
+              <div className="urw-footer-item">
+                <span className="urw-footer-label">C. catastral</span>
+                <ColorChip
+                  label={truncateText(cadastralKey || '', 10)}
+                  size='xs'
+                  variant='soft'
+                  color='#0868B2'
+                  icon={<MdCable size='1em' />}
+                  borderRadius={5}
+                />
+              </div>
+            </div>
+            <div className='urw-detail-footer-actions-right'>
+              <Tooltip
+                content={'Actualizar Número de medidor'}
+                followCursor={false}
+              >
+                <Button
+                  onClick={handleOpenUpdateMeterNumberModal}
+                  variant='outline'
+                  circle
+                  color='orange'
+                  size='sm'
+                >
+                  <FaEdit size={16} />
+                </Button>
+              </Tooltip>
+            </div>
+          </div>
         </>
       )}
+
+      <PopoverModal
+        isOpen={openUpdateMeterNumberModal}
+        onClose={handleCloseUpdateMeterNumberModal}
+        anchorElement={anchorEl}
+        title="Actualizar número de medidor"
+      >
+        <ConnectionProvider>
+          <ChangeMeterPage
+            cadastralKeyProp={cadastralKey!}
+            onSuccess={handleSuccessUpdateMeterNumberModal}
+            onCancel={handleCloseUpdateMeterNumberModal}
+          />
+        </ConnectionProvider>
+      </PopoverModal>
     </div>
   );
 };
