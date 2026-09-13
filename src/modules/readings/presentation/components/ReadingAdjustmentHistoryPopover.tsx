@@ -151,7 +151,7 @@ export const ReadingAdjustmentHistoryPopover: React.FC<ReadingAdjustmentHistoryP
               }
             }
           })
-        ) : (
+        ) : isOpen !== undefined ? undefined : (
           <Tooltip followCursor={false} themeColor="secondary" content="Ver Historial de Ajustes">
             <Button size="sm" variant="ghost" color="secondary" circle onClick={handleOpen}>
               <History size={16} />
