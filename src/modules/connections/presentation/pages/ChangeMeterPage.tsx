@@ -33,7 +33,7 @@ export const ChangeMeterPage: React.FC<ChangeMeterPageProps> = ({ cadastralKeyPr
   const [prevMedidor, setPrevMedidor] = useState('');
 
   // New Meter State
-  const [newMedidor, setNewMedidor] = useState('');
+  const [newMedidor, setNewMedidor] = useState(prevMedidor);
 
   useEffect(() => {
     const fetchConnectionData = async () => {
@@ -43,6 +43,7 @@ export const ChangeMeterPage: React.FC<ChangeMeterPageProps> = ({ cadastralKeyPr
           if (connectionData) {
             setConnectionId(connectionData.connectionId);
             setClaveCatastral(connectionData.connectionCadastralKey || '');
+            setNewMedidor(connectionData.connectionMeterNumber || '');
             setNumeroMedidor(connectionData.connectionMeterNumber || '');
             setPrevMedidor(connectionData.connectionMeterNumber || '');
             setUbicacion(connectionData.connectionAddress || '');
@@ -108,6 +109,13 @@ export const ChangeMeterPage: React.FC<ChangeMeterPageProps> = ({ cadastralKeyPr
     }
   };
 
+  const handleChangeNewMedidor = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMedidor(e.target.value);
+  };
+
+  console.log('newMedidor', newMedidor);
+
+
   const content = (
     <div className={`change-meter-page ${cadastralKeyProp ? 'is-modal' : ''}`}>
       <div className="change-meter-form-card" style={cadastralKeyProp ? { margin: 0, padding: '1rem', boxShadow: 'none' } : {}}>
@@ -134,8 +142,9 @@ export const ChangeMeterPage: React.FC<ChangeMeterPageProps> = ({ cadastralKeyPr
               <Input
                 label="Nuevo número de medidor"
                 value={newMedidor}
-                onChange={(e) => setNewMedidor(e.target.value)}
+                onChange={handleChangeNewMedidor}
                 required
+                minLength={6}
                 leftIcon={<BsSpeedometer size={16} />}
               />
               <div className="change-meter-actions">
