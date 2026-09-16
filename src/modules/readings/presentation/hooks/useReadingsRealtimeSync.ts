@@ -7,19 +7,21 @@ interface UseReadingsRealtimeSyncProps {
   month: string;
   sector: string | number;
   userId: string;
+  date?: string;
   fetchReadings: (
     activeTab: string,
     monthIso: string,
     sectorToFetch?: string | number,
-    userId?: string
+    userId?: string,
+    date?: string
   ) => void;
 }
 
 /**
  * Hook `useReadingsRealtimeSync`
- * 
- * SRP (Single Responsibility Principle): Este hook se encarga ÚNICAMENTE de la 
- * orquestación en tiempo real. Abstrae la complejidad de los sockets fuera 
+ *
+ * SRP (Single Responsibility Principle): Este hook se encarga ÚNICAMENTE de la
+ * orquestación en tiempo real. Abstrae la complejidad de los sockets fuera
  * de la Vista (UI) y escucha de forma silenciosa para recargar los datos.
  */
 export const useReadingsRealtimeSync = ({
@@ -27,20 +29,26 @@ export const useReadingsRealtimeSync = ({
   month,
   sector,
   userId,
-  fetchReadings,
+  date,
+  fetchReadings
 }: UseReadingsRealtimeSyncProps) => {
-  
   useRealtimeEvent('connection.created', (payload) => {
     console.log('[RealtimeSync] connection.created received:', payload);
     if (!sector || payload.sector.toString() === sector.toString()) {
-      setTimeout(() => fetchReadings(activeTab, month, sector, userId), 1500);
+      setTimeout(() => {
+        console.log('[RealtimeSync] calling fetchReadings with date:', date);
+        fetchReadings(activeTab, month, sector, userId, date);
+      }, 1500);
     }
   });
 
   useRealtimeEvent('connection.updated', (payload) => {
     console.log('[RealtimeSync] connection.updated received:', payload);
     if (!sector || payload.sector.toString() === sector.toString()) {
-      setTimeout(() => fetchReadings(activeTab, month, sector, userId), 1500);
+      setTimeout(
+        () => fetchReadings(activeTab, month, sector, userId, date),
+        1500
+      );
     }
   });
 
@@ -48,7 +56,10 @@ export const useReadingsRealtimeSync = ({
     console.log('[RealtimeSync] reading:updated received:', payload);
     if (!sector || payload.sectorId.toString() === sector.toString()) {
       if (payload.month.startsWith(month)) {
-        setTimeout(() => fetchReadings(activeTab, month, sector, userId), 1500);
+        setTimeout(() => {
+          console.log('[RealtimeSync] calling fetchReadings with date:', date);
+          fetchReadings(activeTab, month, sector, userId, date);
+        }, 1500);
       }
     }
   });

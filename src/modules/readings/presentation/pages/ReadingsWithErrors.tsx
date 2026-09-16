@@ -70,6 +70,8 @@ export const ReadingsWithErrors: React.FC = () => {
   const [userId, setUserId] = useState('');
   const [globalSearch, setGlobalSearch] = useState('');
 
+  const [isManualSync, setIsManualSync] = useState(false);
+
   const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
     isOpen: false,
     cadastralKey: null,
@@ -159,6 +161,7 @@ export const ReadingsWithErrors: React.FC = () => {
     month,
     sector,
     userId,
+    date,
     fetchReadings,
   });
 
@@ -166,6 +169,17 @@ export const ReadingsWithErrors: React.FC = () => {
     closeModal();
     fetchReadings(activeTab as any, month, sector, userId, date);
   };
+
+  const handleManualFetch = () => {
+    setIsManualSync(true);
+    fetchReadings(activeTab as any, month, sector, userId, date);
+  };
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsManualSync(false);
+    }
+  }, [isLoading]);
 
   if (activeTab === 'novelties') {
     return (
@@ -203,8 +217,8 @@ export const ReadingsWithErrors: React.FC = () => {
           onSectorChange={setSector}
           userId={userId}
           onUserIdChange={setUserId}
-          onFetch={() => fetchReadings(activeTab as any, month, sector, userId, date)}
-          isLoading={isLoading}
+          onFetch={handleManualFetch}
+          isLoading={isLoading && isManualSync}
           search={globalSearch}
           onSearchChange={setGlobalSearch}
         />
@@ -223,7 +237,7 @@ export const ReadingsWithErrors: React.FC = () => {
           {activeTab === 'completed' && (
             <CompletedReadingConnectionTable
               data={filteredCompleted}
-              isLoading={isLoading}
+              isLoading={isLoading && isManualSync}
               onAction={handleTableAction}
               onViewDetails={handleViewDetails}
               onViewConnectionDetails={(key) => setDetailCadastralKey(key)}
@@ -233,7 +247,7 @@ export const ReadingsWithErrors: React.FC = () => {
           {activeTab === 'estimated' && (
             <EstimatedReadingConnectionTable
               data={filteredEstimated}
-              isLoading={isLoading}
+              isLoading={isLoading && isManualSync}
               onAction={handleTableAction}
               onViewDetails={handleViewDetails}
               onViewConnectionDetails={(key) => setDetailCadastralKey(key)}
@@ -243,7 +257,7 @@ export const ReadingsWithErrors: React.FC = () => {
           {activeTab === 'all' && (
             <AllReadingsTable
               data={filteredAll}
-              isLoading={isLoading}
+              isLoading={isLoading && isManualSync}
               onAction={handleTableAction}
               onViewReadingDetails={handleViewDetails}
               onViewConnectionDetails={(key) => setDetailCadastralKey(key)}

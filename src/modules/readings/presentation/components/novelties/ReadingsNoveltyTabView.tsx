@@ -1,15 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ReadingNoveltyProvider } from '../../context/ReadingNoveltyContext';
 import { useReadingNovelty } from '../../hooks/useReadingNovelty';
 import { ReadingNoveltyFilters } from './ReadingNoveltyFilters';
 import { ReadingsNoveltyTable } from './ReadingsNoveltyTable';
 import { useReadingNoveltySearch } from '../../hooks/useReadingNoveltySearch';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
-import {
-  CircularProgress,
-  useSimulatedProgress
-} from '@/shared/presentation/components/CircularProgress';
-import { useTranslation } from 'react-i18next';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { NoveltyType } from '@/shared/utils/types/novelties-type';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
@@ -35,7 +30,6 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
   header,
   forceSpecialUpdateModal
 }) => {
-  const { t } = useTranslation();
   const currentMonthStr = dateService.getCurrentMonthString();
 
   const [month, setMonth] = useState(currentMonthStr);
@@ -43,6 +37,9 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
   const [userId, setUserId] = useState('');
   const [novelty, setNovelty] = useState<string>(NoveltyType.NORMAL);
   const [modalState, setModalState] = useState<ModalState | null>(null);
+  // Al inicio de tu componente ReadingsNoveltyContent, donde tienes tus otros useState:
+  const [isManualSync, setIsManualSync] = useState(false);
+
 
 
   const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
@@ -75,11 +72,21 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
     filteredData
   } = useReadingNoveltySearch(readingNovelties, novelty);
 
-  const loadingProgress = useSimulatedProgress(loading);
 
   const handleFetch = () => {
     fetchNoveltyReadings(novelty, month, sector ? Number(sector) : undefined, userId);
   };
+
+  const handleManualFetch = () => {
+    setIsManualSync(true);
+    handleFetch();
+  };
+
+  useEffect(() => {
+    if (!loading) {
+      setIsManualSync(false);
+    }
+  }, [loading]);
 
   useReadingNoveltiesRealtimeSync(month, sector, handleFetch);
 
@@ -114,8 +121,8 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
           onNoveltyChange={setNovelty}
           userId={userId}
           onUserIdChange={setUserId}
-          onFetch={handleFetch}
-          isLoading={loading}
+          onFetch={handleManualFetch}
+          isLoading={loading && isManualSync}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           noveltySearchTerm={noveltySearchTerm}
@@ -123,43 +130,26 @@ const ReadingsNoveltyContent: React.FC<ReadingsNoveltyTabViewProps> = ({
         />
       }
     >
-      {loading ? (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginTop: '2rem',
-            width: '100%',
-            height: '100%',
-            alignItems: 'center'
-          }}
-        >
-          <CircularProgress
-            progress={loadingProgress}
-            size={112}
-            strokeWidth={9}
-            label={t('common.loading', 'Cargando datos...')}
-          />
-        </div>
-      ) : error ? (
+      {error && (
         <div
           className="entry-data-error"
           style={{ color: 'red', marginTop: '0rem' }}
         >
           <strong>Error: </strong> {error}
         </div>
-      ) : (
-        <ReadingsNoveltyTable
-          data={filteredData}
-          isLoading={loading}
-          error={error ? new Error(error) : null}
-          month={month}
-          novelty={novelty}
-          sector={sector}
-          onAction={handleTableAction}
-          onViewDetails={handleViewDetails}
-        />
       )}
+
+      <ReadingsNoveltyTable
+        data={filteredData}
+        isLoading={loading}
+        error={error ? new Error(error) : null}
+        month={month}
+        novelty={novelty}
+        sector={sector}
+        onAction={handleTableAction}
+        onViewDetails={handleViewDetails}
+      />
+
 
       {/* MODAL DE CREACIÓN / EDICIÓN */}
       <Modal

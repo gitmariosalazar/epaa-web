@@ -82,6 +82,9 @@ export const ReadingsListPage: React.FC = () => {
   const [userId, setUserId] = useState('');
   const [globalSearch, setGlobalSearch] = useState('');
 
+  const [isManualSync, setIsManualSync] = useState(false);
+
+
   const [detailModalState, setDetailModalState] = useState<{
     isOpen: boolean;
     cadastralKey: string | null;
@@ -208,6 +211,7 @@ export const ReadingsListPage: React.FC = () => {
     month,
     sector,
     userId,
+    date,
     fetchReadings
   });
 
@@ -230,6 +234,17 @@ export const ReadingsListPage: React.FC = () => {
     );
   }
 
+  const handleManualFetch = () => {
+    setIsManualSync(true);
+    fetchReadings(activeTab as any, month, sector, userId, date);
+  };
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsManualSync(false);
+    }
+  }, [isLoading]);
+
   return (
     <PageLayout
       className="reading-images-page"
@@ -251,10 +266,8 @@ export const ReadingsListPage: React.FC = () => {
           onSectorChange={setSector}
           userId={userId}
           onUserIdChange={setUserId}
-          onFetch={() =>
-            fetchReadings(activeTab as any, month, sector, userId, date)
-          }
-          isLoading={isLoading}
+          onFetch={handleManualFetch}
+          isLoading={isLoading && isManualSync}
           search={globalSearch}
           onSearchChange={setGlobalSearch}
         />
@@ -292,7 +305,7 @@ export const ReadingsListPage: React.FC = () => {
           {activeTab === 'completed' && (
             <CompletedReadingConnectionTable
               data={filteredCompleted}
-              isLoading={isLoading}
+              isLoading={isLoading && isManualSync}
               onAction={handleTableAction}
               onViewDetails={handleViewDetails}
               onViewConnectionDetails={(key) => setDetailCadastralKey(key)}
@@ -312,7 +325,7 @@ export const ReadingsListPage: React.FC = () => {
           {activeTab === 'estimated' && (
             <EstimatedReadingConnectionTable
               data={filteredEstimated}
-              isLoading={isLoading}
+              isLoading={isLoading && isManualSync}
               onAction={handleTableAction}
               onViewDetails={handleViewDetails}
               onViewConnectionDetails={(key) => setDetailCadastralKey(key)}
@@ -322,7 +335,7 @@ export const ReadingsListPage: React.FC = () => {
           {activeTab === 'all' && (
             <AllReadingsTable
               data={filteredAll}
-              isLoading={isLoading}
+              isLoading={isLoading && isManualSync}
               onAction={handleTableAction}
               onViewReadingDetails={handleViewDetails}
               onViewConnectionDetails={(key) => setDetailCadastralKey(key)}

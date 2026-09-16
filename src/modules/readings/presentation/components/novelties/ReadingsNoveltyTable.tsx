@@ -472,6 +472,28 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
             variant="info"
           />
         }
+        contextMenuItems={(row) => [
+          {
+            label: t('readingsNovelty.viewDetails', 'Ver Información de la Acometida'),
+            icon: <MapPin size={16} />,
+            color: 'cyan',
+            onClick: () => {
+              setDetailCadastralKey(row.cadastralKey)
+            }
+          },
+          {
+            label: t('readingsNovelty.editReading', 'Editar Lectura'),
+            icon: <FaEdit size={16} />,
+            color: 'warning',
+            onClick: () => onAction?.('update', row.cadastralKey)
+          },
+          {
+            label: t('readingsNovelty.viewReading', 'Ver detalles de la lectura'),
+            icon: <FileText size={16} />,
+            color: 'accent',
+            onClick: () => onViewDetails?.(row.cadastralKey, row.readingDate)
+          }
+        ]}
       />
       {PdfPreviewModal}
       <ConnectionProvider>
