@@ -14,13 +14,15 @@ export class TakenReadingConnectionUseCase {
     dateMonth: string,
     sector?: number,
     userId?: string,
-    date?: string
+    date?: string,
+    failed?: boolean
   ): Promise<TakenReadingConnection[]> {
     return this.takenReadingConnectionRepository.getTakenReadingsByMonth(
       dateMonth,
       sector,
       userId,
-      date
+      date,
+      failed
     );
   }
 

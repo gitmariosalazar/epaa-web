@@ -28,6 +28,8 @@ export interface InterfaceIncidentRepository {
       connectionId?: string | null;
       status?: string | null;
       priority?: string | null;
+      meterCondition?: string | null;
+      physicalState?: string | null;
       categoryId?: number | null;
       sector?: string | null;
       reference?: string | null;

@@ -250,6 +250,7 @@ export const en = {
         pending: 'Pending Readings',
         completed: 'Taken Readings',
         estimated: 'Taken (Estimated)',
+        failed: 'Readings with Possible Defects',
         all: 'All'
       },
       columns: {

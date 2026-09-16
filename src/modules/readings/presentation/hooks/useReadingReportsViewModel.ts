@@ -22,6 +22,8 @@ export interface IncidentsFilterState {
   searchField: string;
   status: string;
   priority: string;
+  meterCondition?: string;
+  physicalState?: string;
   categoryId: number | null;
   sector?: string | null;
   reference?: string | null;
@@ -73,6 +75,7 @@ export const useReadingReportsViewModel = () => {
     isLoading,
     error,
     loadIncidents,
+    totalCount,
     loadActiveByConnection,
     createIncident,
     resolveIncident,
@@ -92,6 +95,8 @@ export const useReadingReportsViewModel = () => {
     searchField: 'all',
     status: '',
     priority: '',
+    meterCondition: '',
+    physicalState: '',
     categoryId: null,
     sector: null,
     reference: null,
@@ -115,22 +120,44 @@ export const useReadingReportsViewModel = () => {
       loadActiveByConnection(connectionIdFromUrl);
     } else {
       // Modo "todos": carga usando filtros normales
-      loadIncidents({
-        status: filters.status || null,
-        priority: filters.priority || null,
-        categoryId: filters.categoryId ? Number(filters.categoryId) : null,
-        connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
-        sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
-        reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
-        reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null),
-        reportRangeDate:
-          filters.searchField === 'reportRangeDate' && filters.reportRangeDate?.start && filters.reportRangeDate?.end
-            ? {
-                start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
-                end: new Date(filters.reportRangeDate.end + 'T23:59:59')
-              }
-            : null
-      });
+      loadIncidents(
+        {
+          status: filters.status || null,
+          priority: filters.priority || null,
+          ...(filters.meterCondition ? { meterCondition: filters.meterCondition } : {}),
+          ...(filters.physicalState ? { physicalState: filters.physicalState } : {}),
+          categoryId: filters.categoryId ? Number(filters.categoryId) : null,
+          connectionId:
+            filters.searchField === 'connectionId'
+              ? filters.search
+              : filters.searchField === 'all' && filters.search.includes('-')
+                ? filters.search
+                : null,
+          sector:
+            filters.searchField === 'sector'
+              ? filters.search
+              : filters.sector || null,
+          reference:
+            filters.searchField === 'reference'
+              ? filters.search
+              : filters.reference || null,
+          reportDate:
+            filters.searchField === 'reportDate' && filters.search
+              ? new Date(filters.search + 'T00:00:00')
+              : filters.reportDate || null,
+          reportRangeDate:
+            filters.searchField === 'reportRangeDate' &&
+            filters.reportRangeDate?.start &&
+            filters.reportRangeDate?.end
+              ? {
+                  start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
+                  end: new Date(filters.reportRangeDate.end + 'T23:59:59')
+                }
+              : null
+        },
+        pageSize,
+        (page - 1) * pageSize
+      );
     }
     // Solo se ejecuta una vez al montar (o si cambia el connectionId de la URL)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -172,55 +199,109 @@ export const useReadingReportsViewModel = () => {
     loadIncidentsRef.current = loadIncidents;
   }, [loadIncidents]);
 
+  const lecturaCategory = categories.find(
+    (c) => c.categoryCode === 'RUTA_LECTURA'
+  );
+  const lecturaCategoryId = lecturaCategory
+    ? Number(lecturaCategory.categoryId)
+    : null;
+
   /** Auto-fetch cuando cambian los filtros (solo fuera del modo-conexión). */
   useEffect(() => {
     if (connectionMode) return; // ya cargado por la carga inicial
 
     const delay = filters.search && !filters.search.includes('-') ? 300 : 0;
     const timer = setTimeout(() => {
-      loadIncidentsRef.current({
-        status: filters.status || null,
-        priority: filters.priority || null,
-        categoryId: filters.categoryId ? Number(filters.categoryId) : null,
-        connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
-        sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
-        reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
-        reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null),
-        reportRangeDate:
-          filters.searchField === 'reportRangeDate' && filters.reportRangeDate?.start && filters.reportRangeDate?.end
-            ? {
-                start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
-                end: new Date(filters.reportRangeDate.end + 'T23:59:59')
-              }
-            : null
-      });
+      loadIncidentsRef.current(
+        {
+          status: filters.status || null,
+          priority: filters.priority || null,
+          ...(filters.meterCondition ? { meterCondition: filters.meterCondition } : {}),
+          ...(filters.physicalState ? { physicalState: filters.physicalState } : {}),
+          categoryId: filters.categoryId
+            ? Number(filters.categoryId)
+            : lecturaCategoryId,
+          connectionId:
+            filters.searchField === 'connectionId'
+              ? filters.search
+              : filters.searchField === 'all' && filters.search.includes('-')
+                ? filters.search
+                : null,
+          sector:
+            filters.searchField === 'sector'
+              ? filters.search
+              : filters.sector || null,
+          reference:
+            filters.searchField === 'reference'
+              ? filters.search
+              : filters.reference || null,
+          reportDate:
+            filters.searchField === 'reportDate' && filters.search
+              ? new Date(filters.search + 'T00:00:00')
+              : filters.reportDate || null,
+          reportRangeDate:
+            filters.searchField === 'reportRangeDate' &&
+            filters.reportRangeDate?.start &&
+            filters.reportRangeDate?.end
+              ? {
+                  start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
+                  end: new Date(filters.reportRangeDate.end + 'T23:59:59')
+                }
+              : null
+        },
+        pageSize,
+        (page - 1) * pageSize
+      );
     }, delay);
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, connectionMode]);
+  }, [filters, connectionMode, page, pageSize, lecturaCategoryId]);
 
   /** Botón Consultar: recarga manualmente con los filtros actuales. */
   const handleConsultar = useCallback(() => {
     setConnectionMode(false);
     setSearchParams({});
-    loadIncidents({
-      status: filters.status || null,
-      priority: filters.priority || null,
-      categoryId: filters.categoryId ? Number(filters.categoryId) : null,
-      connectionId: filters.searchField === 'connectionId' ? filters.search : (filters.searchField === 'all' && filters.search.includes('-') ? filters.search : null),
-      sector: filters.searchField === 'sector' ? filters.search : (filters.sector || null),
-      reference: filters.searchField === 'reference' ? filters.search : (filters.reference || null),
-      reportDate: filters.searchField === 'reportDate' && filters.search ? new Date(filters.search + 'T00:00:00') : (filters.reportDate || null),
-      reportRangeDate:
-        filters.searchField === 'reportRangeDate' && filters.reportRangeDate?.start && filters.reportRangeDate?.end
-          ? {
-              start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
-              end: new Date(filters.reportRangeDate.end + 'T23:59:59')
-            }
-          : null
-    });
+    loadIncidents(
+      {
+        status: filters.status || null,
+        priority: filters.priority || null,
+        ...(filters.meterCondition ? { meterCondition: filters.meterCondition } : {}),
+        ...(filters.physicalState ? { physicalState: filters.physicalState } : {}),
+        categoryId: filters.categoryId
+          ? Number(filters.categoryId)
+          : lecturaCategoryId,
+        connectionId:
+          filters.searchField === 'connectionId'
+            ? filters.search
+            : filters.searchField === 'all' && filters.search.includes('-')
+              ? filters.search
+              : null,
+        sector:
+          filters.searchField === 'sector'
+            ? filters.search
+            : filters.sector || null,
+        reference:
+          filters.searchField === 'reference'
+            ? filters.search
+            : filters.reference || null,
+        reportDate:
+          filters.searchField === 'reportDate' && filters.search
+            ? new Date(filters.search + 'T00:00:00')
+            : filters.reportDate || null,
+        reportRangeDate:
+          filters.searchField === 'reportRangeDate' &&
+          filters.reportRangeDate?.start &&
+          filters.reportRangeDate?.end
+            ? {
+                start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
+                end: new Date(filters.reportRangeDate.end + 'T23:59:59')
+              }
+            : null
+      },
+      pageSize,
+      0
+    ); // 0 because page will be set to 1
     setPage(1);
-  }, [filters, loadIncidents, setSearchParams]);
+  }, [filters, loadIncidents, setSearchParams, pageSize, lecturaCategoryId]);
 
   const handleSortChange = useCallback((key: IncidentSortKey) => {
     setSortBy(key);
@@ -242,20 +323,21 @@ export const useReadingReportsViewModel = () => {
 
   // ── Estado derivado ───────────────────────────────────────────────────────
   const filteredSorted = useMemo(() => {
-    let list = incidents.filter(i => i.categoryCode === 'RUTA_LECTURA');
+    // Note: To have true server-side sorting, the backend must support sortBy and sortDir params.
+    // For now we sort the current page locally.
+    const list = [...incidents];
     list.sort((a, b) => sortFn(a, b, sortBy));
     return list;
   }, [incidents, sortBy]);
 
   const paginated = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredSorted.slice(start, start + pageSize);
-  }, [filteredSorted, page, pageSize]);
+    return filteredSorted;
+  }, [filteredSorted]);
 
   return {
     // ── List state ─────────────────────────────────────────────────────────
     incidents: filteredSorted,
-    totalCount: filteredSorted.length,
+    totalCount: totalCount,
     categories,
     paginated,
     page,

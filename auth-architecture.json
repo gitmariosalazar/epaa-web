@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Auth Module Clean Architecture",
+    "quality_profile": "showcase",
+    "viewBox": [1160, 1100]
+  },
+  "layout": {
+    "mode": "grid",
+    "origin": [60, 60],
+    "cols": 3,
+    "gapX": 100,
+    "gapY": 100,
+    "cellW": 280,
+    "cellH": 120
+  },
+  "components": [
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "Presentation Layer",
+      "sublabel": "React Components",
+      "tag": "RequireElevatedToken",
+      "row": 0,
+      "col": 1
+    },
+    {
+      "id": "usecases",
+      "type": "backend",
+      "label": "Application Layer",
+      "sublabel": "Login, Refresh, Verify",
+      "row": 1,
+      "col": 1
+    },
+    {
+      "id": "domain_models",
+      "type": "backend",
+      "label": "Domain Models",
+      "sublabel": "AuthSession, Credentials",
+      "row": 2,
+      "col": 0
+    },
+    {
+      "id": "domain_repo",
+      "type": "backend",
+      "label": "AuthRepository",
+      "sublabel": "«interface»",
+      "row": 2,
+      "col": 2
+    },
+    {
+      "id": "repo_impl",
+      "type": "backend",
+      "label": "AuthRepositoryImpl",
+      "sublabel": "Infrastructure Layer",
+      "row": 3,
+      "col": 2
+    },
+    {
+      "id": "api_client",
+      "type": "external",
+      "label": "ApiClient",
+      "sublabel": "HTTP Requests",
+      "row": 4,
+      "col": 2
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Domain (Core)",
+      "wraps": ["domain_models", "domain_repo"]
+    }
+  ],
+  "connections": [
+    {
+      "from": "ui",
+      "to": "usecases",
+      "label": "uses",
+      "labelDy": 24
+    },
+    {
+      "from": "usecases",
+      "to": "domain_models",
+      "label": "imports"
+    },
+    {
+      "from": "usecases",
+      "to": "domain_repo",
+      "label": "injects"
+    },
+    {
+      "from": "repo_impl",
+      "to": "domain_repo",
+      "label": "implements (DIP)"
+    },
+    {
+      "from": "repo_impl",
+      "to": "domain_models",
+      "label": "returns"
+    },
+    {
+      "from": "repo_impl",
+      "to": "api_client",
+      "label": "HTTP requests",
+      "labelDy": 24
+    }
+  ]
+}

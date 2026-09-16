@@ -31,6 +31,9 @@ export const useReadingsList = () => {
   const [completedReadings, setCompletedReadings] = useState<
     TakenReadingConnection[]
   >([]);
+  const [failedReadings, setFailedReadings] = useState<
+    TakenReadingConnection[]
+  >([]);
   const [estimatedReadings, setEstimatedReadings] = useState<
     TakenReadingConnection[]
   >([]);
@@ -74,6 +77,17 @@ export const useReadingsList = () => {
             );
           setCompletedReadings(completed || []);
         }
+        if (activeTab === 'failed' || activeTab === 'all') {
+          const failed =
+            await getTakenReadingsByMonthUseCase.executeGetTakenReadingsByMonth(
+              formattedDate,
+              sectorPayload,
+              userIdPayload,
+              datePayload,
+              true
+            );
+          setFailedReadings(failed || []);
+        }
 
         if (activeTab === 'estimated' || activeTab === 'all') {
           const estimated =
@@ -93,6 +107,8 @@ export const useReadingsList = () => {
           setPendingReadings([]);
         if (activeTab === 'completed' || activeTab === 'all')
           setCompletedReadings([]);
+        if (activeTab === 'failed' || activeTab === 'all')
+          setFailedReadings([]);
         if (activeTab === 'estimated' || activeTab === 'all')
           setEstimatedReadings([]);
       } finally {
@@ -113,6 +129,7 @@ export const useReadingsList = () => {
   const clearAll = useCallback(() => {
     setPendingReadings([]);
     setCompletedReadings([]);
+    setFailedReadings([]);
     setEstimatedReadings([]);
     setError(null);
   }, []);
@@ -120,6 +137,7 @@ export const useReadingsList = () => {
   return {
     pendingReadings,
     completedReadings,
+    failedReadings,
     estimatedReadings,
     isLoading,
     error,

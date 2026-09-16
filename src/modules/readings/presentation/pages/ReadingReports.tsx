@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
-import { useReadingReportsViewModel } from '../hooks/useReadingReportsViewModel';
+import { useReadingReportsViewModel, type IncidentsFilterState } from '../hooks/useReadingReportsViewModel';
 import type { IncidentTab } from '../hooks/useReadingReportsViewModel';
 import { ResolveReadingReportModal } from '../components/ReadingReports/ResolveReadingReportModal';
 import { AddWorkOrderReadingReportModal } from '../components/ReadingReports/AddWorkOrderReadingReportModal';
@@ -13,7 +13,8 @@ import { CreateReadingPage } from './CreateReadingPage';
 import { UpdateReadingWithImagesPage } from './UpdateReadingWithImagesPage';
 import {
   Table,
-  type Column
+  type Column,
+  type ContextMenuItem
 } from '@/shared/presentation/components/Table/Table';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
@@ -238,6 +239,28 @@ const ReadingReportsContent: React.FC = () => {
         );
       },
       id: 'connectionState',
+      filterable: true,
+      filterConfigs: [
+        {
+          key: 'meterCondition',
+          label: 'Condición',
+          options: [
+            { label: 'Nuevo', value: 'NUEVO' },
+            { label: 'Antiguo', value: 'ANTIGUO' },
+            { label: 'No Identificado', value: 'NO_IDENTIFICADO' }
+          ]
+        },
+        {
+          key: 'physicalState',
+          label: 'Estado Físico',
+          options: [
+            { label: 'Bueno', value: 'BUENO' },
+            { label: 'Regular', value: 'REGULAR' },
+            { label: 'Malo', value: 'MALO' }
+          ]
+        }
+      ],
+      filterValueGetter: (item) => `${item.meterCondition || ''} ${item.physicalState || ''}`,
       style: { width: '110px' }
     },
     {
@@ -248,7 +271,8 @@ const ReadingReportsContent: React.FC = () => {
           <span className="incident-type-text">{item.incidentTypeName}</span>
         </div>
       ),
-      id: 'categoryAndType'
+      id: 'categoryAndType',
+      filterValueGetter: (item) => `${item.categoryName || ''} ${item.incidentTypeName || ''}`
     },
     {
       header: 'UBICACIÓN',
@@ -276,7 +300,8 @@ const ReadingReportsContent: React.FC = () => {
           </div>
         </div>
       ),
-      id: 'location'
+      id: 'location',
+      filterValueGetter: (item) => `${item.referenceAddress || ''} ${item.latitude || ''} ${item.longitude || ''}`
     },
     {
       header: 'PRIORIDAD',
@@ -289,6 +314,15 @@ const ReadingReportsContent: React.FC = () => {
         />
       ),
       id: 'priority',
+      filterable: true,
+      filterKey: 'priority',
+      filterOptions: [
+        { label: 'Crítica', value: 'CRITICA' },
+        { label: 'Alta', value: 'ALTA' },
+        { label: 'Media', value: 'MEDIA' },
+        { label: 'Baja', value: 'BAJA' }
+      ],
+      filterValueGetter: (item) => item.suggestedPriority,
       style: { width: '100px' }
     },
     {
@@ -302,6 +336,15 @@ const ReadingReportsContent: React.FC = () => {
         />
       ),
       id: 'status',
+      filterable: true,
+      filterKey: 'status',
+      filterOptions: [
+        { label: 'Reportado', value: 'REPORTADO' },
+        { label: 'En Inspección', value: 'EN_INSPECCION' },
+        { label: 'Falso Reporte', value: 'FALSO_REPORTE' },
+        { label: 'Resuelto', value: 'RESUELTO' }
+      ],
+      filterValueGetter: (item) => item.status?.replace(/_/g, ' '),
       style: { width: '130px' }
     },
     {
@@ -312,6 +355,7 @@ const ReadingReportsContent: React.FC = () => {
         </span>
       ),
       id: 'reportDate',
+      filterValueGetter: (item) => ConverDate(item.reportDate),
       style: { width: '110px' }
     },
     {
@@ -367,6 +411,7 @@ const ReadingReportsContent: React.FC = () => {
 
       ),
       id: 'currentOrderState',
+      filterValueGetter: (item) => item.currentOrderState ? `${item.currentOrderState.replace(/_/g, ' ')} ${item.orderCode}` : 'Sin Orden de Trabajo',
       style: { width: '110px' }
     },
     {
@@ -574,6 +619,25 @@ const ReadingReportsContent: React.FC = () => {
             }
             pagination={true}
             pageSize={pageSize}
+            serverSidePagination={true}
+            totalRecords={vm.totalCount}
+            currentPage={vm.page}
+            onPageChange={vm.setPage}
+            onPageSizeChange={vm.setPageSize}
+            onFilterModelChange={(models) => {
+              const updates: Partial<IncidentsFilterState> = {};
+              const statusModel = models.find(m => m.columnField === 'status');
+              const priorityModel = models.find(m => m.columnField === 'priority');
+              const meterModel = models.find(m => m.columnField === 'meterCondition');
+              const physicalModel = models.find(m => m.columnField === 'physicalState');
+
+              updates.status = statusModel ? String(statusModel.value) : '';
+              updates.priority = priorityModel ? String(priorityModel.value) : '';
+              updates.meterCondition = meterModel ? String(meterModel.value) : '';
+              updates.physicalState = physicalModel ? String(physicalModel.value) : '';
+
+              vm.handleFilterChange(updates);
+            }}
             onEndReached={() => { }}
             hasMore={false}
             getRowColor={(item) => {
@@ -585,7 +649,7 @@ const ReadingReportsContent: React.FC = () => {
             }}
 
             contextMenuItems={(item: IncidentDetailRowResponse) => {
-              const items: any[] = [
+              const items: ContextMenuItem<IncidentDetailRowResponse>[] = [
                 {
                   label: 'Ver detalles del incidente',
                   icon: <Eye size={16} />,

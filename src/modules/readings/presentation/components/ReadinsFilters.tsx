@@ -16,7 +16,8 @@ export type ReadingDataTab =
   | 'completed'
   | 'estimated'
   | 'all'
-  | 'novelties';
+  | 'novelties'
+  | 'failed';
 
 // ── Filter visibility rules per tab (SRP / OCP) ──────────────────────────────
 const SHOW: Record<
@@ -39,6 +40,11 @@ const SHOW: Record<
     userId: true
   },
   estimated: {
+    month: true,
+    sector: true,
+    userId: true
+  },
+  failed: {
     month: true,
     sector: true,
     userId: true

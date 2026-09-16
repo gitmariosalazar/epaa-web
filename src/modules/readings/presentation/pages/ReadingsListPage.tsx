@@ -30,6 +30,7 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { useReadingsRealtimeSync } from '../hooks/useReadingsRealtimeSync';
 import { UpdateReadingWithImagesPage } from './UpdateReadingWithImagesPage';
+import { IoMdRefresh } from 'react-icons/io';
 
 interface ModalState {
   isOpen: boolean;
@@ -51,6 +52,11 @@ export const ReadingsListPage: React.FC = () => {
         id: 'completed',
         label: t('readings.tabs.completed'),
         icon: <CheckCircle size={16} />
+      },
+      {
+        id: 'failed',
+        label: t('readings.tabs.failed'),
+        icon: <BsExclamationCircleFill size={16} />
       },
       {
         id: 'estimated',
@@ -76,16 +82,25 @@ export const ReadingsListPage: React.FC = () => {
   const [userId, setUserId] = useState('');
   const [globalSearch, setGlobalSearch] = useState('');
 
-  const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
+  const [detailModalState, setDetailModalState] = useState<{
+    isOpen: boolean;
+    cadastralKey: string | null;
+    yearAndMonth: string | null;
+  }>({
     isOpen: false,
     cadastralKey: null,
-    yearAndMonth: null,
+    yearAndMonth: null
   });
 
   // Detail Modal State for Connection
-  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(null);
+  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(
+    null
+  );
 
-  const handleViewDetails = (cadastralKey: string, readingDate: Date | null) => {
+  const handleViewDetails = (
+    cadastralKey: string,
+    readingDate: Date | null
+  ) => {
     let yearAndMonth = month;
     if (readingDate) {
       const d = new Date(readingDate);
@@ -99,13 +114,13 @@ export const ReadingsListPage: React.FC = () => {
   const {
     pendingReadings,
     completedReadings,
+    failedReadings,
     estimatedReadings,
     isLoading,
     error,
     fetchReadings,
     clearAll
   } = useReadingsList();
-
 
   useEffect(() => {
     setSector('');
@@ -115,21 +130,36 @@ export const ReadingsListPage: React.FC = () => {
     clearAll();
   }, [activeTab]);
 
-  const filterData = <T extends { sector: number | string; cadastralKey?: string; clientName?: string; meterNumber?: string }>(list: T[]) => {
+  const filterData = <
+    T extends {
+      sector: number | string;
+      cadastralKey?: string;
+      clientName?: string;
+      meterNumber?: string;
+    }
+  >(
+    list: T[]
+  ) => {
     let filtered = list;
 
     // Filter by sector
     if (sector) {
-      filtered = filtered.filter((item) => String(item.sector).includes(sector));
+      filtered = filtered.filter((item) =>
+        String(item.sector).includes(sector)
+      );
     }
 
     // Filter by global search
     if (globalSearch) {
       const lowerSearch = globalSearch.toLowerCase();
-      filtered = filtered.filter((item) =>
-        (item.cadastralKey && String(item.cadastralKey).toLowerCase().includes(lowerSearch)) ||
-        (item.clientName && String(item.clientName).toLowerCase().includes(lowerSearch)) ||
-        (item.meterNumber && String(item.meterNumber).toLowerCase().includes(lowerSearch))
+      filtered = filtered.filter(
+        (item) =>
+          (item.cadastralKey &&
+            String(item.cadastralKey).toLowerCase().includes(lowerSearch)) ||
+          (item.clientName &&
+            String(item.clientName).toLowerCase().includes(lowerSearch)) ||
+          (item.meterNumber &&
+            String(item.meterNumber).toLowerCase().includes(lowerSearch))
       );
     }
 
@@ -143,6 +173,11 @@ export const ReadingsListPage: React.FC = () => {
   const filteredCompleted = useMemo(
     () => filterData(completedReadings),
     [completedReadings, sector, globalSearch]
+  );
+
+  const filteredFailed = useMemo(
+    () => filterData(failedReadings),
+    [failedReadings, sector, globalSearch]
   );
   const filteredEstimated = useMemo(
     () => filterData(estimatedReadings),
@@ -167,15 +202,13 @@ export const ReadingsListPage: React.FC = () => {
     setModalState(null);
   };
 
-
-
   // ── WebSockets: Actualización INSTANTÁNEA ────────────────────────────────
   useReadingsRealtimeSync({
     activeTab,
     month,
     sector,
     userId,
-    fetchReadings,
+    fetchReadings
   });
 
   const handleModalSuccess = () => {
@@ -218,7 +251,9 @@ export const ReadingsListPage: React.FC = () => {
           onSectorChange={setSector}
           userId={userId}
           onUserIdChange={setUserId}
-          onFetch={() => fetchReadings(activeTab as any, month, sector, userId, date)}
+          onFetch={() =>
+            fetchReadings(activeTab as any, month, sector, userId, date)
+          }
           isLoading={isLoading}
           search={globalSearch}
           onSearchChange={setGlobalSearch}
@@ -227,10 +262,20 @@ export const ReadingsListPage: React.FC = () => {
     >
       {error ? (
         <EmptyState
-          message='No se pudieron cargar las lecturas'
-          description='Intenta de nuevo más tarde.'
-          variant='error'
-          actionButton={<Button title='Reintentar' onClick={() => fetchReadings(activeTab as any, month, sector, userId, date)} />}
+          message="No se pudieron cargar las lecturas"
+          description="Intenta de nuevo más tarde."
+          variant="error"
+          actionButton={
+            <Button
+              title="Reintentar"
+              onClick={() =>
+                fetchReadings(activeTab as any, month, sector, userId, date)
+              }
+              leftIcon={<IoMdRefresh />}
+            >
+              Reintentar
+            </Button>
+          }
           icon={<BsExclamationCircleFill />}
         />
       ) : (
@@ -247,6 +292,16 @@ export const ReadingsListPage: React.FC = () => {
           {activeTab === 'completed' && (
             <CompletedReadingConnectionTable
               data={filteredCompleted}
+              isLoading={isLoading}
+              onAction={handleTableAction}
+              onViewDetails={handleViewDetails}
+              onViewConnectionDetails={(key) => setDetailCadastralKey(key)}
+            />
+          )}
+
+          {activeTab === 'failed' && (
+            <CompletedReadingConnectionTable
+              data={filteredFailed}
               isLoading={isLoading}
               onAction={handleTableAction}
               onViewDetails={handleViewDetails}
@@ -306,7 +361,9 @@ export const ReadingsListPage: React.FC = () => {
 
       <ReadingDetailModal
         isOpen={detailModalState.isOpen}
-        onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+        onClose={() =>
+          setDetailModalState((prev) => ({ ...prev, isOpen: false }))
+        }
         cadastralKey={detailModalState.cadastralKey}
         yearAndMonth={detailModalState.yearAndMonth}
       />

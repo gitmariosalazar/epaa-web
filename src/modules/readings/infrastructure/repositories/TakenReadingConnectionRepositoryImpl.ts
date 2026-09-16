@@ -15,17 +15,19 @@ export class TakenReadingConnectionRepositoryImpl implements TakenReadingConnect
     dateMonth: string,
     sector?: number,
     userId?: string,
-    date?: string
+    date?: string,
+    failed?: boolean
   ): Promise<TakenReadingConnection[]> {
     let path = `/Readings/get-taken-readings-by-month/${dateMonth}`;
     if (sector !== undefined) {
       path += `/${sector}`;
     }
-    
+
     const params = new URLSearchParams();
     if (userId) params.append('userId', userId);
     if (date) params.append('date', date);
-    
+    if (failed) params.append('failed', failed.toString());
+
     const queryString = params.toString();
     if (queryString) {
       path += `?${queryString}`;

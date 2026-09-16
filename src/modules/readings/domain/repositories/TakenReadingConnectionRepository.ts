@@ -5,7 +5,8 @@ export interface TakenReadingConnectionRepository {
     dateMonth: string,
     sector?: number,
     userId?: string,
-    date?: string
+    date?: string,
+    failed?: boolean
   ): Promise<TakenReadingConnection[]>;
 
   getTakenReadingEstimatesOrAverage(

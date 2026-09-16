@@ -27,6 +27,14 @@ import { applyTableFilters } from './utils/filterUtils';
 import { TableFilterModal } from './TableFilterModal';
 import { TableSortModal } from './TableSortModal';
 import { TableContextMenu, type ContextMenuItem } from './TableContextMenu';
+import { TableColumnFilter } from './TableColumnFilter';
+import type { SearchableSelectOption } from '../Input/SearchableSelect';
+
+export interface FilterConfig {
+  key: string;
+  label?: string;
+  options: SearchableSelectOption[];
+}
 
 export type { ContextMenuItem };
 
@@ -42,6 +50,10 @@ export interface Column<T> {
   id?: string;
   isColumnVisible?: boolean;
   filterValueGetter?: (item: T) => any;
+  filterable?: boolean;
+  filterOptions?: SearchableSelectOption[];
+  filterKey?: string;
+  filterConfigs?: FilterConfig[];
 }
 
 export interface SummaryRow {
@@ -94,6 +106,7 @@ interface TableProps<T> {
   totalRecords?: number;
   currentPage?: number;
   onPageChange?: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
   contextMenuItems?: ContextMenuItem<T>[] | ((item: T) => ContextMenuItem<T>[]);
 }
 
@@ -130,6 +143,7 @@ export const Table = <T extends { [key: string]: any }>({
   totalRecords = 0,
   currentPage: externalCurrentPage,
   onPageChange,
+  onPageSizeChange,
   contextMenuItems
 }: TableProps<T>) => {
   const { t } = useTranslation();
@@ -315,6 +329,9 @@ export const Table = <T extends { [key: string]: any }>({
                   (typeof col.accessor === 'string' ? col.accessor : undefined);
                 const isSorted = sortConfig?.key === sortKey;
 
+                const filterKeyRaw = col.filterKey || sortKey || col.id || (typeof col.accessor === 'string' ? col.accessor : undefined);
+                const filterKeyStr = filterKeyRaw ? String(filterKeyRaw) : '';
+
                 return (
                   <th
                     key={index}
@@ -351,6 +368,36 @@ export const Table = <T extends { [key: string]: any }>({
                             <ArrowUpDown size={14} strokeWidth={2} />
                           )}
                         </span>
+                      )}
+                      
+                      {(col.filterable && (filterKeyStr || col.filterConfigs)) && (
+                        <TableColumnFilter
+                          options={col.filterOptions}
+                          configs={col.filterConfigs}
+                          filterKeyStr={filterKeyStr}
+                          activeFilters={filters}
+                          onChange={(changedKey, value) => {
+                            let newFilters = [...filters];
+                            if (value) {
+                              // Add or update filter
+                              const existingIndex = newFilters.findIndex(f => f.columnField === changedKey);
+                              if (existingIndex >= 0) {
+                                newFilters[existingIndex] = { ...newFilters[existingIndex], value };
+                              } else {
+                                newFilters.push({
+                                  id: `filter-${changedKey}-${Date.now()}`,
+                                  columnField: changedKey,
+                                  operatorValue: 'equals',
+                                  value
+                                });
+                              }
+                            } else {
+                              // Remove filter
+                              newFilters = newFilters.filter(f => f.columnField !== changedKey);
+                            }
+                            handleFilterChange(newFilters);
+                          }}
+                        />
                       )}
                     </div>
                   </th>
@@ -709,7 +756,11 @@ export const Table = <T extends { [key: string]: any }>({
                   <Select
                     value={currentLimit}
                     onChange={(e) => {
-                      setCurrentLimit(Number(e.target.value));
+                      const newSize = Number(e.target.value);
+                      setCurrentLimit(newSize);
+                      if (onPageSizeChange) {
+                        onPageSizeChange(newSize);
+                      }
                       setCurrentPage(1);
                     }}
                     size="small"

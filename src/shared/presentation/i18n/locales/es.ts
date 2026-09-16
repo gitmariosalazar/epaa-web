@@ -250,7 +250,8 @@ export const es = {
       tabs: {
         pending: 'Lecturas Pendientes',
         completed: 'Lecturas Tomadas',
-        estimated: 'Tomadas (Estimadas)',
+        estimated: 'Lecturas Tomadas (Estimadas)',
+        failed: 'Lecturas con Posibles Defectos',
         all: 'Todas'
       },
       columns: {
