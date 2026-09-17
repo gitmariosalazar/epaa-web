@@ -220,6 +220,17 @@ export const ReadingsListPage: React.FC = () => {
     fetchReadings(activeTab as any, month, sector, userId, date);
   };
 
+  const handleManualFetch = () => {
+    setIsManualSync(true);
+    fetchReadings(activeTab as any, month, sector, userId, date);
+  };
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsManualSync(false);
+    }
+  }, [isLoading]);
+
   if (activeTab === 'novelties') {
     return (
       <ReadingsNoveltyTabView
@@ -233,17 +244,6 @@ export const ReadingsListPage: React.FC = () => {
       />
     );
   }
-
-  const handleManualFetch = () => {
-    setIsManualSync(true);
-    fetchReadings(activeTab as any, month, sector, userId, date);
-  };
-
-  useEffect(() => {
-    if (!isLoading) {
-      setIsManualSync(false);
-    }
-  }, [isLoading]);
 
   return (
     <PageLayout

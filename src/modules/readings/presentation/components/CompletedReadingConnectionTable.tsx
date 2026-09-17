@@ -11,7 +11,7 @@ import { dateService } from '@/shared/infrastructure/services/EcuadorDateService
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { FileText, MapPin } from 'lucide-react';
 import { FaEdit, FaCheckCircle, FaHome } from 'react-icons/fa';
-import { MdMyLocation } from 'react-icons/md';
+import { MdCable, MdMyLocation } from 'react-icons/md';
 import { IoIosCloseCircle } from 'react-icons/io';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.colors';
@@ -19,7 +19,7 @@ import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { FaLocationCrosshairs } from 'react-icons/fa6';
 import { ReadingLocationModal } from './draw-map/ReadingLocationModal';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { IoInformationCircleOutline } from 'react-icons/io5';
+import { IoInformationCircleOutline, IoSpeedometerSharp } from 'react-icons/io5';
 import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
 import { BsSpeedometer } from 'react-icons/bs';
 import { ReadingAdjustmentHistoryPopover } from './ReadingAdjustmentHistoryPopover';
@@ -373,6 +373,24 @@ export const CompletedReadingConnectionTable: React.FC<PropTypes> = ({
       <Table<TakenReadingConnection>
         data={data}
         columns={columns}
+        contextMenuHeader={(row) => (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Tooltip
+              content={<> Clave Catastral: {row.cadastralKey} </>}
+              followCursor={false}
+              themeColor='cyan'
+            >
+              <ColorChip color='cyan' label={row.cadastralKey} size='xs' variant='soft' icon={<MdCable />} borderRadius={8} />
+            </Tooltip>
+            <Tooltip
+              content={<> Número de Medidor: {row.meterNumber} </>}
+              followCursor={false}
+              themeColor='green'
+            >
+              <ColorChip color='green' label={row.meterNumber} size='xs' variant='soft' icon={<IoSpeedometerSharp />} borderRadius={8} />
+            </Tooltip>
+          </div>
+        )}
         contextMenuItems={() => [
           {
             label: 'Ver Detalles de la Acometida',

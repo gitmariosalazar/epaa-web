@@ -108,6 +108,7 @@ interface TableProps<T> {
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
   contextMenuItems?: ContextMenuItem<T>[] | ((item: T) => ContextMenuItem<T>[]);
+  contextMenuHeader?: React.ReactNode | ((item: T) => React.ReactNode);
 }
 
 export const Table = <T extends { [key: string]: any }>({
@@ -144,7 +145,8 @@ export const Table = <T extends { [key: string]: any }>({
   currentPage: externalCurrentPage,
   onPageChange,
   onPageSizeChange,
-  contextMenuItems
+  contextMenuItems,
+  contextMenuHeader
 }: TableProps<T>) => {
   const { t } = useTranslation();
   const [localCurrentPage, setLocalCurrentPage] = React.useState(1);
@@ -1083,6 +1085,9 @@ export const Table = <T extends { [key: string]: any }>({
           menuItems={typeof contextMenuItems === 'function' && contextMenuState.item 
             ? contextMenuItems(contextMenuState.item) 
             : (contextMenuItems as ContextMenuItem<T>[])}
+          header={typeof contextMenuHeader === 'function' && contextMenuState.item
+            ? contextMenuHeader(contextMenuState.item)
+            : (contextMenuHeader as React.ReactNode)}
           onClose={() => setContextMenuState(prev => ({ ...prev, isOpen: false }))}
         />
       )}

@@ -18,21 +18,22 @@ interface TableContextMenuProps<T> {
   item: T | null;
   menuItems: ContextMenuItem<T>[];
   onClose: () => void;
+  header?: React.ReactNode;
 }
 
-export function TableContextMenu<T>({ isOpen, x, y, item, menuItems, onClose }: TableContextMenuProps<T>) {
+export function TableContextMenu<T>({ isOpen, x, y, item, menuItems, onClose, header }: TableContextMenuProps<T>) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ top: y, left: x });
 
   useEffect(() => {
     if (!isOpen) return;
-    
+
     // Adjust position if it overflows the window
     if (menuRef.current) {
       const rect = menuRef.current.getBoundingClientRect();
       let newTop = y;
       let newLeft = x;
-      
+
       if (x + rect.width > window.innerWidth) {
         newLeft = window.innerWidth - rect.width - 10;
       }
@@ -45,13 +46,13 @@ export function TableContextMenu<T>({ isOpen, x, y, item, menuItems, onClose }: 
 
   useEffect(() => {
     if (!isOpen) return;
-    
+
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         onClose();
       }
     };
-    
+
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
     };
@@ -61,7 +62,7 @@ export function TableContextMenu<T>({ isOpen, x, y, item, menuItems, onClose }: 
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleEscape);
     }, 0);
-    
+
     return () => {
       clearTimeout(timeoutId);
       document.removeEventListener('mousedown', handleClickOutside);
@@ -72,23 +73,28 @@ export function TableContextMenu<T>({ isOpen, x, y, item, menuItems, onClose }: 
   if (!isOpen || !item) return null;
 
   const content = (
-    <div 
-      className="table-context-menu" 
-      style={{ top: position.top, left: position.left }} 
-      ref={menuRef} 
+    <div
+      className="table-context-menu"
+      style={{ top: position.top, left: position.left }}
+      ref={menuRef}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
       }}
     >
+      {header && (
+        <div className='table-context-menu__header'>
+          {header}
+        </div>
+      )}
       {menuItems.map((menuItem, index) => {
         if (menuItem.divider) {
           return <div key={`divider-${index}`} className="table-context-menu-divider" />;
         }
-        
+
         const isDisabled = typeof menuItem.disabled === 'function' ? menuItem.disabled(item) : menuItem.disabled;
         const colorClass = menuItem.color && menuItem.color !== 'default' ? `table-context-menu-item--${menuItem.color}` : '';
-        
+
         return (
           <button
             key={index}

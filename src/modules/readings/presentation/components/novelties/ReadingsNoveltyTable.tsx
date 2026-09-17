@@ -18,8 +18,9 @@ import { ConnectionProvider } from '@/modules/connections/presentation/context/C
 import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
 import { useTranslation } from 'react-i18next';
 import { FaEdit } from 'react-icons/fa';
-import { IoInformationCircleOutline } from 'react-icons/io5';
+import { IoInformationCircleOutline, IoSpeedometerSharp } from 'react-icons/io5';
 import { TbChartPieFilled } from 'react-icons/tb';
+import { MdCable } from 'react-icons/md';
 
 interface ReadingsNoveltyTableProps {
   data: ReadingNovelty[];
@@ -472,6 +473,24 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
             variant="info"
           />
         }
+        contextMenuHeader={(row) => (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Tooltip
+              content={<> Clave Catastral: {row.cadastralKey} </>}
+              followCursor={false}
+              themeColor='cyan'
+            >
+              <ColorChip color='cyan' label={row.cadastralKey} size='xs' variant='soft' icon={<MdCable />} borderRadius={8} />
+            </Tooltip>
+            <Tooltip
+              content={<> Número de Medidor: {row.meterNumber} </>}
+              followCursor={false}
+              themeColor='green'
+            >
+              <ColorChip color='green' label={row.meterNumber} size='xs' variant='soft' icon={<IoSpeedometerSharp />} borderRadius={8} />
+            </Tooltip>
+          </div>
+        )}
         contextMenuItems={(row) => [
           {
             label: t('readingsNovelty.viewDetails', 'Ver Información de la Acometida'),

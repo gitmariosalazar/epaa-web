@@ -13,6 +13,15 @@
   animation: contextMenuFadeIn 0.15s ease-out forwards;
 }
 
+.table-context-menu__header {
+  padding: 5px 10px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--background);
+}
+
 @keyframes contextMenuFadeIn {
   from {
     opacity: 0;
@@ -37,7 +46,9 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--text-main);
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .table-context-menu-item:hover:not(:disabled) {
@@ -74,7 +85,8 @@
 .table-context-menu-item--danger .table-context-menu-item-icon {
   color: var(--danger);
 }
-.table-context-menu-item--danger:hover:not(:disabled) .table-context-menu-item-icon {
+.table-context-menu-item--danger:hover:not(:disabled)
+  .table-context-menu-item-icon {
   color: var(--danger);
 }
 
@@ -88,7 +100,8 @@
 .table-context-menu-item--warning .table-context-menu-item-icon {
   color: var(--warning);
 }
-.table-context-menu-item--warning:hover:not(:disabled) .table-context-menu-item-icon {
+.table-context-menu-item--warning:hover:not(:disabled)
+  .table-context-menu-item-icon {
   color: var(--warning);
 }
 
@@ -102,7 +115,8 @@
 .table-context-menu-item--success .table-context-menu-item-icon {
   color: var(--success);
 }
-.table-context-menu-item--success:hover:not(:disabled) .table-context-menu-item-icon {
+.table-context-menu-item--success:hover:not(:disabled)
+  .table-context-menu-item-icon {
   color: var(--success);
 }
 
@@ -116,7 +130,8 @@
 .table-context-menu-item--info .table-context-menu-item-icon {
   color: var(--accent);
 }
-.table-context-menu-item--info:hover:not(:disabled) .table-context-menu-item-icon {
+.table-context-menu-item--info:hover:not(:disabled)
+  .table-context-menu-item-icon {
   color: var(--accent);
 }
 
@@ -130,7 +145,8 @@
 .table-context-menu-item--primary .table-context-menu-item-icon {
   color: var(--text-secondary);
 }
-.table-context-menu-item--primary:hover:not(:disabled) .table-context-menu-item-icon {
+.table-context-menu-item--primary:hover:not(:disabled)
+  .table-context-menu-item-icon {
   color: var(--text-main);
 }
 
@@ -144,7 +160,8 @@
 .table-context-menu-item--secondary .table-context-menu-item-icon {
   color: var(--text-muted);
 }
-.table-context-menu-item--secondary:hover:not(:disabled) .table-context-menu-item-icon {
+.table-context-menu-item--secondary:hover:not(:disabled)
+  .table-context-menu-item-icon {
   color: var(--text-main);
 }
 
@@ -158,7 +175,8 @@
 .table-context-menu-item--accent .table-context-menu-item-icon {
   color: var(--accent);
 }
-.table-context-menu-item--accent:hover:not(:disabled) .table-context-menu-item-icon {
+.table-context-menu-item--accent:hover:not(:disabled)
+  .table-context-menu-item-icon {
   color: var(--accent-hover);
 }
 
@@ -172,7 +190,8 @@
 .table-context-menu-item--purple .table-context-menu-item-icon {
   color: var(--purple, #8b5cf6);
 }
-.table-context-menu-item--purple:hover:not(:disabled) .table-context-menu-item-icon {
+.table-context-menu-item--purple:hover:not(:disabled)
+  .table-context-menu-item-icon {
   color: var(--purple, #8b5cf6);
 }
 
@@ -186,7 +205,8 @@
 .table-context-menu-item--pink .table-context-menu-item-icon {
   color: var(--pink, #ec4899);
 }
-.table-context-menu-item--pink:hover:not(:disabled) .table-context-menu-item-icon {
+.table-context-menu-item--pink:hover:not(:disabled)
+  .table-context-menu-item-icon {
   color: var(--pink, #ec4899);
 }
 
@@ -200,7 +220,8 @@
 .table-context-menu-item--orange .table-context-menu-item-icon {
   color: var(--orange, #f97316);
 }
-.table-context-menu-item--orange:hover:not(:disabled) .table-context-menu-item-icon {
+.table-context-menu-item--orange:hover:not(:disabled)
+  .table-context-menu-item-icon {
   color: var(--orange, #f97316);
 }
 
@@ -214,7 +235,8 @@
 .table-context-menu-item--cyan .table-context-menu-item-icon {
   color: #06b6d4;
 }
-.table-context-menu-item--cyan:hover:not(:disabled) .table-context-menu-item-icon {
+.table-context-menu-item--cyan:hover:not(:disabled)
+  .table-context-menu-item-icon {
   color: #06b6d4;
 }
 

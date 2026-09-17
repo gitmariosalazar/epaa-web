@@ -28,6 +28,7 @@ import { ConnectionDetailModal } from '@/modules/connections/presentation/compon
 import { UpdateSpecialReadingWithImagesPage } from './UpdateSpecialReadingWithImagesPage';
 import { BsExclamationCircleFill } from 'react-icons/bs';
 import { useReadingImagesRealtimeSync } from '../hooks/useReadingImagesRealtimeSync';
+import { MdCable, MdOutlineKey } from 'react-icons/md';
 
 
 interface ReadingImagesPageProps {
@@ -254,6 +255,24 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
             isLoading={isLoading}
             pagination
             pageSize={15}
+            contextMenuHeader={(row) => (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Tooltip
+                  content={<> Clave Catastral: {row.cadastralKey} </>}
+                  followCursor={false}
+                  themeColor='cyan'
+                >
+                  <ColorChip color='cyan' label={row.cadastralKey} size='xs' variant='soft' icon={<MdCable />} borderRadius={8} />
+                </Tooltip>
+                <Tooltip
+                  content={<> Lectura ID: {row.readingId} </>}
+                  themeColor='green'
+                  followCursor={false}
+                >
+                  <ColorChip color='green' label={row.readingId} size='xs' variant='soft' icon={<MdOutlineKey />} borderRadius={8} />
+                </Tooltip>
+              </div>
+            )}
             contextMenuItems={() => [
               {
                 label: 'Ver Detalles de la Acometida',
