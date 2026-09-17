@@ -6,7 +6,7 @@ import '../styles/UpdateReadingWithImagesPage.css';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { PopoverModal } from '@/shared/presentation/components/PopoverModal';
 import { ReadingInfoPopoverContent } from '../components/ReadingInfoPopoverContent';
-import { FaList, FaCamera, FaEdit } from 'react-icons/fa';
+import { FaList, FaCamera, FaEdit, FaClipboardList } from 'react-icons/fa';
 import { Tabs, TabPanel } from '@/shared/presentation/components/Tabs/Tabs';
 import { ReadingDetailTabContent } from '../components/ReadingDetailTabContent';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
@@ -178,7 +178,25 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
                   />
                 </div>
               )}
+              <div className="reading-detail-section">
+                <h4>
+                  <FaClipboardList /> {'Observaciones / Notas'}
+                </h4>
+                {readingDetailed?.observations && readingDetailed?.observations.length > 0 ? (
+                  <div className="reading-detail-observations">
+                    {readingDetailed?.observations.map((obs) => (
+                      <div key={obs.id} className="reading-detail-obs-card">
+                        <h5>{obs.title}</h5>
+                        <p>{obs.observation}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="reading-detail-empty">No hay observaciones adicionales.</span>
+                )}
+              </div>
               <div className="urw-image-footer">
+
                 <div className="urw-footer-grid">
                   {/*Botones de accnoes abrir popovers con la informacion de la lectura*/}
 
@@ -244,7 +262,7 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
                 </div>
                 <div className='urw-footer-actions-right'>
                   <Tooltip
-                    content={'Actualizar Número de medidor'}
+                    content={'Actualizar Número de medidor1'}
                     followCursor={false}
                   >
                     <Button
