@@ -67,10 +67,11 @@ export type RowColor = 'success' | 'warning' | 'error' | 'info' | 'neutral';
 
 interface TotalRow {
   label: string;
-  value: string | number;
+  value: string | number | React.ReactNode;
   highlight?: boolean;
   percentage?: string;
   columnId?: string;
+  color?: string;
 }
 
 interface TableProps<T> {
@@ -611,7 +612,8 @@ export const Table = <T extends { [key: string]: any }>({
                       style={{
                         ...col.style,
                         textAlign: colIndex === 0 ? 'left' : 'right',
-                        fontWeight: 'bold'
+                        fontWeight: 'bold',
+                        color: matchingTotal?.color ? `var(--palette-${matchingTotal.color}, var(--${matchingTotal.color}, ${matchingTotal.color}))` : undefined
                       }}
                     >
                       {totalContent}

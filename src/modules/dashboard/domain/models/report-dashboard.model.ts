@@ -101,6 +101,7 @@ export interface SectorStatsReport {
   averageSewerRate: number;
   averageConsumption: number;
   activeDays: number;
+  totalConsumption?: number;
 }
 
 export interface NoveltyStatsReport {

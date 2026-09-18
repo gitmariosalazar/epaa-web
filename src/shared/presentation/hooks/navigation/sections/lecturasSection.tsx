@@ -1,4 +1,4 @@
-import { TbClock24, TbPhotoSearch } from 'react-icons/tb';
+import { TbClock24, TbFileAnalyticsFilled, TbPhotoSearch } from 'react-icons/tb';
 import { MdAssignmentAdd, MdReport, MdAdminPanelSettings, MdOutlineContentPasteSearch } from 'react-icons/md';
 import { TiThList } from 'react-icons/ti';
 import { FaEdit } from 'react-icons/fa';
@@ -14,6 +14,11 @@ export const getLecturasSection = (): NavSection => ({
       icon: <TbClock24 size={20} />,
       label: 'Lecturas',
       subItems: [
+        {
+          icon: <TbFileAnalyticsFilled size={18} />,
+          label: 'Resumen Operativo',
+          to: '/readings/dashboard'
+        },
         {
           icon: <RiListCheck3 size={18} />,
           label: 'Gestión',

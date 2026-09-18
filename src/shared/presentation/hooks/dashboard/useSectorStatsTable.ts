@@ -10,9 +10,16 @@ export const useSectorStatsTable = ({ data }: UseSectorStatsTableProps) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredData = useMemo(() => {
-    return data.filter((row) =>
-      row.sector.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return data
+      .filter((row) =>
+        row.sector.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .map((row) => ({
+        ...row,
+        totalConsumption:
+          row.totalConsumption ??
+          Number(row.averageConsumption) * Number(row.readingsCount)
+      }));
   }, [data, searchTerm]);
 
   const { sortedData, sortConfig, requestSort } = useTableSort(filteredData);

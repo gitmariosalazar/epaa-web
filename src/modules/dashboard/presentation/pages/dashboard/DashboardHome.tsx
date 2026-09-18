@@ -136,7 +136,7 @@ export const DashboardHome = () => {
                   title={t('dashboard.sectorStats.title', 'Sector Analysis')}
                   className="h-full"
                 >
-                  <SectorStatsTable data={sectorStats} loading={false} />
+                  <SectorStatsTable data={sectorStats} loading={false} currentMonth={currentMonth} />
                 </DashboardWidgetWrapper>
               </div>
             </div>

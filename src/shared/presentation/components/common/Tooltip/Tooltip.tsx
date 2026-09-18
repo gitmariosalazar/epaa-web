@@ -267,6 +267,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         onMouseLeave?.(e);
       }}
       onClick={(e: React.MouseEvent) => {
+        setIsVisible(false);
         onClick?.(e);
       }}
     >

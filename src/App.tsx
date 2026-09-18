@@ -98,6 +98,7 @@ import { ReadingsWithErrors } from './modules/readings/presentation/pages/Readin
 import { RequireElevatedToken } from './modules/auth/presentation/components/RequireElevatedToken';
 import { UpdateSpecialReadingPage } from './modules/readings/presentation/pages/UpdateSpecialReadingPage';
 import { ReadingsReconciliationPage } from './modules/readings/presentation/pages';
+import { ReadingsDashboardPage } from './modules/readings/presentation/pages/ReadingsDashboardPage';
 
 const ProtectedRoute = () => {
   const { token, user, isLoading, isVerifying, logout } = useAuth();
@@ -341,6 +342,7 @@ function App() {
                           <Route path="update" element={<UpdateReadingPage />} />
                           <Route path="audit" element={<ReadingAuditPage />} />
                           <Route path="report" element={<ReadingReports />} />
+                          <Route path="dashboard" element={<ReadingsDashboardPage />} />
                           <Route
                             path="report-errors"
                             element={

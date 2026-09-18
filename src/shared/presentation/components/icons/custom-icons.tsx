@@ -152,3 +152,4 @@ export const IconUnauthorized = ({ size = 18 }: { size?: number }) => (
     iconColorBorderHover="var(--error)"
   />
 );
+

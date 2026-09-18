@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
 import type { SectorStatsReport } from '@/modules/dashboard/domain/models/report-dashboard.model';
@@ -11,14 +12,21 @@ import { IoInformationCircleOutline } from 'react-icons/io5';
 
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { Input } from '@/shared/presentation/components/Input/Input';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import { FaChartBar } from 'react-icons/fa';
+import { Modal } from '@/shared/presentation/components/Modal/Modal';
+import { ReadingsDashboardPage } from '@/modules/readings/presentation/pages/ReadingsDashboardPage';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 interface SectorStatsProps {
   data: SectorStatsReport[];
   loading: boolean;
+  currentMonth?: string;
 }
 
-export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
+export const SectorStatsTable = ({ data, loading, currentMonth }: SectorStatsProps) => {
   const { t } = useTranslation();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const {
     searchTerm,
@@ -78,6 +86,20 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
       sortKey: 'averageConsumption'
     },
     {
+      header: t('dashboard.sectorStats.columns.totalConsumption', 'Consumo Total'),
+      accessor: (row) => `${Number(row.totalConsumption).toFixed(2)} m³`,
+      className: 'text-right',
+      sortable: true,
+      sortKey: 'totalConsumption'
+    },
+    {
+      header: t('dashboard.sectorStats.columns.totalIncome', 'Ingreso Total'),
+      accessor: (row) => `$${Number(row.totalReadingValue).toFixed(2)}`,
+      className: 'text-right',
+      sortable: true,
+      sortKey: 'totalReadingValue'
+    },
+    {
       header: t('dashboard.sectorStats.columns.activeDays'),
       accessor: 'activeDays',
       className: 'text-right',
@@ -101,6 +123,16 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
     0
   );
 
+  const totalConsumptionSum = sortedData.reduce(
+    (total, row) => total + Number(row.totalConsumption || 0),
+    0
+  );
+
+  const totalReadingValueSum = sortedData.reduce(
+    (total, row) => total + Number(row.totalReadingValue || 0),
+    0
+  );
+
   const totalRows = [
     {
       label: t('dashboard.sectorStats.totals.readings'),
@@ -109,6 +141,14 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
     {
       label: t('dashboard.sectorStats.totals.averageConsumption'),
       value: `${totalAverageConsumption.toFixed(2)} m³`
+    },
+    {
+      label: t('dashboard.sectorStats.totals.totalConsumption', 'Consumo Total'),
+      value: `${totalConsumptionSum.toFixed(2)} m³`
+    },
+    {
+      label: t('dashboard.sectorStats.totals.totalIncome', 'Ingreso Total'),
+      value: `$${totalReadingValueSum.toFixed(2)}`
     },
     {
       label: t('dashboard.sectorStats.totals.activeDays'),
@@ -136,7 +176,18 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
         }}
       >
         <h3>{t('dashboard.sectorStats.title')}</h3>
-        <div style={{ position: 'relative', maxWidth: '150px' }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+          <Tooltip content={t('dashboard.sectorStats.title1', 'Ir a la sección de estadísticas del sector')} position="top"
+            followCursor={false} themeColor='amber'
+          >
+            <Button size="xs" leftIcon={<FaChartBar size={16} />}
+              onClick={() => setIsModalOpen(true)}
+              iconOnly
+              circle
+              color='amber'
+            >
+            </Button>
+          </Tooltip>
           <Input
             type="text"
             placeholder={t('dashboard.sectorStats.searchPlaceholder')}
@@ -174,6 +225,17 @@ export const SectorStatsTable = ({ data, loading }: SectorStatsProps) => {
           />
         }
       />
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={t('dashboard.sectorStats.title', 'Estadísticas del Sector')}
+        size="full"
+      >
+        <div style={{ height: '100%', width: '100%' }}>
+          {isModalOpen && <ReadingsDashboardPage initialMonth={currentMonth} isModal={true} />}
+        </div>
+      </Modal>
     </div>
   );
 };
