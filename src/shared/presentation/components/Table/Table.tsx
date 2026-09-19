@@ -756,26 +756,24 @@ export const Table = <T extends { [key: string]: any }>({
                     defaultValue: 'Mostrar:'
                   })}
                 </span>
-                <Tooltip content={t('common.table.rowsPerPage', 'Mostrar:')} followCursor={false}>
-                  <Select
-                    value={currentLimit}
-                    onChange={(e) => {
-                      const newSize = Number(e.target.value);
-                      setCurrentLimit(newSize);
-                      if (onPageSizeChange) {
-                        onPageSizeChange(newSize);
-                      }
-                      setCurrentPage(1);
-                    }}
-                    size="small"
-                  >
-                    {[5, 10, 15, 20, 50, 100].map((val) => (
-                      <option key={val} value={val}>
-                        {val}
-                      </option>
-                    ))}
-                  </Select>
-                </Tooltip>
+                <Select
+                  value={currentLimit}
+                  onChange={(e) => {
+                    const newSize = Number(e.target.value);
+                    setCurrentLimit(newSize);
+                    if (onPageSizeChange) {
+                      onPageSizeChange(newSize);
+                    }
+                    setCurrentPage(1);
+                  }}
+                  size="small"
+                >
+                  {[5, 10, 15, 20, 50, 100].map((val) => (
+                    <option key={val} value={val}>
+                      {val}
+                    </option>
+                  ))}
+                </Select>
               </div>
             )}
           </div>

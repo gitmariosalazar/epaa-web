@@ -1,4 +1,7 @@
-import type { DashboardKpiResponse } from '../../domain/models/reading-kpi';
+import type {
+  DashboardKpiAnnualSqlResponse,
+  DashboardKpiResponse
+} from '../../domain/models/reading-kpi';
 import type { GetDashboardKpisByPeriodRepository } from '../../domain/repositories/GetDashboardKpisByPeriodRepository';
 
 export class GetDashboardKpisByPeriodUseCase {
@@ -16,5 +19,9 @@ export class GetDashboardKpisByPeriodUseCase {
       year,
       month
     );
+  }
+
+  async executeByYear(year: number): Promise<DashboardKpiAnnualSqlResponse[]> {
+    return this.getDashboardKpisByPeriodRepository.getDashboardKpisByYear(year);
   }
 }

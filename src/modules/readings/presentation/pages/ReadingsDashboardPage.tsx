@@ -8,6 +8,7 @@ import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePick
 import { Select } from '@/shared/presentation/components/Input/Select';
 
 import { DashboardKpisByPeriodTab } from '../components/reconciliation/DashboardKpisByPeriodTab';
+import { DashboardKpisByYearTab } from '../components/reconciliation/DashboardKpisByYearTab';
 import '../styles/ReadingsReconciliation.css';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
@@ -25,13 +26,13 @@ const ReadingsReconciliationContent: React.FC<ReadingsReconciliationContentProps
 
   const READINGS_DASHBOARD_TABS: TabItem<ReadingsDashboardTab>[] = useMemo(() => [
     {
-      id: 'dashboard-kpis',
-      label: t('readings.reconciliation.tabDashboardKpis', 'Dashboard KPIs'),
+      id: 'dashboard-kpi-month',
+      label: t('readings.reconciliation.tabDashboardKpis', 'Dashboard KPIs Mensual'),
       icon: <BarChart2 size={16} />
     },
     {
-      id: 'basic-summary',
-      label: t('readings.reconciliation.tabSummary', 'Resumen Estadístico'),
+      id: 'dashboard-kpi-year',
+      label: t('readings.reconciliation.tabSummary', 'Dashboard KPIs Anual'),
       icon: <BarChart2 size={16} />
     },
   ], [t]);
@@ -46,12 +47,20 @@ const ReadingsReconciliationContent: React.FC<ReadingsReconciliationContentProps
 
   const renderContent = () => {
     switch (vm.activeTab) {
-      case 'dashboard-kpis':
+      case 'dashboard-kpi-month':
         return (
           <DashboardKpisByPeriodTab
             data={vm.dashboardKpisData}
             isLoading={vm.isLoading}
             onRefresh={vm.fetchDashboardKpis}
+          />
+        );
+      case 'dashboard-kpi-year':
+        return (
+          <DashboardKpisByYearTab
+            data={vm.dashboardKpisAnnualData}
+            isLoading={vm.isLoading}
+            onRefresh={vm.fetchDashboardKpisAnnual}
           />
         );
       default:
@@ -75,11 +84,13 @@ const ReadingsReconciliationContent: React.FC<ReadingsReconciliationContentProps
         <div className="reconciliation-filters" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '1rem', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: 'var(--font-size-md)' }}>
-              {vm.activeTab === 'dashboard-kpis' ? 'Dashboard de KPIs por Periodo' :
+              {vm.activeTab === 'dashboard-kpi-month' ? 'Dashboard de KPIs por Periodo' :
+                vm.activeTab === 'dashboard-kpi-year' ? 'Dashboard de KPIs Anual' :
                 'Resumen Estadístico del Período'}
             </h3>
             <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-              {vm.activeTab === 'dashboard-kpis' ? 'Análisis avanzado de KPIs de lectura (Siempre busca datos pasados)' :
+              {vm.activeTab === 'dashboard-kpi-month' ? 'Análisis avanzado de KPIs de lectura mensual (Siempre busca datos pasados)' :
+                vm.activeTab === 'dashboard-kpi-year' ? 'Análisis avanzado de KPIs de lectura anual' :
                 'Resumen estadístico de las lecturas realizadas en el período seleccionado'}
             </p>
           </div>
@@ -87,10 +98,10 @@ const ReadingsReconciliationContent: React.FC<ReadingsReconciliationContentProps
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', flexWrap: 'wrap' }}>
             <div className="reconciliation-filter-group">
               <label className="reconciliation-filter-label">
-                {t('readingData.filters.month', 'Mes de Operación')}
+                {vm.activeTab === 'dashboard-kpi-year' ? 'Año de Operación' : t('readingData.filters.month', 'Mes de Operación')}
               </label>
-              <div style={{ width: vm.activeTab === 'dashboard-kpis' ? '250px' : '200px' }}>
-                {vm.activeTab === 'dashboard-kpis' ? (
+              <div style={{ width: vm.activeTab === 'dashboard-kpi-month' ? '250px' : '200px' }}>
+                {vm.activeTab === 'dashboard-kpi-month' ? (
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <Select
                       size="small"
@@ -121,6 +132,17 @@ const ReadingsReconciliationContent: React.FC<ReadingsReconciliationContentProps
                       })}
                     </Select>
                   </div>
+                ) : vm.activeTab === 'dashboard-kpi-year' ? (
+                  <Select
+                    size="small"
+                    value={vm.dashboardSelectedYear}
+                    onChange={(e) => vm.setDashboardSelectedYear(e.target.value)}
+                  >
+                    {Array.from({ length: 5 }).map((_, i) => {
+                      const year = (new Date().getFullYear() - i).toString();
+                      return <option key={year} value={year}>{year}</option>;
+                    })}
+                  </Select>
                 ) : (
                   <DatePicker
                     size="small"
@@ -132,7 +154,7 @@ const ReadingsReconciliationContent: React.FC<ReadingsReconciliationContentProps
               </div>
             </div>
 
-            {vm.activeTab === 'dashboard-kpis' ? (
+            {vm.activeTab === 'dashboard-kpi-month' || vm.activeTab === 'dashboard-kpi-year' ? (
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <Button
                   onClick={vm.fetchAllData}

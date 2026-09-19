@@ -24,6 +24,7 @@ import { IoInformationCircleOutline } from 'react-icons/io5';
 import { MdPhoneIphone } from 'react-icons/md';
 import { useUserDetailViewModel } from '@/modules/users/presentation/hooks/useUserDetailViewModel';
 import '../styles/SessionLogsTable.css';
+import { Alert } from '@/shared/presentation/components/Alert';
 
 
 export const SessionLogsTable: React.FC = () => {
@@ -264,21 +265,13 @@ export const SessionLogsTable: React.FC = () => {
 
             {/* Failure Reason Alert */}
             {selectedLog.failureReason && (
-              <div className={styles.failureAlert}>
-                <AlertTriangle
-                  size={20}
-                  color="#ef4444"
-                  className={styles.failureIcon}
-                />
-                <div>
-                  <h4 className={styles.failureTitle}>
-                    Motivo de Fallo Analizado
-                  </h4>
-                  <p className={styles.failureText}>
-                    {selectedLog.failureReason}
-                  </p>
-                </div>
-              </div>
+              <Alert
+                icon={<AlertTriangle />}
+                title='Motivo de Fallo Analizado'
+                type='error'
+                size='xsmall'
+                dismissible={false}
+                message={selectedLog.failureReason} />
             )}
 
             {/* Metadata JSON block */}

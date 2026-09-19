@@ -1,5 +1,5 @@
 .premium-dashboard-container {
-  padding: 1.5rem;
+  padding: 0.5rem;
   background-color: var(--background);
   color: var(--text-main);
   min-height: calc(100vh - 200px);
@@ -8,16 +8,16 @@
     system-ui,
     -apple-system,
     sans-serif;
-  border-radius: 12px;
+  border-radius: 6px;
 }
 
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 0.5rem;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.25rem;
 }
 
 .dashboard-title-area {
@@ -32,6 +32,7 @@
   margin: 0;
   background: linear-gradient(90deg, #00e5ff, #d500f9);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 20px rgba(213, 0, 249, 0.3);
 }
@@ -97,8 +98,10 @@
 .kpi-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  padding-bottom: 0.25rem;
 }
 
 .text-success {

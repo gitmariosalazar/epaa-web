@@ -28,7 +28,7 @@ import {
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { KPICard } from '@/shared/presentation/components/Card/KPICard';
-import type { DashboardKpiResponse } from '@/modules/readings/domain/models/reading-kpi';
+import type { DashboardKpiAnnualSqlResponse } from '@/modules/readings/domain/models/reading-kpi';
 import './DashboardKpisByPeriodTab.css';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
@@ -46,18 +46,24 @@ interface FormattedKpiData {
   paid: number;
   unpaid: number;
   debt: number;
+  totalAmountToCollect: number;
+  totalAmountToCollectUnpaid: number;
+  totalAmountToCollectPaid: number;
+  totalAmountToCollectOverdue: number;
+  totalAmountToCollectUpcoming: number;
+  totalAmountToCollectCanceled: number;
 }
 
-interface DashboardKpisByPeriodTabProps {
-  data: DashboardKpiResponse[] | null;
+interface DashboardKpisByYearTabProps {
+  data: DashboardKpiAnnualSqlResponse[] | null;
   isLoading: boolean;
   onRefresh: () => void;
 }
 
 const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
 
-export const DashboardKpisByPeriodTab: React.FC<
-  DashboardKpisByPeriodTabProps
+export const DashboardKpisByYearTab: React.FC<
+  DashboardKpisByYearTabProps
 > = ({ data, isLoading }) => {
   const [activeMetric, setActiveMetric] = useState<'consumption' | 'financial'>(
     'consumption'
@@ -85,7 +91,13 @@ export const DashboardKpisByPeriodTab: React.FC<
         paidBillsCount: 0,
         unpaidBillsCount: 0,
         sewage: 0,
-        trash: 0
+        trash: 0,
+        totalAmountToCollect: 0,
+        totalAmountToCollectUnpaid: 0,
+        totalAmountToCollectPaid: 0,
+        totalAmountToCollectOverdue: 0,
+        totalAmountToCollectUpcoming: 0,
+        totalAmountToCollectCanceled: 0
       };
 
       const aggregated = data.reduce((acc, curr) => {
@@ -100,6 +112,12 @@ export const DashboardKpisByPeriodTab: React.FC<
         acc.unpaidBillsCount += Number(curr.unpaidBillsCount) || 0;
         acc.sewage += Number(curr.totalSewageValue) || 0;
         acc.trash += Number(curr.totalTrashRate) || 0;
+        acc.totalAmountToCollect += Number(curr.totalAmountToCollect) || 0;
+        acc.totalAmountToCollectUnpaid += Number(curr.totalAmountToCollectUnpaid) || 0;
+        acc.totalAmountToCollectPaid += Number(curr.totalAmountToCollectPaid) || 0;
+        acc.totalAmountToCollectOverdue += Number(curr.totalAmountToCollectOverdue) || 0;
+        acc.totalAmountToCollectUpcoming += Number(curr.totalAmountToCollectUpcoming) || 0;
+        acc.totalAmountToCollectCanceled += Number(curr.totalAmountToCollectCanceled) || 0;
         return acc;
       }, initialTotals);
 
@@ -113,7 +131,13 @@ export const DashboardKpisByPeriodTab: React.FC<
           billed: Number(item.totalBilledWater) || 0,
           paid: Number(item.totalPaidWater) || 0,
           unpaid: Number(item.totalUnpaidWater) || 0,
-          debt: Number(item.totalDebtAmount) || 0
+          debt: Number(item.totalDebtAmount) || 0,
+          totalAmountToCollect: Number(item.totalAmountToCollect) || 0,
+          totalAmountToCollectUnpaid: Number(item.totalAmountToCollectUnpaid) || 0,
+          totalAmountToCollectPaid: Number(item.totalAmountToCollectPaid) || 0,
+          totalAmountToCollectOverdue: Number(item.totalAmountToCollectOverdue) || 0,
+          totalAmountToCollectUpcoming: Number(item.totalAmountToCollectUpcoming) || 0,
+          totalAmountToCollectCanceled: Number(item.totalAmountToCollectCanceled) || 0
         }))
         .sort((a, b) => a.sectorNum - b.sectorNum);
 
@@ -187,14 +211,64 @@ export const DashboardKpisByPeriodTab: React.FC<
         id: 'unpaid'
       },
       {
-        header: 'Cartera',
+        header: 'Total Cobrar',
         accessor: (item: FormattedKpiData) => (
-          <ColorChip label={formatCurrency(item.debt)} size='xs' color={'red'} variant="ghost" />
+          <ColorChip label={formatCurrency(item.totalAmountToCollect)} size='xs' color={'cyan'} variant="ghost" />
         ),
-        sortKey: 'debt',
+        sortKey: 'totalAmountToCollect',
         sortable: true,
         isNumeric: true,
-        id: 'debt'
+        id: 'totalAmountToCollect'
+      },
+      {
+        header: 'Total Pagado (Recaudado)',
+        accessor: (item: FormattedKpiData) => (
+          <ColorChip label={formatCurrency(item.totalAmountToCollectPaid)} size='xs' color={'green'} variant="ghost" />
+        ),
+        sortKey: 'totalAmountToCollectPaid',
+        sortable: true,
+        isNumeric: true,
+        id: 'totalAmountToCollectPaid'
+      },
+      {
+        header: 'Pendiente/No Pagado',
+        accessor: (item: FormattedKpiData) => (
+          <ColorChip label={formatCurrency(item.totalAmountToCollectUnpaid)} size='xs' color={'red'} variant="ghost" />
+        ),
+        sortKey: 'totalAmountToCollectUnpaid',
+        sortable: true,
+        isNumeric: true,
+        id: 'totalAmountToCollectUnpaid'
+      },
+      {
+        header: 'Vencido',
+        accessor: (item: FormattedKpiData) => (
+          <ColorChip label={formatCurrency(item.totalAmountToCollectOverdue)} size='xs' color={'red'} variant="ghost" />
+        ),
+        sortKey: 'totalAmountToCollectOverdue',
+        sortable: true,
+        isNumeric: true,
+        id: 'totalAmountToCollectOverdue'
+      },
+      {
+        header: 'Por Vencer',
+        accessor: (item: FormattedKpiData) => (
+          <ColorChip label={formatCurrency(item.totalAmountToCollectUpcoming)} size='xs' color={'amber'} variant="ghost" />
+        ),
+        sortKey: 'totalAmountToCollectUpcoming',
+        sortable: true,
+        isNumeric: true,
+        id: 'totalAmountToCollectUpcoming'
+      },
+      {
+        header: 'Anulados',
+        accessor: (item: FormattedKpiData) => (
+          <ColorChip label={formatCurrency(item.totalAmountToCollectCanceled)} size='xs' color={'gray'} variant="ghost" />
+        ),
+        sortKey: 'totalAmountToCollectCanceled',
+        sortable: true,
+        isNumeric: true,
+        id: 'totalAmountToCollectCanceled'
       }
     ],
     []
@@ -237,6 +311,42 @@ export const DashboardKpisByPeriodTab: React.FC<
         value: formatCurrency(totals.totalDebt),
         columnId: 'debt',
         color: 'rose'
+      },
+      {
+        label: 'Total Cobrar',
+        value: formatCurrency(totals.totalAmountToCollect),
+        columnId: 'totalAmountToCollect',
+        color: 'cyan'
+      },
+      {
+        label: 'Total Pagado',
+        value: formatCurrency(totals.totalAmountToCollectPaid),
+        columnId: 'totalAmountToCollectPaid',
+        color: 'emerald'
+      },
+      {
+        label: 'Pendiente',
+        value: formatCurrency(totals.totalAmountToCollectUnpaid),
+        columnId: 'totalAmountToCollectUnpaid',
+        color: 'amber'
+      },
+      {
+        label: 'Vencido',
+        value: formatCurrency(totals.totalAmountToCollectOverdue),
+        columnId: 'totalAmountToCollectOverdue',
+        color: 'rose'
+      },
+      {
+        label: 'Por Vencer',
+        value: formatCurrency(totals.totalAmountToCollectUpcoming),
+        columnId: 'totalAmountToCollectUpcoming',
+        color: 'amber'
+      },
+      {
+        label: 'Anulados',
+        value: formatCurrency(totals.totalAmountToCollectCanceled),
+        columnId: 'totalAmountToCollectCanceled',
+        color: 'gray'
       }
     ];
   }, [totals]);
@@ -517,9 +627,9 @@ export const DashboardKpisByPeriodTab: React.FC<
                     contentStyle={{
                       backgroundColor: 'var(--surface)',
                       borderColor: 'var(--border-color)',
-                      borderRadius: '8px',
-                      color: 'var(--text-main)'
+                      borderRadius: '8px'
                     }}
+                    itemStyle={{ color: 'var(--text-main)' }}
                   />
                   <Legend verticalAlign="bottom" height={36} />
                 </PieChart>

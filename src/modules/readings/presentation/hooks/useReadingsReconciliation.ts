@@ -99,6 +99,15 @@ export const useReadingsReconciliation = () => {
     [context]
   );
 
+  const getDashboardKpisByYear = useCallback(
+    (year: number) => {
+      return executeWithErrorHandling(() =>
+        context.getDashboardKpisByPeriodUseCase.executeByYear(year)
+      );
+    },
+    [context]
+  );
+
   const clearError = useCallback(() => setError(null), []);
 
   return {
@@ -112,6 +121,7 @@ export const useReadingsReconciliation = () => {
     getMismatches,
     getKpis,
     getDiscrepanciesDetail,
-    getDashboardKpisByPeriod
+    getDashboardKpisByPeriod,
+    getDashboardKpisByYear
   };
 };

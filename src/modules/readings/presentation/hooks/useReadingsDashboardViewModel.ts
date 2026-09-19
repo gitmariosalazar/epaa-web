@@ -1,16 +1,17 @@
 import { useState, useCallback } from 'react';
 import { useReadingsReconciliation } from './useReadingsReconciliation';
 import type { ReconciliationSummary } from '../../domain/models/lecturas-reconciliation';
-import type { DashboardKpiResponse } from '../../domain/models/reading-kpi';
+import type { DashboardKpiResponse, DashboardKpiAnnualSqlResponse } from '../../domain/models/reading-kpi';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
-export type ReadingsDashboardTab = 'dashboard-kpis' | 'basic-summary';
+export type ReadingsDashboardTab = 'dashboard-kpi-month' | 'dashboard-kpi-year';
 
 export const useReadingsDashboardViewModel = (initialMonth?: string) => {
   const repo = useReadingsReconciliation();
 
-  const [activeTab, setActiveTab] =
-    useState<ReadingsDashboardTab>('dashboard-kpis');
+  const [activeTab, setActiveTab] = useState<ReadingsDashboardTab>(
+    'dashboard-kpi-month'
+  );
 
   // State for Month Selection
   const [selectedMonth, setSelectedMonth] = useState<string>(
@@ -23,12 +24,22 @@ export const useReadingsDashboardViewModel = (initialMonth?: string) => {
     d.setMonth(d.getMonth() - 1);
     return dateService.toISODateString(d).substring(0, 7);
   };
-  const [dashboardSelectedMonth, setDashboardSelectedMonth] =
-    useState<string>(initialMonth || getPreviousMonth());
+  const [dashboardSelectedMonth, setDashboardSelectedMonth] = useState<string>(
+    initialMonth || getPreviousMonth()
+  );
+
+  const [dashboardSelectedYear, setDashboardSelectedYear] = useState<string>(
+    initialMonth ? initialMonth.split('-')[0] : String(dateService.getCurrentDate().getFullYear())
+  );
 
   // State for Dashboard KPIs Tab
   const [dashboardKpisData, setDashboardKpisData] = useState<
     DashboardKpiResponse[] | null
+  >(null);
+
+  // State for Dashboard KPIs Annual Tab
+  const [dashboardKpisAnnualData, setDashboardKpisAnnualData] = useState<
+    DashboardKpiAnnualSqlResponse[] | null
   >(null);
 
   // State for Basic Summary Tab
@@ -87,19 +98,32 @@ export const useReadingsDashboardViewModel = (initialMonth?: string) => {
     if (result) setDashboardKpisData(result);
   }, [dashboardSelectedMonth, repo]);
 
-  // Fetch all data for the selected month
+  // Actions for Dashboard KPIs Annual
+  const fetchDashboardKpisAnnual = useCallback(async () => {
+    if (!dashboardSelectedYear) return;
+
+    const result = await repo.getDashboardKpisByYear(
+      parseInt(dashboardSelectedYear)
+    );
+    if (result) setDashboardKpisAnnualData(result);
+  }, [dashboardSelectedYear, repo]);
+
+  // Fetch data for the active tab when refresh is clicked
   const fetchAllData = useCallback(async () => {
-    await Promise.allSettled([fetchBasicSummary(), fetchDashboardKpis()]);
-  }, [fetchBasicSummary, fetchDashboardKpis]);
+    if (activeTab === 'dashboard-kpi-month') {
+      await fetchDashboardKpis();
+    } else if (activeTab === 'dashboard-kpi-year') {
+      await fetchDashboardKpisAnnual();
+    }
+  }, [activeTab, fetchDashboardKpis, fetchDashboardKpisAnnual]);
 
   // Automatic fetches based on tab switching
   const handleFetchData = useCallback(() => {
-    if (activeTab === 'dashboard-kpis') {
+    if (activeTab === 'dashboard-kpi-month') {
       fetchDashboardKpis();
     }
-    if (activeTab === 'basic-summary') fetchBasicSummary();
-    if (activeTab === 'dashboard-kpis') fetchDashboardKpis();
-  }, [activeTab, fetchBasicSummary, fetchDashboardKpis]);
+    if (activeTab === 'dashboard-kpi-year') fetchDashboardKpisAnnual();
+  }, [activeTab, fetchDashboardKpis, fetchDashboardKpisAnnual]);
 
   return {
     activeTab,
@@ -115,6 +139,11 @@ export const useReadingsDashboardViewModel = (initialMonth?: string) => {
     setDashboardSelectedMonth,
     dashboardKpisData,
     fetchDashboardKpis,
+
+    dashboardSelectedYear,
+    setDashboardSelectedYear,
+    dashboardKpisAnnualData,
+    fetchDashboardKpisAnnual,
 
     handleFetchData,
 

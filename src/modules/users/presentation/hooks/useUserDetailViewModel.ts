@@ -15,15 +15,20 @@ export const useUserDetailViewModel = (username: string | undefined) => {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   const fetchUser = useCallback(async () => {
-    if (!username) return;
+    if (!username) {
+      setUser(null);
+      return;
+    }
 
     try {
       setLoading(true);
+      setError(null);
       const userData = await getProfileUseCase.execute(username);
       setUser(userData);
     } catch (err) {
       console.error('Failed to fetch user', err);
       setError('Failed to load user data.');
+      setUser(null);
     } finally {
       setLoading(false);
     }
