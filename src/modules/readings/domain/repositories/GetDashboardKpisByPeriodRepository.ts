@@ -12,4 +12,9 @@ export interface GetDashboardKpisByPeriodRepository {
   getDashboardKpisByYear(
     year: number
   ): Promise<DashboardKpiAnnualSqlResponse[]>;
+
+  getDashboardKpisByYearAndSector(
+    year: number,
+    sector: string
+  ): Promise<DashboardKpiResponse[]>;
 }

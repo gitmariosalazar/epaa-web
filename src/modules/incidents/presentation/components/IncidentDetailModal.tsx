@@ -10,6 +10,7 @@ import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip
 import { StatusTimeline } from '@/shared/presentation/components/Timeline';
 import { GeoSection } from '@/shared/presentation/components/GeoLocation';
 import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
+import type { ConnectionWithProperty } from '@/modules/connections/domain/models/Connection';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { MdOutlineTripOrigin, MdPhotoLibrary } from 'react-icons/md';
 import { FaUserCheck, FaUsersCog } from 'react-icons/fa';
@@ -23,6 +24,8 @@ interface IncidentDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   incident: IncidentDetailRowResponse | null;
+  connection?: ConnectionWithProperty | null;
+  isFetchingConnection?: boolean;
 }
 
 
@@ -66,7 +69,9 @@ function getPriorityColor(priority: string): string {
 export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
   isOpen,
   onClose,
-  incident
+  incident,
+  connection,
+  isFetchingConnection
 }) => {
   // Lightbox state: null = closed, number = index of the open photo
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -144,6 +149,41 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* ── Connection Info ── */}
+              {incident?.connectionId && (
+                <div className="detail-section">
+                  <h4 className="detail-section-title">Detalles de Acometida</h4>
+                  {isFetchingConnection ? (
+                    <div className="text-secondary" style={{ fontSize: '0.875rem' }}>Cargando datos de la acometida...</div>
+                  ) : connection ? (
+                    <div className="detail-grid">
+                      <div className="detail-item">
+                        <span className="detail-label">Cliente</span>
+                        <span className="detail-value font-medium">{connection.person ? `${connection.person.firstName} ${connection.person.lastName}` : connection.company?.businessName || 'Desconocido'}</span>
+                      </div>
+                      <div className="detail-item">
+                        <span className="detail-label">Medidor</span>
+                        <span className="detail-value">{connection.connectionMeterNumber || 'Sin medidor'}</span>
+                      </div>
+                      <div className="detail-item">
+                        <span className="detail-label">Estado</span>
+                        <span className="detail-value">{connection.connectionStatus || 'N/A'}</span>
+                      </div>
+                      <div className="detail-item">
+                        <span className="detail-label">Dirección</span>
+                        <span className="detail-value">{connection.connectionAddress || 'N/A'}</span>
+                      </div>
+                      <div className="detail-item">
+                        <span className="detail-label">Zona</span>
+                        <span className="detail-value">{connection.zoneName || 'N/A'}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-secondary" style={{ fontSize: '0.875rem' }}>No se pudo cargar la información de la acometida.</div>
+                  )}
+                </div>
+              )}
 
               {/* ── Report ── */}
               <div className="detail-section">

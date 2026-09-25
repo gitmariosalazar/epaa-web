@@ -154,17 +154,21 @@ export class IncidentRepositoryImpl implements InterfaceIncidentRepository {
       reference?: string | null;
       reportDate?: Date | null;
       reportRangeDate?: { start: Date; end: Date } | null;
+      incidentTypeId?: number | null;
     },
     limit?: number | null,
     offset?: number | null
   ): Promise<ApiResponse<IncidentDetailRowResponse[]>> {
-    const { reportRangeDate, ...restFilters } = filters;
+    const { reportRangeDate, incidentTypeId, ...restFilters } = filters;
     const params: any = { ...restFilters, limit, offset };
 
     // Format dates to ISO strings (or YYYY-MM-DD) to send as top-level params
     if (reportRangeDate) {
       params.startDate = reportRangeDate.start.toISOString().split('T')[0];
       params.endDate = reportRangeDate.end.toISOString().split('T')[0];
+    }
+    if (incidentTypeId !== undefined && incidentTypeId !== null) {
+      params.incidentTypeId = incidentTypeId;
     }
 
     const response = await this.client.get<

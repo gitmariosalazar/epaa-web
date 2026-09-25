@@ -38,6 +38,8 @@ export interface IncidentMapProps {
   onCameraChange?: (center: { lat: number; lng: number }, zoom: number) => void;
   /** Map ID requerido para AdvancedMarker */
   mapId?: string;
+  onPrintNotification?: (incident: IncidentDetailRowResponse) => void;
+
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -57,6 +59,7 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
   onResolve,
   onAddWorkOrder,
   onCameraChange,
+  onPrintNotification,
   mapId
 }) => {
   const [infoWindowShown, setInfoWindowShown] = useState(false);
@@ -221,6 +224,7 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
                 onViewDetail={onViewDetail}
                 onResolve={onResolve}
                 onAddWorkOrder={onAddWorkOrder}
+                onPrintNotification={onPrintNotification}
                 onViewOrder={(code) => navigate(`/work-orders/search?code=${code}`)}
               />
             </InfoWindow>

@@ -9,6 +9,7 @@ import { Select } from '@/shared/presentation/components/Input/Select';
 
 import { DashboardKpisByPeriodTab } from '../components/reconciliation/DashboardKpisByPeriodTab';
 import { DashboardKpisByYearTab } from '../components/reconciliation/DashboardKpisByYearTab';
+import { DashboardKpisBySectorYearTab } from '../components/reconciliation/DashboardKpisBySectorYearTab';
 import '../styles/ReadingsReconciliation.css';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
@@ -33,6 +34,11 @@ const ReadingsReconciliationContent: React.FC<ReadingsReconciliationContentProps
     {
       id: 'dashboard-kpi-year',
       label: t('readings.reconciliation.tabSummary', 'Dashboard KPIs Anual'),
+      icon: <BarChart2 size={16} />
+    },
+    {
+      id: 'dashboard-kpi-sector-year',
+      label: 'Dashboard KPIs por Sector y Año',
       icon: <BarChart2 size={16} />
     },
   ], [t]);
@@ -63,6 +69,14 @@ const ReadingsReconciliationContent: React.FC<ReadingsReconciliationContentProps
             onRefresh={vm.fetchDashboardKpisAnnual}
           />
         );
+      case 'dashboard-kpi-sector-year':
+        return (
+          <DashboardKpisBySectorYearTab
+            data={vm.dashboardKpisSectorYearData}
+            isLoading={vm.isLoading}
+            onRefresh={vm.fetchDashboardKpisSectorYear}
+          />
+        );
       default:
         return null;
     }
@@ -86,11 +100,13 @@ const ReadingsReconciliationContent: React.FC<ReadingsReconciliationContentProps
             <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: 'var(--font-size-md)' }}>
               {vm.activeTab === 'dashboard-kpi-month' ? 'Dashboard de KPIs por Periodo' :
                 vm.activeTab === 'dashboard-kpi-year' ? 'Dashboard de KPIs Anual' :
+                vm.activeTab === 'dashboard-kpi-sector-year' ? 'Dashboard de KPIs por Sector y Año' :
                 'Resumen Estadístico del Período'}
             </h3>
             <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
               {vm.activeTab === 'dashboard-kpi-month' ? 'Análisis avanzado de KPIs de lectura mensual (Siempre busca datos pasados)' :
                 vm.activeTab === 'dashboard-kpi-year' ? 'Análisis avanzado de KPIs de lectura anual' :
+                vm.activeTab === 'dashboard-kpi-sector-year' ? 'Análisis avanzado de KPIs de lectura por sector en un año específico' :
                 'Resumen estadístico de las lecturas realizadas en el período seleccionado'}
             </p>
           </div>
@@ -98,7 +114,7 @@ const ReadingsReconciliationContent: React.FC<ReadingsReconciliationContentProps
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', flexWrap: 'wrap' }}>
             <div className="reconciliation-filter-group">
               <label className="reconciliation-filter-label">
-                {vm.activeTab === 'dashboard-kpi-year' ? 'Año de Operación' : t('readingData.filters.month', 'Mes de Operación')}
+                {(vm.activeTab === 'dashboard-kpi-year' || vm.activeTab === 'dashboard-kpi-sector-year') ? 'Año de Operación' : t('readingData.filters.month', 'Mes de Operación')}
               </label>
               <div style={{ width: vm.activeTab === 'dashboard-kpi-month' ? '250px' : '200px' }}>
                 {vm.activeTab === 'dashboard-kpi-month' ? (
@@ -132,17 +148,31 @@ const ReadingsReconciliationContent: React.FC<ReadingsReconciliationContentProps
                       })}
                     </Select>
                   </div>
-                ) : vm.activeTab === 'dashboard-kpi-year' ? (
-                  <Select
-                    size="small"
-                    value={vm.dashboardSelectedYear}
-                    onChange={(e) => vm.setDashboardSelectedYear(e.target.value)}
-                  >
-                    {Array.from({ length: 5 }).map((_, i) => {
-                      const year = (new Date().getFullYear() - i).toString();
-                      return <option key={year} value={year}>{year}</option>;
-                    })}
-                  </Select>
+                ) : (vm.activeTab === 'dashboard-kpi-year' || vm.activeTab === 'dashboard-kpi-sector-year') ? (
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <Select
+                      size="small"
+                      value={vm.dashboardSelectedYear}
+                      onChange={(e) => vm.setDashboardSelectedYear(e.target.value)}
+                    >
+                      {Array.from({ length: 5 }).map((_, i) => {
+                        const year = (new Date().getFullYear() - i).toString();
+                        return <option key={year} value={year}>{year}</option>;
+                      })}
+                    </Select>
+                    {vm.activeTab === 'dashboard-kpi-sector-year' && (
+                      <Select
+                        size="small"
+                        value={vm.dashboardSelectedSector}
+                        onChange={(e) => vm.setDashboardSelectedSector(e.target.value)}
+                      >
+                        {Array.from({ length: 40 }).map((_, i) => {
+                          const sector = (i + 1).toString();
+                          return <option key={sector} value={sector}>Sector {sector}</option>;
+                        })}
+                      </Select>
+                    )}
+                  </div>
                 ) : (
                   <DatePicker
                     size="small"
@@ -154,7 +184,7 @@ const ReadingsReconciliationContent: React.FC<ReadingsReconciliationContentProps
               </div>
             </div>
 
-            {vm.activeTab === 'dashboard-kpi-month' || vm.activeTab === 'dashboard-kpi-year' ? (
+            {vm.activeTab === 'dashboard-kpi-month' || vm.activeTab === 'dashboard-kpi-year' || vm.activeTab === 'dashboard-kpi-sector-year' ? (
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <Button
                   onClick={vm.fetchAllData}

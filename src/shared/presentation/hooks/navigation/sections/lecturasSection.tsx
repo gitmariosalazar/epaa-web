@@ -72,6 +72,11 @@ export const getLecturasSection = (): NavSection => ({
             },
             {
               icon: <FaEdit size={18} />,
+              label: 'Lectura Histórica',
+              to: '/readings/add-historical'
+            },
+            {
+              icon: <FaEdit size={18} />,
               label: 'Actualización Avanzada',
               to: '/readings/advanced-update'
             },

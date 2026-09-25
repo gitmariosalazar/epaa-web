@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   Calendar,
   MapPin,
+  Printer,
   Tag,
   X
 } from 'lucide-react';
@@ -32,6 +33,8 @@ interface IncidentMapInfoWindowProps {
 
   onResolve?: (incidentId: string) => void;
   onAddWorkOrder?: (incident: IncidentDetailRowResponse) => void;
+  onPrintNotification?: (incident: IncidentDetailRowResponse) => void;
+
 }
 
 /**
@@ -47,7 +50,8 @@ export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
     onViewDetail,
     onViewOrder,
     onResolve,
-    onAddWorkOrder
+    onAddWorkOrder,
+    onPrintNotification
   }) => {
     const pCfg = PRIORITY_CONFIG[incident.currentPriority] ?? DEFAULT_CONFIG;
     const sCfg = STATUS_CONFIG[incident.status] ?? {
@@ -266,6 +270,29 @@ export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
             </div>
             {/* Botones de Acción right */}
             <div className="card-incidents-actions">
+              {
+                (incident.incidentTypeName.includes('clandestino') || incident.incidentTypeName.includes('CONEXIÓN') || incident.incidentTypeName.includes('CLANDESTINA') || incident.incidentTypeName.includes('CONEXIÓN CLANDESTINA')) && (
+                  <Tooltip
+                    themeColor="danger"
+                    content="Generar Notificación PDF"
+                    position="bottom"
+                    followCursor={false}
+                  >
+                    <Button
+                      variant="dashed"
+                      size="xs"
+                      leftIcon={<Printer size={16} />}
+                      circle
+                      color='red'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onPrintNotification?.(incident);
+                      }}
+                    >
+                    </Button>
+                  </Tooltip>
+                )
+              }
               <Tooltip
                 themeColor="warning"
                 content="Ver detalles del incidente reportado"

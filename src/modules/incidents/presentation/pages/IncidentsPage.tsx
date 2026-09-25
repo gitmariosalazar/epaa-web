@@ -8,9 +8,11 @@ import { AddWorkOrderModal } from '../components/AddWorkOrderModal';
 import { IncidentDetailModal } from '../components/IncidentDetailModal';
 import { IncidentFilters } from '../components/IncidentFilters';
 import { IncidentMapFeature } from '../components/Map/IncidentMapFeature';
+import { DocumentPreviewModal } from '@/shared/presentation/components/DocumentPreviewModal';
 import {
   Table,
-  type Column
+  type Column,
+  type ContextMenuItem
 } from '@/shared/presentation/components/Table/Table';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
@@ -29,6 +31,7 @@ import {
   Navigation,
   Repeat,
   Plus,
+  Printer,
 } from 'lucide-react';
 import {
   CircularProgress,
@@ -43,6 +46,9 @@ import { truncateText } from '@/shared/utils/text/truncate-text';
 import { getPriorityColor, getStatusColor, getWorkOrderStatusColor } from '@/shared/presentation/utils/colors/status-colors';
 import { FaTools } from 'react-icons/fa';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { useConnectionsContext } from '@/modules/connections/presentation/context/ConnectionContext';
+import type { ConnectionWithProperty } from '@/modules/connections/domain/models/Connection';
+
 
 /**
  * IncidentsPage — Página principal de incidentes con tabs (Lista | Mapa).
@@ -84,11 +90,14 @@ export const IncidentsPage: React.FC = () => {
     handleConsultar,
     handleTabChange,
     refresh,
+    generateNotificationPdfUrl,
     pageSize
   } = vm;
 
   const { pathname } = useLocation();
   const navigate = useNavigate();
+
+
 
   // ── Detectar ruta activa para sincronizar el tab (igual que ConnectionsPage) ──
   useEffect(() => {
@@ -118,6 +127,32 @@ export const IncidentsPage: React.FC = () => {
   const [selectedIncident, setSelectedIncident] =
     useState<IncidentDetailRowResponse | null>(null);
 
+  const { findConnectionWithPropertyByCadastralKeyUseCase } = useConnectionsContext();
+  const [selectedConnection, setSelectedConnection] = useState<ConnectionWithProperty | null>(null);
+  const [isFetchingConnection, setIsFetchingConnection] = useState(false);
+  const [fileNamePDF, setFileNamePDF] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selectedIncident?.connectionId) {
+      setIsFetchingConnection(true);
+      findConnectionWithPropertyByCadastralKeyUseCase
+        .execute(selectedIncident.connectionId)
+        .then((connectionData) => {
+          setSelectedConnection(connectionData);
+        })
+        .catch((err) => {
+          console.error('Error fetching connection data:', err);
+          setSelectedConnection(null);
+        })
+        .finally(() => {
+          setIsFetchingConnection(false);
+        });
+    } else {
+      setSelectedConnection(null);
+    }
+  }, [selectedIncident, findConnectionWithPropertyByCadastralKeyUseCase]);
+
+
   const [focusedIncidentId, setFocusedIncidentId] = useState<string | null>(null);
   const focusedIncident = useMemo(
     () => incidents.find((i) => i.incidentId === focusedIncidentId) || null,
@@ -125,6 +160,55 @@ export const IncidentsPage: React.FC = () => {
   );
   const [addWorkOrderIncident, setAddWorkOrderIncident] =
     useState<IncidentDetailRowResponse | null>(null);
+
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  const handlePreviewPdf = async (item: IncidentDetailRowResponse) => {
+    setIsPreviewOpen(true);
+    setIsGeneratingPdf(true);
+    try {
+      const url = await generateNotificationPdfUrl([item], findConnectionWithPropertyByCadastralKeyUseCase);
+      setPreviewUrl(url);
+      setFileNamePDF(`NOTIFICACION_${item.connectionId}_${item.incidentCode}.pdf`);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handlePrintAllNotifications = async () => {
+    const clandestineIncidents = incidents.filter(item => 
+      item.incidentTypeName.includes('clandestino') || 
+      item.incidentTypeName.includes('CONEXIÓN') || 
+      item.incidentTypeName.includes('CLANDESTINA') || 
+      item.incidentTypeName.includes('CONEXIÓN CLANDESTINA')
+    );
+    
+    if (clandestineIncidents.length === 0) {
+      return;
+    }
+    
+    setIsPreviewOpen(true);
+    setIsGeneratingPdf(true);
+    try {
+      const url = await generateNotificationPdfUrl(clandestineIncidents, findConnectionWithPropertyByCadastralKeyUseCase);
+      setPreviewUrl(url);
+      setFileNamePDF(`NOTIFICACIONES_CLANDESTINAS.pdf`);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handleClosePreview = () => {
+    setIsPreviewOpen(false);
+    setTimeout(() => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
+    }, 300);
+  };
 
   // ── Columnas de la tabla ──────────────────────────────────────────────────
   const columns: Column<IncidentDetailRowResponse>[] = [
@@ -272,52 +356,54 @@ export const IncidentsPage: React.FC = () => {
       ),
       id: 'currentOrderState',
       style: { width: '110px' }
-    },
-    {
-      header: 'ACCIONES',
-      accessor: (item) => (
-        <div
-          className="incident-actions-cell"
-          style={{ display: 'flex', gap: '8px' }}
-        >
-          <Button
-            variant="outline"
-            size="xs"
-            onClick={() => setSelectedIncident(item)}
-            leftIcon={<Eye size={12} />}
-          >
-            Ver
-          </Button>
-          {item.currentOrderState == 'COMPLETADA' && item.status != 'RESUELTO' && (
-            <Button
-              variant="dashed"
-              color="amber"
-              size="xs"
-              onClick={() => setResolveIncidentId(item.incidentId)}
-              leftIcon={<Wrench size={12} />}
-            >
-              Resolver
-            </Button>
-          )}
-          {
-            !item.orderCode && item.status != 'RESUELTO' && item.status !== 'FALSO_REPORTE' && (
-              <Button
-                variant="dashed"
-                color="green"
-                size="xs"
-                onClick={() => setAddWorkOrderIncident(item)}
-                leftIcon={<Plus size={12} />}
-              >
-                Agregar OT
-              </Button>
-            )
-          }
-        </div>
-      ),
-      id: 'actions',
-      style: { width: '180px' }
     }
   ];
+
+  const getContextMenuItems = (item: IncidentDetailRowResponse): ContextMenuItem<IncidentDetailRowResponse>[] => {
+    const items: ContextMenuItem<IncidentDetailRowResponse>[] = [
+      {
+        label: 'Ver detalle del incidente',
+        icon: <Eye size={16} />,
+        onClick: () => setSelectedIncident(item),
+        color: 'primary'
+      }
+    ];
+
+    if (item.currentOrderState === 'COMPLETADA' && item.status !== 'RESUELTO') {
+      items.push({
+        label: 'Resolver',
+        icon: <Wrench size={16} />,
+        onClick: () => setResolveIncidentId(item.incidentId),
+        color: 'warning'
+      });
+    }
+
+    if (!item.orderCode && item.status !== 'RESUELTO' && item.status !== 'FALSO_REPORTE') {
+      items.push({
+        label: 'Agregar Orden de Trabajo',
+        icon: <Plus size={16} />,
+        onClick: () => setAddWorkOrderIncident(item),
+        color: 'success'
+      });
+    }
+
+    items.push({
+      label: '-',
+      onClick: () => { },
+      divider: true
+    });
+
+    if (item.incidentTypeName.includes('clandestino') || item.incidentTypeName.includes('CONEXIÓN') || item.incidentTypeName.includes('CLANDESTINA') || item.incidentTypeName.includes('CONEXIÓN CLANDESTINA')) {
+      items.push({
+        label: 'Generar Notificación PDF',
+        icon: <Printer size={16} />,
+        onClick: () => handlePreviewPdf(item),
+        color: 'danger'
+      });
+    }
+
+    return items;
+  };
 
   // ── Banner de conexión (reutilizable entre lista y mapa) ─────────────────
   const ConnectionBanner =
@@ -397,6 +483,7 @@ export const IncidentsPage: React.FC = () => {
               hasMore={page * pageSize < totalCount}
               onPageChange={setPage}
               isLoading={isLoading}
+              onPrintNotification={handlePreviewPdf}
             />
           </div>
         </div>
@@ -427,6 +514,7 @@ export const IncidentsPage: React.FC = () => {
           <Table<IncidentDetailRowResponse>
             data={incidents}
             columns={columns}
+            contextMenuItems={getContextMenuItems}
             isLoading={isLoading}
             loadingState={
               <div
@@ -486,7 +574,7 @@ export const IncidentsPage: React.FC = () => {
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <Button
                 leftIcon={<ShieldAlert size={16} />}
-                size="small"
+                size="xs"
                 onClick={() => navigate('/incidents/create')}
               >
                 Reportar Incidente
@@ -512,6 +600,7 @@ export const IncidentsPage: React.FC = () => {
             isLoading={isLoading}
             reportRangeDate={filters.reportRangeDate || null}
             onReportRangeDateChange={(start, end) => handleFilterChange({ reportRangeDate: { start, end } })}
+            onPrintAllNotifications={handlePrintAllNotifications}
           />
         }
       >
@@ -533,6 +622,8 @@ export const IncidentsPage: React.FC = () => {
           isOpen={true}
           onClose={() => setSelectedIncident(null)}
           incident={selectedIncident}
+          connection={selectedConnection}
+          isFetchingConnection={isFetchingConnection}
         />
       )}
 
@@ -547,6 +638,15 @@ export const IncidentsPage: React.FC = () => {
           }}
         />
       )}
+
+      <DocumentPreviewModal
+        isOpen={isPreviewOpen}
+        onClose={handleClosePreview}
+        documentUrl={previewUrl}
+        isLoading={isGeneratingPdf}
+        title="Vista Previa de Notificación"
+        fileName={fileNamePDF || "NOTIFICACION_INCIDENTE.pdf"}
+      />
     </>
   );
 };

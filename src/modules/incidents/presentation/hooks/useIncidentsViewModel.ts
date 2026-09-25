@@ -2,6 +2,9 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useIncidentContext } from '../context/IncidentContext';
 import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
+import { NotificationIncidentPdfGenerator } from '../components/templates/pdf/NotificationIncidentPdfGenerator';
+import type { NotificationIncidentItem } from '../components/templates/pdf/components/NotificationIncidentDocument';
+import type { FindConnectionWithPropertyByCadastralKeyUseCase } from '@/modules/connections/application/usecases/FindConnectionWithPropertyByCadastralKeyUseCase';
 
 export type IncidentSortKey =
   | 'fecha_desc'
@@ -12,7 +15,8 @@ export type IncidentSortKey =
   | 'sector'
   | 'reference'
   | 'reportDate'
-  | 'reportRangeDate';
+  | 'reportRangeDate'
+  | 'incidentTypeId';
 
 // ── Tab type (Open/Closed: add tabs here without touching logic) ─────────────
 export type IncidentTab = 'list' | 'map';
@@ -27,6 +31,7 @@ export interface IncidentsFilterState {
   reference?: string | null;
   reportDate?: Date | null;
   reportRangeDate?: { start: string; end: string } | null;
+  incidentTypeId?: number | null;
 }
 
 const sortFn = (
@@ -49,6 +54,8 @@ const sortFn = (
       return a.suggestedPriority.localeCompare(b.suggestedPriority);
     case 'connection':
       return (a.connectionId ?? '').localeCompare(b.connectionId ?? '');
+    case 'incidentTypeId':
+      return (a.incidentTypeId ?? 0) - (b.incidentTypeId ?? 0);
     default:
       return 0;
   }
@@ -140,12 +147,18 @@ export const useIncidentsViewModel = () => {
               ? new Date(filters.search + 'T00:00:00')
               : filters.reportDate || null,
           reportRangeDate:
-            filters.searchField === 'reportRangeDate' && filters.reportRangeDate?.start && filters.reportRangeDate?.end
+            filters.searchField === 'reportRangeDate' &&
+            filters.reportRangeDate?.start &&
+            filters.reportRangeDate?.end
               ? {
                   start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
                   end: new Date(filters.reportRangeDate.end + 'T23:59:59')
                 }
-              : null
+              : null,
+          incidentTypeId:
+            filters.searchField === 'incident_type'
+              ? (filters.search ? Number(filters.search) : null)
+              : filters.incidentTypeId || null
         },
         pageSize,
         (page - 1) * pageSize
@@ -213,7 +226,11 @@ export const useIncidentsViewModel = () => {
                   start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
                   end: new Date(filters.reportRangeDate.end + 'T23:59:59')
                 }
-              : null
+              : null,
+          incidentTypeId:
+            filters.searchField === 'incident_type'
+              ? (filters.search ? Number(filters.search) : null)
+              : filters.incidentTypeId || null
         },
         pageSize,
         (page - 1) * pageSize
@@ -251,12 +268,18 @@ export const useIncidentsViewModel = () => {
             ? new Date(filters.search + 'T00:00:00')
             : filters.reportDate || null,
         reportRangeDate:
-          filters.searchField === 'reportRangeDate' && filters.reportRangeDate?.start && filters.reportRangeDate?.end
+          filters.searchField === 'reportRangeDate' &&
+          filters.reportRangeDate?.start &&
+          filters.reportRangeDate?.end
             ? {
                 start: new Date(filters.reportRangeDate.start + 'T00:00:00'),
                 end: new Date(filters.reportRangeDate.end + 'T23:59:59')
               }
-            : null
+            : null,
+        incidentTypeId:
+          filters.searchField === 'incident_type'
+            ? (filters.search ? Number(filters.search) : null)
+            : filters.incidentTypeId || null
       },
       pageSize,
       0
@@ -281,6 +304,77 @@ export const useIncidentsViewModel = () => {
   const handleTabChange = useCallback((tab: IncidentTab) => {
     setActiveTab(tab);
   }, []);
+
+  /**
+   * Genera y descarga el PDF de notificación para un incidente (o varios).
+   * Llama a la infraestructura de PDF usando su abstracción IPdfDocumentGenerator.
+   */
+  const generateNotificationPdf = useCallback(
+    async (
+      incidentsToPrint: IncidentDetailRowResponse[],
+      findConnectionUseCase?: FindConnectionWithPropertyByCadastralKeyUseCase
+    ) => {
+      try {
+        const items: NotificationIncidentItem[] = [];
+        for (const incident of incidentsToPrint) {
+          let connection = null;
+          if (incident.connectionId && findConnectionUseCase) {
+            try {
+              connection = await findConnectionUseCase.execute(
+                incident.connectionId
+              );
+            } catch (err) {
+              console.error(
+                `Error fetching connection ${incident.connectionId} for PDF:`,
+                err
+              );
+            }
+          }
+          items.push({ incident, connection });
+        }
+
+        const generator = new NotificationIncidentPdfGenerator();
+        await generator.downloadPdf(items);
+      } catch (err) {
+        console.error('Error generating PDF:', err);
+      }
+    },
+    []
+  );
+
+  const generateNotificationPdfUrl = useCallback(
+    async (
+      incidentsToPrint: IncidentDetailRowResponse[],
+      findConnectionUseCase?: FindConnectionWithPropertyByCadastralKeyUseCase
+    ): Promise<string | null> => {
+      try {
+        const items: NotificationIncidentItem[] = [];
+        for (const incident of incidentsToPrint) {
+          let connection = null;
+          if (incident.connectionId && findConnectionUseCase) {
+            try {
+              connection = await findConnectionUseCase.execute(
+                incident.connectionId
+              );
+            } catch (err) {
+              console.error(
+                `Error fetching connection ${incident.connectionId} for PDF:`,
+                err
+              );
+            }
+          }
+          items.push({ incident, connection });
+        }
+
+        const generator = new NotificationIncidentPdfGenerator();
+        return await generator.generateBlobUrl(items);
+      } catch (err) {
+        console.error('Error generating PDF:', err);
+        return null;
+      }
+    },
+    []
+  );
 
   // ── Estado derivado ───────────────────────────────────────────────────────
   const filteredSorted = useMemo(() => {
@@ -319,6 +413,8 @@ export const useIncidentsViewModel = () => {
     handleTabChange,
     createIncident,
     resolveIncident,
-    refresh
+    refresh,
+    generateNotificationPdf,
+    generateNotificationPdfUrl
   };
 };

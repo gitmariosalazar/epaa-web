@@ -32,17 +32,23 @@ export interface ReadingConfirmationViewModel {
 export const useReadingConfirmationModal = (
   readingInfo: ReadingInfo,
   currentReadingInput: number | '',
-  method: 'create' | 'update'
+  method: 'create' | 'update',
+  previousReadingOverride?: number | ''
 ): ReadingConfirmationViewModel => {
   return useMemo(() => {
-    const previousReading =
-      method === 'create'
+    let previousReading = 0;
+    
+    if (previousReadingOverride !== undefined && previousReadingOverride !== '') {
+      previousReading = Number(previousReadingOverride);
+    } else {
+      previousReading = method === 'create'
         ? Number(
             readingInfo.currentReading !== null
               ? readingInfo.currentReading
               : readingInfo.previousReading
           ) || 0
         : Number(readingInfo.previousReading) || 0;
+    }
 
     const currentReading = Number(currentReadingInput) || 0;
     const consumption = currentReading - previousReading;

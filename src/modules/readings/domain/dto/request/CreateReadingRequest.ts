@@ -15,5 +15,6 @@ export interface CreateReadingRequest {
   averageConsumption: number;
   typeNoveltyReadingId: number;
   previousMonthReading: string;
+  currentMonthReading: string;
   newCurrentReading: number;
 }

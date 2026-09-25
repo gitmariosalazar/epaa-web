@@ -32,4 +32,14 @@ export class GetDashboardKpisByPeriodRepositoryImpl implements GetDashboardKpisB
     >(`/Readings/get-dashboard-kpis-by-year?year=${year}`);
     return response.data.data;
   }
+
+  async getDashboardKpisByYearAndSector(
+    year: number,
+    sector: string
+  ): Promise<DashboardKpiResponse[]> {
+    const response = await this.client.get<ApiResponse<DashboardKpiResponse[]>>(
+      `/Readings/get-dashboard-kpis-by-year-and-sector?year=${year}&sector=${sector}`
+    );
+    return response.data.data;
+  }
 }

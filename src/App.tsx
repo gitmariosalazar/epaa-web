@@ -38,6 +38,7 @@ import { RolesProvider } from '@/modules/roles/presentation/context/RolesContext
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { ReadingsProvider } from '@/modules/readings/presentation/context/ReadingsContext';
 import { CreateReadingPage } from '@/modules/readings/presentation/pages/CreateReadingPage';
+import { CreateHistoricalReadingPage } from '@/modules/readings/presentation/pages/CreateHistoricalReadingPage';
 import { PaymentsProvider } from '@/modules/accounting/presentation/context/payments/PaymentsContext';
 import { PaymentsPage } from '@/modules/accounting/presentation/pages/payments/PaymentsPage';
 import { EntryDataProvider } from '@/modules/accounting/presentation/context/entry-data/EntryDataContext';
@@ -375,6 +376,14 @@ function App() {
                               </RequireElevatedToken>
                             }
                           />
+                          <Route
+                            path="add-historical"
+                            element={
+                              <RequireElevatedToken fallbackMessage="La adición de lecturas históricas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                <CreateHistoricalReadingPage />
+                              </RequireElevatedToken>
+                            }
+                          />
 
 
                           {/* Other reading routes can be added here */}
@@ -385,24 +394,26 @@ function App() {
                   <Route
                     path="/incidents/*"
                     element={
-                      <IncidentProvider>
-                        <Routes>
-                          {/* Ruta raíz → lista */}
-                          <Route index element={<IncidentsPage />} />
-                          {/* Tab: Lista e Incidentes (comparten IncidentsPage, el tab se sincroniza por pathname) */}
-                          <Route path="list" element={<IncidentsPage />} />
-                          <Route path="map" element={<IncidentsPage />} />
-                          {/* Crear incidente (flujo separado) */}
-                          <Route
-                            path="create"
-                            element={
-                              <ReadingsProvider>
-                                <CreateIncidentPage />
-                              </ReadingsProvider>
-                            }
-                          />
-                        </Routes>
-                      </IncidentProvider>
+                      <ConnectionProvider>
+                        <IncidentProvider>
+                          <Routes>
+                            {/* Ruta raíz → lista */}
+                            <Route index element={<IncidentsPage />} />
+                            {/* Tab: Lista e Incidentes (comparten IncidentsPage, el tab se sincroniza por pathname) */}
+                            <Route path="list" element={<IncidentsPage />} />
+                            <Route path="map" element={<IncidentsPage />} />
+                            {/* Crear incidente (flujo separado) */}
+                            <Route
+                              path="create"
+                              element={
+                                <ReadingsProvider>
+                                  <CreateIncidentPage />
+                                </ReadingsProvider>
+                              }
+                            />
+                          </Routes>
+                        </IncidentProvider>
+                      </ConnectionProvider>
                     }
                   />
                   <Route

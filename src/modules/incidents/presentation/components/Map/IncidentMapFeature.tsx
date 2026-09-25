@@ -23,6 +23,7 @@ export interface IncidentMapFeatureProps {
   hasMore?: boolean;
   onPageChange?: (page: number) => void;
   isLoading?: boolean;
+  onPrintNotification?: (incident: IncidentDetailRowResponse) => void;
 }
 
 /**
@@ -46,7 +47,8 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
   totalCount,
   hasMore,
   onPageChange,
-  isLoading
+  isLoading,
+  onPrintNotification
 }) => {
   const { centerLocationIncident, loading, error } =
     useCenterLocationIncident();
@@ -130,6 +132,7 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
           hasMore={hasMore}
           onPageChange={onPageChange}
           isLoading={isLoading}
+          onPrintNotification={onPrintNotification}
         />
 
         <div className="incident-map-view-wrapper">
@@ -143,6 +146,7 @@ export const IncidentMapFeature: React.FC<IncidentMapFeatureProps> = ({
             onViewDetail={onViewDetail}
             onResolve={onResolve}
             onAddWorkOrder={onAddWorkOrder}
+            onPrintNotification={onPrintNotification}
             onCameraChange={(center, zoom) => {
               latestCameraRef.current = {
                 center: {

@@ -15,6 +15,7 @@ export class SearchIncidentsUseCase {
       status?: string | null;
       priority?: string | null;
       categoryId?: number | null;
+      incidentTypeId?: number | null;
       sector?: string | null;
       reference?: string | null;
       reportDate?: Date | null;

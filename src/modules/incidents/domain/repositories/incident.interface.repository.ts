@@ -35,6 +35,7 @@ export interface InterfaceIncidentRepository {
       reference?: string | null;
       reportDate?: Date | null;
       reportRangeDate?: { start: Date; end: Date } | null;
+      incidentTypeId?: number | null;
     },
     limit?: number | null,
     offset?: number | null

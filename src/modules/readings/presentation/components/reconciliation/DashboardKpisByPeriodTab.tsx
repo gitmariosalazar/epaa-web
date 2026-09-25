@@ -46,6 +46,12 @@ interface FormattedKpiData {
   paid: number;
   unpaid: number;
   debt: number;
+  totalAmountToCollect: number;
+  totalAmountToCollectUnpaid: number;
+  totalAmountToCollectPaid: number;
+  totalAmountToCollectOverdue: number;
+  totalAmountToCollectUpcoming: number;
+  totalAmountToCollectCanceled: number;
 }
 
 interface DashboardKpisByPeriodTabProps {
@@ -85,7 +91,13 @@ export const DashboardKpisByPeriodTab: React.FC<
         paidBillsCount: 0,
         unpaidBillsCount: 0,
         sewage: 0,
-        trash: 0
+        trash: 0,
+        totalAmountToCollect: 0,
+        totalAmountToCollectUnpaid: 0,
+        totalAmountToCollectPaid: 0,
+        totalAmountToCollectOverdue: 0,
+        totalAmountToCollectUpcoming: 0,
+        totalAmountToCollectCanceled: 0
       };
 
       const aggregated = data.reduce((acc, curr) => {
@@ -100,6 +112,12 @@ export const DashboardKpisByPeriodTab: React.FC<
         acc.unpaidBillsCount += Number(curr.unpaidBillsCount) || 0;
         acc.sewage += Number(curr.totalSewageValue) || 0;
         acc.trash += Number(curr.totalTrashRate) || 0;
+        acc.totalAmountToCollect += Number(curr.totalAmountToCollect) || 0;
+        acc.totalAmountToCollectUnpaid += Number(curr.totalAmountToCollectUnpaid) || 0;
+        acc.totalAmountToCollectPaid += Number(curr.totalAmountToCollectPaid) || 0;
+        acc.totalAmountToCollectOverdue += Number(curr.totalAmountToCollectOverdue) || 0;
+        acc.totalAmountToCollectUpcoming += Number(curr.totalAmountToCollectUpcoming) || 0;
+        acc.totalAmountToCollectCanceled += Number(curr.totalAmountToCollectCanceled) || 0;
         return acc;
       }, initialTotals);
 
@@ -113,7 +131,13 @@ export const DashboardKpisByPeriodTab: React.FC<
           billed: Number(item.totalBilledWater) || 0,
           paid: Number(item.totalPaidWater) || 0,
           unpaid: Number(item.totalUnpaidWater) || 0,
-          debt: Number(item.totalDebtAmount) || 0
+          debt: Number(item.totalDebtAmount) || 0,
+          totalAmountToCollect: Number(item.totalAmountToCollect) || 0,
+          totalAmountToCollectUnpaid: Number(item.totalAmountToCollectUnpaid) || 0,
+          totalAmountToCollectPaid: Number(item.totalAmountToCollectPaid) || 0,
+          totalAmountToCollectOverdue: Number(item.totalAmountToCollectOverdue) || 0,
+          totalAmountToCollectUpcoming: Number(item.totalAmountToCollectUpcoming) || 0,
+          totalAmountToCollectCanceled: Number(item.totalAmountToCollectCanceled) || 0
         }))
         .sort((a, b) => a.sectorNum - b.sectorNum);
 
@@ -134,6 +158,8 @@ export const DashboardKpisByPeriodTab: React.FC<
       currency: 'USD'
     }).format(value);
   };
+
+  console.log("formattedData", formattedData)
 
   const columns: Column<FormattedKpiData>[] = useMemo(
     () => [
@@ -268,9 +294,9 @@ export const DashboardKpisByPeriodTab: React.FC<
   }
 
   const revenueDistributionData = [
-    { name: 'Agua', value: totals?.totalBilled || 0 },
-    { name: 'Alcantarillado', value: totals?.sewage || 0 },
-    { name: 'Basura', value: totals?.trash || 0 }
+    { name: 'Agua', value: totals?.totalBilled || 0, textColor: '#667eea' },
+    { name: 'Alcantarillado', value: totals?.sewage || 0, textColor: 'green' },
+    { name: 'Basura', value: totals?.trash || 0, textColor: '#f59e0b' }
   ];
 
   const renderMainChart = (dataSubset: any[], titleSuffix: string) => {
@@ -518,8 +544,8 @@ export const DashboardKpisByPeriodTab: React.FC<
                       backgroundColor: 'var(--surface)',
                       borderColor: 'var(--border-color)',
                       borderRadius: '8px',
-                      color: 'var(--text-main)'
                     }}
+                    itemStyle={{ color: 'var(--text-primary)' }}
                   />
                   <Legend verticalAlign="bottom" height={36} />
                 </PieChart>
@@ -660,9 +686,72 @@ export const DashboardKpisByPeriodTab: React.FC<
         </div>
       </div>
 
+      <div className="chart-container large-chart glass-panel" style={{ marginTop: '20px' }}>
+        <h3 className="chart-title">
+          Evolución del Estado de Cartera (Cobros)
+        </h3>
+        <div className="chart-wrapper" style={{ height: '350px', marginTop: '20px' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart
+              data={formattedData}
+              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient id="colorTotalCollect" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} opacity={0.4} />
+              <XAxis
+                dataKey="name"
+                stroke="var(--text-secondary)"
+                tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
+                tickMargin={10}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                stroke="var(--text-secondary)"
+                tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                axisLine={false}
+                tickLine={false}
+                width={80}
+              />
+              <RechartsTooltip
+                contentStyle={{
+                  backgroundColor: 'var(--surface)',
+                  borderColor: 'var(--border-color)',
+                  borderRadius: '12px',
+                  color: 'var(--text-main)',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                  padding: '12px'
+                }}
+                formatter={(value: number) => formatCurrency(value)}
+                cursor={{ fill: 'var(--border-color)', opacity: 0.2 }}
+              />
+              <Legend wrapperStyle={{ paddingTop: '20px' }} iconType="circle" />
+              <Area
+                type="monotone"
+                dataKey="totalAmountToCollect"
+                name="Total a Cobrar"
+                stroke="#3b82f6"
+                strokeWidth={3}
+                fillOpacity={1}
+                fill="url(#colorTotalCollect)"
+              />
+              <Bar dataKey="totalAmountToCollectPaid" name="Pagado" stackId="a" fill="#10b981" radius={[0, 0, 4, 4]} barSize={24} />
+              <Bar dataKey="totalAmountToCollectUnpaid" name="Pendiente" stackId="a" fill="#f59e0b" />
+              <Bar dataKey="totalAmountToCollectOverdue" name="Vencido" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]} />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
       <div
         className="table-container chart-container glass-panel"
-        style={{ marginTop: '10px' }}
+        style={{ marginTop: '20px' }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
           <h3 className="chart-title" style={{ margin: 0 }}>

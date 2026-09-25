@@ -1,0 +1,134 @@
+import React from 'react';
+import { FaSave, FaTimes, FaSearch, FaEye } from 'react-icons/fa';
+import { InputCadastralKey } from '@/shared/presentation/components/Input/InputCadastralKey';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import type { ReadingInfo } from '../../domain/models/ReadingInfoResponse';
+import { GrClear } from 'react-icons/gr';
+import { FaSchoolLock } from 'react-icons/fa6';
+import { useTranslation } from 'react-i18next';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+
+interface HistoricalReadingToolbarProps {
+  cadastralKeyInput: string;
+  setCadastralKeyInput: (val: string) => void;
+  selectedMonth: string;
+  setSelectedMonth: (val: string) => void;
+  handleSearch: () => void;
+  handleSave: () => void;
+  handleCancel: () => void;
+  isLoadingInfo: boolean;
+  isSubmitting: boolean;
+  readingInfo: ReadingInfo | null;
+  method: 'create' | 'update';
+  onViewLastReading?: (cadastralKey: string, readingDate: Date | null) => void;
+  isHistorical: boolean;
+}
+
+export const HistoricalReadingToolbar: React.FC<HistoricalReadingToolbarProps> = ({
+  cadastralKeyInput,
+  setCadastralKeyInput,
+  handleSearch,
+  handleSave,
+  handleCancel,
+  isLoadingInfo,
+  isSubmitting,
+  readingInfo,
+  method,
+  onViewLastReading,
+  isHistorical
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="cr-toolbar" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+      {/* Search Area */}
+      <form
+        className="cr-search-area"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSearch();
+        }}
+        style={{ display: 'flex', gap: '10px', alignItems: 'center' }}
+      >
+        <InputCadastralKey
+          className="entry-filter-input"
+          placeholder="Clave catastral (Ej: 12-364)"
+          value={cadastralKeyInput}
+          onChange={(val) => setCadastralKeyInput(val)}
+          leftIcon={<FaSchoolLock />}
+          size="small"
+          required={true}
+        />
+        <Button
+          type="submit"
+          className="cr-search-btn"
+          disabled={isLoadingInfo}
+          leftIcon={<FaSearch />}
+          size="xs"
+        >
+          {isLoadingInfo ? t('common.searching') : t('common.search')}
+        </Button>
+      </form>
+
+      {/* Action Buttons Area */}
+      <div className="cr-actions">
+        <Button
+          className="cr-action-btn"
+          color="success"
+          onClick={handleSave}
+          disabled={
+            isHistorical ? false :
+              method === 'create'
+                ? !readingInfo?.hasCurrentReading || isSubmitting
+                : !readingInfo || !readingInfo?.permitReading || isSubmitting
+          }
+          leftIcon={<FaSave />}
+          size="xs"
+        >
+          {isSubmitting ? 'Guardando...' : 'Guardar'}
+        </Button>
+        <Button
+          className="cr-action-btn"
+          color="error"
+          onClick={handleCancel}
+          disabled={!readingInfo}
+          leftIcon={<FaTimes />}
+          size="xs"
+        >
+          Cancelar
+        </Button>
+
+        <Button
+          className="cr-action-btn"
+          color="warning"
+          onClick={handleCancel}
+          disabled={!readingInfo}
+          leftIcon={<GrClear />}
+          size="xs"
+        >
+          Limpiar
+        </Button>
+        <Tooltip
+          content={'Ver detalle de la ultima lectura realizada'}
+          followCursor={false}
+        >
+          <Button
+            className="cr-action-btn"
+            color="primary"
+            onClick={() =>
+              onViewLastReading &&
+              onViewLastReading(
+                readingInfo?.cadastralKey!,
+                new Date(readingInfo?.readingDate!)
+              )
+            }
+            disabled={!readingInfo}
+            leftIcon={<FaEye />}
+            size="xs"
+            circle
+          ></Button>
+        </Tooltip>
+      </div>
+    </div>
+  );
+};

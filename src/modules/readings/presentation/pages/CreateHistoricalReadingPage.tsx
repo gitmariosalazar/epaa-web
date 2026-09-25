@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useReading } from '../hooks/useReading';
+import { useReadingsContext } from '../context/ReadingsContext';
 import { ReadingSummaryCards } from '../components/ReadingSummaryCards';
-import { ReadingCreateInfoForm } from '../components/ReadingCreateInfoForm';
+import { HistoricalReadingCreateInfoForm } from '../components/HistoricalReadingCreateInfoForm';
 import { AdditionalInfoAccordion } from '../components/AdditionalInfoAccordion';
 import { ReadingHistoryTable } from '../components/ReadingHistoryTable';
-import { ReadingToolbar } from '../components/ReadingToolbar';
+import { HistoricalReadingToolbar } from '../components/HistoricalReadingToolbar';
 import { ReadingConfirmationModal } from '../components/ReadingConfirmationModal';
 import '../styles/create-reading.css';
 import {
@@ -26,13 +27,18 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
 
-export interface CreateReadingPageProps {
+export interface CreateHistoricalReadingPageProps {
   initialCadastralKey?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
+const monthMap: Record<string, number> = {
+  'ENERO': 1, 'FEBRERO': 2, 'MARZO': 3, 'ABRIL': 4, 'MAYO': 5, 'JUNIO': 6,
+  'JULIO': 7, 'AGOSTO': 8, 'SEPTIEMBRE': 9, 'OCTUBRE': 10, 'NOVIEMBRE': 11, 'DICIEMBRE': 12
+};
+
+export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPageProps> = ({
   initialCadastralKey,
   onSuccess,
   onCancel
@@ -49,11 +55,16 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
     error
   } = useReading();
 
+  const { getReadingHistoryUseCase } = useReadingsContext();
+
   const [cadastralKeyInput, setCadastralKeyInput] = useState('');
-  const [currentReadingInput, setCurrentReadingInput] = useState<number | ''>(
-    ''
-  );
+  const [previousReadingInput, setPreviousReadingInput] = useState<number | ''>('');
+  const [currentReadingInput, setCurrentReadingInput] = useState<number | ''>('');
   const [observationInput, setObservationInput] = useState('');
+
+  // Empty initially, computed automatically on search
+  const [selectedMonth, setSelectedMonth] = useState<string>('');
+  const [isSearching, setIsSearching] = useState(false);
 
   // ── Estado del modal de confirmación ──────────────────────────────────────
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -64,9 +75,20 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
     const keyToLoad = initialCadastralKey || location.state?.cadastralKey;
     if (keyToLoad) {
       setCadastralKeyInput(keyToLoad as string);
-      fetchReadingData(keyToLoad as string);
+      // We need to trigger the full search logic if loaded from props
+      handleSearch(keyToLoad as string);
     }
   }, [initialCadastralKey, location.state?.cadastralKey]);
+
+  useEffect(() => {
+    if (readingInfo.length > 0) {
+      setPreviousReadingInput(
+        readingInfo[0].currentReading !== null
+          ? readingInfo[0].currentReading
+          : readingInfo[0].previousReading
+      );
+    }
+  }, [readingInfo]);
 
 
   // ── Helpers ───────────────────────────────────────────────────────────────
@@ -79,11 +101,7 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
     account: readingInfoForRequest.account,
     cadastralKey: readingInfoForRequest.cadastralKey,
     sewerRate: 0,
-    previousReading: Number(
-      readingInfoForRequest.currentReading !== null
-        ? readingInfoForRequest.currentReading
-        : readingInfoForRequest.previousReading
-    ),
+    previousReading: Number(previousReadingInput),
     currentReading: Number(currentReadingInput),
     newCurrentReading: Number(currentReadingInput),
     incomeCode: 0,
@@ -94,14 +112,16 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
     novelty: observationInput,
     averageConsumption: Number(readingInfoForRequest.averageConsumption),
     typeNoveltyReadingId: 1,
-    currentMonthReading: readingInfoForRequest.monthReading,
+    currentMonthReading: selectedMonth,
     previousMonthReading: readingInfoForRequest.monthReading
   });
 
+
   // ── Handlers ──────────────────────────────────────────────────────────────
 
-  const handleSearch = () => {
-    if (!cadastralKeyInput.trim()) {
+  const handleSearch = async (overrideKey?: string) => {
+    const searchKey = overrideKey || cadastralKeyInput.trim();
+    if (!searchKey) {
       MessageToastCustom(
         'error',
         'Ingrese una clave catastral para buscar.',
@@ -113,7 +133,42 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
 
     setCurrentReadingInput('');
     setObservationInput('');
-    fetchReadingData(cadastralKeyInput.trim());
+    setIsSearching(true);
+
+    try {
+      // 1. Fetch history to compute the next month
+      const history = await getReadingHistoryUseCase.execute(searchKey, 1, 0);
+      let targetMonthStr = '';
+
+      if (history && history.length > 0) {
+        const latest = history[0];
+        const monthNum = monthMap[latest.readingMonth.toUpperCase()] || 0;
+        if (monthNum > 0) {
+          let nextMonthNum = monthNum + 1;
+          let nextYear = latest.readingYear;
+          if (nextMonthNum > 12) {
+            nextMonthNum = 1;
+            nextYear += 1;
+          }
+          targetMonthStr = `${nextYear}-${String(nextMonthNum).padStart(2, '0')}`;
+        }
+      }
+
+      // If we couldn't compute it (e.g. no history or parsing failed), fallback to current month
+      if (!targetMonthStr) {
+        const d = new Date();
+        targetMonthStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      }
+
+      setSelectedMonth(targetMonthStr);
+      await fetchReadingData(searchKey, targetMonthStr);
+    } catch (e) {
+      console.error("Error computing historical month", e);
+      // Fallback
+      await fetchReadingData(searchKey);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   /**
@@ -138,7 +193,10 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
    */
   const handleConfirm = async () => {
     try {
-      const result = await submitReading(buildRequest());
+      const requestPayload = buildRequest();
+      console.log('🚀 ENVIANDO AL BACKEND:', JSON.stringify(requestPayload, null, 2));
+
+      const result = await submitReading(requestPayload);
       setIsConfirmModalOpen(false);
 
       if (result) {
@@ -147,7 +205,7 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
           onSuccess();
           return;
         }
-        await fetchReadingData(cadastralKeyInput);
+        await fetchReadingData(cadastralKeyInput, selectedMonth);
         setCurrentReadingInput('');
         setObservationInput('');
       }
@@ -169,9 +227,6 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
-
-
-
 
   const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
     isOpen: false,
@@ -198,7 +253,7 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
     <div className="cr-container">
       <div className="cr-content-wrapper">
         <div className="cr-header-container">
-          <h2 className="cr-page-title">Registro de Lecturas</h2>
+          <h2 className="cr-page-title">Registro de Lecturas Históricas</h2>
 
           {readingInfoForRequest && (
             <div className="cr-client-badge">
@@ -215,17 +270,20 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
           )}
         </div>
 
-        <ReadingToolbar
+        <HistoricalReadingToolbar
           cadastralKeyInput={cadastralKeyInput}
           setCadastralKeyInput={setCadastralKeyInput}
+          selectedMonth={selectedMonth}
+          setSelectedMonth={setSelectedMonth}
           handleSearch={handleSearch}
           handleSave={handleSave}
           handleCancel={handleCancel}
-          isLoadingInfo={isLoadingInfo}
+          isLoadingInfo={isLoadingInfo || isSearching}
           isSubmitting={isSubmitting}
           readingInfo={readingInfoForRequest}
           method="create"
           onViewLastReading={handleViewDetails}
+          isHistorical={true}
         />
 
         {/* ── Estado de la conexión ─────────────────────────────────────────── */}
@@ -360,24 +418,20 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
               <EmptyState
                 variant='warning'
                 message="No se encontraron resultados"
-                description={`No se han encontrado datos para el predio con clave catastral "${cadastralKeyInput.toUpperCase()}".`}
+                description={`No se han encontrado datos para el predio con clave catastral "${cadastralKeyInput.toUpperCase()}" en el periodo seleccionado.`}
               />
             ) : (
               <Alert
                 type="info"
                 title="Buscar Conexión"
-                message="Ingrese la clave catastral en la barra superior y presione buscar para cargar los datos."
+                message="Seleccione el mes y año, ingrese la clave catastral y presione buscar para cargar los datos históricos."
               />
             )}
           </div>
         )}
 
-
-
         {readingInfoForRequest?.permitReading && (
           <>
-
-
             {readingInfoForRequest && (
               <>
                 <ReadingSummaryCards
@@ -387,12 +441,16 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
                   permitCreate={readingInfoForRequest.hasCurrentReading}
                 />
 
-                <ReadingCreateInfoForm
+                <HistoricalReadingCreateInfoForm
                   info={readingInfo}
+                  previousReadingInput={previousReadingInput}
+                  setPreviousReadingInput={setPreviousReadingInput}
                   currentReadingInput={currentReadingInput}
                   setCurrentReadingInput={setCurrentReadingInput}
                   observationInput={observationInput}
                   setObservationInput={setObservationInput}
+                  selectedMonth={selectedMonth}
+                  setSelectedMonth={setSelectedMonth}
                 />
               </>
             )}
@@ -424,7 +482,6 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
         yearAndMonth={detailModalState.yearAndMonth}
       />
 
-
       {/* ── Modal de confirmación ─────────────────────────────────────────── */}
       {readingInfoForRequest && (
         <ReadingConfirmationModal
@@ -432,6 +489,7 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
           onClose={handleCloseModal}
           onConfirm={handleConfirm}
           readingInfo={readingInfoForRequest}
+          previousReadingInput={previousReadingInput}
           currentReadingInput={currentReadingInput}
           observationInput={observationInput}
           isSubmitting={isSubmitting}

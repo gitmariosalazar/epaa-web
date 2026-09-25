@@ -24,4 +24,14 @@ export class GetDashboardKpisByPeriodUseCase {
   async executeByYear(year: number): Promise<DashboardKpiAnnualSqlResponse[]> {
     return this.getDashboardKpisByPeriodRepository.getDashboardKpisByYear(year);
   }
+
+  async executeByYearAndSector(
+    year: number,
+    sector: string
+  ): Promise<DashboardKpiResponse[]> {
+    return this.getDashboardKpisByPeriodRepository.getDashboardKpisByYearAndSector(
+      year,
+      sector
+    );
+  }
 }

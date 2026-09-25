@@ -28,7 +28,7 @@ import {
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { KPICard } from '@/shared/presentation/components/Card/KPICard';
-import type { DashboardKpiAnnualSqlResponse } from '@/modules/readings/domain/models/reading-kpi';
+import type { DashboardKpiResponse } from '@/modules/readings/domain/models/reading-kpi';
 import './DashboardKpisByPeriodTab.css';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic-lights.colors';
@@ -38,7 +38,8 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 
 interface FormattedKpiData {
   name: string;
-  sectorNum: number;
+  monthText: string;
+  monthIndex: number;
   consumption: number;
   avgConsumption: number;
   meters: number;
@@ -54,29 +55,28 @@ interface FormattedKpiData {
   totalAmountToCollectCanceled: number;
 }
 
-interface DashboardKpisByYearTabProps {
-  data: DashboardKpiAnnualSqlResponse[] | null;
+interface DashboardKpisBySectorYearTabProps {
+  data: DashboardKpiResponse[] | null;
   isLoading: boolean;
   onRefresh: () => void;
 }
 
 const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
 
-export const DashboardKpisByYearTab: React.FC<
-  DashboardKpisByYearTabProps
+export const DashboardKpisBySectorYearTab: React.FC<
+  DashboardKpisBySectorYearTabProps
 > = ({ data, isLoading }) => {
   const [activeMetric, setActiveMetric] = useState<'consumption' | 'financial'>(
     'consumption'
   );
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { totals, chartData1To20, chartData21To40, formattedData } =
+  const { totals, chartData1To20, formattedData } =
     useMemo(() => {
       if (!data || data.length === 0)
         return {
           totals: null,
           chartData1To20: [],
-          chartData21To40: [],
           formattedData: []
         };
 
@@ -121,10 +121,16 @@ export const DashboardKpisByYearTab: React.FC<
         return acc;
       }, initialTotals);
 
+      const monthOrder = [
+        'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
+        'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+      ];
+
       const formattedData = data
         .map((item) => ({
-          name: `Sect. ${item.sector}`,
-          sectorNum: Number(item.sector) || 0,
+          name: item.month ? item.month.substring(0, 3) : '',
+          monthText: item.month,
+          monthIndex: monthOrder.indexOf(item.month),
           consumption: Number(item.totalConsumptionM3) || 0,
           avgConsumption: Number(item.averageConsumptionM3) || 0,
           meters: Number(item.totalMetersRead) || 0,
@@ -139,15 +145,13 @@ export const DashboardKpisByYearTab: React.FC<
           totalAmountToCollectUpcoming: Number(item.totalAmountToCollectUpcoming) || 0,
           totalAmountToCollectCanceled: Number(item.totalAmountToCollectCanceled) || 0
         }))
-        .sort((a, b) => a.sectorNum - b.sectorNum);
+        .sort((a, b) => a.monthIndex - b.monthIndex);
 
-      const chartData1To20 = formattedData.filter((d) => d.sectorNum <= 20);
-      const chartData21To40 = formattedData.filter((d) => d.sectorNum > 20);
+      const chartData1To20 = formattedData;
 
       return {
         totals: aggregated,
         chartData1To20,
-        chartData21To40,
         formattedData
       };
     }, [data]);
@@ -161,7 +165,7 @@ export const DashboardKpisByYearTab: React.FC<
 
   const columns: Column<FormattedKpiData>[] = useMemo(
     () => [
-      { header: 'Sector', accessor: 'name', sortable: true },
+      { header: 'Mes', accessor: 'monthText', sortable: true },
       {
         header: 'Lecturas',
         accessor: 'meters',
@@ -211,7 +215,7 @@ export const DashboardKpisByYearTab: React.FC<
         id: 'unpaid'
       },
       {
-        header: 'Total Cobrar',
+        header: 'Total Deuda Histórica',
         accessor: (item: FormattedKpiData) => (
           <ColorChip label={formatCurrency(item.totalAmountToCollect)} size='xs' color={'cyan'} variant="ghost" />
         ),
@@ -353,8 +357,8 @@ export const DashboardKpisByYearTab: React.FC<
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return formattedData;
-    return formattedData.filter(item =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    return formattedData.filter((item) =>
+      item.monthText.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [formattedData, searchTerm]);
 
@@ -591,12 +595,11 @@ export const DashboardKpisByYearTab: React.FC<
         <div className="chart-container large-chart glass-panel">
           <h3 className="chart-title">
             {activeMetric === 'consumption'
-              ? 'Consumo por Sector (m³)'
-              : 'Facturado vs Recaudado por Sector'}
+              ? 'Consumo por Mes (m³)'
+              : 'Facturado vs Recaudado por Mes'}
           </h3>
 
-          {renderMainChart(chartData1To20, 'Sectores 1 al 20')}
-          {renderMainChart(chartData21To40, 'Sectores 21 al 40')}
+          {renderMainChart(chartData1To20, '')}
         </div>
 
         <div className="secondary-charts-container">
@@ -777,7 +780,7 @@ export const DashboardKpisByYearTab: React.FC<
         <div className="chart-wrapper" style={{ height: '350px', marginTop: '20px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
-              data={formattedData}
+              data={chartData1To20}
               margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
             >
               <defs>
@@ -839,16 +842,16 @@ export const DashboardKpisByYearTab: React.FC<
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
           <h3 className="chart-title" style={{ margin: 0 }}>
-            Detalle por Sector
+            Detalle por Mes
           </h3>
           <Input
-            placeholder="Buscar por sector..."
+            placeholder="Buscar por mes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             leftIcon={<Search size={16} />}
             style={{ width: '170px' }}
             size="small"
-            type="number"
+            type="text"
           />
         </div>
         <Table

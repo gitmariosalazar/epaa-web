@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AlertTriangle, ChevronLeft, ChevronRight, Printer } from 'lucide-react';
 import type { IncidentDetailRowResponse } from '../../../domain/schemas/dtos/response/view_incident.response';
 import {
   PRIORITY_CONFIG,
@@ -34,6 +34,7 @@ interface IncidentMapSidePanelProps {
   hasMore?: boolean;
   onPageChange?: (page: number) => void;
   isLoading?: boolean;
+  onPrintNotification?: (incident: IncidentDetailRowResponse) => void;
 }
 
 /**
@@ -51,13 +52,17 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
   collapsed,
   onToggle,
   page,
+
   pageSize,
   totalCount,
   hasMore,
   onPageChange,
-  isLoading
+  isLoading,
+  onPrintNotification
 }) => {
   const [search, setSearch] = useState('');
+
+
 
   const filteredIncidents = useMemo(() => {
     if (!search.trim()) return incidents;
@@ -368,6 +373,28 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                         >
                         </Button>
                       </Tooltip>
+
+                      {(incident.incidentTypeName.includes('clandestino') || incident.incidentTypeName.includes('CONEXIÓN') || incident.incidentTypeName.includes('CLANDESTINA') || incident.incidentTypeName.includes('CONEXIÓN CLANDESTINA')) && (
+                        <Tooltip
+                          themeColor="danger"
+                          content="Generar Notificación PDF"
+                          position="bottom"
+                          followCursor={false}
+                        >
+                          <Button
+                            variant="dashed"
+                            color="red"
+                            size="xs"
+                            leftIcon={<Printer size={16} />}
+                            circle
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onPrintNotification?.(incident);
+                            }}
+                          >
+                          </Button>
+                        </Tooltip>
+                      )}
 
                       <Tooltip
                         themeColor="warning"

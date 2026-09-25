@@ -25,6 +25,7 @@ interface IncidentContextType {
     status?: string | null;
     priority?: string | null;
     categoryId?: number | null;
+    incidentTypeId?: number | null;
     sector?: string | null;
     reference?: string | null;
     reportDate?: Date | null;
@@ -62,6 +63,7 @@ export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }
       status?: string | null;
       priority?: string | null;
       categoryId?: number | null;
+      incidentTypeId?: number | null;
       sector?: string | null;
       reference?: string | null;
       reportDate?: Date | null;

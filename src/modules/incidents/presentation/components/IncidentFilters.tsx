@@ -11,6 +11,8 @@ import { Divider } from '@/shared/presentation/components/divider/Divider';
 import { FaFilter } from 'react-icons/fa';
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import { DateRangePicker } from '@/shared/presentation/components/DatePicker/DateRangePicker';
+import { FcPrint } from 'react-icons/fc';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 interface IncidentFiltersProps {
   searchQuery: string;
@@ -29,6 +31,7 @@ interface IncidentFiltersProps {
   isLoading: boolean;
   reportRangeDate: { start: string; end: string } | null;
   onReportRangeDateChange: (start: string, end: string) => void;
+  onPrintAllNotifications?: () => void;
 }
 
 const SEARCH_FIELDS = [
@@ -56,6 +59,10 @@ const SEARCH_FIELDS = [
     value: 'reportRangeDate',
     labelKey: 'common.reportRangeDate',
     labelDefault: 'Rango de fechas'
+  }, {
+    value: 'incident_type',
+    labelKey: 'common.incidentType',
+    labelDefault: 'Tipo de Incidente'
   }
 ];
 
@@ -74,12 +81,13 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
   onConsultar,
   isLoading,
   reportRangeDate,
-  onReportRangeDateChange
+  onReportRangeDateChange,
+  onPrintAllNotifications
 }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="incident-filters-wrapper">
+    <div className="incident-filters-wrapper incident-filters-wrapper--print">
       <div className="incident-filters-body">
         {/* Search */}
         <div className="filter-group filter-group--search">
@@ -115,12 +123,13 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
 
         <div className="filter-group">
           <label className="filter-label">{
-            searchField === 'reportDate' ? t('common.reportDate', 'Fecha de reporte') : 
-            searchField === 'reportRangeDate' ? t('common.reportRangeDate', 'Rango de fechas') :
-            searchField === 'sector' ? t('common.sector', 'Sector') : 
-            searchField === 'reference' ? t('common.reference', 'Referencia') : 
-            searchField === 'connectionId' ? t('common.connectionId', 'ID Acometida') : 
-            t('common.search', 'Búsqueda')
+            searchField === 'reportDate' ? t('common.reportDate', 'Fecha de reporte') :
+              searchField === 'reportRangeDate' ? t('common.reportRangeDate', 'Rango de fechas') :
+                searchField === 'sector' ? t('common.sector', 'Sector') :
+                  searchField === 'reference' ? t('common.reference', 'Referencia') :
+                    searchField === 'connectionId' ? t('common.connectionId', 'ID Acometida') :
+                      searchField === 'incident_type' ? t('common.incidentType', 'Tipo de Incidente') :
+                        t('common.search', 'Búsqueda')
           }</label>
           {
             searchField === 'reportDate' ? (
@@ -138,6 +147,20 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
                   onChange={(start, end) => onReportRangeDateChange(start, end)}
                 />
               </div>
+            ) : searchField === 'incident_type' ? (
+              <Select
+                size="small"
+                value={searchQuery}
+                onChange={(e) => onSearchQueryChange(e.target.value)}
+                leftIcon={<MdCategory size={18} />}
+              >
+                <option value="">{t('incidents.filters.allIncidentTypes', 'Todos los tipos')}</option>
+                {categories.flatMap(c => c.incidentTypes || []).map((type) => (
+                  <option key={type.typeCode} value={type.typeCode}>
+                    {type.typeName}
+                  </option>
+                ))}
+              </Select>
             ) : (
               <Input
                 type={'text'}
@@ -213,13 +236,28 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
         </div>
         <Button
           variant="outline"
-          size="small"
+          size="xs"
           onClick={onConsultar}
           isLoading={isLoading}
           leftIcon={<RefreshCw size={16} />}
         >
           {t('common.consult', 'Consultar')}
         </Button>
+      </div>
+      <div className="button-container-print">
+        <Tooltip content={'Imprimir notificaciones de medidores Clandestinos.'} position="top"
+          followCursor={false}
+        >
+          <Button
+            variant="ghost"
+            size="small"
+            onClick={onPrintAllNotifications}
+            isLoading={isLoading}
+            leftIcon={<FcPrint size={16} />}
+            iconOnly
+            circle
+          />
+        </Tooltip>
       </div>
     </div>
   );

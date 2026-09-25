@@ -4,7 +4,7 @@ import type { ReconciliationSummary } from '../../domain/models/lecturas-reconci
 import type { DashboardKpiResponse, DashboardKpiAnnualSqlResponse } from '../../domain/models/reading-kpi';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
-export type ReadingsDashboardTab = 'dashboard-kpi-month' | 'dashboard-kpi-year';
+export type ReadingsDashboardTab = 'dashboard-kpi-month' | 'dashboard-kpi-year' | 'dashboard-kpi-sector-year';
 
 export const useReadingsDashboardViewModel = (initialMonth?: string) => {
   const repo = useReadingsReconciliation();
@@ -40,6 +40,12 @@ export const useReadingsDashboardViewModel = (initialMonth?: string) => {
   // State for Dashboard KPIs Annual Tab
   const [dashboardKpisAnnualData, setDashboardKpisAnnualData] = useState<
     DashboardKpiAnnualSqlResponse[] | null
+  >(null);
+
+  // State for Dashboard KPIs Sector Year Tab
+  const [dashboardSelectedSector, setDashboardSelectedSector] = useState<string>('1');
+  const [dashboardKpisSectorYearData, setDashboardKpisSectorYearData] = useState<
+    DashboardKpiResponse[] | null
   >(null);
 
   // State for Basic Summary Tab
@@ -108,14 +114,27 @@ export const useReadingsDashboardViewModel = (initialMonth?: string) => {
     if (result) setDashboardKpisAnnualData(result);
   }, [dashboardSelectedYear, repo]);
 
+  // Actions for Dashboard KPIs Sector Year
+  const fetchDashboardKpisSectorYear = useCallback(async () => {
+    if (!dashboardSelectedYear || !dashboardSelectedSector) return;
+
+    const result = await repo.getDashboardKpisByYearAndSector(
+      parseInt(dashboardSelectedYear),
+      dashboardSelectedSector
+    );
+    if (result) setDashboardKpisSectorYearData(result);
+  }, [dashboardSelectedYear, dashboardSelectedSector, repo]);
+
   // Fetch data for the active tab when refresh is clicked
   const fetchAllData = useCallback(async () => {
     if (activeTab === 'dashboard-kpi-month') {
       await fetchDashboardKpis();
     } else if (activeTab === 'dashboard-kpi-year') {
       await fetchDashboardKpisAnnual();
+    } else if (activeTab === 'dashboard-kpi-sector-year') {
+      await fetchDashboardKpisSectorYear();
     }
-  }, [activeTab, fetchDashboardKpis, fetchDashboardKpisAnnual]);
+  }, [activeTab, fetchDashboardKpis, fetchDashboardKpisAnnual, fetchDashboardKpisSectorYear]);
 
   // Automatic fetches based on tab switching
   const handleFetchData = useCallback(() => {
@@ -123,7 +142,8 @@ export const useReadingsDashboardViewModel = (initialMonth?: string) => {
       fetchDashboardKpis();
     }
     if (activeTab === 'dashboard-kpi-year') fetchDashboardKpisAnnual();
-  }, [activeTab, fetchDashboardKpis, fetchDashboardKpisAnnual]);
+    if (activeTab === 'dashboard-kpi-sector-year') fetchDashboardKpisSectorYear();
+  }, [activeTab, fetchDashboardKpis, fetchDashboardKpisAnnual, fetchDashboardKpisSectorYear]);
 
   return {
     activeTab,
@@ -144,6 +164,11 @@ export const useReadingsDashboardViewModel = (initialMonth?: string) => {
     setDashboardSelectedYear,
     dashboardKpisAnnualData,
     fetchDashboardKpisAnnual,
+
+    dashboardSelectedSector,
+    setDashboardSelectedSector,
+    dashboardKpisSectorYearData,
+    fetchDashboardKpisSectorYear,
 
     handleFetchData,
 

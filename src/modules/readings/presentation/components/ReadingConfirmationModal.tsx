@@ -43,6 +43,7 @@ interface ReadingConfirmationModalProps {
   onClose: () => void;
   onConfirm: () => void;
   readingInfo: ReadingInfo;
+  previousReadingInput?: number | '';
   currentReadingInput: number | '';
   observationInput: string;
   isSubmitting: boolean;
@@ -283,6 +284,7 @@ export const ReadingConfirmationModal: React.FC<
   onClose,
   onConfirm,
   readingInfo,
+  previousReadingInput,
   currentReadingInput,
   observationInput,
   isSubmitting,
@@ -291,7 +293,8 @@ export const ReadingConfirmationModal: React.FC<
   const viewModel = useReadingConfirmationModal(
     readingInfo,
     currentReadingInput,
-    method
+    method,
+    previousReadingInput
   );
 
   return (
