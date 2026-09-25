@@ -190,8 +190,8 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
               />
             )}
             {withCoords.map((incident, idx) => {
-              const pCfg =
-                PRIORITY_CONFIG[incident.currentPriority] ?? DEFAULT_CONFIG;
+              const priority = incident.currentPriority ?? incident.suggestedPriority ?? 'BAJA';
+              const pCfg = PRIORITY_CONFIG[priority] ?? DEFAULT_CONFIG;
               const sCfg = STATUS_CONFIG[incident.status] ?? {
                 color: '#6b7280',
                 label: incident.status
@@ -374,7 +374,7 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
                         </Button>
                       </Tooltip>
 
-                      {(incident.incidentTypeName.includes('clandestino') || incident.incidentTypeName.includes('CONEXIÓN') || incident.incidentTypeName.includes('CLANDESTINA') || incident.incidentTypeName.includes('CONEXIÓN CLANDESTINA')) && (
+                      {(incident.incidentTypeName.includes('clandestino') || incident.incidentTypeName.includes('Bypass') || incident.incidentTypeName.includes('CLANDESTINA') || incident.incidentTypeName.includes('CONEXIÓN CLANDESTINA')) && (
                         <Tooltip
                           themeColor="danger"
                           content="Generar Notificación PDF"

@@ -271,7 +271,7 @@ export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
             {/* Botones de Acción right */}
             <div className="card-incidents-actions">
               {
-                (incident.incidentTypeName.includes('clandestino') || incident.incidentTypeName.includes('CONEXIÓN') || incident.incidentTypeName.includes('CLANDESTINA') || incident.incidentTypeName.includes('CONEXIÓN CLANDESTINA')) && (
+                (incident.incidentTypeName.includes('clandestino') || incident.incidentTypeName.includes('Bypass') || incident.incidentTypeName.includes('CLANDESTINA') || incident.incidentTypeName.includes('CONEXIÓN CLANDESTINA')) && (
                   <Tooltip
                     themeColor="danger"
                     content="Generar Notificación PDF"

@@ -178,17 +178,17 @@ export const IncidentsPage: React.FC = () => {
   };
 
   const handlePrintAllNotifications = async () => {
-    const clandestineIncidents = incidents.filter(item => 
-      item.incidentTypeName.includes('clandestino') || 
-      item.incidentTypeName.includes('CONEXIÓN') || 
-      item.incidentTypeName.includes('CLANDESTINA') || 
+    const clandestineIncidents = incidents.filter(item =>
+      item.incidentTypeName.includes('clandestino') ||
+      item.incidentTypeName.includes('Bypass') ||
+      item.incidentTypeName.includes('CLANDESTINA') ||
       item.incidentTypeName.includes('CONEXIÓN CLANDESTINA')
     );
-    
+
     if (clandestineIncidents.length === 0) {
       return;
     }
-    
+
     setIsPreviewOpen(true);
     setIsGeneratingPdf(true);
     try {
@@ -393,7 +393,7 @@ export const IncidentsPage: React.FC = () => {
       divider: true
     });
 
-    if (item.incidentTypeName.includes('clandestino') || item.incidentTypeName.includes('CONEXIÓN') || item.incidentTypeName.includes('CLANDESTINA') || item.incidentTypeName.includes('CONEXIÓN CLANDESTINA')) {
+    if (item.incidentTypeName.includes('clandestino') || item.incidentTypeName.includes('Bypass') || item.incidentTypeName.includes('CLANDESTINA') || item.incidentTypeName.includes('CONEXIÓN CLANDESTINA')) {
       items.push({
         label: 'Generar Notificación PDF',
         icon: <Printer size={16} />,
