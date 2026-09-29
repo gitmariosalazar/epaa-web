@@ -12,7 +12,7 @@ export const getNetworkOperationsSection = (): NavSection => ({
       subItems: [
         {
           icon: <Map size={18} />,
-          label: 'Dashboard SCADA/GIS',
+          label: 'Mapa de Infraestructura',
           to: '/network-operations/scada'
         }
       ]

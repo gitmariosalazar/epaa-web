@@ -1,15 +1,12 @@
 export type GeoJsonCoordinates = number[] | number[][] | number[][][];
 
-export interface GeoJsonGeometry {
-  type:
-    | 'Point'
-    | 'LineString'
-    | 'Polygon'
-    | 'MultiPoint'
-    | 'MultiLineString'
-    | 'MultiPolygon';
-  coordinates: GeoJsonCoordinates;
-}
+export type GeoJsonGeometry =
+  | { type: 'Point'; coordinates: number[] }
+  | { type: 'LineString'; coordinates: number[][] }
+  | { type: 'Polygon'; coordinates: number[][][] }
+  | { type: 'MultiPoint'; coordinates: number[][] }
+  | { type: 'MultiLineString'; coordinates: number[][][] }
+  | { type: 'MultiPolygon'; coordinates: number[][][][] };
 
 export interface GeoJsonFeatureProperties {
   nodeType: 'TANK' | 'CONNECTION' | 'VIRTUAL_LINK';
