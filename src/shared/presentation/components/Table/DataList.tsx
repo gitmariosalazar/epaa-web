@@ -223,7 +223,7 @@ export const DataList = <T extends { [key: string]: any }>({
       { threshold: 0.1 }
     );
     
-    const target = observerTarget.current;
+    const target = observerTarget.current as any;
     if (target && target instanceof Element) {
       observer.observe(target);
     }
