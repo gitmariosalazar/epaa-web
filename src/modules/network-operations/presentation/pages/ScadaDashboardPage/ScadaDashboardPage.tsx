@@ -5,6 +5,7 @@ import { useScadaTelemetryViewModel } from '../../hooks/useScadaTelemetryViewMod
 import { useScadaConnectionDetails } from '../../hooks/useScadaConnectionDetails';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { RefreshCw } from 'lucide-react';
+import { useTheme } from '@/shared/presentation/context/ThemeContext';
 
 import styles from './ScadaDashboardPage.module.css';
 import { ScadaMap } from '../../components/Map/ScadaMap';
@@ -14,6 +15,7 @@ export const ScadaDashboardPage: React.FC = () => {
   const { scadaData, loadingScada, errorScada, fetchScadaData } = useScadaTelemetryViewModel();
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   const [selectedNode, setSelectedNode] = useState<any>(null);
+  const { theme } = useTheme();
 
   const { connectionDetails, loadingConnection, errorConnection } = useScadaConnectionDetails(
     selectedNode?.properties?.nodeType === 'CONNECTION' ? selectedNode?.properties?.cadastralKey : null
@@ -46,6 +48,7 @@ export const ScadaDashboardPage: React.FC = () => {
         <div className={styles.mapContainer}>
           <APIProvider apiKey={apiKey} libraries={['marker']}>
             <ScadaMap
+              key={theme}
               geoJsonData={geoJsonData}
               onNodeSelect={setSelectedNode}
               selectedNode={selectedNode}

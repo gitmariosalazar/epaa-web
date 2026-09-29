@@ -20,7 +20,7 @@ const DeckGlOverlay: React.FC<{ layers: any[] }> = ({ layers }) => {
 
   useEffect(() => {
     if (!map) return;
-
+    
     const instance = new GoogleMapsOverlay({ interleaved: false });
 
     // Workaround for deck.gl bug where it crashes on resize/draw if projection is null
@@ -32,11 +32,16 @@ const DeckGlOverlay: React.FC<{ layers: any[] }> = ({ layers }) => {
       }
       originalDrawRaster();
     };
-
-    instance.setMap(map);
-    setOverlay(instance);
+    
+    // La inyección del canvas de Deck.gl falla si Google Maps está en medio de un repintado (ej. cambio de tema).
+    // Escuchar el evento 'idle' garantiza que el DOM de Google Maps esté 100% listo.
+    const listener = google.maps.event.addListenerOnce(map, 'idle', () => {
+      instance.setMap(map);
+      setOverlay(instance);
+    });
 
     return () => {
+      google.maps.event.removeListener(listener);
       instance.setMap(null);
       instance.finalize();
     };
