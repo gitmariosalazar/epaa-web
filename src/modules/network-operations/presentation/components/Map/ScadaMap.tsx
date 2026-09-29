@@ -62,7 +62,7 @@ export const ScadaMap: React.FC<ScadaMapProps> = ({ geoJsonData, onNodeSelect })
       // 1. Line/Polygon Layer
       new GeoJsonLayer({
         id: 'scada-network-layer',
-        data: geoJsonData,
+        data: geoJsonData as any,
         pickable: true,
         stroked: true,
         filled: true,
