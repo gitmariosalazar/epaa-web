@@ -42,7 +42,7 @@ const NotificationsInner: React.FC<{ userId: string }> = ({ userId }) => {
         </div>
         <Button
           variant="outline"
-          size="small"
+          size="xs"
           leftIcon={<CheckCheck size={15} />}
           onClick={handleMarkAll}
           disabled={unreadCount === 0 || isLoading}

@@ -152,7 +152,7 @@ export const DonutChart: React.FC<DonutChartProps> = memo(
               <div className="chart-card-header-button">
                 <Button
                   variant="ghost"
-                  size="small"
+                  size="xs"
                   onClick={() => {
                     if (onExport) {
                       onExport();

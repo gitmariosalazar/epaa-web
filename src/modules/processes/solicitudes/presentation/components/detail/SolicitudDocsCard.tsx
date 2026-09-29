@@ -38,7 +38,7 @@ export const SolicitudDocsCard: React.FC<SolicitudDocsCardProps> = ({
             {hasRejectedDocs && onBulkCorrectionsClick && (
               <Button
                 variant="primary"
-                size="small"
+                size="xs"
                 leftIcon={<Upload size={14} />}
                 onClick={onBulkCorrectionsClick}
               >
@@ -47,7 +47,7 @@ export const SolicitudDocsCard: React.FC<SolicitudDocsCardProps> = ({
             )}
             <Button
               variant="outline"
-              size="small"
+              size="xs"
               leftIcon={<FolderOpen size={14} />}
               onClick={() => setDocsOpen(true)}
             >

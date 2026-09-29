@@ -246,7 +246,7 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
           type="button"
           variant="dashed"
           color='primary'
-          size="small"
+          size="xs"
           onClick={handleGetLocation}
           isLoading={isLocating}
           leftIcon={<MapPin size={16} />}
@@ -260,7 +260,7 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
             type="button"
             variant="dashed"
             color='emerald'
-            size="small"
+            size="xs"
             onClick={() => {
               onFormChange({ latitude: initialLocation.lat, longitude: initialLocation.lng });
               setShowMap(true);
@@ -277,7 +277,7 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
             type="button"
             variant="dashed"
             color='indigo'
-            size="small"
+            size="xs"
             onClick={() => setShowMap(!showMap)}
             leftIcon={showMap ? <TbMapPinOff size={16} /> : <TbMapPin size={16} />}
             style={{ flex: 1, justifyContent: 'center', minWidth: '200px' }}

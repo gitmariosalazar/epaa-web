@@ -86,7 +86,7 @@ export const CustomerFilters: React.FC<CustomerFiltersProps> = ({
           <Button
             variant="outline"
             color="gray"
-            size="small"
+            size="xs"
             onClick={onRefresh}
             isLoading={isLoading}
             leftIcon={<RefreshCw size={16} />}

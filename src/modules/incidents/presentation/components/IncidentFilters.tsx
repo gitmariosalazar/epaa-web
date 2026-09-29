@@ -250,7 +250,7 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
         >
           <Button
             variant="ghost"
-            size="small"
+            size="xs"
             onClick={onPrintAllNotifications}
             isLoading={isLoading}
             leftIcon={<FcPrint size={16} />}

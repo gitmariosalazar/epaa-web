@@ -249,7 +249,7 @@ export const ManageWorkersModal: React.FC<ManageWorkersModalProps> = ({
                 variant='secondary'
                 disabled={!workerId.trim() || isLoading}
                 leftIcon={<FaUserPlus size={14} />}
-                size='small'
+                size='xs'
               >
                 Agregar
               </Button>

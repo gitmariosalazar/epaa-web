@@ -116,7 +116,7 @@ export const CreateInspectionInvoiceModal: React.FC<
             onClick={onClose}
             aria-label="Cerrar"
             circle
-            size='small'
+            size='xs'
             color='error'
           >
             <X size={18} />

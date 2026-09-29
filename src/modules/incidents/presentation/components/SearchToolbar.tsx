@@ -53,7 +53,7 @@ export const SearchToolbar: React.FC<SearchToolbarProps> = ({
           className="cr-search-btn"
           disabled={isLoadingInfo}
           leftIcon={<FaSearch />}
-          size="sm"
+          size="xs"
         >
           {isLoadingInfo ? t('common.searching') : t('common.search')}
         </Button>
@@ -67,7 +67,7 @@ export const SearchToolbar: React.FC<SearchToolbarProps> = ({
           onClick={handleCancel}
           disabled={!readingInfo}
           leftIcon={<GrClear />}
-          size="sm"
+          size="xs"
         >
           Limpiar
         </Button>

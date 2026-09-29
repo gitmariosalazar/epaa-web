@@ -82,7 +82,12 @@ import { SolicitudNuevaPage } from '@/modules/processes/solicitudes/presentation
 import { SolicitudesTrackingPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudesTrackingPage';
 import { SolicitudesListPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudesListPage';
 import { SolicitudDetailPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudDetailPage';
+// Work Orders Module
 import { WorkOrdersProcessPage, WorkOrderCreatePage, AllWorkOrdersListPage, WorkOrderDetailPage, WorkOrderSearchPage } from '@/modules/work-orders/presentation/pages';
+
+// Network Operations Module
+import { NetworkOperationsProvider } from '@/modules/network-operations/presentation/context/NetworkOperationsContext';
+import { ScadaDashboardPage } from '@/modules/network-operations/presentation/pages/ScadaDashboardPage/ScadaDashboardPage';
 
 // Incidents Module
 import { IncidentProvider } from '@/modules/incidents/presentation/context/IncidentContext';
@@ -256,6 +261,19 @@ function App() {
                           />
                         </Routes>
                       </ConnectionProvider>
+                    }
+                  />
+                  <Route
+                    path="/network-operations/*"
+                    element={
+                      <NetworkOperationsProvider>
+                        <Routes>
+                          <Route
+                            path="scada"
+                            element={<ScadaDashboardPage />}
+                          />
+                        </Routes>
+                      </NetworkOperationsProvider>
                     }
                   />
                   <Route

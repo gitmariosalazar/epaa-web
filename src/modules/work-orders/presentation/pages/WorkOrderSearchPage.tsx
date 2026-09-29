@@ -61,7 +61,7 @@ export const WorkOrderSearchPage: React.FC = () => {
               variant="primary"
               leftIcon={<Search size={14} />}
               disabled={!searchInput.trim()}
-              size="small"
+              size="xs"
             >
               Buscar
             </Button>
@@ -69,7 +69,7 @@ export const WorkOrderSearchPage: React.FC = () => {
               <Button
                 variant="dashed"
                 color='warning'
-                size="small"
+                size="xs"
                 leftIcon={<X size={14} />}
                 onClick={handleClear}
               >

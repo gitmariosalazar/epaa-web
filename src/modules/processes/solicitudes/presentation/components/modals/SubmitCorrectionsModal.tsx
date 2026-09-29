@@ -63,13 +63,14 @@ export const SubmitCorrectionsModal: React.FC<SubmitCorrectionsModalProps> = ({
       title="Subir Correcciones Pendientes"
       footer={
         <>
-          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+          <Button variant="outline" size='xs' onClick={onClose} disabled={isSubmitting}>
             Cancelar
           </Button>
           <Button
             onClick={handleSubmit}
             isLoading={isSubmitting}
             disabled={!isFormValid || isSubmitting}
+            size='xs'
           >
             Enviar Todas las Correcciones
           </Button>
@@ -143,7 +144,7 @@ export const SubmitCorrectionsModal: React.FC<SubmitCorrectionsModalProps> = ({
                   </span>
                   <Button
                     variant="ghost"
-                    size="small"
+                    size="xs"
                     color="error"
                     onClick={() => removeFile(doc.id)}
                     iconOnly

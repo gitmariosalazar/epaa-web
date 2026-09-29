@@ -15,6 +15,7 @@ import { getLecturasSection } from './navigation/sections/lecturasSection';
 import { getRecoleccionSection } from './navigation/sections/recoleccionSection';
 import { getPropiedadesSection } from './navigation/sections/propiedadesSection';
 import { getTramitesSection } from './navigation/sections/tramitesSection';
+import { getNetworkOperationsSection } from './navigation/sections/network-operations';
 
 export const useNavigation = (): NavSection[] => {
   const { t } = useTranslation();
@@ -29,5 +30,6 @@ export const useNavigation = (): NavSection[] => {
     getRecoleccionSection(),
     getPropiedadesSection(t),
     getTramitesSection(),
+    getNetworkOperationsSection(),
   ];
 };

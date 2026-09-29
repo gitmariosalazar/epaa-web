@@ -514,7 +514,7 @@ export const CreateIncidentPage: React.FC = () => {
           <div className="create-incident-header">
             <Button
               variant="ghost"
-              size="sm"
+              size="xs"
               onClick={() => navigate('/incidents/list')}
               leftIcon={<ArrowLeft size={16} />}
               style={{ paddingLeft: 0 }}
@@ -539,7 +539,7 @@ export const CreateIncidentPage: React.FC = () => {
         <div className="create-incident-header">
           <Button
             variant="ghost"
-            size="sm"
+            size="xs"
             onClick={() => navigate('/incidents/list')}
             leftIcon={<ArrowLeft size={16} />}
             style={{ paddingLeft: 0 }}
@@ -701,7 +701,7 @@ export const CreateIncidentPage: React.FC = () => {
             <Button
               type="button"
               variant="dashed"
-              size="small"
+              size="xs"
               color='primary'
               onClick={handleGetLocation}
               isLoading={isLocating}
@@ -715,7 +715,7 @@ export const CreateIncidentPage: React.FC = () => {
               <Button
                 type="button"
                 variant="dashed"
-                size="small"
+                size="xs"
                 color='emerald'
                 disabled={!activeReadingInfo.connectionLocation}
                 onClick={() => {
@@ -735,7 +735,7 @@ export const CreateIncidentPage: React.FC = () => {
                 type="button"
                 variant="dashed"
                 color='indigo'
-                size="small"
+                size="xs"
                 onClick={() => setShowMap(!showMap)}
                 leftIcon={showMap ? <TbMapPinOff size={16} /> : <TbMapPin size={16} />}
                 style={{ flex: 1, justifyContent: 'center', minWidth: '200px' }}
@@ -800,10 +800,10 @@ export const CreateIncidentPage: React.FC = () => {
           )}
 
           <div className="incident-form-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '1.5rem' }}>
-            <Button type="button" variant="outline" onClick={() => navigate('/incidents/list')} disabled={isSubmitting}>
+            <Button type="button" variant="outline" onClick={() => navigate('/incidents/list')} disabled={isSubmitting} size="xs">
               Cancelar
             </Button>
-            <Button type="submit" variant="primary" disabled={isSubmitting}>
+            <Button type="submit" variant="primary" disabled={isSubmitting} size="xs">
               {isSubmitting ? 'Reportando...' : 'Reportar Incidente'}
             </Button>
           </div>

@@ -37,8 +37,7 @@ export const RolesFilters: React.FC<RolesFiltersProps> = ({
         <Button
           variant="outline"
           onClick={onRefresh}
-          size="small"
-          style={{ height: '30px' }}
+          size="xs"
           leftIcon={<RefreshCw size={14} />}
         >
           Refresh
@@ -46,8 +45,7 @@ export const RolesFilters: React.FC<RolesFiltersProps> = ({
         <Button
           onClick={onCreateClick}
           leftIcon={<Plus size={14} />}
-          size="small"
-          style={{ height: '30px' }}
+          size="xs"
           variant="dashed"
           color="green"
         >

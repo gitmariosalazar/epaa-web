@@ -105,7 +105,7 @@ export const NotificationToolbar: React.FC<NotificationToolbarProps> = ({
           {/* Filter button — shared Button with active indicator */}
           <Button
             variant={activeFilterCount > 0 ? 'primary' : 'outline'}
-            size="small"
+            size="xs"
             leftIcon={<SlidersHorizontal size={14} />}
             onClick={openFilter}
             aria-label="Abrir filtros"
@@ -117,7 +117,7 @@ export const NotificationToolbar: React.FC<NotificationToolbarProps> = ({
           {activeFilterCount > 0 && (
             <Button
               variant="ghost"
-              size="small"
+              size="xs"
               circle
               leftIcon={<X size={14} />}
               onClick={onClearFilters}
@@ -135,10 +135,10 @@ export const NotificationToolbar: React.FC<NotificationToolbarProps> = ({
         size="sm"
         footer={
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-            <Button variant="ghost" onClick={resetFilter}>
+            <Button variant="ghost" onClick={resetFilter} size='xs'>
               Restablecer
             </Button>
-            <Button variant="primary" onClick={applyFilter}>
+            <Button variant="primary" onClick={applyFilter} size='xs'>
               Aplicar filtros
             </Button>
           </div>

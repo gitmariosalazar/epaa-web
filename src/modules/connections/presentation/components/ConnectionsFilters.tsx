@@ -104,7 +104,7 @@ export const ConnectionsFilters: React.FC<ConnectionsFiltersProps> = ({
       <div className="conn-filter-group conn-filter-group--btn">
         <Button
           variant="outline"
-          size="small"
+          size="xs"
           onClick={onFetch}
           disabled={!canFetch}
           isLoading={isLoading}
