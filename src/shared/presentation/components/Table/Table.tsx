@@ -289,7 +289,12 @@ export const Table = <T extends { [key: string]: any }>({
       },
       { threshold: 0.1 }
     );
-    if (observerTarget.current) observer.observe(observerTarget.current);
+    
+    const target = observerTarget.current;
+    if (target && target instanceof Element) {
+      observer.observe(target);
+    }
+    
     return () => observer.disconnect();
   }, [onEndReached, hasMore]);
 
