@@ -73,30 +73,35 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
 
   /** Construye el DTO de creación a partir del estado actual del formulario. */
   const readingInfoForRequest = readingInfo[0];
-  const buildRequest = (): CreateReadingRequest => ({
-    connectionId: readingInfoForRequest.cadastralKey,
-    sector: readingInfoForRequest.sector,
-    account: readingInfoForRequest.account,
-    cadastralKey: readingInfoForRequest.cadastralKey,
-    sewerRate: 0,
-    previousReading: Number(
-      readingInfoForRequest.currentReading !== null
-        ? readingInfoForRequest.currentReading
-        : readingInfoForRequest.previousReading
-    ),
-    currentReading: Number(currentReadingInput),
-    newCurrentReading: Number(currentReadingInput),
-    incomeCode: 0,
-    readingDate: new Date(),
-    readingTime: new Date().toISOString(),
-    readingValue: Number(readingInfoForRequest.readingValue),
-    rentalIncomeCode: 0,
-    novelty: observationInput,
-    averageConsumption: Number(readingInfoForRequest.averageConsumption),
-    typeNoveltyReadingId: 1,
-    currentMonthReading: readingInfoForRequest.monthReading,
-    previousMonthReading: readingInfoForRequest.monthReading
-  });
+  const buildRequest = (): CreateReadingRequest => {
+    const now = new Date();
+    const currentMonthReadingStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    
+    return {
+      connectionId: readingInfoForRequest.cadastralKey,
+      sector: readingInfoForRequest.sector,
+      account: readingInfoForRequest.account,
+      cadastralKey: readingInfoForRequest.cadastralKey,
+      sewerRate: 0,
+      previousReading: Number(
+        readingInfoForRequest.currentReading !== null
+          ? readingInfoForRequest.currentReading
+          : readingInfoForRequest.previousReading
+      ),
+      currentReading: Number(currentReadingInput),
+      newCurrentReading: Number(currentReadingInput),
+      incomeCode: 0,
+      readingDate: now,
+      readingTime: now.toISOString(),
+      readingValue: Number(readingInfoForRequest.readingValue),
+      rentalIncomeCode: 0,
+      novelty: observationInput,
+      averageConsumption: Number(readingInfoForRequest.averageConsumption),
+      typeNoveltyReadingId: 1,
+      currentMonthReading: currentMonthReadingStr,
+      previousMonthReading: readingInfoForRequest.monthReading
+    };
+  };
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
