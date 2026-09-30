@@ -36,6 +36,8 @@ import type { HistoryMeters } from '../../domain/models/Connection';
 import { decodeEWKBPoint } from '@/shared/utils/geoUtils';
 import './ConnectionDetailModal.css';
 import { IoMdPhotos } from 'react-icons/io';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { Button } from '@/shared/presentation/components/Button/Button';
 
 interface ConnectionDetailModalProps {
   isOpen: boolean;
@@ -505,18 +507,23 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
               </div>
 
               {/* Floating Action Button for PDF */}
-              <button
-                className="connection-fab-pdf"
-                onClick={handleDownloadPdf}
-                disabled={isGeneratingPdf}
-                title={t('connections.detail.downloadPdf', 'Descargar Ficha Técnica')}
-              >
-                {isGeneratingPdf ? (
-                  <div className="spinner-border spinner-border-sm" role="status" style={{ width: '1.2rem', height: '1.2rem', borderTopColor: 'transparent', borderRadius: '50%', border: '2px solid white', animation: 'spin 1s linear infinite' }} />
-                ) : (
-                  <Download size={24} />
-                )}
-              </button>
+              <div className="connection-fab-wrapper">
+                <Tooltip content="Descargar Ficha Técnica" followCursor={false}>
+                  <Button
+                    onClick={handleDownloadPdf}
+                    className="connection-fab-btn"
+                    disabled={isGeneratingPdf}
+                    color="indigo"
+                    variant='primary'
+                  >
+                    {isGeneratingPdf ? (
+                      <div className="connection-fab-spinner" role="status" />
+                    ) : (
+                      <Download size={24} />
+                    )}
+                  </Button>
+                </Tooltip>
+              </div>
             </div>
           ) : null}
         </div>
