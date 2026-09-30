@@ -24,9 +24,11 @@ import {
   Mail,
   Check,
   X,
-  Pause
+  Pause,
+  Download
 } from 'lucide-react';
 import { useConnectionsContext } from '../context/ConnectionContext';
+import { TechnicalDataSheetPdfGenerator } from './templates/pdf/TechnicalDataSheetPdfGenerator';
 import { ReadingHistoryTable } from '@/modules/readings/presentation/components/ReadingHistoryTable';
 import type { ReadingHistory } from '@/modules/readings/domain/models/ReadingHistory';
 import { Table, type Column } from '@/shared/presentation/components/Table/Table';
@@ -59,6 +61,20 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
 
   const [lightboxFacadeIndex, setLightboxFacadeIndex] = useState<number | null>(null);
   const [lightboxMeterIndex, setLightboxMeterIndex] = useState<number | null>(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (!connectionData) return;
+    setIsGeneratingPdf(true);
+    try {
+      const generator = new TechnicalDataSheetPdfGenerator();
+      await generator.downloadPdf([connectionData], `FICHA_TECNICA_${connectionData.connectionId || connectionData.connectionMeterNumber}.pdf`);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
 
 
   useEffect(() => {
@@ -487,6 +503,20 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
                 {renderFacadePhotos()}
                 {renderMeterPhotos()}
               </div>
+
+              {/* Floating Action Button for PDF */}
+              <button
+                className="connection-fab-pdf"
+                onClick={handleDownloadPdf}
+                disabled={isGeneratingPdf}
+                title={t('connections.detail.downloadPdf', 'Descargar Ficha Técnica')}
+              >
+                {isGeneratingPdf ? (
+                  <div className="spinner-border spinner-border-sm" role="status" style={{ width: '1.2rem', height: '1.2rem', borderTopColor: 'transparent', borderRadius: '50%', border: '2px solid white', animation: 'spin 1s linear infinite' }} />
+                ) : (
+                  <Download size={24} />
+                )}
+              </button>
             </div>
           ) : null}
         </div>

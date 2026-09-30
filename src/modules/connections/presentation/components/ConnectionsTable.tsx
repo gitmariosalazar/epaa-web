@@ -23,6 +23,10 @@ import { BsTable } from 'react-icons/bs';
 import { GiHexagonalNut } from 'react-icons/gi';
 
 import { ConnectionDetailModal } from './ConnectionDetailModal';
+import { DocumentPreviewModal } from '@/shared/presentation/components/DocumentPreviewModal';
+import { useConnectionsContext } from '../context/ConnectionContext';
+import { TechnicalDataSheetPdfGenerator } from './templates/pdf/TechnicalDataSheetPdfGenerator';
+import { Printer } from 'lucide-react';
 // ── Props ──────────────────────────────────────────────────────────────────────
 interface ConnectionsTableProps {
   data: Connection[];
@@ -54,9 +58,52 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
   onViewIncidentsOnMap
 }) => {
   const { t } = useTranslation();
+  const { findAllConnectionsWithPropertyUseCase } = useConnectionsContext();
   const [selectedConnection, setSelectedConnection] =
     useState<Connection | null>(null);
 
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [fileNamePDF, setFileNamePDF] = useState<string | null>(null);
+
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  const handlePreviewPdf = async (item: Connection) => {
+    setIsPreviewOpen(true);
+    setIsGeneratingPdf(true);
+    try {
+      // 1. Fetch full connection data
+      const fullDataList = await findAllConnectionsWithPropertyUseCase.execute({
+        limit: 1,
+        offset: 0,
+        query: item.connectionCadastralKey
+      });
+      if (!fullDataList || fullDataList.length === 0) {
+        throw new Error('No se pudo encontrar la información detallada de la acometida.');
+      }
+      const fullData = fullDataList[0];
+      // 2. Generate PDF using the full data
+      const generator = new TechnicalDataSheetPdfGenerator();
+      const url = await generator.generateBlobUrl([fullData]);
+      setPreviewUrl(url);
+      setFileNamePDF(`FICHA_TECNICA_${item.connectionId || item.connectionMeterNumber}.pdf`);
+    } catch (error) {
+      console.error('Error generando la ficha técnica:', error);
+      setIsPreviewOpen(false);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handleClosePreview = () => {
+    setIsPreviewOpen(false);
+    setTimeout(() => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
+    }, 300);
+  };
   // ── Columns ──────────────────────────────────────────────────────────────
   const columns: Column<Connection>[] = useMemo(
     () => [
@@ -311,6 +358,17 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
                 <FaMapMarkerAlt size={14} />
               </Button>
             </Tooltip>
+            <Tooltip content="Generar Ficha Técnica" position="top">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => handlePreviewPdf(row)}
+                circle
+                style={{ color: 'var(--primary)' }}
+              >
+                <Printer size={14} />
+              </Button>
+            </Tooltip>
           </div>
         )
       }
@@ -346,6 +404,17 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         onClick: () => onViewOnMap(item),
         icon: <FaMapMarkerAlt size={14} />,
         color: "orange"
+      },
+      {
+        label: '-',
+        onClick: () => { },
+        divider: true
+      },
+      {
+        label: 'Generar Ficha Técnica PDF',
+        onClick: () => handlePreviewPdf(item),
+        icon: <Printer size={14} />,
+        color: 'primary'
       }
     ];
     return items;
@@ -434,6 +503,15 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         cadastralKey={selectedConnection?.connectionCadastralKey || null}
       />
       {PdfPreviewModal}
+
+      <DocumentPreviewModal
+        isOpen={isPreviewOpen}
+        onClose={handleClosePreview}
+        documentUrl={previewUrl}
+        isLoading={isGeneratingPdf}
+        title="Vista Previa de Ficha Técnica"
+        fileName={fileNamePDF || "FICHA_TECNICA.pdf"}
+      />
     </div>
   );
 };

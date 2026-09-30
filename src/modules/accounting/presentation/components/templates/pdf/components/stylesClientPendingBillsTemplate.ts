@@ -4,60 +4,67 @@ import { StyleSheet } from '@react-pdf/renderer';
 // Default Helvetica is provided by react-pdf.
 
 export const colors = {
-  primary: '#0f172a',    // For titles and main texts
-  secondary: '#334155',  // For subtexts
-  accent: '#0369a1',     // For table headers, EPAA branding color
-  border: '#cbd5e1',     // Light borders
+  primary: '#0f172a', // For titles and main texts
+  secondary: '#334155', // For subtexts
+  accent: '#0369a1', // For table headers, EPAA branding color
+  border: '#cbd5e1', // Light borders
   backgroundAlt: '#f8fafc', // Alternate row colors
-  muted: '#64748b',      // Muted text
+  muted: '#64748b', // Muted text
   grandTotalBg: '#f1f5f9',
-  grandTotalText: '#0f766e',
+  grandTotalText: '#0f766e'
 };
 
 export const styles = StyleSheet.create({
   page: {
-    padding: 30,
     fontFamily: 'Helvetica',
     fontSize: 10,
-    color: colors.primary,
+    color: colors.primary
+  },
+  contentWrapper: {
+    padding: 30,
+    flex: 1
+  },
+  backgroundImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    zIndex: -1,
+    objectFit: 'fill'
   },
   headerRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 20,
-  },
-  logoContainer: {
-    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-  },
-  logo: {
-    width: 60,
-    height: 'auto',
+    marginBottom: 20
   },
   headerTextContainer: {
-    alignItems: 'flex-end',
+    alignItems: 'center'
   },
   companyName: {
     fontFamily: 'Helvetica-Bold',
     fontSize: 11,
-    textAlign: 'right',
+    textAlign: 'center'
   },
   rucText: {
     fontSize: 9,
     color: colors.secondary,
     marginTop: 2,
-    textAlign: 'right',
+    textAlign: 'center'
   },
   documentTitleContainer: {
-    marginBottom: 20,
-    alignItems: 'center',
+    marginBottom: 10,
+    marginTop: 10,
+    alignItems: 'center'
   },
   documentTitle: {
     fontFamily: 'Helvetica-Bold',
     fontSize: 16,
     color: '#1e3a8a', // Dark blue
-    textTransform: 'uppercase',
+    textTransform: 'uppercase'
   },
   clientInfoCard: {
     borderWidth: 1,
@@ -66,94 +73,97 @@ export const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 20,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-between'
   },
   clientInfoCol: {
-    flex: 1,
+    flex: 1
   },
   clientInfoRow: {
     flexDirection: 'row',
-    marginBottom: 6,
+    marginBottom: 6
   },
   clientInfoLabel: {
     fontFamily: 'Helvetica-Bold',
-    width: 90,
+    width: 90
   },
   clientInfoValue: {
     flex: 1,
-    color: colors.secondary,
+    color: colors.secondary
   },
   sectionTitle: {
     fontFamily: 'Helvetica-Bold',
     fontSize: 11,
     color: '#0284c7', // Sky blue
     marginBottom: 6,
-    marginTop: 10,
+    marginTop: 5
   },
   table: {
     width: '100%',
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 15,
+    borderStyle: 'solid',
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderTopColor: colors.border,
+    borderLeftColor: colors.border,
+    marginBottom: 15
   },
   tableHeader: {
     flexDirection: 'row',
     backgroundColor: '#0ea5e9', // Blue header background
-    color: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    color: '#ffffff'
   },
   tableHeaderSecondary: {
     flexDirection: 'row',
     backgroundColor: '#fde047', // Yellow header background (for Tasa Basura)
-    color: '#0f172a',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    color: '#0f172a'
   },
   tableHeaderTertiary: {
     flexDirection: 'row',
     backgroundColor: '#93c5fd', // Light blue (for Mejoras)
-    color: '#0f172a',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    color: '#0f172a'
   },
   tableRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    flexDirection: 'row'
   },
   tableRowAlt: {
-    backgroundColor: colors.backgroundAlt,
+    backgroundColor: colors.backgroundAlt
   },
   tableColHeader: {
     padding: 6,
     fontFamily: 'Helvetica-Bold',
     fontSize: 9,
     flex: 1,
+    borderStyle: 'solid',
     borderRightWidth: 1,
-    borderRightColor: 'rgba(0,0,0,0.1)',
+    borderBottomWidth: 1,
+    borderRightColor: colors.border,
+    borderBottomColor: colors.border
   },
   tableCol: {
     padding: 6,
     fontSize: 9,
     flex: 1,
+    borderStyle: 'solid',
     borderRightWidth: 1,
+    borderBottomWidth: 1,
     borderRightColor: colors.border,
+    borderBottomColor: colors.border
   },
   tableColRight: {
     padding: 6,
     fontSize: 9,
     flex: 1,
+    borderStyle: 'solid',
     borderRightWidth: 1,
+    borderBottomWidth: 1,
     borderRightColor: colors.border,
-    textAlign: 'right',
+    borderBottomColor: colors.border,
+    textAlign: 'right'
   },
   colPeriod: { flex: 2 },
-  colLast: { borderRightWidth: 0 },
   grandTotalContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 10,
+    marginTop: 10
   },
   grandTotalBox: {
     flexDirection: 'row',
@@ -161,16 +171,16 @@ export const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   grandTotalLabel: {
     fontFamily: 'Helvetica-Bold',
     fontSize: 12,
-    marginRight: 15,
+    marginRight: 15
   },
   grandTotalValue: {
     fontFamily: 'Helvetica-Bold',
     fontSize: 14,
-    color: colors.grandTotalText,
+    color: colors.grandTotalText
   }
 });
