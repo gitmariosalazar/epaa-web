@@ -3,6 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { CircularProgress, useSimulatedProgress } from '@/shared/presentation/components/CircularProgress';
 
+import { EvidenceFiles } from '@/shared/files';
+import { PhotoLightbox } from '@/modules/incidents/presentation/components/PhotoLightbox';
+import '@/modules/incidents/presentation/components/PhotoLightbox.css';
+import { MdPhotoLibrary } from 'react-icons/md';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { getConnectionStateChip } from '../utils/connectionStateChip';
@@ -28,6 +33,7 @@ import { Table, type Column } from '@/shared/presentation/components/Table/Table
 import type { HistoryMeters } from '../../domain/models/Connection';
 import { decodeEWKBPoint } from '@/shared/utils/geoUtils';
 import './ConnectionDetailModal.css';
+import { IoMdPhotos } from 'react-icons/io';
 
 interface ConnectionDetailModalProps {
   isOpen: boolean;
@@ -50,6 +56,10 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
   const [isNavExpanded, setIsNavExpanded] = useState<boolean>(false);
 
   const loadingProgress = useSimulatedProgress(loading);
+
+  const [lightboxFacadeIndex, setLightboxFacadeIndex] = useState<number | null>(null);
+  const [lightboxMeterIndex, setLightboxMeterIndex] = useState<number | null>(null);
+
 
   useEffect(() => {
     let isMounted = true;
@@ -109,7 +119,10 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     { id: 'section-general', label: t('connections.detail.general', 'Informacion Basica'), icon: <Info size={16} /> },
     { id: 'section-client', label: t('connections.detail.client', 'Datos del Cliente'), icon: <User size={16} /> },
     { id: 'section-readings', label: t('connections.detail.readings', 'Historial de Lecturas'), icon: <History size={16} /> },
-    { id: 'section-meters', label: t('connections.detail.meters', 'Historial de Medidores'), icon: <Settings size={16} /> }
+    { id: 'section-meters', label: t('connections.detail.meters', 'Historial de Medidores'), icon: <Settings size={16} /> },
+
+    { id: 'section-photos-facade', label: t('connections.detail.photos', 'Evidencias Fachada'), icon: <MdPhotoLibrary size={16} /> },
+    { id: 'section-photos-meter', label: t('connections.detail.photos', 'Evidencias Medidor'), icon: <IoMdPhotos size={16} /> }
   ];
 
   const renderGeneralInfo = () => {
@@ -169,6 +182,75 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
             </span>
           </div>
         </div>
+      </div>
+    );
+  };
+
+
+  const renderFacadePhotos = () => {
+    const photosFacade = connectionData?.photoFacade || [];
+    return (
+      <div id="section-photos-facade" className="connection-section-card connection-photos-section">
+        <h3 className="connection-section-title connection-section-title-mb">
+          <MdPhotoLibrary size={18} /> Evidencias - Fotos de Fachada ({photosFacade.length})
+        </h3>
+        {photosFacade.length > 0 ? (
+          <div className="photos-gallery">
+            {photosFacade.map((photo, idx) => (
+              <EvidenceFiles
+                key={photo.id}
+                fileId={photo.id}
+                filePath={photo.imagePath}
+                type={photo.photoType}
+                category="connection_documents"
+                onClick={() => setLightboxFacadeIndex(idx)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="evidence-empty-state">
+            <EmptyState
+              message="Sin evidencia de fachada"
+              description="No se ha agregado evidencia."
+              icon={<MdPhotoLibrary size={35} className="icon-error-color" />}
+              variant="warning"
+            />
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderMeterPhotos = () => {
+    const photosMeter = connectionData?.photoMeter || [];
+    return (
+      <div id="section-photos-meter" className="connection-section-card connection-photos-section">
+        <h3 className="connection-section-title connection-section-title-mb">
+          <MdPhotoLibrary size={18} /> Evidencias - Fotos de Medidor ({photosMeter.length})
+        </h3>
+        {photosMeter.length > 0 ? (
+          <div className="photos-gallery">
+            {photosMeter.map((photo, idx) => (
+              <EvidenceFiles
+                key={photo.id}
+                fileId={photo.id}
+                filePath={photo.imagePath}
+                type={photo.photoType}
+                category="connection_documents"
+                onClick={() => setLightboxMeterIndex(idx)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="evidence-empty-state">
+            <EmptyState
+              message="Sin evidencia de medidor"
+              description="No se ha agregado evidencia."
+              icon={<MdPhotoLibrary size={35} className="icon-error-color" />}
+              variant="warning"
+            />
+          </div>
+        )}
       </div>
     );
   };
@@ -347,64 +429,91 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title={`Detalles de Acometida: ${cadastralKey || ''}`}
-      size="xxl"
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        title={`Detalles de Acometida: ${cadastralKey || ''}`}
+        size="xxl"
 
-    >
-      <div className="connection-modal-body">
-        {loading ? (
-          <div className="connection-loading-state">
-            <CircularProgress
-              progress={loadingProgress}
-              size={100}
-              strokeWidth={8}
-              label={t('common.loading', 'Cargando detalles...')}
-            />
-          </div>
-        ) : error ? (
-          <div className="connection-error-state">
-            <AlertTriangle size={48} />
-            <p>{error}</p>
-          </div>
-        ) : connectionData ? (
-          <div className="connection-content-layout">
-            {/* Sidebar Navigation */}
-            <div
-              onMouseEnter={() => setIsNavExpanded(true)}
-              onMouseLeave={() => setIsNavExpanded(false)}
-              className={`connection-sidebar ${isNavExpanded ? 'expanded' : 'collapsed'}`}
-            >
-              {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => scrollToSection(item.id)}
-                  title={!isNavExpanded ? item.label : undefined}
-                  className={`connection-nav-item ${activeTab === item.id ? 'active' : 'inactive'}`}
-                >
-                  <div className="connection-nav-icon">
-                    {item.icon}
-                  </div>
-
-                  <span className="connection-nav-label">
-                    {item.label}
-                  </span>
-                </button>
-              ))}
+      >
+        <div className="connection-modal-body">
+          {loading ? (
+            <div className="connection-loading-state">
+              <CircularProgress
+                progress={loadingProgress}
+                size={100}
+                strokeWidth={8}
+                label={t('common.loading', 'Cargando detalles...')}
+              />
             </div>
-
-            {/* Scrollable Content */}
-            <div className="connection-scrollable-content custom-scrollbar">
-              {renderGeneralInfo()}
-              {renderClientInfo()}
-              {renderReadingsHistory()}
-              {renderMetersHistory()}
+          ) : error ? (
+            <div className="connection-error-state">
+              <AlertTriangle size={48} />
+              <p>{error}</p>
             </div>
-          </div>
-        ) : null}
-      </div>
-    </Modal>
+          ) : connectionData ? (
+            <div className="connection-content-layout">
+              {/* Sidebar Navigation */}
+              <div
+                onMouseEnter={() => setIsNavExpanded(true)}
+                onMouseLeave={() => setIsNavExpanded(false)}
+                className={`connection-sidebar ${isNavExpanded ? 'expanded' : 'collapsed'}`}
+              >
+                {navItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollToSection(item.id)}
+                    title={!isNavExpanded ? item.label : undefined}
+                    className={`connection-nav-item ${activeTab === item.id ? 'active' : 'inactive'}`}
+                  >
+                    <div className="connection-nav-icon">
+                      {item.icon}
+                    </div>
+
+                    <span className="connection-nav-label">
+                      {item.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="connection-scrollable-content custom-scrollbar">
+                {renderGeneralInfo()}
+                {renderClientInfo()}
+                {renderReadingsHistory()}
+                {renderMetersHistory()}
+                {renderFacadePhotos()}
+                {renderMeterPhotos()}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </Modal>
+
+      {/* Lightbox for Facade Photos */}
+      {lightboxFacadeIndex !== null && connectionData?.photoFacade && connectionData.photoFacade.length > 0 && (
+        <PhotoLightbox
+          photos={connectionData.photoFacade.map((p) => ({ photoId: p.id, filePath: p.imagePath, type: p.photoType }))}
+          activeIndex={lightboxFacadeIndex}
+          category="connection_documents"
+          onClose={() => setLightboxFacadeIndex(null)}
+          onIndexChange={setLightboxFacadeIndex}
+        />
+      )}
+
+      {/* Lightbox for Meter Photos */}
+      {lightboxMeterIndex !== null && connectionData?.photoMeter && connectionData.photoMeter.length > 0 && (
+        <PhotoLightbox
+          photos={connectionData.photoMeter.map((p) => ({ photoId: p.id, filePath: p.imagePath, type: p.photoType }))}
+          activeIndex={lightboxMeterIndex}
+          category="connection_documents"
+          onClose={() => setLightboxMeterIndex(null)}
+          onIndexChange={setLightboxMeterIndex}
+        />
+      )}
+    </>
   );
 };
+

@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import '../styles/ConnectionsTable.css';
 import {
   Table,
-  type Column
+  type Column,
+  type ContextMenuItem
 } from '@/shared/presentation/components/Table/Table';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
@@ -317,6 +318,39 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
     [onEdit, onDelete, t]
   );
 
+  const getContextMenuItems = (item: Connection): ContextMenuItem<Connection>[] => {
+    const items: ContextMenuItem<Connection>[] = [
+      {
+        label: t('connections.table.edit'),
+        onClick: () => onEdit(item),
+        icon: <FaEdit size={14} />,
+        color: "purple"
+      },
+      {
+        label: t('connections.table.delete'),
+        onClick: () => onDelete(item),
+        icon: <FaTrashCan size={14} />,
+        color: "danger"
+      },
+      {
+        label: t('connections.table.viewDetails'),
+        onClick: () => setSelectedConnection(item),
+        icon: <EyeIcon size={14} />,
+        color: "success"
+      },
+      {
+        label: t(
+          'connections.table.connectionCoordinates',
+          'Ver en mapa'
+        ),
+        onClick: () => onViewOnMap(item),
+        icon: <FaMapMarkerAlt size={14} />,
+        color: "orange"
+      }
+    ];
+    return items;
+  };
+
   // ── PDF Export ────────────────────────────────────────────────────────────
   const { setShowPdfPreview, PdfPreviewModal } = useTablePdfExport<Connection>({
     data,
@@ -391,6 +425,7 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
             variant="info"
           />
         }
+        contextMenuItems={getContextMenuItems}
       />
 
       <ConnectionDetailModal

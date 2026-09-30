@@ -1,5 +1,6 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
+import './PhotoLightbox.css';
 import {
   X, Download, ChevronLeft, ChevronRight,
   Loader2, ImageOff, ZoomIn
@@ -10,10 +11,13 @@ import type { FileCategory } from '@/shared/files';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
+// ─── Constants ─────────────────────────────────────────────────────────────────
+const LIGHTBOX_PORTAL_ID = 'epaa-lightbox-portal-root';
+
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
 export interface LightboxPhoto {
-  photoId: number;
+  photoId: number | string;
   filePath: string;
   type: string;
 }
@@ -62,6 +66,22 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
   onClose,
   onIndexChange
 }) => {
+  const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    let node = document.getElementById(LIGHTBOX_PORTAL_ID);
+    if (!node) {
+      node = document.createElement('div');
+      node.id = LIGHTBOX_PORTAL_ID;
+      node.style.position = 'fixed';
+      node.style.inset = '0';
+      node.style.zIndex = '2147483647'; // Max safe CSS z-index
+      node.style.pointerEvents = 'none'; // Only the overlay catches events
+      document.body.appendChild(node);
+    }
+    setPortalNode(node);
+  }, []);
+
   const photo = photos[activeIndex];
   const filename = photo ? extractFilename(photo.filePath) : '';
 
@@ -96,7 +116,7 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
     return () => { document.body.style.overflow = prev; };
   }, []);
 
-  if (!photo) return null;
+  if (!photo || !portalNode) return null;
 
   const handleDownload = () => {
     download(category, filename, `Evidencia-${photo.photoId}`);
@@ -105,6 +125,7 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
   return createPortal(
     <div
       className="lightbox-overlay"
+      style={{ pointerEvents: 'auto', zIndex: 2147483647 }}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -221,7 +242,7 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
         )}
       </div>
     </div>,
-    document.body
+    portalNode
   );
 };
 

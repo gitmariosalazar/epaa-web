@@ -47,4 +47,5 @@ export type FileCategory =
   | 'readings'
   | 'qrcodes'
   | 'connections'
+  | 'connection_documents'
   | 'work_orders';

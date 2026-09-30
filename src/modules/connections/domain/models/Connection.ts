@@ -123,6 +123,8 @@ export interface ConnectionWithoutProperty {
   person: Client | null;
   lastReadings: LastReading[] | null;
   historyMeters?: HistoryMeters[] | null;
+  photoFacade: PhotoResponse[] | null;
+  photoMeter: PhotoResponse[] | null;
 }
 
 export interface HistoryMeters {
@@ -173,7 +175,14 @@ export interface Email {
   emailid: number;
   email: string;
 }
-
+export interface PhotoResponse {
+  id: string;
+  cadastralKey: string;
+  imagePath: string;
+  description: string | null;
+  photoType: string;
+  date: string | Date;
+}
 export interface ConnectionAndPropertyResponse {
   // Connection Data
   connectionId: string;
@@ -212,6 +221,8 @@ export interface ConnectionAndPropertyResponse {
   // Property Data
   property: PropertyResponse | null;
   lastReadings: LastReading[] | null;
+  photoFacade: PhotoResponse[] | null;
+  photoMeter: PhotoResponse[] | null;
 }
 
 export interface LastReading {
