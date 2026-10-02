@@ -16,7 +16,7 @@ export const NotificationBellWrapper: React.FC = () => {
   if (!user?.userId) return null;
 
   return (
-    <NotificationsProvider userId={user.userId} pollInterval={60_000}>
+    <NotificationsProvider userId={user.userId} pollInterval={60_000 * 10}>
       <NotificationBell />
     </NotificationsProvider>
   );

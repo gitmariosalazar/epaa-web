@@ -12,8 +12,8 @@ export const useDailyStatsTable = ({ data }: UseDailyStatsTableProps) => {
   const filteredData = useMemo(() => {
     return data.filter(
       (row) =>
-        row.date.includes(searchTerm) ||
-        row.uniqueSectors.toString().includes(searchTerm)
+        row.date?.toString().includes(searchTerm) ||
+        row.uniqueSectors?.toString().includes(searchTerm)
     );
   }, [data, searchTerm]);
 

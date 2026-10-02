@@ -93,7 +93,7 @@ export const NotificationsPage: React.FC = () => {
   if (!user?.userId) return null;
 
   return (
-    <NotificationsProvider userId={user.userId} pollInterval={60_000}>
+    <NotificationsProvider userId={user.userId} pollInterval={60_000 * 10}>
       <NotificationsInner userId={user.userId} />
     </NotificationsProvider>
   );
