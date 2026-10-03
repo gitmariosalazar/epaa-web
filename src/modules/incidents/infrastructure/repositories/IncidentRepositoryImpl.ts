@@ -7,6 +7,7 @@ import type { ResolveIncidentRequest } from '../../domain/schemas/dtos/request/r
 import type { IncidentResponse } from '../../domain/schemas/dtos/response/incident.response';
 import type { IncidentCategoryResponse } from '../../domain/schemas/dtos/response/incident-category-type.response';
 import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
+import type { IncidentDashboardResponseDto } from '../../domain/schemas/dtos/response/incident-dashboard.dto';
 
 function dataURLtoFile(dataurl: string, filename: string): File {
   const arr = dataurl.split(',');
@@ -144,6 +145,7 @@ export class IncidentRepositoryImpl implements InterfaceIncidentRepository {
 
   async findIncidents(
     filters: {
+      categoriesPermit: number[];
       connectionId?: string | null;
       status?: string | null;
       priority?: string | null;
@@ -159,7 +161,12 @@ export class IncidentRepositoryImpl implements InterfaceIncidentRepository {
     limit?: number | null,
     offset?: number | null
   ): Promise<ApiResponse<IncidentDetailRowResponse[]>> {
-    const { reportRangeDate, incidentTypeId, ...restFilters } = filters;
+    const {
+      reportRangeDate,
+      incidentTypeId,
+      categoriesPermit,
+      ...restFilters
+    } = filters;
     const params: any = { ...restFilters, limit, offset };
 
     // Format dates to ISO strings (or YYYY-MM-DD) to send as top-level params
@@ -169,6 +176,13 @@ export class IncidentRepositoryImpl implements InterfaceIncidentRepository {
     }
     if (incidentTypeId !== undefined && incidentTypeId !== null) {
       params.incidentTypeId = incidentTypeId;
+    }
+
+    // El backend recibe esto como un string desde la URL si hay un solo elemento.
+    // Para evitar el error de Postgres "literal de array mal formado: «8»",
+    // enviamos el string ya formateado como un array nativo de Postgres: "{8}" o "{8,9}"
+    if (categoriesPermit && categoriesPermit.length > 0) {
+      params.categoriesPermit = `{${categoriesPermit.join(',')}}`;
     }
 
     const response = await this.client.get<
@@ -184,5 +198,12 @@ export class IncidentRepositoryImpl implements InterfaceIncidentRepository {
       ApiResponse<IncidentCategoryResponse[]>
     >('/incidents/categories');
     return response.data;
+  }
+
+  async getIncidentDashboardKpis(): Promise<IncidentDashboardResponseDto | null> {
+    const response = await this.client.get<
+      ApiResponse<IncidentDashboardResponseDto>
+    >('/incidents/dashboard/kpis');
+    return response.data.data;
   }
 }

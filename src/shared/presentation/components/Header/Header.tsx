@@ -94,7 +94,7 @@ const SupportTooltipContent: React.FC<SupportTooltipContentProps> = ({ onSupport
                 <span style={{ color: 'white' }}>¡Copiado!</span>
               </div>
             ) : (
-              <Tooltip content="Copiar número" themeColor="info">
+              <Tooltip content="Copiar número" themeColor="info" followCursor={false}>
                 <Copy size={14} />
               </Tooltip>
             )}
@@ -187,7 +187,7 @@ export const Header: React.FC = () => {
 
         <div className="header__right">
           <div className="header__support-container" ref={supportRef}>
-            <Tooltip content={t('header.support', 'Soporte Técnico')} themeColor="info" position='top'>
+            <Tooltip content={t('header.support', 'Soporte Técnico')} themeColor="info" position='top' followCursor={false}>
               <button
                 onClick={() => setIsSupportOpen(!isSupportOpen)}
                 className='header__nav-btn header__nav-btn--whatsapp'
@@ -204,7 +204,7 @@ export const Header: React.FC = () => {
 
           <NotificationBellWrapper />
 
-          <Tooltip content={t('header.switchLang')} themeColor="info">
+          <Tooltip content={t('header.switchLang')} themeColor="info" followCursor={false}>
             <button
               onClick={toggleLanguage}
               className="header__nav-btn"
@@ -217,7 +217,7 @@ export const Header: React.FC = () => {
             </button>
           </Tooltip>
 
-          <Tooltip content={t('header.switchTheme')} themeColor="info">
+          <Tooltip content={t('header.switchTheme')} themeColor="info" followCursor={false}>
             <button
               onClick={toggleTheme}
               className="header__nav-btn header__nav-btn--theme"

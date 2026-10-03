@@ -1,0 +1,166 @@
+/* SidebarHeader.css */
+.sidebar-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+  transition:
+    padding 0.3s ease,
+    justify-content 0.3s ease,
+    border-color 0.3s ease,
+    background-color 0.3s ease;
+}
+
+.sidebar-header.dark {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.sidebar-header.collapsed {
+  justify-content: center;
+  padding: 0 8px;
+}
+
+.sidebar-header.expanded {
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+/* Brand Container */
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Water Icon Box */
+.icon-water-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.15),
+    rgba(37, 99, 235, 0.05)
+  );
+  color: #2563eb;
+  /* Sombra sutil para la caja */
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.8),
+    0 1px 3px rgba(37, 99, 235, 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Sombra fuerte para el ícono de la gota */
+.icon-water-wrapper svg {
+  filter: drop-shadow(0px 3px 4px rgba(29, 78, 216, 0.6));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.icon-water-wrapper:hover svg {
+  transform: scale(1.15) translateY(-1px);
+}
+
+.sidebar-header.dark .icon-water-wrapper {
+  background: linear-gradient(
+    135deg,
+    rgba(96, 165, 250, 0.2),
+    rgba(96, 165, 250, 0.05)
+  );
+  color: #60a5fa;
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.sidebar-header.dark .icon-water-wrapper svg {
+  filter: drop-shadow(0px 3px 4px rgba(0, 0, 0, 0.8));
+}
+
+/* Typography */
+.brand-text-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.brand-title {
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: -0.03em;
+  color: #1e3a8a;
+  line-height: 1.1;
+  user-select: none;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.sidebar-header.dark .brand-title {
+  color: #eff6ff;
+}
+
+.brand-subtitle {
+  font-weight: 700;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  line-height: 1.1;
+  user-select: none;
+  white-space: nowrap;
+  text-transform: uppercase;
+  margin-top: 1px;
+  transition: color 0.3s ease;
+}
+
+.sidebar-header.dark .brand-subtitle {
+  color: #94a3b8;
+}
+
+/* Toggle Button */
+.toggle-button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.sidebar-header:not(.dark) .toggle-button {
+  color: #64748b !important;
+}
+
+.sidebar-header.dark .toggle-button {
+  color: #94a3b8 !important;
+}
+
+.toggle-button:hover {
+  background-color: rgba(37, 99, 235, 0.08) !important;
+  color: #2563eb !important;
+}
+
+.sidebar-header.dark .toggle-button:hover {
+  background-color: rgba(96, 165, 250, 0.1) !important;
+  color: #60a5fa !important;
+}
+
+.toggle-button.expanded:hover {
+  transform: translateX(-3px);
+}
+
+.toggle-button.collapsed:hover {
+  transform: scale(1.1);
+}

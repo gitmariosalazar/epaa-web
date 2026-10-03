@@ -13,14 +13,18 @@ import { FindActiveIncidentsByConnectionUseCase } from '../../application/usecas
 import { SearchIncidentsUseCase } from '../../application/usecases/queries/SearchIncidentsUseCase';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
+import type { IncidentDashboardResponseDto } from '../../domain/schemas/dtos/response/incident-dashboard.dto';
+import { GetIncidentDashboardKpisUseCase } from '../../application/usecases/queries/GetIncidentDashboardKpisUseCase';
 
 interface IncidentContextType {
   incidents: IncidentDetailRowResponse[];
   totalCount: number;
   categories: IncidentCategoryResponse[];
   isLoading: boolean;
+  isDashboardLoading: boolean;
   error: string | null;
   loadIncidents: (filters?: {
+    categoriesPermit: number[];
     connectionId?: string | null;
     status?: string | null;
     priority?: string | null;
@@ -36,6 +40,8 @@ interface IncidentContextType {
   resolveIncident: (request: ResolveIncidentRequest) => Promise<ApiResponse<IncidentResponse> | null>;
   loadByConnection: (connectionId: string) => Promise<void>;
   loadActiveByConnection: (connectionId: string) => Promise<void>;
+  dashboardKpis: IncidentDashboardResponseDto | null;
+  loadDashboardKpis: () => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -47,6 +53,8 @@ export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [categories, setCategories] = useState<IncidentCategoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dashboardKpis, setDashboardKpis] = useState<IncidentDashboardResponseDto | null>(null);
+  const [isDashboardLoading, setIsDashboardLoading] = useState(false);
 
   const repository = useMemo(() => new IncidentRepositoryImpl(), []);
 
@@ -57,8 +65,11 @@ export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }
   const findActiveIncidentsByConnectionUseCase = useMemo(() => new FindActiveIncidentsByConnectionUseCase(repository), [repository]);
   const searchIncidentsUseCase = useMemo(() => new SearchIncidentsUseCase(repository), [repository]);
 
+  const getIncidentDashboardKpisUseCase = useMemo(() => new GetIncidentDashboardKpisUseCase(repository), [repository]);
+
   const loadIncidents = useCallback(
     async (filters: {
+      categoriesPermit: number[];
       connectionId?: string | null;
       status?: string | null;
       priority?: string | null;
@@ -68,7 +79,7 @@ export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }
       reference?: string | null;
       reportDate?: Date | null;
       reportRangeDate?: { start: Date; end: Date } | null;
-    } = {}, limit?: number, offset?: number) => {
+    } = { categoriesPermit: [] }, limit?: number, offset?: number) => {
       setIsLoading(true);
       setError(null);
       try {
@@ -171,6 +182,20 @@ export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }
     [resolveIncidentUseCase, loadIncidents]
   );
 
+  const loadDashboardKpis = useCallback(async () => {
+    setIsDashboardLoading(true);
+    setError(null);
+    try {
+      const response = await getIncidentDashboardKpisUseCase.execute();
+      setDashboardKpis(response || null);
+    } catch (err: any) {
+      console.error('Error loading dashboard KPIs:', err);
+      setError(err.message || 'Error al cargar las estadísticas del tablero.');
+    } finally {
+      setIsDashboardLoading(false);
+    }
+  }, [getIncidentDashboardKpisUseCase]);
+
   const refresh = useCallback(async () => {
     await loadIncidents();
     await loadCategories();
@@ -187,6 +212,7 @@ export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }
       totalCount,
       categories,
       isLoading,
+      isDashboardLoading,
       error,
       loadIncidents,
       loadCategories,
@@ -194,9 +220,15 @@ export const IncidentProvider: React.FC<{ children: ReactNode }> = ({ children }
       resolveIncident,
       loadByConnection,
       loadActiveByConnection,
+      dashboardKpis,
+      loadDashboardKpis,
       refresh,
     }),
-    [incidents, totalCount, categories, isLoading, error, loadIncidents, loadCategories, createIncident, resolveIncident, loadByConnection, loadActiveByConnection, refresh]
+    [
+      incidents, totalCount, categories, isLoading, isDashboardLoading, error, loadIncidents,
+      loadCategories, createIncident, resolveIncident, loadByConnection,
+      loadActiveByConnection, dashboardKpis, loadDashboardKpis, refresh
+    ]
   );
 
   return (

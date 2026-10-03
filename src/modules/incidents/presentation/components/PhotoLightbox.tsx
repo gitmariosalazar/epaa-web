@@ -161,10 +161,11 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
             </Tooltip>
             <Tooltip content='Cerrar visor' position='bottom' followCursor={false}>
               <Button
-                className="lightbox-btn lightbox-btn--close"
                 onClick={onClose}
                 aria-label="Cerrar visor"
                 size='xs'
+                circle
+                color='red'
               >
                 <X size={18} />
               </Button>

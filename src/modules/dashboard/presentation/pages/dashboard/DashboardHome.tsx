@@ -72,6 +72,7 @@ export const DashboardHome = () => {
             content={t('dashboard.changePeriod', 'Cambiar periodo')}
             position="bottom"
             themeColor="sky"
+            followCursor={false}
           >
             <div
               className="dashboard-control pulse-hover"

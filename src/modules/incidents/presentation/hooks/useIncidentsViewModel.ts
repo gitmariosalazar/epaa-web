@@ -116,6 +116,8 @@ export const useIncidentsViewModel = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
 
+  const categoriesPermit: number[] = [1, 7];
+
   // ── Carga inicial según el modo ──────────────────────────────────────────
   useEffect(() => {
     if (connectionIdFromUrl) {
@@ -125,6 +127,7 @@ export const useIncidentsViewModel = () => {
       // Modo "todos": carga usando filtros normales
       loadIncidents(
         {
+          categoriesPermit: categoriesPermit,
           status: filters.status || null,
           priority: filters.priority || null,
           categoryId: filters.categoryId ? Number(filters.categoryId) : null,
@@ -157,7 +160,9 @@ export const useIncidentsViewModel = () => {
               : null,
           incidentTypeId:
             filters.searchField === 'incident_type'
-              ? (filters.search ? Number(filters.search) : null)
+              ? filters.search
+                ? Number(filters.search)
+                : null
               : filters.incidentTypeId || null
         },
         pageSize,
@@ -199,6 +204,7 @@ export const useIncidentsViewModel = () => {
     const timer = setTimeout(() => {
       loadIncidentsRef.current(
         {
+          categoriesPermit: categoriesPermit,
           status: filters.status || null,
           priority: filters.priority || null,
           categoryId: filters.categoryId ? Number(filters.categoryId) : null,
@@ -229,7 +235,9 @@ export const useIncidentsViewModel = () => {
               : null,
           incidentTypeId:
             filters.searchField === 'incident_type'
-              ? (filters.search ? Number(filters.search) : null)
+              ? filters.search
+                ? Number(filters.search)
+                : null
               : filters.incidentTypeId || null
         },
         pageSize,
@@ -246,6 +254,7 @@ export const useIncidentsViewModel = () => {
     setSearchParams({});
     loadIncidents(
       {
+        categoriesPermit: categoriesPermit,
         status: filters.status || null,
         priority: filters.priority || null,
         categoryId: filters.categoryId ? Number(filters.categoryId) : null,
@@ -278,7 +287,9 @@ export const useIncidentsViewModel = () => {
             : null,
         incidentTypeId:
           filters.searchField === 'incident_type'
-            ? (filters.search ? Number(filters.search) : null)
+            ? filters.search
+              ? Number(filters.search)
+              : null
             : filters.incidentTypeId || null
       },
       pageSize,

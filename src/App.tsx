@@ -94,6 +94,7 @@ import { IncidentProvider } from '@/modules/incidents/presentation/context/Incid
 //import { IncidentsListPage } from '@/modules/incidents/presentation/pages/IncidentsListPage';
 //import { IncidentsMapPage } from '@/modules/incidents/presentation/pages/IncidentsMapPage';
 import { IncidentsPage } from '@/modules/incidents/presentation/pages/IncidentsPage';
+import { IncidentDashboardPage } from '@/modules/incidents/presentation/pages/IncidentDashboardPage';
 import { CreateIncidentPage } from '@/modules/incidents/presentation/pages/CreateIncidentPage';
 
 import UnAuthorizedPage from '@/shared/presentation/components/unauthorized/UnAuthorizedPage';
@@ -420,6 +421,7 @@ function App() {
                             {/* Tab: Lista e Incidentes (comparten IncidentsPage, el tab se sincroniza por pathname) */}
                             <Route path="list" element={<IncidentsPage />} />
                             <Route path="map" element={<IncidentsPage />} />
+                            <Route path="dashboard" element={<IncidentDashboardPage />} />
                             {/* Crear incidente (flujo separado) */}
                             <Route
                               path="create"

@@ -122,10 +122,15 @@ export const useReadingReportsViewModel = () => {
       // Modo "todos": carga usando filtros normales
       loadIncidents(
         {
+          categoriesPermit: [8], // TODO: Provide actual categories permitted
           status: filters.status || null,
           priority: filters.priority || null,
-          ...(filters.meterCondition ? { meterCondition: filters.meterCondition } : {}),
-          ...(filters.physicalState ? { physicalState: filters.physicalState } : {}),
+          ...(filters.meterCondition
+            ? { meterCondition: filters.meterCondition }
+            : {}),
+          ...(filters.physicalState
+            ? { physicalState: filters.physicalState }
+            : {}),
           categoryId: filters.categoryId ? Number(filters.categoryId) : null,
           connectionId:
             filters.searchField === 'connectionId'
@@ -214,10 +219,15 @@ export const useReadingReportsViewModel = () => {
     const timer = setTimeout(() => {
       loadIncidentsRef.current(
         {
+          categoriesPermit: [8], // TODO: Provide actual categories permitted
           status: filters.status || null,
           priority: filters.priority || null,
-          ...(filters.meterCondition ? { meterCondition: filters.meterCondition } : {}),
-          ...(filters.physicalState ? { physicalState: filters.physicalState } : {}),
+          ...(filters.meterCondition
+            ? { meterCondition: filters.meterCondition }
+            : {}),
+          ...(filters.physicalState
+            ? { physicalState: filters.physicalState }
+            : {}),
           categoryId: filters.categoryId
             ? Number(filters.categoryId)
             : lecturaCategoryId,
@@ -262,10 +272,15 @@ export const useReadingReportsViewModel = () => {
     setSearchParams({});
     loadIncidents(
       {
+        categoriesPermit: [8], // TODO: Provide actual categories permitted
         status: filters.status || null,
         priority: filters.priority || null,
-        ...(filters.meterCondition ? { meterCondition: filters.meterCondition } : {}),
-        ...(filters.physicalState ? { physicalState: filters.physicalState } : {}),
+        ...(filters.meterCondition
+          ? { meterCondition: filters.meterCondition }
+          : {}),
+        ...(filters.physicalState
+          ? { physicalState: filters.physicalState }
+          : {}),
         categoryId: filters.categoryId
           ? Number(filters.categoryId)
           : lecturaCategoryId,

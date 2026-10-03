@@ -16,6 +16,7 @@ import { getRecoleccionSection } from './navigation/sections/recoleccionSection'
 import { getPropiedadesSection } from './navigation/sections/propiedadesSection';
 import { getTramitesSection } from './navigation/sections/tramitesSection';
 import { getNetworkOperationsSection } from './navigation/sections/network-operations';
+import { getIncidentsSection } from './navigation/sections/incidentsSection';
 
 export const useNavigation = (): NavSection[] => {
   const { t } = useTranslation();
@@ -25,6 +26,7 @@ export const useNavigation = (): NavSection[] => {
     getAdministrationSection(t),
     getCustomersSection(t),
     getCatastrosSection(t),
+    getIncidentsSection(t),
     getContabilidadSection(),
     getLecturasSection(),
     getRecoleccionSection(),

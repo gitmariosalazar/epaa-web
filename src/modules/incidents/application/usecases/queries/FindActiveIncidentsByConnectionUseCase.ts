@@ -22,13 +22,14 @@ export class FindActiveIncidentsByConnectionUseCase {
 
   async execute(connectionId: string): Promise<IncidentDetailRowResponse[]> {
     try {
-      const response = await this.incidentRepository.findIncidents({ connectionId });
+      const response = await this.incidentRepository.findIncidents({
+        categoriesPermit: [],
+        connectionId
+      });
       const allIncidents: IncidentDetailRowResponse[] = response.data ?? [];
 
       // Regla de negocio: "activo" = estado distinto de RESUELTO
-      return allIncidents.filter(
-        (incident) => incident.status !== 'RESUELTO'
-      );
+      return allIncidents.filter((incident) => incident.status !== 'RESUELTO');
     } catch (error) {
       throw error;
     }

@@ -139,7 +139,7 @@ export const NotificationBell: React.FC = () => {
   return (
     <div className="notif-bell">
       {/* ── Bell trigger ── */}
-      <Tooltip content="Notificaciones" themeColor="info">
+      <Tooltip content="Notificaciones" themeColor="info" followCursor={false}>
         <Button
           ref={bell.triggerRef}
           className={`notif-bell__btn ${bell.isOpen ? 'notif-bell__btn--active' : ''}`}

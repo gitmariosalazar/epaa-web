@@ -4,11 +4,13 @@ import type { ResolveIncidentRequest } from '../schemas/dtos/request/resolve-inc
 import type { IncidentCategoryResponse } from '../schemas/dtos/response/incident-category-type.response';
 import type { IncidentResponse } from '../schemas/dtos/response/incident.response';
 import type { IncidentDetailRowResponse } from '../schemas/dtos/response/view_incident.response';
+import type { IncidentDashboardResponseDto } from '../schemas/dtos/response/incident-dashboard.dto';
 
 /**
  * Repository interface for Incident operations.
  */
 export interface InterfaceIncidentRepository {
+  getIncidentDashboardKpis(): Promise<IncidentDashboardResponseDto | null>;
   createIncident(
     incident: CreateIncidentRequest
   ): Promise<ApiResponse<IncidentResponse> | null>;
@@ -25,6 +27,7 @@ export interface InterfaceIncidentRepository {
   ): Promise<ApiResponse<IncidentDetailRowResponse> | null>;
   findIncidents(
     filters: {
+      categoriesPermit: number[];
       connectionId?: string | null;
       status?: string | null;
       priority?: string | null;

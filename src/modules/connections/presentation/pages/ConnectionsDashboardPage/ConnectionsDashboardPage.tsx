@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useConnectionDashboard } from '../../hooks/useConnectionDashboard';
 import { GradientAreaChart } from '@/shared/presentation/components/Charts/GradientAreaChart';
 import {
@@ -79,6 +79,13 @@ export const ConnectionsDashboardPage: React.FC = () => {
     useState<LiveMapConnectionResponse | null>(null);
   const [hoveredPinId, setHoveredPinId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [visibleBounds, setVisibleBounds] = useState<{
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+  } | null>(null);
+  const lastBoundsUpdateRef = useRef(0);
 
   const filteredLiveData = useMemo(() => {
     if (!searchQuery.trim()) return liveData;
@@ -92,6 +99,25 @@ export const ConnectionsDashboardPage: React.FC = () => {
       );
     });
   }, [liveData, searchQuery]);
+
+  const visibleMapConnections = useMemo(() => {
+    // Si hay muy pocos resultados (ej: el usuario usó el buscador), no filtramos por límites
+    // para asegurar que el marcador siempre se renderice en el mapa y no desaparezca al panear.
+    if (!visibleBounds || filteredLiveData.length <= 50) {
+      return filteredLiveData.slice(0, 50);
+    }
+    const BOUNDS_PADDING_DEG = 0.01;
+    return filteredLiveData.filter((conn) => {
+      const lat = Number(conn.latitude);
+      const lng = Number(conn.longitude);
+      return (
+        lat <= visibleBounds.north + BOUNDS_PADDING_DEG &&
+        lat >= visibleBounds.south - BOUNDS_PADDING_DEG &&
+        lng <= visibleBounds.east + BOUNDS_PADDING_DEG &&
+        lng >= visibleBounds.west - BOUNDS_PADDING_DEG
+      );
+    }).slice(0, 50);
+  }, [filteredLiveData, visibleBounds]);
 
   interface ZonaRow {
     zona_id: number;
@@ -1017,11 +1043,20 @@ export const ConnectionsDashboardPage: React.FC = () => {
                       defaultZoom={13}
                       gestureHandling="greedy"
                       disableDefaultUI={false}
+                      onCameraChanged={(ev) => {
+                        const now = Date.now();
+                        if (now - lastBoundsUpdateRef.current > 120) {
+                          if (ev.detail.bounds) {
+                            setVisibleBounds(ev.detail.bounds);
+                          }
+                          lastBoundsUpdateRef.current = now;
+                        }
+                      }}
                       onClick={() => setSelectedPin(null)}
                       style={{ width: '100%', height: '100%' }}
                     >
                       <MapController theme={theme} selectedPin={selectedPin} />
-                      {filteredLiveData.map((conn) => {
+                      {visibleMapConnections.map((conn) => {
                         const isSelected =
                           selectedPin?.connectionId === conn.connectionId;
                         const isHovered = hoveredPinId === conn.connectionId;

@@ -3,10 +3,8 @@
 .lightbox-overlay {
   position: fixed;
   inset: 0;
-  /* Glassmorphism overlay that adapts to current theme background */
-  background-color: var(--surface-hover) !important;
-  background-color: rgba(15, 23, 42, 0.7); /* fallback */
-  background-color: color-mix(in srgb, var(--primary) 60%, transparent);
+  /* Glassmorphism overlay: dark translucent background adaptable */
+  background-color: rgba(15, 23, 42, 0.4) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px);
   z-index: 2147483647;
