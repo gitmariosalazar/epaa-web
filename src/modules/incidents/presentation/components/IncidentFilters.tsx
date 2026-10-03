@@ -24,7 +24,7 @@ interface IncidentFiltersProps {
   selectedPriority: string;
   onPriorityChange: (val: string) => void;
   selectedCategoryId: number | null;
-  onCategoryIdChange: (val: number) => void;
+  onCategoryIdChange: (val: number | null) => void;
   categories: IncidentCategoryResponse[];
   onConsultar: () => void;
   onReportIncident: () => void;
@@ -217,7 +217,7 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
           <div className="filter-input-wrapper">
             <Select
               value={selectedCategoryId?.toString() ?? ''}
-              onChange={(e) => onCategoryIdChange(Number(e.target.value))}
+              onChange={(e) => onCategoryIdChange(e.target.value ? Number(e.target.value) : null)}
               size="small"
               leftIcon={<MdCategory size={18} />}
             >

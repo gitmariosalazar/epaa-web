@@ -116,7 +116,7 @@ export const useIncidentsViewModel = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
 
-  const categoriesPermit: number[] = [1, 7];
+  const categoriesPermit: number[] = [1, 7, 8];
 
   // ── Carga inicial según el modo ──────────────────────────────────────────
   useEffect(() => {
