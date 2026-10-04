@@ -6,11 +6,33 @@
   border-radius: 10px;
   border: 1px solid var(--border-color) !important;
   box-shadow: var(--shadow-sm) !important;
-  background: var(--surface) !important;
+  background: var(--surface);
   text-align: left;
   width: 100%;
   transition: all 0.15s ease;
   position: relative;
+}
+
+/* Aplicar los colores de servicio sobre el surface para que no se vuelvan transparentes */
+.incident-item-container.row-service-potable {
+  background: linear-gradient(0deg, rgba(37, 99, 235, 0.08), rgba(37, 99, 235, 0.08)), var(--surface) !important;
+}
+[data-theme='dark'] .incident-item-container.row-service-potable {
+  background: linear-gradient(0deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.08)), var(--surface) !important;
+}
+
+.incident-item-container.row-service-alcantarillado {
+  background: linear-gradient(0deg, rgba(234, 88, 12, 0.08), rgba(234, 88, 12, 0.08)), var(--surface) !important;
+}
+[data-theme='dark'] .incident-item-container.row-service-alcantarillado {
+  background: linear-gradient(0deg, rgba(249, 115, 22, 0.08), rgba(249, 115, 22, 0.08)), var(--surface) !important;
+}
+
+.incident-item-container.row-service-inspeccion {
+  background: linear-gradient(0deg, rgba(2, 132, 199, 0.08), rgba(2, 132, 199, 0.08)), var(--surface) !important;
+}
+[data-theme='dark'] .incident-item-container.row-service-inspeccion {
+  background: linear-gradient(0deg, rgba(14, 165, 233, 0.08), rgba(14, 165, 233, 0.08)), var(--surface) !important;
 }
 /* ====================== STATS PILLS - Versión Premium ====================== */
 

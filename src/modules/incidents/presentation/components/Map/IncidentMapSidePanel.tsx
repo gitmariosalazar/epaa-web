@@ -12,6 +12,7 @@ import { MdCable, MdFactCheck, MdKey, MdLocationOn, MdNoteAdd } from 'react-icon
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { Divider } from '@/shared/presentation/components/divider/Divider';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { SERVICES } from '@/shared/presentation/utils/icons/icons-water';
 import { truncateText } from '@/shared/utils/text/truncate-text';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { FaListUl } from 'react-icons/fa';
@@ -198,21 +199,30 @@ export const IncidentMapSidePanel: React.FC<IncidentMapSidePanelProps> = ({
               };
               const isSelected =
                 selectedIncident?.incidentId === incident.incidentId;
+              const serviceInfo = SERVICES.find(s => s.name.toLowerCase() === incident.categoryName?.toLowerCase());
+              const rowClass = serviceInfo ? `row-${serviceInfo.themeClass}` : '';
+              const IconComponent = serviceInfo?.icon;
 
               return (
                 <div
                   key={idx}
-                  className={`incident-item-container ${isSelected ? 'is-selected' : ''}`}
+                  className={`incident-item-container ${isSelected ? 'is-selected' : ''} ${rowClass}`}
                   onClick={() => onSelect(incident)} // ← SOLO ENFOCAR MAPA
                 >
                   {/* Contenido principal */}
                   <div className={`incident-item-bottom`}>
                     <div className="">
                       <div className="incident-item-dot-content">
-                        <div
-                          className="incident-item-dot"
-                          style={{ background: pCfg.color }}
-                        />
+                        {IconComponent && serviceInfo ? (
+                          <div className={`service-icon-container ${serviceInfo.themeClass}`} style={{ padding: '4px', borderRadius: '4px' }}>
+                            <IconComponent style={{ width: '14px', height: '14px' }} />
+                          </div>
+                        ) : (
+                          <div
+                            className="incident-item-dot"
+                            style={{ background: pCfg.color }}
+                          />
+                        )}
                         <div className="incident-item-body">
                           <Tooltip
                             content={incident.incidentTypeName}

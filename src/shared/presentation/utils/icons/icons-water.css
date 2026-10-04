@@ -1,0 +1,74 @@
+.service-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+}
+
+.service-icon-svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* 1. Agua Potable (Azul) */
+.service-potable {
+  background-color: #dbeafe; /* blue-100 */
+  border-color: #93c5fd; /* blue-300 */
+  color: #2563eb; /* blue-600 */
+}
+
+[data-theme='dark'] .service-potable {
+  background-color: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #60a5fa; /* blue-400 */
+}
+
+/* 2. Alcantarillado (Tomate) */
+.service-alcantarillado {
+  background-color: #ffedd5; /* orange-100 */
+  border-color: #fdba74; /* orange-300 */
+  color: #ea580c; /* orange-600 */
+}
+
+[data-theme='dark'] .service-alcantarillado {
+  background-color: rgba(249, 115, 22, 0.2);
+  border-color: rgba(249, 115, 22, 0.3);
+  color: #fb923c; /* orange-400 */
+}
+
+/* 3. Inspección en Ruta (Celeste) */
+.service-inspeccion {
+  background-color: #e0f2fe; /* sky-100 */
+  border-color: #7dd3fc; /* sky-300 */
+  color: #0284c7; /* sky-600 */
+}
+
+[data-theme='dark'] .service-inspeccion {
+  background-color: rgba(14, 165, 233, 0.2);
+  border-color: rgba(14, 165, 233, 0.3);
+  color: #38bdf8; /* sky-400 */
+}
+
+/* --- ESTILOS PARA FILAS DE TABLA --- */
+.row-service-potable {
+  background-color: rgba(37, 99, 235, 0.05) !important;
+}
+[data-theme='dark'] .row-service-potable {
+  background-color: rgba(59, 130, 246, 0.05) !important;
+}
+
+.row-service-alcantarillado {
+  background-color: rgba(234, 88, 12, 0.05) !important;
+}
+[data-theme='dark'] .row-service-alcantarillado {
+  background-color: rgba(249, 115, 22, 0.05) !important;
+}
+
+.row-service-inspeccion {
+  background-color: rgba(2, 132, 199, 0.05) !important;
+}
+[data-theme='dark'] .row-service-inspeccion {
+  background-color: rgba(14, 165, 233, 0.05) !important;
+}

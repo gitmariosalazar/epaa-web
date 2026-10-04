@@ -1,9 +1,19 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Calendar, MapPin, User, CheckCircle, Navigation } from 'lucide-react';
+import {
+  X,
+  Calendar,
+  MapPin,
+  User,
+  CheckCircle,
+  Navigation
+} from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
-import { ConverDate, ConverDateTimeToText } from '@/shared/utils/datetime/ConverDate';
+import {
+  ConverDate,
+  ConverDateTimeToText
+} from '@/shared/utils/datetime/ConverDate';
 import { EvidenceFiles } from '@/shared/files';
 import { PhotoLightbox } from './PhotoLightbox';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
@@ -16,7 +26,11 @@ import { MdOutlineTripOrigin, MdPhotoLibrary } from 'react-icons/md';
 import { FaUserCheck, FaUsersCog } from 'react-icons/fa';
 import { IoMail } from 'react-icons/io5';
 import '../styles/IncidentDetailModal.css';
-import { GiPhone } from "react-icons/gi";
+import { GiPhone } from 'react-icons/gi';
+import {
+  getMeterConditionColor,
+  getPhysicalStateColor
+} from '@/shared/presentation/utils/colors/status-colors';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -28,26 +42,35 @@ interface IncidentDetailModalProps {
   isFetchingConnection?: boolean;
 }
 
-
 // ─── Pure helpers (module-level — no closures, no re-creation on render) ───────
 
 function getStatusColor(status: string): string {
   switch (status.toUpperCase()) {
-    case 'RESUELTO': return 'green';
-    case 'EN_INSPECCION': return 'orange';
-    case 'REPORTADO': return 'blue';
-    case 'FALSO_REPORTE': return 'red';
-    default: return 'neutral';
+    case 'RESUELTO':
+      return 'green';
+    case 'EN_INSPECCION':
+      return 'orange';
+    case 'REPORTADO':
+      return 'blue';
+    case 'FALSO_REPORTE':
+      return 'red';
+    default:
+      return 'neutral';
   }
 }
 
 function getPriorityColor(priority: string): string {
   switch (priority.toUpperCase()) {
-    case 'CRITICA': return 'red';
-    case 'ALTA': return 'orange';
-    case 'MEDIA': return 'amber';
-    case 'BAJA': return 'green';
-    default: return 'neutral';
+    case 'CRITICA':
+      return 'red';
+    case 'ALTA':
+      return 'orange';
+    case 'MEDIA':
+      return 'amber';
+    case 'BAJA':
+      return 'green';
+    default:
+      return 'neutral';
   }
 }
 
@@ -75,12 +98,13 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
 }) => {
   // Lightbox state: null = closed, number = index of the open photo
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [lightboxResolutionIndex, setLightboxResolutionIndex] = useState<number | null>(null);
+  const [lightboxResolutionIndex, setLightboxResolutionIndex] = useState<
+    number | null
+  >(null);
 
   // All hooks must be called before any conditional return (Rules of Hooks)
   const photosReport = incident?.photosReport ?? [];
   const photosResolution = incident?.photosResolution ?? [];
-
 
   if (!isOpen || !incident) return null;
 
@@ -109,36 +133,52 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                   size="xs"
                 />
               </div>
-              <Tooltip content='Cerrar' position='bottom' followCursor={false}>
-                <Button variant="ghost" size="sm" circle onClick={onClose} className="close-btn-p" color='red'>
+              <Tooltip content="Cerrar" position="bottom" followCursor={false}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  circle
+                  onClick={onClose}
+                  className="close-btn-p"
+                  color="red"
+                >
                   <X size={20} />
                 </Button>
               </Tooltip>
             </div>
 
             <div className="incident-modal-body">
-
               {/* ── Basic info ── */}
               <div className="detail-section">
                 <h4 className="detail-section-title">Información Básica</h4>
                 <div className="detail-grid">
                   <div className="detail-item">
                     <span className="detail-label">Tipo de Incidente</span>
-                    <span className="detail-value">{incident.incidentTypeName || 'Sin registrar'}</span>
+                    <span className="detail-value">
+                      {incident.incidentTypeName || 'Sin registrar'}
+                    </span>
                   </div>
                   <div className="detail-item">
                     <span className="detail-label">Categoría</span>
-                    <span className="detail-value">{incident.categoryName || 'Sin registrar'}</span>
+                    <span className="detail-value">
+                      {incident.categoryName || 'Sin registrar'}
+                    </span>
                   </div>
                   <div className="detail-item">
                     <span className="detail-label">Conexión / Acometida</span>
-                    <span className="detail-value">{incident.connectionId || 'No asociado'}</span>
+                    <span className="detail-value">
+                      {incident.connectionId || 'No asociado'}
+                    </span>
                   </div>
                   <div className="detail-item">
                     <span className="detail-label">Días en curso</span>
                     <span className="detail-value font-medium">
-                      {incident.openDays || 0} {' '}
-                      {incident.openDays && incident.openDays == 0 ? 'días' : incident.openDays == 1 ? 'día' : 'días'}
+                      {incident.openDays || 0}{' '}
+                      {incident.openDays && incident.openDays == 0
+                        ? 'días'
+                        : incident.openDays == 1
+                          ? 'día'
+                          : 'días'}
                     </span>
                   </div>
                   <div className="detail-item">
@@ -148,39 +188,144 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                     </span>
                   </div>
                 </div>
+                {/* ── Meter Conditions ── */}
+                {(incident.meterCondition || incident.physicalState) && (
+                  <div className="meter-condition">
+                    <span className="meter-condition-text">
+                      Condición del Medidor
+                    </span>
+                    {incident.physicalState &&
+                      (() => {
+                        const physical = getPhysicalStateColor(
+                          incident.physicalState
+                        );
+                        return (
+                          <div className="meter-info">
+                            <Tooltip
+                              content={
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    flexDirection: 'column'
+                                  }}
+                                >
+                                  <span className="geo-status-bar__label">
+                                    Estado físico del medidor: {physical.label}
+                                  </span>
+                                </div>
+                              }
+                              followCursor={false}
+                              themeColor={physical.color as any}
+                              position="top"
+                            >
+                              <div style={{ display: 'inline-block' }}>
+                                <ColorChip
+                                  label={physical.label}
+                                  color={physical.color as any}
+                                  icon={physical.icon}
+                                  size="xs"
+                                />
+                              </div>
+                            </Tooltip>
+                          </div>
+                        );
+                      })()}
+                    {incident.meterCondition &&
+                      (() => {
+                        const meter = getMeterConditionColor(
+                          incident.meterCondition
+                        );
+                        return (
+                          <div className="meter-info">
+                            <Tooltip
+                              content={
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    flexDirection: 'column'
+                                  }}
+                                >
+                                  <span className="geo-status-bar__label">
+                                    Condición funcional del medidor:{' '}
+                                    {meter.label}
+                                  </span>
+                                </div>
+                              }
+                              followCursor={false}
+                              themeColor={meter.color as any}
+                              position="top"
+                            >
+                              <div style={{ display: 'inline-block' }}>
+                                <ColorChip
+                                  label={meter.label}
+                                  color={meter.color as any}
+                                  icon={meter.icon}
+                                  size="xs"
+                                />
+                              </div>
+                            </Tooltip>
+                          </div>
+                        );
+                      })()}
+                  </div>
+                )}
               </div>
 
               {/* ── Connection Info ── */}
               {incident?.connectionId && (
                 <div className="detail-section">
-                  <h4 className="detail-section-title">Detalles de Acometida</h4>
+                  <h4 className="detail-section-title">
+                    Detalles de Acometida
+                  </h4>
                   {isFetchingConnection ? (
-                    <div className="text-secondary" style={{ fontSize: '0.875rem' }}>Cargando datos de la acometida...</div>
+                    <div
+                      className="text-secondary"
+                      style={{ fontSize: '0.875rem' }}
+                    >
+                      Cargando datos de la acometida...
+                    </div>
                   ) : connection ? (
                     <div className="detail-grid">
                       <div className="detail-item">
                         <span className="detail-label">Cliente</span>
-                        <span className="detail-value font-medium">{connection.person ? `${connection.person.firstName} ${connection.person.lastName}` : connection.company?.businessName || 'Desconocido'}</span>
+                        <span className="detail-value font-medium">
+                          {connection.person
+                            ? `${connection.person.firstName} ${connection.person.lastName}`
+                            : connection.company?.businessName || 'Desconocido'}
+                        </span>
                       </div>
                       <div className="detail-item">
                         <span className="detail-label">Medidor</span>
-                        <span className="detail-value">{connection.connectionMeterNumber || 'Sin medidor'}</span>
+                        <span className="detail-value">
+                          {connection.connectionMeterNumber || 'Sin medidor'}
+                        </span>
                       </div>
                       <div className="detail-item">
                         <span className="detail-label">Estado</span>
-                        <span className="detail-value">{connection.connectionStatus || 'N/A'}</span>
+                        <span className="detail-value">
+                          {connection.connectionStatus || 'N/A'}
+                        </span>
                       </div>
                       <div className="detail-item">
                         <span className="detail-label">Dirección</span>
-                        <span className="detail-value">{connection.connectionAddress || 'N/A'}</span>
+                        <span className="detail-value">
+                          {connection.connectionAddress || 'N/A'}
+                        </span>
                       </div>
                       <div className="detail-item">
                         <span className="detail-label">Zona</span>
-                        <span className="detail-value">{connection.zoneName || 'N/A'}</span>
+                        <span className="detail-value">
+                          {connection.zoneName || 'N/A'}
+                        </span>
                       </div>
                     </div>
                   ) : (
-                    <div className="text-secondary" style={{ fontSize: '0.875rem' }}>No se pudo cargar la información de la acometida.</div>
+                    <div
+                      className="text-secondary"
+                      style={{ fontSize: '0.875rem' }}
+                    >
+                      No se pudo cargar la información de la acometida.
+                    </div>
                   )}
                 </div>
               )}
@@ -189,7 +334,9 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
               <div className="detail-section">
                 <h4 className="detail-section-title">Reporte</h4>
                 <div className="detail-description-box">
-                  <p className="description-text">{incident.reportDescription}</p>
+                  <p className="description-text">
+                    {incident.reportDescription}
+                  </p>
                 </div>
                 <div className="detail-grid mt-2">
                   <div className="detail-item">
@@ -212,119 +359,147 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                       Reportado Por (Usuario / Cliente)
                     </span>
                     <div className="detail-value detail-value-user">
-
                       <ColorChip
-                        label={incident.reportedBy.name ? incident.reportedBy.name : 'N/A'}
+                        label={
+                          incident.reportedBy.name
+                            ? incident.reportedBy.name
+                            : 'N/A'
+                        }
                         variant="ghost"
-                        color='yellow'
+                        color="yellow"
                         size="xs"
                         borderRadius={5}
                         icon={<FaUserCheck />}
                       />
                       <ColorChip
-                        label={incident.reportOrigin ? incident.reportOrigin : 'N/A'}
+                        label={
+                          incident.reportOrigin ? incident.reportOrigin : 'N/A'
+                        }
                         variant="ghost"
-                        color='gray'
+                        color="gray"
                         size="xs"
                         borderRadius={5}
                         icon={<MdOutlineTripOrigin />}
                       />
                       <ColorChip
-                        label={incident.reportedBy.userType ? incident.reportedBy.userType : 'N/A'}
+                        label={
+                          incident.reportedBy.userType
+                            ? incident.reportedBy.userType
+                            : 'N/A'
+                        }
                         variant="ghost"
-                        color='green'
+                        color="green"
                         size="xs"
                         borderRadius={5}
                         icon={<FaUsersCog />}
                       />
-                      {
-                        incident.reportedBy.phone && (
-                          <ColorChip
-                            label={typeof incident.reportedBy.phone === 'object' ? (incident.reportedBy.phone as any).numero : incident.reportedBy.phone}
-                            variant="ghost"
-                            status='info'
-                            size="xs"
-                            borderRadius={5}
-                            icon={<GiPhone />}
-                          />
-                        )
-                      }
-                      {
-                        incident.reportedBy.email && (
-                          <ColorChip
-                            label={typeof incident.reportedBy.email === 'object' ? (incident.reportedBy.email as any).correo : incident.reportedBy.email}
-                            variant="ghost"
-                            status='info'
-                            size="xs"
-                            borderRadius={5}
-                            icon={<IoMail />}
-                          />
-                        )
-                      }
+                      {incident.reportedBy.phone && (
+                        <ColorChip
+                          label={
+                            typeof incident.reportedBy.phone === 'object'
+                              ? (incident.reportedBy.phone as any).numero
+                              : incident.reportedBy.phone
+                          }
+                          variant="ghost"
+                          status="info"
+                          size="xs"
+                          borderRadius={5}
+                          icon={<GiPhone />}
+                        />
+                      )}
+                      {incident.reportedBy.email && (
+                        <ColorChip
+                          label={
+                            typeof incident.reportedBy.email === 'object'
+                              ? (incident.reportedBy.email as any).correo
+                              : incident.reportedBy.email
+                          }
+                          variant="ghost"
+                          status="info"
+                          size="xs"
+                          borderRadius={5}
+                          icon={<IoMail />}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* ── Location ── */}
-              {(incident.referenceAddress || (incident.latitude && incident.longitude)) && (
-                <div className="detail-section">
-                  <h4 className="detail-section-title">Ubicación</h4>
-                  {incident.referenceAddress && (
-                    <div className="incident-location-header">
-                      <MapPin size={16} className="text-secondary" />
-                      <span className="detail-value">{incident.referenceAddress}</span>
-                    </div>
-                  )}
-                  {/* Original coordinates box — kept intact */}
-                  {incident.latitude && incident.longitude && (
-                    <div className="geolocation-box">
-                      <span className="detail-value">
-                        Coordenadas: {incident.latitude}, {incident.longitude}
-                      </span>
-                      <div className="maps-link">
-                        <a className='geo-card__maps-link'
-                          href={`https://www.google.com/maps/search/?api=1&query=${incident.latitude},${incident.longitude}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Navigation size={12} />
-                          Ver en Google Maps
-                        </a>
+              {(incident.referenceAddress ||
+                (incident.latitude && incident.longitude)) && (
+                  <div className="detail-section">
+                    <h4 className="detail-section-title">Ubicación</h4>
+                    {incident.referenceAddress && (
+                      <div className="incident-location-header">
+                        <MapPin size={16} className="text-secondary" />
+                        <span className="detail-value">
+                          {incident.referenceAddress}
+                        </span>
                       </div>
-                    </div>
-                  )}
-                  {/* Geocoded address card — reverse geocodes the saved coordinates */}
-                  {incident.latitude && incident.longitude && (
-                    <div className="incident-location-map-wrapper">
-                      <GeoSection lat={Number(incident.latitude)} lng={Number(incident.longitude)} />
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                    {/* Original coordinates box — kept intact */}
+                    {incident.latitude && incident.longitude && (
+                      <div className="geolocation-box">
+                        <span className="detail-value">
+                          Coordenadas: {incident.latitude}, {incident.longitude}
+                        </span>
+                        <div className="maps-link">
+                          <a
+                            className="geo-card__maps-link"
+                            href={`https://www.google.com/maps/search/?api=1&query=${incident.latitude},${incident.longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Navigation size={12} />
+                            Ver en Google Maps
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                    {/* Geocoded address card — reverse geocodes the saved coordinates */}
+                    {incident.latitude && incident.longitude && (
+                      <div className="incident-location-map-wrapper">
+                        <GeoSection
+                          lat={Number(incident.latitude)}
+                          lng={Number(incident.longitude)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
 
               {/* ── Resolution ── */}
               {incident.status === 'RESUELTO' && (
                 <div className="detail-section highlight-resolved">
                   <h4 className="detail-section-title detail-section-title--success">
-                    <CheckCircle size={14} className="detail-section-title-icon" />
+                    <CheckCircle
+                      size={14}
+                      className="detail-section-title-icon"
+                    />
                     Resolución
                   </h4>
                   <div className="detail-description-box">
                     <p className="description-text">
-                      {incident.resolutionDescription || 'Sin comentarios de resolución.'}
+                      {incident.resolutionDescription ||
+                        'Sin comentarios de resolución.'}
                     </p>
                   </div>
                   <div className="detail-grid mt-2">
                     <div className="detail-item">
                       <span className="detail-label">Fecha de Resolución</span>
                       <span className="detail-value">
-                        {incident.resolutionDate ? ConverDate(incident.resolutionDate) : 'N/A'}
+                        {incident.resolutionDate
+                          ? ConverDate(incident.resolutionDate)
+                          : 'N/A'}
                       </span>
                     </div>
                     <div className="detail-item">
                       <span className="detail-label">Resuelto Por</span>
-                      <span className="detail-value">{incident.resolvedBy?.name || 'Desconocido'}</span>
+                      <span className="detail-value">
+                        {incident.resolvedBy?.name || 'Desconocido'}
+                      </span>
                     </div>
                     <div className="detail-item">
                       <span className="detail-label">Costo de Reparación</span>
@@ -334,7 +509,9 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                     </div>
                     <div className="detail-item">
                       <span className="detail-label">Cobrado al Usuario</span>
-                      <span className="detail-value">{incident.chargeToUser ? 'Sí' : 'No'}</span>
+                      <span className="detail-value">
+                        {incident.chargeToUser ? 'Sí' : 'No'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -362,8 +539,13 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                     <EmptyState
                       message="Sin evidencia de reporte"
                       description="No se ha agregado evidencia fotográfica de reporte."
-                      icon={<MdPhotoLibrary size={35} className='icon-error-color' />}
-                      variant='warning'
+                      icon={
+                        <MdPhotoLibrary
+                          size={35}
+                          className="icon-error-color"
+                        />
+                      }
+                      variant="warning"
                     />
                   </div>
                 )}
@@ -372,7 +554,8 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
               {/* ── Resolution photo evidence ── */}
               <div className="detail-section">
                 <h4 className="detail-section-title">
-                  Evidencia Fotográfica de Resolución ({photosResolution.length})
+                  Evidencia Fotográfica de Resolución ({photosResolution.length}
+                  )
                 </h4>
                 {photosResolution.length > 0 ? (
                   <div className="photos-gallery">
@@ -391,8 +574,13 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                     <EmptyState
                       message="Sin evidencia de resolución"
                       description="No se ha agregado evidencia fotográfica de resolución."
-                      icon={<MdPhotoLibrary size={35} className='icon-error-color' />}
-                      variant='warning'
+                      icon={
+                        <MdPhotoLibrary
+                          size={35}
+                          className="icon-error-color"
+                        />
+                      }
+                      variant="warning"
                     />
                   </div>
                 )}
@@ -413,45 +601,73 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                       comment: h.observation ?? undefined,
                       actor: h.managedBy ? (
                         <div className="timeline-actor-container">
-                          <p className='timeline-actor-title'>Actor del cambio:</p>
+                          <p className="timeline-actor-title">
+                            Actor del cambio:
+                          </p>
                           <div className="timeline-actor-secondary">
-                            <ColorChip size='xs' variant='ghost' color='yellow' label={
-                              typeof h.managedBy === 'string'
-                                ? h.managedBy
-                                : `${h.managedBy.nombre} ${h.managedBy.apellido}`
-
-                            }
+                            <ColorChip
+                              size="xs"
+                              variant="ghost"
+                              color="yellow"
+                              label={
+                                typeof h.managedBy === 'string'
+                                  ? h.managedBy
+                                  : `${h.managedBy.nombre} ${h.managedBy.apellido}`
+                              }
                               icon={<FaUserCheck />}
                             />
-                            {typeof h.managedBy === 'object' && h.managedBy !== null && (h.managedBy.celular || h.managedBy.correo) && (
-                              <div className="timeline-actor-secondary">
-                                {h.managedBy.celular && (
-                                  <ColorChip size='xs' variant='ghost' status='info' label={typeof h.managedBy.celular === 'object' ? (h.managedBy.celular as any).numero : h.managedBy.celular}
-                                    icon={<GiPhone size={10} />}
-                                  />
-                                )}
-                                {h.managedBy.correo && (
-                                  <ColorChip size='xs' variant='ghost' status='accent' label={typeof h.managedBy.correo === 'object' ? (h.managedBy.correo as any).correo : h.managedBy.correo}
-                                    icon={<IoMail size={10} />}
-                                  />
-                                )}
-                              </div>
-                            )}
+                            {typeof h.managedBy === 'object' &&
+                              h.managedBy !== null &&
+                              (h.managedBy.celular || h.managedBy.correo) && (
+                                <div className="timeline-actor-secondary">
+                                  {h.managedBy.celular && (
+                                    <ColorChip
+                                      size="xs"
+                                      variant="ghost"
+                                      status="info"
+                                      label={
+                                        typeof h.managedBy.celular === 'object'
+                                          ? (h.managedBy.celular as any).numero
+                                          : h.managedBy.celular
+                                      }
+                                      icon={<GiPhone size={10} />}
+                                    />
+                                  )}
+                                  {h.managedBy.correo && (
+                                    <ColorChip
+                                      size="xs"
+                                      variant="ghost"
+                                      status="accent"
+                                      label={
+                                        typeof h.managedBy.correo === 'object'
+                                          ? (h.managedBy.correo as any).correo
+                                          : h.managedBy.correo
+                                      }
+                                      icon={<IoMail size={10} />}
+                                    />
+                                  )}
+                                </div>
+                              )}
                           </div>
                         </div>
-                      ) : undefined,
+                      ) : undefined
                     }))}
                     emptyMessage="Sin historial de estados."
                   />
                 </div>
               )}
-
             </div>
 
             {/* ── Footer ── */}
             <div className="incident-modal-footer">
-              <Tooltip content='Cerrar' position='bottom' followCursor={false}>
-                <Button variant="outline" onClick={onClose} className="close-btn-p" color='red' value='Cerrar'>
+              <Tooltip content="Cerrar" position="bottom" followCursor={false}>
+                <Button
+                  variant="outline"
+                  onClick={onClose}
+                  className="close-btn-p"
+                  color="red"
+                  value="Cerrar"
+                >
                   <X size={20} />
                   Cerrar
                 </Button>
@@ -465,7 +681,11 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
       {/* ── Lightbox — rendered in its own portal above the modal ── */}
       {lightboxIndex !== null && photosReport.length > 0 && (
         <PhotoLightbox
-          photos={photosReport.map((p) => ({ photoId: p.id, filePath: p.filePath, type: p.type }))}
+          photos={photosReport.map((p) => ({
+            photoId: p.id,
+            filePath: p.filePath,
+            type: p.type
+          }))}
           activeIndex={lightboxIndex}
           category="incidents"
           onClose={() => setLightboxIndex(null)}
@@ -476,7 +696,11 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
       {/* ── Resolution photo lightbox ── */}
       {lightboxResolutionIndex !== null && photosResolution.length > 0 && (
         <PhotoLightbox
-          photos={photosResolution.map((p) => ({ photoId: p.id, filePath: p.filePath, type: p.type }))}
+          photos={photosResolution.map((p) => ({
+            photoId: p.id,
+            filePath: p.filePath,
+            type: p.type
+          }))}
           activeIndex={lightboxResolutionIndex}
           category="incidents"
           onClose={() => setLightboxResolutionIndex(null)}

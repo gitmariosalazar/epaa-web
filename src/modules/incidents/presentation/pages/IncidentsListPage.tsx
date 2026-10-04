@@ -11,6 +11,7 @@ import { Table, type Column, type ContextMenuItem } from '@/shared/presentation/
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { ConverDate } from '@/shared/utils/datetime/ConverDate';
+import { SERVICES } from '@/shared/presentation/utils/icons/icons-water';
 import { AlertCircle, Eye, Wrench, ShieldAlert, Network, X, Navigation, Repeat, Plus, Printer } from 'lucide-react';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress/CircularProgress';
 import { useSimulatedProgress } from '@/shared/presentation/components/CircularProgress/useSimulatedProgress';
@@ -149,12 +150,24 @@ export const IncidentsListPage: React.FC = () => {
     },
     {
       header: 'CATEGORIA / TIPO',
-      accessor: (item) => (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span className="incident-category-text">{item.categoryName}</span>
-          <span className="incident-type-text">{item.incidentTypeName}</span>
-        </div>
-      ),
+      accessor: (item) => {
+        const serviceInfo = SERVICES.find(s => s.name.toLowerCase() === item.categoryName?.toLowerCase());
+        const IconComponent = serviceInfo?.icon;
+        
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {IconComponent && serviceInfo && (
+              <div className={`service-icon-container ${serviceInfo.themeClass}`}>
+                <IconComponent className="service-icon-svg" />
+              </div>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span className="incident-category-text" style={{ fontWeight: 600 }}>{item.categoryName}</span>
+              <span className="incident-type-text" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.incidentTypeName}</span>
+            </div>
+          </div>
+        );
+      },
       id: 'categoryAndType'
     },
     {
@@ -389,6 +402,10 @@ export const IncidentsListPage: React.FC = () => {
             data={incidents}
             columns={columns}
             contextMenuItems={getContextMenuItems}
+            getRowClassName={(item) => {
+              const serviceInfo = SERVICES.find(s => s.name.toLowerCase() === item.categoryName?.toLowerCase());
+              return serviceInfo ? `row-${serviceInfo.themeClass}` : undefined;
+            }}
             isLoading={isLoading}
             loadingState={
               <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '3rem', gap: '1rem' }}>

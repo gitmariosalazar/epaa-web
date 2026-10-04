@@ -76,6 +76,29 @@
   margin-right: 4px;
 }
 
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+
+.meter-condition {
+  gap: 16px;
+  position: absolute;
+  right: 10px;
+  bottom: 16px;
+}
+
+.meter-condition-text {
+  font-size: 0.72rem;
+  font-weight: bold;
+}
+
+.meter-info {
+  margin: 5px;
+}
+
 .detail-section-title-icon {
   margin-right: 4px;
 }

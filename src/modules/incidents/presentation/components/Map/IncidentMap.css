@@ -165,15 +165,18 @@
   flex-direction: column;
   gap: 4px;
   scrollbar-width: thin;
-  scrollbar-color: var(--surface-hover) transparent;
+  scrollbar-color: rgba(100, 116, 139, 0.4) transparent;
 }
 
 .incident-side-panel-list::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 .incident-side-panel-list::-webkit-scrollbar-thumb {
-  background: var(--surface-hover) !important;
+  background: rgba(100, 116, 139, 0.4) !important;
   border-radius: 4px;
+}
+.incident-side-panel-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.7) !important;
 }
 
 /* Individual item */
