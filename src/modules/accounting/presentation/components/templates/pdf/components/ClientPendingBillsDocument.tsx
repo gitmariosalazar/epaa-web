@@ -24,6 +24,7 @@ export const ClientPendingBillsDocument: React.FC<Props> = ({ groups }) => {
           <Image src="/sigepaa.png" style={styles.backgroundImage} fixed />
 
           <View style={styles.contentWrapper}>
+            <View style={styles.headerSpacer} fixed />
             {/* HEADER */}
             <View style={styles.headerRow} fixed>
               <View style={styles.headerTextContainer}>
@@ -41,7 +42,7 @@ export const ClientPendingBillsDocument: React.FC<Props> = ({ groups }) => {
             </View>
 
             {/* CLIENT INFO BOX */}
-            <View style={styles.clientInfoCard}>
+            <View style={styles.clientInfoCard} wrap={false}>
               <View style={styles.clientInfoCol}>
                 <View style={styles.clientInfoRow}>
                   <Text style={styles.clientInfoLabel}>Contribuyente:</Text>
@@ -73,69 +74,75 @@ export const ClientPendingBillsDocument: React.FC<Props> = ({ groups }) => {
             </View>
 
             {/* PLANILLA GENERAL TABLE */}
-            <Text style={styles.sectionTitle}>Planilla General de Agua Potable</Text>
-            <View style={styles.table}>
-              <View style={styles.tableHeader}>
-                <Text style={[styles.tableColHeader, styles.colPeriod]}>Periodo</Text>
-                <Text style={[styles.tableColHeader, { textAlign: 'center' }]}>Consumo (m³)</Text>
-                <Text style={[styles.tableColHeader, { textAlign: 'right' }]}>Valor EPAA</Text>
-                <Text style={[styles.tableColHeader, { textAlign: 'right' }]}>Interés</Text>
-                <Text style={[styles.tableColHeader, { textAlign: 'right' }]}>Recargo</Text>
-                <Text style={[styles.tableColHeader, { textAlign: 'right' }]}>Total</Text>
-              </View>
-
-              {group.bills.map((bill, i) => (
-                <View key={`general-${i}`} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowAlt : {}]} wrap={false}>
-                  <Text style={[styles.tableCol, styles.colPeriod]}>{bill.monthDue} - {bill.yearDue}</Text>
-                  <Text style={[styles.tableCol, { textAlign: 'center' }]}>{bill.consumption.toFixed(1)}</Text>
-                  <Text style={styles.tableColRight}>{fmt(Number(bill.epaaValue))}</Text>
-                  <Text style={styles.tableColRight}>{fmt(Number(bill.interestValue))}</Text>
-                  <Text style={styles.tableColRight}>{Number(bill.surcharge) === 0 ? '-' : fmt(Number(bill.surcharge))}</Text>
-                  <Text style={[styles.tableColRight]}>{fmt(Number(bill.total))}</Text>
+            <View wrap={false}>
+              <Text style={styles.sectionTitle}>Planilla General de Agua Potable</Text>
+              <View style={styles.table}>
+                <View style={styles.tableHeader}>
+                  <Text style={[styles.tableColHeader, styles.colPeriod]}>Periodo</Text>
+                  <Text style={[styles.tableColHeader, { textAlign: 'center' }]}>Consumo (m³)</Text>
+                  <Text style={[styles.tableColHeader, { textAlign: 'right' }]}>Valor EPAA</Text>
+                  <Text style={[styles.tableColHeader, { textAlign: 'right' }]}>Interés</Text>
+                  <Text style={[styles.tableColHeader, { textAlign: 'right' }]}>Recargo</Text>
+                  <Text style={[styles.tableColHeader, { textAlign: 'right' }]}>Total</Text>
                 </View>
-              ))}
+
+                {group.bills.map((bill, i) => (
+                  <View key={`general-${i}`} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowAlt : {}]} wrap={false}>
+                    <Text style={[styles.tableCol, styles.colPeriod]}>{bill.monthDue} - {bill.yearDue}</Text>
+                    <Text style={[styles.tableCol, { textAlign: 'center' }]}>{bill.consumption.toFixed(1)}</Text>
+                    <Text style={styles.tableColRight}>{fmt(Number(bill.epaaValue))}</Text>
+                    <Text style={styles.tableColRight}>{fmt(Number(bill.interestValue))}</Text>
+                    <Text style={styles.tableColRight}>{Number(bill.surcharge) === 0 ? '-' : fmt(Number(bill.surcharge))}</Text>
+                    <Text style={[styles.tableColRight]}>{fmt(Number(bill.total))}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
 
             {/* DETALLE TASA BASURA TABLE */}
-            <Text style={styles.sectionTitle}>Detalle Tasa de Recolección de Residuos Sólidos</Text>
-            <View style={styles.table}>
-              <View style={styles.tableHeaderSecondary}>
-                <Text style={[styles.tableColHeader, styles.colPeriod]}>Periodo</Text>
-                <Text style={[styles.tableColHeader, { textAlign: 'center' }]}>TB Actual</Text>
-                <Text style={[styles.tableColHeader, { textAlign: 'center' }]}>TB Anterior</Text>
-                <Text style={[styles.tableColHeader, { textAlign: 'center' }]}>Saldo a Favor</Text>
-                <Text style={[styles.tableColHeader, { textAlign: 'center' }]}>Saldo (Próx. Mes)</Text>
-                <Text style={[styles.tableColHeader, { textAlign: 'right' }]}>Total a Pagar</Text>
-              </View>
-
-              {group.bills.map((bill, i) => (
-                <View key={`trash-${i}`} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowAlt : {}]} wrap={false}>
-                  <Text style={[styles.tableCol, styles.colPeriod]}>{bill.monthDue} - {bill.yearDue}</Text>
-                  <Text style={[styles.tableColRight, { textAlign: 'center' }]}>{fmt(Number(bill.trashRateOfficial))}</Text>
-                  <Text style={[styles.tableColRight, { textAlign: 'center' }]}>{fmt(Number(bill.trashRatePrevious))}</Text>
-                  <Text style={[styles.tableColRight, { textAlign: 'center' }]}>{Number(bill.balanceInFavorCurrentMonth) === 0 ? '-' : fmt(Number(bill.balanceInFavorCurrentMonth))}</Text>
-                  <Text style={[styles.tableColRight, { textAlign: 'center' }]}>{Number(bill.balanceInFavorNextMonth) === 0 ? '-' : fmt(Number(bill.balanceInFavorNextMonth))}</Text>
-                  <Text style={[styles.tableColRight]}>{fmt(Number(bill.totalTrashRate))}</Text>
+            <View wrap={false}>
+              <Text style={styles.sectionTitle}>Detalle Tasa de Recolección de Residuos Sólidos</Text>
+              <View style={styles.table}>
+                <View style={styles.tableHeaderSecondary}>
+                  <Text style={[styles.tableColHeader, styles.colPeriod]}>Periodo</Text>
+                  <Text style={[styles.tableColHeader, { textAlign: 'center' }]}>TB Actual</Text>
+                  <Text style={[styles.tableColHeader, { textAlign: 'center' }]}>TB Anterior</Text>
+                  <Text style={[styles.tableColHeader, { textAlign: 'center' }]}>Saldo a Favor</Text>
+                  <Text style={[styles.tableColHeader, { textAlign: 'center' }]}>Saldo (Próx. Mes)</Text>
+                  <Text style={[styles.tableColHeader, { textAlign: 'right' }]}>Total a Pagar</Text>
                 </View>
-              ))}
+
+                {group.bills.map((bill, i) => (
+                  <View key={`trash-${i}`} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowAlt : {}]} wrap={false}>
+                    <Text style={[styles.tableCol, styles.colPeriod]}>{bill.monthDue} - {bill.yearDue}</Text>
+                    <Text style={[styles.tableColRight, { textAlign: 'center' }]}>{fmt(Number(bill.trashRateOfficial))}</Text>
+                    <Text style={[styles.tableColRight, { textAlign: 'center' }]}>{fmt(Number(bill.trashRatePrevious))}</Text>
+                    <Text style={[styles.tableColRight, { textAlign: 'center' }]}>{Number(bill.balanceInFavorCurrentMonth) === 0 ? '-' : fmt(Number(bill.balanceInFavorCurrentMonth))}</Text>
+                    <Text style={[styles.tableColRight, { textAlign: 'center' }]}>{Number(bill.balanceInFavorNextMonth) === 0 ? '-' : fmt(Number(bill.balanceInFavorNextMonth))}</Text>
+                    <Text style={[styles.tableColRight]}>{fmt(Number(bill.totalTrashRate))}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
 
             {/* MEJORAS MUNICIPIO TABLE */}
-            <Text style={styles.sectionTitle}>Mejoras Municipio Antonio Ante</Text>
-            <View style={styles.table}>
-              <View style={styles.tableHeaderTertiary}>
-                <Text style={[styles.tableColHeader, { flex: 2 }]}>Periodo</Text>
-                <Text style={[styles.tableColHeader, { flex: 1, textAlign: 'center' }]}>Valor Mejoras</Text>
-                <Text style={[styles.tableColHeader, { flex: 1, textAlign: 'right' }]}>Total a Pagar</Text>
-              </View>
-
-              {group.bills.map((bill, i) => (
-                <View key={`improvements-${i}`} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowAlt : {}]} wrap={false}>
-                  <Text style={[styles.tableCol, { flex: 2 }]}>{bill.monthDue} - {bill.yearDue}</Text>
-                  <Text style={[styles.tableColRight, { flex: 1, textAlign: 'center' }]}>$0.00</Text>
-                  <Text style={[styles.tableColRight, { flex: 1 }]}>$0.00</Text>
+            <View wrap={false}>
+              <Text style={styles.sectionTitle}>Mejoras Municipio Antonio Ante</Text>
+              <View style={styles.table}>
+                <View style={styles.tableHeaderTertiary}>
+                  <Text style={[styles.tableColHeader, { flex: 2 }]}>Periodo</Text>
+                  <Text style={[styles.tableColHeader, { flex: 1, textAlign: 'center' }]}>Valor Mejoras</Text>
+                  <Text style={[styles.tableColHeader, { flex: 1, textAlign: 'right' }]}>Total a Pagar</Text>
                 </View>
-              ))}
+
+                {group.bills.map((bill, i) => (
+                  <View key={`improvements-${i}`} style={[styles.tableRow, i % 2 !== 0 ? styles.tableRowAlt : {}]} wrap={false}>
+                    <Text style={[styles.tableCol, { flex: 2 }]}>{bill.monthDue} - {bill.yearDue}</Text>
+                    <Text style={[styles.tableColRight, { flex: 1, textAlign: 'center' }]}>$0.00</Text>
+                    <Text style={[styles.tableColRight, { flex: 1 }]}>$0.00</Text>
+                  </View>
+                ))}
+              </View>
             </View>
 
             {/* GRAN TOTAL */}

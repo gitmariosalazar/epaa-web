@@ -245,19 +245,22 @@ export const IncidentFilters: React.FC<IncidentFiltersProps> = ({
         </Button>
       </div>
       <div className="button-container-print">
-        <Tooltip content={'Imprimir notificaciones de medidores Clandestinos.'} position="top"
-          followCursor={false}
-        >
-          <Button
-            variant="ghost"
-            size="xs"
-            onClick={onPrintAllNotifications}
-            isLoading={isLoading}
-            leftIcon={<FcPrint size={16} />}
-            iconOnly
-            circle
-          />
-        </Tooltip>
+        {
+          onPrintAllNotifications &&
+          (<Tooltip content={'Imprimir notificaciones de medidores Clandestinos.'} position="top"
+            followCursor={false}
+          >
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={onPrintAllNotifications}
+              isLoading={isLoading}
+              leftIcon={<FcPrint size={16} />}
+              iconOnly
+              circle
+            />
+          </Tooltip>)
+        }
       </div>
     </div>
   );

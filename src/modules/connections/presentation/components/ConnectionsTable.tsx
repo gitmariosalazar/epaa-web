@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Check, CheckCircle, EyeIcon, X } from 'lucide-react';
 import { FaTrashCan } from 'react-icons/fa6';
 import { FaEdit, FaMapMarkerAlt } from 'react-icons/fa';
-import type { Connection } from '../../domain/models/Connection';
+import type { Connection, ConnectionWithoutProperty } from '../../domain/models/Connection';
 import type { SortConfig } from '../hooks/useConnectionsViewModel';
 import { IoInformationCircleOutline, IoWaterSharp } from 'react-icons/io5';
 import { getConnectionStateChip } from '../utils/connectionStateChip';
@@ -72,21 +72,55 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
     setIsPreviewOpen(true);
     setIsGeneratingPdf(true);
     try {
-      // 1. Fetch full connection data
-      const fullDataList = await findAllConnectionsWithPropertyUseCase.execute({
-        limit: 1,
-        offset: 0,
-        query: item.connectionCadastralKey
-      });
-      if (!fullDataList || fullDataList.length === 0) {
-        throw new Error('No se pudo encontrar la información detallada de la acometida.');
+      // 1. Fetch full connection data using fallbacks for candidate search terms
+      const candidateTerms = Array.from(
+        new Set(
+          [
+            item.connectionCadastralKey,
+            item.connectionId,
+            item.connectionMeterNumber,
+            item.connectionAccount ? String(item.connectionAccount) : null,
+            item.clientId
+          ].filter((val): val is string => typeof val === 'string' && val.trim().length > 0)
+        )
+      );
+
+      let fullData: ConnectionWithoutProperty | null = null;
+
+      for (const queryTerm of candidateTerms) {
+        try {
+          const fullDataList = await findAllConnectionsWithPropertyUseCase.execute({
+            limit: 100,
+            offset: 0,
+            query: queryTerm
+          });
+          if (fullDataList && fullDataList.length > 0) {
+            // Filter by exact connectionId or cadastral key match if client owns multiple connections
+            const match = fullDataList.find(
+              c =>
+                (c.connectionId && c.connectionId.trim().toLowerCase() === item.connectionId.trim().toLowerCase()) ||
+                (c.connectionCadastralKey && item.connectionCadastralKey && c.connectionCadastralKey.trim().toLowerCase() === item.connectionCadastralKey.trim().toLowerCase()) ||
+                (c.connectionAccount && item.connectionAccount && String(c.connectionAccount).trim() === String(item.connectionAccount).trim())
+            );
+            if (match) {
+              fullData = match;
+              break;
+            }
+          }
+        } catch (err) {
+          // Ignore individual 404/not-found errors and try next candidate search term
+        }
       }
-      const fullData = fullDataList[0];
+
+      if (!fullData) {
+        throw new Error('No se pudo encontrar la información detallada de esta acometida en el sistema.');
+      }
+
       // 2. Generate PDF using the full data
       const generator = new TechnicalDataSheetPdfGenerator();
       const url = await generator.generateBlobUrl([fullData]);
       setPreviewUrl(url);
-      setFileNamePDF(`FICHA_TECNICA_${item.connectionId || item.connectionMeterNumber}.pdf`);
+      setFileNamePDF(`FICHA_TECNICA_${item.connectionId || item.connectionMeterNumber || 'ACOMETIDA'}.pdf`);
     } catch (error) {
       console.error('Error generando la ficha técnica:', error);
       setIsPreviewOpen(false);

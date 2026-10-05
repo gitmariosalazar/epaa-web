@@ -58,12 +58,15 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid transparent;
   gap: 6px;
-  min-width: 40px;
-  min-height: 40px;
+  min-width: 38px;
+  min-height: 38px;
 }
 
 .header__nav-btn--theme {
-  padding: 6px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 50% !important;
 }
 
 .header__nav-btn:hover {
@@ -76,7 +79,6 @@
   background-color: var(--surface-hover);
   color: var(--text-main);
   border-color: var(--border-color);
-  border-radius: 50% !important;
 }
 
 .header__nav-btn:active {
@@ -84,16 +86,19 @@
 }
 
 .header__nav-btn--whatsapp {
+  width: 38px;
+  height: 38px;
+  padding: 0;
   background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
   color: white !important;
   border: none;
-  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
-  border-radius: 9999px !important;
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.28);
+  border-radius: 50% !important;
 }
 
 .header__nav-btn--whatsapp:hover {
   background: linear-gradient(135deg, #2ae06d 0%, #16a091 100%);
-  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.38);
   transform: translateY(-1px);
 }
 

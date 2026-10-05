@@ -18,20 +18,27 @@ export const styles = StyleSheet.create({
   page: {
     fontFamily: 'Helvetica',
     fontSize: 10,
-    color: colors.primary
+    color: colors.primary,
+    backgroundColor: '#ffffff',
+    padding: 0,
+    margin: 0
   },
   contentWrapper: {
-    padding: 30,
+    paddingTop: 5,
+    paddingBottom: 120,
+    paddingLeft: 45,
+    paddingRight: 45,
     flex: 1
+  },
+  headerSpacer: {
+    height: 85
   },
   backgroundImage: {
     position: 'absolute',
     top: 0,
     left: 0,
-    right: 0,
-    bottom: 0,
-    width: '100%',
-    height: '100%',
+    width: 595.28,
+    height: 841.89,
     zIndex: -1,
     objectFit: 'fill'
   },

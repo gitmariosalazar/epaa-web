@@ -49,6 +49,7 @@ import { FaTools } from 'react-icons/fa';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { useConnectionsContext } from '@/modules/connections/presentation/context/ConnectionContext';
 import type { ConnectionWithProperty } from '@/modules/connections/domain/models/Connection';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
 
 /**
@@ -179,6 +180,7 @@ export const IncidentsPage: React.FC = () => {
   };
 
   const handlePrintAllNotifications = async () => {
+
     const clandestineIncidents = incidents.filter(item =>
       item.incidentTypeName.includes('clandestino') ||
       item.incidentTypeName.includes('Bypass') ||
@@ -187,6 +189,12 @@ export const IncidentsPage: React.FC = () => {
     );
 
     if (clandestineIncidents.length === 0) {
+      MessageToastCustom(
+        'error',
+        'No hay notificaciones clandestinas para imprimir.',
+        'Sin Notificaciones Clandestinas',
+        { duration: 4000 }
+      );
       return;
     }
 
@@ -234,7 +242,7 @@ export const IncidentsPage: React.FC = () => {
       accessor: (item) => {
         const serviceInfo = SERVICES.find(s => s.name.toLowerCase() === item.categoryName?.toLowerCase());
         const IconComponent = serviceInfo?.icon;
-        
+
         return (
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {IconComponent && serviceInfo && (

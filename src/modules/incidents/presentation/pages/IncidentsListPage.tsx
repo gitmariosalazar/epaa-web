@@ -7,23 +7,44 @@ import { AddWorkOrderModal } from '../components/AddWorkOrderModal';
 import { IncidentDetailModal } from '../components/IncidentDetailModal';
 import { IncidentFilters } from '../components/IncidentFilters';
 import { DocumentPreviewModal } from '@/shared/presentation/components/DocumentPreviewModal';
-import { Table, type Column, type ContextMenuItem } from '@/shared/presentation/components/Table/Table';
+import {
+  Table,
+  type Column,
+  type ContextMenuItem
+} from '@/shared/presentation/components/Table/Table';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { ConverDate } from '@/shared/utils/datetime/ConverDate';
 import { SERVICES } from '@/shared/presentation/utils/icons/icons-water';
-import { AlertCircle, Eye, Wrench, ShieldAlert, Network, X, Navigation, Repeat, Plus, Printer } from 'lucide-react';
+import {
+  AlertCircle,
+  Eye,
+  Wrench,
+  ShieldAlert,
+  Network,
+  X,
+  Navigation,
+  Repeat,
+  Plus,
+  Printer
+} from 'lucide-react';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress/CircularProgress';
 import { useSimulatedProgress } from '@/shared/presentation/components/CircularProgress/useSimulatedProgress';
 import '../styles/Incidents.css';
 import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { truncateText } from '@/shared/utils/text/truncate-text';
-import { getPriorityColor, getStatusColor, getWorkOrderStatusColor } from '@/shared/presentation/utils/colors/status-colors';
+import {
+  getPriorityColor,
+  getStatusColor,
+  getWorkOrderStatusColor
+} from '@/shared/presentation/utils/colors/status-colors';
 import { FaTools } from 'react-icons/fa';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { useConnectionsContext } from '@/modules/connections/presentation/context/ConnectionContext';
 import type { ConnectionWithProperty } from '@/modules/connections/domain/models/Connection';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
+
 
 /**
  * IncidentsListPage
@@ -53,12 +74,17 @@ export const IncidentsListPage: React.FC = () => {
   const progress = useSimulatedProgress(isLoading);
   const navigate = useNavigate();
 
-  const [resolveIncidentId, setResolveIncidentId] = useState<string | null>(null);
-  const [selectedIncident, setSelectedIncident] = useState<IncidentDetailRowResponse | null>(null);
+  const [resolveIncidentId, setResolveIncidentId] = useState<string | null>(
+    null
+  );
+  const [selectedIncident, setSelectedIncident] =
+    useState<IncidentDetailRowResponse | null>(null);
   const [fileNamePDF, setFileNamePDF] = useState<string | null>(null);
 
-  const { findConnectionWithPropertyByCadastralKeyUseCase } = useConnectionsContext();
-  const [selectedConnection, setSelectedConnection] = useState<ConnectionWithProperty | null>(null);
+  const { findConnectionWithPropertyByCadastralKeyUseCase } =
+    useConnectionsContext();
+  const [selectedConnection, setSelectedConnection] =
+    useState<ConnectionWithProperty | null>(null);
   const [isFetchingConnection, setIsFetchingConnection] = useState(false);
 
   React.useEffect(() => {
@@ -81,7 +107,8 @@ export const IncidentsListPage: React.FC = () => {
     }
   }, [selectedIncident, findConnectionWithPropertyByCadastralKeyUseCase]);
 
-  const [addWorkOrderIncident, setAddWorkOrderIncident] = useState<IncidentDetailRowResponse | null>(null);
+  const [addWorkOrderIncident, setAddWorkOrderIncident] =
+    useState<IncidentDetailRowResponse | null>(null);
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -91,30 +118,46 @@ export const IncidentsListPage: React.FC = () => {
     setIsPreviewOpen(true);
     setIsGeneratingPdf(true);
     try {
-      const url = await generateNotificationPdfUrl([item], findConnectionWithPropertyByCadastralKeyUseCase);
+      const url = await generateNotificationPdfUrl(
+        [item],
+        findConnectionWithPropertyByCadastralKeyUseCase
+      );
       setPreviewUrl(url);
-      setFileNamePDF(`NOTIFICACION_${item.connectionId}_${item.incidentCode}.pdf`);
+      setFileNamePDF(
+        `NOTIFICACION_${item.connectionId}_${item.incidentCode}.pdf`
+      );
     } finally {
       setIsGeneratingPdf(false);
     }
   };
 
   const handlePrintAllNotifications = async () => {
-    const clandestineIncidents = incidents.filter(item =>
-      item.incidentTypeName.includes('clandestino') ||
-      item.incidentTypeName.includes('Bypass') ||
-      item.incidentTypeName.includes('CLANDESTINA') ||
-      item.incidentTypeName.includes('CONEXIÓN CLANDESTINA')
+
+    const clandestineIncidents = incidents.filter(
+      (item) =>
+        item.incidentTypeName.includes('clandestino') ||
+        item.incidentTypeName.includes('Bypass') ||
+        item.incidentTypeName.includes('CLANDESTINA') ||
+        item.incidentTypeName.includes('CONEXIÓN CLANDESTINA')
     );
 
     if (clandestineIncidents.length === 0) {
+      MessageToastCustom(
+        'error',
+        'No hay notificaciones clandestinas para imprimir.',
+        'Sin Notificaciones Clandestinas',
+        { duration: 4000 }
+      );
       return;
     }
 
     setIsPreviewOpen(true);
     setIsGeneratingPdf(true);
     try {
-      const url = await generateNotificationPdfUrl(clandestineIncidents, findConnectionWithPropertyByCadastralKeyUseCase);
+      const url = await generateNotificationPdfUrl(
+        clandestineIncidents,
+        findConnectionWithPropertyByCadastralKeyUseCase
+      );
       setPreviewUrl(url);
       setFileNamePDF(`NOTIFICACIONES_CLANDESTINAS.pdf`);
     } finally {
@@ -132,12 +175,13 @@ export const IncidentsListPage: React.FC = () => {
     }, 300);
   };
 
-
   const columns: Column<IncidentDetailRowResponse>[] = [
     {
       header: 'Nº Incidente',
       accessor: (item) => (
-        <span className="text-secondary" style={{ fontWeight: 600 }}>{item.incidentCode}</span>
+        <span className="text-secondary" style={{ fontWeight: 600 }}>
+          {item.incidentCode}
+        </span>
       ),
       id: 'incidentCode',
       style: { width: '80px' }
@@ -151,19 +195,33 @@ export const IncidentsListPage: React.FC = () => {
     {
       header: 'CATEGORIA / TIPO',
       accessor: (item) => {
-        const serviceInfo = SERVICES.find(s => s.name.toLowerCase() === item.categoryName?.toLowerCase());
+        const serviceInfo = SERVICES.find(
+          (s) => s.name.toLowerCase() === item.categoryName?.toLowerCase()
+        );
         const IconComponent = serviceInfo?.icon;
-        
+
         return (
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {IconComponent && serviceInfo && (
-              <div className={`service-icon-container ${serviceInfo.themeClass}`}>
+              <div
+                className={`service-icon-container ${serviceInfo.themeClass}`}
+              >
                 <IconComponent className="service-icon-svg" />
               </div>
             )}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span className="incident-category-text" style={{ fontWeight: 600 }}>{item.categoryName}</span>
-              <span className="incident-type-text" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.incidentTypeName}</span>
+              <span
+                className="incident-category-text"
+                style={{ fontWeight: 600 }}
+              >
+                {item.categoryName}
+              </span>
+              <span
+                className="incident-type-text"
+                style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}
+              >
+                {item.incidentTypeName}
+              </span>
             </div>
           </div>
         );
@@ -174,12 +232,17 @@ export const IncidentsListPage: React.FC = () => {
       header: 'UBICACIÓN',
       accessor: (item) => (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span className="incident-category-text">{truncateText(item.referenceAddress?.toUpperCase() || '-', 40)}</span>
+          <span className="incident-category-text">
+            {truncateText(item.referenceAddress?.toUpperCase() || '-', 40)}
+          </span>
           <div className="geo-status-bar">
             <div className="geo-status-bar__divider" />
             <div className="geo-status-bar__divider" />
             <div className="geo-status-bar__item">
-              <Navigation size={12} className="geo-status-bar__icon geo-status-bar__icon--lat" />
+              <Navigation
+                size={12}
+                className="geo-status-bar__icon geo-status-bar__icon--lat"
+              />
               <span className="geo-status-bar__label">Latitud:</span>
               <span className="geo-status-bar__value geo-status-bar__value--coord">
                 {item.latitude ? Number(item.latitude).toFixed(7) : '-'}
@@ -187,7 +250,11 @@ export const IncidentsListPage: React.FC = () => {
             </div>
             <div className="geo-status-bar__divider" />
             <div className="geo-status-bar__item">
-              <Navigation size={12} className="geo-status-bar__icon geo-status-bar__icon--lng" style={{ transform: 'rotate(90deg)' }} />
+              <Navigation
+                size={12}
+                className="geo-status-bar__icon geo-status-bar__icon--lng"
+                style={{ transform: 'rotate(90deg)' }}
+              />
               <span className="geo-status-bar__label">Longitud:</span>
               <span className="geo-status-bar__value geo-status-bar__value--coord">
                 {item.longitude ? Number(item.longitude).toFixed(7) : '-'}
@@ -227,18 +294,19 @@ export const IncidentsListPage: React.FC = () => {
     {
       header: 'F. REPORTE',
       accessor: (item) => (
-        <span style={{ fontSize: '0.8125rem' }}>{ConverDate(item.reportDate)}</span>
+        <span style={{ fontSize: '0.8125rem' }}>
+          {ConverDate(item.reportDate)}
+        </span>
       ),
       id: 'reportDate',
       style: { width: '110px' }
     },
     {
       header: 'ESTADO OT1',
-      accessor: (item) => (
+      accessor: (item) =>
         item.currentOrderState ? (
-          <div
-            className="incident-actions-cell-state">
-            <div className='incident-row'>
+          <div className="incident-actions-cell-state">
+            <div className="incident-row">
               <ColorChip
                 label={item.currentOrderState.replace(/_/g, ' ')}
                 color={getWorkOrderStatusColor(item.currentOrderState || '')}
@@ -248,31 +316,36 @@ export const IncidentsListPage: React.FC = () => {
               />
               <ColorChip
                 label={item.orderCode}
-                color={item.currentOrderState === 'COMPLETADA' ? 'green' : 'amber'}
+                color={
+                  item.currentOrderState === 'COMPLETADA' ? 'green' : 'amber'
+                }
                 variant="ghost"
                 size="xs"
                 borderRadius={5}
               />
             </div>
-            {
-              item.orderCode !== null && (
-                <Tooltip content={`Ver Orden de Trabajo`} themeColor='accent' followCursor={false}>
-                  <Button
-                    onClick={() => navigate(`/work-orders/search?code=${item.orderCode}`)}
-                    size='xs'
-                    color='accent'
-                    circle
-                    variant='dashed'
-                  >
-                    <FaTools size={13} />
-                  </Button>
-                </Tooltip>
-              )
-            }
+            {item.orderCode !== null && (
+              <Tooltip
+                content={`Ver Orden de Trabajo`}
+                themeColor="accent"
+                followCursor={false}
+              >
+                <Button
+                  onClick={() =>
+                    navigate(`/work-orders/search?code=${item.orderCode}`)
+                  }
+                  size="xs"
+                  color="accent"
+                  circle
+                  variant="dashed"
+                >
+                  <FaTools size={13} />
+                </Button>
+              </Tooltip>
+            )}
           </div>
         ) : (
-          <div
-            className="incident-actions-cell">
+          <div className="incident-actions-cell">
             <ColorChip
               label="Sin Orden de Trabajo"
               color="red"
@@ -281,15 +354,15 @@ export const IncidentsListPage: React.FC = () => {
               borderRadius={5}
             />
           </div>
-        )
-
-      ),
+        ),
       id: 'currentOrderState',
       style: { width: '110px' }
     }
   ];
 
-  const getContextMenuItems = (item: IncidentDetailRowResponse): ContextMenuItem<IncidentDetailRowResponse>[] => {
+  const getContextMenuItems = (
+    item: IncidentDetailRowResponse
+  ): ContextMenuItem<IncidentDetailRowResponse>[] => {
     const items: ContextMenuItem<IncidentDetailRowResponse>[] = [
       {
         label: 'Ver detalle del incidente',
@@ -308,7 +381,11 @@ export const IncidentsListPage: React.FC = () => {
       });
     }
 
-    if (!item.orderCode && item.status !== 'RESUELTO' && item.status !== 'FALSO_REPORTE') {
+    if (
+      !item.orderCode &&
+      item.status !== 'RESUELTO' &&
+      item.status !== 'FALSO_REPORTE'
+    ) {
       items.push({
         label: 'Agregar Orden de Trabajo',
         icon: <Plus size={16} />,
@@ -323,7 +400,12 @@ export const IncidentsListPage: React.FC = () => {
       divider: true
     });
 
-    if (item.incidentTypeName.includes('clandestino') || item.incidentTypeName.includes('Bypass') || item.incidentTypeName.includes('CLANDESTINA') || item.incidentTypeName.includes('CONEXIÓN CLANDESTINA')) {
+    if (
+      item.incidentTypeName.includes('clandestino') ||
+      item.incidentTypeName.includes('Bypass') ||
+      item.incidentTypeName.includes('CLANDESTINA') ||
+      item.incidentTypeName.includes('CONEXIÓN CLANDESTINA')
+    ) {
       items.push({
         label: 'Generar Notificación PDF',
         icon: <Printer size={16} />,
@@ -344,19 +426,25 @@ export const IncidentsListPage: React.FC = () => {
             searchQuery={filters.search}
             onSearchQueryChange={(val) => handleFilterChange({ search: val })}
             searchField={filters.searchField}
-            onSearchFieldChange={(val) => handleFilterChange({ searchField: val })}
+            onSearchFieldChange={(val) =>
+              handleFilterChange({ searchField: val })
+            }
             selectedStatus={filters.status}
             onStatusChange={(val) => handleFilterChange({ status: val })}
             selectedPriority={filters.priority}
             onPriorityChange={(val) => handleFilterChange({ priority: val })}
             selectedCategoryId={filters.categoryId}
-            onCategoryIdChange={(val) => handleFilterChange({ categoryId: val })}
+            onCategoryIdChange={(val) =>
+              handleFilterChange({ categoryId: val })
+            }
             categories={categories}
             onConsultar={handleConsultar}
             onReportIncident={() => navigate('/incidents/create')}
             isLoading={isLoading}
             reportRangeDate={filters.reportRangeDate || null}
-            onReportRangeDateChange={(start, end) => handleFilterChange({ reportRangeDate: { start, end } })}
+            onReportRangeDateChange={(start, end) =>
+              handleFilterChange({ reportRangeDate: { start, end } })
+            }
             onPrintAllNotifications={handlePrintAllNotifications}
           />
         }
@@ -366,8 +454,8 @@ export const IncidentsListPage: React.FC = () => {
             <Network size={16} />
             <span>
               Incidentes activos de la acometida
-              <strong> {connectionIdFromUrl}</strong>
-              {' '}— solo estados distintos de RESUELTO
+              <strong> {connectionIdFromUrl}</strong> — solo estados distintos
+              de RESUELTO
             </span>
             <button
               className="incidents-banner-clear"
@@ -389,7 +477,11 @@ export const IncidentsListPage: React.FC = () => {
               variant="error"
               minHeight="300px"
               actionButton={
-                <Button onClick={refresh} variant="outline" size="sm" color='error'
+                <Button
+                  onClick={refresh}
+                  variant="outline"
+                  size="sm"
+                  color="error"
                   leftIcon={<Repeat size={12} />}
                 >
                   Actualizar
@@ -403,13 +495,28 @@ export const IncidentsListPage: React.FC = () => {
             columns={columns}
             contextMenuItems={getContextMenuItems}
             getRowClassName={(item) => {
-              const serviceInfo = SERVICES.find(s => s.name.toLowerCase() === item.categoryName?.toLowerCase());
+              const serviceInfo = SERVICES.find(
+                (s) => s.name.toLowerCase() === item.categoryName?.toLowerCase()
+              );
               return serviceInfo ? `row-${serviceInfo.themeClass}` : undefined;
             }}
             isLoading={isLoading}
             loadingState={
-              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '3rem', gap: '1rem' }}>
-                <CircularProgress progress={progress} size={80} label="Cargando incidentes..." />
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  padding: '3rem',
+                  gap: '1rem'
+                }}
+              >
+                <CircularProgress
+                  progress={progress}
+                  size={80}
+                  label="Cargando incidentes..."
+                />
               </div>
             }
             pagination={true}
@@ -473,7 +580,7 @@ export const IncidentsListPage: React.FC = () => {
         documentUrl={previewUrl}
         isLoading={isGeneratingPdf}
         title="Vista Previa de Notificación"
-        fileName={fileNamePDF || "NOTIFICACION_INCIDENTE.pdf"}
+        fileName={fileNamePDF || 'NOTIFICACION_INCIDENTE.pdf'}
       />
     </>
   );

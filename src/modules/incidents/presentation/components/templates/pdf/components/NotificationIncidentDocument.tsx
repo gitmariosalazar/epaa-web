@@ -42,6 +42,8 @@ export const NotificationIncidentDocument: React.FC<Props> = ({ items }) => {
             <Image src="/sigepaa.png" style={styles.backgroundImage} fixed />
 
             <View style={styles.contentWrapper}>
+              {/* HEADER SPACER FOR ALL PAGES */}
+              <View style={styles.headerSpacer} fixed />
 
               {/* FECHA Example  Atuntaqui, 24 de septiembre de 2026*/}
               <Text style={styles.dateText}>Atuntaqui, {new Date().toLocaleDateString('es-EC', { year: 'numeric', month: 'long', day: 'numeric' })}</Text>

@@ -17,17 +17,7 @@ type CustomToastProps = {
 const CustomToast = ({ title, icon, message }: CustomToastProps) => {
   let IconComponent;
 
-  // Definición de colores según el tipo para el icono
-  const colors = {
-    success: '#22c55e',
-    error: '#ef4444',
-    warning: '#f59e0b',
-    info: '#3b82f6',
-    dark: '#94a3b8'
-  };
-
-  const iconColor = colors[icon] || colors.info;
-
+  // El color del icono lo define el CSS (--toast-accent) según variante y tema.
   switch (icon) {
     case 'success':
       IconComponent = CheckCircle2;
@@ -47,8 +37,8 @@ const CustomToast = ({ title, icon, message }: CustomToastProps) => {
 
   return (
     <div className="container-toast">
-      <div className="icon-toast-wrapper pulse">
-        <IconComponent size={26} color={iconColor} strokeWidth={2.5} />
+      <div className="icon-toast-wrapper" aria-hidden="true">
+        <IconComponent size={20} strokeWidth={2.25} />
       </div>
       <div className="body-toast">
         <div className="title-toast">

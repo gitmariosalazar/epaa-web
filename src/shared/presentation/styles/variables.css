@@ -118,6 +118,26 @@
   --table-row-hover: #f1f5f9; /* Slate 100 */
   --table-row-striped: #f8fafc; /* Slate 50 */
   --table-border: #e2e8f0; /* Slate 200 */
+
+  /* Toast / Notificaciones - Light Mode */
+  --toast-bg: #ffffff;
+  --toast-border: #e2e8f0; /* Slate 200 */
+  --toast-title: #0f172a; /* Slate 900 */
+  --toast-text: #475569; /* Slate 600 */
+  --toast-close: #94a3b8; /* Slate 400 */
+  --toast-close-hover: #0f172a; /* Slate 900 */
+  --toast-shadow:
+    0 1px 2px rgb(15 23 42 / 0.04), 0 10px 28px -8px rgb(15 23 42 / 0.18);
+  --toast-success: #16a34a; /* Green 600 */
+  --toast-success-soft: rgb(22 163 74 / 0.1);
+  --toast-error: #dc2626; /* Red 600 */
+  --toast-error-soft: rgb(220 38 38 / 0.1);
+  --toast-warning: #d97706; /* Amber 600 */
+  --toast-warning-soft: rgb(217 119 6 / 0.12);
+  --toast-info: #2563eb; /* Blue 600 */
+  --toast-info-soft: rgb(37 99 235 / 0.1);
+  --toast-neutral: #334155; /* Slate 700 */
+  --toast-neutral-soft: rgb(51 65 85 / 0.1);
 }
 
 /* Dark Mode Tokens */
@@ -169,4 +189,24 @@
   --sewer-icon-hover: #ff7300; /* Orange 400 */
   --sewer-gradient: linear-gradient(145deg, #0f172a, rgba(234, 88, 12, 0.15));
   --sewer-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+
+  /* Toast / Notificaciones - Dark Mode */
+  --toast-bg: #0f172a; /* Slate 900 */
+  --toast-border: #1e293b; /* Slate 800 */
+  --toast-title: #f8fafc; /* Slate 50 */
+  --toast-text: #94a3b8; /* Slate 400 */
+  --toast-close: #64748b; /* Slate 500 */
+  --toast-close-hover: #f8fafc; /* Slate 50 */
+  --toast-shadow:
+    0 1px 2px rgb(0 0 0 / 0.4), 0 14px 36px -10px rgb(0 0 0 / 0.65);
+  --toast-success: #4ade80; /* Green 400 */
+  --toast-success-soft: rgb(74 222 128 / 0.14);
+  --toast-error: #f87171; /* Red 400 */
+  --toast-error-soft: rgb(248 113 113 / 0.14);
+  --toast-warning: #fbbf24; /* Amber 400 */
+  --toast-warning-soft: rgb(251 191 36 / 0.14);
+  --toast-info: #60a5fa; /* Blue 400 */
+  --toast-info-soft: rgb(96 165 250 / 0.14);
+  --toast-neutral: #cbd5e1; /* Slate 300 */
+  --toast-neutral-soft: rgb(203 213 225 / 0.12);
 }

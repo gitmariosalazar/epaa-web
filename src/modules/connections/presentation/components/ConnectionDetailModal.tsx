@@ -25,7 +25,8 @@ import {
   Check,
   X,
   Pause,
-  Download
+  Download,
+  Eye
 } from 'lucide-react';
 import { useConnectionsContext } from '../context/ConnectionContext';
 import { TechnicalDataSheetPdfGenerator } from './templates/pdf/TechnicalDataSheetPdfGenerator';
@@ -38,6 +39,7 @@ import './ConnectionDetailModal.css';
 import { IoMdPhotos } from 'react-icons/io';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { DocumentPreviewModal } from '@/shared/presentation/components/DocumentPreviewModal';
 
 interface ConnectionDetailModalProps {
   isOpen: boolean;
@@ -51,7 +53,7 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
   cadastralKey
 }) => {
   const { t } = useTranslation();
-  const { findAllConnectionsWithPropertyUseCase } = useConnectionsContext();
+  const { getConnectionsUseCase, findAllConnectionsWithPropertyUseCase } = useConnectionsContext();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +66,26 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
   const [lightboxFacadeIndex, setLightboxFacadeIndex] = useState<number | null>(null);
   const [lightboxMeterIndex, setLightboxMeterIndex] = useState<number | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [fileNamePDF, setFileNamePDF] = useState<string | null>(null);
+
+  const handlePreviewPdf = async () => {
+    if (!connectionData) return;
+    setIsPreviewOpen(true);
+    setIsGeneratingPdf(true);
+    try {
+      const generator = new TechnicalDataSheetPdfGenerator();
+      const url = await generator.generateBlobUrl([connectionData]);
+      setPreviewUrl(url);
+      setFileNamePDF(`FICHA_TECNICA_${connectionData.connectionId || connectionData.connectionMeterNumber}.pdf`);
+    } catch (error) {
+      console.error('Error generando vista previa de PDF:', error);
+      setIsPreviewOpen(false);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
 
   const handleDownloadPdf = async () => {
     if (!connectionData) return;
@@ -78,6 +100,16 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     }
   };
 
+  const handleClosePreview = () => {
+    setIsPreviewOpen(false);
+    setTimeout(() => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
+    }, 300);
+  };
+
 
   useEffect(() => {
     let isMounted = true;
@@ -86,16 +118,88 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
 
       setLoading(true);
       setError(null);
+
+      const isTargetMatch = (
+        c: ConnectionWithoutProperty,
+        targetId: string,
+        targetAccount?: string | number | null
+      ) => {
+        const cleanTarget = targetId.trim().toLowerCase();
+        const cleanConnId = (c.connectionId || '').trim().toLowerCase();
+        const cleanCadastral = (c.connectionCadastralKey || '').trim().toLowerCase();
+        const cleanAccount = c.connectionAccount ? String(c.connectionAccount).trim() : '';
+        const targetAccStr = targetAccount != null ? String(targetAccount).trim() : '';
+
+        return (
+          cleanConnId === cleanTarget ||
+          cleanCadastral === cleanTarget ||
+          (targetAccStr.length > 0 && cleanAccount === targetAccStr)
+        );
+      };
+
       try {
-        const results = await findAllConnectionsWithPropertyUseCase.execute({
-          limit: 1,
-          offset: 0,
-          query: cadastralKey
-        });
+        let foundData: ConnectionWithoutProperty | null = null;
+
+        // 1. Direct query with cadastralKey
+        try {
+          const results = await findAllConnectionsWithPropertyUseCase.execute({
+            limit: 50,
+            offset: 0,
+            query: cadastralKey
+          });
+          if (results && results.length > 0) {
+            foundData = results.find(c => isTargetMatch(c, cadastralKey)) || null;
+          }
+        } catch {
+          // If 404 or error, continue to fallback search
+        }
+
+        // 2. Fallback: Query basic connections first to resolve clientId or meter number
+        if (!foundData) {
+          try {
+            const paginated = await getConnectionsUseCase.execute(50, 0, cadastralKey);
+            if (paginated && paginated.length > 0) {
+              const matchedBasic = paginated.find(
+                c => c.connectionId === cadastralKey || c.connectionCadastralKey === cadastralKey || String(c.connectionAccount) === cadastralKey
+              ) || paginated[0];
+
+              // Prefer meter number first (unique search term), then cadastralKey, account, and clientId
+              const fallbackSearchTerms = [
+                matchedBasic.connectionMeterNumber,
+                matchedBasic.connectionCadastralKey,
+                matchedBasic.connectionAccount ? String(matchedBasic.connectionAccount) : null,
+                matchedBasic.clientId
+              ].filter((term): term is string => typeof term === 'string' && term.trim().length > 0);
+
+              for (const term of fallbackSearchTerms) {
+                try {
+                  const fallbackResults = await findAllConnectionsWithPropertyUseCase.execute({
+                    limit: 100,
+                    offset: 0,
+                    query: term
+                  });
+                  if (fallbackResults && fallbackResults.length > 0) {
+                    const match = fallbackResults.find(c =>
+                      isTargetMatch(c, matchedBasic.connectionId, matchedBasic.connectionAccount)
+                    );
+                    if (match) {
+                      foundData = match;
+                      break;
+                    }
+                  }
+                } catch {
+                  // Try next fallback search term
+                }
+              }
+            }
+          } catch {
+            // Fallback search failed
+          }
+        }
 
         if (isMounted) {
-          if (results && results.length > 0) {
-            setConnectionData(results[0]);
+          if (foundData) {
+            setConnectionData(foundData);
           } else {
             setError(t('connections.table.noData', 'No se encontraron datos para esta acometida.'));
           }
@@ -117,7 +221,7 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [isOpen, cadastralKey, findAllConnectionsWithPropertyUseCase, t]);
+  }, [isOpen, cadastralKey, findAllConnectionsWithPropertyUseCase, getConnectionsUseCase, t]);
 
   const handleClose = () => {
     setActiveTab('general');
@@ -506,8 +610,24 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
                 {renderMeterPhotos()}
               </div>
 
-              {/* Floating Action Button for PDF */}
-              <div className="connection-fab-wrapper">
+              {/* Floating Action Buttons for PDF */}
+              <div className="connection-fab-wrapper" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <Tooltip content="Vista Previa de Ficha Técnica" followCursor={false}>
+                  <Button
+                    onClick={handlePreviewPdf}
+                    className="connection-fab-btn"
+                    disabled={isGeneratingPdf}
+                    color="indigo"
+                    variant="outline"
+                  >
+                    {isGeneratingPdf ? (
+                      <div className="connection-fab-spinner" role="status" />
+                    ) : (
+                      <Eye size={24} />
+                    )}
+                  </Button>
+                </Tooltip>
+
                 <Tooltip content="Descargar Ficha Técnica" followCursor={false}>
                   <Button
                     onClick={handleDownloadPdf}
@@ -550,6 +670,15 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
           onIndexChange={setLightboxMeterIndex}
         />
       )}
+
+      <DocumentPreviewModal
+        isOpen={isPreviewOpen}
+        onClose={handleClosePreview}
+        documentUrl={previewUrl}
+        isLoading={isGeneratingPdf}
+        title="Vista Previa de Ficha Técnica"
+        fileName={fileNamePDF || "FICHA_TECNICA_ACOMETIDA.pdf"}
+      />
     </>
   );
 };

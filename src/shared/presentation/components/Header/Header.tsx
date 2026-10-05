@@ -192,7 +192,7 @@ export const Header: React.FC = () => {
                 onClick={() => setIsSupportOpen(!isSupportOpen)}
                 className='header__nav-btn header__nav-btn--whatsapp'
               >
-                <FaWhatsapp size={22} />
+                <FaWhatsapp size={19} />
               </button>
             </Tooltip>
             {isSupportOpen && (
