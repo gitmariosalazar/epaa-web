@@ -6,7 +6,8 @@ import {
   MapPin,
   User,
   CheckCircle,
-  Navigation
+  Navigation,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
@@ -40,6 +41,7 @@ interface IncidentDetailModalProps {
   incident: IncidentDetailRowResponse | null;
   connection?: ConnectionWithProperty | null;
   isFetchingConnection?: boolean;
+  onPreviewWorkOrderPdf?: (orderCode: string) => void;
 }
 
 // ─── Pure helpers (module-level — no closures, no re-creation on render) ───────
@@ -94,7 +96,8 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
   onClose,
   incident,
   connection,
-  isFetchingConnection
+  isFetchingConnection,
+  onPreviewWorkOrderPdf
 }) => {
   // Lightbox state: null = closed, number = index of the open photo
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -183,8 +186,21 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                   </div>
                   <div className="detail-item">
                     <span className="detail-label">Orden de Trabajo</span>
-                    <span className="detail-value font-medium">
+                    <span className="detail-value font-medium" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {incident.orderCode || 'No asignada'}
+                      {incident.orderCode && onPreviewWorkOrderPdf && (
+                        <Tooltip content="Ver PDF de la Orden de Trabajo" position="top">
+                          <Button
+                            onClick={() => onPreviewWorkOrderPdf(incident.orderCode!)}
+                            size="xs"
+                            color="primary"
+                            circle
+                            variant="dashed"
+                          >
+                            <FileText size={13} />
+                          </Button>
+                        </Tooltip>
+                      )}
                     </span>
                   </div>
                 </div>

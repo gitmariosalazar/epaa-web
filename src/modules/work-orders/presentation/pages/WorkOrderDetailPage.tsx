@@ -79,6 +79,9 @@ import { SubmitInspectionReportModal as WOInspectionModal } from '../components/
 import { RegisterCadastralModal } from '../components/modals/RegisterCadastralModal';
 import { SubmitInspectionReportModal as SolicitudInspectionModal } from '../../../processes/solicitudes/presentation/components/SubmitInspectionReportModal';
 
+import { DocumentPreviewModal } from '@/shared/presentation/components/DocumentPreviewModal';
+import { WorkOrderPdfGenerator } from '../components/templates/pdf/WorkOrderPdfGenerator';
+
 // ── Icons ──────────────────────────────────────────────────────────────────────
 import {
   ArrowLeft,
@@ -91,7 +94,8 @@ import {
   Star,
   AlertTriangle,
   Clock,
-  FileText
+  FileText,
+  Printer
 } from 'lucide-react';
 import '../styles/WorkOrderDetailPage.css';
 
@@ -153,6 +157,12 @@ export const WorkOrderDetailPage: React.FC = () => {
   const [showSolicitudReport, setShowSolicitudReport] = useState(false);
   const [showCadastral, setShowCadastral] = useState(false);
   const [pendingNextState, setPendingNextState] = useState<string | null>(null);
+
+  // ── Document Preview PDF state ──────────────────────────────────────────────
+  const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
+  const [isDocPreviewOpen, setIsDocPreviewOpen] = useState(false);
+  const [isGeneratingDocPdf, setIsGeneratingDocPdf] = useState(false);
+  const [pdfFileName, setPdfFileName] = useState<string>('OrdenTrabajo.pdf');
 
   // ── Loading states ──────────────────────────────────────────────────────────
   const [isReceiving, setIsReceiving] = useState(false);
@@ -246,6 +256,42 @@ export const WorkOrderDetailPage: React.FC = () => {
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
   const reload = useCallback(() => setReloadTrigger((p) => p + 1), []);
+
+  // ── Print PDF ───────────────────────────────────────────────────────────────
+  const handlePrintWorkOrderPdf = useCallback(async () => {
+    if (!codigoOrden) return;
+    setIsGeneratingDocPdf(true);
+    setIsDocPreviewOpen(true);
+    try {
+      let detailToPrint = orden;
+      if (!detailToPrint || detailToPrint.codigoOrden !== codigoOrden) {
+        detailToPrint = await detalleUseCase.execute(codigoOrden);
+      }
+      const printedBy = user?.username || user?.cardId || '-';
+      const inputData = detailToPrint ? { ...detailToPrint, printedBy } : { printedBy };
+      const generator = new WorkOrderPdfGenerator();
+      const url = await generator.generateBlobUrl([inputData as any]);
+      setDocPreviewUrl(url);
+      setPdfFileName(`OrdenTrabajo_${codigoOrden}.pdf`);
+    } catch (e: any) {
+      MessageToastCustom(
+        'error',
+        'Error al generar PDF',
+        e.message || 'No se pudo generar el PDF de la orden de trabajo.'
+      );
+      setIsDocPreviewOpen(false);
+    } finally {
+      setIsGeneratingDocPdf(false);
+    }
+  }, [codigoOrden, orden, detalleUseCase, user]);
+
+  const handleCloseDocPreview = useCallback(() => {
+    if (docPreviewUrl) {
+      URL.revokeObjectURL(docPreviewUrl);
+    }
+    setDocPreviewUrl(null);
+    setIsDocPreviewOpen(false);
+  }, [docPreviewUrl]);
 
   // ── Load orden + tracking ───────────────────────────────────────────────────
   React.useEffect(() => {
@@ -924,23 +970,33 @@ export const WorkOrderDetailPage: React.FC = () => {
   return (
     <PageLayout
       header={
-        <div className="wo-detail-header-nav">
-          <Button
-            variant="ghost"
-            size="sm"
-            leftIcon={<ArrowLeft size={16} />}
-            onClick={() => navigate(-1)}
-          >
-            Volver
-          </Button>
-          <div className="wo-detail-header-nav__info">
-            <h2 className="wo-detail-header-nav__title">
-              Orden de Trabajo: {orden.codigoOrden}
-            </h2>
-            <span className="wo-detail-header-nav__subtitle">
-              {orden.tipoTrabajo} · {orden.departamento}
-            </span>
+        <div className="wo-detail-header-nav" style={{ width: '100%', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<ArrowLeft size={16} />}
+              onClick={() => navigate(-1)}
+            >
+              Volver
+            </Button>
+            <div className="wo-detail-header-nav__info">
+              <h2 className="wo-detail-header-nav__title">
+                Orden de Trabajo: {orden.codigoOrden}
+              </h2>
+              <span className="wo-detail-header-nav__subtitle">
+                {orden.tipoTrabajo} · {orden.departamento}
+              </span>
+            </div>
           </div>
+          <Button
+            variant="dashed"
+            size="sm"
+            leftIcon={<Printer size={16} />}
+            onClick={handlePrintWorkOrderPdf}
+          >
+            Imprimir Orden de Trabajo
+          </Button>
         </div>
       }
     >
@@ -1353,6 +1409,16 @@ export const WorkOrderDetailPage: React.FC = () => {
           isLoading={isModalLoading}
         />
       )}
+
+      {/* ── Document Preview Modal ── */}
+      <DocumentPreviewModal
+        isOpen={isDocPreviewOpen}
+        onClose={handleCloseDocPreview}
+        documentUrl={docPreviewUrl}
+        isLoading={isGeneratingDocPdf}
+        title="Vista Previa - Orden de Trabajo"
+        fileName={pdfFileName}
+      />
     </PageLayout>
   );
 };

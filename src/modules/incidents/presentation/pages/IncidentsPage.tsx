@@ -33,7 +33,12 @@ import {
   Repeat,
   Plus,
   Printer,
+  FileText
 } from 'lucide-react';
+import { useAuth } from '@/shared/presentation/context/AuthContext';
+import { GetOrdenTrabajoDetalleByNumeroOrdenUseCase } from '@/modules/work-orders/application/usecases/GetOrdenTrabajoDetalleByNumeroOrdenUseCase';
+import { ProcessWorkOrderRepositoryImpl } from '@/modules/work-orders/infrastructure/repositories/ProcessWorkOrderRepositoryImpl';
+import { WorkOrderPdfGenerator } from '@/modules/work-orders/presentation/components/templates/pdf/WorkOrderPdfGenerator';
 import {
   CircularProgress,
   useSimulatedProgress
@@ -76,6 +81,7 @@ const INCIDENT_TABS: TabItem<IncidentTab>[] = [
 
 export const IncidentsPage: React.FC = () => {
   const vm = useIncidentsViewModel();
+  const { user } = useAuth();
   const {
     incidents,
     totalCount,
@@ -166,10 +172,12 @@ export const IncidentsPage: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [previewTitle, setPreviewTitle] = useState<string>('Vista Previa de Notificación');
 
   const handlePreviewPdf = async (item: IncidentDetailRowResponse) => {
     setIsPreviewOpen(true);
     setIsGeneratingPdf(true);
+    setPreviewTitle('Vista Previa de Notificación Clandestina');
     try {
       const url = await generateNotificationPdfUrl([item], findConnectionWithPropertyByCadastralKeyUseCase);
       setPreviewUrl(url);
@@ -178,6 +186,41 @@ export const IncidentsPage: React.FC = () => {
       setIsGeneratingPdf(false);
     }
   };
+
+  const handlePreviewWorkOrderPdf = React.useCallback(
+    async (orderCode: string) => {
+      if (!orderCode) return;
+      setIsPreviewOpen(true);
+      setIsGeneratingPdf(true);
+      setPreviewTitle(`Vista Previa - Orden de Trabajo ${orderCode}`);
+      setFileNamePDF(`Orden_de_Trabajo_${orderCode}.pdf`);
+      try {
+        const getDetalleUseCase =
+          new GetOrdenTrabajoDetalleByNumeroOrdenUseCase(
+            new ProcessWorkOrderRepositoryImpl()
+          );
+        const detalle = await getDetalleUseCase.execute(orderCode);
+        const printedBy = user?.username || user?.cardId || 'solanoa';
+        const inputData = detalle
+          ? { ...detalle, printedBy }
+          : { orderCode, printedBy };
+
+        const generator = new WorkOrderPdfGenerator();
+        const url = await generator.generateBlobUrl([inputData as any]);
+        setPreviewUrl(url);
+      } catch (e: any) {
+        MessageToastCustom(
+          'error',
+          'Error al generar PDF de la Orden de Trabajo',
+          e.message || 'No se pudo generar el PDF de la orden de trabajo.'
+        );
+        setIsPreviewOpen(false);
+      } finally {
+        setIsGeneratingPdf(false);
+      }
+    },
+    [user]
+  );
 
   const handlePrintAllNotifications = async () => {
 
@@ -200,6 +243,7 @@ export const IncidentsPage: React.FC = () => {
 
     setIsPreviewOpen(true);
     setIsGeneratingPdf(true);
+    setPreviewTitle('Vista Previa de Notificaciones Clandestinas');
     try {
       const url = await generateNotificationPdfUrl(clandestineIncidents, findConnectionWithPropertyByCadastralKeyUseCase);
       setPreviewUrl(url);
@@ -347,17 +391,30 @@ export const IncidentsPage: React.FC = () => {
             </div>
             {
               item.orderCode !== null && (
-                <Tooltip content={`Ver Orden de Trabajo Nro. : ${item.orderCode}`} themeColor='accent' followCursor={false}>
-                  <Button
-                    onClick={() => navigate(`/work-orders/search?code=${item.orderCode}`)}
-                    size='xs'
-                    color='accent'
-                    circle
-                    variant='dashed'
-                  >
-                    <FaTools size={13} />
-                  </Button>
-                </Tooltip>
+                <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                  <Tooltip content={`Ver Orden de Trabajo Nro. : ${item.orderCode}`} themeColor='accent' followCursor={false}>
+                    <Button
+                      onClick={() => navigate(`/work-orders/search?code=${item.orderCode}`)}
+                      size='xs'
+                      color='accent'
+                      circle
+                      variant='dashed'
+                    >
+                      <FaTools size={13} />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip content={`Imprimir PDF Orden de Trabajo Nro. : ${item.orderCode}`} themeColor='primary' followCursor={false}>
+                    <Button
+                      onClick={() => handlePreviewWorkOrderPdf(item.orderCode!)}
+                      size='xs'
+                      color='primary'
+                      circle
+                      variant='dashed'
+                    >
+                      <FileText size={13} />
+                    </Button>
+                  </Tooltip>
+                </div>
               )
             }
           </div>
@@ -420,6 +477,15 @@ export const IncidentsPage: React.FC = () => {
         icon: <Printer size={16} />,
         onClick: () => handlePreviewPdf(item),
         color: 'danger'
+      });
+    }
+
+    if (item.orderCode) {
+      items.push({
+        label: 'Ver PDF Orden de Trabajo',
+        icon: <FileText size={16} />,
+        onClick: () => handlePreviewWorkOrderPdf(item.orderCode!),
+        color: 'primary'
       });
     }
 
@@ -649,6 +715,7 @@ export const IncidentsPage: React.FC = () => {
           incident={selectedIncident}
           connection={selectedConnection}
           isFetchingConnection={isFetchingConnection}
+          onPreviewWorkOrderPdf={handlePreviewWorkOrderPdf}
         />
       )}
 
@@ -669,7 +736,7 @@ export const IncidentsPage: React.FC = () => {
         onClose={handleClosePreview}
         documentUrl={previewUrl}
         isLoading={isGeneratingPdf}
-        title="Vista Previa de Notificación"
+        title={previewTitle}
         fileName={fileNamePDF || "NOTIFICACION_INCIDENTE.pdf"}
       />
     </>

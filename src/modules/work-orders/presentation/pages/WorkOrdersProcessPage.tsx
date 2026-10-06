@@ -27,8 +27,9 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 import { useAuth } from '@/shared/presentation/context/AuthContext';
+import { DocumentPreviewModal } from '@/shared/presentation/components/DocumentPreviewModal';
+import { WorkOrderPdfGenerator } from '../components/templates/pdf/WorkOrderPdfGenerator';
 
 // ── Use Cases ──────────────────────────────────────────────────────────────────
 import { GetOrdenTrabajoDetalleByNumeroOrdenUseCase } from '../../application/usecases/GetOrdenTrabajoDetalleByNumeroOrdenUseCase';
@@ -91,11 +92,13 @@ import {
   Wrench,
   Check,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Printer
 } from 'lucide-react';
 import '../styles/WorkOrdersProcessPage.css';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
 const STEPS = [
   { label: 'Recepción', icon: Inbox },
@@ -211,6 +214,12 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
   const [submitReportOpen, setSubmitReportOpen] = useState(false);
   const [submitInstallationReportOpen, setSubmitInstallationReportOpen] = useState(false);
 
+  // ── Document PDF preview state (Single Work Order template) ──
+  const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
+  const [isDocPreviewOpen, setIsDocPreviewOpen] = useState(false);
+  const [isGeneratingDocPdf, setIsGeneratingDocPdf] = useState(false);
+  const [pdfFileName, setPdfFileName] = useState<string>('Orden_de_Trabajo.pdf');
+
   // ── Quick-action loading (inline buttons) ───────────────────────────────────
   const [isReceiving, setIsReceiving] = useState(false);
   const [isStartingPrep, setIsStartingPrep] = useState(false);
@@ -304,6 +313,44 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
     () => new RegisterSatisfactionSurveyUseCase(repo),
     [repo]
   );
+
+  // ── PDF Print Handler ──────────────────────────────────────────────────────
+  const handlePrintWorkOrderPdf = useCallback(async () => {
+    const targetCode = currentCode || orden?.codigoOrden || '';
+    if (!targetCode && !orden) return;
+
+    setIsDocPreviewOpen(true);
+    setIsGeneratingDocPdf(true);
+    setPdfFileName(`Orden_de_Trabajo_${targetCode || 'OT'}.pdf`);
+    try {
+      // Clean Architecture: Obtener el detalle completo mediante UseCase o usar el orden cargado
+      const detailToUse = (targetCode ? await detalleUseCase.execute(targetCode) : null) || orden;
+      console.warn('📌 [ORDEN DE TRABAJO DETALLE OBTENIDA EN PROCESO]:', detailToUse);
+
+      if (!detailToUse) return;
+
+      const printedBy = user?.username || 'solanoa';
+      const inputData = { ...detailToUse, printedBy };
+
+      const generator = new WorkOrderPdfGenerator();
+      const url = await generator.generateBlobUrl([inputData]);
+      setDocPreviewUrl(url);
+    } catch (err) {
+      console.error('Error al generar PDF de la Orden de Trabajo:', err);
+    } finally {
+      setIsGeneratingDocPdf(false);
+    }
+  }, [currentCode, orden, detalleUseCase, user]);
+
+  const handleCloseDocPreview = useCallback(() => {
+    setIsDocPreviewOpen(false);
+    setTimeout(() => {
+      if (docPreviewUrl) {
+        URL.revokeObjectURL(docPreviewUrl);
+        setDocPreviewUrl(null);
+      }
+    }, 300);
+  }, [docPreviewUrl]);
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
   const reload = useCallback(() => setReloadTrigger((p) => p + 1), []);
@@ -1255,23 +1302,60 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
   );
 
   if (isEmbedded) {
-    return content;
+    return (
+      <>
+        {content}
+        <DocumentPreviewModal
+          isOpen={isDocPreviewOpen}
+          onClose={handleCloseDocPreview}
+          documentUrl={docPreviewUrl}
+          isLoading={isGeneratingDocPdf}
+          title="Vista Previa - Orden de Trabajo"
+          fileName={pdfFileName}
+        />
+      </>
+    );
   }
 
   return (
-    <PageLayout
-      header={
-        <div className="wo-process-header">
-          <div className="wo-process-header__info">
-            <h2 className="wo-process-header__title">Proceso de Órdenes de Trabajo</h2>
-            <p className="wo-process-header__subtitle">
-              {currentCode ? `Procesando OT: ${currentCode}` : 'Avanza cada fase del flujo de la orden de trabajo'}
-            </p>
+    <>
+      <PageLayout
+        header={
+          <div className="wo-process-header">
+            <div className="wo-process-header__info">
+              <h2 className="wo-process-header__title">Proceso de Órdenes de Trabajo</h2>
+              <p className="wo-process-header__subtitle">
+                {currentCode ? `Procesando OT: ${currentCode}` : 'Avanza cada fase del flujo de la orden de trabajo'}
+              </p>
+            </div>
+
+            {currentCode && (
+              <div className="wo-process-header__actions">
+                <Button
+                  variant="dashed"
+                  size="sm"
+                  leftIcon={<Printer size={16} />}
+                  onClick={handlePrintWorkOrderPdf}
+                >
+                  Imprimir Orden de Trabajo
+                </Button>
+              </div>
+            )}
           </div>
-        </div>
-      }
-    >
-      {content}
-    </PageLayout>
+        }
+      >
+        {content}
+      </PageLayout>
+
+      {/* ── Document Preview Modal ── */}
+      <DocumentPreviewModal
+        isOpen={isDocPreviewOpen}
+        onClose={handleCloseDocPreview}
+        documentUrl={docPreviewUrl}
+        isLoading={isGeneratingDocPdf}
+        title="Vista Previa - Orden de Trabajo"
+        fileName={pdfFileName}
+      />
+    </>
   );
 };
