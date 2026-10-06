@@ -54,12 +54,12 @@ export const WorkOrderTimelineCard: React.FC<WorkOrderTimelineCardProps> = ({
 
           const fechaStr = hito.fecha
             ? new Date(hito.fecha).toLocaleString('es-EC', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })
             : '—';
 
           return (

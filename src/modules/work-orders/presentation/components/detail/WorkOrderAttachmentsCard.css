@@ -1,3 +1,14 @@
+.photos-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.evidence-empty-state {
+  padding: 0.5rem 0;
+}
+
 .wo-attachments-upload-container {
   background: var(--surface);
   padding: 1.25rem;

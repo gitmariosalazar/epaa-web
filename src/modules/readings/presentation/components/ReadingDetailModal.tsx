@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { useReadingDetailViewModel } from '../hooks/useReadingDetailViewModel';
@@ -55,6 +55,12 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
   const { t } = useTranslation();
   const { readingDetail, isLoading, error, refetch } = useReadingDetailViewModel(cadastralKey, yearAndMonth);
   const loadingProgress = useSimulatedProgress(isLoading);
+
+  useEffect(() => {
+    if (isOpen && cadastralKey && yearAndMonth) {
+      refetch();
+    }
+  }, [isOpen, cadastralKey, yearAndMonth, refetch]);
 
   const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);

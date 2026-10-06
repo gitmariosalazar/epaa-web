@@ -4,32 +4,55 @@
  * SRP: galería de fotos de evidencia y adjuntos de la OT.
  */
 import React, { useState } from 'react';
-import { Paperclip, Image as ImageIcon, FileText, ExternalLink, UploadCloud, X } from 'lucide-react';
+import { Paperclip, FileText, ExternalLink, UploadCloud, X } from 'lucide-react';
 import { Card } from '@/shared/presentation/components/Card/Card';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import type { AdjuntoEvidencia } from '../../../domain/schemas/dto/response/work-orders.get.response';
 import './WorkOrderAttachmentsCard.css';
+import { EvidenceFiles } from '@/shared/files';
+import type { FileCategory } from '@/shared/files';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { MdPhotoLibrary } from 'react-icons/md';
+import { PhotoLightbox } from '@/modules/incidents/presentation/components/PhotoLightbox';
 
 interface WorkOrderAttachmentsCardProps {
   adjuntos: AdjuntoEvidencia[];
   onAddAttachment?: (files: File[]) => Promise<void>;
   isLoading?: boolean;
+  category?: FileCategory;
 }
 
-const isImage = (mime: string) => mime?.startsWith('image/');
+const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'tiff', 'tif']);
+
+const isImageAttachment = (adj: AdjuntoEvidencia): boolean => {
+  if (!adj) return false;
+
+  const mime = (adj.mimeType || (adj as any).mime_type || (adj as any).type || '').toLowerCase();
+  if (mime.startsWith('image/')) return true;
+
+  const tipo = (adj.tipoAdjunto || (adj as any).tipo_adjunto || '').toLowerCase();
+  if (tipo.startsWith('image/') || tipo === 'foto' || tipo === 'imagen') return true;
+
+  const filename = adj.nombreArchivo || (adj as any).nombre_archivo || adj.url || '';
+  const ext = filename.split('?')[0].split('.').pop()?.toLowerCase();
+  return ext ? IMAGE_EXTENSIONS.has(ext) : false;
+};
 
 export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> = ({
   adjuntos: adjuntosRaw,
   onAddAttachment,
   isLoading = false,
+  category = 'work_orders',
 }) => {
   const adjuntos = adjuntosRaw ?? [];
-  const [preview, setPreview] = useState<string | null>(null);
 
   // Form states
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [lightboxResolutionIndex, setLightboxResolutionIndex] = useState<number | null>(null);
+
 
   const handleFilesSelected = (files: File[]) => {
     if (files.length + selectedFiles.length > 10) {
@@ -105,43 +128,91 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
     );
   }
 
-  const imagenes = adjuntos.filter((a) => isImage(a.mimeType));
-  const documentos = adjuntos.filter((a) => !isImage(a.mimeType));
+  const imagenes = adjuntos.filter(isImageAttachment);
+  const documentos = adjuntos.filter((a) => !isImageAttachment(a));
+
+  const isResolutionPhoto = (adj: AdjuntoEvidencia) => {
+    const t = (adj.tipoAdjunto || '').toUpperCase();
+    return (
+      t.includes('RESOLUCION') ||
+      t.includes('RESOLUC') ||
+      t.includes('EJECUC') ||
+      t.includes('FINAL') ||
+      t.includes('DESPUES') ||
+      t.includes('SALIDA')
+    );
+  };
+
+  const photosReport = imagenes.filter((a) => !isResolutionPhoto(a));
+  const photosResolution = imagenes.filter((a) => isResolutionPhoto(a));
 
   return (
     <Card title={`Evidencia de Campo (${adjuntos.length})`} className="wo-detail-card">
-
       {adjuntos.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '1.5rem', background: 'rgba(0,0,0,0.01)', borderRadius: '0.375rem', border: '1px dashed rgba(0,0,0,0.06)', marginBottom: onAddAttachment ? '1rem' : '0' }}>
           <p className="wo-empty-text" style={{ margin: 0, fontSize: '0.78rem' }}>No hay adjuntos cargados para esta orden.</p>
         </div>
       ) : (
         <>
-          {/* Galería de imágenes */}
-          {imagenes.length > 0 && (
-            <div className="wo-attachments-gallery" style={{ marginBottom: onAddAttachment ? '1rem' : '0' }}>
-              {imagenes.map((img) => (
-                <div
-                  key={img.idAdjunto}
-                  className="wo-attachment-thumb"
-                  onClick={() => setPreview(img.url)}
-                  title={img.nombreArchivo}
-                >
-                  <img
-                    src={img.url}
-                    alt={img.nombreArchivo}
-                    loading="lazy"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
+          {/* ── Evidencia Fotográfica de Reporte ── */}
+          <div className="detail-section" style={{ marginBottom: '1.25rem' }}>
+            <h4 className="detail-section-title" style={{ fontSize: '0.82rem', fontWeight: 700, color: '#3b82f6', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.02em' }}>
+              Evidencia Fotográfica de Reporte ({photosReport.length})
+            </h4>
+            {photosReport.length > 0 ? (
+              <div className="photos-gallery">
+                {photosReport.map((photo, idx) => (
+                  <EvidenceFiles
+                    key={photo.idAdjunto}
+                    fileId={photo.idAdjunto}
+                    filePath={photo.url}
+                    type={photo.mimeType}
+                    category={category}
+                    onClick={() => setLightboxIndex(idx)}
                   />
-                  <div className="wo-attachment-thumb__overlay">
-                    <ImageIcon size={16} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            ) : (
+              <div className="evidence-empty-state">
+                <EmptyState
+                  message="Sin evidencia de reporte"
+                  description="No se ha agregado evidencia fotográfica de reporte."
+                  icon={<MdPhotoLibrary size={35} className="icon-error-color" />}
+                  variant="warning"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* ── Evidencia Fotográfica de Resolución ── */}
+          <div className="detail-section" style={{ marginBottom: '1.25rem' }}>
+            <h4 className="detail-section-title" style={{ fontSize: '0.82rem', fontWeight: 700, color: '#3b82f6', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.02em' }}>
+              Evidencia Fotográfica de Resolución ({photosResolution.length})
+            </h4>
+            {photosResolution.length > 0 ? (
+              <div className="photos-gallery">
+                {photosResolution.map((photo, idx) => (
+                  <EvidenceFiles
+                    key={photo.idAdjunto}
+                    fileId={photo.idAdjunto}
+                    filePath={photo.url}
+                    type={photo.mimeType}
+                    category={category}
+                    onClick={() => setLightboxResolutionIndex(idx)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="evidence-empty-state">
+                <EmptyState
+                  message="Sin evidencia de resolución"
+                  description="No se ha agregado evidencia fotográfica de resolución."
+                  icon={<MdPhotoLibrary size={35} className="icon-error-color" />}
+                  variant="warning"
+                />
+              </div>
+            )}
+          </div>
 
           {/* Documentos (no imágenes) */}
           {documentos.length > 0 && (
@@ -244,19 +315,39 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
         </div>
       )}
 
-      {/* Lightbox simple */}
-      {preview && (
-        <div className="wo-lightbox" onClick={() => setPreview(null)}>
-          <img src={preview} alt="preview" />
-          <span className="wo-lightbox__close">✕</span>
-        </div>
-      )}
-
       {adjuntos.length > 0 && (
         <div className="wo-attachments-legend" style={{ marginTop: '1rem' }}>
           <Paperclip size={11} />
           <span>{imagenes.length} fotos · {documentos.length} documentos</span>
         </div>
+      )}
+
+      {lightboxIndex !== null && photosReport.length > 0 && (
+        <PhotoLightbox
+          photos={photosReport.map((p) => ({
+            photoId: p.idAdjunto,
+            filePath: p.url,
+            type: p.mimeType
+          }))}
+          activeIndex={lightboxIndex}
+          category={category}
+          onClose={() => setLightboxIndex(null)}
+          onIndexChange={setLightboxIndex}
+        />
+      )}
+
+      {lightboxResolutionIndex !== null && photosResolution.length > 0 && (
+        <PhotoLightbox
+          photos={photosResolution.map((p) => ({
+            photoId: p.idAdjunto,
+            filePath: p.url,
+            type: p.mimeType
+          }))}
+          activeIndex={lightboxResolutionIndex}
+          category={category}
+          onClose={() => setLightboxResolutionIndex(null)}
+          onIndexChange={setLightboxResolutionIndex}
+        />
       )}
     </Card>
   );

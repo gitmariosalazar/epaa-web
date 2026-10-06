@@ -397,7 +397,7 @@ export const IncidentsListPage: React.FC = () => {
                   <Button
                     onClick={() => handlePreviewWorkOrderPdf(item.orderCode!)}
                     size="xs"
-                    color="primary"
+                    color="orange"
                     circle
                     variant="dashed"
                   >
@@ -482,7 +482,7 @@ export const IncidentsListPage: React.FC = () => {
         label: 'Ver PDF Orden de Trabajo',
         icon: <FileText size={16} />,
         onClick: () => handlePreviewWorkOrderPdf(item.orderCode!),
-        color: 'primary'
+        color: 'orange'
       });
     }
 

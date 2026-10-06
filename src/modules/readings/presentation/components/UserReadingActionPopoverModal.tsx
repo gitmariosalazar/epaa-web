@@ -22,6 +22,26 @@ export const UserReadingActionPopoverModal: React.FC<UserReadingActionPopoverMod
   userActions,
   trigger
 }) => {
+  const processedUserActions = useMemo(() => {
+    if (!userActions || userActions.length === 0) return [];
+
+    const uniqueMap = new Map<string, UserReadingActionAuditSqlResul>();
+
+    userActions.forEach((item) => {
+      const timeStr = item.adjustmentDate ? new Date(item.adjustmentDate).getTime() : 0;
+      const key = `${item.action || ''}_${item.username || ''}_${timeStr}_${item.justification || ''}_${item.previousReading ?? ''}_${item.newReading ?? ''}`;
+      if (!uniqueMap.has(key)) {
+        uniqueMap.set(key, item);
+      }
+    });
+
+    return Array.from(uniqueMap.values()).sort((a, b) => {
+      const timeA = a.adjustmentDate ? new Date(a.adjustmentDate).getTime() : 0;
+      const timeB = b.adjustmentDate ? new Date(b.adjustmentDate).getTime() : 0;
+      return timeB - timeA;
+    });
+  }, [userActions]);
+
   const columns: Column<UserReadingActionAuditSqlResul>[] = useMemo(() => [
     {
       header: 'Acción',
@@ -86,9 +106,6 @@ export const UserReadingActionPopoverModal: React.FC<UserReadingActionPopoverMod
     }
   ], []);
 
-
-  console.log(userActions)
-
   return (
     <PopoverModal
       title="Historial de Cambios de Lectura"
@@ -96,7 +113,7 @@ export const UserReadingActionPopoverModal: React.FC<UserReadingActionPopoverMod
     >
       <div className="reading-history-container" >
         <Table
-          data={userActions || []}
+          data={processedUserActions}
           columns={columns}
           pagination={false}
           emptyState={

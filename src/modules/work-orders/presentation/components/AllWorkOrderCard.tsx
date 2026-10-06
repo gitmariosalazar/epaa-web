@@ -28,6 +28,7 @@ import { ConverDateTimeToText } from '@/shared/utils/datetime/ConverDate';
 import { Alert } from '@/shared/presentation/components/Alert';
 import { MdOutlineDescription } from 'react-icons/md';
 import { FaPrint } from 'react-icons/fa';
+import { WorkOrderProcessSteps } from './WorkOrderProcessSteps';
 
 // ── Priority label/color map ─────────────────────────────────────────────────
 const PRIORITY_MAP: Record<number, { label: string; color: string }> = {
@@ -122,6 +123,7 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
               variant="soft"
               size="xs"
             />
+            <WorkOrderProcessSteps estadoCodigo={orden.status} variant="mini" />
           </div>
 
           {/* Client + work type */}
@@ -226,6 +228,9 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
       {/* ── Expanded row ────────────────────────────────────────────────────── */}
       {expanded && (
         <div className="wo-list-card__expanded">
+          <div style={{ width: '100%', marginBottom: '0.85rem' }}>
+            <WorkOrderProcessSteps estadoCodigo={orden.status} variant="full" />
+          </div>
           <div className="wo-list-card__expanded-grid">
             {orden.assignationDate && (
               <div className="wo-list-card__exp-item">

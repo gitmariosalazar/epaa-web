@@ -1,12 +1,6 @@
-/**
- * WorkOrderCard — expandable card for the list page.
- *
- * SRP: renders one OrdenTrabajoVistaCliente. Expand state is local.
- * DIP: receives onView as prop.
- */
 import React, { useState } from 'react';
 import {
-  Wrench, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp,
+  Wrench, CheckCircle, XCircle, ChevronDown, ChevronUp,
   MapPin, Calendar, User, Eye, ShieldCheck, AlertTriangle
 } from 'lucide-react';
 import type { OrdenTrabajoVistaCliente } from '../../domain/schemas/dto/response/work-orders.get.response';
@@ -21,6 +15,7 @@ import {
   formatSlaHoras,
   getSlaColor,
 } from './WorkOrderConfig';
+import { WorkOrderProcessSteps } from './WorkOrderProcessSteps';
 
 interface WorkOrderCardProps {
   orden: OrdenTrabajoVistaCliente;
@@ -58,8 +53,6 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onP
       : orden.tecnicoNombre ?? 'Sin asignar';
 
   const toggle = () => setExpanded((p) => !p);
-
-  console.log("orden:", orden);
 
   return (
     <div
@@ -117,16 +110,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onP
               />
             </Tooltip>
 
-            <Tooltip content="Días en proceso" position="bottom" themeColor="info">
-              <ColorChip
-                label={orden.diasEnProceso > 1 ? `${orden.diasEnProceso} días` : '1 día'}
-                icon={<Clock size={10} />}
-                variant="soft"
-                size="xs"
-                color="var(--text-muted)"
-                borderRadius={5}
-              />
-            </Tooltip>
+            <WorkOrderProcessSteps estadoCodigo={orden.estadoCodigo} variant="mini" />
           </div>
 
           <div className="wo-card__meta">
@@ -210,6 +194,11 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onP
       <div className={`wo-card__expand-panel${expanded ? ' wo-card__expand-panel--open' : ''}`}>
         <div className="wo-card__expand-inner">
 
+          {/* Stepper Proceso Completo de la OT */}
+          <div style={{ gridColumn: '1 / -1', marginBottom: '0.35rem' }}>
+            <WorkOrderProcessSteps estadoCodigo={orden.estadoCodigo} variant="full" />
+          </div>
+
           <div className="wo-expand__group">
             <span className="wo-expand__label">
               <Wrench size={10} style={{ display: 'inline', marginRight: 3 }} />
@@ -247,7 +236,7 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onP
           <div className="wo-expand__group">
             <span className="wo-expand__label">
               <ShieldCheck size={10} style={{ display: 'inline', marginRight: 3 }} />
-              SLA1
+              SLA
             </span>
             <span className="wo-expand__value">
               Límite: <strong style={{ color: slaColor }}>{formatSlaHoras(orden.slaHoras)}</strong>

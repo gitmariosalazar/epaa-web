@@ -5,7 +5,7 @@ import { AdditionalInfoAccordion } from '../components/AdditionalInfoAccordion';
 import { ReadingHistoryTable } from '../components/ReadingHistoryTable';
 import { ReadingToolbar } from '../components/ReadingToolbar';
 import { useLocation } from 'react-router-dom';
-import type { UpdateSpecialReadingRequest } from '../../domain/dto/request/UpdateSpecialReadingRequest';
+import type { UpdateSpecialReadingRequest, PhotoInputDto } from '../../domain/dto/request/UpdateSpecialReadingRequest';
 import {
   IdCard,
   User,
@@ -30,6 +30,7 @@ import { ReadingSpecialUpdateInfoForm } from '../components/ReadingSpecialUpdate
 export interface UpdateReadingPageProps {
   initialCadastralKey?: string;
   initialMonth?: string;
+  initialPhotos?: (string | PhotoInputDto)[];
   onSuccess?: () => void;
   onCancel?: () => void;
   refreshTrigger?: number;
@@ -38,6 +39,7 @@ export interface UpdateReadingPageProps {
 export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
   initialCadastralKey,
   initialMonth,
+  initialPhotos,
   onSuccess,
   onCancel,
   refreshTrigger
@@ -65,6 +67,17 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
   );
   const [observationInput, setObservationInput] = useState('');
   const [tipoAjusteId, setTipoAjusteId] = useState<number | ''>('');
+  const [photosInput, setPhotosInput] = useState<PhotoInputDto[]>([]);
+
+  // ── Sincronizar initialPhotos si son provistas desde componente padre ────
+  useEffect(() => {
+    if (initialPhotos && initialPhotos.length > 0) {
+      const formatted: PhotoInputDto[] = initialPhotos.map((p) =>
+        typeof p === 'string' ? { photoUrl: p, description: 'Foto evidencia de lectura' } : p
+      );
+      setPhotosInput(formatted);
+    }
+  }, [initialPhotos]);
 
   // ── Estado del modal de confirmación ──────────────────────────────────────
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -116,6 +129,9 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
     currentReading: currentReadingInput === '' ? null : Number(currentReadingInput),
     cadastralKey: currentReadingInfoForRequest?.cadastralKey ?? '',
     averageConsumption: currentReadingInfoForRequest?.averageConsumption ?? 0,
+    photos: photosInput.length > 0 ? photosInput : undefined,
+    evidencePhotos: photosInput.length > 0 ? photosInput : undefined,
+    images: photosInput.length > 0 ? photosInput : undefined,
   });
 
   const handleSearch = async () => {
@@ -127,6 +143,7 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
     setObservationInput('');
     setCurrentReadingInput('');
     setPreviousReadingInput('');
+    setPhotosInput([]);
     await fetchReadingData(cadastralKey, initialMonth);
   };
 
@@ -193,6 +210,7 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
         setPreviousReadingInput('');
         setObservationInput('');
         setTipoAjusteId('');
+        setPhotosInput([]);
       }
     }
   };
@@ -208,6 +226,7 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
     setCurrentReadingInput('');
     setPreviousReadingInput('');
     setTipoAjusteId('');
+    setPhotosInput([]);
     clearData();
     if (onCancel) onCancel();
   };
@@ -436,6 +455,8 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
                 setObservationInput={setObservationInput}
                 tipoAjusteId={tipoAjusteId}
                 setTipoAjusteId={setTipoAjusteId}
+                photosInput={photosInput}
+                setPhotosInput={setPhotosInput}
               />
             </>
           )}

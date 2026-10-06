@@ -13,7 +13,7 @@ export interface ColorChipProps {
   icon?: React.ReactNode;
   /** If provided, right icon/action */
   iconPosition?: 'left' | 'right';
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   /** Add a dot indicator for status (useful in 'soft' or 'outline' variants) */
   withDot?: boolean;
   /** Optional custom border radius (e.g. '4px', '50%') */

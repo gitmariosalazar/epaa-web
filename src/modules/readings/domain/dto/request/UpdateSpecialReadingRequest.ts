@@ -1,3 +1,8 @@
+export interface PhotoInputDto {
+  photoUrl: string;
+  description?: string;
+}
+
 export interface UpdateSpecialReadingRequest {
   tipoAjusteId: number;
   justificacion: string;
@@ -9,4 +14,11 @@ export interface UpdateSpecialReadingRequest {
   typeNoveltyReadingId?: number | null;
   cadastralKey?: string;
   averageConsumption?: number;
+
+  /**
+   * Fotos de evidencia (URLs en string o DTOs con photoUrl y descripción)
+   */
+  photos?: (string | PhotoInputDto)[];
+  evidencePhotos?: (string | PhotoInputDto)[];
+  images?: (string | PhotoInputDto)[];
 }

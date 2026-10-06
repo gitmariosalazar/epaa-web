@@ -118,8 +118,6 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
   const currentItem = imageItems[currentImageIndex];
   const displayData: ReadingDetailed = readingDetailed!;
 
-  console.log("currentItem", readingDetailed);
-
   return (
     <div className="urw-split-container">
       {/* Left Pane: Images */}
@@ -198,6 +196,7 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
               <div className="urw-image-footer">
 
                 <div className="urw-footer-grid">
+
                   {/*Botones de accnoes abrir popovers con la informacion de la lectura*/}
 
                   <div className="urw-footer-item">

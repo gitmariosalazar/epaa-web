@@ -1,7 +1,8 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import {
   AlertTriangle,
   Calendar,
+  FileText,
   MapPin,
   Printer,
   Tag,
@@ -23,6 +24,12 @@ import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip
 import { MdFactCheck, MdNoteAdd } from 'react-icons/md';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { FaListUl } from 'react-icons/fa';
+import { useAuth } from '@/shared/presentation/context/AuthContext';
+import { GetOrdenTrabajoDetalleByNumeroOrdenUseCase } from '@/modules/work-orders/application/usecases/GetOrdenTrabajoDetalleByNumeroOrdenUseCase';
+import { ProcessWorkOrderRepositoryImpl } from '@/modules/work-orders/infrastructure/repositories/ProcessWorkOrderRepositoryImpl';
+import { WorkOrderPdfGenerator } from '@/modules/work-orders/presentation/components/templates/pdf/WorkOrderPdfGenerator';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
+import { DocumentPreviewModal } from '@/shared/presentation/components/DocumentPreviewModal';
 
 interface IncidentMapInfoWindowProps {
   incident: IncidentDetailRowResponse;
@@ -72,6 +79,61 @@ export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
       },
       [onClose, stopEventPropagation]
     );
+
+    const { user } = useAuth();
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+    const [isGeneratingPdf, setIsGeneratingPdf] =
+      useState(false);
+
+    const [previewUrl, setPreviewUrl] = useState('');
+    const [previewTitle, setPreviewTitle] = useState('');
+    const [fileNamePDF, setFileNamePDF] = useState<string | null>(null);
+
+    const handlePreviewWorkOrderPdf = React.useCallback(
+      async (orderCode: string) => {
+        if (!orderCode) return;
+        setIsPreviewOpen(true);
+        setIsGeneratingPdf(true);
+        setPreviewTitle(`Vista Previa - Orden de Trabajo ${orderCode}`);
+        setFileNamePDF(`Orden_de_Trabajo_${orderCode}.pdf`);
+        try {
+          const getDetalleUseCase =
+            new GetOrdenTrabajoDetalleByNumeroOrdenUseCase(
+              new ProcessWorkOrderRepositoryImpl()
+            );
+          const detalle = await getDetalleUseCase.execute(orderCode);
+          const printedBy = user?.username || user?.cardId || 'solanoa';
+          const inputData = detalle
+            ? { ...detalle, printedBy }
+            : { orderCode, printedBy };
+
+          const generator = new WorkOrderPdfGenerator();
+          const url = await generator.generateBlobUrl([inputData as any]);
+          setPreviewUrl(url);
+        } catch (e: any) {
+          MessageToastCustom(
+            'error',
+            'Error al generar PDF de la Orden de Trabajo',
+            e.message || 'No se pudo generar el PDF de la orden de trabajo.'
+          );
+          setIsPreviewOpen(false);
+        } finally {
+          setIsGeneratingPdf(false);
+        }
+      },
+      [user]
+    );
+
+    const handleClosePreview = React.useCallback(() => {
+      setIsPreviewOpen(false);
+      setTimeout(() => {
+        if (previewUrl) {
+          URL.revokeObjectURL(previewUrl);
+          setPreviewUrl('');
+        }
+      }, 300);
+    }, [previewUrl]);
 
     return (
       <div className={`premium-popup ${isDark ? 'dark' : ''}`}>
@@ -206,21 +268,37 @@ export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
             <div className="card-incidents-actions-left">
               {
                 incident.orderCode && (
-                  <Tooltip
-                    themeColor="warning"
-                    content="Ver Orden de Trabajo"
-                    position="bottom"
-                    followCursor={false}
-                  >
-                    <ColorChip
-                      label={incident.orderCode}
-                      color={incident.currentOrderState === 'COMPLETADA' ? 'green' : 'amber'}
-                      variant="ghost"
-                      size="xs"
-                      borderRadius={5}
-                      onClick={() => onViewOrder(incident.orderCode!)}
-                    />
-                  </Tooltip>
+                  <>
+                    <Tooltip
+                      themeColor="warning"
+                      content="Ver Orden de Trabajo"
+                      position="bottom"
+                      followCursor={false}
+                    >
+                      <ColorChip
+                        label={incident.orderCode}
+                        color={incident.currentOrderState === 'COMPLETADA' ? 'green' : 'amber'}
+                        variant="ghost"
+                        size="xs"
+                        borderRadius={5}
+                        onClick={() => onViewOrder(incident.orderCode!)}
+                      />
+                    </Tooltip>
+                    <Tooltip content={`Imprimir PDF Orden de Trabajo Nro. : ${incident.orderCode}`} themeColor='primary' followCursor={false}>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePreviewWorkOrderPdf(incident.orderCode!);
+                        }}
+                        size='xs'
+                        color='orange'
+                        circle
+                        variant='dashed'
+                      >
+                        <FileText size={13} />
+                      </Button>
+                    </Tooltip>
+                  </>
                 )
               }
               {incident.currentOrderState == 'COMPLETADA' && incident.status != 'RESUELTO' && (
@@ -246,25 +324,27 @@ export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
               )}
               {
                 !incident.orderCode && incident.status != 'RESUELTO' && incident.status !== 'FALSO_REPORTE' && (
-                  <Tooltip
-                    themeColor="warning"
-                    content="Agregar Orden de Trabajo"
-                    position="bottom"
-                    followCursor={false}
-                  >
-                    <Button
-                      variant="dashed"
-                      color="green"
-                      size="xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onAddWorkOrder?.(incident);
-                      }}
-                      leftIcon={<MdNoteAdd size={16} />}
-                      circle
+                  <>
+                    <Tooltip
+                      themeColor="warning"
+                      content="Agregar Orden de Trabajo"
+                      position="bottom"
+                      followCursor={false}
                     >
-                    </Button>
-                  </Tooltip>
+                      <Button
+                        variant="dashed"
+                        color="green"
+                        size="xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAddWorkOrder?.(incident);
+                        }}
+                        leftIcon={<MdNoteAdd size={16} />}
+                        circle
+                      >
+                      </Button>
+                    </Tooltip>
+                  </>
                 )
               }
             </div>
@@ -316,6 +396,14 @@ export const IncidentMapInfoWindow: React.FC<IncidentMapInfoWindowProps> = memo(
           </div>
 
         </div>
+        <DocumentPreviewModal
+          isOpen={isPreviewOpen}
+          onClose={handleClosePreview}
+          title={previewTitle}
+          fileName={fileNamePDF ?? undefined}
+          isLoading={isGeneratingPdf}
+          documentUrl={previewUrl}
+        />
       </div>
     );
   }

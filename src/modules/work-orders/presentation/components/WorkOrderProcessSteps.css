@@ -1,0 +1,212 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+   WorkOrderProcessSteps — Presentation Component Styles
+   Supports both mini (compact) and full (expanded) step progress views.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Mini Stepper (Compact mode for WorkOrderCard main row) ───────────────── */
+.wo-mini-stepper {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 4px;
+}
+
+.wo-mini-step-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.wo-mini-step--completed {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1.5px solid #10b981;
+  color: #10b981;
+}
+
+.wo-mini-step--active {
+  background: rgba(245, 158, 11, 0.18);
+  border: 1.5px solid #f59e0b;
+  color: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+  animation: wo-pulse-orange-mini 2s infinite;
+}
+
+.wo-mini-step--pending {
+  background: var(--surface-hover, rgba(148, 163, 184, 0.1));
+  border: 1.5px solid var(--border-color);
+  color: var(--text-muted);
+}
+
+.wo-mini-step-line {
+  flex: 1;
+  min-width: 8px;
+  max-width: 18px;
+  height: 2px;
+  background: var(--border-color);
+  border-radius: 1px;
+  transition: background 0.3s ease;
+}
+
+.wo-mini-step-line--completed {
+  background: #10b981;
+}
+
+@keyframes wo-pulse-orange-mini {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgba(245, 158, 11, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
+
+/* ── Full Stepper (Expanded mode for WorkOrderCard panel) ──────────────────── */
+.wo-card-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  width: 100%;
+  overflow-x: auto;
+  gap: 0.25rem;
+}
+
+.wo-card-step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  min-width: 65px;
+}
+
+.wo-card-step-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+}
+
+.wo-card-step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-hover);
+  border: 2px solid var(--border-color);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Completed Step */
+.wo-card-step--completed .wo-card-step-circle {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
+  color: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
+}
+
+/* Active Step */
+.wo-card-step--active .wo-card-step-circle {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.08);
+  color: #f59e0b;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+  animation: wo-pulse-orange-card 2s infinite;
+}
+
+/* Pending Step */
+.wo-card-step--pending .wo-card-step-circle {
+  border-color: var(--border-color);
+  background: var(--surface-hover);
+  color: var(--text-muted);
+}
+
+/* Step Badges */
+.wo-card-step-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--surface);
+  z-index: 3;
+}
+
+.wo-card-step-badge--completed {
+  background: #10b981;
+  color: #fff;
+}
+
+.wo-card-step-badge--pending {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* Step Label */
+.wo-card-step-label {
+  margin-top: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-muted);
+  transition: color 0.3s;
+  white-space: nowrap;
+}
+
+.wo-card-step--active .wo-card-step-label {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.wo-card-step--completed .wo-card-step-label {
+  color: var(--text-secondary);
+}
+
+/* Stepper Connecting Line */
+.wo-card-step-line {
+  position: absolute;
+  top: 18px;
+  left: calc(50% + 18px);
+  width: calc(100% - 36px);
+  height: 2.5px;
+  background: var(--border-color);
+  z-index: 1;
+  transition: background 0.3s ease;
+}
+
+.wo-card-step-line--completed {
+  background: #10b981;
+}
+
+@keyframes wo-pulse-orange-card {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
