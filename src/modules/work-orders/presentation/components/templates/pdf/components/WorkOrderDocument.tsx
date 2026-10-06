@@ -176,22 +176,22 @@ export function mapWorkOrderToPdfItem(input: WorkOrderInputData): WorkOrderPdfIt
 
     return {
       orderCode: vista.codigoOrden,
-      createdBy: vista.tecnicoNombre || 'solanoa',
-      printedBy: (input as any).printedBy || 'solanoa',
-      department: vista.departamentoEjecutor || 'DIRECCION TECNICA',
+      createdBy: vista.tecnicoNombre || '',
+      printedBy: (input as any).printedBy || '',
+      department: vista.departamentoEjecutor || '',
       entryDate: entryDateStr,
       entryTime: entryTimeStr,
       printDate: printDateStr,
-      accountSector: '15-305',
+      accountSector: '',
       clientId: vista.idCliente || '',
       clientName: '',
-      telephones: ';0988133113',
-      parish: 'ANDRADE MARIN',
-      neighborhood: 'LA DOLOROSA DE A. MARIN',
-      streetType: 'ADOQUIN',
-      mainStreet: vista.direccionTrabajo || 'PANAMERICANA',
-      secondaryStreet: 'CALLEJÓN DE CONDUÑOS',
-      reference: vista.ubicacionDetalles || 'JUNTO A LA MECÁNICA CHICAIZA',
+      telephones: '',
+      parish: '',
+      neighborhood: '',
+      streetType: '',
+      mainStreet: vista.direccionTrabajo || '',
+      secondaryStreet: '',
+      reference: vista.ubicacionDetalles || '',
       workDescription: vista.descripcion || vista.tipoTrabajo || '',
       assignedWorkers: vista.tecnicoNombre ? [vista.tecnicoNombre] : [],
       deliveryDate: vista.fechaCompletada ? new Date(vista.fechaCompletada).toLocaleDateString('es-EC') : undefined,
@@ -225,13 +225,13 @@ export function mapWorkOrderToPdfItem(input: WorkOrderInputData): WorkOrderPdfIt
 
     const personPhones = detail.person?.phones?.map((p: any) => p.numero).join('; ');
     const companyPhones = detail.company?.phones?.map((p: any) => p.numero).join('; ');
-    const resolvedTelephones = personPhones || companyPhones || (detail.metadata as any)?.telefonos || ';0988133113';
+    const resolvedTelephones = personPhones || companyPhones || (detail.metadata as any)?.telefonos || '';
 
     const resolvedAccountSector = (detail.acometida?.sector != null && detail.acometida?.account != null)
       ? `${detail.acometida.sector}-${detail.acometida.account}`
-      : (detail.claveCatastral || '15-305');
+      : (detail.claveCatastral || '');
 
-    const resolvedAddress = detail.acometida?.address || detail.direccion || (detail.metadata as any)?.callePrincipal || 'PANAMERICANA';
+    const resolvedAddress = detail.acometida?.address || detail.direccion || (detail.metadata as any)?.callePrincipal || '';
 
     return {
       rawDetail: detail,
@@ -250,9 +250,9 @@ export function mapWorkOrderToPdfItem(input: WorkOrderInputData): WorkOrderPdfIt
       codigoEntidadOrigen: detail.codigoEntidadOrigen,
       idEntidadOrigen: detail.idEntidadOrigen,
 
-      createdBy: detail.creadorNombre || detail.creadorUsername || 'solanoa',
-      printedBy: (input as any).printedBy || detail.creadorUsername || 'solanoa',
-      department: detail.departamento || 'DIRECCION TECNICA',
+      createdBy: detail.creadorNombre || detail.creadorUsername || '',
+      printedBy: (input as any).printedBy || detail.creadorUsername || '',
+      department: detail.departamento || '',
 
       entryDate: entryDateStr,
       entryTime: entryTimeStr,
@@ -280,12 +280,12 @@ export function mapWorkOrderToPdfItem(input: WorkOrderInputData): WorkOrderPdfIt
       clientId: resolvedClientId,
       clientName: resolvedClientName,
       telephones: resolvedTelephones,
-      parish: (detail.metadata as any)?.parroquia || 'ANDRADE MARIN',
-      neighborhood: (detail.metadata as any)?.barrio || 'LA DOLOROSA DE A. MARIN',
-      streetType: (detail.metadata as any)?.tipoCalle || 'ADOQUIN',
+      parish: (detail.metadata as any)?.parroquia || '',
+      neighborhood: (detail.metadata as any)?.barrio || '',
+      streetType: (detail.metadata as any)?.tipoCalle || '',
       mainStreet: resolvedAddress,
-      secondaryStreet: (detail.metadata as any)?.calleSecundaria || 'CALLEJÓN DE CONDUÑOS',
-      reference: detail.ubicacionDetalles || (detail.metadata as any)?.referencia || 'JUNTO A LA MECÁNICA CHICAIZA',
+      secondaryStreet: (detail.metadata as any)?.calleSecundaria || '',
+      reference: detail.ubicacionDetalles || (detail.metadata as any)?.referencia || '',
       coordenadasPunto: detail.coordenadasPunto,
       latitud: detail.latitud,
       longitud: detail.longitud,
@@ -342,22 +342,22 @@ export function mapWorkOrderToPdfItem(input: WorkOrderInputData): WorkOrderPdfIt
 
     return {
       orderCode: list.orderCode,
-      createdBy: list.createdUserId || 'solanoa',
-      printedBy: (input as any).printedBy || list.createdUserId || 'solanoa',
-      department: metaObj.department || 'DIRECCION TECNICA',
+      createdBy: list.createdUserId || '',
+      printedBy: (input as any).printedBy || list.createdUserId || '',
+      department: metaObj.department || '',
       entryDate: entryDateStr,
       entryTime: entryTimeStr,
       printDate: printDateStr,
-      accountSector: list.cadastralKey || metaObj.sectorCuenta || '15-305',
+      accountSector: list.cadastralKey || metaObj.sectorCuenta || '',
       clientId: list.clientId || '',
       clientName: list.clientName || '',
-      telephones: metaObj.telefonos || ';0988133113',
-      parish: metaObj.parroquia || 'ANDRADE MARIN',
-      neighborhood: metaObj.barrio || 'LA DOLOROSA DE A. MARIN',
-      streetType: metaObj.tipoCalle || 'ADOQUIN',
-      mainStreet: list.location || metaObj.callePrincipal || 'PANAMERICANA',
-      secondaryStreet: metaObj.calleSecundaria || 'CALLEJÓN DE CONDUÑOS',
-      reference: metaObj.referencia || 'JUNTO A LA MECÁNICA CHICAIZA',
+      telephones: metaObj.telefonos || '',
+      parish: metaObj.parroquia || '',
+      neighborhood: metaObj.barrio || '',
+      streetType: metaObj.tipoCalle || '',
+      mainStreet: list.location || metaObj.callePrincipal || '',
+      secondaryStreet: metaObj.calleSecundaria || '',
+      reference: metaObj.referencia || '',
       workDescription: list.description || list.workTypeName || '',
       materials: metaObj.materials || [],
       assignedWorkers: metaObj.assignedWorkers || [],
@@ -370,22 +370,22 @@ export function mapWorkOrderToPdfItem(input: WorkOrderInputData): WorkOrderPdfIt
   const pdfItem = input as WorkOrderPdfItem;
   return {
     ...pdfItem,
-    createdBy: pdfItem.createdBy || 'solanoa',
-    printedBy: pdfItem.printedBy || 'solanoa',
-    department: pdfItem.department || 'DIRECCION TECNICA',
+    createdBy: pdfItem.createdBy || '',
+    printedBy: pdfItem.printedBy || '',
+    department: pdfItem.department || '',
     entryDate: pdfItem.entryDate || printDateStr,
     entryTime: pdfItem.entryTime || printTimeStr,
     printDate: pdfItem.printDate || printDateStr,
-    accountSector: pdfItem.accountSector || '15-305',
+    accountSector: pdfItem.accountSector || '',
     clientId: pdfItem.clientId || '',
     clientName: pdfItem.clientName || '',
-    telephones: pdfItem.telephones || ';0988133113',
-    parish: pdfItem.parish || 'ANDRADE MARIN',
-    neighborhood: pdfItem.neighborhood || 'LA DOLOROSA DE A. MARIN',
-    streetType: pdfItem.streetType || 'ADOQUIN',
-    mainStreet: pdfItem.mainStreet || 'PANAMERICANA',
-    secondaryStreet: pdfItem.secondaryStreet || 'CALLEJÓN DE CONDUÑOS',
-    reference: pdfItem.reference || 'JUNTO A LA MECÁNICA CHICAIZA',
+    telephones: pdfItem.telephones || '',
+    parish: pdfItem.parish || '',
+    neighborhood: pdfItem.neighborhood || '',
+    streetType: pdfItem.streetType || '',
+    mainStreet: pdfItem.mainStreet || '',
+    secondaryStreet: pdfItem.secondaryStreet || '',
+    reference: pdfItem.reference || '',
     workDescription: pdfItem.workDescription || '',
   };
 }
