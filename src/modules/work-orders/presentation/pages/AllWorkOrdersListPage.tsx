@@ -10,18 +10,22 @@
 //   DIP : reads data via useAllWorkOrdersViewModel.
 //   OCP : adding a new feature = extending hooks/components, not this file.
 // ============================================================
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { ReportPreviewModal } from '@/shared/presentation/components/reports/ReportPreviewModal';
 import type { ExportColumn } from '@/shared/presentation/components/reports/ReportPreviewModal';
+import { DocumentPreviewModal } from '@/shared/presentation/components/DocumentPreviewModal';
 import { ExportService } from '@/shared/infrastructure/services/ExportService';
 import { AlertTriangle, Inbox, RefreshCw } from 'lucide-react';
-
-import { useAllWorkOrdersViewModel } from '../hooks/useAllWorkOrdersViewModel';
-import type { AllWorkOrderSortKey } from '../hooks/useAllWorkOrdersViewModel';
+import { WorkOrderPdfGenerator } from '../components/templates/pdf/WorkOrderPdfGenerator';
+import type { OrdenTrabajoDetalle, WorkOrderListItem } from '../../domain/schemas/dto/response/work-orders.get.response';
+import { GetOrdenTrabajoDetalleByNumeroOrdenUseCase } from '../../application/usecases/GetOrdenTrabajoDetalleByNumeroOrdenUseCase';
+import { ProcessWorkOrderRepositoryImpl } from '../../infrastructure/repositories/ProcessWorkOrderRepositoryImpl';
+import { useAllWorkOrdersViewModel, type AllWorkOrderSortKey } from '../hooks/useAllWorkOrdersViewModel';
+import { useAuth } from '@/shared/presentation/context/AuthContext';
 import { AllWorkOrderToolbar } from '../components/AllWorkOrderToolbar';
 import { AllWorkOrderCard } from '../components/AllWorkOrderCard';
 import { WorkOrderPagination } from '../components/WorkOrderPagination';
@@ -58,6 +62,53 @@ export const AllWorkOrdersListPage: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [pdfError, setPdfError] = useState(false);
+
+  // ── Document PDF preview state (Single Work Order template) ──
+  const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
+  const [isDocPreviewOpen, setIsDocPreviewOpen] = useState(false);
+  const [isGeneratingDocPdf, setIsGeneratingDocPdf] = useState(false);
+  const [pdfFileName, setPdfFileName] = useState<string>('Orden_de_Trabajo.pdf');
+
+  // DIP: Inject GetOrdenTrabajoDetalleByNumeroOrdenUseCase via useMemo
+  const getOrdenTrabajoDetalleUseCase = useMemo(
+    () => new GetOrdenTrabajoDetalleByNumeroOrdenUseCase(new ProcessWorkOrderRepositoryImpl()),
+    []
+  );
+
+  const { user } = useAuth();
+
+  const handlePrintWorkOrderPdf = useCallback(async (orden: WorkOrderListItem) => {
+    setIsDocPreviewOpen(true);
+    setIsGeneratingDocPdf(true);
+    setPdfFileName(`Orden_de_Trabajo_${orden.orderCode}.pdf`);
+    try {
+      // 1. Obtener la OrdenTrabajoDetalle completa mediante el Caso de Uso (Clean Architecture)
+      const detalle: OrdenTrabajoDetalle | null | undefined = await getOrdenTrabajoDetalleUseCase.execute(orden.orderCode);
+      console.warn('📌 [ORDEN DE TRABAJO DETALLE OBTENIDA]:', detalle);
+
+      const printedBy = user?.username || 'solanoa';
+
+      // 2. Generar el PDF con el detalle completo y el usuario logueado como printedBy
+      const inputData = detalle ? { ...detalle, printedBy } : { ...orden, printedBy };
+      const generator = new WorkOrderPdfGenerator();
+      const url = await generator.generateBlobUrl([inputData]);
+      setDocPreviewUrl(url);
+    } catch (err) {
+      console.error('Error al obtener detalle o generar PDF de la Orden de Trabajo:', err);
+    } finally {
+      setIsGeneratingDocPdf(false);
+    }
+  }, [getOrdenTrabajoDetalleUseCase, user]);
+
+  const handleCloseDocPreview = useCallback(() => {
+    setIsDocPreviewOpen(false);
+    setTimeout(() => {
+      if (docPreviewUrl) {
+        URL.revokeObjectURL(docPreviewUrl);
+        setDocPreviewUrl(null);
+      }
+    }, 300);
+  }, [docPreviewUrl]);
 
   // ── ViewModel ────────────────────────────────────────────────────────────
   const {
@@ -277,6 +328,7 @@ export const AllWorkOrdersListPage: React.FC = () => {
                   orden={orden}
                   onView={handleView}
                   onProcess={handleProcess}
+                  onPrintPdf={handlePrintWorkOrderPdf}
                   style={{ animationDelay: `${idx * 0.04}s` }}
                 />
               ))}
@@ -285,7 +337,7 @@ export const AllWorkOrdersListPage: React.FC = () => {
         </div>
       </PageLayout>
 
-      {/* ── PDF Modal ── */}
+      {/* ── Table Export PDF Modal ── */}
       <ReportPreviewModal
         isOpen={pdfOpen}
         onClose={() => {
@@ -305,6 +357,16 @@ export const AllWorkOrdersListPage: React.FC = () => {
         selectedColumnIds={selColIds}
         setSelectedColumnIds={setSelColIds}
         hasError={pdfError}
+      />
+
+      {/* ── Individual Work Order Document PDF Modal ── */}
+      <DocumentPreviewModal
+        isOpen={isDocPreviewOpen}
+        onClose={handleCloseDocPreview}
+        documentUrl={docPreviewUrl}
+        isLoading={isGeneratingDocPdf}
+        title="Vista Previa - Orden de Trabajo"
+        fileName={pdfFileName}
       />
     </>
   );

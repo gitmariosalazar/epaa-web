@@ -27,6 +27,7 @@ import { getEstadoOrdenConfig } from './WorkOrderConfig';
 import { ConverDateTimeToText } from '@/shared/utils/datetime/ConverDate';
 import { Alert } from '@/shared/presentation/components/Alert';
 import { MdOutlineDescription } from 'react-icons/md';
+import { FaPrint } from 'react-icons/fa';
 
 // ── Priority label/color map ─────────────────────────────────────────────────
 const PRIORITY_MAP: Record<number, { label: string; color: string }> = {
@@ -53,6 +54,7 @@ interface AllWorkOrderCardProps {
   orden: WorkOrderListItem;
   onView: (orderCode: string) => void;
   onProcess: (orderCode: string) => void;
+  onPrintPdf?: (orden: WorkOrderListItem) => void;
   style?: React.CSSProperties;
 }
 
@@ -60,6 +62,7 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
   orden,
   onView,
   onProcess,
+  onPrintPdf,
   style
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -182,6 +185,23 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
           >
             Ver detalle
           </Button>
+
+          <Tooltip
+            content={'Imprimir detalle de orden de trabajo'}
+            position='top'
+            followCursor={false}
+          >
+            <Button
+              onClick={() => onPrintPdf?.(orden)}
+              size='sm'
+              variant='dashed'
+              aria-label={'Imprimir detalle de orden de trabajo'}
+              color='orange'
+            >
+              {<FaPrint size={16} />}
+            </Button>
+          </Tooltip>
+
           <Tooltip
             content={
               expanded ? 'Ocultar detalles' : 'Ver más detalles'
@@ -199,6 +219,7 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
               {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </Button>
           </Tooltip>
+
         </div>
       </div>
 

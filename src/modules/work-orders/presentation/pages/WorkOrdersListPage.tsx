@@ -11,11 +11,16 @@
 //   OCP: adding a new feature = extending hooks/components, not this file.
 // ============================================================
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { AlertTriangle, Inbox, RefreshCw } from 'lucide-react';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
+import { DocumentPreviewModal } from '@/shared/presentation/components/DocumentPreviewModal';
+import { WorkOrderPdfGenerator } from '../components/templates/pdf/WorkOrderPdfGenerator';
+import { GetOrdenTrabajoDetalleByNumeroOrdenUseCase } from '../../application/usecases/GetOrdenTrabajoDetalleByNumeroOrdenUseCase';
+import { ProcessWorkOrderRepositoryImpl } from '../../infrastructure/repositories/ProcessWorkOrderRepositoryImpl';
+import { useAuth } from '@/shared/presentation/context/AuthContext';
 
 import { useWorkOrdersViewModel } from '../hooks/useWorkOrdersViewModel';
 import type { WorkOrderSortKey } from '../components/WorkOrderToolbar';
@@ -50,6 +55,53 @@ export const WorkOrdersListPage: React.FC = () => {
     (codigoOrden: string) => navigate(`/work-orders/${codigoOrden}`),
     [navigate]
   );
+
+  // ── Document PDF preview state ──
+  const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
+  const [isDocPreviewOpen, setIsDocPreviewOpen] = useState(false);
+  const [isGeneratingDocPdf, setIsGeneratingDocPdf] = useState(false);
+  const [pdfFileName, setPdfFileName] = useState<string>('Orden_de_Trabajo.pdf');
+
+  // DIP: Inject GetOrdenTrabajoDetalleByNumeroOrdenUseCase via useMemo
+  const getOrdenTrabajoDetalleUseCase = useMemo(
+    () => new GetOrdenTrabajoDetalleByNumeroOrdenUseCase(new ProcessWorkOrderRepositoryImpl()),
+    []
+  );
+
+  const { user } = useAuth();
+
+  const handlePrintPdf = useCallback(async (orden: OrdenTrabajoVistaCliente) => {
+    setIsDocPreviewOpen(true);
+    setIsGeneratingDocPdf(true);
+    setPdfFileName(`Orden_de_Trabajo_${orden.codigoOrden}.pdf`);
+    try {
+      // 1. Obtener la OrdenTrabajoDetalle completa mediante el Caso de Uso (Clean Architecture)
+      const detalle = await getOrdenTrabajoDetalleUseCase.execute(orden.codigoOrden);
+      console.warn('📌 [ORDEN DE TRABAJO DETALLE OBTENIDA]:', detalle || orden);
+
+      const printedBy = user?.username || 'solanoa';
+
+      // 2. Generar el PDF con el detalle completo y el usuario logueado como printedBy
+      const inputData = detalle ? { ...detalle, printedBy } : { ...orden, printedBy };
+      const generator = new WorkOrderPdfGenerator();
+      const url = await generator.generateBlobUrl([inputData]);
+      setDocPreviewUrl(url);
+    } catch (err) {
+      console.error('Error al obtener detalle o generar PDF de la Orden de Trabajo:', err);
+    } finally {
+      setIsGeneratingDocPdf(false);
+    }
+  }, [getOrdenTrabajoDetalleUseCase, user]);
+
+  const handleCloseDocPreview = useCallback(() => {
+    setIsDocPreviewOpen(false);
+    setTimeout(() => {
+      if (docPreviewUrl) {
+        URL.revokeObjectURL(docPreviewUrl);
+        setDocPreviewUrl(null);
+      }
+    }, 300);
+  }, [docPreviewUrl]);
 
   // ── Loading ────────────────────────────────────────────────────────────────
   if (isLoading) {
@@ -145,12 +197,22 @@ export const WorkOrdersListPage: React.FC = () => {
                 key={orden.idOrdenTrabajo}
                 orden={orden}
                 onView={handleView}
+                onPrintPdf={handlePrintPdf}
                 style={{ animationDelay: `${idx * 0.04}s` }}
               />
             ))}
           </div>
         )}
       </div>
+
+      <DocumentPreviewModal
+        isOpen={isDocPreviewOpen}
+        onClose={handleCloseDocPreview}
+        documentUrl={docPreviewUrl}
+        isLoading={isGeneratingDocPdf}
+        title="Vista Previa - Orden de Trabajo"
+        fileName={pdfFileName}
+      />
     </PageLayout>
   );
 };

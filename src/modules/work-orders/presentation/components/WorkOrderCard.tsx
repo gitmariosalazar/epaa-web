@@ -13,6 +13,7 @@ import type { OrdenTrabajoVistaCliente } from '../../domain/schemas/dto/response
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { FaPrint } from 'react-icons/fa';
 import {
   getEstadoOrdenConfig,
   getPrioridadConfig,
@@ -24,6 +25,7 @@ import {
 interface WorkOrderCardProps {
   orden: OrdenTrabajoVistaCliente;
   onView: (codigoOrden: string) => void;
+  onPrintPdf?: (orden: OrdenTrabajoVistaCliente) => void;
   style?: React.CSSProperties;
 }
 
@@ -35,7 +37,7 @@ const TIPO_ICON: Record<string, React.ReactNode> = {
   EMERGENCIA: <AlertTriangle size={20} />,
 };
 
-export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, style }) => {
+export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onPrintPdf, style }) => {
   const [expanded, setExpanded] = useState(false);
 
   const estadoConfig = getEstadoOrdenConfig(orden.estadoCodigo);
@@ -56,6 +58,8 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, sty
       : orden.tecnicoNombre ?? 'Sin asignar';
 
   const toggle = () => setExpanded((p) => !p);
+
+  console.log("orden:", orden);
 
   return (
     <div
@@ -176,6 +180,20 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, sty
           >
             Ver Detalle
           </Button>
+
+          {onPrintPdf && (
+            <Tooltip content="Imprimir Orden de Trabajo" position="bottom" themeColor="info">
+              <Button
+                onClick={() => onPrintPdf(orden)}
+                variant="dashed"
+                color="orange"
+                size="xs"
+                aria-label="Imprimir Orden de Trabajo"
+              >
+                <FaPrint size={13} />
+              </Button>
+            </Tooltip>
+          )}
 
           <Button
             className={`wo-card__expand-btn${expanded ? ' wo-card__expand-btn--open' : ''}`}

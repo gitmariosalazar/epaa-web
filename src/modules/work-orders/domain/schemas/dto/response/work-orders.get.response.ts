@@ -57,6 +57,61 @@ export interface FotoEvidenciaCliente {
   fechaCarga: string; // ISO Timestamp
 }
 
+export interface AcometidaResult {
+  connection_id: string; // UUID
+  rate_id: string | null;
+  rate_name: string | null;
+  category_id: string | null;
+  category_name: string | null;
+  address: string | null;
+  meter_number: string | null;
+  sector: number | null;
+  account: number | null;
+  location: {
+    lat: number | null;
+    lng: number | null;
+  } | null;
+}
+
+export interface ClientResponse {
+  address: string;
+  country: string;
+  genderId: number;
+  lastName: string;
+  parishId: string;
+  personId: string;
+  birthDate: string;
+  firstName: string;
+  isDeceased: boolean | null | number;
+  professionId: number;
+  civilStatusId: number;
+  phones: PhoneResponse[];
+  emails: EmailResponse[];
+}
+
+export interface CompanyResponse {
+  ruc: string;
+  address: string;
+  country: string;
+  clientId: string;
+  parishId: string;
+  companyId: number;
+  businessName: string;
+  commercialName: string;
+  phones: PhoneResponse[];
+  emails: EmailResponse[];
+}
+
+export interface PhoneResponse {
+  telefonoId: number;
+  numero: string;
+}
+
+export interface EmailResponse {
+  correoElectronicoId: number;
+  correo: string;
+}
+
 export interface OrdenTrabajoDetalle {
   // ── Identificación ──
   idOrdenTrabajo: string; // UUID
@@ -83,6 +138,9 @@ export interface OrdenTrabajoDetalle {
   direccion: string | null;
   ubicacionDetalles: string | null;
   claveCatastral: string | null;
+  acometida: AcometidaResult | null;
+  company: CompanyResponse | null;
+  person: ClientResponse | null;
   coordenadasPunto: string | null; // WKT ej: "POINT(-78.12 0.34)"
   coordenadasTrazado: string | null; // WKT ej: "LINESTRING(...)"
   coordenadasArea: string | null; // WKT ej: "POLYGON(...)"
