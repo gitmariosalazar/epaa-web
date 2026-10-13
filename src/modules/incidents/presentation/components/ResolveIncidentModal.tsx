@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { X, AlertCircle, UploadCloud } from 'lucide-react';
+import { X, AlertCircle, UploadCloud, CheckCircle2 } from 'lucide-react';
+import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { TextArea } from '@/shared/presentation/components/TextArea/TextArea';
 import { CheckBox } from '@/shared/presentation/components/Input/CheckBox';
-import { useIncidentContext } from '../context/IncidentContext';
+import { useOptionalIncidentContext } from '../context/IncidentContext';
+import type { ResolveIncidentRequest } from '../../domain/schemas/dtos/request/resolve-incident.request';
+import { ResolveIncidentUseCase } from '../../application/usecases/commands/ResolveIncidentUseCase';
+import { IncidentRepositoryImpl } from '../../infrastructure/repositories/IncidentRepositoryImpl';
 import { useAuth } from '@/shared/presentation/context/AuthContext';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import '../styles/ResolveIncidentModal.css';
@@ -15,10 +18,27 @@ import type { OrdenTrabajoDetalle } from '@/modules/work-orders/domain/schemas/d
 import { GetOrdenTrabajoDetalleByNumeroOrdenUseCase } from '@/modules/work-orders/application/usecases/GetOrdenTrabajoDetalleByNumeroOrdenUseCase';
 import { ProcessWorkOrderRepositoryImpl } from '@/modules/work-orders/infrastructure/repositories/ProcessWorkOrderRepositoryImpl';
 
+/** Resultado expuesto por el modal tras una resolución exitosa. */
+export interface ResolveIncidentResult {
+  /** Imágenes subidas por el usuario en el modal (data URLs JPEG comprimidas). */
+  newImages: string[];
+}
+
 interface ResolveIncidentModalProps {
   isOpen: boolean;
   onClose: () => void;
   incidentId: string;
+  /** Código del incidente (cuando el modal se usa fuera de IncidentProvider). */
+  incidentCode?: string | null;
+  /** Código de OT asociada (cuando el modal se usa fuera de IncidentProvider). */
+  orderCode?: string | null;
+  /** Estrategia de resolución inyectable (DIP). Por defecto: contexto o caso de uso. */
+  onResolve?: (request: ResolveIncidentRequest) => Promise<unknown>;
+  /**
+   * Callback tras resolver con éxito (p. ej. completar la OT).
+   * Recibe las imágenes NUEVAS (data URLs) adjuntadas en la resolución.
+   */
+  onResolved?: (result: ResolveIncidentResult) => void | Promise<void>;
 }
 
 // Helper to compress images client-side before base64 conversion
@@ -103,9 +123,27 @@ function useWorkOrderDetail(orderCode: string | null | undefined) {
 export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
   isOpen,
   onClose,
-  incidentId
+  incidentId,
+  incidentCode,
+  orderCode,
+  onResolve,
+  onResolved,
 }) => {
-  const { resolveIncident, incidents } = useIncidentContext();
+  const incidentCtx = useOptionalIncidentContext();
+  const incidents = incidentCtx?.incidents ?? [];
+  const fallbackResolver = React.useMemo(
+    () => new ResolveIncidentUseCase(new IncidentRepositoryImpl()),
+    []
+  );
+  const resolveIncident = React.useCallback(
+    (request: ResolveIncidentRequest) =>
+      onResolve
+        ? onResolve(request)
+        : incidentCtx
+          ? incidentCtx.resolveIncident(request)
+          : fallbackResolver.execute(request),
+    [onResolve, incidentCtx, fallbackResolver]
+  );
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -114,7 +152,8 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
   const incident = incidents.find((i) => i.incidentId === incidentId);
 
   // Consuming the Hook
-  const { workOrder, loadingOrder } = useWorkOrderDetail(incident?.orderCode);
+  const effectiveOrderCode = incident?.orderCode ?? orderCode ?? null;
+  const { workOrder, loadingOrder } = useWorkOrderDetail(effectiveOrderCode);
 
   const workOrderCost = React.useMemo(() => {
     if (!workOrder) return 0;
@@ -229,6 +268,7 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
         images: finalImages
       });
       onClose();
+      await onResolved?.({ newImages: [...images] });
     } catch (err: any) {
       setFormError(err.message || 'Error al resolver el incidente.');
     } finally {
@@ -236,18 +276,16 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
     }
   };
 
-  return createPortal(
-    <div className="incident-modal-overlay" onClick={onClose}>
-      <div className="incident-modal premium-theme resolve-modal-wide" onClick={(e) => e.stopPropagation()}>
-        <div className="incident-modal-header">
-          <h3>Resolver Incidente {incident?.incidentCode}</h3>
-          <Tooltip content="Cerrar" position="left">
-            <Button variant="ghost" size="sm" circle onClick={onClose} className="close-btn-p">
-              <X size={20} />
-            </Button>
-          </Tooltip>
-        </div>
-
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="xxl"
+      headerColor="green"
+      icon={<CheckCircle2 size={20} />}
+      title={`Resolver Incidente ${incident?.incidentCode ?? incidentCode ?? ''}`}
+      description="Registre la resolución del incidente"
+    >
         <div className="incident-resolve-modal-body">
           {/* Left Panel - Work Order Info */}
           <div className="incident-modal-content-left">
@@ -257,7 +295,7 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
               </div>
             ) : workOrder ? (
               <IncidentWorkorderDetail orden={workOrder} />
-            ) : incident?.orderCode ? (
+            ) : effectiveOrderCode ? (
               <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444' }}>
                 No se pudo cargar la orden de trabajo.
               </div>
@@ -463,9 +501,6 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
             </form>
           </div>
         </div>
-
-      </div>
-    </div>,
-    document.body
+    </Modal>
   );
 };

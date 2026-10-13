@@ -245,3 +245,9 @@ export const useIncidentContext = () => {
   }
   return context;
 };
+
+/**
+ * Variante segura: devuelve `undefined` fuera de un IncidentProvider.
+ * Permite reutilizar componentes de incidentes en otros módulos (p. ej. work-orders).
+ */
+export const useOptionalIncidentContext = () => useContext(IncidentContext);

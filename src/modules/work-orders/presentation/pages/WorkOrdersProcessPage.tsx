@@ -96,6 +96,9 @@ import {
   Printer
 } from 'lucide-react';
 import '../styles/WorkOrdersProcessPage.css';
+import { resolveCompletionPreStep, type CompletionPreStep } from '../completion/orderCompletionStrategies';
+import { CompletionPreStepHost, type CompletionPreStepResult } from '../completion/CompletionPreStepHost';
+import { syncEvidenceToWorkOrder } from '../completion/syncEvidenceToWorkOrder';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
@@ -213,6 +216,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
   const [registerSurveyOpen, setRegisterSurveyOpen] = useState(false);
   const [submitReportOpen, setSubmitReportOpen] = useState(false);
   const [submitInstallationReportOpen, setSubmitInstallationReportOpen] = useState(false);
+  const [completionPreStep, setCompletionPreStep] = useState<CompletionPreStep>({ type: 'NONE' });
 
   // ── Document PDF preview state (Single Work Order template) ──
   const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
@@ -837,6 +841,39 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
     }
   };
 
+  /** Tras el paso previo: adjunta evidencias (si hay) y completa la OT. */
+  const handlePreStepConfirmed = async ({ evidenceDataUrls = [] }: CompletionPreStepResult) => {
+    if (!orden) return;
+    if (evidenceDataUrls.length) {
+      try {
+        const sent = await syncEvidenceToWorkOrder(attachmentUseCase, {
+          workOrderId: orden.idOrdenTrabajo,
+          userId: currentUserId,
+          dataUrls: evidenceDataUrls,
+        });
+        MessageToastCustom('success', 'Evidencias adjuntadas', `${sent} foto(s) añadidas a la OT.`);
+      } catch (e: any) {
+        // No bloquea el cierre: el incidente ya fue resuelto.
+        MessageToastCustom('warning', 'Evidencias', e?.message || 'No se pudieron adjuntar las fotos a la OT.');
+      }
+    }
+    await handleComplete();
+  };
+
+  /** Punto de entrada del botón: aplica la estrategia según el origen de la OT. */
+  const handleCompleteClick = () => {
+    if (!orden) return;
+    const step = resolveCompletionPreStep(orden);
+    if (step.type === 'NONE') {
+      void handleComplete();
+    } else if (step.type === 'BLOCKED') {
+      console.warn('[WO completion] Orden sin ID de origen:', orden);
+      MessageToastCustom('warning', 'No se puede completar', step.reason);
+    } else {
+      setCompletionPreStep(step);
+    }
+  };
+
   const handleRegisterSurvey = async (rating: number, comments: string) => {
     if (!orden) return;
     setIsModalLoading(true);
@@ -1124,12 +1161,12 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
                   color="#ec4899"
                   bg="rgba(236,72,153,0.1)"
                   icon={<ShieldCheck size={18} />}
-                  label="Emitir Control de Calidad"
+                  label="Emitir 1Control de Calidad"
                   sublabel="Fase 5 — Dictamen técnico"
                   onClick={() => setQualityControlOpen(true)}
                 />
               )}
-              {orden.idControl && (
+              {(
                 <WorkOrderPhaseActionBtn
                   id="wo-btn-complete"
                   color="#10b981"
@@ -1137,11 +1174,19 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
                   icon={<Zap size={18} />}
                   label="Completar Orden de Trabajo"
                   sublabel="Fase 6 — Cierre administrativo"
-                  onClick={handleComplete}
+                  onClick={handleCompleteClick}
                   loading={isCompleting}
                 />
               )}
             </div>
+            <CompletionPreStepHost
+              step={completionPreStep}
+              onCancel={() => setCompletionPreStep({ type: 'NONE' })}
+              onConfirmed={async (result) => {
+                setCompletionPreStep({ type: 'NONE' });
+                await handlePreStepConfirmed(result);
+              }}
+            />
             <WorkOrderInfoCard orden={orden} />
             <WorkOrderWorkersCard codigoOrden={orden.codigoOrden} personalAsignado={orden.personalAsignado ?? []} />
             <WorkOrderMaterialsCard materiales={orden.materiales ?? []} costosAdicionales={orden.costosAdicionales ?? []} />
