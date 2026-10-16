@@ -25,6 +25,9 @@ import { Alert } from '@/shared/presentation/components/Alert';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
+import { PopoverModal } from '@/shared/presentation/components/PopoverModal';
+import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ChangeMeterPage } from '@/modules/connections/presentation/pages/ChangeMeterPage';
 
 export interface CreateReadingPageProps {
   initialCadastralKey?: string;
@@ -58,6 +61,21 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
   // ── Estado del modal de confirmación ──────────────────────────────────────
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
+  // Modal for to update meter number
+  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+  const handleOpenUpdateMeterNumberModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(e.currentTarget);
+    setOpenUpdateMeterNumberModal(true);
+  };
+  const handleCloseUpdateMeterNumberModal = () => {
+    setOpenUpdateMeterNumberModal(false);
+  };
+  const handleSuccessUpdateMeterNumberModal = async () => {
+    setOpenUpdateMeterNumberModal(false);
+  };
+
   // ── Auto cargar desde navegacion o Props ──────────────────────────────────────────
   const location = useLocation();
   useEffect(() => {
@@ -76,7 +94,7 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
   const buildRequest = (): CreateReadingRequest => {
     const now = new Date();
     const currentMonthReadingStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    
+
     return {
       connectionId: readingInfoForRequest.cadastralKey,
       sector: readingInfoForRequest.sector,
@@ -413,6 +431,7 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
                 cadastralKey: readingInfoForRequest.cadastralKey,
                 meterNumber: readingInfoForRequest.meterNumber
               }}
+              onUpdateMeterNumber={handleOpenUpdateMeterNumberModal}
             />
           </div>
         )}
@@ -442,6 +461,23 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
           isSubmitting={isSubmitting}
           method="create"
         />
+      )}
+
+      {readingInfoForRequest && (
+        <PopoverModal
+          isOpen={openUpdateMeterNumberModal}
+          onClose={handleCloseUpdateMeterNumberModal}
+          anchorElement={anchorEl}
+          title="Actualizar número de medidor"
+        >
+          <ConnectionProvider>
+            <ChangeMeterPage
+              cadastralKeyProp={readingInfoForRequest.cadastralKey || ''}
+              onSuccess={handleSuccessUpdateMeterNumberModal}
+              onCancel={handleCloseUpdateMeterNumberModal}
+            />
+          </ConnectionProvider>
+        </PopoverModal>
       )}
     </div>
   );

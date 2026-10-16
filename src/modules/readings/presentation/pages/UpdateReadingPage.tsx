@@ -83,9 +83,12 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
   const handleCloseUpdateMeterNumberModal = () => {
     setOpenUpdateMeterNumberModal(false);
   };
-  const handleSuccessUpdateMeterNumberModal = () => {
+  const handleSuccessUpdateMeterNumberModal = async () => {
     setOpenUpdateMeterNumberModal(false);
-    refreshTrigger
+    const activeKey = currentReadingInfoForRequest?.cadastralKey || cadastralKey || initialCadastralKey;
+    if (activeKey) {
+      await fetchReadingData(activeKey, initialMonth);
+    }
   };
 
   // ── Auto cargar desde navegacion o Props ──────────────────────────────────────────
@@ -496,20 +499,22 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
         />
       )}
 
-      <PopoverModal
-        isOpen={openUpdateMeterNumberModal}
-        onClose={handleCloseUpdateMeterNumberModal}
-        anchorElement={anchorEl}
-        title="Actualizar número de medidor"
-      >
-        <ConnectionProvider>
-          <ChangeMeterPage
-            cadastralKeyProp={initialCadastralKey!}
-            onSuccess={handleSuccessUpdateMeterNumberModal}
-            onCancel={handleCloseUpdateMeterNumberModal}
-          />
-        </ConnectionProvider>
-      </PopoverModal>
+      {currentReadingInfoForRequest && (
+        <PopoverModal
+          isOpen={openUpdateMeterNumberModal}
+          onClose={handleCloseUpdateMeterNumberModal}
+          anchorElement={anchorEl}
+          title="Actualizar número de medidor"
+        >
+          <ConnectionProvider>
+            <ChangeMeterPage
+              cadastralKeyProp={currentReadingInfoForRequest?.cadastralKey || cadastralKey || initialCadastralKey || ''}
+              onSuccess={handleSuccessUpdateMeterNumberModal}
+              onCancel={handleCloseUpdateMeterNumberModal}
+            />
+          </ConnectionProvider>
+        </PopoverModal>
+      )}
     </div>
   );
 };

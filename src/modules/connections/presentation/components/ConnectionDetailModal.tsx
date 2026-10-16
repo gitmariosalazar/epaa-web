@@ -28,7 +28,7 @@ import {
   Download,
   Eye
 } from 'lucide-react';
-import { useConnectionsContext } from '../context/ConnectionContext';
+import { ConnectionProvider, useConnectionsContext } from '../context/ConnectionContext';
 import { TechnicalDataSheetPdfGenerator } from './templates/pdf/TechnicalDataSheetPdfGenerator';
 import { ReadingHistoryTable } from '@/modules/readings/presentation/components/ReadingHistoryTable';
 import type { ReadingHistory } from '@/modules/readings/domain/models/ReadingHistory';
@@ -40,6 +40,8 @@ import { IoMdPhotos } from 'react-icons/io';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DocumentPreviewModal } from '@/shared/presentation/components/DocumentPreviewModal';
+import { PopoverModal } from '@/shared/presentation/components/PopoverModal';
+import { ChangeMeterPage } from '../pages/ChangeMeterPage';
 
 interface ConnectionDetailModalProps {
   isOpen: boolean;
@@ -69,6 +71,21 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fileNamePDF, setFileNamePDF] = useState<string | null>(null);
+
+  // Modal for to update meter number
+  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+  const handleOpenUpdateMeterNumberModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(e.currentTarget);
+    setOpenUpdateMeterNumberModal(true);
+  };
+  const handleCloseUpdateMeterNumberModal = () => {
+    setOpenUpdateMeterNumberModal(false);
+  };
+  const handleSuccessUpdateMeterNumberModal = async () => {
+    setOpenUpdateMeterNumberModal(false);
+  };
 
   const handlePreviewPdf = async () => {
     if (!connectionData) return;
@@ -471,6 +488,7 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
             cadastralKey: connectionData.connectionId ?? '',
             meterNumber: connectionData.connectionMeterNumber ?? ''
           }}
+          onUpdateMeterNumber={handleOpenUpdateMeterNumberModal}
         />
       </div>
     );
@@ -679,6 +697,23 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
         title="Vista Previa de Ficha Técnica"
         fileName={fileNamePDF || "FICHA_TECNICA_ACOMETIDA.pdf"}
       />
+
+      {connectionData && (
+        <PopoverModal
+          isOpen={openUpdateMeterNumberModal}
+          onClose={handleCloseUpdateMeterNumberModal}
+          anchorElement={anchorEl}
+          title="Actualizar número de medidor"
+        >
+          <ConnectionProvider>
+            <ChangeMeterPage
+              cadastralKeyProp={connectionData?.connectionId || ''}
+              onSuccess={handleSuccessUpdateMeterNumberModal}
+              onCancel={handleCloseUpdateMeterNumberModal}
+            />
+          </ConnectionProvider>
+        </PopoverModal>
+      )}
     </>
   );
 };

@@ -198,12 +198,12 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
           >
             <Button
               onClick={onUpdateMeterNumber}
-              variant='outline'
+              variant='ghost'
               circle
               color='orange'
-              size='sm'
+              size='xs'
             >
-              <FaEdit size={16} />
+              <FaEdit size={15} />
             </Button>
           </Tooltip>
         </div>

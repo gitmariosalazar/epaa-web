@@ -535,20 +535,22 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
         />
       )}
 
-      <PopoverModal
-        isOpen={openUpdateMeterNumberModal}
-        onClose={handleCloseUpdateMeterNumberModal}
-        anchorElement={anchorEl}
-        title="Actualizar número de medidor"
-      >
-        <ConnectionProvider>
-          <ChangeMeterPage
-            cadastralKeyProp={initialCadastralKey!}
-            onSuccess={handleSuccessUpdateMeterNumberModal}
-            onCancel={handleCloseUpdateMeterNumberModal}
-          />
-        </ConnectionProvider>
-      </PopoverModal>
+      {currentReadingInfoForRequest && (
+        <PopoverModal
+          isOpen={openUpdateMeterNumberModal}
+          onClose={handleCloseUpdateMeterNumberModal}
+          anchorElement={anchorEl}
+          title="Actualizar número de medidor"
+        >
+          <ConnectionProvider>
+            <ChangeMeterPage
+              cadastralKeyProp={currentReadingInfoForRequest?.cadastralKey || initialCadastralKey!}
+              onSuccess={handleSuccessUpdateMeterNumberModal}
+              onCancel={handleCloseUpdateMeterNumberModal}
+            />
+          </ConnectionProvider>
+        </PopoverModal>
+      )}
     </div>
   );
 };
