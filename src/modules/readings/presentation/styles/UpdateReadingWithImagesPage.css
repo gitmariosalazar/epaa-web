@@ -59,7 +59,7 @@
   }
 }
 
-.urw-form-pane {
+.urw-form-panel {
   flex: 6;
   overflow-y: auto;
   background-color: var(--bg-secondary, #0b1120);

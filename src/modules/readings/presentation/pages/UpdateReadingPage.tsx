@@ -26,6 +26,9 @@ import '../styles/create-reading.css';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
+import { PopoverModal } from '@/shared/presentation/components/PopoverModal';
+import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ChangeMeterPage } from '@/modules/connections/presentation/pages/ChangeMeterPage';
 
 export interface UpdateReadingPageProps {
   initialCadastralKey?: string;
@@ -68,6 +71,22 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
   // ── Estado del modal de advertencia de mes anterior ──────────────────────
   const [isPreviousMonthModalOpen, setIsPreviousMonthModalOpen] =
     useState(false);
+
+  // Modal for to update meter number
+  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+  const handleOpenUpdateMeterNumberModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(e.currentTarget);
+    setOpenUpdateMeterNumberModal(true);
+  };
+  const handleCloseUpdateMeterNumberModal = () => {
+    setOpenUpdateMeterNumberModal(false);
+  };
+  const handleSuccessUpdateMeterNumberModal = () => {
+    setOpenUpdateMeterNumberModal(false);
+    refreshTrigger
+  };
 
   // ── Auto cargar desde navegacion o Props ──────────────────────────────────────────
   const location = useLocation();
@@ -431,6 +450,7 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
                 meterNumber: currentReadingInfoForRequest.meterNumber,
               }}
               isLoading={isLoadingHistory}
+              onUpdateMeterNumber={handleOpenUpdateMeterNumberModal}
             />
           </div>
         )}
@@ -475,6 +495,21 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
           method="update"
         />
       )}
+
+      <PopoverModal
+        isOpen={openUpdateMeterNumberModal}
+        onClose={handleCloseUpdateMeterNumberModal}
+        anchorElement={anchorEl}
+        title="Actualizar número de medidor"
+      >
+        <ConnectionProvider>
+          <ChangeMeterPage
+            cadastralKeyProp={initialCadastralKey!}
+            onSuccess={handleSuccessUpdateMeterNumberModal}
+            onCancel={handleCloseUpdateMeterNumberModal}
+          />
+        </ConnectionProvider>
+      </PopoverModal>
     </div>
   );
 };

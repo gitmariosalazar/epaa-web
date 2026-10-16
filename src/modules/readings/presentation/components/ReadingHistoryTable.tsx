@@ -13,6 +13,8 @@ import { IoInformationCircleOutline, IoSpeedometer, IoTimeOutline } from 'react-
 import '../styles/ReadingReportsFilters.css';
 import { MdCable } from 'react-icons/md';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { Button } from '@/shared/presentation/components/Button/Button';
+import { FaEdit } from 'react-icons/fa';
 
 interface PropTypes {
   history: ReadingHistory[];
@@ -21,12 +23,14 @@ interface PropTypes {
     meterNumber: string;
   }
   isLoading: boolean;
+  onUpdateMeterNumber: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export const ReadingHistoryTable: React.FC<PropTypes> = ({
   history,
   connectionInfo,
-  isLoading
+  isLoading,
+  onUpdateMeterNumber
 }) => {
   const { t } = useTranslation();
 
@@ -187,6 +191,20 @@ export const ReadingHistoryTable: React.FC<PropTypes> = ({
               icon={<IoSpeedometer />}
               borderRadius={8}
             />
+          </Tooltip>
+          <Tooltip
+            content={'Actualizar Número de medidor'}
+            followCursor={false}
+          >
+            <Button
+              onClick={onUpdateMeterNumber}
+              variant='outline'
+              circle
+              color='orange'
+              size='sm'
+            >
+              <FaEdit size={16} />
+            </Button>
           </Tooltip>
         </div>
       </div>

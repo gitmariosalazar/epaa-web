@@ -299,7 +299,7 @@ export const UpdateSpecialReadingWithImagesPage: React.FC<UpdateReadingPageProps
 
 
       {/* Right Pane: Edit Form */}
-      <div className="urw-form-pane">
+      <div className="urw-form-panel">
         <UpdateSpecialReadingPage
           initialCadastralKey={initialCadastralKey}
           initialMonth={initialMonth}

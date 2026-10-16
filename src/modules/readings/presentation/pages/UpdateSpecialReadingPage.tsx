@@ -26,6 +26,9 @@ import { CircularProgress } from '@/shared/presentation/components/CircularProgr
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
 import { ReadingSpecialUpdateInfoForm } from '../components/ReadingSpecialUpdateInfoForm';
+import { PopoverModal } from '@/shared/presentation/components/PopoverModal';
+import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ChangeMeterPage } from '@/modules/connections/presentation/pages/ChangeMeterPage';
 
 export interface UpdateReadingPageProps {
   initialCadastralKey?: string;
@@ -68,6 +71,22 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
   const [observationInput, setObservationInput] = useState('');
   const [tipoAjusteId, setTipoAjusteId] = useState<number | ''>('');
   const [photosInput, setPhotosInput] = useState<PhotoInputDto[]>([]);
+
+  // Modal for to update meter number
+  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+  const handleOpenUpdateMeterNumberModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(e.currentTarget);
+    setOpenUpdateMeterNumberModal(true);
+  };
+  const handleCloseUpdateMeterNumberModal = () => {
+    setOpenUpdateMeterNumberModal(false);
+  };
+  const handleSuccessUpdateMeterNumberModal = () => {
+    setOpenUpdateMeterNumberModal(false);
+    refreshTrigger
+  };
 
   // ── Sincronizar initialPhotos si son provistas desde componente padre ────
   useEffect(() => {
@@ -470,6 +489,7 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
                 meterNumber: currentReadingInfoForRequest.meterNumber,
               }}
               isLoading={isLoadingHistory}
+              onUpdateMeterNumber={handleOpenUpdateMeterNumberModal}
             />
           </div>
         )}
@@ -514,6 +534,21 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
           method="update"
         />
       )}
+
+      <PopoverModal
+        isOpen={openUpdateMeterNumberModal}
+        onClose={handleCloseUpdateMeterNumberModal}
+        anchorElement={anchorEl}
+        title="Actualizar número de medidor"
+      >
+        <ConnectionProvider>
+          <ChangeMeterPage
+            cadastralKeyProp={initialCadastralKey!}
+            onSuccess={handleSuccessUpdateMeterNumberModal}
+            onCancel={handleCloseUpdateMeterNumberModal}
+          />
+        </ConnectionProvider>
+      </PopoverModal>
     </div>
   );
 };
