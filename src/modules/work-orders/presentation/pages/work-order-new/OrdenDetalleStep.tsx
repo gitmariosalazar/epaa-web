@@ -11,7 +11,7 @@
  *   - ISP  : props mínimas necesarias.
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Wrench, MapPin, FileText, AlertTriangle } from 'lucide-react';
+import { Wrench, MapPin, FileText, AlertTriangle, Camera } from 'lucide-react';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { Button } from '@/shared/presentation/components/Button/Button';
@@ -19,6 +19,7 @@ import { FaMapLocationDot } from 'react-icons/fa6';
 import { TbMapPin, TbMapPinOff } from 'react-icons/tb';
 import { ORIGINS, WORK_TYPES, PRIORITIES } from './constants';
 import type { WorkOrderForm } from './types';
+import { EvidenceUploader } from './EvidenceUploader';
 
 
 // ── Estilos GPS/mapa (reutiliza los de incidents) ───────────────────────────
@@ -196,6 +197,7 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
     }
   }, [form.latitude, form.longitude]);
 
+
   return (
     <div className="solicitud-form-section">
 
@@ -318,6 +320,19 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
           onChange={field('description')}
           placeholder="Describe brevemente el problema o requerimiento técnico..."
           rows={4}
+        />
+      </div>
+
+      {/* ── Evidencia ─────────────────────────────────────────────── */}
+      <div className="form-group">
+        <div className="solicitud-form-section__header" style={{ marginTop: 'var(--spacing-lg)' }}>
+          <Camera size={20} />
+          <h3>Descripción del Problema</h3>
+        </div>
+        <EvidenceUploader
+          files={form.images}
+          onChange={(images) => onFormChange({ images })}
+          onError={setFormError}
         />
       </div>
     </div>

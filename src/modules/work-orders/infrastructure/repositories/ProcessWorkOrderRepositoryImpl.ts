@@ -296,6 +296,9 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
     const formData = new FormData();
     formData.append('workOrderId', addWorkOrderAttachment.workOrderId);
     formData.append('createdByUserId', addWorkOrderAttachment.createdByUserId);
+    if (addWorkOrderAttachment.evidenceStageCode) {
+      formData.append('evidenceStageCode', addWorkOrderAttachment.evidenceStageCode);
+    }
     addWorkOrderAttachment.files.forEach((file) => {
       formData.append('files', file);
     });

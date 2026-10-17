@@ -5,10 +5,11 @@
  * DIP : recibe datos ya procesados como props, sin importar de dónde vienen.
  */
 import React from 'react';
-import { User, MapPin, Wrench, AlertTriangle, Mail, Phone, FileText } from 'lucide-react';
+import { User, MapPin, Wrench, AlertTriangle, Mail, Phone, FileText, Camera } from 'lucide-react';
 import { Alert } from '@/shared/presentation/components/Alert';
 import { ORIGINS, WORK_TYPES, PRIORITIES } from './constants';
 import type { WorkOrderForm } from './types';
+import { useObjectUrls } from './useObjectUrls';
 
 interface ConfirmacionStepProps {
   form: WorkOrderForm;
@@ -25,9 +26,10 @@ const Row: React.FC<{ icon: React.ReactNode; label: string; value: string }> = (
 );
 
 export const ConfirmacionStep: React.FC<ConfirmacionStepProps> = ({ form }) => {
-  const origin    = ORIGINS.find(o => o.value === form.origin)?.label    ?? form.origin;
-  const workType  = WORK_TYPES.find(t => t.id  === form.workTypeId)?.label ?? String(form.workTypeId);
-  const priority  = PRIORITIES.find(p => p.id  === form.priorityId)?.label ?? String(form.priorityId);
+  const previews = useObjectUrls(form.images);
+  const origin = ORIGINS.find(o => o.value === form.origin)?.label ?? form.origin;
+  const workType = WORK_TYPES.find(t => t.id === form.workTypeId)?.label ?? String(form.workTypeId);
+  const priority = PRIORITIES.find(p => p.id === form.priorityId)?.label ?? String(form.priorityId);
 
   return (
     <div className="solicitud-form-section">
@@ -44,10 +46,10 @@ export const ConfirmacionStep: React.FC<ConfirmacionStepProps> = ({ form }) => {
         <h3>Cliente</h3>
       </div>
       <div className="wo-confirm-card">
-        <Row icon={<User size={14} />}    label="Identificación" value={form.clientId} />
-        <Row icon={<User size={14} />}    label="Nombre"         value={form.clientName} />
-        <Row icon={<Mail size={14} />}    label="Correo"         value={form.clientEmail} />
-        <Row icon={<Phone size={14} />}   label="Teléfono"       value={form.clientPhone} />
+        <Row icon={<User size={14} />} label="Identificación" value={form.clientId} />
+        <Row icon={<User size={14} />} label="Nombre" value={form.clientName} />
+        <Row icon={<Mail size={14} />} label="Correo" value={form.clientEmail} />
+        <Row icon={<Phone size={14} />} label="Teléfono" value={form.clientPhone} />
       </div>
 
       {/* ── Sección Orden ───────────────────────────────────────── */}
@@ -56,18 +58,18 @@ export const ConfirmacionStep: React.FC<ConfirmacionStepProps> = ({ form }) => {
         <h3>Detalle de la Orden</h3>
       </div>
       <div className="wo-confirm-card">
-        <Row icon={<AlertTriangle size={14} />} label="Origen"          value={origin} />
-        <Row icon={<Wrench size={14} />}        label="Tipo de Trabajo"  value={workType} />
-        <Row icon={<AlertTriangle size={14} />} label="Prioridad"        value={priority} />
-        <Row icon={<MapPin size={14} />}        label="Dirección"        value={form.location} />
+        <Row icon={<AlertTriangle size={14} />} label="Origen" value={origin} />
+        <Row icon={<Wrench size={14} />} label="Tipo de Trabajo" value={workType} />
+        <Row icon={<AlertTriangle size={14} />} label="Prioridad" value={priority} />
+        <Row icon={<MapPin size={14} />} label="Dirección" value={form.location} />
         {form.cadastralKey && (
-          <Row icon={<FileText size={14} />}    label="Clave Catastral"  value={form.cadastralKey} />
+          <Row icon={<FileText size={14} />} label="Clave Catastral" value={form.cadastralKey} />
         )}
         {form.longitude && (
-          <Row icon={<MapPin size={14} />}      label="Coordenadas"      value={`${form.latitude}, ${form.longitude}`} />
+          <Row icon={<MapPin size={14} />} label="Coordenadas" value={`${form.latitude}, ${form.longitude}`} />
         )}
         {form.description && (
-          <Row icon={<FileText size={14} />}    label="Descripción"      value={form.description} />
+          <Row icon={<FileText size={14} />} label="Descripción" value={form.description} />
         )}
       </div>
 
@@ -75,6 +77,21 @@ export const ConfirmacionStep: React.FC<ConfirmacionStepProps> = ({ form }) => {
         <span className="wo-badge wo-badge--notificada">NOTIFICADA</span>
         <span>Estado inicial de la nueva orden de trabajo</span>
       </div>
+
+      {/* ── Evidencias ─────────────────────────────────────────────── */}
+      <div className="solicitud-form-section__header" style={{ marginTop: 'var(--spacing-lg)' }}>
+        <Camera size={20} />
+        <h3>Evidencias</h3>
+      </div>
+      <div className="wo-confirm-card">
+        {previews.map((src, idx) => (
+          <div key={src} className="evidence-image-preview-wrapper">
+            <img src={src} alt={`evidencia-${idx}`} className="evidence-image-preview" />
+          </div>
+        ))}
+      </div>
+
+
     </div>
   );
 };

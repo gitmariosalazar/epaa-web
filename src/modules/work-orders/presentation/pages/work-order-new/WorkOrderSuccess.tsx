@@ -11,12 +11,14 @@ interface WorkOrderSuccessProps {
   codigoOrden:    string | null;
   onCreateAnother: () => void;
   onGoToProcess:   () => void;
+  evidenceWarning?: string | null;
 }
 
 export const WorkOrderSuccess: React.FC<WorkOrderSuccessProps> = ({
   codigoOrden,
   onCreateAnother,
   onGoToProcess,
+  evidenceWarning,
 }) => (
   <div className="wo-success">
     <div className="wo-success__icon-wrapper">
@@ -30,6 +32,13 @@ export const WorkOrderSuccess: React.FC<WorkOrderSuccessProps> = ({
         <span className="wo-success__code-label">Código de la OT</span>
         <span className="wo-success__code">{codigoOrden}</span>
       </div>
+    )}
+
+    {evidenceWarning && (
+      <p className="wo-success__hint" role="alert">
+        La orden se creó, pero las evidencias no se pudieron subir: {evidenceWarning}
+        Puedes adjuntarlas desde el detalle de la orden.
+      </p>
     )}
 
     <p className="wo-success__hint">

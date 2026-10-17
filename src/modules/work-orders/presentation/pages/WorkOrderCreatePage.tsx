@@ -23,7 +23,7 @@ import { useAuth }    from '@/shared/presentation/context/AuthContext';
 
 // ── Domain ────────────────────────────────────────────────────────────────────
 import { ProcessWorkOrderRepositoryImpl } from '../../infrastructure/repositories/ProcessWorkOrderRepositoryImpl';
-import { CreateWorkOrderUseCase }         from '../../application/usecases/CreateWorkOrderUseCase';
+import { CreateWorkOrderWithEvidenceUseCase } from '../../application/usecases/CreateWorkOrderWithEvidenceUseCase';
 
 // ── Sub-components (SRP — each file owns one concern) ────────────────────────
 import { StepIndicator }    from '@/modules/processes/solicitudes/presentation/pages/solicitud-nueva/StepIndicator';
@@ -49,7 +49,7 @@ export const WorkOrderCreatePage: React.FC = () => {
 
   // ── DIP: inject repository through use case ──────────────────────────────
   const repo          = React.useMemo(() => new ProcessWorkOrderRepositoryImpl(), []);
-  const createUseCase = React.useMemo(() => new CreateWorkOrderUseCase(repo), [repo]);
+  const createUseCase = React.useMemo(() => new CreateWorkOrderWithEvidenceUseCase(repo), [repo]);
 
   // ── Wizard state ─────────────────────────────────────────────────────────
   const [step,         setStep]         = useState(1);
@@ -59,6 +59,7 @@ export const WorkOrderCreatePage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted,    setSubmitted]    = useState(false);
   const [codigoOrden,  setCodigoOrden]  = useState<string | null>(null);
+  const [evidenceWarning, setEvidenceWarning] = useState<string | null>(null);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleFormChange = useCallback((fields: Partial<WorkOrderForm>) => {
@@ -96,7 +97,7 @@ export const WorkOrderCreatePage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await createUseCase.execute({
+      const { workOrder: response, evidenceUploaded, evidenceError } = await createUseCase.execute({
         origin:          form.origin,
         workTypeId:      form.workTypeId,
         priorityId:      form.priorityId,
@@ -107,11 +108,13 @@ export const WorkOrderCreatePage: React.FC = () => {
         longitude:       form.longitude ? parseFloat(form.longitude) : undefined,
         latitude:        form.latitude  ? parseFloat(form.latitude)  : undefined,
         createdByUserId: currentUserId,
+        evidenceFiles:   form.images,
       });
       const code = (response as any)?.codigoOrden
                 ?? (response as any)?.workOrderCode
                 ?? null;
       setCodigoOrden(code);
+      setEvidenceWarning(evidenceUploaded ? null : (evidenceError ?? 'No se pudieron subir las evidencias.'));
       setSubmitted(true);
     } catch (e: any) {
       setErrors({ submit: e.message || 'Error al crear la orden de trabajo.' });
@@ -126,6 +129,7 @@ export const WorkOrderCreatePage: React.FC = () => {
     setStep(1);
     setForm(INITIAL_FORM);
     setCodigoOrden(null);
+    setEvidenceWarning(null);
     setErrors({});
   }, []);
 
@@ -135,6 +139,7 @@ export const WorkOrderCreatePage: React.FC = () => {
       <PageLayout>
         <WorkOrderSuccess
           codigoOrden={codigoOrden}
+          evidenceWarning={evidenceWarning}
           onCreateAnother={handleCreateAnother}
           onGoToProcess={() => navigate('/work-orders/process')}
         />

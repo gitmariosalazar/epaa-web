@@ -22,6 +22,7 @@ export const INITIAL_FORM: WorkOrderForm = {
   description:  '',
   longitude:    '',
   latitude:     '',
+  images:       [],
 };
 
 export const ORIGINS = [

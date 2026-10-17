@@ -1,3 +1,5 @@
+import type { EvidenceStageCode } from '../../constants/evidence-stage';
+
 export interface CreateWorkOrderCommand {
   origin: string;
   workTypeId: number;
@@ -10,6 +12,7 @@ export interface CreateWorkOrderCommand {
   latitude?: number | null;
   createdByUserId: string;
   metadata?: string;
+  images?: string[];
 }
 
 export interface CreateWorkOrderFromIncidentCommand {
@@ -68,6 +71,7 @@ export interface AddWorkOrderAttachmentCommand {
   workOrderId: string;
   createdByUserId: string;
   files: File[];
+  evidenceStageCode?: EvidenceStageCode;
 }
 
 export interface CreateQualityControlCommand {
