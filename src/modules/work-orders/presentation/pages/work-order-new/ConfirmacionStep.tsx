@@ -4,9 +4,10 @@
  * SRP : solo muestra el resumen, no ejecuta lógica de negocio.
  * DIP : recibe datos ya procesados como props, sin importar de dónde vienen.
  */
-import React from 'react';
-import { User, MapPin, Wrench, AlertTriangle, Mail, Phone, FileText, Camera } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, MapPin, Wrench, AlertTriangle, Mail, Phone, FileText, Camera, Maximize2 } from 'lucide-react';
 import { Alert } from '@/shared/presentation/components/Alert';
+import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { ORIGINS, WORK_TYPES, PRIORITIES } from './constants';
 import type { WorkOrderForm } from './types';
 import { useObjectUrls } from './useObjectUrls';
@@ -27,6 +28,8 @@ const Row: React.FC<{ icon: React.ReactNode; label: string; value: string }> = (
 
 export const ConfirmacionStep: React.FC<ConfirmacionStepProps> = ({ form }) => {
   const previews = useObjectUrls(form.images);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   const origin = ORIGINS.find(o => o.value === form.origin)?.label ?? form.origin;
   const workType = WORK_TYPES.find(t => t.id === form.workTypeId)?.label ?? String(form.workTypeId);
   const priority = PRIORITIES.find(p => p.id === form.priorityId)?.label ?? String(form.priorityId);
@@ -82,16 +85,57 @@ export const ConfirmacionStep: React.FC<ConfirmacionStepProps> = ({ form }) => {
       <div className="solicitud-form-section__header" style={{ marginTop: 'var(--spacing-lg)' }}>
         <Camera size={20} />
         <h3>Evidencias</h3>
+        {previews.length > 0 && (
+          <span className="wo-badge wo-badge--count" style={{ marginLeft: '0.5rem' }}>
+            {previews.length} {previews.length === 1 ? 'adjunta' : 'adjuntas'}
+          </span>
+        )}
       </div>
-      <div className="wo-confirm-card">
-        {previews.map((src, idx) => (
-          <div key={src} className="evidence-image-preview-wrapper">
-            <img src={src} alt={`evidencia-${idx}`} className="evidence-image-preview" />
+      <div className="wo-confirm-card wo-confirm-card--evidence">
+        {previews.length > 0 ? (
+          previews.map((src, idx) => (
+            <div
+              key={src}
+              className="evidence-image-preview-wrapper wo-confirm-evidence-item"
+              onClick={() => setSelectedImage(src)}
+              title="Clic para ampliar imagen"
+            >
+              <img src={src} alt={`evidencia-${idx}`} className="evidence-image-preview" />
+              <div className="wo-confirm-evidence-overlay">
+                <Maximize2 size={16} />
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="wo-confirm-evidence-empty">
+            <Camera size={18} />
+            <span>No se adjuntaron evidencias para esta orden</span>
           </div>
-        ))}
+        )}
       </div>
 
-
+      {/* ── Modal de vista previa ampliada ────────────────────────── */}
+      {selectedImage && (
+        <Modal
+          isOpen={!!selectedImage}
+          onClose={() => setSelectedImage(null)}
+          title="Vista previa de evidencia"
+          size="lg"
+        >
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem' }}>
+            <img
+              src={selectedImage}
+              alt="Evidencia ampliada"
+              style={{
+                maxWidth: '100%',
+                maxHeight: '75vh',
+                borderRadius: '8px',
+                objectFit: 'contain'
+              }}
+            />
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

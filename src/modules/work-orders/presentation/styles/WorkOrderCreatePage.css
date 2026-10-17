@@ -67,6 +67,72 @@
   transition: background 0.2s, border-color 0.2s;
 }
 
+/* ── Confirmación: Card de Evidencias (Flex juntos como el uploader) ──────── */
+.wo-confirm-card--evidence {
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 1.25rem;
+}
+
+.wo-confirm-evidence-item {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.wo-confirm-evidence-item:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.wo-confirm-evidence-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.wo-confirm-evidence-item:hover .wo-confirm-evidence-overlay {
+  opacity: 1;
+}
+
+.wo-confirm-evidence-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding: 0.25rem 0;
+}
+
+/* Previews de imágenes */
+.evidence-image-preview-wrapper {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.evidence-image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .wo-confirm-row {
   display: flex;
   align-items: flex-start;
@@ -139,6 +205,15 @@
   background: rgba(245, 158, 11, 0.15);
   color: #fbbf24;
   border-color: rgba(245, 158, 11, 0.35);
+}
+
+.wo-badge--count {
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: none;
 }
 
 /* ── Pantalla de éxito ───────────────────────────────────────────────────── */

@@ -327,7 +327,7 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
       <div className="form-group">
         <div className="solicitud-form-section__header" style={{ marginTop: 'var(--spacing-lg)' }}>
           <Camera size={20} />
-          <h3>Descripción del Problema</h3>
+          <h3>Evidencias</h3>
         </div>
         <EvidenceUploader
           files={form.images}
