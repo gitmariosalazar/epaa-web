@@ -41,6 +41,9 @@ export class UpdateSpecialReadingRepositoryImpl implements UpdateSpecialReadingR
     if (request.currentReading !== undefined && request.currentReading !== null) {
       formData.append('currentReading', String(request.currentReading));
     }
+    if (request.meterStatus) {
+      formData.append('meterStatus', request.meterStatus);
+    }
     if (request.cadastralKey) {
       formData.append('cadastralKey', request.cadastralKey);
     }

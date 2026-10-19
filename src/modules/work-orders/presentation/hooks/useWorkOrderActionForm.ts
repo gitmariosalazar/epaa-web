@@ -5,8 +5,8 @@
  * OCP: adding a new action field = extend the matching sub-state, nothing else changes.
  * DIP: accepts userId from outside so the hook is not coupled to AuthContext.
  */
-import { useState, useCallback } from 'react';
-import type { WorkOrderActionKey } from './workOrderProcess.types';
+import { useState, useCallback } from "react";
+import type { WorkOrderActionKey } from "./workOrderProcess.types";
 
 // ── Per-action form state ────────────────────────────────────────────────────
 
@@ -27,6 +27,10 @@ export interface TransitionForm {
   workOrderId: string;
   userId: string;
   comment: string;
+}
+
+export interface CompleteWorkOrderForm extends TransitionForm {
+  finalizationDescription: string;
 }
 
 export interface AssignCrewForm {
@@ -137,107 +141,112 @@ export interface WorkOrderActionForms {
   createQualityControl: CreateQualityControlForm;
   addQualityControlDetail: AddQualityDetailForm;
   resolveQualityControl: ResolveQualityForm;
-  completeWorkOrder: TransitionForm;
+  completeWorkOrder: CompleteWorkOrderForm;
   registerSatisfactionSurvey: SatisfactionSurveyForm;
 }
 
 const initialForms = (userId: string): WorkOrderActionForms => ({
   createWorkOrder: {
-    origin: 'TRAMITE',
-    workTypeId: '',
-    priorityId: '',
-    clientId: '',
-    cadastralKey: '',
-    description: '',
-    location: '',
-    longitude: '',
-    latitude: '',
-    createdByUserId: userId
+    origin: "TRAMITE",
+    workTypeId: "",
+    priorityId: "",
+    clientId: "",
+    cadastralKey: "",
+    description: "",
+    location: "",
+    longitude: "",
+    latitude: "",
+    createdByUserId: userId,
   },
-  receiveWorkOrder: { workOrderId: '', userId, comment: '' },
+  receiveWorkOrder: { workOrderId: "", userId, comment: "" },
   assignWorkOrderToCrew: {
-    workOrderId: '',
-    crewId: '',
+    workOrderId: "",
+    crewId: "",
     assignedByUserId: userId,
-    comment: ''
+    comment: "",
   },
   assignWorkOrderToWorker: {
-    workOrderId: '',
-    workerId: '',
+    workOrderId: "",
+    workerId: "",
     assignedByUserId: userId,
-    comment: ''
+    comment: "",
   },
-  startPreparation: { workOrderId: '', userId, comment: '' },
+  startPreparation: { workOrderId: "", userId, comment: "" },
   createPreparationInspection: {
-    workOrderId: '',
-    crewId: '',
+    workOrderId: "",
+    crewId: "",
     createdByUserId: userId,
     passed: true,
-    observations: ''
+    observations: "",
   },
   addPreparationInspectionDetail: {
-    workOrderId: '',
-    inspectionId: '',
-    code: '',
+    workOrderId: "",
+    inspectionId: "",
+    code: "",
     passed: true,
     createdByUserId: userId,
-    comment: ''
+    comment: "",
   },
   resolvePreparationInspection: {
-    workOrderId: '',
+    workOrderId: "",
     userId,
     passed: true,
-    comment: ''
+    comment: "",
   },
-  startExecution: { workOrderId: '', userId, comment: '' },
+  startExecution: { workOrderId: "", userId, comment: "" },
   addWorkOrderMaterial: {
-    workOrderId: '',
-    materialId: '',
-    quantity: '1',
-    unitCost: '',
-    createdByUserId: userId
+    workOrderId: "",
+    materialId: "",
+    quantity: "1",
+    unitCost: "",
+    createdByUserId: userId,
   },
   addAdditionalCost: {
-    workOrderId: '',
-    concept: '',
-    quantity: '1',
-    unitCost: '',
-    createdByUserId: userId
+    workOrderId: "",
+    concept: "",
+    quantity: "1",
+    unitCost: "",
+    createdByUserId: userId,
   },
   addWorkOrderAttachment: {
-    workOrderId: '',
-    fileName: '',
-    fileType: 'FOTO',
-    fileUrl: '',
-    createdByUserId: userId
+    workOrderId: "",
+    fileName: "",
+    fileType: "FOTO",
+    fileUrl: "",
+    createdByUserId: userId,
   },
   createQualityControl: {
-    workOrderId: '',
+    workOrderId: "",
     createdByUserId: userId,
     approved: true,
-    comments: ''
+    comments: "",
   },
   addQualityControlDetail: {
-    workOrderId: '',
-    controlId: '',
-    code: '',
+    workOrderId: "",
+    controlId: "",
+    code: "",
     passed: true,
     createdByUserId: userId,
-    comment: ''
+    comment: "",
   },
   resolveQualityControl: {
-    workOrderId: '',
+    workOrderId: "",
     userId,
     approved: true,
-    comment: ''
+    comment: "",
   },
-  completeWorkOrder: { workOrderId: '', userId, comment: '' },
+  completeWorkOrder: {
+    workOrderId: "",
+    userId,
+    comment: "",
+    finalizationDescription: "",
+  },
   registerSatisfactionSurvey: {
-    workOrderId: '',
-    rating: '5',
+    workOrderId: "",
+    rating: "5",
     createdByUserId: userId,
-    comments: ''
-  }
+    comments: "",
+  },
 });
 
 // ── Key mapping action → form key ────────────────────────────────────────────
@@ -245,46 +254,46 @@ const initialForms = (userId: string): WorkOrderActionForms => ({
 type FormKey = keyof WorkOrderActionForms;
 
 const ACTION_TO_FORM_KEY: Record<WorkOrderActionKey, FormKey> = {
-  'create-work-order': 'createWorkOrder',
-  'receive-work-order': 'receiveWorkOrder',
-  'assign-work-order-to-crew': 'assignWorkOrderToCrew',
-  'assign-work-order-to-worker': 'assignWorkOrderToWorker',
-  'start-preparation': 'startPreparation',
-  'create-preparation-inspection': 'createPreparationInspection',
-  'add-preparation-inspection-detail': 'addPreparationInspectionDetail',
-  'resolve-preparation-inspection': 'resolvePreparationInspection',
-  'start-execution': 'startExecution',
-  'add-work-order-material': 'addWorkOrderMaterial',
-  'add-additional-cost': 'addAdditionalCost',
-  'add-work-order-attachment': 'addWorkOrderAttachment',
-  'create-quality-control': 'createQualityControl',
-  'add-quality-control-detail': 'addQualityControlDetail',
-  'resolve-quality-control': 'resolveQualityControl',
-  'complete-work-order': 'completeWorkOrder',
-  'complete-inspection-work-order': 'completeWorkOrder',
-  'complete-installation-work-order': 'completeWorkOrder',
-  'register-satisfaction-survey': 'registerSatisfactionSurvey'
+  "create-work-order": "createWorkOrder",
+  "receive-work-order": "receiveWorkOrder",
+  "assign-work-order-to-crew": "assignWorkOrderToCrew",
+  "assign-work-order-to-worker": "assignWorkOrderToWorker",
+  "start-preparation": "startPreparation",
+  "create-preparation-inspection": "createPreparationInspection",
+  "add-preparation-inspection-detail": "addPreparationInspectionDetail",
+  "resolve-preparation-inspection": "resolvePreparationInspection",
+  "start-execution": "startExecution",
+  "add-work-order-material": "addWorkOrderMaterial",
+  "add-additional-cost": "addAdditionalCost",
+  "add-work-order-attachment": "addWorkOrderAttachment",
+  "create-quality-control": "createQualityControl",
+  "add-quality-control-detail": "addQualityControlDetail",
+  "resolve-quality-control": "resolveQualityControl",
+  "complete-work-order": "completeWorkOrder",
+  "complete-inspection-work-order": "completeWorkOrder",
+  "complete-installation-work-order": "completeWorkOrder",
+  "register-satisfaction-survey": "registerSatisfactionSurvey",
 };
 
 // ── Hook ─────────────────────────────────────────────────────────────────────
 
 export const useWorkOrderActionForm = (userId: string) => {
   const [forms, setForms] = useState<WorkOrderActionForms>(() =>
-    initialForms(userId)
+    initialForms(userId),
   );
 
   const setField = useCallback(
     <K extends FormKey, F extends WorkOrderActionForms[K]>(
       formKey: K,
       field: keyof F,
-      value: F[keyof F]
+      value: F[keyof F],
     ) => {
       setForms((prev) => ({
         ...prev,
-        [formKey]: { ...prev[formKey], [field]: value }
+        [formKey]: { ...prev[formKey], [field]: value },
       }));
     },
-    []
+    [],
   );
 
   const getFormForAction = useCallback(
@@ -292,7 +301,7 @@ export const useWorkOrderActionForm = (userId: string) => {
       const key = ACTION_TO_FORM_KEY[action];
       return forms[key];
     },
-    [forms]
+    [forms],
   );
 
   const buildPayload = useCallback(
@@ -302,22 +311,22 @@ export const useWorkOrderActionForm = (userId: string) => {
 
       // Coerce numeric strings to numbers where needed
       const numFields: Record<string, string[]> = {
-        createWorkOrder: ['workTypeId', 'priorityId', 'longitude', 'latitude'],
-        addWorkOrderMaterial: ['materialId', 'quantity', 'unitCost'],
-        addAdditionalCost: ['quantity', 'unitCost'],
-        registerSatisfactionSurvey: ['rating']
+        createWorkOrder: ["workTypeId", "priorityId", "longitude", "latitude"],
+        addWorkOrderMaterial: ["materialId", "quantity", "unitCost"],
+        addAdditionalCost: ["quantity", "unitCost"],
+        registerSatisfactionSurvey: ["rating"],
       };
 
       const result = { ...form };
       for (const f of numFields[key] ?? []) {
-        if (result[f] !== '' && result[f] !== undefined) {
+        if (result[f] !== "" && result[f] !== undefined) {
           result[f] = Number(result[f]);
         }
       }
 
       return result;
     },
-    [forms]
+    [forms],
   );
 
   return {
@@ -325,6 +334,6 @@ export const useWorkOrderActionForm = (userId: string) => {
     setField,
     getFormForAction,
     buildPayload,
-    ACTION_TO_FORM_KEY
+    ACTION_TO_FORM_KEY,
   };
 };

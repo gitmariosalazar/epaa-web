@@ -128,6 +128,7 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
     readingValue: Number(readingInfoForRequest.readingValue),
     rentalIncomeCode: 0,
     novelty: observationInput,
+    meterStatus: 'NORMAL',
     averageConsumption: Number(readingInfoForRequest.averageConsumption),
     typeNoveltyReadingId: 1,
     currentMonthReading: selectedMonth,

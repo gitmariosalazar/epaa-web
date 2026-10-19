@@ -5,9 +5,9 @@
  * OCP: adding a field = extend the matching form component only.
  * No JSON, no raw textareas — all inputs are typed and labeled.
  */
-import React from 'react';
-import { CheckCircle2, XCircle, Star } from 'lucide-react';
-import type { WorkOrderActionForms } from '../hooks/useWorkOrderActionForm';
+import React from "react";
+import { CheckCircle2, XCircle, Star } from "lucide-react";
+import type { WorkOrderActionForms } from "../hooks/useWorkOrderActionForm";
 
 // ── Shared field wrapper ─────────────────────────────────────────────────────
 
@@ -15,7 +15,7 @@ const F = ({
   label,
   required,
   children,
-  hint
+  hint,
 }: {
   label: string;
   required?: boolean;
@@ -43,7 +43,7 @@ const BoolToggle = ({
   trueLabel,
   falseLabel,
   value,
-  onChange
+  onChange,
 }: {
   label: string;
   trueLabel: string;
@@ -55,7 +55,7 @@ const BoolToggle = ({
     <div className="wof__toggle-group">
       <button
         type="button"
-        className={`wof__toggle-btn wof__toggle-btn--success${value ? ' wof__toggle-btn--active' : ''}`}
+        className={`wof__toggle-btn wof__toggle-btn--success${value ? " wof__toggle-btn--active" : ""}`}
         onClick={() => onChange(true)}
       >
         <CheckCircle2 size={15} />
@@ -63,7 +63,7 @@ const BoolToggle = ({
       </button>
       <button
         type="button"
-        className={`wof__toggle-btn wof__toggle-btn--error${!value ? ' wof__toggle-btn--active' : ''}`}
+        className={`wof__toggle-btn wof__toggle-btn--error${!value ? " wof__toggle-btn--active" : ""}`}
         onClick={() => onChange(false)}
       >
         <XCircle size={15} />
@@ -79,7 +79,7 @@ const PhaseHeader = ({
   phase,
   step,
   title,
-  colorClass
+  colorClass,
 }: {
   phase: string;
   step: string;
@@ -99,12 +99,12 @@ const PhaseHeader = ({
 
 export const CreateWorkOrderFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['createWorkOrder'];
-  onChange: <K extends keyof WorkOrderActionForms['createWorkOrder']>(
+  form: WorkOrderActionForms["createWorkOrder"];
+  onChange: <K extends keyof WorkOrderActionForms["createWorkOrder"]>(
     field: K,
-    value: WorkOrderActionForms['createWorkOrder'][K]
+    value: WorkOrderActionForms["createWorkOrder"][K],
   ) => void;
 }) => (
   <div className="wof__form">
@@ -120,7 +120,7 @@ export const CreateWorkOrderFormUI = ({
         <select
           className="wof__select"
           value={form.origin}
-          onChange={(e) => onChange('origin', e.target.value)}
+          onChange={(e) => onChange("origin", e.target.value)}
         >
           <option value="TRAMITE">Trámite</option>
           <option value="EMERGENCIA">Emergencia</option>
@@ -132,7 +132,7 @@ export const CreateWorkOrderFormUI = ({
         <select
           className="wof__select"
           value={form.priorityId}
-          onChange={(e) => onChange('priorityId', e.target.value)}
+          onChange={(e) => onChange("priorityId", e.target.value)}
         >
           <option value="">-- Seleccionar --</option>
           <option value="1">Alta</option>
@@ -150,7 +150,7 @@ export const CreateWorkOrderFormUI = ({
           min="1"
           placeholder="Ej: 1"
           value={form.workTypeId}
-          onChange={(e) => onChange('workTypeId', e.target.value)}
+          onChange={(e) => onChange("workTypeId", e.target.value)}
         />
       </F>
       <F label="Cliente ID" required>
@@ -159,7 +159,7 @@ export const CreateWorkOrderFormUI = ({
           type="text"
           placeholder="UUID del cliente"
           value={form.clientId}
-          onChange={(e) => onChange('clientId', e.target.value)}
+          onChange={(e) => onChange("clientId", e.target.value)}
         />
       </F>
     </Row>
@@ -170,7 +170,7 @@ export const CreateWorkOrderFormUI = ({
         type="text"
         placeholder="Ej: 0101010101"
         value={form.cadastralKey}
-        onChange={(e) => onChange('cadastralKey', e.target.value)}
+        onChange={(e) => onChange("cadastralKey", e.target.value)}
       />
     </F>
 
@@ -180,7 +180,7 @@ export const CreateWorkOrderFormUI = ({
         type="text"
         placeholder="Sector, calle, referencia..."
         value={form.location}
-        onChange={(e) => onChange('location', e.target.value)}
+        onChange={(e) => onChange("location", e.target.value)}
       />
     </F>
 
@@ -192,7 +192,7 @@ export const CreateWorkOrderFormUI = ({
           step="any"
           placeholder="-78.5"
           value={form.longitude}
-          onChange={(e) => onChange('longitude', e.target.value)}
+          onChange={(e) => onChange("longitude", e.target.value)}
         />
       </F>
       <F label="Latitud">
@@ -202,7 +202,7 @@ export const CreateWorkOrderFormUI = ({
           step="any"
           placeholder="-0.22"
           value={form.latitude}
-          onChange={(e) => onChange('latitude', e.target.value)}
+          onChange={(e) => onChange("latitude", e.target.value)}
         />
       </F>
     </Row>
@@ -213,7 +213,7 @@ export const CreateWorkOrderFormUI = ({
         rows={3}
         placeholder="Detalle de la falla o trabajo a realizar..."
         value={form.description}
-        onChange={(e) => onChange('description', e.target.value)}
+        onChange={(e) => onChange("description", e.target.value)}
       />
     </F>
 
@@ -222,7 +222,7 @@ export const CreateWorkOrderFormUI = ({
         className="wof__input"
         type="text"
         value={form.createdByUserId}
-        onChange={(e) => onChange('createdByUserId', e.target.value)}
+        onChange={(e) => onChange("createdByUserId", e.target.value)}
       />
     </F>
   </div>
@@ -239,7 +239,7 @@ const TransitionFormBase = ({
   step,
   title,
   colorClass,
-  commentPlaceholder
+  commentPlaceholder,
 }: {
   form: { workOrderId: string; userId: string; comment: string };
   onChange: (field: string, value: string) => void;
@@ -262,7 +262,7 @@ const TransitionFormBase = ({
         type="text"
         placeholder="UUID o código OT-..."
         value={form.workOrderId}
-        onChange={(e) => onChange('workOrderId', e.target.value)}
+        onChange={(e) => onChange("workOrderId", e.target.value)}
       />
     </F>
     <F label="Usuario ID" required>
@@ -270,7 +270,7 @@ const TransitionFormBase = ({
         className="wof__input"
         type="text"
         value={form.userId}
-        onChange={(e) => onChange('userId', e.target.value)}
+        onChange={(e) => onChange("userId", e.target.value)}
       />
     </F>
     <F label="Comentario">
@@ -279,7 +279,7 @@ const TransitionFormBase = ({
         rows={3}
         placeholder={commentPlaceholder}
         value={form.comment}
-        onChange={(e) => onChange('comment', e.target.value)}
+        onChange={(e) => onChange("comment", e.target.value)}
       />
     </F>
   </div>
@@ -287,9 +287,9 @@ const TransitionFormBase = ({
 
 export const ReceiveWorkOrderFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['receiveWorkOrder'];
+  form: WorkOrderActionForms["receiveWorkOrder"];
   onChange: (field: string, value: string) => void;
 }) => (
   <TransitionFormBase
@@ -305,9 +305,9 @@ export const ReceiveWorkOrderFormUI = ({
 
 export const StartPreparationFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['startPreparation'];
+  form: WorkOrderActionForms["startPreparation"];
   onChange: (field: string, value: string) => void;
 }) => (
   <TransitionFormBase
@@ -323,9 +323,9 @@ export const StartPreparationFormUI = ({
 
 export const StartExecutionFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['startExecution'];
+  form: WorkOrderActionForms["startExecution"];
   onChange: (field: string, value: string) => void;
 }) => (
   <TransitionFormBase
@@ -341,22 +341,33 @@ export const StartExecutionFormUI = ({
 
 export const CompleteWorkOrderFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['completeWorkOrder'];
+  form: WorkOrderActionForms["completeWorkOrder"];
   onChange: (field: string, value: string) => void;
 }) => (
-  <TransitionFormBase
-    form={form}
-    onChange={onChange}
-    phase="Fase 6"
-    step="Paso 1"
-    title="Completar y Cerrar Orden de Trabajo"
-    colorClass="green"
-    commentPlaceholder="Cierre administrativo del proceso..."
-  />
+  <>
+    <TransitionFormBase
+      form={form}
+      onChange={onChange}
+      phase="Fase 6"
+      step="Paso 1"
+      title="Completar y Cerrar Orden de Trabajo"
+      colorClass="green"
+      commentPlaceholder="Cierre administrativo del proceso..."
+    />
+    <F label="Descripción de finalización" required>
+      <textarea
+        className="wof__textarea"
+        rows={4}
+        required
+        placeholder="Describe los trabajos realizados y el resultado..."
+        value={form.finalizationDescription}
+        onChange={(e) => onChange("finalizationDescription", e.target.value)}
+      />
+    </F>
+  </>
 );
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FASE 2 — Asignar a técnico
@@ -364,9 +375,9 @@ export const CompleteWorkOrderFormUI = ({
 
 export const AssignWorkerFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['assignWorkOrderToWorker'];
+  form: WorkOrderActionForms["assignWorkOrderToWorker"];
   onChange: (field: string, value: string) => void;
 }) => (
   <div className="wof__form">
@@ -382,7 +393,7 @@ export const AssignWorkerFormUI = ({
         type="text"
         placeholder="UUID o código OT-..."
         value={form.workOrderId}
-        onChange={(e) => onChange('workOrderId', e.target.value)}
+        onChange={(e) => onChange("workOrderId", e.target.value)}
       />
     </F>
     <F label="Técnico Worker ID" required>
@@ -391,7 +402,7 @@ export const AssignWorkerFormUI = ({
         type="text"
         placeholder="UUID del técnico"
         value={form.workerId}
-        onChange={(e) => onChange('workerId', e.target.value)}
+        onChange={(e) => onChange("workerId", e.target.value)}
       />
     </F>
     <F label="Asignado por (User ID)" required>
@@ -399,7 +410,7 @@ export const AssignWorkerFormUI = ({
         className="wof__input"
         type="text"
         value={form.assignedByUserId}
-        onChange={(e) => onChange('assignedByUserId', e.target.value)}
+        onChange={(e) => onChange("assignedByUserId", e.target.value)}
       />
     </F>
     <F label="Comentario">
@@ -408,7 +419,7 @@ export const AssignWorkerFormUI = ({
         rows={3}
         placeholder="Instrucciones de asignación..."
         value={form.comment}
-        onChange={(e) => onChange('comment', e.target.value)}
+        onChange={(e) => onChange("comment", e.target.value)}
       />
     </F>
   </div>
@@ -420,12 +431,12 @@ export const AssignWorkerFormUI = ({
 
 export const CreateInspectionFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['createPreparationInspection'];
+  form: WorkOrderActionForms["createPreparationInspection"];
   onChange: (
-    field: keyof WorkOrderActionForms['createPreparationInspection'],
-    value: any
+    field: keyof WorkOrderActionForms["createPreparationInspection"],
+    value: any,
   ) => void;
 }) => (
   <div className="wof__form">
@@ -441,7 +452,7 @@ export const CreateInspectionFormUI = ({
         type="text"
         placeholder="UUID o código OT-..."
         value={form.workOrderId}
-        onChange={(e) => onChange('workOrderId', e.target.value)}
+        onChange={(e) => onChange("workOrderId", e.target.value)}
       />
     </F>
     <F label="Creado por (userId)" required>
@@ -449,7 +460,7 @@ export const CreateInspectionFormUI = ({
         className="wof__input"
         type="text"
         value={form.createdByUserId}
-        onChange={(e) => onChange('createdByUserId', e.target.value)}
+        onChange={(e) => onChange("createdByUserId", e.target.value)}
       />
     </F>
 
@@ -458,7 +469,7 @@ export const CreateInspectionFormUI = ({
       trueLabel="Pasa"
       falseLabel="No pasa"
       value={form.passed}
-      onChange={(v) => onChange('passed', v)}
+      onChange={(v) => onChange("passed", v)}
     />
     <F label="Observaciones">
       <textarea
@@ -466,7 +477,7 @@ export const CreateInspectionFormUI = ({
         rows={3}
         placeholder="Observaciones del checklist..."
         value={form.observations}
-        onChange={(e) => onChange('observations', e.target.value)}
+        onChange={(e) => onChange("observations", e.target.value)}
       />
     </F>
   </div>
@@ -478,12 +489,12 @@ export const CreateInspectionFormUI = ({
 
 export const AddInspectionDetailFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['addPreparationInspectionDetail'];
+  form: WorkOrderActionForms["addPreparationInspectionDetail"];
   onChange: (
-    field: keyof WorkOrderActionForms['addPreparationInspectionDetail'],
-    value: any
+    field: keyof WorkOrderActionForms["addPreparationInspectionDetail"],
+    value: any,
   ) => void;
 }) => (
   <div className="wof__form">
@@ -500,7 +511,7 @@ export const AddInspectionDetailFormUI = ({
           type="text"
           placeholder="UUID OT"
           value={form.workOrderId}
-          onChange={(e) => onChange('workOrderId', e.target.value)}
+          onChange={(e) => onChange("workOrderId", e.target.value)}
         />
       </F>
       <F label="Inspección ID" required>
@@ -509,7 +520,7 @@ export const AddInspectionDetailFormUI = ({
           type="text"
           placeholder="UUID inspección"
           value={form.inspectionId}
-          onChange={(e) => onChange('inspectionId', e.target.value)}
+          onChange={(e) => onChange("inspectionId", e.target.value)}
         />
       </F>
     </Row>
@@ -520,7 +531,7 @@ export const AddInspectionDetailFormUI = ({
           type="text"
           placeholder="EPP-01"
           value={form.code}
-          onChange={(e) => onChange('code', e.target.value)}
+          onChange={(e) => onChange("code", e.target.value)}
         />
       </F>
       <F label="Creado por (User ID)" required>
@@ -528,7 +539,7 @@ export const AddInspectionDetailFormUI = ({
           className="wof__input"
           type="text"
           value={form.createdByUserId}
-          onChange={(e) => onChange('createdByUserId', e.target.value)}
+          onChange={(e) => onChange("createdByUserId", e.target.value)}
         />
       </F>
     </Row>
@@ -537,7 +548,7 @@ export const AddInspectionDetailFormUI = ({
       trueLabel="Pasa"
       falseLabel="No pasa"
       value={form.passed}
-      onChange={(v) => onChange('passed', v)}
+      onChange={(v) => onChange("passed", v)}
     />
     <F label="Comentario">
       <textarea
@@ -545,7 +556,7 @@ export const AddInspectionDetailFormUI = ({
         rows={2}
         placeholder="Observación del ítem..."
         value={form.comment}
-        onChange={(e) => onChange('comment', e.target.value)}
+        onChange={(e) => onChange("comment", e.target.value)}
       />
     </F>
   </div>
@@ -557,12 +568,12 @@ export const AddInspectionDetailFormUI = ({
 
 export const ResolveInspectionFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['resolvePreparationInspection'];
+  form: WorkOrderActionForms["resolvePreparationInspection"];
   onChange: (
-    field: keyof WorkOrderActionForms['resolvePreparationInspection'],
-    value: any
+    field: keyof WorkOrderActionForms["resolvePreparationInspection"],
+    value: any,
   ) => void;
 }) => (
   <div className="wof__form">
@@ -578,7 +589,7 @@ export const ResolveInspectionFormUI = ({
         type="text"
         placeholder="UUID OT"
         value={form.workOrderId}
-        onChange={(e) => onChange('workOrderId', e.target.value)}
+        onChange={(e) => onChange("workOrderId", e.target.value)}
       />
     </F>
     <F label="Usuario ID" required>
@@ -586,7 +597,7 @@ export const ResolveInspectionFormUI = ({
         className="wof__input"
         type="text"
         value={form.userId}
-        onChange={(e) => onChange('userId', e.target.value)}
+        onChange={(e) => onChange("userId", e.target.value)}
       />
     </F>
     <BoolToggle
@@ -594,7 +605,7 @@ export const ResolveInspectionFormUI = ({
       trueLabel="Aprobada → EN_PROCESO"
       falseLabel="Rechazada → REVISION_RECHAZADA"
       value={form.passed}
-      onChange={(v) => onChange('passed', v)}
+      onChange={(v) => onChange("passed", v)}
     />
     <F label="Comentario de resolución">
       <textarea
@@ -602,7 +613,7 @@ export const ResolveInspectionFormUI = ({
         rows={3}
         placeholder="Justificación del resultado de la inspección..."
         value={form.comment}
-        onChange={(e) => onChange('comment', e.target.value)}
+        onChange={(e) => onChange("comment", e.target.value)}
       />
     </F>
   </div>
@@ -614,9 +625,9 @@ export const ResolveInspectionFormUI = ({
 
 export const AddMaterialFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['addWorkOrderMaterial'];
+  form: WorkOrderActionForms["addWorkOrderMaterial"];
   onChange: (field: string, value: string) => void;
 }) => (
   <div className="wof__form">
@@ -632,7 +643,7 @@ export const AddMaterialFormUI = ({
         type="text"
         placeholder="UUID OT"
         value={form.workOrderId}
-        onChange={(e) => onChange('workOrderId', e.target.value)}
+        onChange={(e) => onChange("workOrderId", e.target.value)}
       />
     </F>
     <Row>
@@ -643,7 +654,7 @@ export const AddMaterialFormUI = ({
           min="1"
           placeholder="1"
           value={form.materialId}
-          onChange={(e) => onChange('materialId', e.target.value)}
+          onChange={(e) => onChange("materialId", e.target.value)}
         />
       </F>
       <F label="Creado por (User ID)" required>
@@ -651,7 +662,7 @@ export const AddMaterialFormUI = ({
           className="wof__input"
           type="text"
           value={form.createdByUserId}
-          onChange={(e) => onChange('createdByUserId', e.target.value)}
+          onChange={(e) => onChange("createdByUserId", e.target.value)}
         />
       </F>
     </Row>
@@ -664,7 +675,7 @@ export const AddMaterialFormUI = ({
           step="1"
           placeholder="1"
           value={form.quantity}
-          onChange={(e) => onChange('quantity', e.target.value)}
+          onChange={(e) => onChange("quantity", e.target.value)}
         />
       </F>
       <F label="Costo unitario (USD)" required>
@@ -675,7 +686,7 @@ export const AddMaterialFormUI = ({
           step="0.01"
           placeholder="0.00"
           value={form.unitCost}
-          onChange={(e) => onChange('unitCost', e.target.value)}
+          onChange={(e) => onChange("unitCost", e.target.value)}
         />
       </F>
     </Row>
@@ -688,9 +699,9 @@ export const AddMaterialFormUI = ({
 
 export const AddAdditionalCostFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['addAdditionalCost'];
+  form: WorkOrderActionForms["addAdditionalCost"];
   onChange: (field: string, value: string) => void;
 }) => (
   <div className="wof__form">
@@ -706,7 +717,7 @@ export const AddAdditionalCostFormUI = ({
         type="text"
         placeholder="UUID OT"
         value={form.workOrderId}
-        onChange={(e) => onChange('workOrderId', e.target.value)}
+        onChange={(e) => onChange("workOrderId", e.target.value)}
       />
     </F>
     <F label="Concepto" required>
@@ -715,7 +726,7 @@ export const AddAdditionalCostFormUI = ({
         type="text"
         placeholder="Ej: Horas extra, maquinaria, traslado..."
         value={form.concept}
-        onChange={(e) => onChange('concept', e.target.value)}
+        onChange={(e) => onChange("concept", e.target.value)}
       />
     </F>
     <Row>
@@ -727,7 +738,7 @@ export const AddAdditionalCostFormUI = ({
           step="1"
           placeholder="1"
           value={form.quantity}
-          onChange={(e) => onChange('quantity', e.target.value)}
+          onChange={(e) => onChange("quantity", e.target.value)}
         />
       </F>
       <F label="Costo unitario (USD)" required>
@@ -738,7 +749,7 @@ export const AddAdditionalCostFormUI = ({
           step="0.01"
           placeholder="0.00"
           value={form.unitCost}
-          onChange={(e) => onChange('unitCost', e.target.value)}
+          onChange={(e) => onChange("unitCost", e.target.value)}
         />
       </F>
     </Row>
@@ -747,7 +758,7 @@ export const AddAdditionalCostFormUI = ({
         className="wof__input"
         type="text"
         value={form.createdByUserId}
-        onChange={(e) => onChange('createdByUserId', e.target.value)}
+        onChange={(e) => onChange("createdByUserId", e.target.value)}
       />
     </F>
   </div>
@@ -759,9 +770,9 @@ export const AddAdditionalCostFormUI = ({
 
 export const AddAttachmentFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['addWorkOrderAttachment'];
+  form: WorkOrderActionForms["addWorkOrderAttachment"];
   onChange: (field: string, value: string) => void;
 }) => (
   <div className="wof__form">
@@ -777,7 +788,7 @@ export const AddAttachmentFormUI = ({
         type="text"
         placeholder="UUID OT"
         value={form.workOrderId}
-        onChange={(e) => onChange('workOrderId', e.target.value)}
+        onChange={(e) => onChange("workOrderId", e.target.value)}
       />
     </F>
     <Row>
@@ -787,14 +798,14 @@ export const AddAttachmentFormUI = ({
           type="text"
           placeholder="evidencia.jpg"
           value={form.fileName}
-          onChange={(e) => onChange('fileName', e.target.value)}
+          onChange={(e) => onChange("fileName", e.target.value)}
         />
       </F>
       <F label="Tipo de adjunto" required>
         <select
           className="wof__select"
           value={form.fileType}
-          onChange={(e) => onChange('fileType', e.target.value)}
+          onChange={(e) => onChange("fileType", e.target.value)}
         >
           <option value="FOTO">Foto</option>
           <option value="VIDEO">Video</option>
@@ -814,7 +825,7 @@ export const AddAttachmentFormUI = ({
         type="url"
         placeholder="https://storage.epaa.gob.ec/..."
         value={form.fileUrl}
-        onChange={(e) => onChange('fileUrl', e.target.value)}
+        onChange={(e) => onChange("fileUrl", e.target.value)}
       />
     </F>
     <F label="Subido por (User ID)" required>
@@ -822,7 +833,7 @@ export const AddAttachmentFormUI = ({
         className="wof__input"
         type="text"
         value={form.createdByUserId}
-        onChange={(e) => onChange('createdByUserId', e.target.value)}
+        onChange={(e) => onChange("createdByUserId", e.target.value)}
       />
     </F>
   </div>
@@ -834,12 +845,12 @@ export const AddAttachmentFormUI = ({
 
 export const CreateQualityControlFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['createQualityControl'];
+  form: WorkOrderActionForms["createQualityControl"];
   onChange: (
-    field: keyof WorkOrderActionForms['createQualityControl'],
-    value: any
+    field: keyof WorkOrderActionForms["createQualityControl"],
+    value: any,
   ) => void;
 }) => (
   <div className="wof__form">
@@ -855,7 +866,7 @@ export const CreateQualityControlFormUI = ({
         type="text"
         placeholder="UUID OT"
         value={form.workOrderId}
-        onChange={(e) => onChange('workOrderId', e.target.value)}
+        onChange={(e) => onChange("workOrderId", e.target.value)}
       />
     </F>
     <F label="Creado por (User ID)" required>
@@ -863,7 +874,7 @@ export const CreateQualityControlFormUI = ({
         className="wof__input"
         type="text"
         value={form.createdByUserId}
-        onChange={(e) => onChange('createdByUserId', e.target.value)}
+        onChange={(e) => onChange("createdByUserId", e.target.value)}
       />
     </F>
     <BoolToggle
@@ -871,7 +882,7 @@ export const CreateQualityControlFormUI = ({
       trueLabel="Aprobado"
       falseLabel="Pendiente / Rechazado"
       value={form.approved}
-      onChange={(v) => onChange('approved', v)}
+      onChange={(v) => onChange("approved", v)}
     />
     <F label="Comentarios">
       <textarea
@@ -879,7 +890,7 @@ export const CreateQualityControlFormUI = ({
         rows={3}
         placeholder="Observaciones del control de calidad..."
         value={form.comments}
-        onChange={(e) => onChange('comments', e.target.value)}
+        onChange={(e) => onChange("comments", e.target.value)}
       />
     </F>
   </div>
@@ -891,12 +902,12 @@ export const CreateQualityControlFormUI = ({
 
 export const AddQualityDetailFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['addQualityControlDetail'];
+  form: WorkOrderActionForms["addQualityControlDetail"];
   onChange: (
-    field: keyof WorkOrderActionForms['addQualityControlDetail'],
-    value: any
+    field: keyof WorkOrderActionForms["addQualityControlDetail"],
+    value: any,
   ) => void;
 }) => (
   <div className="wof__form">
@@ -913,7 +924,7 @@ export const AddQualityDetailFormUI = ({
           type="text"
           placeholder="UUID OT"
           value={form.workOrderId}
-          onChange={(e) => onChange('workOrderId', e.target.value)}
+          onChange={(e) => onChange("workOrderId", e.target.value)}
         />
       </F>
       <F label="Control ID" required>
@@ -922,7 +933,7 @@ export const AddQualityDetailFormUI = ({
           type="text"
           placeholder="UUID control"
           value={form.controlId}
-          onChange={(e) => onChange('controlId', e.target.value)}
+          onChange={(e) => onChange("controlId", e.target.value)}
         />
       </F>
     </Row>
@@ -933,7 +944,7 @@ export const AddQualityDetailFormUI = ({
           type="text"
           placeholder="QC-01"
           value={form.code}
-          onChange={(e) => onChange('code', e.target.value)}
+          onChange={(e) => onChange("code", e.target.value)}
         />
       </F>
       <F label="Creado por (User ID)" required>
@@ -941,7 +952,7 @@ export const AddQualityDetailFormUI = ({
           className="wof__input"
           type="text"
           value={form.createdByUserId}
-          onChange={(e) => onChange('createdByUserId', e.target.value)}
+          onChange={(e) => onChange("createdByUserId", e.target.value)}
         />
       </F>
     </Row>
@@ -950,7 +961,7 @@ export const AddQualityDetailFormUI = ({
       trueLabel="Pasa"
       falseLabel="No pasa"
       value={form.passed}
-      onChange={(v) => onChange('passed', v)}
+      onChange={(v) => onChange("passed", v)}
     />
     <F label="Comentario">
       <textarea
@@ -958,7 +969,7 @@ export const AddQualityDetailFormUI = ({
         rows={2}
         placeholder="Observación del ítem..."
         value={form.comment}
-        onChange={(e) => onChange('comment', e.target.value)}
+        onChange={(e) => onChange("comment", e.target.value)}
       />
     </F>
   </div>
@@ -970,12 +981,12 @@ export const AddQualityDetailFormUI = ({
 
 export const ResolveQualityFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['resolveQualityControl'];
+  form: WorkOrderActionForms["resolveQualityControl"];
   onChange: (
-    field: keyof WorkOrderActionForms['resolveQualityControl'],
-    value: any
+    field: keyof WorkOrderActionForms["resolveQualityControl"],
+    value: any,
   ) => void;
 }) => (
   <div className="wof__form">
@@ -991,7 +1002,7 @@ export const ResolveQualityFormUI = ({
         type="text"
         placeholder="UUID OT"
         value={form.workOrderId}
-        onChange={(e) => onChange('workOrderId', e.target.value)}
+        onChange={(e) => onChange("workOrderId", e.target.value)}
       />
     </F>
     <F label="Usuario ID" required>
@@ -999,7 +1010,7 @@ export const ResolveQualityFormUI = ({
         className="wof__input"
         type="text"
         value={form.userId}
-        onChange={(e) => onChange('userId', e.target.value)}
+        onChange={(e) => onChange("userId", e.target.value)}
       />
     </F>
     <BoolToggle
@@ -1007,7 +1018,7 @@ export const ResolveQualityFormUI = ({
       trueLabel="Aprobado → COMPLETADA"
       falseLabel="Rechazado → RECHAZADA_TECNICA"
       value={form.approved}
-      onChange={(v) => onChange('approved', v)}
+      onChange={(v) => onChange("approved", v)}
     />
     <F label="Comentario de resolución">
       <textarea
@@ -1015,7 +1026,7 @@ export const ResolveQualityFormUI = ({
         rows={3}
         placeholder="Justificación del resultado del control..."
         value={form.comment}
-        onChange={(e) => onChange('comment', e.target.value)}
+        onChange={(e) => onChange("comment", e.target.value)}
       />
     </F>
   </div>
@@ -1029,12 +1040,12 @@ const STARS = [1, 2, 3, 4, 5];
 
 export const SatisfactionSurveyFormUI = ({
   form,
-  onChange
+  onChange,
 }: {
-  form: WorkOrderActionForms['registerSatisfactionSurvey'];
+  form: WorkOrderActionForms["registerSatisfactionSurvey"];
   onChange: (
-    field: keyof WorkOrderActionForms['registerSatisfactionSurvey'],
-    value: any
+    field: keyof WorkOrderActionForms["registerSatisfactionSurvey"],
+    value: any,
   ) => void;
 }) => (
   <div className="wof__form">
@@ -1050,7 +1061,7 @@ export const SatisfactionSurveyFormUI = ({
         type="text"
         placeholder="UUID OT"
         value={form.workOrderId}
-        onChange={(e) => onChange('workOrderId', e.target.value)}
+        onChange={(e) => onChange("workOrderId", e.target.value)}
       />
     </F>
     <F label="Creado por (User ID)" required>
@@ -1058,7 +1069,7 @@ export const SatisfactionSurveyFormUI = ({
         className="wof__input"
         type="text"
         value={form.createdByUserId}
-        onChange={(e) => onChange('createdByUserId', e.target.value)}
+        onChange={(e) => onChange("createdByUserId", e.target.value)}
       />
     </F>
     <F label="Calificación (1–5)">
@@ -1067,9 +1078,9 @@ export const SatisfactionSurveyFormUI = ({
           <button
             key={s}
             type="button"
-            className={`wof__star${Number(form.rating) >= s ? ' wof__star--active' : ''}`}
-            onClick={() => onChange('rating', String(s))}
-            title={`${s} estrella${s > 1 ? 's' : ''}`}
+            className={`wof__star${Number(form.rating) >= s ? " wof__star--active" : ""}`}
+            onClick={() => onChange("rating", String(s))}
+            title={`${s} estrella${s > 1 ? "s" : ""}`}
           >
             <Star size={22} />
           </button>
@@ -1083,7 +1094,7 @@ export const SatisfactionSurveyFormUI = ({
         rows={3}
         placeholder="Retroalimentación del cliente sobre el servicio..."
         value={form.comments}
-        onChange={(e) => onChange('comments', e.target.value)}
+        onChange={(e) => onChange("comments", e.target.value)}
       />
     </F>
   </div>
@@ -1093,7 +1104,7 @@ export const SatisfactionSurveyFormUI = ({
 // Dispatcher — renders the correct form for the selected action
 // ─────────────────────────────────────────────────────────────────────────────
 
-import type { WorkOrderActionKey } from '../hooks/workOrderProcess.types';
+import type { WorkOrderActionKey } from "../hooks/workOrderProcess.types";
 
 interface ActionFormDispatcherProps {
   actionKey: WorkOrderActionKey;
@@ -1101,140 +1112,140 @@ interface ActionFormDispatcherProps {
   setField: <K extends keyof WorkOrderActionForms>(
     formKey: K,
     field: keyof WorkOrderActionForms[K],
-    value: WorkOrderActionForms[K][keyof WorkOrderActionForms[K]]
+    value: WorkOrderActionForms[K][keyof WorkOrderActionForms[K]],
   ) => void;
 }
 
 export const ActionFormDispatcher = ({
   actionKey,
   forms,
-  setField
+  setField,
 }: ActionFormDispatcherProps) => {
   switch (actionKey) {
-    case 'create-work-order':
+    case "create-work-order":
       return (
         <CreateWorkOrderFormUI
           form={forms.createWorkOrder}
-          onChange={(f, v) => setField('createWorkOrder', f as any, v as any)}
+          onChange={(f, v) => setField("createWorkOrder", f as any, v as any)}
         />
       );
-    case 'receive-work-order':
+    case "receive-work-order":
       return (
         <ReceiveWorkOrderFormUI
           form={forms.receiveWorkOrder}
-          onChange={(f, v) => setField('receiveWorkOrder', f as any, v)}
+          onChange={(f, v) => setField("receiveWorkOrder", f as any, v)}
         />
       );
-    case 'assign-work-order-to-crew':
-    case 'assign-work-order-to-worker':
+    case "assign-work-order-to-crew":
+    case "assign-work-order-to-worker":
       return (
         <AssignWorkerFormUI
           form={forms.assignWorkOrderToWorker}
-          onChange={(f, v) => setField('assignWorkOrderToWorker', f as any, v)}
+          onChange={(f, v) => setField("assignWorkOrderToWorker", f as any, v)}
         />
       );
-    case 'start-preparation':
+    case "start-preparation":
       return (
         <StartPreparationFormUI
           form={forms.startPreparation}
-          onChange={(f, v) => setField('startPreparation', f as any, v)}
+          onChange={(f, v) => setField("startPreparation", f as any, v)}
         />
       );
-    case 'create-preparation-inspection':
+    case "create-preparation-inspection":
       return (
         <CreateInspectionFormUI
           form={forms.createPreparationInspection}
           onChange={(f, v) =>
-            setField('createPreparationInspection', f as any, v as any)
+            setField("createPreparationInspection", f as any, v as any)
           }
         />
       );
-    case 'add-preparation-inspection-detail':
+    case "add-preparation-inspection-detail":
       return (
         <AddInspectionDetailFormUI
           form={forms.addPreparationInspectionDetail}
           onChange={(f, v) =>
-            setField('addPreparationInspectionDetail', f as any, v as any)
+            setField("addPreparationInspectionDetail", f as any, v as any)
           }
         />
       );
-    case 'resolve-preparation-inspection':
+    case "resolve-preparation-inspection":
       return (
         <ResolveInspectionFormUI
           form={forms.resolvePreparationInspection}
           onChange={(f, v) =>
-            setField('resolvePreparationInspection', f as any, v as any)
+            setField("resolvePreparationInspection", f as any, v as any)
           }
         />
       );
-    case 'start-execution':
+    case "start-execution":
       return (
         <StartExecutionFormUI
           form={forms.startExecution}
-          onChange={(f, v) => setField('startExecution', f as any, v)}
+          onChange={(f, v) => setField("startExecution", f as any, v)}
         />
       );
-    case 'add-work-order-material':
+    case "add-work-order-material":
       return (
         <AddMaterialFormUI
           form={forms.addWorkOrderMaterial}
-          onChange={(f, v) => setField('addWorkOrderMaterial', f as any, v)}
+          onChange={(f, v) => setField("addWorkOrderMaterial", f as any, v)}
         />
       );
-    case 'add-additional-cost':
+    case "add-additional-cost":
       return (
         <AddAdditionalCostFormUI
           form={forms.addAdditionalCost}
-          onChange={(f, v) => setField('addAdditionalCost', f as any, v)}
+          onChange={(f, v) => setField("addAdditionalCost", f as any, v)}
         />
       );
-    case 'add-work-order-attachment':
+    case "add-work-order-attachment":
       return (
         <AddAttachmentFormUI
           form={forms.addWorkOrderAttachment}
-          onChange={(f, v) => setField('addWorkOrderAttachment', f as any, v)}
+          onChange={(f, v) => setField("addWorkOrderAttachment", f as any, v)}
         />
       );
-    case 'create-quality-control':
+    case "create-quality-control":
       return (
         <CreateQualityControlFormUI
           form={forms.createQualityControl}
           onChange={(f, v) =>
-            setField('createQualityControl', f as any, v as any)
+            setField("createQualityControl", f as any, v as any)
           }
         />
       );
-    case 'add-quality-control-detail':
+    case "add-quality-control-detail":
       return (
         <AddQualityDetailFormUI
           form={forms.addQualityControlDetail}
           onChange={(f, v) =>
-            setField('addQualityControlDetail', f as any, v as any)
+            setField("addQualityControlDetail", f as any, v as any)
           }
         />
       );
-    case 'resolve-quality-control':
+    case "resolve-quality-control":
       return (
         <ResolveQualityFormUI
           form={forms.resolveQualityControl}
           onChange={(f, v) =>
-            setField('resolveQualityControl', f as any, v as any)
+            setField("resolveQualityControl", f as any, v as any)
           }
         />
       );
-    case 'complete-work-order':
+    case "complete-work-order":
       return (
         <CompleteWorkOrderFormUI
           form={forms.completeWorkOrder}
-          onChange={(f, v) => setField('completeWorkOrder', f as any, v)}
+          onChange={(f, v) => setField("completeWorkOrder", f as any, v)}
         />
       );
-    case 'register-satisfaction-survey':
+    case "register-satisfaction-survey":
       return (
         <SatisfactionSurveyFormUI
           form={forms.registerSatisfactionSurvey}
           onChange={(f, v) =>
-            setField('registerSatisfactionSurvey', f as any, v as any)
+            setField("registerSatisfactionSurvey", f as any, v as any)
           }
         />
       );

@@ -11,6 +11,7 @@ export interface UpdateSpecialReadingRequest {
   readingValue?: number | null;
   sewerRate?: number | null;
   novelty?: string | null;
+  meterStatus?: string | null;
   typeNoveltyReadingId?: number | null;
   cadastralKey?: string;
   averageConsumption?: number;

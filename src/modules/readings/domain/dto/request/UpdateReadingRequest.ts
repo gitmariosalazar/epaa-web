@@ -3,6 +3,7 @@ export interface UpdateReadingRequest {
   currentReading: number;
   rentalIncomeCode: number;
   novelty: string;
+  meterStatus: string;
   incomeCode: number;
   cadastralKey: string;
   sector: number;

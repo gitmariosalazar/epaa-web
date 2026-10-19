@@ -146,6 +146,7 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
     justificacion: observationInput,
     previousReading: previousReadingInput === '' ? null : Number(previousReadingInput),
     currentReading: currentReadingInput === '' ? null : Number(currentReadingInput),
+    meterStatus: 'NORMAL',
     cadastralKey: currentReadingInfoForRequest?.cadastralKey ?? '',
     averageConsumption: currentReadingInfoForRequest?.averageConsumption ?? 0,
     photos: photosInput.length > 0 ? photosInput : undefined,

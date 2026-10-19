@@ -126,6 +126,7 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
     currentReading: Number(currentReadingInput),
     rentalIncomeCode: 0,
     novelty: observationInput,
+    meterStatus: 'NORMAL',
     incomeCode: 0,
     cadastralKey: currentReadingInfoForRequest.cadastralKey,
     sector: currentReadingInfoForRequest.sector,

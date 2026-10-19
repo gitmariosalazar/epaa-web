@@ -11,76 +11,74 @@
  *   OCP: nueva fase → nuevo modal + nuevo PhaseActionBtn; nada más cambia.
  *   DIP: depende de Use Cases (interfaces), no de repos concretos.
  */
-import React, { useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
-import { Button } from '@/shared/presentation/components/Button/Button';
-import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
-import { useAuth } from '@/shared/presentation/context/AuthContext';
+import React, { useState, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { PageLayout } from "@/shared/presentation/components/Layout/PageLayout";
+import { Button } from "@/shared/presentation/components/Button/Button";
+import { MessageToastCustom } from "@/shared/presentation/components/toast/CustomMessageToast";
+import { useAuth } from "@/shared/presentation/context/AuthContext";
 
 // ── Use Cases ──────────────────────────────────────────────────────────────────
-import { GetOrdenTrabajoDetalleByNumeroOrdenUseCase } from '../../application/usecases/GetOrdenTrabajoDetalleByNumeroOrdenUseCase';
-import { GetOrdenTrabajoTrackingByNumeroOrdenUseCase } from '../../application/usecases/GetOrdenTrabajoTrackingByNumeroOrdenUseCase';
-import { ReceiveWorkOrderUseCase } from '../../application/usecases/ReceiveWorkOrderUseCase';
-import { AssignWorkOrderToCrewUseCase } from '../../application/usecases/AssignWorkOrderToCrewUseCase';
-import { AssignWorkOrderToWorkerUseCase } from '../../application/usecases/AssignWorkOrderToWorkerUseCase';
-import { StartPreparationUseCase } from '../../application/usecases/StartPreparationUseCase';
-import { CreatePreparationInspectionUseCase } from '../../application/usecases/CreatePreparationInspectionUseCase';
-import { ResolvePreparationInspectionUseCase } from '../../application/usecases/ResolvePreparationInspectionUseCase';
-import { FinishExecutionUseCase } from '../../application/usecases/FinishExecutionUseCase';
-import { AddWorkersBatchToWorkOrderUseCase } from '../../application/usecases/AddWorkersBatchToWorkOrderUseCase';
-import { RemoveWorkerFromWorkOrderUseCase } from '../../application/usecases/RemoveWorkerFromWorkOrderUseCase';
-import { AddWorkOrderMaterialsBatchUseCase } from '../../application/usecases/AddWorkOrderMaterialsBatchUseCase';
-import { AddAdditionalCostsBatchUseCase } from '../../application/usecases/AddAdditionalCostsBatchUseCase';
-import { AddWorkOrderAttachmentUseCase } from '../../application/usecases/AddWorkOrderAttachmentUseCase';
-import { CreateQualityControlUseCase } from '../../application/usecases/CreateQualityControlUseCase';
-import { CompleteWorkOrderUseCase } from '../../application/usecases/CompleteWorkOrderUseCase';
-import { RegisterSatisfactionSurveyUseCase } from '../../application/usecases/RegisterSatisfactionSurveyUseCase';
-import { SubmitInspectionReportUseCase } from '../../application/usecases/SubmitInspectionReportUseCase';
-import { ProcessWorkOrderRepositoryImpl } from '../../infrastructure/repositories/ProcessWorkOrderRepositoryImpl';
+import { GetOrdenTrabajoDetalleByNumeroOrdenUseCase } from "../../application/usecases/GetOrdenTrabajoDetalleByNumeroOrdenUseCase";
+import { GetOrdenTrabajoTrackingByNumeroOrdenUseCase } from "../../application/usecases/GetOrdenTrabajoTrackingByNumeroOrdenUseCase";
+import { ReceiveWorkOrderUseCase } from "../../application/usecases/ReceiveWorkOrderUseCase";
+import { AssignWorkOrderToCrewUseCase } from "../../application/usecases/AssignWorkOrderToCrewUseCase";
+import { AssignWorkOrderToWorkerUseCase } from "../../application/usecases/AssignWorkOrderToWorkerUseCase";
+import { StartPreparationUseCase } from "../../application/usecases/StartPreparationUseCase";
+import { CreatePreparationInspectionUseCase } from "../../application/usecases/CreatePreparationInspectionUseCase";
+import { ResolvePreparationInspectionUseCase } from "../../application/usecases/ResolvePreparationInspectionUseCase";
+import { FinishExecutionUseCase } from "../../application/usecases/FinishExecutionUseCase";
+import { AddWorkersBatchToWorkOrderUseCase } from "../../application/usecases/AddWorkersBatchToWorkOrderUseCase";
+import { RemoveWorkerFromWorkOrderUseCase } from "../../application/usecases/RemoveWorkerFromWorkOrderUseCase";
+import { AddWorkOrderMaterialsBatchUseCase } from "../../application/usecases/AddWorkOrderMaterialsBatchUseCase";
+import { AddAdditionalCostsBatchUseCase } from "../../application/usecases/AddAdditionalCostsBatchUseCase";
+import { AddWorkOrderAttachmentUseCase } from "../../application/usecases/AddWorkOrderAttachmentUseCase";
+import { CreateQualityControlUseCase } from "../../application/usecases/CreateQualityControlUseCase";
+import { CompleteWorkOrderUseCase } from "../../application/usecases/CompleteWorkOrderUseCase";
+import { RegisterSatisfactionSurveyUseCase } from "../../application/usecases/RegisterSatisfactionSurveyUseCase";
+import { SubmitInspectionReportUseCase } from "../../application/usecases/SubmitInspectionReportUseCase";
+import { ProcessWorkOrderRepositoryImpl } from "../../infrastructure/repositories/ProcessWorkOrderRepositoryImpl";
 
 // ── Catastral (Fase 14 — solo instalación acometida) ──────────────────────────
-import { RegisterCadastralUseCase } from '../../../processes/solicitudes/application/usecases/RegisterCadastralUseCase';
-import { SolicitudRepositoryImpl } from '../../../processes/solicitudes/infrastructure/repositories/SolicitudRepositoryImpl';
-import type { RegisterCadastralDto } from '../../../processes/solicitudes/domain/repositories/SolicitudRepository';
-
-
+import { RegisterCadastralUseCase } from "../../../processes/solicitudes/application/usecases/RegisterCadastralUseCase";
+import { SolicitudRepositoryImpl } from "../../../processes/solicitudes/infrastructure/repositories/SolicitudRepositoryImpl";
+import type { RegisterCadastralDto } from "../../../processes/solicitudes/domain/repositories/SolicitudRepository";
 
 // ── Request DTO ────────────────────────────────────────────────────────────────
-import { ProcessWorkOrderRequest } from '../../domain/schemas/dto/request/process-work-order.request';
+import { ProcessWorkOrderRequest } from "../../domain/schemas/dto/request/process-work-order.request";
 
 // ── Domain types ───────────────────────────────────────────────────────────────
 import type {
   OrdenTrabajoDetalle,
-  OrdenTrabajoTracking
-} from '../../domain/schemas/dto/response/work-orders.get.response';
-import type { SubmitInspectionReportCommand } from '../../domain/schemas/dto/commands/submit-inspection-report.command';
+  OrdenTrabajoTracking,
+} from "../../domain/schemas/dto/response/work-orders.get.response";
+import type { SubmitInspectionReportCommand } from "../../domain/schemas/dto/commands/submit-inspection-report.command";
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
-import { WorkOrderHeroCard } from '../components/detail/WorkOrderHeroCard';
-import { WorkOrderInfoCard } from '../components/detail/WorkOrderInfoCard';
-import { WorkOrderMetricsCard } from '../components/detail/WorkOrderMetricsCard';
-import { WorkOrderTimelineCard } from '../components/detail/WorkOrderTimelineCard';
-import { WorkOrderMaterialsCard } from '../components/detail/WorkOrderMaterialsCard';
-import { WorkOrderAttachmentsCard } from '../components/detail/WorkOrderAttachmentsCard';
-import { WorkOrderQualityCard } from '../components/detail/WorkOrderQualityCard';
-import { WorkOrderSatisfactionCard } from '../components/detail/WorkOrderSatisfactionCard';
-import { WorkOrderPhaseActionBtn } from '../components/WorkOrderPhaseActionBtn';
+import { WorkOrderHeroCard } from "../components/detail/WorkOrderHeroCard";
+import { WorkOrderInfoCard } from "../components/detail/WorkOrderInfoCard";
+import { WorkOrderMetricsCard } from "../components/detail/WorkOrderMetricsCard";
+import { WorkOrderTimelineCard } from "../components/detail/WorkOrderTimelineCard";
+import { WorkOrderMaterialsCard } from "../components/detail/WorkOrderMaterialsCard";
+import { WorkOrderAttachmentsCard } from "../components/detail/WorkOrderAttachmentsCard";
+import { WorkOrderQualityCard } from "../components/detail/WorkOrderQualityCard";
+import { WorkOrderSatisfactionCard } from "../components/detail/WorkOrderSatisfactionCard";
+import { WorkOrderPhaseActionBtn } from "../components/WorkOrderPhaseActionBtn";
 
 // ── Modales ────────────────────────────────────────────────────────────────────
-import { AssignToCrewModal } from '../components/modals/AssignToCrewModal';
-import { AssignToWorkerModal } from '../components/modals/AssignToWorkerModal';
-import { CreateChecklistModal } from '../components/modals/CreateChecklistModal';
-import { AddAttachmentModal } from '../components/modals/AddAttachmentModal';
-import { CreateQualityControlModal } from '../components/modals/CreateQualityControlModal';
-import { RegisterSurveyModal } from '../components/modals/RegisterSurveyModal';
-import { ManageWorkersModal } from '../components/modals/ManageWorkersModal';
-import { SubmitInspectionReportModal as WOInspectionModal } from '../components/modals/SubmitInspectionReportModal';
-import { RegisterCadastralModal } from '../components/modals/RegisterCadastralModal';
-import { SubmitInspectionReportModal as SolicitudInspectionModal } from '../../../processes/solicitudes/presentation/components/SubmitInspectionReportModal';
+import { AssignToCrewModal } from "../components/modals/AssignToCrewModal";
+import { AssignToWorkerModal } from "../components/modals/AssignToWorkerModal";
+import { CreateChecklistModal } from "../components/modals/CreateChecklistModal";
+import { AddAttachmentModal } from "../components/modals/AddAttachmentModal";
+import { CreateQualityControlModal } from "../components/modals/CreateQualityControlModal";
+import { RegisterSurveyModal } from "../components/modals/RegisterSurveyModal";
+import { ManageWorkersModal } from "../components/modals/ManageWorkersModal";
+import { SubmitInspectionReportModal as WOInspectionModal } from "../components/modals/SubmitInspectionReportModal";
+import { RegisterCadastralModal } from "../components/modals/RegisterCadastralModal";
+import { SubmitInspectionReportModal as SolicitudInspectionModal } from "../../../processes/solicitudes/presentation/components/SubmitInspectionReportModal";
 
-import { DocumentPreviewModal } from '@/shared/presentation/components/DocumentPreviewModal';
-import { WorkOrderPdfGenerator } from '../components/templates/pdf/WorkOrderPdfGenerator';
+import { DocumentPreviewModal } from "@/shared/presentation/components/DocumentPreviewModal";
+import { WorkOrderPdfGenerator } from "../components/templates/pdf/WorkOrderPdfGenerator";
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 import {
@@ -95,47 +93,47 @@ import {
   AlertTriangle,
   Clock,
   FileText,
-  Printer
-} from 'lucide-react';
-import '../styles/WorkOrderDetailPage.css';
+  Printer,
+} from "lucide-react";
+import "../styles/WorkOrderDetailPage.css";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 const esOTInspeccionAcometida = (orden: OrdenTrabajoDetalle): boolean => {
-  const nombre = (orden.tipoTrabajo ?? '').toUpperCase();
+  const nombre = (orden.tipoTrabajo ?? "").toUpperCase();
   return (
-    (nombre.includes('INSPECCION') ||
-      nombre.includes('INSPECCIÓN') ||
-      nombre.includes('FACTIBILIDAD')) &&
-    (orden.origen ?? '').toUpperCase() === 'SOLICITUD' &&
+    (nombre.includes("INSPECCION") ||
+      nombre.includes("INSPECCIÓN") ||
+      nombre.includes("FACTIBILIDAD")) &&
+    (orden.origen ?? "").toUpperCase() === "SOLICITUD" &&
     !!orden.idEntidadOrigen
   );
 };
 
 const esOTInstalacionAcometida = (orden: OrdenTrabajoDetalle): boolean => {
-  const nombre = (orden.tipoTrabajo ?? '').toUpperCase();
+  const nombre = (orden.tipoTrabajo ?? "").toUpperCase();
   return (
-    (nombre.includes('INSTALACION') ||
-      nombre.includes('INSTALACIÓN') ||
-      nombre.includes('MEDIDOR') ||
-      nombre.includes('CALIBRACION')) &&
-    (orden.origen ?? '').toUpperCase() === 'SOLICITUD' &&
+    (nombre.includes("INSTALACION") ||
+      nombre.includes("INSTALACIÓN") ||
+      nombre.includes("MEDIDOR") ||
+      nombre.includes("CALIBRACION")) &&
+    (orden.origen ?? "").toUpperCase() === "SOLICITUD" &&
     !!orden.idEntidadOrigen
   );
 };
 
 const ESTADOS_TERMINAL = new Set([
-  'COMPLETADA',
-  'CANCELADA',
-  'INSTALACION_COMPLETADA',
-  'INSPECCION_COMPLETADA'
+  "COMPLETADA",
+  "CANCELADA",
+  "INSTALACION_COMPLETADA",
+  "INSPECCION_COMPLETADA",
 ]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 export const WorkOrderDetailPage: React.FC = () => {
-  const { codigoOrden = '' } = useParams<{ codigoOrden: string }>();
+  const { codigoOrden = "" } = useParams<{ codigoOrden: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const currentUserId = user?.userId ?? '';
+  const currentUserId = user?.userId ?? "";
 
   // ── Data state ──────────────────────────────────────────────────────────────
   const [orden, setOrden] = useState<OrdenTrabajoDetalle | null>(null);
@@ -157,12 +155,14 @@ export const WorkOrderDetailPage: React.FC = () => {
   const [showSolicitudReport, setShowSolicitudReport] = useState(false);
   const [showCadastral, setShowCadastral] = useState(false);
   const [pendingNextState, setPendingNextState] = useState<string | null>(null);
+  const [pendingFinalizationDescription, setPendingFinalizationDescription] =
+    useState<string | null>(null);
 
   // ── Document Preview PDF state ──────────────────────────────────────────────
   const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
   const [isDocPreviewOpen, setIsDocPreviewOpen] = useState(false);
   const [isGeneratingDocPdf, setIsGeneratingDocPdf] = useState(false);
-  const [pdfFileName, setPdfFileName] = useState<string>('OrdenTrabajo.pdf');
+  const [pdfFileName, setPdfFileName] = useState<string>("OrdenTrabajo.pdf");
 
   // ── Loading states ──────────────────────────────────────────────────────────
   const [isReceiving, setIsReceiving] = useState(false);
@@ -178,81 +178,80 @@ export const WorkOrderDetailPage: React.FC = () => {
 
   const detalleUseCase = React.useMemo(
     () => new GetOrdenTrabajoDetalleByNumeroOrdenUseCase(repo),
-    [repo]
+    [repo],
   );
   const trackingUseCase = React.useMemo(
     () => new GetOrdenTrabajoTrackingByNumeroOrdenUseCase(repo),
-    [repo]
+    [repo],
   );
   const receiveUseCase = React.useMemo(
     () => new ReceiveWorkOrderUseCase(repo),
-    [repo]
+    [repo],
   );
   const assignCrewUseCase = React.useMemo(
     () => new AssignWorkOrderToCrewUseCase(repo),
-    [repo]
+    [repo],
   );
   const assignWorkerUseCase = React.useMemo(
     () => new AssignWorkOrderToWorkerUseCase(repo),
-    [repo]
+    [repo],
   );
   const startPrepUseCase = React.useMemo(
     () => new StartPreparationUseCase(repo),
-    [repo]
+    [repo],
   );
   const checklistUseCase = React.useMemo(
     () => new CreatePreparationInspectionUseCase(repo),
-    [repo]
+    [repo],
   );
   const resolveChecklistUC = React.useMemo(
     () => new ResolvePreparationInspectionUseCase(repo),
-    [repo]
+    [repo],
   );
   const finishExecUseCase = React.useMemo(
     () => new FinishExecutionUseCase(repo),
-    [repo]
+    [repo],
   );
   const addWorkersBatchUseCase = React.useMemo(
     () => new AddWorkersBatchToWorkOrderUseCase(repo),
-    [repo]
+    [repo],
   );
   const removeWorkerUseCase = React.useMemo(
     () => new RemoveWorkerFromWorkOrderUseCase(repo),
-    [repo]
+    [repo],
   );
   const materialsBatchUseCase = React.useMemo(
     () => new AddWorkOrderMaterialsBatchUseCase(repo),
-    [repo]
+    [repo],
   );
   const costsBatchUseCase = React.useMemo(
     () => new AddAdditionalCostsBatchUseCase(repo),
-    [repo]
+    [repo],
   );
   const attachmentUseCase = React.useMemo(
     () => new AddWorkOrderAttachmentUseCase(repo),
-    [repo]
+    [repo],
   );
   const qcUseCase = React.useMemo(
     () => new CreateQualityControlUseCase(repo),
-    [repo]
+    [repo],
   );
   const completeUseCase = React.useMemo(
     () => new CompleteWorkOrderUseCase(repo),
-    [repo]
+    [repo],
   );
   const surveyUseCase = React.useMemo(
     () => new RegisterSatisfactionSurveyUseCase(repo),
-    [repo]
+    [repo],
   );
   const woInspUseCase = React.useMemo(
     () => new SubmitInspectionReportUseCase(repo),
-    [repo]
+    [repo],
   );
   const cadastralUseCase = React.useMemo(
     () => new RegisterCadastralUseCase(solicitudRepo),
-    [solicitudRepo]
+    [solicitudRepo],
   );
-
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
   const reload = useCallback(() => setReloadTrigger((p) => p + 1), []);
@@ -267,17 +266,19 @@ export const WorkOrderDetailPage: React.FC = () => {
       if (!detailToPrint || detailToPrint.codigoOrden !== codigoOrden) {
         detailToPrint = await detalleUseCase.execute(codigoOrden);
       }
-      const printedBy = user?.username || user?.cardId || '-';
-      const inputData = detailToPrint ? { ...detailToPrint, printedBy } : { printedBy };
+      const printedBy = user?.username || user?.cardId || "-";
+      const inputData = detailToPrint
+        ? { ...detailToPrint, printedBy }
+        : { printedBy };
       const generator = new WorkOrderPdfGenerator();
       const url = await generator.generateBlobUrl([inputData as any]);
       setDocPreviewUrl(url);
       setPdfFileName(`OrdenTrabajo_${codigoOrden}.pdf`);
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error al generar PDF',
-        e.message || 'No se pudo generar el PDF de la orden de trabajo.'
+        "error",
+        "Error al generar PDF",
+        e.message || "No se pudo generar el PDF de la orden de trabajo.",
       );
       setIsDocPreviewOpen(false);
     } finally {
@@ -303,7 +304,7 @@ export const WorkOrderDetailPage: React.FC = () => {
       try {
         const [det, trk] = await Promise.all([
           detalleUseCase.execute(codigoOrden),
-          trackingUseCase.execute(codigoOrden)
+          trackingUseCase.execute(codigoOrden),
         ]);
         if (isMounted) {
           setOrden(det);
@@ -311,7 +312,7 @@ export const WorkOrderDetailPage: React.FC = () => {
         }
       } catch (e: any) {
         if (isMounted)
-          setError(e.message || 'Error al cargar la orden de trabajo.');
+          setError(e.message || "Error al cargar la orden de trabajo.");
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -336,22 +337,22 @@ export const WorkOrderDetailPage: React.FC = () => {
       await receiveUseCase.execute(
         new ProcessWorkOrderRequest(
           orden.idOrdenTrabajo,
-          'PENDIENTE',
+          "PENDIENTE",
           currentUserId,
-          'OT recepcionada'
-        )
+          "OT recepcionada",
+        ),
       );
       MessageToastCustom(
-        'success',
-        'OT Recepcionada',
-        'La orden pasó a estado PENDIENTE.'
+        "success",
+        "OT Recepcionada",
+        "La orden pasó a estado PENDIENTE.",
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo recepcionar la OT.'
+        "error",
+        "Error",
+        e.message || "No se pudo recepcionar la OT.",
       );
     } finally {
       setIsReceiving(false);
@@ -367,20 +368,20 @@ export const WorkOrderDetailPage: React.FC = () => {
         workOrderId: orden.idOrdenTrabajo,
         crewId,
         assignedByUserId: currentUserId,
-        comment
+        comment,
       });
       MessageToastCustom(
-        'success',
-        'Técnico Asignado',
-        'La OT fue asignada al técnico.'
+        "success",
+        "Técnico Asignado",
+        "La OT fue asignada al técnico.",
       );
       setAssignCrewOpen(false);
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo asignar el técnico.'
+        "error",
+        "Error",
+        e.message || "No se pudo asignar el técnico.",
       );
     } finally {
       setIsModalLoading(false);
@@ -395,20 +396,20 @@ export const WorkOrderDetailPage: React.FC = () => {
         workOrderId: orden.idOrdenTrabajo,
         workerId,
         assignedByUserId: currentUserId,
-        comment
+        comment,
       });
       MessageToastCustom(
-        'success',
-        'Técnico Asignado',
-        'La OT fue asignada al técnico.'
+        "success",
+        "Técnico Asignado",
+        "La OT fue asignada al técnico.",
       );
       setAssignWorkerOpen(false);
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo asignar el técnico.'
+        "error",
+        "Error",
+        e.message || "No se pudo asignar el técnico.",
       );
     } finally {
       setIsModalLoading(false);
@@ -423,22 +424,22 @@ export const WorkOrderDetailPage: React.FC = () => {
       await startPrepUseCase.execute(
         new ProcessWorkOrderRequest(
           orden.idOrdenTrabajo,
-          'PREPARACION',
+          "PREPARACION",
           currentUserId,
-          'Inicio de preparación'
-        )
+          "Inicio de preparación",
+        ),
       );
       MessageToastCustom(
-        'success',
-        'Preparación Iniciada',
-        'La OT pasó a estado PREPARACION.'
+        "success",
+        "Preparación Iniciada",
+        "La OT pasó a estado PREPARACION.",
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo iniciar la preparación.'
+        "error",
+        "Error",
+        e.message || "No se pudo iniciar la preparación.",
       );
     } finally {
       setIsStartingPrep(false);
@@ -452,22 +453,22 @@ export const WorkOrderDetailPage: React.FC = () => {
       await startPrepUseCase.execute(
         new ProcessWorkOrderRequest(
           orden.idOrdenTrabajo,
-          'PREPARACION',
+          "PREPARACION",
           currentUserId,
-          'Reinicio de preparación'
-        )
+          "Reinicio de preparación",
+        ),
       );
       MessageToastCustom(
-        'success',
-        'Preparación Reiniciada',
-        'La OT volvió al estado PREPARACION.'
+        "success",
+        "Preparación Reiniciada",
+        "La OT volvió al estado PREPARACION.",
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo reiniciar la preparación.'
+        "error",
+        "Error",
+        e.message || "No se pudo reiniciar la preparación.",
       );
     } finally {
       setIsRestartingPrep(false);
@@ -476,7 +477,7 @@ export const WorkOrderDetailPage: React.FC = () => {
 
   const handleCreateChecklist = async (
     passed: boolean,
-    observations: string
+    observations: string,
   ) => {
     if (!orden) return;
     setIsModalLoading(true);
@@ -485,20 +486,20 @@ export const WorkOrderDetailPage: React.FC = () => {
         workOrderId: orden.idOrdenTrabajo,
         createdByUserId: currentUserId,
         passed,
-        observations
+        observations,
       });
       MessageToastCustom(
-        'success',
-        'Checklist Registrado',
-        passed ? 'Preparación aprobada.' : 'Preparación rechazada.'
+        "success",
+        "Checklist Registrado",
+        passed ? "Preparación aprobada." : "Preparación rechazada.",
       );
       setChecklistOpen(false);
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo registrar el checklist.'
+        "error",
+        "Error",
+        e.message || "No se pudo registrar el checklist.",
       );
     } finally {
       setIsModalLoading(false);
@@ -508,7 +509,7 @@ export const WorkOrderDetailPage: React.FC = () => {
   const handleResolveChecklist = async (approved: boolean) => {
     if (!orden) return;
     setIsResolvingChecklist(true);
-    const newStatus = approved ? 'EN_PROCESO' : 'REVISION_RECHAZADA';
+    const newStatus = approved ? "EN_PROCESO" : "REVISION_RECHAZADA";
     try {
       await resolveChecklistUC.execute(
         new ProcessWorkOrderRequest(
@@ -516,23 +517,23 @@ export const WorkOrderDetailPage: React.FC = () => {
           newStatus,
           currentUserId,
           approved
-            ? 'Inspección aprobada — iniciando ejecución'
-            : 'Inspección rechazada'
-        )
+            ? "Inspección aprobada — iniciando ejecución"
+            : "Inspección rechazada",
+        ),
       );
       MessageToastCustom(
-        'success',
-        approved ? 'Checklist Aprobado' : 'Checklist Rechazado',
+        "success",
+        approved ? "Checklist Aprobado" : "Checklist Rechazado",
         approved
-          ? 'La OT pasó a EN PROCESO.'
-          : 'El técnico debe corregir y reiniciar.'
+          ? "La OT pasó a EN PROCESO."
+          : "El técnico debe corregir y reiniciar.",
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo resolver el checklist.'
+        "error",
+        "Error",
+        e.message || "No se pudo resolver el checklist.",
       );
     } finally {
       setIsResolvingChecklist(false);
@@ -542,41 +543,41 @@ export const WorkOrderDetailPage: React.FC = () => {
   // ── Fase 4: Ejecución en campo ───────────────────────────────────────────────
   const executeFinishExec = async () => {
     if (!orden) return;
-    if (esInspeccionAcometida && orden.estado === 'EN_PROCESO_INSPECCION') {
+    if (esInspeccionAcometida && orden.estado === "EN_PROCESO_INSPECCION") {
       MessageToastCustom(
-        'warning',
-        'Paso requerido',
-        'Para esta OT primero debes registrar el informe técnico antes de finalizar ejecución.'
+        "warning",
+        "Paso requerido",
+        "Para esta OT primero debes registrar el informe técnico antes de finalizar ejecución.",
       );
       return;
     }
     setIsFinishingExec(true);
     const nextStatus =
-      orden.estado === 'EN_PROCESO_INSPECCION'
-        ? 'INSPECCION_EJECUTADA'
-        : orden.estado === 'EN_PROCESO_INSTALACION'
-          ? 'INSTALACION_EJECUTADA'
-          : 'EJECUTADA';
+      orden.estado === "EN_PROCESO_INSPECCION"
+        ? "INSPECCION_EJECUTADA"
+        : orden.estado === "EN_PROCESO_INSTALACION"
+          ? "INSTALACION_EJECUTADA"
+          : "EJECUTADA";
     try {
       await finishExecUseCase.execute(
         new ProcessWorkOrderRequest(
           orden.idOrdenTrabajo,
           nextStatus,
           currentUserId,
-          'Trabajo técnico finalizado en campo'
-        )
+          "Trabajo técnico finalizado en campo",
+        ),
       );
       MessageToastCustom(
-        'success',
-        'Ejecución Finalizada',
-        'La OT pasó al siguiente estado de ejecución.'
+        "success",
+        "Ejecución Finalizada",
+        "La OT pasó al siguiente estado de ejecución.",
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo finalizar la ejecución.'
+        "error",
+        "Error",
+        e.message || "No se pudo finalizar la ejecución.",
       );
     } finally {
       setIsFinishingExec(false);
@@ -598,7 +599,11 @@ export const WorkOrderDetailPage: React.FC = () => {
   }, [reload]);
 
   const handleSaveWorkersBatch = async (
-    workers: { workerId: string; roleId?: number | null; isResponsible?: boolean }[]
+    workers: {
+      workerId: string;
+      roleId?: number | null;
+      isResponsible?: boolean;
+    }[],
   ) => {
     if (!orden) return;
     setIsModalLoading(true);
@@ -606,19 +611,19 @@ export const WorkOrderDetailPage: React.FC = () => {
       await addWorkersBatchUseCase.execute({
         workOrderId: orden.idOrdenTrabajo,
         assignedByUserId: currentUserId,
-        workers
+        workers,
       });
       MessageToastCustom(
-        'success',
-        'Personal Agregado',
-        `Se agregaron ${workers.length} trabajador(es) a la OT.`
+        "success",
+        "Personal Agregado",
+        `Se agregaron ${workers.length} trabajador(es) a la OT.`,
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo agregar al personal.'
+        "error",
+        "Error",
+        e.message || "No se pudo agregar al personal.",
       );
     } finally {
       setIsModalLoading(false);
@@ -632,19 +637,19 @@ export const WorkOrderDetailPage: React.FC = () => {
       await removeWorkerUseCase.execute({
         workOrderId: orden.idOrdenTrabajo,
         workerId,
-        removedByUserId: currentUserId
+        removedByUserId: currentUserId,
       });
       MessageToastCustom(
-        'success',
-        'Personal Removido',
-        'El trabajador fue removido de la OT.'
+        "success",
+        "Personal Removido",
+        "El trabajador fue removido de la OT.",
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo remover al trabajador.'
+        "error",
+        "Error",
+        e.message || "No se pudo remover al trabajador.",
       );
     } finally {
       setIsModalLoading(false);
@@ -652,7 +657,7 @@ export const WorkOrderDetailPage: React.FC = () => {
   };
 
   const handleSaveMaterialsBatch = async (
-    materials: { materialId: number; quantity: number; unitCost: number }[]
+    materials: { materialId: number; quantity: number; unitCost: number }[],
   ) => {
     if (!orden) return;
     setIsModalLoading(true);
@@ -660,19 +665,19 @@ export const WorkOrderDetailPage: React.FC = () => {
       await materialsBatchUseCase.execute({
         workOrderId: orden.idOrdenTrabajo,
         createdByUserId: currentUserId,
-        materials
+        materials,
       });
       MessageToastCustom(
-        'success',
-        'Materiales Registrados',
-        `Se agregaron ${materials.length} material(es) a la OT.`
+        "success",
+        "Materiales Registrados",
+        `Se agregaron ${materials.length} material(es) a la OT.`,
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo registrar los materiales.'
+        "error",
+        "Error",
+        e.message || "No se pudo registrar los materiales.",
       );
     } finally {
       setIsModalLoading(false);
@@ -681,22 +686,22 @@ export const WorkOrderDetailPage: React.FC = () => {
 
   const handleRemoveMaterial = async (_idDetalle: string | number) => {
     MessageToastCustom(
-      'info',
-      'En desarrollo',
-      'La función para remover materiales está en desarrollo.'
+      "info",
+      "En desarrollo",
+      "La función para remover materiales está en desarrollo.",
     );
   };
 
   const handleRemoveCost = async (_idCosto: string | number) => {
     MessageToastCustom(
-      'info',
-      'En desarrollo',
-      'La función para remover costos adicionales está en desarrollo.'
+      "info",
+      "En desarrollo",
+      "La función para remover costos adicionales está en desarrollo.",
     );
   };
 
   const handleSaveCostsBatch = async (
-    costs: { concept: string; quantity: number; unitCost: number }[]
+    costs: { concept: string; quantity: number; unitCost: number }[],
   ) => {
     if (!orden) return;
     setIsModalLoading(true);
@@ -704,48 +709,46 @@ export const WorkOrderDetailPage: React.FC = () => {
       await costsBatchUseCase.execute({
         workOrderId: orden.idOrdenTrabajo,
         createdByUserId: currentUserId,
-        costs
+        costs,
       });
       MessageToastCustom(
-        'success',
-        'Costos Registrados',
-        `Se agregaron ${costs.length} costo(s) adicional(es).`
+        "success",
+        "Costos Registrados",
+        `Se agregaron ${costs.length} costo(s) adicional(es).`,
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo registrar los costos.'
+        "error",
+        "Error",
+        e.message || "No se pudo registrar los costos.",
       );
     } finally {
       setIsModalLoading(false);
     }
   };
 
-  const handleAddAttachment = async (
-    files: File[]
-  ) => {
+  const handleAddAttachment = async (files: File[]) => {
     if (!orden) return;
     setIsModalLoading(true);
     try {
       await attachmentUseCase.execute({
         workOrderId: orden.idOrdenTrabajo,
         files,
-        createdByUserId: currentUserId
+        createdByUserId: currentUserId,
       });
       MessageToastCustom(
-        'success',
-        'Evidencia Adjuntada',
-        `${files.length} archivo(s) adjuntado(s) a la OT.`
+        "success",
+        "Evidencia Adjuntada",
+        `${files.length} archivo(s) adjuntado(s) a la OT.`,
       );
       setAddAttachmentOpen(false);
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo adjuntar la evidencia.'
+        "error",
+        "Error",
+        e.message || "No se pudo adjuntar la evidencia.",
       );
     } finally {
       setIsModalLoading(false);
@@ -761,20 +764,20 @@ export const WorkOrderDetailPage: React.FC = () => {
         workOrderId: orden.idOrdenTrabajo,
         createdByUserId: currentUserId,
         approved,
-        comments
+        comments,
       });
       MessageToastCustom(
-        'success',
-        'QC Registrado',
-        approved ? 'OT aprobada en calidad.' : 'OT rechazada — en revisión.'
+        "success",
+        "QC Registrado",
+        approved ? "OT aprobada en calidad." : "OT rechazada — en revisión.",
       );
       setQualityControlOpen(false);
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo registrar el control de calidad.'
+        "error",
+        "Error",
+        e.message || "No se pudo registrar el control de calidad.",
       );
     } finally {
       setIsModalLoading(false);
@@ -784,15 +787,21 @@ export const WorkOrderDetailPage: React.FC = () => {
   // ── Fase 6: Completar OT ─────────────────────────────────────────────────────
   const handleComplete = async () => {
     if (!orden) return;
+    const finalizationDescription = window
+      .prompt("Describe los trabajos realizados para completar la orden:")
+      ?.trim();
+    if (!finalizationDescription) return;
+
     const nextStatus =
-      orden.estado === 'INSPECCION_EJECUTADA'
-        ? 'INSPECCION_COMPLETADA'
-        : orden.estado === 'INSTALACION_EJECUTADA'
-          ? 'INSTALACION_COMPLETADA'
-          : 'COMPLETADA';
+      orden.estado === "INSPECCION_EJECUTADA"
+        ? "INSPECCION_COMPLETADA"
+        : orden.estado === "INSTALACION_EJECUTADA"
+          ? "INSTALACION_COMPLETADA"
+          : "COMPLETADA";
 
     if (esInstalacionAcometida) {
       setPendingNextState(nextStatus);
+      setPendingFinalizationDescription(finalizationDescription);
       setShowCadastral(true);
       return;
     }
@@ -803,20 +812,21 @@ export const WorkOrderDetailPage: React.FC = () => {
           orden.idOrdenTrabajo,
           nextStatus,
           currentUserId,
-          'Cierre administrativo'
-        )
+          "Cierre administrativo",
+          finalizationDescription,
+        ),
       );
       MessageToastCustom(
-        'success',
-        'OT Completada',
-        'La orden de trabajo fue cerrada exitosamente.'
+        "success",
+        "OT Completada",
+        "La orden de trabajo fue cerrada exitosamente.",
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo completar la OT.'
+        "error",
+        "Error",
+        e.message || "No se pudo completar la OT.",
       );
     } finally {
       setIsCompleting(false);
@@ -832,20 +842,20 @@ export const WorkOrderDetailPage: React.FC = () => {
         workOrderId: orden.idOrdenTrabajo,
         rating,
         createdByUserId: currentUserId,
-        comments
+        comments,
       });
       MessageToastCustom(
-        'success',
-        'Encuesta Registrada',
-        `Calificación ${rating}/5 registrada.`
+        "success",
+        "Encuesta Registrada",
+        `Calificación ${rating}/5 registrada.`,
       );
       setRegisterSurveyOpen(false);
       reload();
     } catch (e: any) {
       MessageToastCustom(
-        'error',
-        'Error',
-        e.message || 'No se pudo registrar la encuesta.'
+        "error",
+        "Error",
+        e.message || "No se pudo registrar la encuesta.",
       );
     } finally {
       setIsModalLoading(false);
@@ -859,23 +869,23 @@ export const WorkOrderDetailPage: React.FC = () => {
       try {
         await woInspUseCase.execute(cmd);
         MessageToastCustom(
-          'success',
-          'Informe Enviado',
-          'El informe técnico fue enviado.'
+          "success",
+          "Informe Enviado",
+          "El informe técnico fue enviado.",
         );
         setShowWOInspReport(false);
         reload();
       } catch (e: any) {
         MessageToastCustom(
-          'error',
-          'Error',
-          e.message || 'No se pudo enviar el informe.'
+          "error",
+          "Error",
+          e.message || "No se pudo enviar el informe.",
         );
       } finally {
         setIsModalLoading(false);
       }
     },
-    [woInspUseCase, reload]
+    [woInspUseCase, reload],
   );
 
   // ── Registro catastral + completar instalación (Fase 14) ────────────────────
@@ -884,28 +894,33 @@ export const WorkOrderDetailPage: React.FC = () => {
       if (!orden || !pendingNextState) return;
       setIsModalLoading(true);
       try {
+        if (!pendingFinalizationDescription) {
+          throw new Error("La descripción de finalización es requerida.");
+        }
         await cadastralUseCase.execute(dto);
         await completeUseCase.execute(
           new ProcessWorkOrderRequest(
             orden.idOrdenTrabajo,
             pendingNextState,
             currentUserId,
-            'Instalación completada con registro catastral.'
-          )
+            "Instalación completada con registro catastral.",
+            pendingFinalizationDescription,
+          ),
         );
         MessageToastCustom(
-          'success',
-          'Instalación Completada',
-          'Servicio activado en el catastro.'
+          "success",
+          "Instalación Completada",
+          "Servicio activado en el catastro.",
         );
         setShowCadastral(false);
         setPendingNextState(null);
+        setPendingFinalizationDescription(null);
         reload();
       } catch (e: any) {
         MessageToastCustom(
-          'error',
-          'Error',
-          e.message || 'Error al registrar el catastro.'
+          "error",
+          "Error",
+          e.message || "Error al registrar el catastro.",
         );
         throw e;
       } finally {
@@ -915,23 +930,24 @@ export const WorkOrderDetailPage: React.FC = () => {
     [
       orden,
       pendingNextState,
+      pendingFinalizationDescription,
       cadastralUseCase,
       completeUseCase,
       currentUserId,
-      reload
-    ]
+      reload,
+    ],
   );
 
   // ── Formatted date ───────────────────────────────────────────────────────────
   const updatedStr = orden?.updatedAt
-    ? new Date(orden.updatedAt).toLocaleDateString('es-EC', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-    : '—';
+    ? new Date(orden.updatedAt).toLocaleDateString("es-EC", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "—";
 
   // ── Loading ──────────────────────────────────────────────────────────────────
   if (isLoading) {
@@ -952,10 +968,10 @@ export const WorkOrderDetailPage: React.FC = () => {
         <div className="wo-detail-error">
           <AlertTriangle
             size={48}
-            style={{ color: 'var(--error)', opacity: 0.8 }}
+            style={{ color: "var(--error)", opacity: 0.8 }}
           />
           <h3>Orden no encontrada</h3>
-          <p>{error || 'No se pudo localizar la orden de trabajo.'}</p>
+          <p>{error || "No se pudo localizar la orden de trabajo."}</p>
           <Button variant="primary" onClick={() => navigate(-1)}>
             Volver Atrás
           </Button>
@@ -964,14 +980,19 @@ export const WorkOrderDetailPage: React.FC = () => {
     );
   }
 
-  const isTerminal = ESTADOS_TERMINAL.has(orden.estado ?? '');
+  const isTerminal = ESTADOS_TERMINAL.has(orden.estado ?? "");
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <PageLayout
       header={
-        <div className="wo-detail-header-nav" style={{ width: '100%', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+        <div
+          className="wo-detail-header-nav"
+          style={{ width: "100%", justifyContent: "space-between" }}
+        >
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}
+          >
             <Button
               variant="ghost"
               size="sm"
@@ -1010,7 +1031,7 @@ export const WorkOrderDetailPage: React.FC = () => {
           {!isTerminal && (
             <div className="wo-process-phase-actions">
               {/* Fase 2: Recepcionar */}
-              {orden.estado === 'NOTIFICADA' && (
+              {orden.estado === "NOTIFICADA" && (
                 <WorkOrderPhaseActionBtn
                   id="wo-btn-recepcionar"
                   color="#3b82f6"
@@ -1024,7 +1045,7 @@ export const WorkOrderDetailPage: React.FC = () => {
               )}
 
               {/* Fase 2: Asignar técnico responsable */}
-              {orden.estado === 'PENDIENTE' && (
+              {orden.estado === "PENDIENTE" && (
                 <WorkOrderPhaseActionBtn
                   id="wo-btn-assign-worker"
                   color="#3b82f6"
@@ -1037,7 +1058,7 @@ export const WorkOrderDetailPage: React.FC = () => {
               )}
 
               {/* Fase 3: Iniciar preparación */}
-              {orden.estado === 'ASIGNADA' && (
+              {orden.estado === "ASIGNADA" && (
                 <WorkOrderPhaseActionBtn
                   id="wo-btn-start-prep"
                   color="#8b5cf6"
@@ -1051,7 +1072,7 @@ export const WorkOrderDetailPage: React.FC = () => {
               )}
 
               {/* Fase 3: PREPARACION — registrar o resolver checklist */}
-              {orden.estado === 'PREPARACION' && (
+              {orden.estado === "PREPARACION" && (
                 <>
                   {!orden.idInspeccion && (
                     <WorkOrderPhaseActionBtn
@@ -1092,7 +1113,7 @@ export const WorkOrderDetailPage: React.FC = () => {
               )}
 
               {/* Fase 3: Revisión rechazada — reiniciar preparación */}
-              {orden.estado === 'REVISION_RECHAZADA' && (
+              {orden.estado === "REVISION_RECHAZADA" && (
                 <>
                   <div className="wo-process-info-banner wo-process-info-banner--warn">
                     <AlertTriangle size={16} />
@@ -1118,15 +1139,15 @@ export const WorkOrderDetailPage: React.FC = () => {
               )}
 
               {/* Fase 4: Acciones durante ejecución */}
-              {orden.estado === 'EN_PROCESO' && (
+              {orden.estado === "EN_PROCESO" && (
                 <>
                   <WorkOrderPhaseActionBtn
                     id="wo-btn-finish-exec"
-                    color={esInspeccionAcometida ? '#a855f7' : '#10b981'}
+                    color={esInspeccionAcometida ? "#a855f7" : "#10b981"}
                     bg={
                       esInspeccionAcometida
-                        ? 'rgba(168,85,247,0.1)'
-                        : 'rgba(16,185,129,0.12)'
+                        ? "rgba(168,85,247,0.1)"
+                        : "rgba(16,185,129,0.12)"
                     }
                     icon={
                       esInspeccionAcometida ? (
@@ -1137,13 +1158,13 @@ export const WorkOrderDetailPage: React.FC = () => {
                     }
                     label={
                       esInspeccionAcometida
-                        ? 'Finalizar Ejecución en Campo (con Informe)'
-                        : 'Finalizar Ejecución en Campo'
+                        ? "Finalizar Ejecución en Campo (con Informe)"
+                        : "Finalizar Ejecución en Campo"
                     }
                     sublabel={
                       esInspeccionAcometida
-                        ? 'Fase 4 — Primero registrar informe técnico'
-                        : 'Fase 4 — Marcar trabajo técnico completado'
+                        ? "Fase 4 — Primero registrar informe técnico"
+                        : "Fase 4 — Marcar trabajo técnico completado"
                     }
                     onClick={handleFinishExec}
                     loading={isFinishingExec}
@@ -1152,7 +1173,7 @@ export const WorkOrderDetailPage: React.FC = () => {
               )}
 
               {/* Fase 5: Control de calidad + Completar */}
-              {orden.estado === 'EJECUTADA' && (
+              {orden.estado === "EJECUTADA" && (
                 <>
                   {!orden.idControl && (
                     <WorkOrderPhaseActionBtn
@@ -1181,7 +1202,7 @@ export const WorkOrderDetailPage: React.FC = () => {
               )}
 
               {/* Fase 6: Encuesta de satisfacción */}
-              {orden.estado === 'COMPLETADA' && !orden.idEncuesta && (
+              {orden.estado === "COMPLETADA" && !orden.idEncuesta && (
                 <WorkOrderPhaseActionBtn
                   id="wo-btn-survey"
                   color="#f59e0b"
@@ -1199,7 +1220,7 @@ export const WorkOrderDetailPage: React.FC = () => {
           {isTerminal && orden.idEncuesta && (
             <div
               className="wo-process-info-banner wo-process-info-banner--success"
-              style={{ marginBottom: '16px' }}
+              style={{ marginBottom: "16px" }}
             >
               <Zap size={16} />
               <div>
@@ -1215,7 +1236,15 @@ export const WorkOrderDetailPage: React.FC = () => {
           <WorkOrderInfoCard
             orden={orden}
             onManageWorkers={
-              !['COMPLETADA', 'CANCELADA', 'EJECUTADA', 'INSPECCION_COMPLETADA', 'INSPECCION_EJECUTADA', 'INSTALACION_COMPLETADA', 'INSTALACION_EJECUTADA'].includes(orden.estado ?? '')
+              ![
+                "COMPLETADA",
+                "CANCELADA",
+                "EJECUTADA",
+                "INSPECCION_COMPLETADA",
+                "INSPECCION_EJECUTADA",
+                "INSTALACION_COMPLETADA",
+                "INSTALACION_EJECUTADA",
+              ].includes(orden.estado ?? "")
                 ? () => setManageWorkersOpen(true)
                 : undefined
             }
@@ -1226,22 +1255,38 @@ export const WorkOrderDetailPage: React.FC = () => {
             materiales={orden.materiales ?? []}
             costosAdicionales={orden.costosAdicionales ?? []}
             onSaveMaterialsBatch={
-              ['EN_PROCESO', 'EN_PROCESO_INSPECCION', 'EN_PROCESO_INSTALACION'].includes(orden.estado ?? '')
+              [
+                "EN_PROCESO",
+                "EN_PROCESO_INSPECCION",
+                "EN_PROCESO_INSTALACION",
+              ].includes(orden.estado ?? "")
                 ? handleSaveMaterialsBatch
                 : undefined
             }
             onRemoveMaterial={
-              ['EN_PROCESO', 'EN_PROCESO_INSPECCION', 'EN_PROCESO_INSTALACION'].includes(orden.estado ?? '')
+              [
+                "EN_PROCESO",
+                "EN_PROCESO_INSPECCION",
+                "EN_PROCESO_INSTALACION",
+              ].includes(orden.estado ?? "")
                 ? handleRemoveMaterial
                 : undefined
             }
             onSaveCostsBatch={
-              ['EN_PROCESO', 'EN_PROCESO_INSPECCION', 'EN_PROCESO_INSTALACION'].includes(orden.estado ?? '')
+              [
+                "EN_PROCESO",
+                "EN_PROCESO_INSPECCION",
+                "EN_PROCESO_INSTALACION",
+              ].includes(orden.estado ?? "")
                 ? handleSaveCostsBatch
                 : undefined
             }
             onRemoveCost={
-              ['EN_PROCESO', 'EN_PROCESO_INSPECCION', 'EN_PROCESO_INSTALACION'].includes(orden.estado ?? '')
+              [
+                "EN_PROCESO",
+                "EN_PROCESO_INSPECCION",
+                "EN_PROCESO_INSTALACION",
+              ].includes(orden.estado ?? "")
                 ? handleRemoveCost
                 : undefined
             }
@@ -1251,7 +1296,12 @@ export const WorkOrderDetailPage: React.FC = () => {
           <WorkOrderAttachmentsCard
             adjuntos={orden.adjuntos ?? []}
             onAddAttachment={
-              ['PREPARACION', 'EN_PROCESO', 'EN_PROCESO_INSPECCION', 'EN_PROCESO_INSTALACION'].includes(orden.estado ?? '')
+              [
+                "PREPARACION",
+                "EN_PROCESO",
+                "EN_PROCESO_INSPECCION",
+                "EN_PROCESO_INSTALACION",
+              ].includes(orden.estado ?? "")
                 ? handleAddAttachment
                 : undefined
             }
@@ -1307,8 +1357,6 @@ export const WorkOrderDetailPage: React.FC = () => {
         />
       )}
 
-
-
       {addAttachmentOpen && orden && (
         <AddAttachmentModal
           isOpen={addAttachmentOpen}
@@ -1329,7 +1377,7 @@ export const WorkOrderDetailPage: React.FC = () => {
             workerName: w.nombreTrabajador,
             roleId: null,
             roleName: w.rol ?? undefined,
-            isResponsible: w.esResponsable
+            isResponsible: w.esResponsable,
           }))}
           onSaveWorkersBatch={handleSaveWorkersBatch}
           onRemoveWorker={handleRemoveWorker}
@@ -1364,11 +1412,11 @@ export const WorkOrderDetailPage: React.FC = () => {
           onClose={() => setShowWOInspReport(false)}
           workOrderId={orden.idOrdenTrabajo}
           orderCode={orden.codigoOrden}
-          solicitudId={orden.idEntidadOrigen ?? ''}
+          solicitudId={orden.idEntidadOrigen ?? ""}
           technicianId={
             orden.personalAsignado?.[0]?.idTrabajador ??
             orden.idUsuarioAsignacion ??
-            ''
+            ""
           }
           onSubmit={handleSubmitWOInspReport}
           isLoading={isModalLoading}
@@ -1400,11 +1448,11 @@ export const WorkOrderDetailPage: React.FC = () => {
             setPendingNextState(null);
           }}
           orderCode={orden.codigoOrden}
-          solicitudId={orden.idEntidadOrigen ?? ''}
+          solicitudId={orden.idEntidadOrigen ?? ""}
           registratorId={currentUserId}
           contractId={undefined}
-          defaultAddress={orden.direccion ?? ''}
-          defaultDate={new Date().toISOString().split('T')[0]}
+          defaultAddress={orden.direccion ?? ""}
+          defaultDate={new Date().toISOString().split("T")[0]}
           onSubmit={handleCadastralSubmit}
           isLoading={isModalLoading}
         />
