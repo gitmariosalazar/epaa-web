@@ -263,10 +263,7 @@ export const AllWorkOrdersListPage: React.FC = () => {
               }}
             >
               <div className="loading">
-                <CircularProgress />
-                <span style={{ color: 'var(--text-muted)' }}>
-                  Cargando órdenes de trabajo...
-                </span>
+                <CircularProgress label='Cargando órdenes de trabajo...' />
               </div>
             </div>
           ) : isSearching ? (
@@ -279,10 +276,9 @@ export const AllWorkOrdersListPage: React.FC = () => {
                 gap: '1rem'
               }}
             >
-              <CircularProgress />
-              <span style={{ color: 'var(--text-muted)' }}>
-                Buscando órdenes de trabajo...
-              </span>
+              <div className="loading">
+                <CircularProgress label="Buscando órdenes de trabajo..." />
+              </div>
             </div>
           ) : error ? (
             <div className="wo-empty">

@@ -117,8 +117,7 @@ export const WorkOrdersListPage: React.FC = () => {
           }}
         >
           <div className="loading">
-            <CircularProgress />
-            <span style={{ color: 'var(--text-muted)' }}>Cargando órdenes de trabajo...</span>
+            <CircularProgress label='Cargando órdenes de trabajo...' />
           </div>
         </div>
       </PageLayout>
