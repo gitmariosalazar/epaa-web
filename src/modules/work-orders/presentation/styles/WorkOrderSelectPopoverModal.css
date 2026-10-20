@@ -1,0 +1,104 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+   WorkOrderSelectPopoverModal — Estilos para el selector de OTs múltiples
+   Compatible con temas Light y Dark usando variables del sistema.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.wo-select-popover-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.25rem 0;
+}
+
+.wo-select-popover-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.85rem;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border-color));
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.wo-select-popover-banner strong {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.wo-select-popover-count-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.wo-select-popover-code-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 6px;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.wo-select-popover-code-btn:hover {
+  background: var(--accent);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.wo-select-popover-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-width: 1px;
+  border-style: solid;
+  white-space: nowrap;
+}
+
+.wo-select-popover-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wo-select-popover-text-main {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.wo-select-popover-text-secondary {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.wo-select-popover-text-muted {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.wo-select-popover-text-sub {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: monospace;
+}

@@ -8,10 +8,10 @@ export class GetOrdenTrabajoTrackingByNumeroOrdenUseCase {
     this.processWorkOrderRepository = processWorkOrderRepository;
   }
 
-  async execute(numeroOrden: string): Promise<OrdenTrabajoTracking | null> {
+  async execute(searchValue: string): Promise<OrdenTrabajoTracking[]> {
     const result =
       await this.processWorkOrderRepository.getOrdenTrabajoTrackingByNumeroOrden(
-        numeroOrden
+        searchValue
       );
     return result;
   }

@@ -19,6 +19,7 @@ import type {
   WorkOrderPhaseId,
   WorkOrderProcessState
 } from './workOrderProcess.types';
+import type { OrdenTrabajoTracking } from '../../domain/schemas/dto/response/work-orders.get.response';
 
 const PHASE_LABELS: Record<WorkOrderPhaseId, string> = {
   all: 'Todas las fases',
@@ -420,10 +421,16 @@ export const useWorkOrderProcess = (
     }));
 
     try {
-      const tracking =
+      const trackingResult =
         await dependencies.getOrdenTrabajoTrackingByNumeroOrdenUseCase.execute(
           numero
         );
+      const tracking = Array.isArray(trackingResult)
+        ? (trackingResult.find(
+          (item) => item.codigoOrden?.toUpperCase() === numero.toUpperCase()
+        ) ?? trackingResult[0] ?? null)
+        : (trackingResult as OrdenTrabajoTracking | null);
+
       setState((current) => ({
         ...current,
         tracking,

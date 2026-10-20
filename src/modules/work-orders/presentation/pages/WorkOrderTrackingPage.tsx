@@ -82,7 +82,12 @@ export const WorkOrderTrackingPage: React.FC = () => {
       setError(null);
       try {
         const data = await trackingUseCase.execute(codigoOrden);
-        if (isMounted) setTracking(data);
+        if (isMounted) {
+          const item = Array.isArray(data)
+            ? (data.find(d => d.codigoOrden.toUpperCase() === codigoOrden.toUpperCase()) || data[0] || null)
+            : data;
+          setTracking(item);
+        }
       } catch (e: any) {
         if (isMounted) setError(e.message || 'Error al cargar el tracking.');
       } finally {
@@ -163,7 +168,7 @@ export const WorkOrderTrackingPage: React.FC = () => {
           className="wo-tracking-estado"
           style={{ borderColor: estadoConfig.color, background: estadoConfig.bg }}
         >
-          <div className="wo-tracking-estado__label">Estado actual</div>Hola Mario
+          <div className="wo-tracking-estado__label">Estado actual</div>
           <div
             className="wo-tracking-estado__value"
             style={{ color: estadoConfig.color }}

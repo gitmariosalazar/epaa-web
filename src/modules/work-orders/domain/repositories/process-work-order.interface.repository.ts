@@ -120,8 +120,8 @@ export interface ProcessWorkOrderRepository {
 
   /** Timeline y métricas de SLA de una OT — monitoreo interno */
   getOrdenTrabajoTrackingByNumeroOrden(
-    numeroOrden: string
-  ): Promise<OrdenTrabajoTracking | null>;
+    searchValue: string
+  ): Promise<OrdenTrabajoTracking[]>;
 
   /** OTs vinculadas a un trámite — portal del cliente */
   getOrdenesTrabajoBySolicitudId(
@@ -129,6 +129,7 @@ export interface ProcessWorkOrderRepository {
   ): Promise<OrdenTrabajoVistaCliente[]>;
 
   getAllWorkOrders(
+    searchValue?: string,
     limit?: number,
     offset?: number
   ): Promise<WorkOrderListItem[]>;

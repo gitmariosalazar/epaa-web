@@ -1,0 +1,51 @@
+.wo-process-auto-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  background: var(--surface, #ffffff);
+  border-radius: 1rem;
+  border: 1px solid var(--border-color, #e2e8f0);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  margin: 1rem 0;
+}
+
+.wo-process-loading__spinner {
+  width: 44px;
+  height: 44px;
+  border: 3.5px solid rgba(2, 132, 199, 0.2);
+  border-top-color: var(--primary, #0284c7);
+  border-radius: 50%;
+  animation: wo-spin 0.8s linear infinite;
+  margin-bottom: 1.25rem;
+  box-sizing: border-box;
+}
+
+@keyframes wo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.wo-process-loading__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+  line-height: 1.4;
+}
+
+.wo-process-loading__subtitle {
+  margin: 0.45rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.4;
+}
+
+.wo-process-loading__footer {
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary, #64748b);
+}

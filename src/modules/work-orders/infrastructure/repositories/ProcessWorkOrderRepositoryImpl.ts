@@ -54,14 +54,25 @@ const BASE = '/process-work-orders';
 /** Rutas del módulo inspection-report (connection-service gateway) */
 const INSPECTION_REPORT_BASE = '/inspection-report';
 
-const normalizeEntityOrigin = <T extends { idEntidadOrigen?: string | null }>(
+const normalizeEntityOrigin = <
+  T extends { idEntidadOrigen?: string | null; adjuntos?: any[] }
+>(
   payload: T | null
 ): T | null => {
   if (!payload) return payload;
-  const source = payload as T & { id_entidad_origen?: string | null };
+  const source = payload as any;
+  const normalizedAdjuntos = Array.isArray(source.adjuntos)
+    ? source.adjuntos.map((a: any) => ({
+        ...a,
+        evidenceStep:
+          a.evidenceStep ?? a.evidence_step ?? a.codigoEtapaEvidencia ?? null
+      }))
+    : source.adjuntos;
+
   return {
     ...payload,
-    idEntidadOrigen: source.idEntidadOrigen ?? source.id_entidad_origen ?? null
+    idEntidadOrigen: source.idEntidadOrigen ?? source.id_entidad_origen ?? null,
+    adjuntos: normalizedAdjuntos
   };
 };
 
@@ -297,7 +308,10 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
     formData.append('workOrderId', addWorkOrderAttachment.workOrderId);
     formData.append('createdByUserId', addWorkOrderAttachment.createdByUserId);
     if (addWorkOrderAttachment.evidenceStageCode) {
-      formData.append('evidenceStageCode', addWorkOrderAttachment.evidenceStageCode);
+      formData.append(
+        'evidenceStageCode',
+        addWorkOrderAttachment.evidenceStageCode
+      );
     }
     addWorkOrderAttachment.files.forEach((file) => {
       formData.append('files', file);
@@ -308,8 +322,8 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
       formData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+          'Content-Type': 'multipart/form-data'
+        }
       }
     );
     return (response.data as any)?.data ?? null;
@@ -396,18 +410,23 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
     return normalizeEntityOrigin(payload);
   }
 
-  // GET /process-work-orders/get-tracking-by-numero-orden?numeroOrden=OT-2026-…
+  // GET /process-work-orders/get-tracking-by-numero-orden?searchValue=…
 
   async getOrdenTrabajoTrackingByNumeroOrden(
-    numeroOrden: string
-  ): Promise<OrdenTrabajoTracking | null> {
-    const response = await this.client.get<OrdenTrabajoTracking>(
-      `${BASE}/get-tracking-by-numero-orden?numeroOrden=${encodeURIComponent(numeroOrden)}`
+    searchValue: string
+  ): Promise<OrdenTrabajoTracking[]> {
+    const response = await this.client.get<OrdenTrabajoTracking[]>(
+      `${BASE}/get-tracking-by-numero-orden?searchValue=${encodeURIComponent(searchValue)}&numeroOrden=${encodeURIComponent(searchValue)}`
     );
-    const payload = ((response.data as any)?.data ?? null) as
-      | (OrdenTrabajoTracking & { id_entidad_origen?: string | null })
-      | null;
-    return normalizeEntityOrigin(payload);
+    const rawData = (response.data as any)?.data;
+    if (!rawData) return [];
+
+    const list: (OrdenTrabajoTracking & { id_entidad_origen?: string | null })[] =
+      Array.isArray(rawData) ? rawData : [rawData];
+
+    return list
+      .map((item) => normalizeEntityOrigin(item))
+      .filter((item): item is OrdenTrabajoTracking => item !== null);
   }
 
   // GET /process-work-orders/get-ordenes-by-solicitud-id?solicitudId=…
@@ -481,18 +500,26 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
   // GET /process-work-orders/get-all-work-orders
 
   async getAllWorkOrders(
+    searchValue?: string,
     limit?: number,
     offset?: number
   ): Promise<WorkOrderListItem[]> {
-    // ✅ Solo incluimos los parámetros si tienen valor numérico válido.
-    //    Si son undefined, enviamos los defaults que acepta el backend.
     const params = new URLSearchParams();
-    params.set('limit', String(limit ?? 100));
-    params.set('offset', String(offset ?? 0));
+    if (searchValue && searchValue.trim().length > 0) {
+      params.set('searchValue', searchValue.trim());
+    }
+    // Límite alto por defecto (2000) para retornar todas las órdenes registradas sin truncar
+    params.set('limit', String(limit ?? 2000));
+    if (offset !== undefined && offset !== null) {
+      params.set('offset', String(offset));
+    }
 
-    const response = await this.client.get<WorkOrderListItem[]>(
-      `${BASE}/get-all-work-orders?${params.toString()}`
-    );
+    const queryString = params.toString();
+    const endpoint = queryString
+      ? `${BASE}/get-all-work-orders?${queryString}`
+      : `${BASE}/get-all-work-orders`;
+
+    const response = await this.client.get<WorkOrderListItem[]>(endpoint);
     return (response.data as any)?.data ?? [];
   }
 
@@ -511,9 +538,6 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
   async submitInstallationReport(
     cmd: SubmitInstallationReportCommand
   ): Promise<void> {
-    await this.client.post<void>(
-      `/installation-report/ordenes/informe`,
-      cmd
-    );
+    await this.client.post<void>(`/installation-report/ordenes/informe`, cmd);
   }
 }

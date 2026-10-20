@@ -48,8 +48,11 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
   useEffect(() => {
     const loadUsers = async () => {
       try {
+        const data = (await getUsersUseCase.execute(500, 0));
+        /*
         const data = (await getUsersUseCase.execute(500, 0)).filter(u =>
           u.positionName?.includes('Analista de Servicios') || u.positionName?.includes('Tecnico de Servicios'));
+        */
         setUsers(data);
       } catch (err) {
         console.error('Error al cargar usuarios:', err);
@@ -57,6 +60,7 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
     };
     loadUsers();
   }, [getUsersUseCase]);
+
 
   const [pendingWorkers, setPendingWorkers] = useState<{
     workerId: string;

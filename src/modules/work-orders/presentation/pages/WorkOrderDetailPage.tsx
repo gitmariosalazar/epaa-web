@@ -38,6 +38,14 @@ import { CompleteWorkOrderUseCase } from "../../application/usecases/CompleteWor
 import { RegisterSatisfactionSurveyUseCase } from "../../application/usecases/RegisterSatisfactionSurveyUseCase";
 import { SubmitInspectionReportUseCase } from "../../application/usecases/SubmitInspectionReportUseCase";
 import { ProcessWorkOrderRepositoryImpl } from "../../infrastructure/repositories/ProcessWorkOrderRepositoryImpl";
+import { WorkOrderAutomationPolicy, WorkOrderAutoStepResolver } from "../../domain/automation/WorkOrderAutomationPolicy";
+import { ExecuteAutoStepUseCase } from "../../application/usecases/ExecuteAutoStepUseCase";
+import { CompleteWorkOrderFlowUseCase } from "../../application/usecases/CompleteWorkOrderFlowUseCase";
+import { resolveCompletionPreStep, type CompletionPreStep } from "../completion/orderCompletionStrategies";
+import { CompletionPreStepHost, type CompletionPreStepResult } from "../completion/CompletionPreStepHost";
+import { syncEvidenceToWorkOrder } from "../completion/syncEvidenceToWorkOrder";
+import { EVIDENCE_STAGES } from "../../domain/constants/evidence-stage";
+import { AutoProcessingView } from "../components/common/AutoProcessingView";
 
 // ── Catastral (Fase 14 — solo instalación acometida) ──────────────────────────
 import { RegisterCadastralUseCase } from "../../../processes/solicitudes/application/usecases/RegisterCadastralUseCase";
@@ -128,6 +136,16 @@ const ESTADOS_TERMINAL = new Set([
   "INSPECCION_COMPLETADA",
 ]);
 
+const isExecutionState = (status?: string | null) =>
+  ["EN_PROCESO", "EN_PROCESO_INSPECCION", "EN_PROCESO_INSTALACION"].includes(
+    status ?? ""
+  );
+
+const isExecutedState = (status?: string | null) =>
+  ["EJECUTADA", "INSPECCION_EJECUTADA", "INSTALACION_EJECUTADA"].includes(
+    status ?? ""
+  );
+
 // ─────────────────────────────────────────────────────────────────────────────
 export const WorkOrderDetailPage: React.FC = () => {
   const { codigoOrden = "" } = useParams<{ codigoOrden: string }>();
@@ -139,6 +157,9 @@ export const WorkOrderDetailPage: React.FC = () => {
   const [orden, setOrden] = useState<OrdenTrabajoDetalle | null>(null);
   const [tracking, setTracking] = useState<OrdenTrabajoTracking | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAutoProcessing, setIsAutoProcessing] = useState(false);
+  const autoRunningRef = React.useRef(false);
+  const automationPolicy = React.useMemo(() => WorkOrderAutomationPolicy.defaults(), []);
   const [error, setError] = useState<string | null>(null);
   const [reloadTrigger, setReloadTrigger] = useState(0);
 
@@ -157,6 +178,9 @@ export const WorkOrderDetailPage: React.FC = () => {
   const [pendingNextState, setPendingNextState] = useState<string | null>(null);
   const [pendingFinalizationDescription, setPendingFinalizationDescription] =
     useState<string | null>(null);
+  const [completionPreStep, setCompletionPreStep] = useState<CompletionPreStep>({
+    type: "NONE",
+  });
 
   // ── Document Preview PDF state ──────────────────────────────────────────────
   const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
@@ -240,6 +264,14 @@ export const WorkOrderDetailPage: React.FC = () => {
     () => new CompleteWorkOrderUseCase(repo),
     [repo],
   );
+  const executeAutoStepUseCase = React.useMemo(
+    () => new ExecuteAutoStepUseCase(repo),
+    [repo],
+  );
+  const completeFlowUseCase = React.useMemo(
+    () => new CompleteWorkOrderFlowUseCase(repo),
+    [repo],
+  );
   const surveyUseCase = React.useMemo(
     () => new RegisterSatisfactionSurveyUseCase(repo),
     [repo],
@@ -255,6 +287,65 @@ export const WorkOrderDetailPage: React.FC = () => {
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
   const reload = useCallback(() => setReloadTrigger((p) => p + 1), []);
+
+  const runAutoSteps = useCallback(
+    async (currentOrder: OrdenTrabajoDetalle) => {
+      if (autoRunningRef.current) return;
+      const initialStep = WorkOrderAutoStepResolver.nextBackgroundStep(
+        currentOrder,
+        automationPolicy
+      );
+      if (!initialStep) return;
+
+      autoRunningRef.current = true;
+      setIsAutoProcessing(true);
+      try {
+        let activeOrder = currentOrder;
+        for (let i = 0; i < 8; i++) {
+          const step = WorkOrderAutoStepResolver.nextBackgroundStep(
+            activeOrder,
+            automationPolicy
+          );
+          if (!step) break;
+
+          const beforeKey = `${activeOrder.estado}|${activeOrder.idInspeccion}`;
+          await executeAutoStepUseCase.execute(step, activeOrder, currentUserId);
+
+          const [newDet, newTrk] = await Promise.all([
+            detalleUseCase.execute(activeOrder.codigoOrden),
+            trackingUseCase.execute(activeOrder.codigoOrden),
+          ]);
+
+          if (!newDet) break;
+          setOrden(newDet);
+          const singleTrk = Array.isArray(newTrk)
+            ? newTrk.find(
+                (d) =>
+                  d.codigoOrden.toUpperCase() ===
+                  activeOrder.codigoOrden.toUpperCase()
+              ) || newTrk[0] || null
+            : newTrk;
+          setTracking(singleTrk);
+          activeOrder = newDet;
+
+          const afterKey = `${activeOrder.estado}|${activeOrder.idInspeccion}`;
+          if (beforeKey === afterKey) break;
+        }
+      } catch (err: any) {
+        console.error("Error durante la automatización de la orden:", err);
+      } finally {
+        autoRunningRef.current = false;
+        setIsAutoProcessing(false);
+      }
+    },
+    [
+      automationPolicy,
+      executeAutoStepUseCase,
+      currentUserId,
+      detalleUseCase,
+      trackingUseCase,
+    ]
+  );
 
   // ── Print PDF ───────────────────────────────────────────────────────────────
   const handlePrintWorkOrderPdf = useCallback(async () => {
@@ -308,7 +399,20 @@ export const WorkOrderDetailPage: React.FC = () => {
         ]);
         if (isMounted) {
           setOrden(det);
-          setTracking(trk);
+          const singleTrk = Array.isArray(trk)
+            ? trk.find(
+                (d) =>
+                  d.codigoOrden.toUpperCase() === codigoOrden.toUpperCase()
+              ) || trk[0] || null
+            : trk;
+          setTracking(singleTrk);
+          if (
+            det &&
+            !autoRunningRef.current &&
+            WorkOrderAutoStepResolver.nextBackgroundStep(det, automationPolicy)
+          ) {
+            void runAutoSteps(det);
+          }
         }
       } catch (e: any) {
         if (isMounted)
@@ -785,48 +889,99 @@ export const WorkOrderDetailPage: React.FC = () => {
   };
 
   // ── Fase 6: Completar OT ─────────────────────────────────────────────────────
-  const handleComplete = async () => {
+  const handleCompleteClick = () => {
     if (!orden) return;
-    const finalizationDescription = window
-      .prompt("Describe los trabajos realizados para completar la orden:")
-      ?.trim();
-    if (!finalizationDescription) return;
-
-    const nextStatus =
-      orden.estado === "INSPECCION_EJECUTADA"
-        ? "INSPECCION_COMPLETADA"
-        : orden.estado === "INSTALACION_EJECUTADA"
-          ? "INSTALACION_COMPLETADA"
-          : "COMPLETADA";
-
-    if (esInstalacionAcometida) {
-      setPendingNextState(nextStatus);
-      setPendingFinalizationDescription(finalizationDescription);
-      setShowCadastral(true);
+    const step = resolveCompletionPreStep(orden);
+    if (step.type === "BLOCKED") {
+      MessageToastCustom("warning", "No se puede completar", step.reason);
       return;
     }
+    setCompletionPreStep(step);
+  };
+
+  const handlePreStepConfirmed = async (result: CompletionPreStepResult) => {
+    if (!orden) return;
     setIsCompleting(true);
     try {
-      await completeUseCase.execute(
-        new ProcessWorkOrderRequest(
-          orden.idOrdenTrabajo,
-          nextStatus,
-          currentUserId,
-          "Cierre administrativo",
-          finalizationDescription,
-        ),
-      );
+      // 1. Evidencias en data URLs (ej. ResolveIncidentModal)
+      if (result.evidenceDataUrls && result.evidenceDataUrls.length > 0) {
+        try {
+          const sent = await syncEvidenceToWorkOrder(attachmentUseCase, {
+            workOrderId: orden.idOrdenTrabajo,
+            userId: currentUserId,
+            dataUrls: result.evidenceDataUrls,
+            evidenceStageCode: EVIDENCE_STAGES.WORK_COMPLETED,
+          });
+          MessageToastCustom(
+            "success",
+            "Evidencias Adjuntadas",
+            `${sent} foto(s) de cierre añadidas a la OT.`
+          );
+        } catch (e: any) {
+          MessageToastCustom(
+            "warning",
+            "Evidencias",
+            e?.message || "No se pudieron adjuntar las fotos a la OT."
+          );
+        }
+      }
+
+      // 2. Evidencias en File objects (ej. CompletionDescriptionModal)
+      if (result.evidenceFiles && result.evidenceFiles.length > 0) {
+        try {
+          await attachmentUseCase.execute({
+            workOrderId: orden.idOrdenTrabajo,
+            createdByUserId: currentUserId,
+            files: result.evidenceFiles,
+            evidenceStageCode: EVIDENCE_STAGES.WORK_COMPLETED,
+          });
+          MessageToastCustom(
+            "success",
+            "Evidencias Adjuntadas",
+            `${result.evidenceFiles.length} archivo(s) de cierre añadidos a la OT.`
+          );
+        } catch (e: any) {
+          MessageToastCustom(
+            "warning",
+            "Evidencias",
+            e?.message || "No se pudieron adjuntar las evidencias a la OT."
+          );
+        }
+      }
+
+      // 3. Si requiere registro catastral
+      if (esInstalacionAcometida) {
+        const nextStatus =
+          orden.estado === "INSPECCION_EJECUTADA"
+            ? "INSPECCION_COMPLETADA"
+            : orden.estado === "INSTALACION_EJECUTADA"
+              ? "INSTALACION_COMPLETADA"
+              : "COMPLETADA";
+        setPendingNextState(nextStatus);
+        setPendingFinalizationDescription(result.description);
+        setShowCadastral(true);
+        return;
+      }
+
+      // 4. Ejecución del flujo de finalización (pasos previos automáticos + completeWorkOrder)
+      await completeFlowUseCase.execute({
+        order: orden,
+        finalizationDescription: result.description,
+        userId: currentUserId,
+        policy: automationPolicy,
+      });
+
       MessageToastCustom(
         "success",
         "OT Completada",
-        "La orden de trabajo fue cerrada exitosamente.",
+        "La orden de trabajo fue finalizada y cerrada exitosamente."
       );
       reload();
     } catch (e: any) {
       MessageToastCustom(
         "error",
-        "Error",
-        e.message || "No se pudo completar la OT.",
+        "Error al completar",
+        e.message || "No se pudo completar la orden."
       );
     } finally {
       setIsCompleting(false);
@@ -957,6 +1112,14 @@ export const WorkOrderDetailPage: React.FC = () => {
           <Clock className="wo-detail-loading__spinner" size={24} />
           <span>Cargando orden de trabajo...</span>
         </div>
+      </PageLayout>
+    );
+  }
+
+  if (isAutoProcessing) {
+    return (
+      <PageLayout>
+        <AutoProcessingView />
       </PageLayout>
     );
   }
@@ -1139,43 +1302,57 @@ export const WorkOrderDetailPage: React.FC = () => {
               )}
 
               {/* Fase 4: Acciones durante ejecución */}
-              {orden.estado === "EN_PROCESO" && (
+              {isExecutionState(orden.estado) && (
                 <>
-                  <WorkOrderPhaseActionBtn
-                    id="wo-btn-finish-exec"
-                    color={esInspeccionAcometida ? "#a855f7" : "#10b981"}
-                    bg={
-                      esInspeccionAcometida
-                        ? "rgba(168,85,247,0.1)"
-                        : "rgba(16,185,129,0.12)"
-                    }
-                    icon={
-                      esInspeccionAcometida ? (
-                        <FileText size={18} />
-                      ) : (
-                        <Zap size={18} />
-                      )
-                    }
-                    label={
-                      esInspeccionAcometida
-                        ? "Finalizar Ejecución en Campo (con Informe)"
-                        : "Finalizar Ejecución en Campo"
-                    }
-                    sublabel={
-                      esInspeccionAcometida
-                        ? "Fase 4 — Primero registrar informe técnico"
-                        : "Fase 4 — Marcar trabajo técnico completado"
-                    }
-                    onClick={handleFinishExec}
-                    loading={isFinishingExec}
-                  />
+                  {automationPolicy.isAuto("finishExecution") && (
+                    <WorkOrderPhaseActionBtn
+                      id="wo-btn-complete-exec"
+                      color="#10b981"
+                      bg="rgba(16,185,129,0.12)"
+                      icon={<Zap size={18} />}
+                      label="Completar Orden de Trabajo"
+                      sublabel="Fase 4 — Finalización y Cierre de la OT"
+                      onClick={handleCompleteClick}
+                      loading={isCompleting}
+                    />
+                  )}
+                  {(esInspeccionAcometida || !automationPolicy.isAuto("finishExecution")) && (
+                    <WorkOrderPhaseActionBtn
+                      id="wo-btn-finish-exec"
+                      color={esInspeccionAcometida ? "#a855f7" : "#10b981"}
+                      bg={
+                        esInspeccionAcometida
+                          ? "rgba(168,85,247,0.1)"
+                          : "rgba(16,185,129,0.12)"
+                      }
+                      icon={
+                        esInspeccionAcometida ? (
+                          <FileText size={18} />
+                        ) : (
+                          <Zap size={18} />
+                        )
+                      }
+                      label={
+                        esInspeccionAcometida
+                          ? "Finalizar Ejecución en Campo (con Informe)"
+                          : "Finalizar Ejecución en Campo"
+                      }
+                      sublabel={
+                        esInspeccionAcometida
+                          ? "Fase 4 — Primero registrar informe técnico"
+                          : "Fase 4 — Marcar trabajo técnico completado"
+                      }
+                      onClick={handleFinishExec}
+                      loading={isFinishingExec}
+                    />
+                  )}
                 </>
               )}
 
               {/* Fase 5: Control de calidad + Completar */}
-              {orden.estado === "EJECUTADA" && (
+              {isExecutedState(orden.estado) && (
                 <>
-                  {!orden.idControl && (
+                  {!orden.idControl && !automationPolicy.isAuto("qualityControl") && (
                     <WorkOrderPhaseActionBtn
                       id="wo-btn-quality"
                       color="#ec4899"
@@ -1186,18 +1363,16 @@ export const WorkOrderDetailPage: React.FC = () => {
                       onClick={() => setQualityControlOpen(true)}
                     />
                   )}
-                  {orden.idControl && (
-                    <WorkOrderPhaseActionBtn
-                      id="wo-btn-complete"
-                      color="#10b981"
-                      bg="rgba(16,185,129,0.1)"
-                      icon={<Zap size={18} />}
-                      label="Completar Orden de Trabajo"
-                      sublabel="Fase 6 — Cierre administrativo"
-                      onClick={handleComplete}
-                      loading={isCompleting}
-                    />
-                  )}
+                  <WorkOrderPhaseActionBtn
+                    id="wo-btn-complete"
+                    color="#10b981"
+                    bg="rgba(16,185,129,0.1)"
+                    icon={<Zap size={18} />}
+                    label="Completar Orden de Trabajo"
+                    sublabel="Fase 6 — Cierre administrativo"
+                    onClick={handleCompleteClick}
+                    loading={isCompleting}
+                  />
                 </>
               )}
 
@@ -1457,6 +1632,12 @@ export const WorkOrderDetailPage: React.FC = () => {
           isLoading={isModalLoading}
         />
       )}
+
+      <CompletionPreStepHost
+        step={completionPreStep}
+        onCancel={() => setCompletionPreStep({ type: "NONE" })}
+        onConfirmed={handlePreStepConfirmed}
+      />
 
       {/* ── Document Preview Modal ── */}
       <DocumentPreviewModal

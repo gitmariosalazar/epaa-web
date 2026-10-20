@@ -56,6 +56,8 @@ interface AllWorkOrderToolbarProps {
   onSortChange: (key: AllWorkOrderSortKey) => void;
   onRefresh: () => void;
   onNuevaOT: () => void;
+  onSearchSubmit?: () => void;
+  isLoading?: boolean;
 }
 
 export const AllWorkOrderToolbar: React.FC<AllWorkOrderToolbarProps> = ({
@@ -67,6 +69,8 @@ export const AllWorkOrderToolbar: React.FC<AllWorkOrderToolbarProps> = ({
   onSortChange,
   onRefresh,
   onNuevaOT,
+  onSearchSubmit,
+  isLoading = false,
 }) => {
   const hasFilters = filters.search || filters.status || filters.priority || filters.origin;
 
@@ -83,6 +87,11 @@ export const AllWorkOrderToolbar: React.FC<AllWorkOrderToolbarProps> = ({
           width={280}
           leftIcon={<Search size={14} />}
           onChange={e => onFilterChange({ search: e.target.value })}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              onSearchSubmit?.();
+            }
+          }}
         />
 
 
@@ -186,6 +195,7 @@ export const AllWorkOrderToolbar: React.FC<AllWorkOrderToolbarProps> = ({
             aria-label="Actualizar lista"
             variant='dashed'
             size='sm'
+            isLoading={isLoading}
           >
             <RefreshCw size={14} />
           </Button>

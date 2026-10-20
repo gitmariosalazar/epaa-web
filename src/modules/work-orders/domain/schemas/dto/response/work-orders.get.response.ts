@@ -23,6 +23,7 @@ export interface AdjuntoEvidencia {
   url: string;
   tipoAdjunto: string;
   mimeType: string;
+  evidenceStep?: string | null;
   fechaCarga: string; // ISO Timestamp
 }
 

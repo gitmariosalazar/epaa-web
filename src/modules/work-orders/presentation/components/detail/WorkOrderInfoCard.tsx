@@ -4,7 +4,15 @@
  * SRP: información general de la OT (tipo, departamento, dirección, cliente).
  */
 import React from 'react';
-import { MapPin, Building2, Wrench, User, Hash, Users } from 'lucide-react';
+import {
+  MapPin,
+  Building2,
+  Wrench,
+  User,
+  Hash,
+  Users,
+  Info
+} from 'lucide-react';
 import { Card } from '@/shared/presentation/components/Card/Card';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import type { OrdenTrabajoDetalle } from '../../../domain/schemas/dto/response/work-orders.get.response';
@@ -29,19 +37,26 @@ const InfoRow: React.FC<InfoRowProps> = ({ icon, label, value }) => (
   </div>
 );
 
-export const WorkOrderInfoCard: React.FC<WorkOrderInfoCardProps> = ({ orden, onManageWorkers }) => {
+export const WorkOrderInfoCard: React.FC<WorkOrderInfoCardProps> = ({
+  orden,
+  onManageWorkers
+}) => {
   const tipoAsignacionLabel =
     TIPO_ASIGNACION_LABELS[orden.tipoAsignacion] ?? orden.tipoAsignacion;
 
-  const ejecutorLabel =
-    false
-      ? orden.inspectorNombre ?? '—'
-      : orden.inspectorNombre
+  const ejecutorLabel = false
+    ? (orden.inspectorNombre ?? '—')
+    : orden.inspectorNombre
       ? `${orden.inspectorNombre} (${orden.inspectorUsername ?? '—'})`
       : 'Sin asignar';
 
   return (
-    <Card title="Información General" className="wo-detail-card">
+    <Card
+      title="Información General"
+      className="wo-detail-card"
+      accordion
+      icon={<Info size={15} />}
+    >
       <div className="wo-info-grid">
         <InfoRow
           icon={<Wrench size={14} />}
@@ -97,7 +112,14 @@ export const WorkOrderInfoCard: React.FC<WorkOrderInfoCardProps> = ({ orden, onM
           />
         )}
 
-        <div className="wo-info-section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div
+          className="wo-info-section-title"
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}
+        >
           <span>Asignación</span>
           {onManageWorkers && (
             <Button
@@ -105,7 +127,11 @@ export const WorkOrderInfoCard: React.FC<WorkOrderInfoCardProps> = ({ orden, onM
               size="xs"
               onClick={onManageWorkers}
               leftIcon={<Users size={12} />}
-              style={{ padding: '0.25rem 0.5rem', height: 'auto', fontSize: '0.75rem' }}
+              style={{
+                padding: '0.25rem 0.5rem',
+                height: 'auto',
+                fontSize: '0.75rem'
+              }}
             >
               Gestionar Personal
             </Button>
@@ -127,7 +153,14 @@ export const WorkOrderInfoCard: React.FC<WorkOrderInfoCardProps> = ({ orden, onM
             icon={<Users size={14} />}
             label="Personal Asignado"
             value={
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.15rem' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '0.25rem',
+                  marginTop: '0.15rem'
+                }}
+              >
                 {orden.personalAsignado.map((w) => (
                   <span
                     key={w.idTrabajador}
@@ -139,12 +172,18 @@ export const WorkOrderInfoCard: React.FC<WorkOrderInfoCardProps> = ({ orden, onM
                       padding: '0.15rem 0.4rem',
                       borderRadius: '0.25rem',
                       fontSize: '0.72rem',
-                      fontWeight: 500,
+                      fontWeight: 500
                     }}
                   >
                     {w.nombreTrabajador}
                     {w.esResponsable && (
-                      <span style={{ fontSize: '0.62rem', marginLeft: '0.25rem', opacity: 0.8 }}>
+                      <span
+                        style={{
+                          fontSize: '0.62rem',
+                          marginLeft: '0.25rem',
+                          opacity: 0.8
+                        }}
+                      >
                         (Resp.)
                       </span>
                     )}

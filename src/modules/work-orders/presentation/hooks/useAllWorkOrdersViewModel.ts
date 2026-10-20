@@ -70,36 +70,83 @@ export const useAllWorkOrdersViewModel = () => {
     []
   );
 
-  const [allOrders,  setAllOrders]  = useState<WorkOrderListItem[]>([]);
-  const [isLoading,  setIsLoading]  = useState(true);
-  const [error,      setError]      = useState<string | null>(null);
+  const [allOrders, setAllOrders] = useState<WorkOrderListItem[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [filters,  setFilters]  = useState<AllWorkOrderFilterState>(defaultAllWorkOrderFilters);
-  const [sortBy,   setSortBy]   = useState<AllWorkOrderSortKey>('fecha_desc');
-  const [page,     setPage]     = useState(1);
+  const [filters, setFilters] = useState<AllWorkOrderFilterState>(defaultAllWorkOrderFilters);
+  const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
+  const [sortBy, setSortBy] = useState<AllWorkOrderSortKey>('fecha_desc');
+  const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // ── Fetch ─────────────────────────────────────────────────────────────────
-  const load = useCallback(async () => {
-    setIsLoading(true);
+  // Debounce para consultar con searchValue sin saturar el servidor
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(filters.search);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [filters.search]);
+
+  // ── Fetch con soporte de searchValue ─────────────────────────────────────────
+  const fetchOrders = useCallback(async (searchQuery?: string) => {
+    setIsSearching(true);
     setError(null);
     try {
-      const data = await useCase.execute();
+      const term = searchQuery !== undefined ? searchQuery : debouncedSearch;
+      const cleanTerm = term.trim();
+      // Si se envía término, consulta con searchValue; por default (vacío/undefined) retorna todo
+      const data = await useCase.execute(cleanTerm || undefined);
       setAllOrders(data);
     } catch (e: any) {
       setError(e.message ?? 'Error al cargar las órdenes.');
     } finally {
-      setIsLoading(false);
+      setIsSearching(false);
+      setIsInitialLoading(false);
     }
-  }, [useCase]);
+  }, [useCase, debouncedSearch]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    let isCurrent = true;
+    const load = async () => {
+      setError(null);
+      try {
+        const cleanTerm = debouncedSearch.trim();
+        // Si hay búsqueda se envía, si no (por default) retorna todo
+        const data = await useCase.execute(cleanTerm || undefined);
+        if (isCurrent) {
+          setAllOrders(data);
+        }
+      } catch (e: any) {
+        if (isCurrent) {
+          setError(e.message ?? 'Error al cargar las órdenes.');
+        }
+      } finally {
+        if (isCurrent) {
+          setIsInitialLoading(false);
+          setIsSearching(false);
+        }
+      }
+    };
+
+    load();
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [debouncedSearch, useCase]);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleFilterChange = useCallback((updates: Partial<AllWorkOrderFilterState>) => {
     setFilters(prev => ({ ...prev, ...updates }));
     setPage(1);
   }, []);
+
+  const handleImmediateSearch = useCallback(() => {
+    setDebouncedSearch(filters.search);
+    setPage(1);
+  }, [filters.search]);
 
   const handleSortChange = useCallback((key: AllWorkOrderSortKey) => {
     setSortBy(key);
@@ -111,29 +158,34 @@ export const useAllWorkOrdersViewModel = () => {
     setPage(1);
   }, []);
 
+  const refresh = useCallback(async () => {
+    await fetchOrders(filters.search);
+  }, [fetchOrders, filters.search]);
+
   // ── Filter + Sort (memoized) ──────────────────────────────────────────────
   const filteredSorted = useMemo(() => {
     let list = [...allOrders];
 
-    if (filters.status)   list = list.filter(o => o.status   === filters.status);
+    if (filters.status)   list = list.filter(o => o.status === filters.status);
     if (filters.priority) list = list.filter(o => String(o.priorityId) === filters.priority);
-    if (filters.origin)   list = list.filter(o => o.origin   === filters.origin);
+    if (filters.origin)   list = list.filter(o => o.origin === filters.origin);
 
     if (filters.search) {
       const q  = filters.search.toLowerCase();
       const by = filters.filterBy.toLowerCase();
       list = list.filter(o => {
-        if (by === 'codigo')    return o.orderCode.toLowerCase().includes(q);
-        if (by === 'cliente')   return o.clientName.toLowerCase().includes(q) || o.clientId.toLowerCase().includes(q);
-        if (by === 'direccion') return o.location.toLowerCase().includes(q);
-        // default: all fields
+        if (by === 'codigo')    return o.orderCode?.toLowerCase().includes(q);
+        if (by === 'cliente')   return o.clientName?.toLowerCase().includes(q) || o.clientId?.toLowerCase().includes(q);
+        if (by === 'direccion') return (o.location ?? '')?.toLowerCase().includes(q);
+        // default: todos los campos
         return (
-          o.orderCode.toLowerCase().includes(q)    ||
-          o.clientName.toLowerCase().includes(q)   ||
-          o.clientId.toLowerCase().includes(q)     ||
-          o.location.toLowerCase().includes(q)     ||
-          o.status.toLowerCase().includes(q)       ||
-          o.workTypeName.toLowerCase().includes(q)
+          o.orderCode?.toLowerCase().includes(q)    ||
+          o.clientName?.toLowerCase().includes(q)   ||
+          o.clientId?.toLowerCase().includes(q)     ||
+          (o.location ?? '')?.toLowerCase().includes(q) ||
+          o.status?.toLowerCase().includes(q)       ||
+          o.workTypeName?.toLowerCase().includes(q) ||
+          o.cadastralKey?.toLowerCase().includes(q)
         );
       });
     }
@@ -149,19 +201,22 @@ export const useAllWorkOrdersViewModel = () => {
   }, [filteredSorted, page, pageSize]);
 
   return {
-    ordenes:       filteredSorted,
-    totalCount:    allOrders.length,
+    ordenes:             filteredSorted,
+    totalCount:          allOrders.length,
     paginated,
     page,
     pageSize,
     setPage,
-    setPageSize:   handlePageSizeChange,
-    isLoading,
+    setPageSize:         handlePageSizeChange,
+    isLoading:           isInitialLoading || isSearching,
+    isInitialLoading,
+    isSearching,
     error,
     filters,
     sortBy,
     handleFilterChange,
+    handleImmediateSearch,
     handleSortChange,
-    refresh:       load,
+    refresh,
   };
 };

@@ -34,9 +34,20 @@
   --border-hover: #cbd5e1; /* Slate 300 */
 
   --text-main: #0f172a; /* Slate 900 */
+  --text-primary: #0f172a; /* Slate 900 */
   --text-secondary: #475569; /* Slate 600 */
   --text-muted: #94a3b8; /* Slate 400 */
   --text-inverse: #ffffff;
+
+  /* Text & Container Aliases */
+  --text-color: var(--text-main);
+  --text-color-primary: var(--text-primary);
+  --text-color-secondary: var(--text-secondary);
+  --text-color-muted: var(--text-muted);
+  --card-bg: var(--surface);
+  --box-shadow-sm: var(--shadow-sm);
+  --box-shadow-md: var(--shadow-md);
+  --box-shadow-lg: var(--shadow-lg);
 
   /* Estados */
   --success: #10b981; /* verde */
@@ -141,7 +152,9 @@
 }
 
 /* Dark Mode Tokens */
-.dark {
+:root.dark,
+.dark,
+[data-theme='dark'] {
   --primary: #f8fafc;
   --primary-light: #cbd5e1;
   --accent-rgb: 59 130 246;
@@ -154,9 +167,20 @@
   --border-hover: #334155; /* Slate 700 - Hover border */
 
   --text-main: #f8fafc; /* Slate 50 */
+  --text-primary: #f8fafc; /* Slate 50 */
   --text-secondary: #94a3b8; /* Slate 400 */
   --text-muted: #64748b; /* Slate 500 */
   --text-inverse: #020617;
+
+  /* Text & Container Aliases */
+  --text-color: var(--text-main);
+  --text-color-primary: var(--text-primary);
+  --text-color-secondary: var(--text-secondary);
+  --text-color-muted: var(--text-muted);
+  --card-bg: var(--surface);
+  --box-shadow-sm: var(--shadow-sm);
+  --box-shadow-md: var(--shadow-md);
+  --box-shadow-lg: var(--shadow-lg);
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);

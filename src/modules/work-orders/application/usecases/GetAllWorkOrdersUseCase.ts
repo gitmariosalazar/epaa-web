@@ -8,8 +8,13 @@ export class GetAllWorkOrdersUseCase {
     this.processWorkOrderRepository = processWorkOrderRepository;
   }
 
-  async execute(limit?: number, offset?: number): Promise<WorkOrderListItem[]> {
+  async execute(
+    searchValue?: string,
+    limit?: number,
+    offset?: number
+  ): Promise<WorkOrderListItem[]> {
     return await this.processWorkOrderRepository.getAllWorkOrders(
+      searchValue,
       limit,
       offset
     );

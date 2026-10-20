@@ -22,6 +22,8 @@ import { ProcessWorkOrderRepositoryImpl } from '@/modules/work-orders/infrastruc
 export interface ResolveIncidentResult {
   /** Imágenes subidas por el usuario en el modal (data URLs JPEG comprimidas). */
   newImages: string[];
+  /** Descripción ingresada para resolver el incidente. */
+  description?: string;
 }
 
 interface ResolveIncidentModalProps {
@@ -268,7 +270,7 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
         images: finalImages
       });
       onClose();
-      await onResolved?.({ newImages: [...images] });
+      await onResolved?.({ newImages: [...images], description: description.trim() });
     } catch (err: any) {
       setFormError(err.message || 'Error al resolver el incidente.');
     } finally {

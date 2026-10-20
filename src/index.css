@@ -30,6 +30,9 @@ body {
   min-width: 320px;
   min-height: 100vh;
   flex-direction: column;
+  background-color: var(--background);
+  color: var(--text-main);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
 h1,

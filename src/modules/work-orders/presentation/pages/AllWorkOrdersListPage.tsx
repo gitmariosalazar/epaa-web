@@ -119,11 +119,13 @@ export const AllWorkOrdersListPage: React.FC = () => {
     pageSize,
     setPage,
     setPageSize,
-    isLoading,
+    isInitialLoading,
+    isSearching,
     error,
     filters,
     sortBy,
     handleFilterChange,
+    handleImmediateSearch,
     handleSortChange,
     refresh
   } = useAllWorkOrdersViewModel();
@@ -220,7 +222,7 @@ export const AllWorkOrdersListPage: React.FC = () => {
   );
 
   // ── Loading ───────────────────────────────────────────────────────────────
-  if (isLoading) {
+  if (isInitialLoading && totalCount === 0) {
     return (
       <PageLayout>
         <div
@@ -279,6 +281,8 @@ export const AllWorkOrdersListPage: React.FC = () => {
             onSortChange={(v) => handleSortChange(v as AllWorkOrderSortKey)}
             onRefresh={refresh}
             onNuevaOT={() => navigate('/work-orders/create')}
+            onSearchSubmit={handleImmediateSearch}
+            isLoading={isSearching}
           />
         }
         footer={
@@ -292,7 +296,22 @@ export const AllWorkOrdersListPage: React.FC = () => {
         }
       >
         <div className="wo-list-container">
-          {paginated.length === 0 ? (
+          {isSearching ? (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '4rem 0',
+                gap: '1rem'
+              }}
+            >
+              <CircularProgress />
+              <span style={{ color: 'var(--text-muted)' }}>
+                Buscando órdenes de trabajo...
+              </span>
+            </div>
+          ) : paginated.length === 0 ? (
             <div className="wo-empty">
               <div className="wo-empty__icon">
                 <Inbox size={28} />

@@ -23,7 +23,7 @@
  *   EJECUTADA        → Completar OT (inline quick-action)
  *   COMPLETADA       → Encuesta Satisfacción (RegisterSurveyModal)
  */
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { Button } from '@/shared/presentation/components/Button/Button';
@@ -46,9 +46,15 @@ import { AddWorkOrderMaterialsBatchUseCase } from '../../application/usecases/Ad
 import { AddAdditionalCostsBatchUseCase } from '../../application/usecases/AddAdditionalCostsBatchUseCase';
 import { AddWorkOrderAttachmentUseCase } from '../../application/usecases/AddWorkOrderAttachmentUseCase';
 import { CreateQualityControlUseCase } from '../../application/usecases/CreateQualityControlUseCase';
-import { CompleteWorkOrderUseCase } from '../../application/usecases/CompleteWorkOrderUseCase';
+import { ExecuteAutoStepUseCase } from '../../application/usecases/ExecuteAutoStepUseCase';
+import { CompleteWorkOrderFlowUseCase } from '../../application/usecases/CompleteWorkOrderFlowUseCase';
 import { RegisterSatisfactionSurveyUseCase } from '../../application/usecases/RegisterSatisfactionSurveyUseCase';
 import { ProcessWorkOrderRepositoryImpl } from '../../infrastructure/repositories/ProcessWorkOrderRepositoryImpl';
+import {
+  WorkOrderAutomationPolicy,
+  WorkOrderAutoStepResolver,
+} from '../../domain/automation/WorkOrderAutomationPolicy';
+import { EVIDENCE_STAGES, type EvidenceStageCode } from '../../domain/constants/evidence-stage';
 
 // ── Request DTO ────────────────────────────────────────────────────────────────
 import { ProcessWorkOrderRequest } from '../../domain/schemas/dto/request/process-work-order.request';
@@ -100,6 +106,7 @@ import { resolveCompletionPreStep, type CompletionPreStep } from '../completion/
 import { CompletionPreStepHost, type CompletionPreStepResult } from '../completion/CompletionPreStepHost';
 import { syncEvidenceToWorkOrder } from '../completion/syncEvidenceToWorkOrder';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { AutoProcessingView } from '../components/common/AutoProcessingView';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
@@ -202,6 +209,9 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
   const [orden, setOrden] = useState<OrdenTrabajoDetalle | null>(null);
   const [tracking, setTracking] = useState<OrdenTrabajoTracking | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAutoProcessing, setIsAutoProcessing] = useState(false);
+  const autoRunningRef = useRef(false);
+  const automationPolicy = useMemo(() => WorkOrderAutomationPolicy.defaults(), []);
   const [error, setError] = useState<string | null>(null);
   const [reloadTrigger, setReloadTrigger] = useState(0);
   const [executionSubStep, setExecutionSubStep] = useState(0); // 0: Personal y Materiales, 1: Evidencias
@@ -309,8 +319,12 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
     () => new CreateQualityControlUseCase(repo),
     [repo]
   );
-  const completeUseCase = useMemo(
-    () => new CompleteWorkOrderUseCase(repo),
+  const executeAutoStepUseCase = useMemo(
+    () => new ExecuteAutoStepUseCase(repo),
+    [repo]
+  );
+  const completeFlowUseCase = useMemo(
+    () => new CompleteWorkOrderFlowUseCase(repo),
     [repo]
   );
   const surveyUseCase = useMemo(
@@ -443,12 +457,28 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         action: 'Acción actual: Emitir control de calidad y completar OT.'
       };
     }
-    if (isCompletedState(estado) && !orden.idEncuesta) {
-      return {
-        phase: 'Fase 6',
-        title: 'Cierre con Cliente',
-        action: 'Acción actual: Registrar encuesta de satisfacción.'
-      };
+    if (isCompletedState(estado)) {
+      if (!orden.idControl && !orden.idEncuesta) {
+        return {
+          phase: 'Fase 6',
+          title: 'Cierre de Orden',
+          action: 'Acción actual: Emitir control de calidad y registrar encuesta de satisfacción.'
+        };
+      }
+      if (!orden.idControl) {
+        return {
+          phase: 'Fase 6',
+          title: 'Control de Calidad',
+          action: 'Acción actual: Emitir control de calidad pendiente.'
+        };
+      }
+      if (!orden.idEncuesta) {
+        return {
+          phase: 'Fase 6',
+          title: 'Cierre con Cliente',
+          action: 'Acción actual: Registrar encuesta de satisfacción.'
+        };
+      }
     }
     return {
       phase: 'Proceso',
@@ -463,6 +493,58 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
     if (!codeParam) return;
     setCurrentCode(codeParam);
   }, [searchParams]);
+
+  const runAutoSteps = useCallback(
+    async (currentOrder: OrdenTrabajoDetalle) => {
+      if (autoRunningRef.current) return;
+      const initialStep = WorkOrderAutoStepResolver.nextBackgroundStep(
+        currentOrder,
+        automationPolicy
+      );
+      if (!initialStep) return;
+
+      autoRunningRef.current = true;
+      setIsAutoProcessing(true);
+      try {
+        let activeOrder = currentOrder;
+        for (let i = 0; i < 8; i++) {
+          const step = WorkOrderAutoStepResolver.nextBackgroundStep(
+            activeOrder,
+            automationPolicy
+          );
+          if (!step) break;
+
+          const beforeKey = `${activeOrder.estado}|${activeOrder.idInspeccion}`;
+          await executeAutoStepUseCase.execute(step, activeOrder, currentUserId);
+
+          const [newDet, newTrk] = await Promise.all([
+            detalleUseCase.execute(activeOrder.codigoOrden),
+            trackingUseCase.execute(activeOrder.codigoOrden),
+          ]);
+
+          if (!newDet) break;
+          setOrden(newDet);
+          setTracking(Array.isArray(newTrk) ? (newTrk[0] ?? null) : newTrk);
+          activeOrder = newDet;
+
+          const afterKey = `${activeOrder.estado}|${activeOrder.idInspeccion}`;
+          if (beforeKey === afterKey) break;
+        }
+      } catch (err: any) {
+        console.error('Error durante la automatización de la orden:', err);
+      } finally {
+        autoRunningRef.current = false;
+        setIsAutoProcessing(false);
+      }
+    },
+    [
+      automationPolicy,
+      executeAutoStepUseCase,
+      currentUserId,
+      detalleUseCase,
+      trackingUseCase,
+    ]
+  );
 
   // ── Load orden (detail + tracking en paralelo) ──────────────────────────────
   useEffect(() => {
@@ -481,10 +563,17 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         ]);
         if (isMounted) {
           setOrden(det);
-          setTracking(trk);
+          setTracking(Array.isArray(trk) ? (trk[0] ?? null) : trk);
           if (!isReload) {
             setExecutionSubStep(0);
             MessageToastCustom('success', 'Búsqueda Exitosa', 'Orden de trabajo encontrada.');
+          }
+          if (
+            det &&
+            !autoRunningRef.current &&
+            WorkOrderAutoStepResolver.nextBackgroundStep(det, automationPolicy)
+          ) {
+            void runAutoSteps(det);
           }
         }
       } catch (e: any) {
@@ -500,7 +589,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
     return () => {
       isMounted = false;
     };
-  }, [currentCode, detalleUseCase, trackingUseCase, reloadTrigger]);
+  }, [currentCode, detalleUseCase, trackingUseCase, reloadTrigger, automationPolicy, runAutoSteps]);
 
   const fetchWorkOrderDetails = async () => {
     if (!currentCode) return;
@@ -511,7 +600,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
   const fetchTrackingData = async () => {
     if (!currentCode) return;
     const trk = await trackingUseCase.execute(currentCode);
-    setTracking(trk);
+    setTracking(Array.isArray(trk) ? (trk[0] ?? null) : trk);
   };
 
   const handleReceive = async () => {
@@ -776,14 +865,15 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
     MessageToastCustom('info', 'En desarrollo', 'La función para remover costos adicionales está en desarrollo.');
   };
 
-  const handleAddAttachment = async (files: File[]) => {
+  const handleAddAttachment = async (files: File[], stage?: EvidenceStageCode) => {
     if (!orden) return;
     setIsModalLoading(true);
     try {
       await attachmentUseCase.execute({
         workOrderId: orden.idOrdenTrabajo,
         files,
-        createdByUserId: currentUserId
+        createdByUserId: currentUserId,
+        evidenceStageCode: stage ?? EVIDENCE_STAGES.IN_PROGRESS,
       });
       MessageToastCustom('success', 'Evidencia Adjuntada', `${files.length} archivo(s) adjuntado(s) a la OT.`);
       reload();
@@ -814,64 +904,92 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
     }
   };
 
-  const handleComplete = async () => {
+  /** Tras el paso previo: adjunta evidencias (si hay) y ejecuta el flujo completo de cierre. */
+  const handlePreStepConfirmed = async (result: CompletionPreStepResult) => {
     if (!orden) return;
     setIsCompleting(true);
-    const nextStatus =
-      orden.estado === 'INSPECCION_EJECUTADA'
-        ? 'INSPECCION_COMPLETADA'
-        : orden.estado === 'INSTALACION_EJECUTADA'
-          ? 'INSTALACION_COMPLETADA'
-          : 'COMPLETADA';
     try {
-      await completeUseCase.execute(
-        new ProcessWorkOrderRequest(
-          orden.idOrdenTrabajo,
-          nextStatus,
-          currentUserId,
-          'Cierre administrativo'
-        )
+      // 1. Evidencias en data URLs (desde ResolveIncidentModal)
+      if (result.evidenceDataUrls && result.evidenceDataUrls.length > 0) {
+        try {
+          const sent = await syncEvidenceToWorkOrder(attachmentUseCase, {
+            workOrderId: orden.idOrdenTrabajo,
+            userId: currentUserId,
+            dataUrls: result.evidenceDataUrls,
+            evidenceStageCode: EVIDENCE_STAGES.WORK_COMPLETED,
+          });
+          MessageToastCustom(
+            'success',
+            'Evidencias Adjuntadas',
+            `${sent} foto(s) de cierre añadidas a la OT.`
+          );
+        } catch (e: any) {
+          MessageToastCustom(
+            'warning',
+            'Evidencias',
+            e?.message || 'No se pudieron adjuntar las fotos a la OT.'
+          );
+        }
+      }
+
+      // 2. Evidencias en archivos File (desde CompletionDescriptionModal)
+      if (result.evidenceFiles && result.evidenceFiles.length > 0) {
+        try {
+          await attachmentUseCase.execute({
+            workOrderId: orden.idOrdenTrabajo,
+            createdByUserId: currentUserId,
+            files: result.evidenceFiles,
+            evidenceStageCode: EVIDENCE_STAGES.WORK_COMPLETED,
+          });
+          MessageToastCustom(
+            'success',
+            'Evidencias Adjuntadas',
+            `${result.evidenceFiles.length} archivo(s) de cierre añadidos a la OT.`
+          );
+        } catch (e: any) {
+          MessageToastCustom(
+            'warning',
+            'Evidencias',
+            e?.message || 'No se pudieron adjuntar las evidencias a la OT.'
+          );
+        }
+      }
+
+      // 3. Ejecución del flujo de finalización (pasos previos automáticos + completeWorkOrder)
+      await completeFlowUseCase.execute({
+        order: orden,
+        finalizationDescription: result.description,
+        userId: currentUserId,
+        policy: automationPolicy,
+      });
+
+      MessageToastCustom(
+        'success',
+        'OT Completada',
+        'La orden de trabajo fue finalizada y cerrada exitosamente.'
       );
-      MessageToastCustom('success', 'OT Completada', 'La orden de trabajo fue cerrada exitosamente.');
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo completar la OT.');
+      MessageToastCustom(
+        'error',
+        'Error al completar',
+        e.message || 'No se pudo completar la orden.'
+      );
     } finally {
       setIsCompleting(false);
     }
-  };
-
-  /** Tras el paso previo: adjunta evidencias (si hay) y completa la OT. */
-  const handlePreStepConfirmed = async ({ evidenceDataUrls = [] }: CompletionPreStepResult) => {
-    if (!orden) return;
-    if (evidenceDataUrls.length) {
-      try {
-        const sent = await syncEvidenceToWorkOrder(attachmentUseCase, {
-          workOrderId: orden.idOrdenTrabajo,
-          userId: currentUserId,
-          dataUrls: evidenceDataUrls,
-        });
-        MessageToastCustom('success', 'Evidencias adjuntadas', `${sent} foto(s) añadidas a la OT.`);
-      } catch (e: any) {
-        // No bloquea el cierre: el incidente ya fue resuelto.
-        MessageToastCustom('warning', 'Evidencias', e?.message || 'No se pudieron adjuntar las fotos a la OT.');
-      }
-    }
-    await handleComplete();
   };
 
   /** Punto de entrada del botón: aplica la estrategia según el origen de la OT. */
   const handleCompleteClick = () => {
     if (!orden) return;
     const step = resolveCompletionPreStep(orden);
-    if (step.type === 'NONE') {
-      void handleComplete();
-    } else if (step.type === 'BLOCKED') {
+    if (step.type === 'BLOCKED') {
       console.warn('[WO completion] Orden sin ID de origen:', orden);
       MessageToastCustom('warning', 'No se puede completar', step.reason);
-    } else {
-      setCompletionPreStep(step);
+      return;
     }
+    setCompletionPreStep(step);
   };
 
   const handleRegisterSurvey = async (rating: number, comments: string) => {
@@ -952,19 +1070,31 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         return (
           <>
             <div className="wo-process-phase-actions">
-              <Tooltip content={orden.estado === 'PENDIENTE_ASIGNACION' ? `De Click para recepcionar la orden de trabajo` : `La orden de trabajo está en proceso de Asignación y no se puede recepcionar`}
-                themeColor={orden.estado === 'PENDIENTE_ASIGNACION' ? 'info' : 'error'}
+              <Tooltip
+                content={
+                  orden.estado === 'NOTIFICADA' || orden.estado === 'PENDIENTE_ASIGNACION'
+                    ? 'De clic para recepcionar la orden de trabajo'
+                    : 'La orden de trabajo ya no está en estado para recepcionar'
+                }
+                themeColor={
+                  orden.estado === 'NOTIFICADA' || orden.estado === 'PENDIENTE_ASIGNACION'
+                    ? 'info'
+                    : 'error'
+                }
               >
                 <WorkOrderPhaseActionBtn
                   id="wo-btn-recepcionar"
                   color="#3b82f6"
                   bg="rgba(59,130,246,0.1)"
                   icon={<Inbox size={18} />}
-                  label={`${orden.estado === 'PENDIENTE_ASIGNACION' ? 'Recepcionar Orden de Trabajo' : 'La orden de trabajo está en proceso de Asignación'}`}
+                  label="Recepcionar Orden de Trabajo"
                   sublabel="Fase 2 — Confirmar recepción operativa"
                   onClick={handleReceive}
                   loading={isReceiving}
-                  disabled={orden?.estado !== 'PENDIENTE_ASIGNACION' ? true : false}
+                  disabled={
+                    orden?.estado !== 'NOTIFICADA' &&
+                    orden?.estado !== 'PENDIENTE_ASIGNACION'
+                  }
                 />
               </Tooltip>
             </div>
@@ -1089,6 +1219,52 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
       case 3:
         return (
           <>
+            <div className="wo-process-substep-tabs" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+              <Button
+                variant={executionSubStep === 0 ? 'primary' : 'outline'}
+                onClick={() => setExecutionSubStep(0)}
+                leftIcon={<Wrench size={16} />}
+                style={{ flex: 1 }}
+              >
+                1. Personal y Materiales
+              </Button>
+              <Button
+                variant={executionSubStep === 1 ? 'primary' : 'outline'}
+                onClick={() => setExecutionSubStep(1)}
+                leftIcon={<FileText size={16} />}
+                style={{ flex: 1 }}
+              >
+                2. Evidencias de Campo
+              </Button>
+            </div>
+
+            <div className="wo-process-phase-actions">
+              {automationPolicy.isAuto('finishExecution') && (
+                <WorkOrderPhaseActionBtn
+                  id="wo-btn-complete-exec-3"
+                  color="#10b981"
+                  bg="rgba(16,185,129,0.12)"
+                  icon={<Zap size={18} />}
+                  label="Completar Orden"
+                  sublabel="Fase 4 — Cierre directo (auto-finalización + QC)"
+                  onClick={handleCompleteClick}
+                  loading={isCompleting}
+                />
+              )}
+              {(requiereInformeSolicitud || requiereInformeInstalacionSolicitud || !automationPolicy.isAuto('finishExecution')) && (
+                <WorkOrderPhaseActionBtn
+                  id="wo-btn-finish-exec-3"
+                  color={requiereInformeSolicitud || requiereInformeInstalacionSolicitud ? '#a855f7' : '#10b981'}
+                  bg={requiereInformeSolicitud || requiereInformeInstalacionSolicitud ? 'rgba(168,85,247,0.1)' : 'rgba(16,185,129,0.12)'}
+                  icon={(requiereInformeSolicitud || requiereInformeInstalacionSolicitud) ? <FileText size={18} /> : <Zap size={18} />}
+                  label={requiereInformeSolicitud ? 'Enviar Informe Técnico' : (requiereInformeInstalacionSolicitud ? 'Enviar Informe Instalación' : 'Finalizar Ejecución')}
+                  sublabel="Fase 4 — Marcar trabajo técnico completado"
+                  onClick={handleFinishExec}
+                  loading={!(requiereInformeSolicitud || requiereInformeInstalacionSolicitud) && isFinishingExec}
+                />
+              )}
+            </div>
+
             <WorkOrderInfoCard orden={orden} />
             <WorkOrderWorkersCard
               codigoOrden={orden.codigoOrden}
@@ -1121,18 +1297,52 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
       case 4:
         return (
           <>
-            <div className="wo-process-phase-actions">
-              <WorkOrderPhaseActionBtn
-                id="wo-btn-finish-exec"
-                color={requiereInformeSolicitud || requiereInformeInstalacionSolicitud ? '#a855f7' : '#10b981'}
-                bg={requiereInformeSolicitud || requiereInformeInstalacionSolicitud ? 'rgba(168,85,247,0.1)' : 'rgba(16,185,129,0.12)'}
-                icon={(requiereInformeSolicitud || requiereInformeInstalacionSolicitud) ? <FileText size={18} /> : <Zap size={18} />}
-                label={requiereInformeSolicitud ? 'Enviar Informe Técnico' : (requiereInformeInstalacionSolicitud ? 'Enviar Informe Instalación' : 'Finalizar Ejecución')}
-                sublabel="Fase 4 — Marcar trabajo técnico completado"
-                onClick={handleFinishExec}
-                loading={!(requiereInformeSolicitud || requiereInformeInstalacionSolicitud) && isFinishingExec}
-              />
+            <div className="wo-process-substep-tabs" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+              <Button
+                variant={executionSubStep === 0 ? 'primary' : 'outline'}
+                onClick={() => setExecutionSubStep(0)}
+                leftIcon={<Wrench size={16} />}
+                style={{ flex: 1 }}
+              >
+                1. Personal y Materiales
+              </Button>
+              <Button
+                variant={executionSubStep === 1 ? 'primary' : 'outline'}
+                onClick={() => setExecutionSubStep(1)}
+                leftIcon={<FileText size={16} />}
+                style={{ flex: 1 }}
+              >
+                2. Evidencias de Campo
+              </Button>
             </div>
+
+            <div className="wo-process-phase-actions">
+              {automationPolicy.isAuto('finishExecution') && (
+                <WorkOrderPhaseActionBtn
+                  id="wo-btn-complete-exec-4"
+                  color="#10b981"
+                  bg="rgba(16,185,129,0.12)"
+                  icon={<Zap size={18} />}
+                  label="Completar Orden"
+                  sublabel="Fase 4 — Cierre directo (auto-finalización + QC)"
+                  onClick={handleCompleteClick}
+                  loading={isCompleting}
+                />
+              )}
+              {(requiereInformeSolicitud || requiereInformeInstalacionSolicitud || !automationPolicy.isAuto('finishExecution')) && (
+                <WorkOrderPhaseActionBtn
+                  id="wo-btn-finish-exec-4"
+                  color={requiereInformeSolicitud || requiereInformeInstalacionSolicitud ? '#a855f7' : '#10b981'}
+                  bg={requiereInformeSolicitud || requiereInformeInstalacionSolicitud ? 'rgba(168,85,247,0.1)' : 'rgba(16,185,129,0.12)'}
+                  icon={(requiereInformeSolicitud || requiereInformeInstalacionSolicitud) ? <FileText size={18} /> : <Zap size={18} />}
+                  label={requiereInformeSolicitud ? 'Enviar Informe Técnico' : (requiereInformeInstalacionSolicitud ? 'Enviar Informe Instalación' : 'Finalizar Ejecución')}
+                  sublabel="Fase 4 — Marcar trabajo técnico completado"
+                  onClick={handleFinishExec}
+                  loading={!(requiereInformeSolicitud || requiereInformeInstalacionSolicitud) && isFinishingExec}
+                />
+              )}
+            </div>
+
             <WorkOrderInfoCard orden={orden} />
             <WorkOrderAttachmentsCard
               adjuntos={orden.adjuntos ?? []}
@@ -1155,38 +1365,28 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         return (
           <>
             <div className="wo-process-phase-actions">
-              {!orden.idControl && (
+              {!orden.idControl && !automationPolicy.isAuto('qualityControl') && (
                 <WorkOrderPhaseActionBtn
                   id="wo-btn-quality"
                   color="#ec4899"
                   bg="rgba(236,72,153,0.1)"
                   icon={<ShieldCheck size={18} />}
-                  label="Emitir 1Control de Calidad"
+                  label="Emitir Control de Calidad"
                   sublabel="Fase 5 — Dictamen técnico"
                   onClick={() => setQualityControlOpen(true)}
                 />
               )}
-              {(
-                <WorkOrderPhaseActionBtn
-                  id="wo-btn-complete"
-                  color="#10b981"
-                  bg="rgba(16,185,129,0.1)"
-                  icon={<Zap size={18} />}
-                  label="Completar Orden de Trabajo"
-                  sublabel="Fase 6 — Cierre administrativo"
-                  onClick={handleCompleteClick}
-                  loading={isCompleting}
-                />
-              )}
+              <WorkOrderPhaseActionBtn
+                id="wo-btn-complete"
+                color="#10b981"
+                bg="rgba(16,185,129,0.1)"
+                icon={<Zap size={18} />}
+                label="Completar Orden de Trabajo"
+                sublabel="Fase 6 — Cierre administrativo"
+                onClick={handleCompleteClick}
+                loading={isCompleting}
+              />
             </div>
-            <CompletionPreStepHost
-              step={completionPreStep}
-              onCancel={() => setCompletionPreStep({ type: 'NONE' })}
-              onConfirmed={async (result) => {
-                setCompletionPreStep({ type: 'NONE' });
-                await handlePreStepConfirmed(result);
-              }}
-            />
             <WorkOrderInfoCard orden={orden} />
             <WorkOrderWorkersCard codigoOrden={orden.codigoOrden} personalAsignado={orden.personalAsignado ?? []} />
             <WorkOrderMaterialsCard materiales={orden.materiales ?? []} costosAdicionales={orden.costosAdicionales ?? []} />
@@ -1199,6 +1399,17 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         return (
           <>
             <div className="wo-process-phase-actions">
+              {!orden.idControl && (
+                <WorkOrderPhaseActionBtn
+                  id="wo-btn-quality"
+                  color="#ec4899"
+                  bg="rgba(236,72,153,0.1)"
+                  icon={<ShieldCheck size={18} />}
+                  label="Emitir Control de Calidad"
+                  sublabel="Fase 5 — Dictamen técnico"
+                  onClick={() => setQualityControlOpen(true)}
+                />
+              )}
               {!orden.idEncuesta && (
                 <WorkOrderPhaseActionBtn
                   id="wo-btn-survey"
@@ -1221,6 +1432,9 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
               )}
             </div>
             <WorkOrderInfoCard orden={orden} />
+            <WorkOrderWorkersCard codigoOrden={orden.codigoOrden} personalAsignado={orden.personalAsignado ?? []} />
+            <WorkOrderMaterialsCard materiales={orden.materiales ?? []} costosAdicionales={orden.costosAdicionales ?? []} />
+            <WorkOrderAttachmentsCard adjuntos={orden.adjuntos ?? []} />
             <WorkOrderQualityCard orden={orden} />
             <WorkOrderSatisfactionCard orden={orden} />
           </>
@@ -1266,7 +1480,10 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
           <span>Cargando orden de trabajo...</span>
         </div>
       )}
-      {!isLoading && !error && orden && (
+      {!isLoading && isAutoProcessing && (
+        <AutoProcessingView />
+      )}
+      {!isLoading && !isAutoProcessing && !error && orden && (
         <div className="wo-process-container">
           <div className="wo-process-main-col">
             {renderStepper(orden.estado ?? '')}
@@ -1343,6 +1560,14 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
           }}
         />
       )}
+      <CompletionPreStepHost
+        step={completionPreStep}
+        onCancel={() => setCompletionPreStep({ type: 'NONE' })}
+        onConfirmed={async (result) => {
+          setCompletionPreStep({ type: 'NONE' });
+          await handlePreStepConfirmed(result);
+        }}
+      />
     </>
   );
 
