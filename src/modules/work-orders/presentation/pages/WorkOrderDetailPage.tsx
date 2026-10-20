@@ -99,11 +99,11 @@ import {
   ShieldCheck,
   Star,
   AlertTriangle,
-  Clock,
   FileText,
   Printer,
 } from "lucide-react";
 import "../styles/WorkOrderDetailPage.css";
+import { CircularProgress } from "@/shared/presentation/components/CircularProgress";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 const esOTInspeccionAcometida = (orden: OrdenTrabajoDetalle): boolean => {
@@ -320,10 +320,10 @@ export const WorkOrderDetailPage: React.FC = () => {
           setOrden(newDet);
           const singleTrk = Array.isArray(newTrk)
             ? newTrk.find(
-                (d) =>
-                  d.codigoOrden.toUpperCase() ===
-                  activeOrder.codigoOrden.toUpperCase()
-              ) || newTrk[0] || null
+              (d) =>
+                d.codigoOrden.toUpperCase() ===
+                activeOrder.codigoOrden.toUpperCase()
+            ) || newTrk[0] || null
             : newTrk;
           setTracking(singleTrk);
           activeOrder = newDet;
@@ -401,9 +401,9 @@ export const WorkOrderDetailPage: React.FC = () => {
           setOrden(det);
           const singleTrk = Array.isArray(trk)
             ? trk.find(
-                (d) =>
-                  d.codigoOrden.toUpperCase() === codigoOrden.toUpperCase()
-              ) || trk[0] || null
+              (d) =>
+                d.codigoOrden.toUpperCase() === codigoOrden.toUpperCase()
+            ) || trk[0] || null
             : trk;
           setTracking(singleTrk);
           if (
@@ -1096,21 +1096,20 @@ export const WorkOrderDetailPage: React.FC = () => {
   // ── Formatted date ───────────────────────────────────────────────────────────
   const updatedStr = orden?.updatedAt
     ? new Date(orden.updatedAt).toLocaleDateString("es-EC", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
     : "—";
 
   // ── Loading ──────────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
       <PageLayout>
-        <div className="wo-detail-loading">
-          <Clock className="wo-detail-loading__spinner" size={24} />
-          <span>Cargando orden de trabajo...</span>
+        <div className='loading'>
+          <CircularProgress label="Cargando orden de trabajo..." />
         </div>
       </PageLayout>
     );

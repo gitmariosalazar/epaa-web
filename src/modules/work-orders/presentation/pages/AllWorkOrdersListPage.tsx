@@ -221,52 +221,6 @@ export const AllWorkOrdersListPage: React.FC = () => {
     [navigate]
   );
 
-  // ── Loading ───────────────────────────────────────────────────────────────
-  if (isInitialLoading && totalCount === 0) {
-    return (
-      <PageLayout>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '5rem 0',
-            gap: '1rem'
-          }}
-        >
-          <CircularProgress />
-          <span style={{ color: 'var(--text-muted)' }}>
-            Cargando órdenes de trabajo...
-          </span>
-        </div>
-      </PageLayout>
-    );
-  }
-
-  // ── Error ─────────────────────────────────────────────────────────────────
-  if (error) {
-    return (
-      <PageLayout>
-        <div className="wo-empty">
-          <div
-            className="wo-empty__icon"
-            style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--error)' }}
-          >
-            <AlertTriangle size={28} />
-          </div>
-          <h3>No se pudo cargar la información</h3>
-          <p>
-            Ocurrió un problema al conectar con el servidor. Por favor intenta
-            de nuevo.
-          </p>
-          <button className="wo-toolbar__btn" onClick={refresh}>
-            <RefreshCw size={14} /> Reintentar
-          </button>
-        </div>
-      </PageLayout>
-    );
-  }
-
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
@@ -286,17 +240,36 @@ export const AllWorkOrdersListPage: React.FC = () => {
           />
         }
         footer={
-          <WorkOrderPagination
-            page={page}
-            pageSize={pageSize}
-            total={ordenes.length}
-            onPageChange={setPage}
-            onPageSizeChange={setPageSize}
-          />
+          !error && !isInitialLoading && paginated.length > 0 ? (
+            <WorkOrderPagination
+              page={page}
+              pageSize={pageSize}
+              total={ordenes.length}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+            />
+          ) : undefined
         }
       >
         <div className="wo-list-container">
-          {isSearching ? (
+          {isInitialLoading && totalCount === 0 && !error ? (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '5rem 0',
+                gap: '1rem'
+              }}
+            >
+              <div className="loading">
+                <CircularProgress />
+                <span style={{ color: 'var(--text-muted)' }}>
+                  Cargando órdenes de trabajo...
+                </span>
+              </div>
+            </div>
+          ) : isSearching ? (
             <div
               style={{
                 display: 'flex',
@@ -311,6 +284,53 @@ export const AllWorkOrdersListPage: React.FC = () => {
                 Buscando órdenes de trabajo...
               </span>
             </div>
+          ) : error ? (
+            <div className="wo-empty">
+              <div
+                className="wo-empty__icon"
+                style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--error)' }}
+              >
+                <AlertTriangle size={28} />
+              </div>
+              <h3>No se pudo cargar la información</h3>
+              <p>
+                {error ||
+                  'Ocurrió un problema al conectar con el servidor. Por favor intenta de nuevo.'}
+              </p>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '0.75rem',
+                  marginTop: '0.5rem',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center'
+                }}
+              >
+                <button className="wo-toolbar__btn" onClick={refresh}>
+                  <RefreshCw size={14} /> Reintentar
+                </button>
+                {(filters.search ||
+                  filters.status ||
+                  filters.priority ||
+                  filters.origin ||
+                  filters.filterBy) && (
+                    <button
+                      className="wo-toolbar__btn"
+                      onClick={() =>
+                        handleFilterChange({
+                          search: '',
+                          status: '',
+                          priority: '',
+                          origin: '',
+                          filterBy: ''
+                        })
+                      }
+                    >
+                      Limpiar filtros
+                    </button>
+                  )}
+              </div>
+            </div>
           ) : paginated.length === 0 ? (
             <div className="wo-empty">
               <div className="wo-empty__icon">
@@ -322,22 +342,27 @@ export const AllWorkOrdersListPage: React.FC = () => {
                   ? 'No se encontraron órdenes en el sistema.'
                   : 'No hay resultados con los filtros aplicados.'}
               </p>
-              {ordenes.length > 0 && (
-                <button
-                  className="wo-toolbar__btn"
-                  onClick={() =>
-                    handleFilterChange({
-                      search: '',
-                      status: '',
-                      priority: '',
-                      origin: '',
-                      filterBy: ''
-                    })
-                  }
-                >
-                  Limpiar filtros
-                </button>
-              )}
+              {(ordenes.length > 0 ||
+                filters.search ||
+                filters.status ||
+                filters.priority ||
+                filters.origin ||
+                filters.filterBy) && (
+                  <button
+                    className="wo-toolbar__btn"
+                    onClick={() =>
+                      handleFilterChange({
+                        search: '',
+                        status: '',
+                        priority: '',
+                        origin: '',
+                        filterBy: ''
+                      })
+                    }
+                  >
+                    Limpiar filtros
+                  </button>
+                )}
             </div>
           ) : (
             <div className="wo-list">

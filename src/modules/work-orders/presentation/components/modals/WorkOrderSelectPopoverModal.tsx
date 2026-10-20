@@ -9,6 +9,7 @@ import { BsPatchQuestionFill } from 'react-icons/bs';
 import { FaListUl } from 'react-icons/fa';
 import '../../styles/WorkOrderSelectPopoverModal.css';
 import type { OrdenTrabajoTracking } from '@/modules/work-orders/domain/schemas/dto/response/work-orders.get.response';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 export interface WorkOrderSelectPopoverModalProps {
   isOpen: boolean;
@@ -43,15 +44,18 @@ export const WorkOrderSelectPopoverModal: React.FC<WorkOrderSelectPopoverModalPr
       {
         header: 'Código OT',
         accessor: (order) => (
-          <button
-            type="button"
-            className="wo-select-popover-code-btn"
-            onClick={() => onSelect(order)}
-            title={`Seleccionar orden ${order.codigoOrden}`}
+          <Tooltip content={`Seleccionar orden ${order.codigoOrden}`} position="top" followCursor={false}
+            themeColor='amber'
           >
-            <Tag size={13} />
-            <span>{order.codigoOrden}</span>
-          </button>
+            <button
+              type="button"
+              className="wo-select-popover-code-btn"
+              onClick={() => onSelect(order)}
+            >
+              <Tag size={13} />
+              <span>{order.codigoOrden}</span>
+            </button>
+          </Tooltip>
         )
       },
       {
@@ -146,7 +150,7 @@ export const WorkOrderSelectPopoverModal: React.FC<WorkOrderSelectPopoverModalPr
       <div className="wo-select-popover-container">
         <div className="wo-select-popover-banner">
           <span>
-            Se encontraron <strong>{orders.length}</strong> órdenes de trabajo asociadas. Haz clic en <strong>Cargar</strong> para seleccionarla.
+            Se encontraron <strong>{orders.length}</strong> órdenes de trabajo asociadas. Haz clic en <strong>Cargar</strong> o en el código de la orden para seleccionarla.
           </span>
           <span className="wo-select-popover-count-chip">
             <Layers size={12} /> {orders.length} encontradas

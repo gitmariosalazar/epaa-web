@@ -33,7 +33,7 @@
   width: 56px;
   height: 56px;
   border-radius: 14px;
-  background: rgba(100,116,139,0.08);
+  background: rgba(100, 116, 139, 0.08);
   color: var(--text-muted);
   margin-bottom: 0.25rem;
 }
@@ -79,7 +79,9 @@
   border-color: var(--accent);
 }
 
-.wo-toolbar__search-icon { flex-shrink: 0; }
+.wo-toolbar__search-icon {
+  flex-shrink: 0;
+}
 
 .wo-toolbar__input {
   flex: 1;
@@ -91,7 +93,9 @@
   font-family: inherit;
 }
 
-.wo-toolbar__input::placeholder { color: var(--text-muted); }
+.wo-toolbar__input::placeholder {
+  color: var(--text-muted);
+}
 
 .wo-toolbar__filters {
   display: flex;
@@ -113,8 +117,13 @@
   transition: border-color 0.2s;
 }
 
-.wo-toolbar__select:focus { border-color: var(--accent); }
-.wo-toolbar__select--sm { font-size: 0.75rem; padding: 0.3rem 0.5rem; }
+.wo-toolbar__select:focus {
+  border-color: var(--accent);
+}
+.wo-toolbar__select--sm {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.5rem;
+}
 
 .wo-toolbar__right {
   display: flex;
@@ -157,23 +166,35 @@
   border-radius: 12px;
   background: var(--surface);
   overflow: hidden;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
   border-left: 3.5px solid var(--wo-accent, var(--accent));
   animation: woCardIn 0.3s ease both;
 }
 
 @keyframes woCardIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .wo-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-  border-color: color-mix(in srgb, var(--wo-accent, var(--accent)) 40%, var(--border-color));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border-color: color-mix(
+    in srgb,
+    var(--wo-accent, var(--accent)) 40%,
+    var(--border-color)
+  );
 }
 
 .wo-card--open {
-  box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
 }
 
 /* ── Main row ─────────────────────────────────────────────────── */
@@ -186,7 +207,9 @@
   user-select: none;
 }
 
-.wo-card__main-row:focus { outline: none; }
+.wo-card__main-row:focus {
+  outline: none;
+}
 
 .wo-card__icon {
   display: flex;
@@ -195,12 +218,15 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: var(--wo-icon-bg, rgba(100,116,139,0.1));
+  background: var(--wo-icon-bg, rgba(100, 116, 139, 0.1));
   color: var(--wo-icon-color, #64748b);
   flex-shrink: 0;
 }
 
-.wo-card__body { flex: 1; min-width: 0; }
+.wo-card__body {
+  flex: 1;
+  min-width: 0;
+}
 
 .wo-card__top {
   display: flex;
@@ -277,11 +303,15 @@
 }
 
 @media (max-width: 768px) {
-  .wo-card__expand-inner { grid-template-columns: 1fr 1fr; }
+  .wo-card__expand-inner {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 480px) {
-  .wo-card__expand-inner { grid-template-columns: 1fr; }
+  .wo-card__expand-inner {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ── Expand groups ────────────────────────────────────────────── */
@@ -373,7 +403,9 @@
   font-family: inherit;
 }
 
-.wo-pagination__size:focus { border-color: var(--accent); }
+.wo-pagination__size:focus {
+  border-color: var(--accent);
+}
 
 /* ══════════════════════════════════════════════════════════════════════════════
    Dark mode overrides — WorkOrdersListPage
@@ -429,19 +461,32 @@
   border-left: 3px solid var(--wo-card-accent, var(--accent));
   border-radius: 12px;
   padding: 1rem 1.1rem;
-  transition: box-shadow 0.2s, transform 0.15s, border-color 0.2s;
+  transition:
+    box-shadow 0.2s,
+    transform 0.15s,
+    border-color 0.2s;
   animation: wo-card-in 0.3s ease both;
 }
 
 @keyframes wo-card-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .wo-list-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--wo-card-accent, var(--accent)) 50%, var(--border-color));
+  border-color: color-mix(
+    in srgb,
+    var(--wo-card-accent, var(--accent)) 50%,
+    var(--border-color)
+  );
 }
 
 /* ── Main row ─────────────────────────────────────────────────────────────── */
@@ -548,7 +593,10 @@
   padding: 0.3rem 0.4rem;
   display: flex;
   align-items: center;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
 }
 
 .wo-list-card__expand-btn:hover {
@@ -566,8 +614,14 @@
 }
 
 @keyframes wo-expand-in {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .wo-list-card__expanded-grid {
@@ -613,7 +667,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  transition: filter 0.15s, transform 0.1s;
+  transition:
+    filter 0.15s,
+    transform 0.1s;
 }
 
 .wo-toolbar__btn--primary:hover {
@@ -630,7 +686,9 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .wo-toolbar__btn--ghost:hover {
@@ -652,4 +710,17 @@
   transform: translateY(-50%);
   color: var(--text-muted);
   pointer-events: none;
+}
+
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }

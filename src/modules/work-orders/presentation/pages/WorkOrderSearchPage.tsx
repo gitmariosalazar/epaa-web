@@ -17,6 +17,7 @@ import '../styles/WorkOrdersProcessPage.css';
 import { WorkOrdersProcessPage } from './WorkOrdersProcessPage';
 import { FaListUl } from 'react-icons/fa';
 import { WorkOrderSelectPopoverModal } from '../components/modals/WorkOrderSelectPopoverModal';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 export const WorkOrderSearchPage: React.FC = () => {
   const [searchInput, setSearchInput] = useState('');
@@ -185,26 +186,31 @@ export const WorkOrderSearchPage: React.FC = () => {
             >
               Buscar
             </Button>
-            <Button
-              id="wo-process-search-list-btn"
-              onClick={() => {
-                if (searchResults.length > 1) {
-                  setIsSelectModalOpen(true);
-                } else {
-                  handleSearch();
-                }
-              }}
-              variant="secondary"
-              leftIcon={<FaListUl size={14} />}
-              disabled={!searchInput.trim() || isSearching}
-              iconOnly
-              size="xs"
-              title={
+            <Tooltip
+              content={
                 searchResults.length > 1
                   ? `Ver ${searchResults.length} resultados encontrados`
                   : 'Buscar órdenes'
               }
-            />
+              position="top"
+              followCursor={false}
+            >
+              <Button
+                id="wo-process-search-list-btn"
+                onClick={() => {
+                  if (searchResults.length > 1) {
+                    setIsSelectModalOpen(true);
+                  } else {
+                    handleSearch();
+                  }
+                }}
+                variant="secondary"
+                leftIcon={<FaListUl size={14} />}
+                disabled={(!searchInput.trim() || isSearching) || searchResults.length <= 1}
+                iconOnly
+                size="xs"
+              />
+            </Tooltip>
             {codeParam && (
               <>
                 <Button

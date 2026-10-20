@@ -116,34 +116,16 @@ export const WorkOrdersListPage: React.FC = () => {
             gap: '1rem',
           }}
         >
-          <CircularProgress />
-          <span style={{ color: 'var(--text-muted)' }}>Cargando órdenes de trabajo...</span>
-        </div>
-      </PageLayout>
-    );
-  }
-
-  // ── Error ──────────────────────────────────────────────────────────────────
-  if (error) {
-    return (
-      <PageLayout>
-        <div className="wo-empty">
-          <div
-            className="wo-empty__icon"
-            style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}
-          >
-            <AlertTriangle size={28} />
+          <div className="loading">
+            <CircularProgress />
+            <span style={{ color: 'var(--text-muted)' }}>Cargando órdenes de trabajo...</span>
           </div>
-          <h3>No se pudo cargar la información</h3>
-          <p>Ocurrió un problema al conectar con el servidor. Por favor intenta de nuevo.</p>
-          <button className="wo-toolbar__btn" onClick={refresh}>
-            <RefreshCw size={14} /> Reintentar
-          </button>
         </div>
       </PageLayout>
     );
   }
 
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <PageLayout
       filters={
@@ -158,17 +140,53 @@ export const WorkOrdersListPage: React.FC = () => {
         />
       }
       footer={
-        <WorkOrderPagination
-          page={page}
-          pageSize={pageSize}
-          total={ordenes.length}
-          onPageChange={setPage}
-          onPageSizeChange={setPageSize}
-        />
+        !error && paginated.length > 0 ? (
+          <WorkOrderPagination
+            page={page}
+            pageSize={pageSize}
+            total={ordenes.length}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          />
+        ) : undefined
       }
     >
       <div className="wo-list-container">
-        {paginated.length === 0 ? (
+        {error ? (
+          <div className="wo-empty">
+            <div
+              className="wo-empty__icon"
+              style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}
+            >
+              <AlertTriangle size={28} />
+            </div>
+            <h3>No se pudo cargar la información</h3>
+            <p>{error || 'Ocurrió un problema al conectar con el servidor. Por favor intenta de nuevo.'}</p>
+            <div
+              style={{
+                display: 'flex',
+                gap: '0.75rem',
+                marginTop: '0.5rem',
+                flexWrap: 'wrap',
+                justifyContent: 'center'
+              }}
+            >
+              <button className="wo-toolbar__btn" onClick={refresh}>
+                <RefreshCw size={14} /> Reintentar
+              </button>
+              {(filters.search || filters.estado || filters.prioridad || filters.tipoOrden || filters.filterBy) && (
+                <button
+                  className="wo-toolbar__btn"
+                  onClick={() =>
+                    handleFilterChange({ search: '', estado: '', prioridad: '', tipoOrden: '', filterBy: '' })
+                  }
+                >
+                  Limpiar filtros
+                </button>
+              )}
+            </div>
+          </div>
+        ) : paginated.length === 0 ? (
           <div className="wo-empty">
             <div className="wo-empty__icon">
               <Inbox size={28} />
@@ -179,11 +197,11 @@ export const WorkOrdersListPage: React.FC = () => {
                 ? 'No hay órdenes cargadas. Selecciona una solicitud para ver sus OTs.'
                 : 'No hay resultados con los filtros aplicados.'}
             </p>
-            {ordenes.length > 0 && (
+            {(ordenes.length > 0 || filters.search || filters.estado || filters.prioridad || filters.tipoOrden || filters.filterBy) && (
               <button
                 className="wo-toolbar__btn"
                 onClick={() =>
-                  handleFilterChange({ search: '', estado: '', prioridad: '', tipoOrden: '' })
+                  handleFilterChange({ search: '', estado: '', prioridad: '', tipoOrden: '', filterBy: '' })
                 }
               >
                 Limpiar filtros

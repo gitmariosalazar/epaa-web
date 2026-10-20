@@ -434,10 +434,24 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
   async getOrdenesTrabajoBySolicitudId(
     solicitudId: string
   ): Promise<OrdenTrabajoVistaCliente[]> {
-    const response = await this.client.get<OrdenTrabajoVistaCliente[]>(
-      `${BASE}/get-ordenes-by-solicitud-id?solicitudId=${encodeURIComponent(solicitudId)}`
-    );
-    return (response.data as any)?.data ?? [];
+    try {
+      const response = await this.client.get<OrdenTrabajoVistaCliente[]>(
+        `${BASE}/get-ordenes-by-solicitud-id?solicitudId=${encodeURIComponent(solicitudId)}`
+      );
+      return (response.data as any)?.data ?? [];
+    } catch (error: any) {
+      const message = Array.isArray(error?.data?.message)
+        ? error.data.message.join(' ')
+        : (error?.message || '');
+
+      if (
+        error?.status === 404 ||
+        message.toLowerCase().includes('no work orders found')
+      ) {
+        return [];
+      }
+      throw error;
+    }
   }
 
   // ─── Personal en campo () ──────────────────────────────────────────
@@ -519,8 +533,22 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
       ? `${BASE}/get-all-work-orders?${queryString}`
       : `${BASE}/get-all-work-orders`;
 
-    const response = await this.client.get<WorkOrderListItem[]>(endpoint);
-    return (response.data as any)?.data ?? [];
+    try {
+      const response = await this.client.get<WorkOrderListItem[]>(endpoint);
+      return (response.data as any)?.data ?? [];
+    } catch (error: any) {
+      const message = Array.isArray(error?.data?.message)
+        ? error.data.message.join(' ')
+        : (error?.message || '');
+
+      if (
+        error?.status === 404 ||
+        message.toLowerCase().includes('no work orders found')
+      ) {
+        return [];
+      }
+      throw error;
+    }
   }
 
   // ── Fase 8 Acometidas — Informe técnico de inspección ──────────────────────

@@ -109,6 +109,7 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { AutoProcessingView } from '../components/common/AutoProcessingView';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
+import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 
 const STEPS = [
   { label: 'Recepción', icon: Inbox },
@@ -1246,7 +1247,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
                   bg="rgba(16,185,129,0.12)"
                   icon={<Zap size={18} />}
                   label="Completar Orden"
-                  sublabel="Fase 4 — Cierre directo (auto-finalización + QC)"
+                  sublabel="Finalizar Orden - Por favor suba todas las evidencias de la orden antes de finalizar, asegúrese de que todo este correcto y terminado correctamente el trabajo en campo."
                   onClick={handleCompleteClick}
                   loading={isCompleting}
                 />
@@ -1258,7 +1259,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
                   bg={requiereInformeSolicitud || requiereInformeInstalacionSolicitud ? 'rgba(168,85,247,0.1)' : 'rgba(16,185,129,0.12)'}
                   icon={(requiereInformeSolicitud || requiereInformeInstalacionSolicitud) ? <FileText size={18} /> : <Zap size={18} />}
                   label={requiereInformeSolicitud ? 'Enviar Informe Técnico' : (requiereInformeInstalacionSolicitud ? 'Enviar Informe Instalación' : 'Finalizar Ejecución')}
-                  sublabel="Fase 4 — Marcar trabajo técnico completado"
+                  sublabel="Finalizar Ejecución - Por favor suba todas las evidencias de la orden antes de finalizar, asegúrese de que todo este correcto y terminado correctamente el trabajo en campo."
                   onClick={handleFinishExec}
                   loading={!(requiereInformeSolicitud || requiereInformeInstalacionSolicitud) && isFinishingExec}
                 />
@@ -1324,7 +1325,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
                   bg="rgba(16,185,129,0.12)"
                   icon={<Zap size={18} />}
                   label="Completar Orden"
-                  sublabel="Fase 4 — Cierre directo (auto-finalización + QC)"
+                  sublabel="Finalizar Orden - Por favor suba todas las evidencias de la orden antes de finalizar, asegúrese de que todo este correcto y terminado correctamente el trabajo en campo."
                   onClick={handleCompleteClick}
                   loading={isCompleting}
                 />
@@ -1475,9 +1476,8 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         </div>
       )}
       {isLoading && (
-        <div className="wo-process-loading">
-          <div className="wo-process-loading__spinner" />
-          <span>Cargando orden de trabajo...</span>
+        <div className='loading'>
+          <CircularProgress label="Cargando orden de trabajo..." />
         </div>
       )}
       {!isLoading && isAutoProcessing && (
