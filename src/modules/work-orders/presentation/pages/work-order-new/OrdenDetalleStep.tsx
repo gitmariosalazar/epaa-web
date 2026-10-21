@@ -10,16 +10,21 @@
  *   - OCP  : agregar campos no requiere tocar otros componentes.
  *   - ISP  : props mínimas necesarias.
  */
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Wrench, MapPin, FileText, AlertTriangle, Camera } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Wrench, MapPin, FileText, AlertTriangle, Camera, ChevronDown } from 'lucide-react';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { Modal } from '@/shared/presentation/components/Modal/Modal';
+import { CircularProgress } from '@/shared/presentation/components/CircularProgress/CircularProgress';
 import { FaMapLocationDot } from 'react-icons/fa6';
 import { TbMapPin, TbMapPinOff } from 'react-icons/tb';
 import { ORIGINS, WORK_TYPES, PRIORITIES } from './constants';
 import type { WorkOrderForm } from './types';
 import { EvidenceUploader } from './EvidenceUploader';
+import { getDepartmentDetails } from './departmentDetails';
+import { useDepartments } from '../../hooks/useDepartments';
+import type { DepartmentResponse } from '../../../domain/schemas/dto/response/work-orders.get.response';
 
 
 // ── Estilos GPS/mapa (reutiliza los de incidents) ───────────────────────────
@@ -62,11 +67,64 @@ interface OrdenDetalleStepProps {
   form: WorkOrderForm;
   onFormChange: (fields: Partial<WorkOrderForm>) => void;
   errors?: Record<string, string>;
+  departments?: DepartmentResponse[];
+  isLoadingDepartments?: boolean;
+  departmentsError?: string | null;
 }
 
 export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
-  form, onFormChange, errors,
+  form,
+  onFormChange,
+  errors,
+  departments: propDepartments,
+  isLoadingDepartments: propIsLoadingDepartments,
+  departmentsError: propDepartmentsError,
 }) => {
+  const defaultHookDepartments = useDepartments();
+  const departments = propDepartments ?? defaultHookDepartments.departments;
+  const isLoadingDepartments = propIsLoadingDepartments ?? defaultHookDepartments.isLoading;
+  const departmentsError = propDepartmentsError ?? defaultHookDepartments.error;
+
+  const [isTypeModalOpen, setIsTypeModalOpen] = useState(false);
+
+  const selectedWorkTypeObj = useMemo(() => {
+    if (!form.workTypeId) return null;
+
+    for (const dept of departments) {
+      const match = dept.workTypes.find(
+        (t) =>
+          String(t.typeCode) === String(form.workTypeId) ||
+          String((t as any).typeId) === String(form.workTypeId)
+      );
+      if (match) {
+        return {
+          departmentName: dept.departmentName,
+          typeCode: match.typeCode,
+          typeName: match.typeName,
+        };
+      }
+    }
+
+    if (form.workTypeName) {
+      return {
+        departmentName: form.departmentName || 'Trabajo',
+        typeCode: String(form.workTypeId),
+        typeName: form.workTypeName,
+      };
+    }
+
+    const staticMatch = WORK_TYPES.find((t) => t.id === form.workTypeId);
+    if (staticMatch) {
+      return {
+        departmentName: 'General',
+        typeCode: String(staticMatch.id),
+        typeName: staticMatch.label,
+      };
+    }
+
+    return null;
+  }, [departments, form.workTypeId, form.workTypeName, form.departmentName]);
+
   const field = <K extends keyof WorkOrderForm>(key: K) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
       onFormChange({ [key]: e.target.value } as Partial<WorkOrderForm>);
@@ -211,10 +269,46 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
         <Select label="Origen *" name="origin" value={form.origin} size="small" onChange={field('origin')} required>
           {ORIGINS.map(o => (<option key={o.value} value={o.value}>{o.label}</option>))}
         </Select>
-        <Select label="Tipo de Trabajo *" name="workTypeId" size="small" value={String(form.workTypeId)}
-          onChange={e => onFormChange({ workTypeId: Number(e.target.value) })} error={errors?.workTypeId} required>
-          {WORK_TYPES.map(t => (<option key={t.id} value={t.id}>{t.label}</option>))}
-        </Select>
+
+        <div className="form-group">
+          <label className="input__label">Tipo de Trabajo *</label>
+          <div
+            className={`incident-type-selector-trigger ${form.workTypeId ? 'has-value' : ''}`}
+            onClick={() => setIsTypeModalOpen(true)}
+            style={errors?.workTypeId ? { borderColor: 'var(--error, #ef4444)' } : undefined}
+          >
+            <div className="selected-type-info">
+              {selectedWorkTypeObj ? (
+                <>
+                  <span
+                    className="type-icon-badge"
+                    style={{
+                      backgroundColor: getDepartmentDetails(selectedWorkTypeObj.departmentName).color
+                    }}
+                  >
+                    {getDepartmentDetails(selectedWorkTypeObj.departmentName).icon}
+                  </span>
+                  <div className="selected-type-text">
+                    <span className="selected-category-name">{selectedWorkTypeObj.departmentName}</span>
+                    <span className="selected-type-name">{selectedWorkTypeObj.typeName}</span>
+                  </div>
+                </>
+              ) : (
+                <span className="placeholder-text">-- Seleccione un tipo de trabajo --</span>
+              )}
+            </div>
+            <ChevronDown size={16} className="trigger-chevron" />
+          </div>
+          {errors?.workTypeId && (
+            <span
+              className="input__error-message"
+              style={{ color: 'var(--error, #ef4444)', fontSize: '0.675rem', marginTop: '2px' }}
+            >
+              {errors.workTypeId}
+            </span>
+          )}
+        </div>
+
         <Select label="Prioridad *" name="priorityId" size="small" value={String(form.priorityId)}
           onChange={e => onFormChange({ priorityId: Number(e.target.value) })} error={errors?.priorityId} required>
           {PRIORITIES.map(p => (<option key={p.id} value={p.id}>{p.label}</option>))}
@@ -335,6 +429,77 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
           onError={setFormError}
         />
       </div>
+
+      <Modal
+        isOpen={isTypeModalOpen}
+        onClose={() => setIsTypeModalOpen(false)}
+        title="Seleccionar Tipo de Trabajo"
+        size="lg"
+      >
+        <div className="incident-categories-modal-body">
+          {isLoadingDepartments ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+              <CircularProgress size={50} label="Cargando tipos de trabajo..." />
+            </div>
+          ) : departmentsError ? (
+            <div className="incident-error-banner" style={{ margin: '1rem 0' }}>
+              <AlertTriangle size={16} />
+              <span>{departmentsError}</span>
+            </div>
+          ) : departments.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+              No se encontraron tipos de trabajo disponibles.
+            </div>
+          ) : (
+            departments.map((dept) => {
+              const details = getDepartmentDetails(dept.departmentName);
+              return (
+                <div key={dept.departmentId ?? dept.departmentName} className="category-section">
+                  <div className="category-section-header" style={{ color: details.color }}>
+                    {details.iconLg}
+                    <h3>{dept.departmentName}</h3>
+                  </div>
+                  <div className="types-grid">
+                    {dept.workTypes.map((type) => {
+                      const isSelected =
+                        String(type.typeCode) === String(form.workTypeId) ||
+                        String((type as any).typeId) === String(form.workTypeId);
+                      return (
+                        <div
+                          key={type.typeCode}
+                          className={`type-selection-card ${isSelected ? 'selected' : ''}`}
+                          style={{
+                            '--theme-color': details.color,
+                            '--theme-bg': details.bgColor,
+                            '--theme-border': details.borderColor
+                          } as React.CSSProperties}
+                          onClick={() => {
+                            const parsedId = Number(type.typeCode);
+                            onFormChange({
+                              workTypeId: isNaN(parsedId) ? ((type as any).typeId ?? 0) : parsedId,
+                              workTypeName: type.typeName,
+                              departmentName: dept.departmentName
+                            });
+                            setIsTypeModalOpen(false);
+                          }}
+                        >
+                          <div className="type-card-icon-wrapper">
+                            {details.icon}
+                          </div>
+                          <span className="type-card-name">{type.typeName}</span>
+                          {isSelected && (
+                            <div className="type-card-selected-badge">✓</div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

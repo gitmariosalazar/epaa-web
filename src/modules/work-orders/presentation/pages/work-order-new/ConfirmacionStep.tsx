@@ -31,7 +31,9 @@ export const ConfirmacionStep: React.FC<ConfirmacionStepProps> = ({ form }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const origin = ORIGINS.find(o => o.value === form.origin)?.label ?? form.origin;
-  const workType = WORK_TYPES.find(t => t.id === form.workTypeId)?.label ?? String(form.workTypeId);
+  const workType = form.workTypeName
+    ?? WORK_TYPES.find(t => t.id === form.workTypeId)?.label
+    ?? (form.workTypeId ? String(form.workTypeId) : '—');
   const priority = PRIORITIES.find(p => p.id === form.priorityId)?.label ?? String(form.priorityId);
 
   return (

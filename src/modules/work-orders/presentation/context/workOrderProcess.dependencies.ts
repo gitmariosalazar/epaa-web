@@ -18,6 +18,7 @@ import { RegisterSatisfactionSurveyUseCase } from '../../application/usecases/Re
 import { ResolvePreparationInspectionUseCase } from '../../application/usecases/ResolvePreparationInspectionUseCase';
 import { ResolveQualityControlUseCase } from '../../application/usecases/ResolveQualityControlUseCase';
 import { StartPreparationUseCase } from '../../application/usecases/StartPreparationUseCase';
+import { GetAllDepartmentsUseCase } from '../../application/usecases/GetAllDepartmentsUseCase';
 import { ProcessWorkOrderRepositoryImpl } from '../../infrastructure/repositories/ProcessWorkOrderRepositoryImpl';
 
 export interface WorkOrderProcessDependencies {
@@ -41,6 +42,7 @@ export interface WorkOrderProcessDependencies {
   getOrdenTrabajoDetalleByNumeroOrdenUseCase: GetOrdenTrabajoDetalleByNumeroOrdenUseCase;
   getOrdenTrabajoTrackingByNumeroOrdenUseCase: GetOrdenTrabajoTrackingByNumeroOrdenUseCase;
   getOrdenesTrabajoBySolicitudIdUseCase: GetOrdenesTrabajoBySolicitudIdUseCase;
+  getAllDepartmentsUseCase: GetAllDepartmentsUseCase;
 }
 
 export const createWorkOrderProcessDependencies =
@@ -86,6 +88,7 @@ export const createWorkOrderProcessDependencies =
       getOrdenTrabajoTrackingByNumeroOrdenUseCase:
         new GetOrdenTrabajoTrackingByNumeroOrdenUseCase(repository),
       getOrdenesTrabajoBySolicitudIdUseCase:
-        new GetOrdenesTrabajoBySolicitudIdUseCase(repository)
+        new GetOrdenesTrabajoBySolicitudIdUseCase(repository),
+      getAllDepartmentsUseCase: new GetAllDepartmentsUseCase(repository)
     };
   };

@@ -41,6 +41,7 @@ import type {
   AddWorkersBatchToWorkOrderCommand
 } from '../../domain/schemas/dto/process-work-order.commands';
 import type {
+  DepartmentResponse,
   OrdenTrabajoDetalle,
   OrdenTrabajoTracking,
   OrdenTrabajoVistaCliente,
@@ -421,8 +422,9 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
     const rawData = (response.data as any)?.data;
     if (!rawData) return [];
 
-    const list: (OrdenTrabajoTracking & { id_entidad_origen?: string | null })[] =
-      Array.isArray(rawData) ? rawData : [rawData];
+    const list: (OrdenTrabajoTracking & {
+      id_entidad_origen?: string | null;
+    })[] = Array.isArray(rawData) ? rawData : [rawData];
 
     return list
       .map((item) => normalizeEntityOrigin(item))
@@ -442,7 +444,7 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
     } catch (error: any) {
       const message = Array.isArray(error?.data?.message)
         ? error.data.message.join(' ')
-        : (error?.message || '');
+        : error?.message || '';
 
       if (
         error?.status === 404 ||
@@ -539,7 +541,7 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
     } catch (error: any) {
       const message = Array.isArray(error?.data?.message)
         ? error.data.message.join(' ')
-        : (error?.message || '');
+        : error?.message || '';
 
       if (
         error?.status === 404 ||
@@ -567,5 +569,13 @@ export class ProcessWorkOrderRepositoryImpl implements ProcessWorkOrderRepositor
     cmd: SubmitInstallationReportCommand
   ): Promise<void> {
     await this.client.post<void>(`/installation-report/ordenes/informe`, cmd);
+  }
+
+  async getAllDepartments(): Promise<DepartmentResponse[]> {
+    const response = await this.client.get<DepartmentResponse[]>(
+      `/work-types/get-all-departments`
+    );
+    const raw = (response.data as any)?.data ?? response.data;
+    return Array.isArray(raw) ? raw : [];
   }
 }

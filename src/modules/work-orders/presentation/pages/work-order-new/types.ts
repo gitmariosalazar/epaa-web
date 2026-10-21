@@ -12,6 +12,8 @@ export interface WorkOrderForm {
   // Paso 2: Detalle
   origin: string;
   workTypeId: number;
+  workTypeName?: string;
+  departmentName?: string;
   priorityId: number;
   cadastralKey: string;
   location: string;

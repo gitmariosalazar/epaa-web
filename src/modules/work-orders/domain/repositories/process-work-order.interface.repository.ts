@@ -20,6 +20,7 @@ import type {
 import type { ProcessWorkOrderRequest } from '../schemas/dto/request/process-work-order.request';
 import type { ProcessWorkOrderResponse } from '../schemas/dto/response/process-work-order.response';
 import type {
+  DepartmentResponse,
   OrdenTrabajoDetalle,
   OrdenTrabajoTracking,
   OrdenTrabajoVistaCliente,
@@ -145,4 +146,5 @@ export interface ProcessWorkOrderRepository {
    * Cierra la OT de instalación y hace avanzar la solicitud a INSTALACION_COMPLETADA o FALLIDA.
    */
   submitInstallationReport(cmd: SubmitInstallationReportCommand): Promise<void>;
+  getAllDepartments(): Promise<DepartmentResponse[]>;
 }

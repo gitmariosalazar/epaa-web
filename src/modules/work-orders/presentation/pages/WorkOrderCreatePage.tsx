@@ -24,6 +24,8 @@ import { useAuth }    from '@/shared/presentation/context/AuthContext';
 // ── Domain ────────────────────────────────────────────────────────────────────
 import { ProcessWorkOrderRepositoryImpl } from '../../infrastructure/repositories/ProcessWorkOrderRepositoryImpl';
 import { CreateWorkOrderWithEvidenceUseCase } from '../../application/usecases/CreateWorkOrderWithEvidenceUseCase';
+import { GetAllDepartmentsUseCase } from '../../application/usecases/GetAllDepartmentsUseCase';
+import { useDepartments } from '../hooks/useDepartments';
 
 // ── Sub-components (SRP — each file owns one concern) ────────────────────────
 import { StepIndicator }    from '@/modules/processes/solicitudes/presentation/pages/solicitud-nueva/StepIndicator';
@@ -48,8 +50,14 @@ export const WorkOrderCreatePage: React.FC = () => {
   const currentUserId = user?.userId ?? '';
 
   // ── DIP: inject repository through use case ──────────────────────────────
-  const repo          = React.useMemo(() => new ProcessWorkOrderRepositoryImpl(), []);
-  const createUseCase = React.useMemo(() => new CreateWorkOrderWithEvidenceUseCase(repo), [repo]);
+  const repo                     = React.useMemo(() => new ProcessWorkOrderRepositoryImpl(), []);
+  const createUseCase            = React.useMemo(() => new CreateWorkOrderWithEvidenceUseCase(repo), [repo]);
+  const getAllDepartmentsUseCase = React.useMemo(() => new GetAllDepartmentsUseCase(repo), [repo]);
+  const {
+    departments,
+    isLoading: isLoadingDepartments,
+    error: departmentsError
+  } = useDepartments(getAllDepartmentsUseCase);
 
   // ── Wizard state ─────────────────────────────────────────────────────────
   const [step,         setStep]         = useState(1);
@@ -228,6 +236,9 @@ export const WorkOrderCreatePage: React.FC = () => {
                 form={form}
                 onFormChange={handleFormChange}
                 errors={errors}
+                departments={departments}
+                isLoadingDepartments={isLoadingDepartments}
+                departmentsError={departmentsError}
               />
             )}
 
