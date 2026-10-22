@@ -1518,6 +1518,7 @@ export const WorkOrderDetailPage: React.FC = () => {
           workOrderId={orden.idOrdenTrabajo}
           onSubmit={handleAssignWorker}
           isLoading={isModalLoading}
+          workOrder={orden}
         />
       )}
 

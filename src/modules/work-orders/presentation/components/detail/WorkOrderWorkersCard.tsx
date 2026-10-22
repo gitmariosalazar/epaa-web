@@ -292,7 +292,7 @@ export const WorkOrderWorkersCard: React.FC<WorkOrderWorkersCardProps> = ({
                   <SearchableSelect
                     options={users.map(user => ({
                       value: user.userId,
-                      label: user.firstName + ' ' + user.lastName + ' (' + user.positionName + ')'
+                      label: user.firstName?.toUpperCase() + ' ' + user.lastName?.toUpperCase() + ' (' + user.positionName + ')'
                     }))}
                     label='Trabajador '
                     size='small'

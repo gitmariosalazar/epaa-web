@@ -76,6 +76,7 @@ import { WorkOrderPhaseActionBtn } from '../components/WorkOrderPhaseActionBtn';
 import { WorkOrderWorkersCard } from '../components/detail/WorkOrderWorkersCard';
 
 // ── Modales ────────────────────────────────────────────────────────────────────
+import { AssignToWorkerModal } from '../components/modals/AssignToWorkerModal';
 import { CreateChecklistModal } from '../components/modals/CreateChecklistModal';
 import { CreateQualityControlModal } from '../components/modals/CreateQualityControlModal';
 import { RegisterSurveyModal } from '../components/modals/RegisterSurveyModal';
@@ -87,6 +88,7 @@ import {
   Search,
   Inbox,
   User,
+  UserCheck,
   Play,
   ClipboardCheck,
   Zap,
@@ -221,6 +223,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
   const [currentCode, setCurrentCode] = useState('');
 
   // ── Modal state (uno por fase) ──────────────────────────────────────────────
+  const [assignWorkerOpen, setAssignWorkerOpen] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(false);
   const [isResolvingChecklist, setIsResolvingChecklist] = useState(false);
   const [qualityControlOpen, setQualityControlOpen] = useState(false);
@@ -636,6 +639,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         comment
       });
       MessageToastCustom('success', 'Técnico Asignado', 'La OT fue asignada al técnico.');
+      setAssignWorkerOpen(false);
       reload();
     } catch (e: any) {
       MessageToastCustom('error', 'Error', e.message || 'No se pudo asignar el técnico.');
@@ -1106,11 +1110,17 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
       case 1:
         return (
           <>
-            <div className="wo-process-info-banner wo-process-info-banner--warn">
+
+
+            <div
+              className="wo-process-info-banner wo-process-info-banner--warn"
+              style={{ cursor: 'pointer' }}
+              onClick={() => setAssignWorkerOpen(true)}
+            >
               <User size={16} />
-              <div>
+              <div style={{ flex: 1 }}>
                 <strong>Asignación Pendiente</strong>
-                <span>Usa el formulario inline a continuación para asignar al Técnico Responsable de la orden de trabajo.</span>
+                <span>Haz clic aquí o en el botón superior para asignar al Técnico Responsable de la orden de trabajo.</span>
               </div>
             </div>
             <WorkOrderInfoCard orden={orden} />
@@ -1489,10 +1499,32 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
             {renderStepper(orden.estado ?? '')}
             <WorkOrderHeroCard orden={orden} updatedStr={updatedStr} />
             {currentStepGuide && (
-              <div className="wo-process-step-guide" role="status" aria-live="polite">
-                <span className="wo-process-step-guide__phase">{currentStepGuide.phase}</span>
-                <strong className="wo-process-step-guide__title">{currentStepGuide.title}</strong>
-                <span className="wo-process-step-guide__action">{currentStepGuide.action}</span>
+              <div
+                className={`wo-process-step-guide ${orden.estado === 'PENDIENTE' ? 'wo-process-step-guide--clickable' : ''}`}
+                role="status"
+                aria-live="polite"
+                onClick={orden.estado === 'PENDIENTE' ? () => setAssignWorkerOpen(true) : undefined}
+                title={orden.estado === 'PENDIENTE' ? 'Haz clic para asignar el técnico responsable' : undefined}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                  <span className="wo-process-step-guide__phase">{currentStepGuide.phase}</span>
+                  <strong className="wo-process-step-guide__title">{currentStepGuide.title}</strong>
+                  <span className="wo-process-step-guide__action">{currentStepGuide.action}</span>
+                </div>
+                {orden.estado === 'PENDIENTE' && (
+                  <Button
+                    size="xs"
+                    variant="primary"
+                    style={{ background: '#6366f1', borderColor: '#6366f1', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setAssignWorkerOpen(true);
+                    }}
+                  >
+                    <UserCheck size={14} />
+                    Asignar Técnico
+                  </Button>
+                )}
               </div>
             )}
             {renderStepContent(orden.estado ?? '')}
@@ -1502,6 +1534,17 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
             <WorkOrderTimelineCard historial={tracking?.historial ?? null} title="Historial de Estados" />
           </div>
         </div>
+      )}
+
+      {assignWorkerOpen && orden && (
+        <AssignToWorkerModal
+          isOpen={assignWorkerOpen}
+          onClose={() => setAssignWorkerOpen(false)}
+          workOrderId={orden.idOrdenTrabajo}
+          workOrder={orden}
+          onSubmit={handleAssignWorker}
+          isLoading={isModalLoading}
+        />
       )}
 
       {checklistOpen && orden && (

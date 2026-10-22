@@ -271,7 +271,7 @@ export const OrdenDetalleStep: React.FC<OrdenDetalleStepProps> = ({
         </Select>
 
         <div className="form-group">
-          <label className="input__label">Tipo de Trabajo *</label>
+          <label className="input--xtrasmall input__label">{`Tipo de Trabajo *`.toUpperCase()}</label>
           <div
             className={`incident-type-selector-trigger ${form.workTypeId ? 'has-value' : ''}`}
             onClick={() => setIsTypeModalOpen(true)}

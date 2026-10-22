@@ -324,11 +324,11 @@
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm, 6px);
   padding: 0.75rem 0.75rem;
-  height: 34px; /* matching small height */
+  height: 28px; /* matching small height */
   box-sizing: border-box;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-top: -0.25rem;
+  margin-top: 0.05rem;
 }
 
 .incident-type-selector-trigger:hover {

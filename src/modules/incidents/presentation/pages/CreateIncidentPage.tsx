@@ -568,38 +568,7 @@ export const CreateIncidentPage: React.FC = () => {
           )}
           <br />
 
-
-          <div className="form-group">
-            <label className="input__label">Tipo de Incidente *</label>
-            <div
-              className={`incident-type-selector-trigger ${incidentTypeId ? 'has-value' : ''}`}
-              onClick={() => setIsTypeModalOpen(true)}
-            >
-              <div className="selected-type-info">
-                {selectedIncidentTypeObj ? (
-                  <>
-                    <span
-                      className="type-icon-badge"
-                      style={{
-                        backgroundColor: getCategoryDetails(selectedIncidentTypeObj.categoryName).color
-                      }}
-                    >
-                      {getCategoryDetails(selectedIncidentTypeObj.categoryName).icon}
-                    </span>
-                    <div className="selected-type-text">
-                      <span className="selected-category-name">{selectedIncidentTypeObj.categoryName}</span>
-                      <span className="selected-type-name">{selectedIncidentTypeObj.typeName}</span>
-                    </div>
-                  </>
-                ) : (
-                  <span className="placeholder-text">-- Seleccione un tipo de incidente --</span>
-                )}
-              </div>
-              <ChevronDown size={16} className="trigger-chevron" />
-            </div>
-          </div>
-
-          <div className="form-grid">
+          <div className="wo-create-grid">
             <div className="form-group">
               <Select
                 label="Prioridad *"
@@ -612,6 +581,36 @@ export const CreateIncidentPage: React.FC = () => {
                 <option value="ALTA">Alta</option>
                 <option value="CRITICA">Crítica</option>
               </Select>
+            </div>
+
+            <div className="form-group">
+              <label className="input--xtrasmall input__label">Tipo de Incidente *</label>
+              <div
+                className={`incident-type-selector-trigger ${incidentTypeId ? 'has-value' : ''}`}
+                onClick={() => setIsTypeModalOpen(true)}
+              >
+                <div className="selected-type-info">
+                  {selectedIncidentTypeObj ? (
+                    <>
+                      <span
+                        className="type-icon-badge"
+                        style={{
+                          backgroundColor: getCategoryDetails(selectedIncidentTypeObj.categoryName).color
+                        }}
+                      >
+                        {getCategoryDetails(selectedIncidentTypeObj.categoryName).icon}
+                      </span>
+                      <div className="selected-type-text">
+                        <span className="selected-category-name">{selectedIncidentTypeObj.categoryName}</span>
+                        <span className="selected-type-name">{selectedIncidentTypeObj.typeName}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <span className="placeholder-text">-- Seleccione un tipo de incidente --</span>
+                  )}
+                </div>
+                <ChevronDown size={16} className="trigger-chevron" />
+              </div>
             </div>
 
             <div className="form-group">
