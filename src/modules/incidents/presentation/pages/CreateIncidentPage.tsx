@@ -20,6 +20,8 @@ import { TiWarning } from 'react-icons/ti';
 import { FaMapLocationDot } from 'react-icons/fa6';
 import { TbMapPin, TbMapPinOff } from 'react-icons/tb';
 import { GeoSection } from '@/shared/presentation/components/GeoLocation';
+import { MdWaterDrop } from 'react-icons/md';
+import { FaTools } from 'react-icons/fa';
 
 // Helper to dynamically load Leaflet from CDN
 const loadLeaflet = (): Promise<any> => {
@@ -80,6 +82,24 @@ const getCategoryDetails = (categoryName: string) => {
       color: 'var(--accent, #3b82f6)',
       bgColor: 'rgba(59, 130, 246, 0.08)',
       borderColor: 'rgba(59, 130, 246, 0.15)'
+    };
+  }
+  if (name.includes('agua potable')) {
+    return {
+      icon: <MdWaterDrop size={iconSizeSmall} />,
+      iconLg: <MdWaterDrop size={iconSizeLarge} />,
+      color: 'var(--accent, #3b82f6)',
+      bgColor: 'rgba(59, 130, 246, 0.08)',
+      borderColor: 'rgba(59, 130, 246, 0.15)'
+    };
+  }
+  if (name.includes('dirección técnica')) {
+    return {
+      icon: <FaTools size={iconSizeSmall} />,
+      iconLg: <FaTools size={iconSizeLarge} />,
+      color: '#f97316',
+      bgColor: 'rgba(249, 115, 22, 0.08)',
+      borderColor: 'rgba(249, 115, 22, 0.15)'
     };
   }
   if (name.includes('infraestructura')) {
