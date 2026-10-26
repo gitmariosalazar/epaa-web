@@ -31,9 +31,17 @@ export const useUpdateReading = () => {
       setReadingHistory([]);
 
       try {
-        const infoPromise = initialMonth
-          ? getReadingInfoUseCase.findReadingInfoForUpdated(cadastralKey, initialMonth)
-          : getReadingInfoUseCase.execute(cadastralKey);
+        const infoPromise = (async () => {
+          if (initialMonth) {
+            try {
+              const res = await getReadingInfoUseCase.findReadingInfoForUpdated(cadastralKey, initialMonth);
+              if (res && res.length > 0) return res;
+            } catch (err) {
+              console.warn('findReadingInfoForUpdated failed with initialMonth, fallback to execute', err);
+            }
+          }
+          return getReadingInfoUseCase.execute(cadastralKey);
+        })();
 
         const [infoResultSettled, historyResultSettled] =
           await Promise.allSettled([
@@ -78,15 +86,17 @@ export const useUpdateReading = () => {
                     cadastralKey,
                     yearAndMonth
                   );
-                if (infoForUpdatedResult) {
+                if (infoForUpdatedResult && infoForUpdatedResult.length > 0) {
                   setReadingInfoForUpdated(infoForUpdatedResult);
                 } else {
-                  setReadingInfoForUpdated([]);
+                  setReadingInfoForUpdated(infoValue);
                 }
               } catch (err) {
                 console.error('Error fetching infoForUpdated:', err);
-                setReadingInfoForUpdated([]);
+                setReadingInfoForUpdated(infoValue);
               }
+            } else {
+              setReadingInfoForUpdated(infoValue);
             }
           }
         } else {
@@ -155,7 +165,7 @@ export const useUpdateReading = () => {
       setIsSubmitting(true);
       try {
         const result = await updateReadingUseCase.execute(readingId, request);
-        return result;
+        return result ?? true;
       } catch (error: any) {
         console.error('Error updating reading:', error);
 

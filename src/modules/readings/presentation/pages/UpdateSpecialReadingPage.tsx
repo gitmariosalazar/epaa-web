@@ -18,8 +18,7 @@ import {
   FileText
 } from 'lucide-react';
 import { ReadingConfirmationModal } from '../components/ReadingConfirmationModal';
-import { PreviousMonthWarningModal } from '../components/PreviousMonthWarningModal';
-import { checkReadingIsCurrentMonth } from '../../application/usecases/CheckReadingMonthUseCase';
+import { checkReadingIsCurrentMonth, formatReadingMonth } from '../../application/usecases/CheckReadingMonthUseCase';
 import { Alert } from '@/shared/presentation/components/Alert';
 import '../styles/create-reading.css';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
@@ -83,9 +82,12 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
   const handleCloseUpdateMeterNumberModal = () => {
     setOpenUpdateMeterNumberModal(false);
   };
-  const handleSuccessUpdateMeterNumberModal = () => {
+  const handleSuccessUpdateMeterNumberModal = async () => {
     setOpenUpdateMeterNumberModal(false);
-    refreshTrigger
+    const activeKey = currentReadingInfoForRequest?.cadastralKey || cadastralKey || initialCadastralKey;
+    if (activeKey) {
+      await fetchReadingData(activeKey, initialMonth);
+    }
   };
 
   // ── Sincronizar initialPhotos si son provistas desde componente padre ────
@@ -101,10 +103,6 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
   // ── Estado del modal de confirmación ──────────────────────────────────────
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
-  // ── Estado del modal de advertencia de mes anterior ──────────────────────
-  const [isPreviousMonthModalOpen, setIsPreviousMonthModalOpen] =
-    useState(false);
-
   // ── Auto cargar desde navegacion o Props ──────────────────────────────────────────
   const location = useLocation();
   useEffect(() => {
@@ -115,10 +113,13 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
     }
   }, [initialCadastralKey, initialMonth, location.state?.cadastralKey, refreshTrigger]);
 
-  // ── Pre-cargar datos y verificar mes de la lectura ───────────────────────
+  // ── Pre-cargar datos para actualización ───────────────────────────────────────────
   useEffect(() => {
     const info = readingInfoForUpdated.length > 0 ? readingInfoForUpdated[0] : (readingInfo && readingInfo.length > 0 ? readingInfo[0] : null);
     if (info) {
+      if (info.readingId) {
+        setCurrentReadingId(info.readingId);
+      }
       if (info.currentReading !== null && info.currentReading !== undefined) {
         setCurrentReadingInput(info.currentReading);
       } else {
@@ -129,11 +130,6 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
         setPreviousReadingInput(info.previousReading);
       } else {
         setPreviousReadingInput('');
-      }
-
-      // Si la lectura es de un mes anterior, advertir inmediatamente
-      if (!checkReadingIsCurrentMonth(info.monthReading)) {
-        setIsPreviousMonthModalOpen(true);
       }
     }
   }, [readingInfo, readingInfoForUpdated]);
@@ -203,34 +199,29 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
   };
 
   const handleConfirm = async () => {
-    if (!currentReadingId) return;
+    const readingIdToUpdate = currentReadingId || currentReadingInfoForRequest?.readingId;
+    if (!readingIdToUpdate) return;
 
     const requestPayload = buildRequest();
 
-    const result = await submitUpdateSpecialReading(currentReadingId, requestPayload);
+    const result = await submitUpdateSpecialReading(readingIdToUpdate, requestPayload);
     setIsConfirmModalOpen(false);
 
     if (result) {
-      setIsConfirmModalOpen(false);
       if (onSuccess) {
         onSuccess();
         return;
       }
 
-      // Si era una lectura de mes anterior → limpiar todo al confirmar
-      const wasPreviousMonth = !checkReadingIsCurrentMonth(
-        currentReadingInfoForRequest?.monthReading ?? ''
-      );
-      if (wasPreviousMonth) {
-        handleCancel();
-      } else {
-        // Mes actual → comportamiento normal: recargar datos
-        await fetchReadingData(cadastralKey);
-        setCurrentReadingInput('');
-        setPreviousReadingInput('');
-        setObservationInput('');
-        setTipoAjusteId('');
-        setPhotosInput([]);
+      // Limpiar campos de la justificación y evidencia del ajuste enviado
+      setObservationInput('');
+      setTipoAjusteId('');
+      setPhotosInput([]);
+
+      // Recargar datos actualizados automáticamente
+      const activeKey = currentReadingInfoForRequest?.cadastralKey || cadastralKey || initialCadastralKey;
+      if (activeKey) {
+        await fetchReadingData(activeKey, initialMonth);
       }
     }
   };
@@ -459,6 +450,18 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
         {currentReadingInfoForRequest &&
           currentReadingInfoForRequest.permitReading && (
             <>
+              {!checkReadingIsCurrentMonth(currentReadingInfoForRequest.monthReading) && (
+                <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                  <Alert
+                    type="warning"
+                    title={`Advertencia de Facturación — Lectura de Mes Anterior (${formatReadingMonth(currentReadingInfoForRequest.monthReading)})`}
+                    message="Esta lectura posiblemente ya fue facturada en el ciclo correspondiente. Modificar este valor puede generar inconsistencias en los registros contables y en el historial del cliente."
+                    size="small"
+                    dismissible={false}
+                  />
+                </div>
+              )}
+
               <ReadingSummaryCards
                 info={readingInfo}
                 currentReadingInput={currentReadingInput}
@@ -500,19 +503,6 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
         </>
       </div>
 
-      {/* ── Modal de advertencia: lectura de mes anterior ─────────────────── */}
-      {currentReadingInfoForRequest && (
-        <PreviousMonthWarningModal
-          isOpen={isPreviousMonthModalOpen}
-          readingInfo={currentReadingInfoForRequest}
-          onCancel={() => {
-            setIsPreviousMonthModalOpen(false);
-            handleCancel();
-          }}
-          onContinue={() => setIsPreviousMonthModalOpen(false)}
-        />
-      )}
-
       <ReadingDetailModal
         isOpen={detailModalState.isOpen}
         onClose={() =>
@@ -545,7 +535,7 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
         >
           <ConnectionProvider>
             <ChangeMeterPage
-              cadastralKeyProp={currentReadingInfoForRequest?.cadastralKey || initialCadastralKey!}
+              cadastralKeyProp={currentReadingInfoForRequest?.cadastralKey || cadastralKey || initialCadastralKey || ''}
               onSuccess={handleSuccessUpdateMeterNumberModal}
               onCancel={handleCloseUpdateMeterNumberModal}
             />
