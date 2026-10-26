@@ -17,6 +17,7 @@ import { CheckCircle } from 'lucide-react';
 import { IoIosCloseCircle } from 'react-icons/io';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface TrashRateAuditRowProps {
   data: TrashRateAuditRow[];
@@ -37,12 +38,6 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
   endDate
 }) => {
   const { t } = useTranslation();
-
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
 
   const columns: Column<TrashRateAuditRow>[] = [
     {
@@ -98,13 +93,13 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
     },
     {
       header: t('Tarifa en Ingreso'),
-      accessor: (r) => formatCurrency(r.rateInIncome ?? 0),
+      accessor: (r) => CurrencyFormatter.format(r.rateInIncome ?? 0),
       isNumeric: true,
       id: 'rateInIncome'
     },
     {
       header: t('Tarifa en Tabla de Valor'),
-      accessor: (r) => formatCurrency(r.rateInValorTable ?? 0),
+      accessor: (r) => CurrencyFormatter.format(r.rateInValorTable ?? 0),
       isNumeric: true,
       id: 'rateInValorTable'
     },
@@ -145,26 +140,26 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
     },
     {
       header: t('Diferencia'),
-      accessor: (r) => formatCurrency(r.difference ?? 0),
+      accessor: (r) => CurrencyFormatter.format(r.difference ?? 0),
       isNumeric: true,
       id: 'difference'
     },
     {
       header: t('Descuento Aplicado'),
-      accessor: (r) => formatCurrency(r.discountApplied ?? 0),
+      accessor: (r) => CurrencyFormatter.format(r.discountApplied ?? 0),
       isNumeric: true,
       id: 'discountApplied'
     },
     {
       header: t('Saldo de Nota de Crédito'),
-      accessor: (r) => formatCurrency(r.creditNoteBalance ?? 0),
+      accessor: (r) => CurrencyFormatter.format(r.creditNoteBalance ?? 0),
       isNumeric: true,
       id: 'creditNoteBalance'
     },
     {
       header: t('Recolectado'),
       accessor: (r) =>
-        formatCurrency(r.rateInIncome - (r.discountApplied ?? 0)),
+        CurrencyFormatter.format(r.rateInIncome - (r.discountApplied ?? 0)),
       isNumeric: true,
       id: 'effectiveTrashToPay'
     },
@@ -285,17 +280,17 @@ export const TrashRateAuditReportTable: React.FC<TrashRateAuditRowProps> = ({
           'Fecha de Emisión': ConverDate(item.issueDate),
           'Fecha de Pago': ConverDate(item.paymentDate),
           'Estado de Pago': item.paymentStatus || '-',
-          'Tarifa en Ingreso': formatCurrency(item.rateInIncome ?? 0),
-          'Tarifa en Tabla de Valor': formatCurrency(
+          'Tarifa en Ingreso': CurrencyFormatter.format(item.rateInIncome ?? 0),
+          'Tarifa en Tabla de Valor': CurrencyFormatter.format(
             item.rateInValorTable ?? 0
           ),
           Diagnóstico: item.diagnostic || '-',
-          Diferencia: formatCurrency(item.difference ?? 0),
-          'Descuento Aplicado': formatCurrency(item.discountApplied ?? 0),
-          'Saldo de Nota de Crédito': formatCurrency(
+          Diferencia: CurrencyFormatter.format(item.difference ?? 0),
+          'Descuento Aplicado': CurrencyFormatter.format(item.discountApplied ?? 0),
+          'Saldo de Nota de Crédito': CurrencyFormatter.format(
             item.creditNoteBalance ?? 0
           ),
-          Recolectado: formatCurrency(
+          Recolectado: CurrencyFormatter.format(
             item.rateInIncome - (item.discountApplied ?? 0)
           ),
           'Método de Pago': item.paymentMethod || '-',

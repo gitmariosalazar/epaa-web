@@ -73,7 +73,7 @@ export const WorkOrderProcessSteps: React.FC<WorkOrderProcessStepsProps> = ({
 
           return (
             <React.Fragment key={step.key}>
-              <Tooltip
+              <Tooltip followCursor={false}
                 content={`Fase ${idx + 1}: ${step.label} ${isActive ? '(Actual)' : isCompleted ? '(Completada)' : ''}`}
                 position="top"
                 themeColor={isActive ? 'warning' : isCompleted ? 'success' : 'slate'}

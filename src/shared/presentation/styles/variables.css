@@ -66,6 +66,10 @@
   --pink: #ec4899;
   --magenta: #d946ef;
   --gray: #64748b;
+  --bg-secundary-color: #0f172a; /* Slate 900 */
+  --bg-secundary-color-hover: #1e293b; /* Slate 800 */
+  --bg-secundary-color-light: #cbd5e1; /* Slate 300 */
+  --bg-secundary-color-dark: #f8fafc; /* Slate 50 */
 
   /* Spacing */
   --spacing-xs: 0.25rem;

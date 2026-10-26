@@ -29,6 +29,7 @@ import { Alert } from '@/shared/presentation/components/Alert';
 import { MdOutlineDescription } from 'react-icons/md';
 import { FaPrint } from 'react-icons/fa';
 import { WorkOrderProcessSteps } from './WorkOrderProcessSteps';
+import { DepartmentHelper } from '../utils/DepartmentHelper';
 
 // ── Priority label/color map ─────────────────────────────────────────────────
 const PRIORITY_MAP: Record<number, { label: string; color: string }> = {
@@ -128,7 +129,7 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
 
           {/* Client + work type */}
           <div className="wo-list-card__meta">
-            <Tooltip
+            <Tooltip followCursor={false}
               content={
                 orden.personType === 'JURIDICA'
                   ? 'Persona Jurídica'
@@ -222,6 +223,33 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
             </Button>
           </Tooltip>
 
+
+        </div>
+        <div className="department-chip">
+          <Tooltip followCursor={false}
+            content={DepartmentHelper.getDepartmentDescription(
+              orden.departmentId ?? 0,
+              orden.departmentName
+            )}
+            themeColor={DepartmentHelper.getDepartmentColor(
+              orden.departmentId ?? 0,
+              orden.departmentName
+            )}
+          >
+            <ColorChip
+              label={DepartmentHelper.getDepartmentText(
+                orden.departmentId ?? 0,
+                orden.departmentName
+              )}
+              icon={DepartmentHelper.getDepartmentIcon(orden.departmentId ?? 0)}
+              color={DepartmentHelper.getDepartmentColor(
+                orden.departmentId ?? 0,
+                orden.departmentName
+              )}
+              variant='soft'
+              size='xs'
+            />
+          </Tooltip>
         </div>
       </div>
 

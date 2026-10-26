@@ -38,6 +38,7 @@ import { ConnectionProvider } from '@/modules/connections/presentation/context/C
 import { ChangeMeterPage } from '@/modules/connections/presentation/pages/ChangeMeterPage';
 import { truncateText } from '@/shared/utils/text/truncate-text';
 import { MdCable } from 'react-icons/md';
+import { ConceptDetailsInvoice } from './ConceptDetailsInvoice';
 
 interface ReadingDetailModalProps {
   isOpen: boolean;
@@ -236,7 +237,9 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                   />
                   <span className="reading-detail-value">
                     {readingDetail.readingTime
-                      ? readingDetail.readingTime
+                      ? typeof readingDetail.readingTime === 'string'
+                        ? readingDetail.readingTime
+                        : readingDetail.readingTime.toLocaleTimeString()
                       : '-'}
                   </span>
                 </div>
@@ -301,6 +304,25 @@ export const ReadingDetailModal: React.FC<ReadingDetailModalProps> = ({
                   </span>
                 </div>
               </div>
+            </div>
+
+
+            {/* Concept details */}
+            <div className="reading-detail-section">
+              <h4>
+                <FaCamera /> {t('readings.details.photos', 'Valores de la Factura')}
+              </h4>
+              {readingDetail.conceptDetails ? (
+                <ConceptDetailsInvoice
+                  conceptDetails={readingDetail.conceptDetails}
+                  readingCode={readingDetail.readingCode}
+                  cadastralKey={readingDetail.cadastralKey}
+                  readingMonthName={readingDetail.readingMonthName}
+                />
+
+              ) : (
+                <span className="reading-detail-empty">No se registraron fotografías para esta lectura.</span>
+              )}
             </div>
 
             {/* Fotografías */}

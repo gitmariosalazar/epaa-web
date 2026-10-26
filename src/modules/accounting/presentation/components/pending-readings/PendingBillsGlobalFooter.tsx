@@ -2,10 +2,10 @@ import React from 'react';
 import { Droplets, Recycle, Building, Hash, DollarSign, Gauge } from 'lucide-react';
 import {
   type GlobalSummary,
-  formatCurrency,
   formatConsumption,
 } from '../../hooks/pending-readings/usePendingBillsSummary';
 import './PendingBillsGlobalFooter.css';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface PendingBillsGlobalFooterProps {
   summary: GlobalSummary;
@@ -34,31 +34,31 @@ export const PendingBillsGlobalFooter: React.FC<PendingBillsGlobalFooterProps> =
     {
       icon: Droplets,
       label: 'EPAA Global',
-      value: `${formatCurrency(summary.totalEpaa)} · ${formatConsumption(summary.totalConsumption)}`,
+      value: `${CurrencyFormatter.format(summary.totalEpaa)} · ${formatConsumption(summary.totalConsumption)}`,
       accent: '#22d3ee',
     },
     {
       icon: Recycle,
       label: 'Basura Global',
-      value: formatCurrency(summary.totalTrash),
+      value: CurrencyFormatter.format(summary.totalTrash),
       accent: '#4ade80',
     },
     {
       icon: Building,
       label: 'Mejoras Global',
-      value: formatCurrency(summary.totalImprovements),
+      value: CurrencyFormatter.format(summary.totalImprovements),
       accent: '#2dd4bf',
     },
     {
       icon: Gauge,
       label: 'Sin Descuentos',
-      value: formatCurrency(summary.totalGeneral),
+      value: CurrencyFormatter.format(summary.totalGeneral),
       accent: '#fb923c',
     },
     {
       icon: DollarSign,
       label: 'TOTAL GLOBAL',
-      value: formatCurrency(summary.totalToPay),
+      value: CurrencyFormatter.format(summary.totalToPay),
       accent: '#f59e0b',
       highlight: true,
     },

@@ -9,6 +9,7 @@ import '../../styles/PaymentsTable.css';
 
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface CollectorPerformanceKPITableProps {
   data: CollectorPerformanceKPI[];
@@ -24,12 +25,6 @@ export const CollectorPerformanceKPITable: React.FC<
   CollectorPerformanceKPITableProps
 > = ({ data, isLoading, onSort, sortConfig, error, startDate, endDate }) => {
   const { t } = useTranslation();
-
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
 
   const columns: Column<CollectorPerformanceKPI>[] = [
     {
@@ -51,7 +46,7 @@ export const CollectorPerformanceKPITable: React.FC<
         'trashRateReport.clientDetail.sourceTrashRateTotal',
         'TB Datos Ingreso'
       ),
-      accessor: (item) => formatCurrency(item.sourceTrashRateTotal),
+      accessor: (item) => CurrencyFormatter.format(item.sourceTrashRateTotal),
       isNumeric: true,
       id: 'sourceTrashRateTotal'
     },
@@ -60,7 +55,7 @@ export const CollectorPerformanceKPITable: React.FC<
         'trashRateReport.clientDetail.valorTableTotal',
         'TB Tabla Valor'
       ),
-      accessor: (item) => formatCurrency(item.valorTableTotal),
+      accessor: (item) => CurrencyFormatter.format(item.valorTableTotal),
       isNumeric: true,
       id: 'valorTableTotal'
     },
@@ -69,13 +64,13 @@ export const CollectorPerformanceKPITable: React.FC<
         'trashRateReport.clientDetail.integrityGapAmount',
         'Diferencia (TBDI - TBTV)'
       ),
-      accessor: (item) => formatCurrency(item.integrityGapAmount),
+      accessor: (item) => CurrencyFormatter.format(item.integrityGapAmount),
       isNumeric: true,
       id: 'integrityGapAmount'
     },
     {
       header: t('trashRateReport.clientDetail.grossAmount', 'Monto Facturado'),
-      accessor: (item) => formatCurrency(item.grossAmount),
+      accessor: (item) => CurrencyFormatter.format(item.grossAmount),
       isNumeric: true,
       id: 'grossAmount'
     },
@@ -84,7 +79,7 @@ export const CollectorPerformanceKPITable: React.FC<
         'trashRateReport.clientDetail.totalDiscountsApplied',
         'DesC. Aplicados'
       ),
-      accessor: (item) => formatCurrency(item.totalDiscountsApplied),
+      accessor: (item) => CurrencyFormatter.format(item.totalDiscountsApplied),
       isNumeric: true,
       id: 'totalDiscountsApplied'
     },
@@ -93,7 +88,7 @@ export const CollectorPerformanceKPITable: React.FC<
         'trashRateReport.clientDetail.netCollectionTotal',
         'Recaudación Neta'
       ),
-      accessor: (item) => formatCurrency(item.netCollectionTotal),
+      accessor: (item) => CurrencyFormatter.format(item.netCollectionTotal),
       isNumeric: true,
       id: 'netCollectionTotal'
     },
@@ -102,7 +97,7 @@ export const CollectorPerformanceKPITable: React.FC<
         'trashRateReport.clientDetail.cancelledBillsValue',
         'Valor Fact. (A - B)'
       ),
-      accessor: (item) => formatCurrency(item.cancelledBillsValue),
+      accessor: (item) => CurrencyFormatter.format(item.cancelledBillsValue),
       isNumeric: true,
       id: 'cancelledBillsValue'
     },
@@ -220,13 +215,13 @@ export const CollectorPerformanceKPITable: React.FC<
         const rowData: Record<string, string> = {
           'ID del Cobrador': item.collectorId || '-',
           'N° de Facturas': String(item.totalTransactions || 0),
-          'TB Datos Ingreso': formatCurrency(item.sourceTrashRateTotal),
-          'TB Tabla Valor': formatCurrency(item.valorTableTotal),
-          'Diferencia (TBDI - TBTV)': formatCurrency(item.integrityGapAmount),
-          'Monto Facturado': formatCurrency(item.grossAmount),
-          'DesC. Aplicados': formatCurrency(item.totalDiscountsApplied),
-          'Recaudación Neta': formatCurrency(item.netCollectionTotal),
-          'Valor Fact. (A - B)': formatCurrency(item.cancelledBillsValue),
+          'TB Datos Ingreso': CurrencyFormatter.format(item.sourceTrashRateTotal),
+          'TB Tabla Valor': CurrencyFormatter.format(item.valorTableTotal),
+          'Diferencia (TBDI - TBTV)': CurrencyFormatter.format(item.integrityGapAmount),
+          'Monto Facturado': CurrencyFormatter.format(item.grossAmount),
+          'DesC. Aplicados': CurrencyFormatter.format(item.totalDiscountsApplied),
+          'Recaudación Neta': CurrencyFormatter.format(item.netCollectionTotal),
+          'Valor Fact. (A - B)': CurrencyFormatter.format(item.cancelledBillsValue),
           'Fact. (A - B)': String(item.cancelledBillsCount || 0)
         };
         return selectedCols.map((col) => rowData[col.label] || '-');

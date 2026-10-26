@@ -2,10 +2,10 @@ import React from 'react';
 import { Droplets, Recycle, Building, FileText, Zap } from 'lucide-react';
 import {
   type ConnectionSummary,
-  formatCurrency,
   formatConsumption,
 } from '../../hooks/pending-readings/usePendingBillsSummary';
 import './PendingBillsStatCards.css';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface PendingBillsStatCardsProps {
   summary: ConnectionSummary;
@@ -30,7 +30,7 @@ export const PendingBillsStatCards: React.FC<PendingBillsStatCardsProps> = ({ su
     {
       icon: FileText,
       label: 'Total a Pagar',
-      value: formatCurrency(summary.totalToPay),
+      value: CurrencyFormatter.format(summary.totalToPay),
       sub: `${summary.billCount} planilla${summary.billCount !== 1 ? 's' : ''}`,
       accent: '#f59e0b',
       accentBg: 'rgba(245,158,11,0.12)',
@@ -39,7 +39,7 @@ export const PendingBillsStatCards: React.FC<PendingBillsStatCardsProps> = ({ su
     {
       icon: Droplets,
       label: 'EPAA – Agua',
-      value: formatCurrency(summary.totalEpaa),
+      value: CurrencyFormatter.format(summary.totalEpaa),
       sub: formatConsumption(summary.totalConsumption),
       accent: '#22d3ee',
       accentBg: 'rgba(34,211,238,0.10)',
@@ -47,7 +47,7 @@ export const PendingBillsStatCards: React.FC<PendingBillsStatCardsProps> = ({ su
     {
       icon: Recycle,
       label: 'Tasa Basura',
-      value: formatCurrency(summary.totalTrash),
+      value: CurrencyFormatter.format(summary.totalTrash),
       sub: 'Ajustado por tarifa',
       accent: '#4ade80',
       accentBg: 'rgba(74,222,128,0.10)',
@@ -55,7 +55,7 @@ export const PendingBillsStatCards: React.FC<PendingBillsStatCardsProps> = ({ su
     {
       icon: Building,
       label: 'Mejoras',
-      value: formatCurrency(summary.totalImprovements),
+      value: CurrencyFormatter.format(summary.totalImprovements),
       sub: 'Contribución',
       accent: '#2dd4bf',
       accentBg: 'rgba(45,212,191,0.10)',
@@ -63,7 +63,7 @@ export const PendingBillsStatCards: React.FC<PendingBillsStatCardsProps> = ({ su
     {
       icon: Zap,
       label: 'Sin Descuentos',
-      value: formatCurrency(summary.totalGeneral),
+      value: CurrencyFormatter.format(summary.totalGeneral),
       sub: 'Agua + Basura + Recargos',
       accent: '#fb923c',
       accentBg: 'rgba(251,146,60,0.10)',

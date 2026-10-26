@@ -9,6 +9,7 @@ import type { MonthlySummaryRow } from '../../../domain/models/trash-rate-report
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface MonthlySummaryTableProps {
   data: MonthlySummaryRow[];
@@ -29,12 +30,6 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
   endDate
 }) => {
   const { t } = useTranslation();
-
-  const formatCurrency = (value: number | null | undefined) =>
-    new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value ?? 0);
 
   const columns: Column<MonthlySummaryRow>[] = [
     {
@@ -59,7 +54,7 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
         'trashRateReport.monthlySummary.totalRateIncome',
         'Tasa Ingreso'
       ),
-      accessor: (r) => formatCurrency(r.totalRateIncome),
+      accessor: (r) => CurrencyFormatter.format(r.totalRateIncome),
       isNumeric: true,
       id: 'totalRateIncome'
     },
@@ -68,19 +63,19 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
         'trashRateReport.monthlySummary.totalRateValorTable',
         'Tasa Valor'
       ),
-      accessor: (r) => formatCurrency(r.totalRateValorTable),
+      accessor: (r) => CurrencyFormatter.format(r.totalRateValorTable),
       isNumeric: true,
       id: 'totalRateValorTable'
     },
     {
       header: t('trashRateReport.monthlySummary.totalDiscounts', 'Descuentos'),
-      accessor: (r) => formatCurrency(r.totalDiscounts),
+      accessor: (r) => CurrencyFormatter.format(r.totalDiscounts),
       isNumeric: true,
       id: 'totalDiscounts'
     },
     {
       header: t('trashRateReport.monthlySummary.totalTrashNet', 'Neto Basura'),
-      accessor: (r) => formatCurrency(r.totalTrashNet),
+      accessor: (r) => CurrencyFormatter.format(r.totalTrashNet),
       isNumeric: true,
       id: 'totalTrashNet'
     },
@@ -189,10 +184,10 @@ export const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({
           'Estado Pago': item.paymentStatusCode || '-',
           'Orden Valor': String(item.valorOrder || '-'),
           Facturas: String(item.billCount || 0),
-          'Tasa Ingreso': formatCurrency(item.totalRateIncome),
-          'Tasa Valor': formatCurrency(item.totalRateValorTable),
-          Descuentos: formatCurrency(item.totalDiscounts),
-          'Neto Basura': formatCurrency(item.totalTrashNet),
+          'Tasa Ingreso': CurrencyFormatter.format(item.totalRateIncome),
+          'Tasa Valor': CurrencyFormatter.format(item.totalRateValorTable),
+          Descuentos: CurrencyFormatter.format(item.totalDiscounts),
+          'Neto Basura': CurrencyFormatter.format(item.totalTrashNet),
           'Sin Valor': String(item.missingValorRecords || 0)
         };
 

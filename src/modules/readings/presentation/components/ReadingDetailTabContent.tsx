@@ -149,7 +149,11 @@ export const ReadingDetailTabContent: React.FC<ReadingDetailTabContentProps> = (
           <div className="reading-detail-item">
             <Label text="Hora de Lectura" size="small" variant="default" weight="semibold" leftIcon={<Clock size="1em" />} />
             <span className="reading-detail-value">
-              {readingDetail.readingTime ? readingDetail.readingTime : '-'}
+              {readingDetail.readingTime
+                ? typeof readingDetail.readingTime === 'string'
+                  ? readingDetail.readingTime
+                  : readingDetail.readingTime.toLocaleTimeString()
+                : '-'}
             </span>
           </div>
           <div className="reading-detail-item">

@@ -11,6 +11,7 @@ import {
   Activity
 } from 'lucide-react';
 import './PaymentReadingDetailModal.css';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface PaymentReadingDetailModalProps {
   isOpen: boolean;
@@ -37,11 +38,6 @@ export const PaymentReadingDetailModal: React.FC<
     } catch {
       return dateString;
     }
-  };
-
-  const formatCurrency = (val: number | string | undefined | null) => {
-    if (val === undefined || val === null) return '$0.00';
-    return `$${Number(val).toFixed(2)}`;
   };
 
   const isPaid = reading.incomeStatus?.toLowerCase() === 'p';
@@ -142,19 +138,19 @@ export const PaymentReadingDetailModal: React.FC<
           </h3>
           <div className="reading-detail__tags">
             <span className="reading-detail__tag reading-detail__tag--money">
-              Valor Lectura: {formatCurrency(reading.readingValue)}
+              Valor Lectura: {CurrencyFormatter.format(reading.readingValue)}
             </span>
             <span className="reading-detail__tag reading-detail__tag--money">
-              EPAA Value: {formatCurrency(reading.epaaValue)}
+              EPAA Value: {CurrencyFormatter.format(reading.epaaValue)}
             </span>
             <span className="reading-detail__tag reading-detail__tag--money">
-              Trash Rate: {formatCurrency(reading.trashRate)}
+              Trash Rate: {CurrencyFormatter.format(reading.trashRate)}
             </span>
             <span className="reading-detail__tag reading-detail__tag--money">
-              Third Party: {formatCurrency(reading.thirdPartyValue)}
+              Third Party: {CurrencyFormatter.format(reading.thirdPartyValue)}
             </span>
             <span className="reading-detail__tag reading-detail__tag--total">
-              Total: {formatCurrency(reading.total)}
+              Total: {CurrencyFormatter.format(reading.total)}
             </span>
           </div>
         </div>

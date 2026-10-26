@@ -17,12 +17,15 @@ export class CurrencyFormatter {
     showDecimals = true
   ): string {
     const num = Number(value || 0);
-    return new Intl.NumberFormat(this.DEFAULT_LOCALE, {
+    const formatted = new Intl.NumberFormat(this.DEFAULT_LOCALE, {
       style: 'currency',
       currency: this.DEFAULT_CURRENCY,
       minimumFractionDigits: showDecimals ? 2 : 0,
       maximumFractionDigits: showDecimals ? 2 : 0
     }).format(num);
+
+    // Corrige el patrón por defecto de 'es-EC' donde el signo menos queda después del '$' (ej. '$-4,22' -> '-$4,22')
+    return formatted.replace(/^(\$)\s*-/, '-$1');
   }
 
   /**
@@ -34,13 +37,16 @@ export class CurrencyFormatter {
     const num = Number(value || 0);
     if (!num) return '$0';
 
-    if (num >= 1000000) {
-      return `$${(num / 1000000).toFixed(1)}M`;
+    const sign = num < 0 ? '-' : '';
+    const abs = Math.abs(num);
+
+    if (abs >= 1000000) {
+      return `${sign}$${(abs / 1000000).toFixed(1)}M`;
     }
-    if (num >= 1000) {
-      return `$${(num / 1000).toFixed(1)}k`;
+    if (abs >= 1000) {
+      return `${sign}$${(abs / 1000).toFixed(1)}k`;
     }
-    return `$${num.toFixed(0)}`;
+    return `${sign}$${abs.toFixed(0)}`;
   }
 
   /**
@@ -48,9 +54,12 @@ export class CurrencyFormatter {
    */
   static formatAxis(value: number | string | null | undefined): string {
     const num = Number(value || 0);
-    if (num >= 1000) {
-      return `$${(num / 1000).toFixed(0)}k`;
+    const sign = num < 0 ? '-' : '';
+    const abs = Math.abs(num);
+
+    if (abs >= 1000) {
+      return `${sign}$${(abs / 1000).toFixed(0)}k`;
     }
-    return `$${num.toFixed(0)}`;
+    return `${sign}$${abs.toFixed(0)}`;
   }
 }

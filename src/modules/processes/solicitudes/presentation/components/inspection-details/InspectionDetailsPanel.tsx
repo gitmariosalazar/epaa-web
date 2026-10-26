@@ -14,6 +14,7 @@ import type {
 } from '@/modules/work-orders/domain/schemas/dto/response/work-orders.get.response';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import './InspectionDetailsPanel.css';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface InspectionDetailsPanelProps {
   materiales: MaterialUtilizado[];
@@ -28,8 +29,6 @@ export const InspectionDetailsPanel: React.FC<InspectionDetailsPanelProps> = ({
   personalAsignado,
   adjuntos
 }) => {
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 
   const totalMaterials = materiales.reduce((acc, m) => acc + (m.subtotal || 0), 0);
   const totalAdicionales = costosAdicionales.reduce((acc, c) => acc + (c.total || 0), 0);
@@ -54,10 +53,10 @@ export const InspectionDetailsPanel: React.FC<InspectionDetailsPanelProps> = ({
                 <div className="idp-item__info">
                   <span className="idp-item__name">{m.nombreMaterial || 'Material Sin Nombre'}</span>
                   <span className="idp-item__sub">
-                    {m.cantidad} ud(s) x {formatCurrency(m.costoUnitario)}
+                    {m.cantidad} ud(s) x {CurrencyFormatter.format(m.costoUnitario)}
                   </span>
                 </div>
-                <div className="idp-item__value">{formatCurrency(m.subtotal)}</div>
+                <div className="idp-item__value">{CurrencyFormatter.format(m.subtotal)}</div>
               </div>
             ))}
 
@@ -66,16 +65,16 @@ export const InspectionDetailsPanel: React.FC<InspectionDetailsPanelProps> = ({
                 <div className="idp-item__info">
                   <span className="idp-item__name">{c.concepto}</span>
                   <span className="idp-item__sub">
-                    {c.cantidad} ud(s) x {formatCurrency(c.costoUnitario)}
+                    {c.cantidad} ud(s) x {CurrencyFormatter.format(c.costoUnitario)}
                   </span>
                 </div>
-                <div className="idp-item__value">{formatCurrency(c.total)}</div>
+                <div className="idp-item__value">{CurrencyFormatter.format(c.total)}</div>
               </div>
             ))}
 
             <div className="idp-total">
               <span className="idp-total__label">Total</span>
-              <span className="idp-total__value">{formatCurrency(grandTotal)}</span>
+              <span className="idp-total__value">{CurrencyFormatter.format(grandTotal)}</span>
             </div>
           </div>
         )}

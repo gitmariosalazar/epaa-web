@@ -42,7 +42,7 @@ export interface ReadingInfo {
   readingLocation?: { lat: number; lng: number } | null;
 }
 
-export interface UserReadingActionAuditSqlResul {
+export interface UserReadingActionAudit {
   username: string | null;
   cardId: string | null;
   action: string | null;
@@ -59,7 +59,8 @@ export interface UserReadingActionAuditSqlResul {
 
 export interface ReadingDetailed {
   readingId: number;
-  readingTime: string | null;
+  readingCode: string;
+  readingTime: Date | null;
   readingDate: Date | null;
   cadastralKey: string;
   cardId: string;
@@ -72,6 +73,7 @@ export interface ReadingDetailed {
   sector: number;
   account: number;
   readingValue: number;
+  totalEpaa: number;
   averageConsumption: number;
   meterNumber: string;
   rateId: number;
@@ -91,5 +93,35 @@ export interface ReadingDetailed {
   images?: { id: number; path: string; novelty: string }[];
   observations?: { id: number; title: string; observation: string }[];
   readingLocation?: { lat: number; lng: number } | null;
-  userActions?: UserReadingActionAuditSqlResul[];
+  userActions?: UserReadingActionAudit[];
+  conceptDetails?: ConceptDetail[];
+  waterCalculationBreakdown?: WaterCalculationBreakdown;
+}
+
+export interface ConceptDetail {
+  code: string;
+  name: string;
+  order: number;
+  amount: number;
+  formula: string;
+  conceptId: number;
+  description: string;
+  defaultValue: any;
+  tariffVersion: string;
+  calculationBase: number;
+  calculationType: string;
+  isCompanyService: boolean;
+  percentageApplied: number | null;
+}
+export interface WaterCalculationBreakdown {
+  categoryId: number;
+  rateName: string;
+  minRange: number;
+  maxRange: number;
+  appliedBase: number;
+  additionalM3Rate: number;
+  additionalM3: number;
+  waterAmount: number;
+  formula: string;
+  tariffVersion: string;
 }

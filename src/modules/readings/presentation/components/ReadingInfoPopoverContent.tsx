@@ -105,7 +105,9 @@ export const ReadingInfoPopoverContent: React.FC<ReadingInfoPopoverContentProps>
             />
             <span className="reading-detail-value">
               {readingDetail.readingTime
-                ? readingDetail.readingTime
+                ? typeof readingDetail.readingTime === 'string'
+                  ? readingDetail.readingTime
+                  : readingDetail.readingTime.toLocaleTimeString()
                 : '-'}
             </span>
           </div>

@@ -390,6 +390,9 @@ export interface WorkOrderListItem {
   completedUserId: string | null;
   metadata: string | null;
   isDeleted: boolean;
+  departmentId?: number;
+  departmentName?: string;
+  priorityLevel?: string;
 }
 
 export interface DepartmentResponse {

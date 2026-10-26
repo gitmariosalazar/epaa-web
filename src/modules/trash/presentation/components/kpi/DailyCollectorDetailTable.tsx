@@ -14,6 +14,7 @@ import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic
 import { CheckCircle } from 'lucide-react';
 import { IoIosCloseCircle } from 'react-icons/io';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface DailyCollectorDetailTableProps {
   data: DailyCollectorDetail[];
@@ -29,12 +30,6 @@ export const DailyCollectorDetailTable: React.FC<
   DailyCollectorDetailTableProps
 > = ({ data, isLoading, onSort, sortConfig, error, startDate, endDate }) => {
   const { t } = useTranslation();
-
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
 
   const columns: Column<DailyCollectorDetail>[] = [
     {
@@ -84,7 +79,7 @@ export const DailyCollectorDetailTable: React.FC<
         'trashRateReport.clientDetail.sourceTrashRateDaily',
         'TB Datos Ingreso'
       ),
-      accessor: (item) => formatCurrency(item.sourceTrashRateDaily),
+      accessor: (item) => CurrencyFormatter.format(item.sourceTrashRateDaily),
       isNumeric: true,
       id: 'sourceTrashRateDaily'
     },
@@ -93,7 +88,7 @@ export const DailyCollectorDetailTable: React.FC<
         'trashRateReport.clientDetail.valorTableDaily',
         'TB Tabla Valor'
       ),
-      accessor: (item) => formatCurrency(item.valorTableDaily),
+      accessor: (item) => CurrencyFormatter.format(item.valorTableDaily),
       isNumeric: true,
       id: 'valorTableDaily'
     },
@@ -102,7 +97,7 @@ export const DailyCollectorDetailTable: React.FC<
         'trashRateReport.clientDetail.integrityGapDaily',
         'Diferencia (TBDI - TBTV)'
       ),
-      accessor: (item) => formatCurrency(item.integrityGapDaily),
+      accessor: (item) => CurrencyFormatter.format(item.integrityGapDaily),
       isNumeric: true,
       id: 'integrityGapDaily'
     },
@@ -111,7 +106,7 @@ export const DailyCollectorDetailTable: React.FC<
         'trashRateReport.clientDetail.grossDailyTotal',
         'Monto Facturado'
       ),
-      accessor: (item) => formatCurrency(item.grossDailyTotal),
+      accessor: (item) => CurrencyFormatter.format(item.grossDailyTotal),
       isNumeric: true,
       id: 'grossDailyTotal'
     },
@@ -120,7 +115,7 @@ export const DailyCollectorDetailTable: React.FC<
         'trashRateReport.clientDetail.discountsDailyTotal',
         'DesC. Aplicados'
       ),
-      accessor: (item) => formatCurrency(item.discountsDailyTotal),
+      accessor: (item) => CurrencyFormatter.format(item.discountsDailyTotal),
       isNumeric: true,
       id: 'discountsDailyTotal'
     },
@@ -129,7 +124,7 @@ export const DailyCollectorDetailTable: React.FC<
         'trashRateReport.clientDetail.netDailyCollection',
         'Recaudación Neta'
       ),
-      accessor: (item) => formatCurrency(item.netDailyCollection),
+      accessor: (item) => CurrencyFormatter.format(item.netDailyCollection),
       isNumeric: true,
       id: 'netDailyCollection'
     },
@@ -138,7 +133,7 @@ export const DailyCollectorDetailTable: React.FC<
         'trashRateReport.clientDetail.cancelledValueDaily',
         'Valor Fact. (A - B)'
       ),
-      accessor: (item) => formatCurrency(item.cancelledValueDaily),
+      accessor: (item) => CurrencyFormatter.format(item.cancelledValueDaily),
       isNumeric: true,
       id: 'cancelledValueDaily'
     },
@@ -263,13 +258,13 @@ export const DailyCollectorDetailTable: React.FC<
           'Fecha Pago': item.paymentDate ? ConverDate(item.paymentDate) : '-',
           'Estado Ingreso': item.incomeStatus || '-',
           'N° de Facturas': String(item.transactionsCount || 0),
-          'TB Datos Ingreso': formatCurrency(item.sourceTrashRateDaily),
-          'TB Tabla Valor': formatCurrency(item.valorTableDaily),
-          'Diferencia (TBDI - TBTV)': formatCurrency(item.integrityGapDaily),
-          'Monto Facturado': formatCurrency(item.grossDailyTotal),
-          'DesC. Aplicados': formatCurrency(item.discountsDailyTotal),
-          'Recaudación Neta': formatCurrency(item.netDailyCollection),
-          'Valor Fact. (A - B)': formatCurrency(item.cancelledValueDaily),
+          'TB Datos Ingreso': CurrencyFormatter.format(item.sourceTrashRateDaily),
+          'TB Tabla Valor': CurrencyFormatter.format(item.valorTableDaily),
+          'Diferencia (TBDI - TBTV)': CurrencyFormatter.format(item.integrityGapDaily),
+          'Monto Facturado': CurrencyFormatter.format(item.grossDailyTotal),
+          'DesC. Aplicados': CurrencyFormatter.format(item.discountsDailyTotal),
+          'Recaudación Neta': CurrencyFormatter.format(item.netDailyCollection),
+          'Valor Fact. (A - B)': CurrencyFormatter.format(item.cancelledValueDaily),
           'Fact. (A - B)': String(item.cancelledCountDaily || 0)
         };
         return selectedCols.map((col) => rowData[col.label] || '-');

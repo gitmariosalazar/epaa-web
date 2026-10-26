@@ -1,4 +1,4 @@
-import { type UserReadingActionAuditSqlResul } from '@/modules/readings/domain/models/ReadingInfoResponse';
+import { type UserReadingActionAudit } from '@/modules/readings/domain/models/ReadingInfoResponse';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { PopoverModal } from '@/shared/presentation/components/PopoverModal';
 import { Button } from '@mui/material';
@@ -14,7 +14,7 @@ import { truncateText } from '@/shared/utils/text/truncate-text';
 import { ConverDateTime } from '@/shared/utils/datetime/ConverDate';
 
 export interface UserReadingActionPopoverModalProps {
-  userActions?: UserReadingActionAuditSqlResul[];
+  userActions?: UserReadingActionAudit[];
   trigger?: React.ReactElement<any>;
 }
 
@@ -25,7 +25,7 @@ export const UserReadingActionPopoverModal: React.FC<UserReadingActionPopoverMod
   const processedUserActions = useMemo(() => {
     if (!userActions || userActions.length === 0) return [];
 
-    const uniqueMap = new Map<string, UserReadingActionAuditSqlResul>();
+    const uniqueMap = new Map<string, UserReadingActionAudit>();
 
     userActions.forEach((item) => {
       const timeStr = item.adjustmentDate ? new Date(item.adjustmentDate).getTime() : 0;
@@ -42,7 +42,7 @@ export const UserReadingActionPopoverModal: React.FC<UserReadingActionPopoverMod
     });
   }, [userActions]);
 
-  const columns: Column<UserReadingActionAuditSqlResul>[] = useMemo(() => [
+  const columns: Column<UserReadingActionAudit>[] = useMemo(() => [
     {
       header: 'Acción',
       accessor: (action) => (

@@ -7,6 +7,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import '../../styles/PaymentsTable.css';
 import { IoInformationCircleOutline } from 'react-icons/io5';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface TrashRateKPITableProps {
   data: TrashRateKPI[];
@@ -26,12 +27,6 @@ export const TrashRateKPITable: React.FC<TrashRateKPITableProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const formatCurrency = (value: number | null | undefined) =>
-    new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value ?? 0);
-
   const columns: Column<TrashRateKPI>[] = [
     {
       header: t('trashRateKPI.table.category', 'Categoría'),
@@ -49,22 +44,22 @@ export const TrashRateKPITable: React.FC<TrashRateKPITableProps> = ({
     },
     {
       header: t('trashRateKPI.table.sourceAmount', 'Emisión Sistema'),
-      accessor: (r) => formatCurrency(r.sourceAmount),
+      accessor: (r) => CurrencyFormatter.format(r.sourceAmount),
       isNumeric: true
     },
     {
       header: t('trashRateKPI.table.valorAmount', 'Emisión Vencimiento'),
-      accessor: (r) => formatCurrency(r.valorAmount),
+      accessor: (r) => CurrencyFormatter.format(r.valorAmount),
       isNumeric: true
     },
     {
       header: t('trashRateKPI.table.integrityGap', 'Brecha Integridad'),
-      accessor: (r) => formatCurrency(r.integrityGap),
+      accessor: (r) => CurrencyFormatter.format(r.integrityGap),
       isNumeric: true
     },
     {
       header: t('trashRateKPI.table.grossAmount', 'Bruto a Recaudar'),
-      accessor: (r) => formatCurrency(r.grossAmount),
+      accessor: (r) => CurrencyFormatter.format(r.grossAmount),
       isNumeric: true
     },
     {
@@ -73,9 +68,9 @@ export const TrashRateKPITable: React.FC<TrashRateKPITableProps> = ({
         try {
           const status = JSON.parse(r.revenueStatusJson || '[]');
           const paid = status.find((i: any) => i.Estado === 'P')?.Monto || 0;
-          return formatCurrency(paid);
+          return CurrencyFormatter.format(paid);
         } catch {
-          return formatCurrency(0);
+          return CurrencyFormatter.format(0);
         }
       },
       isNumeric: true
@@ -88,9 +83,9 @@ export const TrashRateKPITable: React.FC<TrashRateKPITableProps> = ({
           const pending = status
             .filter((i: any) => i.Estado !== 'P')
             .reduce((acc: number, i: any) => acc + i.Monto, 0);
-          return formatCurrency(pending);
+          return CurrencyFormatter.format(pending);
         } catch {
-          return formatCurrency(0);
+          return CurrencyFormatter.format(0);
         }
       },
       isNumeric: true

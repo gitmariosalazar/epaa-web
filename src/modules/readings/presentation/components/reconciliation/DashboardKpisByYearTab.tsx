@@ -35,6 +35,7 @@ import { getTrafficLightColor } from '@/shared/presentation/utils/colors/traffic
 import { Table } from '@/shared/presentation/components/Table/Table';
 import type { Column } from '@/shared/presentation/components/Table/Table';
 import { Button } from '@/shared/presentation/components/Button/Button';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface FormattedKpiData {
   name: string;
@@ -152,13 +153,6 @@ export const DashboardKpisByYearTab: React.FC<
       };
     }, [data]);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(value);
-  };
-
   const columns: Column<FormattedKpiData>[] = useMemo(
     () => [
       { header: 'Sector', accessor: 'name', sortable: true },
@@ -183,7 +177,7 @@ export const DashboardKpisByYearTab: React.FC<
       {
         header: 'Facturado',
         accessor: (item: FormattedKpiData) => (
-          <ColorChip label={formatCurrency(item.billed)} size='xs' color={'cyan'} variant="ghost" />
+          <ColorChip label={CurrencyFormatter.format(item.billed)} size='xs' color={'cyan'} variant="ghost" />
         ),
         sortKey: 'billed',
         sortable: true,
@@ -193,7 +187,7 @@ export const DashboardKpisByYearTab: React.FC<
       {
         header: 'Recaudado',
         accessor: (item: FormattedKpiData) => (
-          <ColorChip label={formatCurrency(item.paid)} size='xs' color={'green'} variant="ghost" />
+          <ColorChip label={CurrencyFormatter.format(item.paid)} size='xs' color={'green'} variant="ghost" />
         ),
         sortKey: 'paid',
         sortable: true,
@@ -203,7 +197,7 @@ export const DashboardKpisByYearTab: React.FC<
       {
         header: 'Pendiente',
         accessor: (item: FormattedKpiData) => (
-          <ColorChip label={formatCurrency(item.unpaid)} size='xs' color={'red'} variant="ghost" />
+          <ColorChip label={CurrencyFormatter.format(item.unpaid)} size='xs' color={'red'} variant="ghost" />
         ),
         sortKey: 'unpaid',
         sortable: true,
@@ -213,7 +207,7 @@ export const DashboardKpisByYearTab: React.FC<
       {
         header: 'Total Cobrar',
         accessor: (item: FormattedKpiData) => (
-          <ColorChip label={formatCurrency(item.totalAmountToCollect)} size='xs' color={'cyan'} variant="ghost" />
+          <ColorChip label={CurrencyFormatter.format(item.totalAmountToCollect)} size='xs' color={'cyan'} variant="ghost" />
         ),
         sortKey: 'totalAmountToCollect',
         sortable: true,
@@ -223,7 +217,7 @@ export const DashboardKpisByYearTab: React.FC<
       {
         header: 'Total Pagado (Recaudado)',
         accessor: (item: FormattedKpiData) => (
-          <ColorChip label={formatCurrency(item.totalAmountToCollectPaid)} size='xs' color={'green'} variant="ghost" />
+          <ColorChip label={CurrencyFormatter.format(item.totalAmountToCollectPaid)} size='xs' color={'green'} variant="ghost" />
         ),
         sortKey: 'totalAmountToCollectPaid',
         sortable: true,
@@ -233,7 +227,7 @@ export const DashboardKpisByYearTab: React.FC<
       {
         header: 'Pendiente/No Pagado',
         accessor: (item: FormattedKpiData) => (
-          <ColorChip label={formatCurrency(item.totalAmountToCollectUnpaid)} size='xs' color={'red'} variant="ghost" />
+          <ColorChip label={CurrencyFormatter.format(item.totalAmountToCollectUnpaid)} size='xs' color={'red'} variant="ghost" />
         ),
         sortKey: 'totalAmountToCollectUnpaid',
         sortable: true,
@@ -243,7 +237,7 @@ export const DashboardKpisByYearTab: React.FC<
       {
         header: 'Vencido',
         accessor: (item: FormattedKpiData) => (
-          <ColorChip label={formatCurrency(item.totalAmountToCollectOverdue)} size='xs' color={'red'} variant="ghost" />
+          <ColorChip label={CurrencyFormatter.format(item.totalAmountToCollectOverdue)} size='xs' color={'red'} variant="ghost" />
         ),
         sortKey: 'totalAmountToCollectOverdue',
         sortable: true,
@@ -253,7 +247,7 @@ export const DashboardKpisByYearTab: React.FC<
       {
         header: 'Por Vencer',
         accessor: (item: FormattedKpiData) => (
-          <ColorChip label={formatCurrency(item.totalAmountToCollectUpcoming)} size='xs' color={'amber'} variant="ghost" />
+          <ColorChip label={CurrencyFormatter.format(item.totalAmountToCollectUpcoming)} size='xs' color={'amber'} variant="ghost" />
         ),
         sortKey: 'totalAmountToCollectUpcoming',
         sortable: true,
@@ -263,7 +257,7 @@ export const DashboardKpisByYearTab: React.FC<
       {
         header: 'Anulados',
         accessor: (item: FormattedKpiData) => (
-          <ColorChip label={formatCurrency(item.totalAmountToCollectCanceled)} size='xs' color={'gray'} variant="ghost" />
+          <ColorChip label={CurrencyFormatter.format(item.totalAmountToCollectCanceled)} size='xs' color={'gray'} variant="ghost" />
         ),
         sortKey: 'totalAmountToCollectCanceled',
         sortable: true,
@@ -290,61 +284,61 @@ export const DashboardKpisByYearTab: React.FC<
       },
       {
         label: 'Total Facturado',
-        value: formatCurrency(totals.totalBilled),
+        value: CurrencyFormatter.format(totals.totalBilled),
         columnId: 'billed',
         color: 'emerald'
       },
       {
         label: 'Total Recaudado',
-        value: formatCurrency(totals.totalPaid),
+        value: CurrencyFormatter.format(totals.totalPaid),
         columnId: 'paid',
         color: 'emerald'
       },
       {
         label: 'Total Pendiente',
-        value: formatCurrency(totals.totalUnpaid),
+        value: CurrencyFormatter.format(totals.totalUnpaid),
         columnId: 'unpaid',
         color: 'amber'
       },
       {
         label: 'Total Cartera',
-        value: formatCurrency(totals.totalDebt),
+        value: CurrencyFormatter.format(totals.totalDebt),
         columnId: 'debt',
         color: 'rose'
       },
       {
         label: 'Total Cobrar',
-        value: formatCurrency(totals.totalAmountToCollect),
+        value: CurrencyFormatter.format(totals.totalAmountToCollect),
         columnId: 'totalAmountToCollect',
         color: 'cyan'
       },
       {
         label: 'Total Pagado',
-        value: formatCurrency(totals.totalAmountToCollectPaid),
+        value: CurrencyFormatter.format(totals.totalAmountToCollectPaid),
         columnId: 'totalAmountToCollectPaid',
         color: 'emerald'
       },
       {
         label: 'Pendiente',
-        value: formatCurrency(totals.totalAmountToCollectUnpaid),
+        value: CurrencyFormatter.format(totals.totalAmountToCollectUnpaid),
         columnId: 'totalAmountToCollectUnpaid',
         color: 'amber'
       },
       {
         label: 'Vencido',
-        value: formatCurrency(totals.totalAmountToCollectOverdue),
+        value: CurrencyFormatter.format(totals.totalAmountToCollectOverdue),
         columnId: 'totalAmountToCollectOverdue',
         color: 'rose'
       },
       {
         label: 'Por Vencer',
-        value: formatCurrency(totals.totalAmountToCollectUpcoming),
+        value: CurrencyFormatter.format(totals.totalAmountToCollectUpcoming),
         columnId: 'totalAmountToCollectUpcoming',
         color: 'amber'
       },
       {
         label: 'Anulados',
-        value: formatCurrency(totals.totalAmountToCollectCanceled),
+        value: CurrencyFormatter.format(totals.totalAmountToCollectCanceled),
         columnId: 'totalAmountToCollectCanceled',
         color: 'gray'
       }
@@ -499,7 +493,7 @@ export const DashboardKpisByYearTab: React.FC<
                   borderRadius: '8px',
                   color: 'var(--text-main)'
                 }}
-                formatter={(value: number) => formatCurrency(value)}
+                formatter={(value: number) => CurrencyFormatter.format(value)}
               />
               <Legend wrapperStyle={{ paddingTop: '15px' }} />
               <Area
@@ -571,7 +565,7 @@ export const DashboardKpisByYearTab: React.FC<
         />
         <KPICard
           label="Agua Facturada"
-          value={formatCurrency(totals?.totalBilled || 0)}
+          value={CurrencyFormatter.format(totals?.totalBilled || 0)}
           icon={<DollarSign size={22} />}
           color="emerald"
           valueColor="emerald"
@@ -579,7 +573,7 @@ export const DashboardKpisByYearTab: React.FC<
         />
         <KPICard
           label="Deuda Consolidada"
-          value={formatCurrency(totals?.totalDebt || 0)}
+          value={CurrencyFormatter.format(totals?.totalDebt || 0)}
           icon={<AlertTriangle size={22} />}
           color="rose"
           valueColor="rose"
@@ -623,7 +617,7 @@ export const DashboardKpisByYearTab: React.FC<
                     ))}
                   </Pie>
                   <RechartsTooltip
-                    formatter={(value: number) => formatCurrency(value)}
+                    formatter={(value: number) => CurrencyFormatter.format(value)}
                     contentStyle={{
                       backgroundColor: 'var(--surface)',
                       borderColor: 'var(--border-color)',
@@ -680,7 +674,7 @@ export const DashboardKpisByYearTab: React.FC<
               </div>
               <span className="right-value">
                 <ColorChip
-                  label={formatCurrency(totals?.totalPaid || 0)}
+                  label={CurrencyFormatter.format(totals?.totalPaid || 0)}
                   color={getTrafficLightColor(
                     Number((totals?.totalPaid! / totals?.totalBilled!) * 100)
                   )}
@@ -704,7 +698,7 @@ export const DashboardKpisByYearTab: React.FC<
               </div>
               <span className="right-value">
                 <ColorChip
-                  label={formatCurrency(totals?.totalUnpaid || 0)}
+                  label={CurrencyFormatter.format(totals?.totalUnpaid || 0)}
                   color={getTrafficLightColor(
                     100 -
                     Number(
@@ -732,7 +726,7 @@ export const DashboardKpisByYearTab: React.FC<
               </div>
               <span className="right-value">
                 <ColorChip
-                  label={formatCurrency(totals?.totalBilled || 0)}
+                  label={CurrencyFormatter.format(totals?.totalBilled || 0)}
                   color={getTrafficLightColor(
                     Number((totals?.totalBilled! / totals?.totalDebt!) * 100)
                   )}
@@ -782,21 +776,21 @@ export const DashboardKpisByYearTab: React.FC<
             >
               <defs>
                 <linearGradient id="colorTotalCollect" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} opacity={0.4} />
-              <XAxis 
-                dataKey="name" 
-                stroke="var(--text-secondary)" 
-                tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} 
+              <XAxis
+                dataKey="name"
+                stroke="var(--text-secondary)"
+                tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
                 tickMargin={10}
                 axisLine={false}
                 tickLine={false}
               />
-              <YAxis 
-                stroke="var(--text-secondary)" 
+              <YAxis
+                stroke="var(--text-secondary)"
                 tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
                 tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                 axisLine={false}
@@ -812,18 +806,18 @@ export const DashboardKpisByYearTab: React.FC<
                   boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
                   padding: '12px'
                 }}
-                formatter={(value: number) => formatCurrency(value)}
+                formatter={(value: number) => CurrencyFormatter.format(value)}
                 cursor={{ fill: 'var(--border-color)', opacity: 0.2 }}
               />
               <Legend wrapperStyle={{ paddingTop: '20px' }} iconType="circle" />
-              <Area 
-                type="monotone" 
-                dataKey="totalAmountToCollect" 
-                name="Total a Cobrar" 
-                stroke="#3b82f6" 
+              <Area
+                type="monotone"
+                dataKey="totalAmountToCollect"
+                name="Total a Cobrar"
+                stroke="#3b82f6"
                 strokeWidth={3}
                 fillOpacity={1}
-                fill="url(#colorTotalCollect)" 
+                fill="url(#colorTotalCollect)"
               />
               <Bar dataKey="totalAmountToCollectPaid" name="Pagado" stackId="a" fill="#10b981" radius={[0, 0, 4, 4]} barSize={24} />
               <Bar dataKey="totalAmountToCollectUnpaid" name="Pendiente" stackId="a" fill="#f59e0b" />

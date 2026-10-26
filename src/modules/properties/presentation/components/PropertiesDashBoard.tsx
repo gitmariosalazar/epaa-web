@@ -15,18 +15,11 @@ import {
 } from 'lucide-react';
 import { CHART_COLORS } from '@/shared/presentation/utils/colors/charts.colors';
 import '../styles/PropertiesDashBoard.css';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface PropTypes {
   data: PropertyByType[];
 }
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('es-EC', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2
-  }).format(value);
-};
 
 const formatNumber = (value: number) => {
   return new Intl.NumberFormat('es-EC', {
@@ -78,7 +71,7 @@ export const PropertiesDashBoard: React.FC<PropTypes> = ({ data }) => {
         value: Number(item.totalPortfolioValue || 0),
         color: CHART_COLORS[index % CHART_COLORS.length],
         label: `${item.propertyType}`,
-        fmt: (val) => formatCurrency(val)
+        fmt: (val) => CurrencyFormatter.format(val)
       })),
     [data]
   );
@@ -96,7 +89,7 @@ export const PropertiesDashBoard: React.FC<PropTypes> = ({ data }) => {
         />
         <KPICard
           label="Valor de Cartera Total"
-          value={formatCurrency(totalPortfolioValue)}
+          value={CurrencyFormatter.format(totalPortfolioValue)}
           icon={<DollarSign size={24} />}
           color="green"
           valueColor="green"
@@ -175,19 +168,19 @@ export const PropertiesDashBoard: React.FC<PropTypes> = ({ data }) => {
                   <div className="stat-item">
                     <span className="stat-label">Valor Promedio</span>
                     <span className="stat-value text-success">
-                      {formatCurrency(Number(item.avgPropertyValue))}
+                      {CurrencyFormatter.format(Number(item.avgPropertyValue))}
                     </span>
                   </div>
                   <div className="stat-item">
                     <span className="stat-label">Precio Prom. Terreno</span>
                     <span className="stat-value">
-                      {formatCurrency(Number(item.weightedPricePerM2Land))} /m²
+                      {CurrencyFormatter.format(Number(item.weightedPricePerM2Land))} /m²
                     </span>
                   </div>
                   <div className="stat-item">
                     <span className="stat-label">Precio Prom. Constr.</span>
                     <span className="stat-value">
-                      {formatCurrency(Number(item.weightedPricePerM2Built))} /m²
+                      {CurrencyFormatter.format(Number(item.weightedPricePerM2Built))} /m²
                     </span>
                   </div>
                 </div>

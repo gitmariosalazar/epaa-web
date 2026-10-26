@@ -11,6 +11,7 @@ import {
   TextSelect
 } from 'lucide-react';
 import './PaymentDetailModal.css';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface PaymentDetailModalProps {
   isOpen: boolean;
@@ -39,11 +40,6 @@ export const PaymentDetailModal: React.FC<PaymentDetailModalProps> = ({
     } catch {
       return dateString;
     }
-  };
-
-  const formatCurrency = (val: number | string | undefined | null) => {
-    if (val === undefined || val === null) return '$0.00';
-    return `$${Number(val).toFixed(2)}`;
   };
 
   const isPaid = payment.incomeStatus?.toLowerCase() === 'p';
@@ -114,24 +110,24 @@ export const PaymentDetailModal: React.FC<PaymentDetailModalProps> = ({
           </h3>
           <div className="payment-detail__tags">
             <span className="payment-detail__tag payment-detail__tag--money">
-              Title Value: {formatCurrency(payment.titleValue)}
+              Title Value: {CurrencyFormatter.format(payment.titleValue)}
             </span>
             <span className="payment-detail__tag payment-detail__tag--money">
-              Third Party: {formatCurrency(payment.thirdPartyValue)}
+              Third Party: {CurrencyFormatter.format(payment.thirdPartyValue)}
             </span>
             <span className="payment-detail__tag payment-detail__tag--highlight">
-              Surcharge: {formatCurrency(payment.surcharge)}
+              Surcharge: {CurrencyFormatter.format(payment.surcharge)}
             </span>
             <span className="payment-detail__tag payment-detail__tag--money">
-              Trash Rate: {formatCurrency(payment.trashRate)}
+              Trash Rate: {CurrencyFormatter.format(payment.trashRate)}
             </span>
             {payment.orderValue !== undefined && (
               <span className="payment-detail__tag payment-detail__tag--money">
-                Order Value: {formatCurrency(payment.orderValue)}
+                Order Value: {CurrencyFormatter.format(payment.orderValue)}
               </span>
             )}
             <span className="payment-detail__tag payment-detail__tag--total">
-              Total: {formatCurrency(payment.total)}
+              Total: {CurrencyFormatter.format(payment.total)}
             </span>
           </div>
         </div>

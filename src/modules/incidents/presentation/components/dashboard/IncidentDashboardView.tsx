@@ -31,6 +31,7 @@ import type {
   IncidenteCriticoDto
 } from '../../../domain/schemas/dtos/response/incident-dashboard.dto';
 import '../../styles/IncidentDashboard.css';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface IncidentDashboardViewProps {
   data: IncidentDashboardResponseDto | null;
@@ -43,12 +44,6 @@ export const IncidentDashboardView: React.FC<IncidentDashboardViewProps> = ({
   data,
   isLoading
 }) => {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(value);
-  };
 
   const columnsCritical: Column<IncidenteCriticoDto>[] = useMemo(() => [
     { header: 'Código', accessor: 'incident_code', sortable: true },
@@ -141,7 +136,7 @@ export const IncidentDashboardView: React.FC<IncidentDashboardViewProps> = ({
         />
         <KPICard
           label="Costo de Reparación (Acumulado)"
-          value={formatCurrency(kpis_generales.costo_reparacion_acumulado)}
+          value={CurrencyFormatter.format(kpis_generales.costo_reparacion_acumulado)}
           icon={<DollarSign size={22} />}
           color="purple"
         />
@@ -268,7 +263,7 @@ export const IncidentDashboardView: React.FC<IncidentDashboardViewProps> = ({
                 cursor={{ fill: 'var(--border-color)', opacity: 0.2 }}
                 contentStyle={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border-color)', borderRadius: '8px' }}
                 formatter={(value: number, name: string) => {
-                  if (name === 'Costo Total') return formatCurrency(value);
+                  if (name === 'Costo Total') return CurrencyFormatter.format(value);
                   return value;
                 }}
               />

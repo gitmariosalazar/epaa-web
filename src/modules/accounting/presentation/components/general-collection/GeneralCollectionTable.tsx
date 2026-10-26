@@ -16,6 +16,7 @@ import {
   getLabelIncomeStatus,
   type TypeIncomeStatus
 } from '@/shared/utils/IncomeStatus';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface GeneralCollectionTableProps {
   data: GeneralCollectionResponse[];
@@ -196,12 +197,6 @@ export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
     ]
   );
 
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
-
   const { setShowPdfPreview, PdfPreviewModal } =
     useTablePdfExport<GeneralCollectionResponse>({
       data,
@@ -228,11 +223,11 @@ export const GeneralCollectionTable: React.FC<GeneralCollectionTableProps> = ({
           'Cód. Título': item.titleCode,
           Cliente: `${item.name} (${item.cardId})`,
           'C.C': item.cadastralKey,
-          'EPAA Val.': formatCurrency(item.titleValue),
-          Recargo: formatCurrency(item.surcharge),
-          '3er. Valor': formatCurrency(item.thirdPartyValue),
-          'Tasa Basura': formatCurrency(item.trashRate),
-          Total: formatCurrency(item.total),
+          'EPAA Val.': CurrencyFormatter.format(item.titleValue),
+          Recargo: CurrencyFormatter.format(item.surcharge),
+          '3er. Valor': CurrencyFormatter.format(item.thirdPartyValue),
+          'Tasa Basura': CurrencyFormatter.format(item.trashRate),
+          Total: CurrencyFormatter.format(item.total),
           Usuario: item.paymentUser,
           Método: item.paymentMethod || '-',
           Estado: item.incomeStatus || '-'

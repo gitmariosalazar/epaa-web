@@ -12,6 +12,7 @@ import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { CurrencyFormatter } from '@/shared/utils/formatters/CurrencyFormatter';
 
 interface PaymentReadingsTableProps {
   data: PaymentReading[];
@@ -34,12 +35,6 @@ export const PaymentReadingsTable: React.FC<PaymentReadingsTableProps> = ({
   const [selectedReading, setSelectedReading] = useState<PaymentReading | null>(
     null
   );
-
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
 
   const columns: Column<PaymentReading>[] = [
     {
@@ -234,14 +229,14 @@ export const PaymentReadingsTable: React.FC<PaymentReadingsTableProps> = ({
           [t('accounting.columns.titleCode')]: item.titleCode,
           Cliente: `${item.name} ${item.lastName} (${item.cardId})`,
           [t('accounting.columns.cadastralKey')]: item.cadastralKey,
-          [t('accounting.columns.surcharge')]: formatCurrency(item.surcharge),
-          [t('accounting.columns.epaaValue')]: formatCurrency(item.epaaValue),
-          [t('accounting.columns.thirdPartyValue')]: formatCurrency(
+          [t('accounting.columns.surcharge')]: CurrencyFormatter.format(item.surcharge),
+          [t('accounting.columns.epaaValue')]: CurrencyFormatter.format(item.epaaValue),
+          [t('accounting.columns.thirdPartyValue')]: CurrencyFormatter.format(
             item.thirdPartyValue
           ),
-          [t('accounting.columns.trashRateDt')]: formatCurrency(item.trashRate),
-          [t('accounting.columns.trashRateVal')]: formatCurrency(item.value),
-          [t('accounting.columns.total')]: formatCurrency(item.total),
+          [t('accounting.columns.trashRateDt')]: CurrencyFormatter.format(item.trashRate),
+          [t('accounting.columns.trashRateVal')]: CurrencyFormatter.format(item.value),
+          [t('accounting.columns.total')]: CurrencyFormatter.format(item.total),
           [t('accounting.columns.user')]: item.paymentUser,
           [t('accounting.columns.paymentMethod')]: item.paymentMethod || '-'
         };
