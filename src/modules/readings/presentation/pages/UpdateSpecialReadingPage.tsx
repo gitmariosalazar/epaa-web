@@ -451,7 +451,7 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
           currentReadingInfoForRequest.permitReading && (
             <>
               {!checkReadingIsCurrentMonth(currentReadingInfoForRequest.monthReading) && (
-                <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                <div style={{ marginTop: '0.09rem', marginBottom: '-0.9rem' }}>
                   <Alert
                     type="warning"
                     title={`Advertencia de Facturación — Lectura de Mes Anterior (${formatReadingMonth(currentReadingInfoForRequest.monthReading)})`}
