@@ -21,7 +21,8 @@ interface HistoricalReadingToolbarProps {
   readingInfo: ReadingInfo | null;
   method: 'create' | 'update';
   onViewLastReading?: (cadastralKey: string, readingDate: Date | null) => void;
-  isHistorical: boolean;
+  isHistorical?: boolean;
+  permitCreate?: boolean;
 }
 
 export const HistoricalReadingToolbar: React.FC<HistoricalReadingToolbarProps> = ({
@@ -35,7 +36,7 @@ export const HistoricalReadingToolbar: React.FC<HistoricalReadingToolbarProps> =
   readingInfo,
   method,
   onViewLastReading,
-  isHistorical
+  permitCreate,
 }) => {
   const { t } = useTranslation();
 
@@ -77,8 +78,9 @@ export const HistoricalReadingToolbar: React.FC<HistoricalReadingToolbarProps> =
           color="success"
           onClick={handleSave}
           disabled={
-            isHistorical ? false :
-              method === 'create'
+            permitCreate !== undefined
+              ? !permitCreate || isSubmitting
+              : method === 'create'
                 ? !readingInfo?.hasCurrentReading || isSubmitting
                 : !readingInfo || !readingInfo?.permitReading || isSubmitting
           }

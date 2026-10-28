@@ -331,10 +331,7 @@ export const useReading = () => {
           'Éxito',
           { position: 'top-right' }
         );
-        if (request.cadastralKey) {
-          await fetchReadingData(request.cadastralKey);
-        }
-        return result;
+        return result ?? true;
       } catch (error: any) {
         console.error('Error creating reading:', error);
 
@@ -357,7 +354,7 @@ export const useReading = () => {
         setIsSubmitting(false);
       }
     },
-    [createReadingUseCase, fetchReadingData]
+    [createReadingUseCase]
   );
 
   return {

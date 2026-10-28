@@ -26,6 +26,7 @@ import { Alert } from '@/shared/presentation/components/Alert';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
+import { checkReadingIsCurrentMonth } from '../../application/usecases/CheckReadingMonthUseCase';
 import { PopoverModal } from '@/shared/presentation/components/PopoverModal';
 import { ChangeMeterPage } from '@/modules/connections/presentation/pages/ChangeMeterPage';
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
@@ -98,21 +99,50 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
     }
   }, [initialCadastralKey, location.state?.cadastralKey]);
 
-  useEffect(() => {
-    if (readingInfo.length > 0) {
-      setPreviousReadingInput(
-        readingInfo[0].currentReading !== null
-          ? readingInfo[0].currentReading
-          : readingInfo[0].previousReading
-      );
-    }
-  }, [readingInfo]);
-
-
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   /** Construye el DTO de creación a partir del estado actual del formulario. */
   const readingInfoForRequest = readingInfo[0];
+
+  // 1. ¿El mes seleccionado es el mes en curso del sistema?
+  const isCurrentMonth = checkReadingIsCurrentMonth(selectedMonth);
+
+  // 2. ¿El mes seleccionado ya existe registrado en el historial?
+  const isSelectedMonthInHistory = readingHistory.some((h) => {
+    if (!selectedMonth) return false;
+    const [selYearStr, selMonthStr] = selectedMonth.split('-');
+    const selYear = parseInt(selYearStr, 10);
+    const selMonth = parseInt(selMonthStr, 10);
+    const hMonthNum = monthMap[h.readingMonth?.toUpperCase()] || parseInt(h.readingMonth, 10);
+    return h.readingYear === selYear && hMonthNum === selMonth;
+  });
+
+  // 3. Regla de bloqueo:
+  // - Si el mes seleccionado ya está en el historial -> BLOQUEADO (evitar duplicado).
+  // - Si el mes seleccionado es el mes actual y ya se registró la lectura -> BLOQUEADO.
+  // - Si el mes seleccionado es un mes pasado y NO está en el historial -> HABILITADO (permite registrar lectura histórica pendiente).
+  const isBlocked = isSelectedMonthInHistory || (isCurrentMonth && !readingInfoForRequest?.hasCurrentReading);
+  const permitCreate = !isBlocked;
+
+  useEffect(() => {
+    if (readingInfo.length > 0) {
+      const info = readingInfo[0];
+      if (isBlocked) {
+        setPreviousReadingInput(
+          info.previousReading !== null && info.previousReading !== undefined
+            ? info.previousReading
+            : ''
+        );
+      } else {
+        setPreviousReadingInput(
+          info.currentReading !== null && info.currentReading !== undefined
+            ? info.currentReading
+            : info.previousReading
+        );
+      }
+    }
+  }, [readingInfo, isBlocked]);
+
   const buildRequest = (): CreateReadingRequest => ({
     connectionId: readingInfoForRequest.cadastralKey,
     sector: readingInfoForRequest.sector,
@@ -199,6 +229,14 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
       alert('Primero debe buscar una conexión.');
       return;
     }
+    if (isBlocked) {
+      alert(
+        isCurrentMonth
+          ? 'La lectura para el mes actual ya se ha registrado.'
+          : 'La lectura para este mes histórico ya se encuentra registrada en el historial.'
+      );
+      return;
+    }
     if (currentReadingInput === '') {
       alert('La lectura actual es obligatoria.');
       return;
@@ -219,7 +257,6 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
       setIsConfirmModalOpen(false);
 
       if (result) {
-        setIsConfirmModalOpen(false);
         if (onSuccess) {
           onSuccess();
           return;
@@ -303,6 +340,7 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
           method="create"
           onViewLastReading={handleViewDetails}
           isHistorical={true}
+          permitCreate={permitCreate}
         />
 
         {/* ── Estado de la conexión ─────────────────────────────────────────── */}
@@ -457,7 +495,7 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
                   info={readingInfo}
                   currentReadingInput={currentReadingInput}
                   method="create"
-                  permitCreate={readingInfoForRequest.hasCurrentReading}
+                  permitCreate={permitCreate}
                 />
 
                 <HistoricalReadingCreateInfoForm
@@ -470,6 +508,7 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
                   setObservationInput={setObservationInput}
                   selectedMonth={selectedMonth}
                   setSelectedMonth={setSelectedMonth}
+                  permitCreate={permitCreate}
                 />
               </>
             )}

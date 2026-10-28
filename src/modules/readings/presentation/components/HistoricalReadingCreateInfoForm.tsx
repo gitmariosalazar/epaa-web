@@ -17,6 +17,7 @@ interface PropTypes {
   setObservationInput: (value: string) => void;
   selectedMonth: string;
   setSelectedMonth: (value: string) => void;
+  permitCreate?: boolean;
 }
 
 export const HistoricalReadingCreateInfoForm: React.FC<PropTypes> = ({
@@ -28,10 +29,12 @@ export const HistoricalReadingCreateInfoForm: React.FC<PropTypes> = ({
   observationInput,
   setObservationInput,
   selectedMonth,
-  setSelectedMonth
+  setSelectedMonth,
+  permitCreate
 }) => {
   const readingInfoSelected = info[0];
   const previousReadingInfoSelected = info[1];
+  const canCreate = permitCreate !== undefined ? permitCreate : (readingInfoSelected?.hasCurrentReading ?? true);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -41,22 +44,30 @@ export const HistoricalReadingCreateInfoForm: React.FC<PropTypes> = ({
             label={
               previousReadingInfoSelected
                 ? `Lectura Anterior ${ConverDate(previousReadingInfoSelected.previousReadingDate)} - ${previousReadingInfoSelected.readingTime || ''}`
-                : 'Lectura Anterior (Editable)'
+                : canCreate
+                  ? 'Lectura Anterior (Editable)'
+                  : 'Lectura Anterior ---'
             }
             leftIcon={<FaHistory color="var(--text-muted)" />}
             type="number"
             placeholder="0.00"
-            value={previousReadingInput}
+            value={
+              canCreate
+                ? previousReadingInput
+                : readingInfoSelected?.previousReading ?? ''
+            }
             onChange={(e) =>
               setPreviousReadingInput(
                 e.target.value === '' ? '' : Number(e.target.value)
               )
             }
+            readOnly={!canCreate}
+            disabled={!canCreate}
             size='small'
           />
           <Input
             label={
-              readingInfoSelected?.hasCurrentReading
+              canCreate
                 ? `Lectura Actual (Obligatorio)`
                 : readingInfoSelected
                   ? `Lectura Actual ${ConverDate(readingInfoSelected.previousReadingDate)} - ${readingInfoSelected.readingTime || ''}`
@@ -65,12 +76,19 @@ export const HistoricalReadingCreateInfoForm: React.FC<PropTypes> = ({
             leftIcon={<FaTachometerAlt color="var(--text-muted)" />}
             type="number"
             placeholder="0.00"
-            value={currentReadingInput}
+            value={
+              canCreate
+                ? currentReadingInput
+                : '' + (readingInfoSelected?.currentReading ?? '')
+            }
             onChange={(e) =>
               setCurrentReadingInput(
                 e.target.value === '' ? '' : Number(e.target.value)
               )
             }
+            readOnly={!canCreate}
+            disabled={!canCreate}
+            focused={canCreate}
             size='small'
           />
         </div>
@@ -82,6 +100,8 @@ export const HistoricalReadingCreateInfoForm: React.FC<PropTypes> = ({
             placeholder="Ingrese una descripción detallada..."
             value={observationInput}
             onChange={(e) => setObservationInput(e.target.value)}
+            disabled={!canCreate}
+            readOnly={!canCreate}
             size='small'
           />
         </div>

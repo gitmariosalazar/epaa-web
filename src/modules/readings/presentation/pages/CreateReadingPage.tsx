@@ -166,7 +166,6 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
       setIsConfirmModalOpen(false);
 
       if (result) {
-        setIsConfirmModalOpen(false);
         if (onSuccess) {
           onSuccess();
           return;
