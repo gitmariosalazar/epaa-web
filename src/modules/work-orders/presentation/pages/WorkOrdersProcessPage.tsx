@@ -23,7 +23,13 @@
  *   EJECUTADA        → Completar OT (inline quick-action)
  *   COMPLETADA       → Encuesta Satisfacción (RegisterSurveyModal)
  */
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef
+} from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { Button } from '@/shared/presentation/components/Button/Button';
@@ -52,9 +58,12 @@ import { RegisterSatisfactionSurveyUseCase } from '../../application/usecases/Re
 import { ProcessWorkOrderRepositoryImpl } from '../../infrastructure/repositories/ProcessWorkOrderRepositoryImpl';
 import {
   WorkOrderAutomationPolicy,
-  WorkOrderAutoStepResolver,
+  WorkOrderAutoStepResolver
 } from '../../domain/automation/WorkOrderAutomationPolicy';
-import { EVIDENCE_STAGES, type EvidenceStageCode } from '../../domain/constants/evidence-stage';
+import {
+  EVIDENCE_STAGES,
+  type EvidenceStageCode
+} from '../../domain/constants/evidence-stage';
 
 // ── Request DTO ────────────────────────────────────────────────────────────────
 import { ProcessWorkOrderRequest } from '../../domain/schemas/dto/request/process-work-order.request';
@@ -104,8 +113,14 @@ import {
   Printer
 } from 'lucide-react';
 import '../styles/WorkOrdersProcessPage.css';
-import { resolveCompletionPreStep, type CompletionPreStep } from '../completion/orderCompletionStrategies';
-import { CompletionPreStepHost, type CompletionPreStepResult } from '../completion/CompletionPreStepHost';
+import {
+  resolveCompletionPreStep,
+  type CompletionPreStep
+} from '../completion/orderCompletionStrategies';
+import {
+  CompletionPreStepHost,
+  type CompletionPreStepResult
+} from '../completion/CompletionPreStepHost';
 import { syncEvidenceToWorkOrder } from '../completion/syncEvidenceToWorkOrder';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { AutoProcessingView } from '../components/common/AutoProcessingView';
@@ -123,16 +138,46 @@ const STEPS = [
   { label: 'Cierre', icon: Star }
 ];
 
-const getActiveStepIndex = (estado: string, executionSubStep: number): number => {
+const getActiveStepIndex = (
+  estado: string,
+  executionSubStep: number,
+  isTechnicianAssigned?: boolean
+): number => {
   const upper = (estado || '').toUpperCase();
   if (upper === 'NOTIFICADA') return 0;
-  if (upper === 'PENDIENTE') return 1;
-  if (['ASIGNADA', 'PREPARACION', 'REVISION_RECHAZADA'].includes(upper)) return 2;
-  if (['EN_PROCESO', 'EN_PROCESO_INSPECCION', 'EN_PROCESO_INSTALACION'].includes(upper)) {
+  if (
+    upper === 'PENDIENTE' ||
+    ([
+      'EN_PROCESO',
+      'EN_PROCESO_INSPECCION',
+      'EN_PROCESO_INSTALACION'
+    ].includes(upper) && isTechnicianAssigned === false)
+  ) {
+    return 1;
+  }
+  if (
+    ['ASIGNADA', 'PREPARACION', 'REVISION_RECHAZADA'].includes(upper)
+  )
+    return 2;
+  if (
+    ['EN_PROCESO', 'EN_PROCESO_INSPECCION', 'EN_PROCESO_INSTALACION'].includes(
+      upper
+    )
+  ) {
     return 3 + executionSubStep;
   }
-  if (['EJECUTADA', 'INSPECCION_EJECUTADA', 'INSTALACION_EJECUTADA'].includes(upper)) return 5;
-  if (['COMPLETADA', 'INSPECCION_COMPLETADA', 'INSTALACION_COMPLETADA'].includes(upper)) return 6;
+  if (
+    ['EJECUTADA', 'INSPECCION_EJECUTADA', 'INSTALACION_EJECUTADA'].includes(
+      upper
+    )
+  )
+    return 5;
+  if (
+    ['COMPLETADA', 'INSPECCION_COMPLETADA', 'INSTALACION_COMPLETADA'].includes(
+      upper
+    )
+  )
+    return 6;
   return 0;
 };
 
@@ -141,7 +186,9 @@ interface WorkOrdersProcessPageProps {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ isEmbedded = false }) => {
+export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
+  isEmbedded = false
+}) => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
 
@@ -179,33 +226,38 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
 
   const esOTInspeccionAcometida = (workOrder: OrdenTrabajoDetalle): boolean => {
     const nombre = (workOrder.tipoTrabajo ?? '').toUpperCase();
-    const isInspeccion = (
+    const isInspeccion =
       nombre.includes('INSPECCION') ||
       nombre.includes('INSPECCIÓN') ||
-      nombre.includes('FACTIBILIDAD')
-    );
-    const isOrigenSolicitud = (workOrder.origen ?? '').toUpperCase() === 'SOLICITUD';
+      nombre.includes('FACTIBILIDAD');
+    const isOrigenSolicitud =
+      (workOrder.origen ?? '').toUpperCase() === 'SOLICITUD';
     const solId = pickSolicitudId(workOrder);
-    return (
-      isInspeccion &&
-      isOrigenSolicitud &&
-      !!solId
-    );
+    return isInspeccion && isOrigenSolicitud && !!solId;
   };
 
-  const esOTInstalacionAcometida = (workOrder: OrdenTrabajoDetalle): boolean => {
+  const esOTInstalacionAcometida = (
+    workOrder: OrdenTrabajoDetalle
+  ): boolean => {
     const nombre = (workOrder.tipoTrabajo ?? '').toUpperCase();
     const descripcion = (workOrder.tipoTrabajoDescripcion ?? '').toUpperCase();
     const origen = (workOrder.origen ?? '').toUpperCase();
 
     const isInstalacion =
-      nombre.includes('INSTALACION') || nombre.includes('INSTALACIÓN') || nombre.includes('MEDIDOR') ||
-      descripcion.includes('INSTALACION') || descripcion.includes('INSTALACIÓN') || descripcion.includes('MEDIDOR');
+      nombre.includes('INSTALACION') ||
+      nombre.includes('INSTALACIÓN') ||
+      nombre.includes('MEDIDOR') ||
+      descripcion.includes('INSTALACION') ||
+      descripcion.includes('INSTALACIÓN') ||
+      descripcion.includes('MEDIDOR');
 
-    const isOrigenSolicitud = (origen === 'SOLICITUD' || origen.includes('SOLICITUD DE SERVICIO') || origen.includes('SOLICITUD'));
+    const isOrigenSolicitud =
+      origen === 'SOLICITUD' ||
+      origen.includes('SOLICITUD DE SERVICIO') ||
+      origen.includes('SOLICITUD');
     const solId = pickSolicitudId(workOrder);
 
-    return (isInstalacion && isOrigenSolicitud && !!solId);
+    return isInstalacion && isOrigenSolicitud && !!solId;
   };
 
   // ── Data state ──────────────────────────────────────────────────────────────
@@ -214,7 +266,10 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
   const [isLoading, setIsLoading] = useState(false);
   const [isAutoProcessing, setIsAutoProcessing] = useState(false);
   const autoRunningRef = useRef(false);
-  const automationPolicy = useMemo(() => WorkOrderAutomationPolicy.defaults(), []);
+  const automationPolicy = useMemo(
+    () => WorkOrderAutomationPolicy.defaults(),
+    []
+  );
   const [error, setError] = useState<string | null>(null);
   const [reloadTrigger, setReloadTrigger] = useState(0);
   const [executionSubStep, setExecutionSubStep] = useState(0); // 0: Personal y Materiales, 1: Evidencias
@@ -229,14 +284,19 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
   const [qualityControlOpen, setQualityControlOpen] = useState(false);
   const [registerSurveyOpen, setRegisterSurveyOpen] = useState(false);
   const [submitReportOpen, setSubmitReportOpen] = useState(false);
-  const [submitInstallationReportOpen, setSubmitInstallationReportOpen] = useState(false);
-  const [completionPreStep, setCompletionPreStep] = useState<CompletionPreStep>({ type: 'NONE' });
+  const [submitInstallationReportOpen, setSubmitInstallationReportOpen] =
+    useState(false);
+  const [completionPreStep, setCompletionPreStep] = useState<CompletionPreStep>(
+    { type: 'NONE' }
+  );
 
   // ── Document PDF preview state (Single Work Order template) ──
   const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
   const [isDocPreviewOpen, setIsDocPreviewOpen] = useState(false);
   const [isGeneratingDocPdf, setIsGeneratingDocPdf] = useState(false);
-  const [pdfFileName, setPdfFileName] = useState<string>('Orden_de_Trabajo.pdf');
+  const [pdfFileName, setPdfFileName] = useState<string>(
+    'Orden_de_Trabajo.pdf'
+  );
 
   // ── Quick-action loading (inline buttons) ───────────────────────────────────
   const [isReceiving, setIsReceiving] = useState(false);
@@ -346,8 +406,9 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
     setPdfFileName(`Orden_de_Trabajo_${targetCode || 'OT'}.pdf`);
     try {
       // Clean Architecture: Obtener el detalle completo mediante UseCase o usar el orden cargado
-      const detailToUse = (targetCode ? await detalleUseCase.execute(targetCode) : null) || orden;
-      console.warn('📌 [ORDEN DE TRABAJO DETALLE OBTENIDA EN PROCESO]:', detailToUse);
+      const detailToUse =
+        (targetCode ? await detalleUseCase.execute(targetCode) : null) || orden;
+
 
       if (!detailToUse) return;
 
@@ -443,15 +504,17 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         return {
           phase: 'Fase 4 - Ejecución',
           title: 'Personal y Materiales',
-          action: 'Paso 1: Asigna personal de apoyo y registra materiales o costos adicionales consumidos.'
+          action:
+            'Paso 1: Asigna personal de apoyo y registra materiales o costos adicionales consumidos.'
         };
       }
       return {
         phase: 'Fase 4 - Ejecución',
         title: 'Evidencias de Campo',
-        action: requiereInformeSolicitud || requiereInformeInstalacionSolicitud
-          ? 'Paso 2: Sube fotos/documentos de evidencia y envía el informe técnico obligatorio.'
-          : 'Paso 2: Sube fotos/documentos de evidencia y finaliza la ejecución.'
+        action:
+          requiereInformeSolicitud || requiereInformeInstalacionSolicitud
+            ? 'Paso 2: Sube fotos/documentos de evidencia y envía el informe técnico obligatorio.'
+            : 'Paso 2: Sube fotos/documentos de evidencia y finaliza la ejecución.'
       };
     }
     if (isExecutedState(estado)) {
@@ -466,7 +529,8 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         return {
           phase: 'Fase 6',
           title: 'Cierre de Orden',
-          action: 'Acción actual: Emitir control de calidad y registrar encuesta de satisfacción.'
+          action:
+            'Acción actual: Emitir control de calidad y registrar encuesta de satisfacción.'
         };
       }
       if (!orden.idControl) {
@@ -489,7 +553,12 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
       title: 'Orden en Estado Final',
       action: 'No hay acciones pendientes para esta OT.'
     };
-  }, [orden, requiereInformeSolicitud, requiereInformeInstalacionSolicitud, executionSubStep]);
+  }, [
+    orden,
+    requiereInformeSolicitud,
+    requiereInformeInstalacionSolicitud,
+    executionSubStep
+  ]);
 
   // ── Optional prefill from route query (?code=OT-...) ───────────────────────
   useEffect(() => {
@@ -519,11 +588,15 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
           if (!step) break;
 
           const beforeKey = `${activeOrder.estado}|${activeOrder.idInspeccion}`;
-          await executeAutoStepUseCase.execute(step, activeOrder, currentUserId);
+          await executeAutoStepUseCase.execute(
+            step,
+            activeOrder,
+            currentUserId
+          );
 
           const [newDet, newTrk] = await Promise.all([
             detalleUseCase.execute(activeOrder.codigoOrden),
-            trackingUseCase.execute(activeOrder.codigoOrden),
+            trackingUseCase.execute(activeOrder.codigoOrden)
           ]);
 
           if (!newDet) break;
@@ -546,7 +619,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
       executeAutoStepUseCase,
       currentUserId,
       detalleUseCase,
-      trackingUseCase,
+      trackingUseCase
     ]
   );
 
@@ -570,7 +643,11 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
           setTracking(Array.isArray(trk) ? (trk[0] ?? null) : trk);
           if (!isReload) {
             setExecutionSubStep(0);
-            MessageToastCustom('success', 'Búsqueda Exitosa', 'Orden de trabajo encontrada.');
+            MessageToastCustom(
+              'success',
+              'Búsqueda Exitosa',
+              'Orden de trabajo encontrada.'
+            );
           }
           if (
             det &&
@@ -583,7 +660,11 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
       } catch (e: any) {
         if (isMounted) {
           setError(e.message || 'Error al cargar la orden de trabajo.');
-          MessageToastCustom('error', 'Error de Búsqueda', e.message || 'No se pudo cargar la orden de trabajo.');
+          MessageToastCustom(
+            'error',
+            'Error de Búsqueda',
+            e.message || 'No se pudo cargar la orden de trabajo.'
+          );
         }
       } finally {
         if (isMounted) setIsLoading(false);
@@ -593,7 +674,14 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
     return () => {
       isMounted = false;
     };
-  }, [currentCode, detalleUseCase, trackingUseCase, reloadTrigger, automationPolicy, runAutoSteps]);
+  }, [
+    currentCode,
+    detalleUseCase,
+    trackingUseCase,
+    reloadTrigger,
+    automationPolicy,
+    runAutoSteps
+  ]);
 
   const fetchWorkOrderDetails = async () => {
     if (!currentCode) return;
@@ -619,10 +707,18 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
           'OT recepcionada'
         )
       );
-      MessageToastCustom('success', 'OT Recepcionada', 'La orden pasó a estado PENDIENTE.');
+      MessageToastCustom(
+        'success',
+        'OT Recepcionada',
+        'La orden pasó a estado PENDIENTE.'
+      );
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo recepcionar la OT.');
+      MessageToastCustom(
+        'error',
+        'Error',
+        e.message || 'No se pudo recepcionar la OT.'
+      );
     } finally {
       setIsReceiving(false);
     }
@@ -638,11 +734,19 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         assignedByUserId: currentUserId,
         comment
       });
-      MessageToastCustom('success', 'Técnico Asignado', 'La OT fue asignada al técnico.');
+      MessageToastCustom(
+        'success',
+        'Técnico Asignado',
+        'La OT fue asignada al técnico.'
+      );
       setAssignWorkerOpen(false);
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo asignar el técnico.');
+      MessageToastCustom(
+        'error',
+        'Error',
+        e.message || 'No se pudo asignar el técnico.'
+      );
     } finally {
       setIsModalLoading(false);
     }
@@ -660,10 +764,18 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
           'Inicio de preparación'
         )
       );
-      MessageToastCustom('success', 'Preparación Iniciada', 'La OT pasó a estado PREPARACION.');
+      MessageToastCustom(
+        'success',
+        'Preparación Iniciada',
+        'La OT pasó a estado PREPARACION.'
+      );
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo iniciar la preparación.');
+      MessageToastCustom(
+        'error',
+        'Error',
+        e.message || 'No se pudo iniciar la preparación.'
+      );
     } finally {
       setIsStartingPrep(false);
     }
@@ -681,16 +793,27 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
           'Reinicio de preparación tras revisión rechazada'
         )
       );
-      MessageToastCustom('success', 'Preparación Reiniciada', 'La OT volvio al estado PREPARACION.');
+      MessageToastCustom(
+        'success',
+        'Preparación Reiniciada',
+        'La OT volvio al estado PREPARACION.'
+      );
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo reiniciar la preparación.');
+      MessageToastCustom(
+        'error',
+        'Error',
+        e.message || 'No se pudo reiniciar la preparación.'
+      );
     } finally {
       setIsRestartingPrep(false);
     }
   };
 
-  const handleCreateChecklist = async (passed: boolean, observations: string) => {
+  const handleCreateChecklist = async (
+    passed: boolean,
+    observations: string
+  ) => {
     if (!orden) return;
     setIsModalLoading(true);
     try {
@@ -700,11 +823,19 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         passed,
         observations
       });
-      MessageToastCustom('success', 'Checklist Registrado', passed ? 'Preparación aprobada.' : 'Preparación rechazada.');
+      MessageToastCustom(
+        'success',
+        'Checklist Registrado',
+        passed ? 'Preparación aprobada.' : 'Preparación rechazada.'
+      );
       setChecklistOpen(false);
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo registrar el checklist.');
+      MessageToastCustom(
+        'error',
+        'Error',
+        e.message || 'No se pudo registrar el checklist.'
+      );
     } finally {
       setIsModalLoading(false);
     }
@@ -720,13 +851,25 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
           orden.idOrdenTrabajo,
           newStatus,
           currentUserId,
-          approved ? 'Inspección de preparación aprobada — iniciando ejecución' : 'Inspección de preparación rechazada'
+          approved
+            ? 'Inspección de preparación aprobada — iniciando ejecución'
+            : 'Inspección de preparación rechazada'
         )
       );
-      MessageToastCustom('success', approved ? 'Checklist Aprobado' : 'Checklist Rechazado', approved ? 'La OT pasó a EN PROCESO.' : 'El técnico debe corregir y reiniciar.');
+      MessageToastCustom(
+        'success',
+        approved ? 'Checklist Aprobado' : 'Checklist Rechazado',
+        approved
+          ? 'La OT pasó a EN PROCESO.'
+          : 'El técnico debe corregir y reiniciar.'
+      );
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo resolver el checklist.');
+      MessageToastCustom(
+        'error',
+        'Error',
+        e.message || 'No se pudo resolver el checklist.'
+      );
     } finally {
       setIsResolvingChecklist(false);
     }
@@ -750,10 +893,18 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
           'Trabajo técnico finalizado en campo'
         )
       );
-      MessageToastCustom('success', 'Ejecución Finalizada', 'La OT pasó al siguiente estado de ejecución. Procede al control de calidad.');
+      MessageToastCustom(
+        'success',
+        'Ejecución Finalizada',
+        'La OT pasó al siguiente estado de ejecución. Procede al control de calidad.'
+      );
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo finalizar la ejecución.');
+      MessageToastCustom(
+        'error',
+        'Error',
+        e.message || 'No se pudo finalizar la ejecución.'
+      );
     } finally {
       setIsFinishingExec(false);
     }
@@ -785,7 +936,11 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
   };
 
   const handleSaveWorkersBatch = async (
-    workers: { workerId: string; roleId?: number | null; isResponsible?: boolean }[]
+    workers: {
+      workerId: string;
+      roleId?: number | null;
+      isResponsible?: boolean;
+    }[]
   ) => {
     if (!orden) return;
     setIsModalLoading(true);
@@ -795,10 +950,18 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         assignedByUserId: currentUserId,
         workers
       });
-      MessageToastCustom('success', 'Personal Agregado', `Se agregaron ${workers.length} trabajador(es) a la OT.`);
+      MessageToastCustom(
+        'success',
+        'Personal Agregado',
+        `Se agregaron ${workers.length} trabajador(es) a la OT.`
+      );
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo agregar al personal.');
+      MessageToastCustom(
+        'error',
+        'Error',
+        e.message || 'No se pudo agregar al personal.'
+      );
     } finally {
       setIsModalLoading(false);
     }
@@ -813,17 +976,31 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         workerId,
         removedByUserId: currentUserId
       });
-      MessageToastCustom('success', 'Personal Removido', 'El trabajador fue removido de la OT.');
+      MessageToastCustom(
+        'success',
+        'Personal Removido',
+        'El trabajador fue removido de la OT.'
+      );
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo remover al trabajador.');
+      MessageToastCustom(
+        'error',
+        'Error',
+        e.message || 'No se pudo remover al trabajador.'
+      );
     } finally {
       setIsModalLoading(false);
     }
   };
 
   const handleSaveMaterialsBatch = async (
-    materials: { materialId: number; quantity: number; unitCost: number; codigoMaterial?: string; nombreMaterial?: string }[]
+    materials: {
+      materialId: number;
+      quantity: number;
+      unitCost: number;
+      codigoMaterial?: string;
+      nombreMaterial?: string;
+    }[]
   ) => {
     if (!orden) return;
     setIsModalLoading(true);
@@ -833,10 +1010,18 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         createdByUserId: currentUserId,
         materials
       });
-      MessageToastCustom('success', 'Materiales Registrados', `Se agregaron ${materials.length} material(es) a la OT.`);
+      MessageToastCustom(
+        'success',
+        'Materiales Registrados',
+        `Se agregaron ${materials.length} material(es) a la OT.`
+      );
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo registrar los materiales.');
+      MessageToastCustom(
+        'error',
+        'Error',
+        e.message || 'No se pudo registrar los materiales.'
+      );
     } finally {
       setIsModalLoading(false);
     }
@@ -853,24 +1038,43 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         createdByUserId: currentUserId,
         costs
       });
-      MessageToastCustom('success', 'Costos Registrados', `Se agregaron ${costs.length} costo(s) adicional(es).`);
+      MessageToastCustom(
+        'success',
+        'Costos Registrados',
+        `Se agregaron ${costs.length} costo(s) adicional(es).`
+      );
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo registrar los costos.');
+      MessageToastCustom(
+        'error',
+        'Error',
+        e.message || 'No se pudo registrar los costos.'
+      );
     } finally {
       setIsModalLoading(false);
     }
   };
 
   const handleRemoveMaterial = async (_idDetalle: string | number) => {
-    MessageToastCustom('info', 'En desarrollo', 'La función para remover materiales está en desarrollo.');
+    MessageToastCustom(
+      'info',
+      'En desarrollo',
+      'La función para remover materiales está en desarrollo.'
+    );
   };
 
   const handleRemoveCost = async (_idCosto: string | number) => {
-    MessageToastCustom('info', 'En desarrollo', 'La función para remover costos adicionales está en desarrollo.');
+    MessageToastCustom(
+      'info',
+      'En desarrollo',
+      'La función para remover costos adicionales está en desarrollo.'
+    );
   };
 
-  const handleAddAttachment = async (files: File[], stage?: EvidenceStageCode) => {
+  const handleAddAttachment = async (
+    files: File[],
+    stage?: EvidenceStageCode
+  ) => {
     if (!orden) return;
     setIsModalLoading(true);
     try {
@@ -878,12 +1082,20 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         workOrderId: orden.idOrdenTrabajo,
         files,
         createdByUserId: currentUserId,
-        evidenceStageCode: stage ?? EVIDENCE_STAGES.IN_PROGRESS,
+        evidenceStageCode: stage ?? EVIDENCE_STAGES.IN_PROGRESS
       });
-      MessageToastCustom('success', 'Evidencia Adjuntada', `${files.length} archivo(s) adjuntado(s) a la OT.`);
+      MessageToastCustom(
+        'success',
+        'Evidencia Adjuntada',
+        `${files.length} archivo(s) adjuntado(s) a la OT.`
+      );
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo adjuntar la evidencia.');
+      MessageToastCustom(
+        'error',
+        'Error',
+        e.message || 'No se pudo adjuntar la evidencia.'
+      );
     } finally {
       setIsModalLoading(false);
     }
@@ -899,11 +1111,19 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         approved,
         comments
       });
-      MessageToastCustom('success', 'QC Registrado', approved ? 'OT aprobada en calidad.' : 'OT rechazada — en revisión.');
+      MessageToastCustom(
+        'success',
+        'QC Registrado',
+        approved ? 'OT aprobada en calidad.' : 'OT rechazada — en revisión.'
+      );
       setQualityControlOpen(false);
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo registrar el control de calidad.');
+      MessageToastCustom(
+        'error',
+        'Error',
+        e.message || 'No se pudo registrar el control de calidad.'
+      );
     } finally {
       setIsModalLoading(false);
     }
@@ -921,7 +1141,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
             workOrderId: orden.idOrdenTrabajo,
             userId: currentUserId,
             dataUrls: result.evidenceDataUrls,
-            evidenceStageCode: EVIDENCE_STAGES.WORK_COMPLETED,
+            evidenceStageCode: EVIDENCE_STAGES.WORK_COMPLETED
           });
           MessageToastCustom(
             'success',
@@ -944,7 +1164,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
             workOrderId: orden.idOrdenTrabajo,
             createdByUserId: currentUserId,
             files: result.evidenceFiles,
-            evidenceStageCode: EVIDENCE_STAGES.WORK_COMPLETED,
+            evidenceStageCode: EVIDENCE_STAGES.WORK_COMPLETED
           });
           MessageToastCustom(
             'success',
@@ -965,7 +1185,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         order: orden,
         finalizationDescription: result.description,
         userId: currentUserId,
-        policy: automationPolicy,
+        policy: automationPolicy
       });
 
       MessageToastCustom(
@@ -990,7 +1210,6 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
     if (!orden) return;
     const step = resolveCompletionPreStep(orden);
     if (step.type === 'BLOCKED') {
-      console.warn('[WO completion] Orden sin ID de origen:', orden);
       MessageToastCustom('warning', 'No se puede completar', step.reason);
       return;
     }
@@ -1007,23 +1226,36 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         createdByUserId: currentUserId,
         comments
       });
-      MessageToastCustom('success', 'Encuesta Registrada', `Calificación ${rating}/5 registrada.`);
+      MessageToastCustom(
+        'success',
+        'Encuesta Registrada',
+        `Calificación ${rating}/5 registrada.`
+      );
       setRegisterSurveyOpen(false);
       reload();
     } catch (e: any) {
-      MessageToastCustom('error', 'Error', e.message || 'No se pudo registrar la encuesta.');
+      MessageToastCustom(
+        'error',
+        'Error',
+        e.message || 'No se pudo registrar la encuesta.'
+      );
     } finally {
       setIsModalLoading(false);
     }
   };
 
   const renderStepper = (estado: string) => {
-    let activeIndex = getActiveStepIndex(estado, executionSubStep);
+    const isTechnicianAssigned = !!orden?.inspectorUsername;
+    let activeIndex = getActiveStepIndex(estado, executionSubStep, isTechnicianAssigned);
     if (activeIndex === 6 && orden?.idEncuesta) {
       activeIndex = 7;
     }
     return (
-      <div className="wo-stepper" role="progressbar" aria-label="Progreso de la Orden de Trabajo">
+      <div
+        className="wo-stepper"
+        role="progressbar"
+        aria-label="Progreso de la Orden de Trabajo"
+      >
         {STEPS.map((step, idx) => {
           const StepIcon = step.icon;
           const isCompleted = idx < activeIndex;
@@ -1064,11 +1296,12 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
     );
   };
 
-
-
   const renderStepContent = (estado: string) => {
     if (!orden) return null;
-    const stepIndex = getActiveStepIndex(estado, executionSubStep);
+
+    const isTechnicianAssigned = !!orden.inspectorUsername;
+
+    const stepIndex = getActiveStepIndex(estado, executionSubStep, isTechnicianAssigned);
 
     switch (stepIndex) {
       case 0:
@@ -1077,12 +1310,14 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
             <div className="wo-process-phase-actions">
               <Tooltip
                 content={
-                  orden.estado === 'NOTIFICADA' || orden.estado === 'PENDIENTE_ASIGNACION'
+                  orden.estado === 'NOTIFICADA' ||
+                    orden.estado === 'PENDIENTE_ASIGNACION'
                     ? 'De clic para recepcionar la orden de trabajo'
                     : 'La orden de trabajo ya no está en estado para recepcionar'
                 }
                 themeColor={
-                  orden.estado === 'NOTIFICADA' || orden.estado === 'PENDIENTE_ASIGNACION'
+                  orden.estado === 'NOTIFICADA' ||
+                    orden.estado === 'PENDIENTE_ASIGNACION'
                     ? 'info'
                     : 'error'
                 }
@@ -1110,8 +1345,6 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
       case 1:
         return (
           <>
-
-
             <div
               className="wo-process-info-banner wo-process-info-banner--warn"
               style={{ cursor: 'pointer' }}
@@ -1120,7 +1353,10 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
               <User size={16} />
               <div style={{ flex: 1 }}>
                 <strong>Asignación Pendiente</strong>
-                <span>Haz clic aquí o en el botón superior para asignar al Técnico Responsable de la orden de trabajo.</span>
+                <span>
+                  Haz clic aquí o en el botón superior para asignar al Técnico
+                  Responsable de la orden de trabajo.
+                </span>
               </div>
             </div>
             <WorkOrderInfoCard orden={orden} />
@@ -1130,8 +1366,13 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
               onSaveWorkersBatch={async (workers) => {
                 if (workers.length > 0) {
                   await handleSaveWorkersBatch(workers);
-                  const responsible = workers.find(w => w.isResponsible || w.roleId === 1) || workers[0];
-                  await handleAssignWorker(responsible.workerId, 'Asignación de personal y transición a estado ASIGNADA');
+                  const responsible =
+                    workers.find((w) => w.isResponsible || w.roleId === 1) ||
+                    workers[0];
+                  await handleAssignWorker(
+                    responsible.workerId,
+                    'Asignación de personal y transición a estado ASIGNADA'
+                  );
                 }
               }}
               isLoading={isModalLoading}
@@ -1200,7 +1441,10 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
                     <AlertTriangle size={16} />
                     <div>
                       <strong>Preparación Rechazada</strong>
-                      <span>Corrige las deficiencias y vuelve a iniciar la preparación de campo.</span>
+                      <span>
+                        Corrige las deficiencias y vuelve a iniciar la
+                        preparación de campo.
+                      </span>
                     </div>
                   </div>
                   <WorkOrderPhaseActionBtn
@@ -1230,7 +1474,10 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
       case 3:
         return (
           <>
-            <div className="wo-process-substep-tabs" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+            <div
+              className="wo-process-substep-tabs"
+              style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}
+            >
               <Button
                 variant={executionSubStep === 0 ? 'primary' : 'outline'}
                 onClick={() => setExecutionSubStep(0)}
@@ -1262,18 +1509,48 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
                   loading={isCompleting}
                 />
               )}
-              {(requiereInformeSolicitud || requiereInformeInstalacionSolicitud || !automationPolicy.isAuto('finishExecution')) && (
-                <WorkOrderPhaseActionBtn
-                  id="wo-btn-finish-exec-3"
-                  color={requiereInformeSolicitud || requiereInformeInstalacionSolicitud ? '#a855f7' : '#10b981'}
-                  bg={requiereInformeSolicitud || requiereInformeInstalacionSolicitud ? 'rgba(168,85,247,0.1)' : 'rgba(16,185,129,0.12)'}
-                  icon={(requiereInformeSolicitud || requiereInformeInstalacionSolicitud) ? <FileText size={18} /> : <Zap size={18} />}
-                  label={requiereInformeSolicitud ? 'Enviar Informe Técnico' : (requiereInformeInstalacionSolicitud ? 'Enviar Informe Instalación' : 'Finalizar Ejecución')}
-                  sublabel="Finalizar Ejecución - Por favor suba todas las evidencias de la orden antes de finalizar, asegúrese de que todo este correcto y terminado correctamente el trabajo en campo."
-                  onClick={handleFinishExec}
-                  loading={!(requiereInformeSolicitud || requiereInformeInstalacionSolicitud) && isFinishingExec}
-                />
-              )}
+              {(requiereInformeSolicitud ||
+                requiereInformeInstalacionSolicitud ||
+                !automationPolicy.isAuto('finishExecution')) && (
+                  <WorkOrderPhaseActionBtn
+                    id="wo-btn-finish-exec-3"
+                    color={
+                      requiereInformeSolicitud ||
+                        requiereInformeInstalacionSolicitud
+                        ? '#a855f7'
+                        : '#10b981'
+                    }
+                    bg={
+                      requiereInformeSolicitud ||
+                        requiereInformeInstalacionSolicitud
+                        ? 'rgba(168,85,247,0.1)'
+                        : 'rgba(16,185,129,0.12)'
+                    }
+                    icon={
+                      requiereInformeSolicitud ||
+                        requiereInformeInstalacionSolicitud ? (
+                        <FileText size={18} />
+                      ) : (
+                        <Zap size={18} />
+                      )
+                    }
+                    label={
+                      requiereInformeSolicitud
+                        ? 'Enviar Informe Técnico'
+                        : requiereInformeInstalacionSolicitud
+                          ? 'Enviar Informe Instalación'
+                          : 'Finalizar Ejecución'
+                    }
+                    sublabel="Finalizar Ejecución - Por favor suba todas las evidencias de la orden antes de finalizar, asegúrese de que todo este correcto y terminado correctamente el trabajo en campo."
+                    onClick={handleFinishExec}
+                    loading={
+                      !(
+                        requiereInformeSolicitud ||
+                        requiereInformeInstalacionSolicitud
+                      ) && isFinishingExec
+                    }
+                  />
+                )}
             </div>
 
             <WorkOrderInfoCard orden={orden} />
@@ -1293,7 +1570,15 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
               onRemoveCost={handleRemoveCost}
               isLoading={isModalLoading}
             />
-            <div className="wo-substep-nav" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem' }}>
+            <div
+              className="wo-substep-nav"
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '0.5rem',
+                marginTop: '1rem'
+              }}
+            >
               <Button
                 variant="primary"
                 onClick={() => setExecutionSubStep(1)}
@@ -1308,7 +1593,10 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
       case 4:
         return (
           <>
-            <div className="wo-process-substep-tabs" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+            <div
+              className="wo-process-substep-tabs"
+              style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}
+            >
               <Button
                 variant={executionSubStep === 0 ? 'primary' : 'outline'}
                 onClick={() => setExecutionSubStep(0)}
@@ -1340,18 +1628,48 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
                   loading={isCompleting}
                 />
               )}
-              {(requiereInformeSolicitud || requiereInformeInstalacionSolicitud || !automationPolicy.isAuto('finishExecution')) && (
-                <WorkOrderPhaseActionBtn
-                  id="wo-btn-finish-exec-4"
-                  color={requiereInformeSolicitud || requiereInformeInstalacionSolicitud ? '#a855f7' : '#10b981'}
-                  bg={requiereInformeSolicitud || requiereInformeInstalacionSolicitud ? 'rgba(168,85,247,0.1)' : 'rgba(16,185,129,0.12)'}
-                  icon={(requiereInformeSolicitud || requiereInformeInstalacionSolicitud) ? <FileText size={18} /> : <Zap size={18} />}
-                  label={requiereInformeSolicitud ? 'Enviar Informe Técnico' : (requiereInformeInstalacionSolicitud ? 'Enviar Informe Instalación' : 'Finalizar Ejecución')}
-                  sublabel="Fase 4 — Marcar trabajo técnico completado"
-                  onClick={handleFinishExec}
-                  loading={!(requiereInformeSolicitud || requiereInformeInstalacionSolicitud) && isFinishingExec}
-                />
-              )}
+              {(requiereInformeSolicitud ||
+                requiereInformeInstalacionSolicitud ||
+                !automationPolicy.isAuto('finishExecution')) && (
+                  <WorkOrderPhaseActionBtn
+                    id="wo-btn-finish-exec-4"
+                    color={
+                      requiereInformeSolicitud ||
+                        requiereInformeInstalacionSolicitud
+                        ? '#a855f7'
+                        : '#10b981'
+                    }
+                    bg={
+                      requiereInformeSolicitud ||
+                        requiereInformeInstalacionSolicitud
+                        ? 'rgba(168,85,247,0.1)'
+                        : 'rgba(16,185,129,0.12)'
+                    }
+                    icon={
+                      requiereInformeSolicitud ||
+                        requiereInformeInstalacionSolicitud ? (
+                        <FileText size={18} />
+                      ) : (
+                        <Zap size={18} />
+                      )
+                    }
+                    label={
+                      requiereInformeSolicitud
+                        ? 'Enviar Informe Técnico'
+                        : requiereInformeInstalacionSolicitud
+                          ? 'Enviar Informe Instalación'
+                          : 'Finalizar Ejecución'
+                    }
+                    sublabel="Fase 4 — Marcar trabajo técnico completado"
+                    onClick={handleFinishExec}
+                    loading={
+                      !(
+                        requiereInformeSolicitud ||
+                        requiereInformeInstalacionSolicitud
+                      ) && isFinishingExec
+                    }
+                  />
+                )}
             </div>
 
             <WorkOrderInfoCard orden={orden} />
@@ -1360,7 +1678,15 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
               onAddAttachment={handleAddAttachment}
               isLoading={isModalLoading}
             />
-            <div className="wo-substep-nav" style={{ display: 'flex', justifyContent: 'flex-start', gap: '0.5rem', marginTop: '1rem' }}>
+            <div
+              className="wo-substep-nav"
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-start',
+                gap: '0.5rem',
+                marginTop: '1rem'
+              }}
+            >
               <Button
                 variant="outline"
                 onClick={() => setExecutionSubStep(0)}
@@ -1376,17 +1702,18 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         return (
           <>
             <div className="wo-process-phase-actions">
-              {!orden.idControl && !automationPolicy.isAuto('qualityControl') && (
-                <WorkOrderPhaseActionBtn
-                  id="wo-btn-quality"
-                  color="#ec4899"
-                  bg="rgba(236,72,153,0.1)"
-                  icon={<ShieldCheck size={18} />}
-                  label="Emitir Control de Calidad"
-                  sublabel="Fase 5 — Dictamen técnico"
-                  onClick={() => setQualityControlOpen(true)}
-                />
-              )}
+              {!orden.idControl &&
+                !automationPolicy.isAuto('qualityControl') && (
+                  <WorkOrderPhaseActionBtn
+                    id="wo-btn-quality"
+                    color="#ec4899"
+                    bg="rgba(236,72,153,0.1)"
+                    icon={<ShieldCheck size={18} />}
+                    label="Emitir Control de Calidad"
+                    sublabel="Fase 5 — Dictamen técnico"
+                    onClick={() => setQualityControlOpen(true)}
+                  />
+                )}
               <WorkOrderPhaseActionBtn
                 id="wo-btn-complete"
                 color="#10b981"
@@ -1399,8 +1726,14 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
               />
             </div>
             <WorkOrderInfoCard orden={orden} />
-            <WorkOrderWorkersCard codigoOrden={orden.codigoOrden} personalAsignado={orden.personalAsignado ?? []} />
-            <WorkOrderMaterialsCard materiales={orden.materiales ?? []} costosAdicionales={orden.costosAdicionales ?? []} />
+            <WorkOrderWorkersCard
+              codigoOrden={orden.codigoOrden}
+              personalAsignado={orden.personalAsignado ?? []}
+            />
+            <WorkOrderMaterialsCard
+              materiales={orden.materiales ?? []}
+              costosAdicionales={orden.costosAdicionales ?? []}
+            />
             <WorkOrderAttachmentsCard adjuntos={orden.adjuntos ?? []} />
             <WorkOrderQualityCard orden={orden} />
           </>
@@ -1437,14 +1770,22 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
                   <Zap size={16} />
                   <div>
                     <strong>Proceso Completado ✓</strong>
-                    <span>Encuesta de satisfacción registrada. La OT está cerrada.</span>
+                    <span>
+                      Encuesta de satisfacción registrada. La OT está cerrada.
+                    </span>
                   </div>
                 </div>
               )}
             </div>
             <WorkOrderInfoCard orden={orden} />
-            <WorkOrderWorkersCard codigoOrden={orden.codigoOrden} personalAsignado={orden.personalAsignado ?? []} />
-            <WorkOrderMaterialsCard materiales={orden.materiales ?? []} costosAdicionales={orden.costosAdicionales ?? []} />
+            <WorkOrderWorkersCard
+              codigoOrden={orden.codigoOrden}
+              personalAsignado={orden.personalAsignado ?? []}
+            />
+            <WorkOrderMaterialsCard
+              materiales={orden.materiales ?? []}
+              costosAdicionales={orden.costosAdicionales ?? []}
+            />
             <WorkOrderAttachmentsCard adjuntos={orden.adjuntos ?? []} />
             <WorkOrderQualityCard orden={orden} />
             <WorkOrderSatisfactionCard orden={orden} />
@@ -1471,7 +1812,11 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
       {!currentCode && !isLoading && !isEmbedded && (
         <div className="wo-process-empty">
           <EmptyState
-            icon={<div className="wo-process-empty__icon"><Search size={48} opacity={0.3} /></div>}
+            icon={
+              <div className="wo-process-empty__icon">
+                <Search size={48} opacity={0.3} />
+              </div>
+            }
             message="No se ha especificado una Orden de Trabajo"
             description="Por favor, usa la vista de 'Buscar OT' o 'Ver todas las OTs' para procesar una orden."
           />
@@ -1482,17 +1827,17 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
           <AlertTriangle size={40} />
           <h3>No se pudo cargar la OT</h3>
           <p>{error}</p>
-          <Button variant="primary" onClick={reload}>Reintentar</Button>
+          <Button variant="primary" onClick={reload}>
+            Reintentar
+          </Button>
         </div>
       )}
       {isLoading && (
-        <div className='loading'>
+        <div className="loading">
           <CircularProgress label="Cargando orden de trabajo..." />
         </div>
       )}
-      {!isLoading && isAutoProcessing && (
-        <AutoProcessingView />
-      )}
+      {!isLoading && isAutoProcessing && <AutoProcessingView />}
       {!isLoading && !isAutoProcessing && !error && orden && (
         <div className="wo-process-container">
           <div className="wo-process-main-col">
@@ -1503,35 +1848,66 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
                 className={`wo-process-step-guide ${orden.estado === 'PENDIENTE' ? 'wo-process-step-guide--clickable' : ''}`}
                 role="status"
                 aria-live="polite"
-                onClick={orden.estado === 'PENDIENTE' ? () => setAssignWorkerOpen(true) : undefined}
-                title={orden.estado === 'PENDIENTE' ? 'Haz clic para asignar el técnico responsable' : undefined}
+                onClick={
+                  orden.estado === 'PENDIENTE'
+                    ? () => setAssignWorkerOpen(true)
+                    : undefined
+                }
+                title={
+                  orden.estado === 'PENDIENTE'
+                    ? 'Haz clic para asignar el técnico responsable'
+                    : undefined
+                }
               >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-                  <span className="wo-process-step-guide__phase">{currentStepGuide.phase}</span>
-                  <strong className="wo-process-step-guide__title">{currentStepGuide.title}</strong>
-                  <span className="wo-process-step-guide__action">{currentStepGuide.action}</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.15rem'
+                  }}
+                >
+                  <span className="wo-process-step-guide__phase">
+                    {currentStepGuide.phase}
+                  </span>
+                  <strong className="wo-process-step-guide__title">
+                    {currentStepGuide.title}
+                  </strong>
+                  <span className="wo-process-step-guide__action">
+                    {currentStepGuide.action}
+                  </span>
                 </div>
-                {orden.estado === 'PENDIENTE' && (
-                  <Button
-                    size="xs"
-                    variant="primary"
-                    style={{ background: '#6366f1', borderColor: '#6366f1', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setAssignWorkerOpen(true);
-                    }}
-                  >
-                    <UserCheck size={14} />
-                    Asignar Técnico
-                  </Button>
-                )}
+                {orden.estado === 'PENDIENTE' ||
+                  (orden.inspectorUsername === null && (
+                    <Button
+                      size="xs"
+                      variant="primary"
+                      style={{
+                        background: '#6366f1',
+                        borderColor: '#6366f1',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        flexShrink: 0
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setAssignWorkerOpen(true);
+                      }}
+                    >
+                      <UserCheck size={14} />
+                      Asignar Técnico
+                    </Button>
+                  ))}
               </div>
             )}
             {renderStepContent(orden.estado ?? '')}
           </div>
           <div className="wo-process-sidebar-col">
             <WorkOrderMetricsCard orden={orden} />
-            <WorkOrderTimelineCard historial={tracking?.historial ?? null} title="Historial de Estados" />
+            <WorkOrderTimelineCard
+              historial={tracking?.historial ?? null}
+              title="Historial de Estados"
+            />
           </div>
         </div>
       )}
@@ -1636,9 +2012,13 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({ is
         header={
           <div className="wo-process-header">
             <div className="wo-process-header__info">
-              <h2 className="wo-process-header__title">Proceso de Órdenes de Trabajo</h2>
+              <h2 className="wo-process-header__title">
+                Proceso de Órdenes de Trabajo
+              </h2>
               <p className="wo-process-header__subtitle">
-                {currentCode ? `Procesando OT: ${currentCode}` : 'Avanza cada fase del flujo de la orden de trabajo'}
+                {currentCode
+                  ? `Procesando OT: ${currentCode}`
+                  : 'Avanza cada fase del flujo de la orden de trabajo'}
               </p>
             </div>
 

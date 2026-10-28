@@ -6,7 +6,7 @@
  * OCP: new filters → extend AllWorkOrderFilterState without touching the page.
  */
 import React from 'react';
-import { Search, RefreshCw, X, FilePlus2 } from 'lucide-react';
+import { Search, RefreshCw, X, FilePlus2, LayoutDashboard } from 'lucide-react';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import type { AllWorkOrderFilterState, AllWorkOrderSortKey } from '../hooks/useAllWorkOrdersViewModel';
 import { Input } from '@/shared/presentation/components/Input/Input';
@@ -56,6 +56,7 @@ interface AllWorkOrderToolbarProps {
   onSortChange: (key: AllWorkOrderSortKey) => void;
   onRefresh: () => void;
   onNuevaOT: () => void;
+  onDashboard?: () => void;
   onSearchSubmit?: () => void;
   isLoading?: boolean;
 }
@@ -69,6 +70,7 @@ export const AllWorkOrderToolbar: React.FC<AllWorkOrderToolbarProps> = ({
   onSortChange,
   onRefresh,
   onNuevaOT,
+  onDashboard,
   onSearchSubmit,
   isLoading = false,
 }) => {
@@ -200,6 +202,24 @@ export const AllWorkOrderToolbar: React.FC<AllWorkOrderToolbarProps> = ({
             <RefreshCw size={14} />
           </Button>
         </Tooltip>
+
+        {/* Dashboard */}
+        {onDashboard && (
+          <Tooltip
+            content='Ver Dashboard y KPIs'
+            position='top'
+            followCursor={false}
+          >
+            <Button
+              id="btn-wo-all-dashboard"
+              onClick={onDashboard}
+              variant='outline'
+              size='sm'
+            >
+              <LayoutDashboard size={14} /> Dashboard
+            </Button>
+          </Tooltip>
+        )}
 
         {/* Nueva OT */}
         <Tooltip

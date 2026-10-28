@@ -5,7 +5,8 @@ import {
   Heart,
   Wrench,
   FilePlus2,
-  List as ListIcon
+  List as ListIcon,
+  LayoutDashboard
 } from 'lucide-react';
 import { MdOutlineWaterDrop } from 'react-icons/md';
 import { FaWheelchair } from 'react-icons/fa';
@@ -62,6 +63,11 @@ export const getTramitesSection = (): NavSection => ({
           icon: <Wrench size={18} />,
           label: 'Órdenes de Trabajo',
           subItems: [
+            {
+              icon: <LayoutDashboard size={16} />,
+              label: 'Dashboard de OTs',
+              to: '/work-orders/dashboard'
+            },
             {
               icon: <FilePlus2 size={16} />,
               label: 'Nueva OT',

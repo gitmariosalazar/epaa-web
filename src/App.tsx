@@ -83,7 +83,7 @@ import { SolicitudesTrackingPage } from '@/modules/processes/solicitudes/present
 import { SolicitudesListPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudesListPage';
 import { SolicitudDetailPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudDetailPage';
 // Work Orders Module
-import { WorkOrdersProcessPage, WorkOrderCreatePage, AllWorkOrdersListPage, WorkOrderDetailPage, WorkOrderSearchPage } from '@/modules/work-orders/presentation/pages';
+import { WorkOrdersProcessPage, WorkOrderCreatePage, AllWorkOrdersListPage, WorkOrderDetailPage, WorkOrderSearchPage, WorkOrdersDashboardPage } from '@/modules/work-orders/presentation/pages';
 
 // Network Operations Module
 import { NetworkOperationsProvider } from '@/modules/network-operations/presentation/context/NetworkOperationsContext';
@@ -172,8 +172,9 @@ const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
 
   // Aseguramos que sea un array de strings o de objetos y extraemos el nombre del rol normalizado
   const rawRoles = Array.isArray(user?.roles) ? user?.roles : [user?.roles];
-  const userRoles = rawRoles.filter(Boolean).flatMap((r: any) => {
-    const name = typeof r === 'object' && r.name ? r.name : String(r);
+  const userRoles = rawRoles.filter(Boolean).flatMap((r: unknown) => {
+    const roleObj = typeof r === 'object' && r !== null ? (r as { name?: string }) : null;
+    const name = roleObj?.name ? roleObj.name : String(r);
     const upper = name.toUpperCase();
 
     // Mapeamos 'SUPER ADMINISTRADOR' para compatibilidad
@@ -469,6 +470,10 @@ function App() {
                   <Route path="/notifications" element={<NotificationsPage />} />
 
                   {/* Módulo de Órdenes de Trabajo */}
+                  <Route
+                    path="/work-orders/dashboard"
+                    element={<WorkOrdersDashboardPage />}
+                  />
                   <Route
                     path="/work-orders/list"
                     element={<AllWorkOrdersListPage />}

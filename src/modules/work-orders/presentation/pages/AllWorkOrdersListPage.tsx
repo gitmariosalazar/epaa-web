@@ -234,6 +234,7 @@ export const AllWorkOrdersListPage: React.FC = () => {
             onFilterChange={handleFilterChange}
             onSortChange={(v) => handleSortChange(v as AllWorkOrderSortKey)}
             onRefresh={refresh}
+            onDashboard={() => navigate('/work-orders/dashboard')}
             onNuevaOT={() => navigate('/work-orders/create')}
             onSearchSubmit={handleImmediateSearch}
             isLoading={isSearching}

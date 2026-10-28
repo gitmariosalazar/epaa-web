@@ -6,3 +6,4 @@ export { WorkOrderTrackingPage }   from './WorkOrderTrackingPage';
 export { WorkOrdersProcessPage }   from './WorkOrdersProcessPage';
 export { WorkOrderCreatePage }     from './WorkOrderCreatePage';
 export { WorkOrderSearchPage }     from './WorkOrderSearchPage';
+export { WorkOrdersDashboardPage }  from './WorkOrdersDashboardPage';
