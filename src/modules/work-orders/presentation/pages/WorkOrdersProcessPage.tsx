@@ -502,14 +502,14 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
     if (isExecutionState(estado)) {
       if (executionSubStep === 0) {
         return {
-          phase: 'Fase 4 - Ejecución',
+          phase: 'Ejecución',
           title: 'Personal y Materiales',
           action:
             'Paso 1: Asigna personal de apoyo y registra materiales o costos adicionales consumidos.'
         };
       }
       return {
-        phase: 'Fase 4 - Ejecución',
+        phase: 'Ejecución',
         title: 'Evidencias de Campo',
         action:
           requiereInformeSolicitud || requiereInformeInstalacionSolicitud
@@ -1328,7 +1328,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
                   bg="rgba(59,130,246,0.1)"
                   icon={<Inbox size={18} />}
                   label="Recepcionar Orden de Trabajo"
-                  sublabel="Fase 2 — Confirmar recepción operativa"
+                  sublabel="Confirmar recepción operativa"
                   onClick={handleReceive}
                   loading={isReceiving}
                   disabled={
@@ -1391,7 +1391,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
                   bg="rgba(139,92,246,0.1)"
                   icon={<Play size={18} />}
                   label="Iniciar Preparación de Campo"
-                  sublabel="Fase 3 — Checklist de alistamiento"
+                  sublabel="Checklist de alistamiento"
                   onClick={handleStartPrep}
                   loading={isStartingPrep}
                 />
@@ -1405,7 +1405,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
                       bg="rgba(139,92,246,0.1)"
                       icon={<ClipboardCheck size={18} />}
                       label="Registrar Inspección de Preparación"
-                      sublabel="Fase 3 — Checklist de preparación"
+                      sublabel="Checklist de preparación"
                       onClick={() => setChecklistOpen(true)}
                     />
                   )}
@@ -1417,7 +1417,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
                         bg="rgba(16,185,129,0.1)"
                         icon={<ShieldCheck size={18} />}
                         label="Aprobar Inspección"
-                        sublabel="Fase 3 — Pasar a ejecución"
+                        sublabel="Pasar a ejecución"
                         onClick={() => handleResolveChecklist(true)}
                         loading={isResolvingChecklist}
                       />
@@ -1427,7 +1427,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
                         bg="rgba(239,68,68,0.08)"
                         icon={<AlertTriangle size={18} />}
                         label="Rechazar Inspección"
-                        sublabel="Fase 3 — Requiere correcciones"
+                        sublabel="Requiere correcciones"
                         onClick={() => handleResolveChecklist(false)}
                         loading={isResolvingChecklist}
                       />
@@ -1453,7 +1453,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
                     bg="rgba(245,158,11,0.1)"
                     icon={<Play size={18} />}
                     label="Reiniciar Preparación"
-                    sublabel="Fase 3 — Volver a preparación de campo"
+                    sublabel="Volver a preparación de campo"
                     onClick={handleRestartPrep}
                     loading={isRestartingPrep}
                   />
@@ -1660,7 +1660,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
                           ? 'Enviar Informe Instalación'
                           : 'Finalizar Ejecución'
                     }
-                    sublabel="Fase 4 — Marcar trabajo técnico completado"
+                    sublabel="Marcar trabajo técnico completado"
                     onClick={handleFinishExec}
                     loading={
                       !(
@@ -1710,7 +1710,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
                     bg="rgba(236,72,153,0.1)"
                     icon={<ShieldCheck size={18} />}
                     label="Emitir Control de Calidad"
-                    sublabel="Fase 5 — Dictamen técnico"
+                    sublabel="Dictamen técnico"
                     onClick={() => setQualityControlOpen(true)}
                   />
                 )}
@@ -1720,7 +1720,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
                 bg="rgba(16,185,129,0.1)"
                 icon={<Zap size={18} />}
                 label="Completar Orden de Trabajo"
-                sublabel="Fase 6 — Cierre administrativo"
+                sublabel="Cierre administrativo"
                 onClick={handleCompleteClick}
                 loading={isCompleting}
               />
@@ -1750,7 +1750,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
                   bg="rgba(236,72,153,0.1)"
                   icon={<ShieldCheck size={18} />}
                   label="Emitir Control de Calidad"
-                  sublabel="Fase 5 — Dictamen técnico"
+                  sublabel="Dictamen técnico"
                   onClick={() => setQualityControlOpen(true)}
                 />
               )}
@@ -1761,7 +1761,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
                   bg="rgba(245,158,11,0.1)"
                   icon={<Star size={18} />}
                   label="Registrar Encuesta de Satisfacción"
-                  sublabel="Fase 6 — Cierre con el cliente"
+                  sublabel="Cierre con el cliente"
                   onClick={() => setRegisterSurveyOpen(true)}
                 />
               )}

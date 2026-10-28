@@ -1144,9 +1144,6 @@ export const WorkOrderDetailPage: React.FC = () => {
 
   const isTerminal = ESTADOS_TERMINAL.has(orden.estado ?? "");
 
-  console.log("ESTADO: ", orden);
-
-
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <PageLayout
@@ -1203,7 +1200,7 @@ export const WorkOrderDetailPage: React.FC = () => {
                   bg="rgba(59,130,246,0.1)"
                   icon={<Inbox size={18} />}
                   label="Recepcionar Orden de Trabajo"
-                  sublabel="Fase 2 — Confirmar recepción operativa"
+                  sublabel="Confirmar recepción operativa"
                   onClick={handleReceive}
                   loading={isReceiving}
                 />
@@ -1217,7 +1214,7 @@ export const WorkOrderDetailPage: React.FC = () => {
                   bg="rgba(59,130,246,0.08)"
                   icon={<User size={18} />}
                   label="Asignar Técnico Responsable"
-                  sublabel="Fase 2 — Asignación de personal"
+                  sublabel="Asignación de personal"
                   onClick={() => setAssignWorkerOpen(true)}
                 />
               )}
@@ -1230,7 +1227,7 @@ export const WorkOrderDetailPage: React.FC = () => {
                   bg="rgba(139,92,246,0.1)"
                   icon={<Play size={18} />}
                   label="Iniciar Preparación de Campo"
-                  sublabel="Fase 3 — Checklist de alistamiento"
+                  sublabel="Checklist de alistamiento"
                   onClick={handleStartPrep}
                   loading={isStartingPrep}
                 />
@@ -1246,7 +1243,7 @@ export const WorkOrderDetailPage: React.FC = () => {
                       bg="rgba(139,92,246,0.1)"
                       icon={<ClipboardCheck size={18} />}
                       label="Registrar Inspección de Preparación"
-                      sublabel="Fase 3 — Checklist de preparación"
+                      sublabel="Checklist de preparación"
                       onClick={() => setChecklistOpen(true)}
                     />
                   )}
@@ -1258,7 +1255,7 @@ export const WorkOrderDetailPage: React.FC = () => {
                         bg="rgba(16,185,129,0.1)"
                         icon={<ShieldCheck size={18} />}
                         label="Aprobar Inspección"
-                        sublabel="Fase 3 — Pasar a ejecución"
+                        sublabel="Pasar a ejecución"
                         onClick={() => handleResolveChecklist(true)}
                         loading={isResolvingChecklist}
                       />
@@ -1268,7 +1265,7 @@ export const WorkOrderDetailPage: React.FC = () => {
                         bg="rgba(239,68,68,0.08)"
                         icon={<AlertTriangle size={18} />}
                         label="Rechazar Inspección"
-                        sublabel="Fase 3 — Requiere correcciones"
+                        sublabel="Requiere correcciones"
                         onClick={() => handleResolveChecklist(false)}
                         loading={isResolvingChecklist}
                       />
@@ -1296,7 +1293,7 @@ export const WorkOrderDetailPage: React.FC = () => {
                     bg="rgba(245,158,11,0.1)"
                     icon={<Play size={18} />}
                     label="Reiniciar Preparación"
-                    sublabel="Fase 3 — Volver a preparación de campo"
+                    sublabel="Volver a preparación de campo"
                     onClick={handleRestartPrep}
                     loading={isRestartingPrep}
                   />
@@ -1313,7 +1310,7 @@ export const WorkOrderDetailPage: React.FC = () => {
                       bg="rgba(16,185,129,0.12)"
                       icon={<Zap size={18} />}
                       label="Completar Orden de Trabajo"
-                      sublabel="Fase 4 — Finalización y Cierre de la OT"
+                      sublabel="Finalización y Cierre de la OT (Opcionalmente, agregue materiales, costos o evidencias antes de cerrar)"
                       onClick={handleCompleteClick}
                       loading={isCompleting}
                     />
@@ -1341,8 +1338,8 @@ export const WorkOrderDetailPage: React.FC = () => {
                       }
                       sublabel={
                         esInspeccionAcometida
-                          ? "Fase 4 — Primero registrar informe técnico"
-                          : "Fase 4 — Marcar trabajo técnico completado"
+                          ? "Primero registrar informe técnico"
+                          : "Marcar trabajo técnico completado"
                       }
                       onClick={handleFinishExec}
                       loading={isFinishingExec}
@@ -1361,7 +1358,7 @@ export const WorkOrderDetailPage: React.FC = () => {
                       bg="rgba(236,72,153,0.1)"
                       icon={<ShieldCheck size={18} />}
                       label="Emitir Control de Calidad"
-                      sublabel="Fase 5 — Dictamen técnico"
+                      sublabel="Dictamen técnico"
                       onClick={() => setQualityControlOpen(true)}
                     />
                   )}
@@ -1371,7 +1368,7 @@ export const WorkOrderDetailPage: React.FC = () => {
                     bg="rgba(16,185,129,0.1)"
                     icon={<Zap size={18} />}
                     label="Completar Orden de Trabajo"
-                    sublabel="Fase 6 — Cierre administrativo"
+                    sublabel="Cierre administrativo"
                     onClick={handleCompleteClick}
                     loading={isCompleting}
                   />
@@ -1386,7 +1383,7 @@ export const WorkOrderDetailPage: React.FC = () => {
                   bg="rgba(245,158,11,0.1)"
                   icon={<Star size={18} />}
                   label="Registrar Encuesta de Satisfacción"
-                  sublabel="Fase 6 — Cierre con el cliente"
+                  sublabel="Cierre con el cliente"
                   onClick={() => setRegisterSurveyOpen(true)}
                 />
               )}
