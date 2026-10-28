@@ -11,7 +11,7 @@
 .wo-list {
   display: flex;
   flex-direction: column;
-  gap: 0.625rem;
+  gap: 0.325rem;
 }
 
 /* ── Empty state ──────────────────────────────────────────────── */
@@ -460,7 +460,7 @@
   border: 1px solid var(--border-color);
   border-left: 3px solid var(--wo-card-accent, var(--accent));
   border-radius: 12px;
-  padding: 1rem 1.1rem;
+  padding: 0.5rem 0.5rem;
   transition:
     box-shadow 0.2s,
     transform 0.15s,
@@ -493,7 +493,7 @@
 .wo-list-card__main {
   display: flex;
   align-items: flex-start;
-  gap: 0.9rem;
+  gap: 0.7rem;
   position: relative;
 }
 

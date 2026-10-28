@@ -1476,7 +1476,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
           <>
             <div
               className="wo-process-substep-tabs"
-              style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}
+              style={{ display: 'flex', gap: '0.5rem', marginBottom: '0rem' }}
             >
               <Button
                 variant={executionSubStep === 0 ? 'primary' : 'outline'}
@@ -1595,7 +1595,7 @@ export const WorkOrdersProcessPage: React.FC<WorkOrdersProcessPageProps> = ({
           <>
             <div
               className="wo-process-substep-tabs"
-              style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}
+              style={{ display: 'flex', gap: '0.5rem', marginBottom: '0rem' }}
             >
               <Button
                 variant={executionSubStep === 0 ? 'primary' : 'outline'}
