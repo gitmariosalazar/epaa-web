@@ -136,10 +136,10 @@ const ESTADOS_TERMINAL = new Set([
   "INSPECCION_COMPLETADA",
 ]);
 
-const isExecutionState = (status?: string | null) =>
+const isExecutionState = (status?: string | null, isTechnicianAssigned?: boolean) =>
   ["EN_PROCESO", "EN_PROCESO_INSPECCION", "EN_PROCESO_INSTALACION"].includes(
     status ?? ""
-  );
+  ) && isTechnicianAssigned == true;
 
 const isExecutedState = (status?: string | null) =>
   ["EJECUTADA", "INSPECCION_EJECUTADA", "INSTALACION_EJECUTADA"].includes(
@@ -1144,6 +1144,9 @@ export const WorkOrderDetailPage: React.FC = () => {
 
   const isTerminal = ESTADOS_TERMINAL.has(orden.estado ?? "");
 
+  console.log("ESTADO: ", orden);
+
+
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <PageLayout
@@ -1207,7 +1210,7 @@ export const WorkOrderDetailPage: React.FC = () => {
               )}
 
               {/* Fase 2: Asignar técnico responsable */}
-              {orden.estado === "PENDIENTE" && (
+              {orden.estado === "PENDIENTE" || orden.inspectorUsername == null && (
                 <WorkOrderPhaseActionBtn
                   id="wo-btn-assign-worker"
                   color="#3b82f6"
@@ -1301,7 +1304,7 @@ export const WorkOrderDetailPage: React.FC = () => {
               )}
 
               {/* Fase 4: Acciones durante ejecución */}
-              {isExecutionState(orden.estado) && (
+              {isExecutionState(orden.estado, orden.inspectorUsername !== null) && (
                 <>
                   {automationPolicy.isAuto("finishExecution") && (
                     <WorkOrderPhaseActionBtn
