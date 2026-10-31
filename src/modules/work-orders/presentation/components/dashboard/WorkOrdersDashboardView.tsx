@@ -68,7 +68,7 @@ export const WorkOrdersDashboardView: React.FC<WorkOrdersDashboardViewProps> = (
   );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
       {/* Top Controls: Tabs & Search Filter */}
       <div className="wo-dashboard__header-bar">
         <Tabs<DashboardTabKey>

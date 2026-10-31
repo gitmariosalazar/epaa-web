@@ -8,8 +8,49 @@ export interface Coordinate {
 }
 
 /**
+ * Tries to extract coordinates from a GeoJSON Point object or serialized JSON string.
+ * GeoJSON standard order: [longitude, latitude]
+ */
+function parseGeoJSONPoint(input: unknown): Coordinate | null {
+  if (!input) return null;
+
+  let obj: any = input;
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
+      return null;
+    }
+    try {
+      obj = JSON.parse(trimmed);
+    } catch {
+      return null;
+    }
+  }
+
+  if (obj && typeof obj === 'object') {
+    // Standard GeoJSON Point: { type: "Point", coordinates: [lng, lat] }
+    if (Array.isArray(obj.coordinates) && obj.coordinates.length >= 2) {
+      const lng = Number(obj.coordinates[0]);
+      const lat = Number(obj.coordinates[1]);
+      if (!isNaN(lat) && !isNaN(lng) && !(lat === 0 && lng === 0)) {
+        return { lat, lng };
+      }
+    }
+
+    // Direct { lat, lng } or { latitude, longitude } properties
+    const lat = Number(obj.lat ?? obj.latitude);
+    const lng = Number(obj.lng ?? obj.longitude);
+    if (!isNaN(lat) && !isNaN(lng) && !(lat === 0 && lng === 0)) {
+      return { lat, lng };
+    }
+  }
+
+  return null;
+}
+
+/**
  * Decodes a PostGIS EWKB (Extended Well-Known Binary) Point in Hex format
- * to a Latitude/Longitude coordinate object.
+ * OR a GeoJSON Point (as an object or serialized JSON string) to a Latitude/Longitude coordinate object.
  *
  * EWKB Format:
  * [1 byte]: Endianness (0x01 = Little Endian, 0x00 = Big Endian)
@@ -18,11 +59,20 @@ export interface Coordinate {
  * [8 bytes]: Double X (Longitude)
  * [8 bytes]: Double Y (Latitude)
  *
- * @param hex The hexadecimal EWKB string
+ * @param hex The hexadecimal EWKB string, GeoJSON object or serialized JSON
  * @returns Coordinate object or null if invalid
  */
-export function decodeEWKBPoint(hex: string | null): Coordinate | null {
-  if (!hex || typeof hex !== 'string' || hex.length < 50) return null;
+export function decodeEWKBPoint(hex: unknown): Coordinate | null {
+  if (!hex) return null;
+
+  // 1. Try GeoJSON first (either JS object or JSON string)
+  const geoJsonCoord = parseGeoJSONPoint(hex);
+  if (geoJsonCoord) {
+    return geoJsonCoord;
+  }
+
+  // 2. Fall back to standard EWKB Hex decoding
+  if (typeof hex !== 'string' || hex.length < 50) return null;
 
   try {
     // Remove potential whitespace or 0x prefix

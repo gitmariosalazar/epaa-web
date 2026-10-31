@@ -77,7 +77,7 @@ export const TechniciansAndSlaTab: React.FC<TechniciansAndSlaTabProps> = ({
         </div>
 
         {filteredTechs.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '0.5rem' }}>
             {filteredTechs.map((t) => {
               const sla = t.tasaCumplimientoSlaPct ?? 0;
               const initials = t.nombreTecnico
@@ -97,18 +97,18 @@ export const TechniciansAndSlaTab: React.FC<TechniciansAndSlaTabProps> = ({
                     padding: '1rem',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.75rem'
+                    gap: '0.5rem'
                   }}
                 >
                   {/* Header info */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <div className="wo-avatar-badge">{initials || 'T'}</div>
                       <div>
-                        <h4 style={{ margin: 0, fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-main)' }}>
-                          {t.nombreTecnico}
+                        <h4 style={{ margin: 0, fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                          {t.nombreTecnico.toUpperCase()}
                         </h4>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
                           Cédula: {t.cedula || 'S/N'} • Ext: {t.telefonoInterno || 'N/A'}
                         </span>
                       </div>
@@ -162,11 +162,11 @@ export const TechniciansAndSlaTab: React.FC<TechniciansAndSlaTabProps> = ({
 
                   {/* Monthly totals and field hours */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                    <span>
+                    <span style={{ fontSize: '0.625rem' }}>
                       Completadas este mes: <strong style={{ color: '#059669' }}>{t.completadasEsteMes}</strong> ({t.totalCompletadas} históricas)
                     </span>
                     {t.horasPromedioEnCampo !== null && (
-                      <span>
+                      <span style={{ fontSize: '0.625rem' }}>
                         Promedio en campo: <strong>{t.horasPromedioEnCampo.toFixed(1)} hrs</strong>
                       </span>
                     )}

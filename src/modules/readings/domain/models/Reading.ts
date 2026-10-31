@@ -1,3 +1,5 @@
+import type { ReadingHistory } from './ReadingHistory';
+
 export interface ReadingResponse {
   readingId: number;
   connectionId: string;
@@ -26,6 +28,8 @@ export interface PendingReadingConnection {
   cardId: string;
   rateName: string;
   averageConsumption: number;
+  locationConnection?: { lat: number; lng: number } | null;
+  lastReading?: ReadingHistory | null;
 }
 
 export interface TakenReadingConnection {

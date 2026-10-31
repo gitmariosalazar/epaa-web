@@ -34,7 +34,7 @@ import { ReadingHistoryTable } from '@/modules/readings/presentation/components/
 import type { ReadingHistory } from '@/modules/readings/domain/models/ReadingHistory';
 import { Table, type Column } from '@/shared/presentation/components/Table/Table';
 import type { HistoryMeters } from '../../domain/models/Connection';
-import { decodeEWKBPoint } from '@/shared/utils/geoUtils';
+import { decodeEWKBPoint, type Coordinate } from '@/shared/utils/geoUtils';
 import './ConnectionDetailModal.css';
 import { IoMdPhotos } from 'react-icons/io';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
@@ -272,51 +272,67 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
       <div id="section-general" className="connection-section-card connection-general-grid">
         <div className="connection-info-column">
           <h3 className="connection-section-title">
-            <Info size={18} /> Información Principal
+            <span className="connection-section-icon">
+              <Info size={18} />
+            </span>
+            Información Principal
           </h3>
           <div className="connection-data-grid">
-            <strong className="connection-data-label">C. Catastral:</strong>
-            <span>{connectionData.connectionCadastralKey || '-'}</span>
+            <strong className="connection-data-label">C. Catastral</strong>
+            <span className="connection-data-value">{connectionData.connectionCadastralKey || '—'}</span>
 
-            <strong className="connection-data-label">Cuenta:</strong>
-            <span>{connectionData.connectionAccount || '-'}</span>
+            <strong className="connection-data-label">Cuenta</strong>
+            <span className="connection-data-value">{connectionData.connectionAccount || '—'}</span>
 
-            <strong className="connection-data-label">Medidor:</strong>
-            <span>{connectionData.connectionMeterNumber || '-'}</span>
+            <strong className="connection-data-label">Medidor</strong>
+            <span className="connection-data-value connection-data-highlight">{connectionData.connectionMeterNumber || '—'}</span>
 
-            <strong className="connection-data-label">Contrato:</strong>
-            <span>{connectionData.connectionContractNumber || '-'}</span>
+            <strong className="connection-data-label">Contrato</strong>
+            <span className="connection-data-value">{connectionData.connectionContractNumber || '—'}</span>
 
-            <strong className="connection-data-label">Estado:</strong>
-            <div><ColorChip label={statusChip.label} color={statusChip.color} icon={statusChip.icon} variant="soft" size="sm" /></div>
+            <strong className="connection-data-label">Estado</strong>
+            <div>
+              <ColorChip label={statusChip.label} color={statusChip.color} icon={statusChip.icon} variant="soft" size="sm" />
+            </div>
 
-            <strong className="connection-data-label">Tarifa:</strong>
-            <div><ColorChip label={connectionData.connectionRateName || '-'} variant="ghost" size="sm" /></div>
+            <strong className="connection-data-label">Tarifa</strong>
+            <div>
+              <ColorChip label={connectionData.connectionRateName || '—'} variant="ghost" size="sm" />
+            </div>
           </div>
         </div>
 
         <div className="connection-info-column">
           <h3 className="connection-section-title">
-            <MapPin size={18} /> Ubicación
+            <span className="connection-section-icon">
+              <MapPin size={18} />
+            </span>
+            Ubicación
           </h3>
           <div className="connection-data-grid">
-            <strong className="connection-data-label">Sector:</strong>
-            <span>{connectionData.connectionSector || '-'}</span>
+            <strong className="connection-data-label">Sector</strong>
+            <span className="connection-data-value">{connectionData.connectionSector || '—'}</span>
 
-            <strong className="connection-data-label">Zona:</strong>
-            <span>{connectionData.zoneName ? `${connectionData.zoneCode} - ${connectionData.zoneName}` : '-'}</span>
+            <strong className="connection-data-label">Zona</strong>
+            <span className="connection-data-value">
+              {connectionData.zoneName ? `${connectionData.zoneCode} – ${connectionData.zoneName}` : '—'}
+            </span>
 
-            <strong className="connection-data-label">Dirección:</strong>
-            <span>{connectionData.connectionAddress || '-'}</span>
+            <strong className="connection-data-label">Dirección</strong>
+            <span className="connection-data-value">{connectionData.connectionAddress || '—'}</span>
 
-            <strong className="connection-data-label">Referencia:</strong>
-            <span>{connectionData.connectionReference || '-'}</span>
+            <strong className="connection-data-label">Referencia</strong>
+            <span className="connection-data-value">{connectionData.connectionReference || '—'}</span>
 
-            <strong className="connection-data-label">Coordenadas:</strong>
+            <strong className="connection-data-label">Coordenadas</strong>
             <span className="connection-data-coords">
               {(() => {
-                const coords = connectionData.connectionCoordinates ? decodeEWKBPoint(connectionData.connectionCoordinates) : null;
-                return coords ? `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}` : '-';
+                const coords = connectionData.connectionCoordinates
+                  ? decodeEWKBPoint(connectionData.connectionCoordinates)
+                  : ((connectionData as any).latitude && (connectionData as any).longitude
+                    ? { lat: Number((connectionData as any).latitude), lng: Number((connectionData as any).longitude) }
+                    : null);
+                return coords ? `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}` : '—';
               })()}
             </span>
           </div>
@@ -325,13 +341,16 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     );
   };
 
-
   const renderFacadePhotos = () => {
     const photosFacade = connectionData?.photoFacade || [];
     return (
       <div id="section-photos-facade" className="connection-section-card connection-photos-section">
         <h3 className="connection-section-title connection-section-title-mb">
-          <MdPhotoLibrary size={18} /> Evidencias - Fotos de Fachada ({photosFacade.length})
+          <span className="connection-section-icon">
+            <MdPhotoLibrary size={18} />
+          </span>
+          Evidencias – Fotos de Fachada
+          <span className="connection-section-count">{photosFacade.length}</span>
         </h3>
         {photosFacade.length > 0 ? (
           <div className="photos-gallery">
@@ -365,7 +384,11 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     return (
       <div id="section-photos-meter" className="connection-section-card connection-photos-section">
         <h3 className="connection-section-title connection-section-title-mb">
-          <MdPhotoLibrary size={18} /> Evidencias - Fotos de Medidor ({photosMeter.length})
+          <span className="connection-section-icon">
+            <MdPhotoLibrary size={18} />
+          </span>
+          Evidencias – Fotos de Medidor
+          <span className="connection-section-count">{photosMeter.length}</span>
         </h3>
         {photosMeter.length > 0 ? (
           <div className="photos-gallery">
@@ -399,34 +422,53 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     const isCompany = !!connectionData.company;
     const client = isCompany ? connectionData.company : connectionData.person;
 
-    if (!client) return <div id="section-client" className="connection-empty-state">No hay información de cliente disponible.</div>;
+    if (!client) {
+      return (
+        <div id="section-client" className="connection-empty-state">
+          No hay información de cliente disponible.
+        </div>
+      );
+    }
 
-    const name = isCompany ? connectionData.company?.businessName : `${connectionData.person?.firstName || ''} ${connectionData.person?.lastName || ''}`.trim();
+    const name = isCompany
+      ? connectionData.company?.businessName
+      : `${connectionData.person?.firstName || ''} ${connectionData.person?.lastName || ''}`.trim();
     const identifier = isCompany ? connectionData.company?.ruc : connectionData.clientId;
 
     return (
       <div id="section-client" className="connection-section-card connection-client-section">
         <h3 className="connection-section-title">
-          <User size={18} /> Datos del Cliente
+          <span className="connection-section-icon">
+            <User size={18} />
+          </span>
+          Datos del Cliente
         </h3>
+
         <div className="connection-client-header">
           <Avatar name={name || ' '} size="lg" />
-          <div>
+          <div className="connection-client-meta">
             <h2 className="connection-client-name">
-              {isCompany ? <Building size={20} /> : <User size={20} />}
-              {name}
+              {isCompany ? <Building size={18} /> : <User size={18} />}
+              <span>{name}</span>
             </h2>
-            <ColorChip label={identifier} variant="ghost" size="sm" />
+            {identifier && (
+              <ColorChip label={identifier} variant="ghost" size="sm" />
+            )}
           </div>
         </div>
 
         <div className="connection-contact-grid">
           <div className="connection-contact-column">
             <div className="connection-contact-item">
-              <MapPin size={16} /> <span>{client.address || 'Sin dirección registrada'}</span>
+              <div className="connection-contact-icon">
+                <MapPin size={15} />
+              </div>
+              <span>{client.address || 'Sin dirección registrada'}</span>
             </div>
             <div className="connection-contact-item">
-              <Phone size={16} />
+              <div className="connection-contact-icon">
+                <Phone size={15} />
+              </div>
               <span>
                 {client.phones && client.phones.length > 0
                   ? client.phones.map(phone => phone.numero).join(', ')
@@ -434,7 +476,9 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
               </span>
             </div>
             <div className="connection-contact-item">
-              <Mail size={16} />
+              <div className="connection-contact-icon">
+                <Mail size={15} />
+              </div>
               <span>
                 {client.emails && client.emails.length > 0
                   ? client.emails.map(email => email.email).join(', ')
@@ -457,6 +501,7 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
       );
     }
 
+
     const mappedReadings: ReadingHistory[] = connectionData.lastReadings.map((lr, idx) => {
       const current = Number(lr.readingValueCurrent) || 0;
       const previous = Number(lr.readingValuePreview) || 0;
@@ -473,13 +518,23 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
         consumption: current - previous,
         observation: lr.novelty || 'NOT_READ',
         readingValue: 0 // LastReading doesn't include the monetary value
+
       } as ReadingHistory;
     });
+
+    const locationLastReading = connectionData.lastReadings[0].locationReading ?? '';
+    console.log('locationLastReading', locationLastReading);
+    const decodedLocation: Coordinate | null = locationLastReading ? decodeEWKBPoint(locationLastReading) : null;
+    console.log('decodedLocation', decodedLocation);
+
 
     return (
       <div id="section-readings" className="connection-section-card connection-table-section">
         <h3 className="connection-section-title connection-section-title-mb">
-          <History size={18} /> Historial de Lecturas
+          <span className="connection-section-icon">
+            <History size={18} />
+          </span>
+          Historial de Lecturas
         </h3>
         <ReadingHistoryTable
           history={mappedReadings}
@@ -507,45 +562,50 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     const meterColumns: Column<HistoryMeters>[] = [
       {
         header: 'Fecha Inst.',
-        accessor: (row) => row.installationDate ? new Date(row.installationDate).toLocaleDateString() : '-',
+        accessor: (row) => row.installationDate ? new Date(row.installationDate).toLocaleDateString() : '—',
         id: 'installationDate'
       },
       {
         header: 'Fecha Desinst.',
-        accessor: (row) => row.uninstallationDate ? new Date(row.uninstallationDate).toLocaleDateString() : '-',
+        accessor: (row) => row.uninstallationDate ? new Date(row.uninstallationDate).toLocaleDateString() : '—',
         id: 'uninstallationDate'
       },
       {
         header: 'Medidor Ant.',
-        accessor: (row) => <ColorChip label={row.previousMeter || '-'} variant="ghost" size="xs" />,
+        accessor: (row) => <ColorChip label={row.previousMeter || '—'} variant="ghost" size="xs" />,
         id: 'previousMeter'
       },
       {
         header: 'Medidor Nuevo',
-        accessor: (row) => <ColorChip label={row.newMeter || '-'} color="var(--primary)" variant="soft" size="xs" />,
+        accessor: (row) => <ColorChip label={row.newMeter || '—'} color="var(--primary)" variant="soft" size="xs" />,
         id: 'newMeter'
       },
       {
         header: 'Estado',
-        accessor: (row) => <ColorChip label={row.status || '-'} variant="soft" size="xs"
-          color={
-            row.status === 'ACTIVO' ? 'var(--success)' :
-              row.status === 'INACTIVO' ? 'var(--error)' :
-                row.status === 'SUSPENDIDO' ? 'var(--warning)' : 'var(--gray)'
-          }
-          icon={
-            row.status === 'ACTIVO' ? <Check size={12} /> :
-              row.status === 'INACTIVO' ? <X size={12} /> :
-                row.status === 'SUSPENDIDO' ? <Pause size={12} /> : null
-          }
-        />,
+        accessor: (row) => (
+          <ColorChip
+            label={row.status || '—'}
+            variant="soft"
+            size="xs"
+            color={
+              row.status === 'ACTIVO' ? 'var(--success)' :
+                row.status === 'INACTIVO' ? 'var(--error)' :
+                  row.status === 'SUSPENDIDO' ? 'var(--warning)' : 'var(--gray)'
+            }
+            icon={
+              row.status === 'ACTIVO' ? <Check size={12} /> :
+                row.status === 'INACTIVO' ? <X size={12} /> :
+                  row.status === 'SUSPENDIDO' ? <Pause size={12} /> : null
+            }
+          />
+        ),
         id: 'status'
       },
       {
         header: 'Observación',
         accessor: (row) => (
           <div className="connection-observation-cell">
-            {row.observation || '-'}
+            {row.observation || '—'}
           </div>
         ),
         id: 'observation'
@@ -555,7 +615,10 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     return (
       <div id="section-meters" className="connection-section-card connection-table-section">
         <h3 className="connection-section-title connection-section-title-mb">
-          <Settings size={18} /> Historial de Medidores
+          <span className="connection-section-icon">
+            <Settings size={18} />
+          </span>
+          Historial de Medidores
         </h3>
         <Table<HistoryMeters>
           columns={meterColumns}
@@ -575,7 +638,6 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
         onClose={handleClose}
         title={`Detalles de Acometida: ${cadastralKey || ''}`}
         size="xxl"
-
       >
         <div className="connection-modal-body">
           {loading ? (
@@ -589,7 +651,9 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
             </div>
           ) : error ? (
             <div className="connection-error-state">
-              <AlertTriangle size={48} />
+              <div className="connection-error-icon">
+                <AlertTriangle size={40} />
+              </div>
               <p>{error}</p>
             </div>
           ) : connectionData ? (
@@ -610,7 +674,6 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
                     <div className="connection-nav-icon">
                       {item.icon}
                     </div>
-
                     <span className="connection-nav-label">
                       {item.label}
                     </span>
@@ -629,7 +692,7 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
               </div>
 
               {/* Floating Action Buttons for PDF */}
-              <div className="connection-fab-wrapper" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div className="connection-fab-wrapper">
                 <Tooltip content="Vista Previa de Ficha Técnica" followCursor={false}>
                   <Button
                     onClick={handlePreviewPdf}
@@ -637,11 +700,12 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
                     disabled={isGeneratingPdf}
                     color="indigo"
                     variant="outline"
+                    size='small'
                   >
                     {isGeneratingPdf ? (
                       <div className="connection-fab-spinner" role="status" />
                     ) : (
-                      <Eye size={24} />
+                      <Eye size={20} />
                     )}
                   </Button>
                 </Tooltip>
@@ -652,12 +716,13 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
                     className="connection-fab-btn"
                     disabled={isGeneratingPdf}
                     color="indigo"
-                    variant='primary'
+                    variant="primary"
+                    size='small'
                   >
                     {isGeneratingPdf ? (
                       <div className="connection-fab-spinner" role="status" />
                     ) : (
-                      <Download size={24} />
+                      <Download size={20} />
                     )}
                   </Button>
                 </Tooltip>
@@ -717,4 +782,3 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     </>
   );
 };
-

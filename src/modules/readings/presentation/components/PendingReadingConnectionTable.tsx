@@ -29,6 +29,8 @@ export const PendingReadingConnectionTable: React.FC<PropTypes> = ({
 }) => {
   const { t } = useTranslation();
 
+  console.log(data)
+
   const columns: Column<PendingReadingConnection>[] = useMemo(
     () => [
       { header: t('readings.columns.cadastralKey'), accessor: 'cadastralKey' },

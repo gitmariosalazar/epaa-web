@@ -10,4 +10,5 @@ export interface ReadingHistory {
   consumption: number;
   observation: string;
   readingValue: number;
+  locationReading?: { lat: number; lng: number } | null;
 }
