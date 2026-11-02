@@ -1,0 +1,43 @@
+.route-centroid-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+}
+
+.route-centroid-marker:hover {
+  transform: scale(1.15) translateY(-4px);
+  z-index: 1000 !important;
+}
+
+.route-centroid-pin {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 9999px;
+  background-color: var(--surface);
+  border: 2px solid;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.route-centroid-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.route-centroid-count {
+  font-size: 0.7rem;
+  font-weight: 500;
+  opacity: 0.8;
+  padding-left: 0.2rem;
+  border-left: 1px solid var(--border-color);
+}

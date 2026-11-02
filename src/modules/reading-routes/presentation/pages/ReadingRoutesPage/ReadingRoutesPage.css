@@ -1,0 +1,159 @@
+.reading-routes-page {
+  background-color: var(--background);
+  color: var(--text-main);
+  padding: 0.35rem 0.65rem;
+  box-sizing: border-box;
+}
+
+.reading-routes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem !important;
+  flex-wrap: wrap;
+}
+
+.reading-routes-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.reading-routes-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  letter-spacing: -0.02em;
+}
+
+.reading-routes-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.reading-routes-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Tabs Bar */
+.reading-routes-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.25rem;
+  background-color: transparent;
+}
+
+.reading-routes-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.25rem;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid transparent;
+  border-bottom: none;
+  background-color: transparent;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.reading-routes-tab-btn:hover {
+  color: var(--text-main);
+  background-color: var(--surface-hover);
+}
+
+.reading-routes-tab-btn.active {
+  color: var(--accent);
+  background-color: var(--surface);
+  border-color: var(--border-color);
+  border-bottom: 2px solid var(--accent);
+}
+
+.reading-routes-tab-badge {
+  padding: 0.15rem 0.45rem;
+  border-radius: 12px;
+  background-color: var(--surface-hover);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.reading-routes-tab-btn.active .reading-routes-tab-badge {
+  background-color: rgba(var(--accent-rgb, 37, 99, 235), 0.12);
+  color: var(--accent);
+}
+
+/* Tab Content Areas */
+.reading-routes-tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+.reading-routes-map-tab-content {
+  flex: 1;
+  height: 100%;
+  min-height: 550px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Resolver Tab Preview Container */
+.reading-routes-resolver-hero {
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg, 12px);
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  max-width: 680px;
+  margin: 2rem auto;
+}
+
+.reading-routes-resolver-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--accent-rgb, 37, 99, 235), 0.15) 0%,
+    rgba(16, 185, 129, 0.15) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+
+.reading-routes-resolver-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.reading-routes-resolver-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}

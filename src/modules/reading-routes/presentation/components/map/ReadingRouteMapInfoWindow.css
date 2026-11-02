@@ -1,0 +1,72 @@
+.route-info-window {
+  padding: 0.6rem;
+  min-width: 220px;
+  max-width: 280px;
+  color: var(--text-main);
+  font-family: inherit;
+}
+
+.route-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.4rem;
+}
+
+.route-info-code {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.route-info-name {
+  font-size: 0.825rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-main);
+}
+
+.route-info-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.route-info-stat-box {
+  background-color: var(--surface-hover);
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+
+.route-info-stat-label {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  display: block;
+}
+
+.route-info-stat-val {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.route-info-btn {
+  width: 100%;
+  padding: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px;
+  background-color: var(--accent);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.route-info-btn:hover {
+  background-color: var(--accent-hover);
+}

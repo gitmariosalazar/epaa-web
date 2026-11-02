@@ -1,0 +1,136 @@
+.route-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.route-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* Status variants */
+.route-badge-asignada {
+  background-color: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+  border-color: rgba(59, 130, 246, 0.25);
+}
+.route-badge-asignada .route-badge-dot {
+  background-color: #2563eb;
+}
+
+.route-badge-en_proceso {
+  background-color: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+.route-badge-en_proceso .route-badge-dot {
+  background-color: #f59e0b;
+  animation: pulse-dot 1.8s infinite;
+}
+
+.route-badge-completada {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.route-badge-completada .route-badge-dot {
+  background-color: #10b981;
+}
+
+.route-badge-reasignada {
+  background-color: rgba(147, 51, 234, 0.12);
+  color: #7c3aed;
+  border-color: rgba(147, 51, 234, 0.3);
+}
+.route-badge-reasignada .route-badge-dot {
+  background-color: #9333ea;
+}
+
+.route-badge-pausada {
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.25);
+}
+.route-badge-pausada .route-badge-dot {
+  background-color: #ef4444;
+}
+
+.route-badge-active {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.25);
+}
+.route-badge-active .route-badge-dot {
+  background-color: #10b981;
+}
+
+.route-badge-inactive {
+  background-color: rgba(100, 116, 139, 0.12);
+  color: #64748b;
+  border-color: rgba(100, 116, 139, 0.25);
+}
+.route-badge-inactive .route-badge-dot {
+  background-color: #64748b;
+}
+
+/* Dark mode adjustments */
+:root.dark .route-badge-asignada,
+.dark .route-badge-asignada,
+[data-theme='dark'] .route-badge-asignada {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+:root.dark .route-badge-en_proceso,
+.dark .route-badge-en_proceso,
+[data-theme='dark'] .route-badge-en_proceso {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+:root.dark .route-badge-completada,
+.dark .route-badge-completada,
+[data-theme='dark'] .route-badge-completada {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+:root.dark .route-badge-reasignada,
+.dark .route-badge-reasignada,
+[data-theme='dark'] .route-badge-reasignada {
+  background-color: rgba(147, 51, 234, 0.2);
+  color: #c084fc;
+  border-color: rgba(147, 51, 234, 0.4);
+}
+
+:root.dark .route-badge-pausada,
+.dark .route-badge-pausada,
+[data-theme='dark'] .route-badge-pausada {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.6;
+  }
+}

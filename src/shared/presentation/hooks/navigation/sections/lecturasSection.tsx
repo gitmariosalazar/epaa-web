@@ -2,7 +2,7 @@ import { TbClock24, TbFileAnalyticsFilled, TbPhotoSearch } from 'react-icons/tb'
 import { MdAssignmentAdd, MdReport, MdAdminPanelSettings, MdOutlineContentPasteSearch } from 'react-icons/md';
 import { TiThList } from 'react-icons/ti';
 import { FaEdit } from 'react-icons/fa';
-import { ClipboardList, LucideCalendarSync } from 'lucide-react';
+import { ClipboardList, LucideCalendarSync, Route } from 'lucide-react';
 import type { NavSection } from '@/shared/domain/models/Navigation';
 import { RiListCheck3 } from 'react-icons/ri';
 
@@ -18,6 +18,11 @@ export const getLecturasSection = (): NavSection => ({
           icon: <TbFileAnalyticsFilled size={18} />,
           label: 'Resumen Operativo',
           to: '/readings/dashboard'
+        },
+        {
+          icon: <Route size={18} />,
+          label: 'Rutas de Lectura (SIG)',
+          to: '/reading-routes'
         },
         {
           icon: <RiListCheck3 size={18} />,

@@ -106,6 +106,8 @@ import { RequireElevatedToken } from './modules/auth/presentation/components/Req
 import { UpdateSpecialReadingPage } from './modules/readings/presentation/pages/UpdateSpecialReadingPage';
 import { ReadingsReconciliationPage } from './modules/readings/presentation/pages';
 import { ReadingsDashboardPage } from './modules/readings/presentation/pages/ReadingsDashboardPage';
+import { ReadingRoutesProvider } from '@/modules/reading-routes/presentation/context/ReadingRoutesContext';
+import { ReadingRoutesPage } from '@/modules/reading-routes/presentation/pages/ReadingRoutesPage/ReadingRoutesPage';
 
 const ProtectedRoute = () => {
   const { token, user, isLoading, isVerifying, logout } = useAuth();
@@ -407,8 +409,24 @@ function App() {
 
 
                           {/* Other reading routes can be added here */}
+                          <Route
+                            path="routes"
+                            element={
+                              <ReadingRoutesProvider>
+                                <ReadingRoutesPage />
+                              </ReadingRoutesProvider>
+                            }
+                          />
                         </Routes>
                       </ReadingsProvider>
+                    }
+                  />
+                  <Route
+                    path="/reading-routes/*"
+                    element={
+                      <ReadingRoutesProvider>
+                        <ReadingRoutesPage />
+                      </ReadingRoutesProvider>
                     }
                   />
                   <Route
