@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Map,
-  Table,
-  Activity,
-  Compass,
-  Send,
-  Route,
-} from 'lucide-react';
+import { Map, Table, Activity, Compass, Send, Route } from 'lucide-react';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { useReadingRoutesViewModel } from '../../hooks/useReadingRoutesViewModel';
@@ -49,7 +42,8 @@ export const ReadingRoutesPage: React.FC = () => {
   // Inspect route from catalog
   const handleInspectRouteCatalog = async (idRuta: number) => {
     await mapVm.selectRouteById(idRuta);
-    const found = pageVm.routes.find(r => r.idRuta === idRuta) || mapVm.selectedRoute;
+    const found =
+      pageVm.routes.find((r) => r.idRuta === idRuta) || mapVm.selectedRoute;
     setDrawerRoute(found);
     setIsDrawerOpen(true);
   };
@@ -66,7 +60,8 @@ export const ReadingRoutesPage: React.FC = () => {
                 Administración SIG de Rutas de Lectura
               </h1>
               <p className="reading-routes-subtitle">
-                Gestión cartográfica, secuenciamiento TSP, despacho matutino y monitoreo en tiempo real
+                Gestión cartográfica, secuenciamiento TSP, despacho matutino y
+                monitoreo en tiempo real
               </p>
             </div>
 
@@ -94,7 +89,10 @@ export const ReadingRoutesPage: React.FC = () => {
           </header>
         }
         filters={
-          <nav className="reading-routes-tabs-bar" aria-label="Secciones de Rutas de Lectura">
+          <nav
+            className="reading-routes-tabs-bar"
+            aria-label="Secciones de Rutas de Lectura"
+          >
             <button
               className={`reading-routes-tab-btn ${pageVm.activeTab === 'map' ? 'active' : ''}`}
               onClick={() => pageVm.setActiveTab('map')}
@@ -109,8 +107,10 @@ export const ReadingRoutesPage: React.FC = () => {
               onClick={() => pageVm.setActiveTab('dispatch')}
             >
               <Activity size={16} />
-              Monitoreo en Vivo
-              <span className="reading-routes-tab-badge">{dispatchVm.assignments.length}</span>
+              Monitoreo de Rutas
+              <span className="reading-routes-tab-badge">
+                {dispatchVm.assignments.length}
+              </span>
             </button>
 
             <button
@@ -119,7 +119,9 @@ export const ReadingRoutesPage: React.FC = () => {
             >
               <Table size={16} />
               Catálogo de Rutas
-              <span className="reading-routes-tab-badge">{pageVm.total || 79}</span>
+              <span className="reading-routes-tab-badge">
+                {pageVm.total || 79}
+              </span>
             </button>
 
             <button
@@ -187,11 +189,13 @@ export const ReadingRoutesPage: React.FC = () => {
               activaOnly={pageVm.activaFilter ?? true}
               onSearchChange={pageVm.setSearch}
               onSectorChange={pageVm.setSectorFilter}
-              onActivaChange={activa => pageVm.setActivaFilter(activa ? true : undefined)}
+              onActivaChange={(activa) =>
+                pageVm.setActivaFilter(activa ? true : undefined)
+              }
               onPageChange={pageVm.setPage}
               onViewInMap={handleViewInMap}
               onInspectRoute={handleInspectRouteCatalog}
-              onOptimize={idRuta => mapVm.optimizeSequence(idRuta)}
+              onOptimize={(idRuta) => mapVm.optimizeSequence(idRuta)}
               onAssignRoute={dispatchVm.openSingleAssignModal}
             />
           )}
@@ -206,14 +210,21 @@ export const ReadingRoutesPage: React.FC = () => {
                 Enrutamiento Automático de Acometidas
               </h2>
               <p className="reading-routes-resolver-desc">
-                Esta herramienta analiza la ubicación geográfica (latitud y longitud) de una acometida
-                nueva o existente, evaluando polígonos cerrados y algoritmos de vecinos más cercanos (KNN PostGIS)
-                para insertarla con el índice de recorrido óptimo sin romper la ruta existente.
+                Esta herramienta analiza la ubicación geográfica (latitud y
+                longitud) de una acometida nueva o existente, evaluando
+                polígonos cerrados y algoritmos de vecinos más cercanos (KNN
+                PostGIS) para insertarla con el índice de recorrido óptimo sin
+                romper la ruta existente.
               </p>
               <button
                 className="btn btn-primary"
                 onClick={() => pageVm.setIsResolverModalOpen(true)}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.5rem' }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.65rem 1.5rem'
+                }}
               >
                 <Compass size={16} />
                 Abrir Enrutador Espacial

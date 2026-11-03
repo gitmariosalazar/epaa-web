@@ -187,6 +187,7 @@
   padding: 0.5rem 0.75rem;
   background-color: var(--surface-hover);
   border-radius: 6px;
+  gap: 0.5rem;
 }
 
 .live-assignment-route-code {
@@ -365,7 +366,9 @@
   padding: 0;
   border-radius: 3px;
   opacity: 0.75;
-  transition: opacity 0.15s, transform 0.15s;
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
 }
 
 .live-filter-tag-remove:hover {

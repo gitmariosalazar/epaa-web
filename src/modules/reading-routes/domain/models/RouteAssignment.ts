@@ -11,6 +11,7 @@ export interface RouteAssignment {
   codigoRuta?: string;
   nombreRuta?: string;
   usuarioId?: string;
+  identificacionUsuario?: string;
   lecturistaId?: string;
   nombreLecturista?: string;
   empleadoId?: string | null;

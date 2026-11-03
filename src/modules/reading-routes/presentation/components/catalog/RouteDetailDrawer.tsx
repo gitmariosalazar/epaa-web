@@ -3,7 +3,6 @@ import {
   X,
   Zap,
   Hash,
-  User,
   MapPin,
   Search,
   ArrowUpDown,
@@ -12,7 +11,7 @@ import {
   Layers,
   Timer,
   Map,
-  Gauge,
+  Gauge
 } from 'lucide-react';
 import type { ReadingRoute } from '../../../domain/models/ReadingRoute';
 import type { RouteConnection } from '../../../domain/models/RouteConnection';
@@ -21,6 +20,9 @@ import './RouteDetailDrawer.css';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { FaTachometerAlt } from 'react-icons/fa';
+import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 
 interface RouteDetailDrawerProps {
   isOpen: boolean;
@@ -41,7 +43,7 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
   isOptimizing,
   onClose,
   onOptimize,
-  onAssignRoute,
+  onAssignRoute
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -51,12 +53,22 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
       list = list.filter(
-        c =>
-          String(c.numeroMedidor ?? '').toLowerCase().includes(q) ||
-          String(c.abonado ?? '').toLowerCase().includes(q) ||
-          String(c.cuenta ?? '').toLowerCase().includes(q) ||
-          String(c.direccion ?? '').toLowerCase().includes(q) ||
-          String(c.acometidaId ?? '').toLowerCase().includes(q),
+        (c) =>
+          String(c.numeroMedidor ?? '')
+            .toLowerCase()
+            .includes(q) ||
+          String(c.abonado ?? '')
+            .toLowerCase()
+            .includes(q) ||
+          String(c.cuenta ?? '')
+            .toLowerCase()
+            .includes(q) ||
+          String(c.direccion ?? '')
+            .toLowerCase()
+            .includes(q) ||
+          String(c.acometidaId ?? '')
+            .toLowerCase()
+            .includes(q)
       );
     }
     list.sort((a, b) => {
@@ -70,20 +82,24 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
 
   return (
     <div className="route-drawer-overlay" onClick={onClose}>
-      <div className="route-drawer-container" onClick={e => e.stopPropagation()}>
+      <div
+        className="route-drawer-container"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="route-drawer-header">
           <div className="route-drawer-title-group">
             <span className="route-drawer-code-badge">
               <Hash size={14} strokeWidth={2.5} />
-              {route.codigoRuta}
+              {route.codigo}
             </span>
 
             <div className="route-drawer-meta-row">
               <RouteBadge sector={route.sector} />
               <span
-                className={`status-pill ${route.activo ? 'status-active' : 'status-inactive'
-                  }`}
+                className={`status-pill ${
+                  route.activo ? 'status-active' : 'status-inactive'
+                }`}
               >
                 {route.activo ? 'Activa' : 'Inactiva'}
               </span>
@@ -93,15 +109,21 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
           </div>
 
           <div className="close-route-detail-btn">
-            <Button
-              variant="dashed"
-              onClick={onClose}
-              aria-label="Cerrar panel"
-              leftIcon={<X size={18} />}
-              size="xs"
-              circle
-              color="error"
-            />
+            <Tooltip
+              content="Cerrar panel de detalle de ruta"
+              themeColor="error"
+              followCursor={false}
+            >
+              <Button
+                variant="dashed"
+                onClick={onClose}
+                aria-label="Cerrar panel"
+                leftIcon={<X size={18} />}
+                size="xs"
+                circle
+                color="error"
+              />
+            </Tooltip>
           </div>
         </div>
 
@@ -135,7 +157,7 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
               Sector
             </span>
             <span className="route-drawer-kpi-val">
-              {route.sector || 'N/A'}
+              {route.sectorId || 'N/A'}
             </span>
           </div>
         </div>
@@ -148,18 +170,21 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
               placeholder="Buscar medidor, abonado, cuenta..."
               value={searchTerm}
               size="small"
-              onChange={e => setSearchTerm(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)}
               leftIcon={<Search size={16} />}
             />
           </div>
 
-          <Tooltip content="Ordenar secuencia" followCursor={false}>
+          <Tooltip
+            content="Invertir orden de secuencia"
+            followCursor={false}
+            themeColor="info"
+          >
             <Button
               variant="outline"
               onClick={() =>
-                setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))
+                setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))
               }
-              title="Invertir orden de secuencia"
               size="xs"
               leftIcon={<ArrowUpDown size={14} />}
               circle
@@ -167,13 +192,17 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
           </Tooltip>
 
           {onAssignRoute && (
-            <Tooltip content="Asignar a lecturista" followCursor={false}>
+            <Tooltip
+              content="Asignar esta ruta a un lecturista"
+              followCursor={false}
+              themeColor="green"
+            >
               <Button
                 variant="outline"
                 onClick={() => onAssignRoute(route)}
-                title="Asignar esta ruta a un lecturista"
                 leftIcon={<UserPlus size={14} />}
                 size="xs"
+                color="green"
                 circle
               />
             </Tooltip>
@@ -181,17 +210,16 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
 
           <Tooltip
             followCursor={false}
+            themeColor="amber"
             content="Optimizar recorrido usando algoritmo TSP en PostGIS"
           >
             <Button
-              variant="primary"
+              variant="dashed"
+              color="amber"
               onClick={() => onOptimize(route.idRuta)}
               disabled={isOptimizing || connections.length < 2}
               leftIcon={
-                <Zap
-                  size={14}
-                  className={isOptimizing ? 'animate-spin' : ''}
-                />
+                <Zap size={14} className={isOptimizing ? 'animate-spin' : ''} />
               }
               size="xs"
             >
@@ -218,9 +246,7 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
           ) : filteredConnections.length === 0 ? (
             <div className="route-drawer-empty">
               <MapPin size={36} className="route-drawer-empty-icon" />
-              <div style={{ fontWeight: 600 }}>
-                No se encontraron medidores
-              </div>
+              <div style={{ fontWeight: 600 }}>No se encontraron medidores</div>
               <div style={{ fontSize: '0.8rem', opacity: 0.75 }}>
                 {searchTerm
                   ? 'Prueba con otro término de búsqueda'
@@ -228,24 +254,45 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
               </div>
             </div>
           ) : (
-            filteredConnections.map(c => (
+            filteredConnections.map((c) => (
               <div
                 key={c.idRutaAcometida || c.acometidaId}
                 className="route-drawer-card"
               >
                 {/* Top row: sequence + meter */}
                 <div className="route-drawer-card-top">
-                  <span className="route-drawer-seq">#{c.ordenSecuencia}</span>
+                  <span className="route-drawer-seq">
+                    Orden Secuencia # {c.ordenSecuencia}
+                  </span>
                   <span className="route-drawer-meter">
-                    <Hash size={13} strokeWidth={2.5} />
-                    {c.numeroMedidor || 'Sin medidor'}
+                    <Tooltip
+                      content="Numero de medidor"
+                      followCursor={false}
+                      themeColor="gray"
+                    >
+                      <ColorChip
+                        label={`${c.numeroMedidor}`}
+                        color=""
+                        variant="ghost"
+                        size="xs"
+                        icon={<FaTachometerAlt />}
+                      />
+                    </Tooltip>
                   </span>
                 </div>
 
                 {/* User */}
                 <div className="route-drawer-user">
-                  <User size={13} className="route-drawer-user-icon" />
-                  {c.abonado || 'Consumidor desconocido'}
+                  <Avatar
+                    size="sm"
+                    name={c.abonado || 'Consumidor desconocido'}
+                  />
+                  <div className="route-drawer-user-name">
+                    <span className="route-drawer-user-name-text">
+                      {c.abonado || 'Consumidor desconocido'}
+                    </span>
+                    <span className="route-drawer-user-id">{c.clienteId}</span>
+                  </div>
                 </div>
 
                 {/* Address */}
@@ -259,7 +306,7 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
                 {/* Footer meta */}
                 <div className="route-drawer-footer-row">
                   <span className="route-drawer-footer-item">
-                    Cuenta: <strong>{c.cuenta || 'N/A'}</strong>
+                    Sector: <strong>{c.sector || 'N/A'}</strong>
                   </span>
                   <span className="route-drawer-footer-item">
                     Acometida: <strong>{c.acometidaId}</strong>

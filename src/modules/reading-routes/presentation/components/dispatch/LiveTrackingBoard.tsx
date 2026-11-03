@@ -15,10 +15,9 @@ import {
   FilterX,
   RotateCcw,
   SlidersHorizontal,
-  X,
+  X
 } from 'lucide-react';
 import type { RouteAssignment } from '../../../domain/models/RouteAssignment';
-import { RouteBadge } from '../common/RouteBadge';
 import './LiveTrackingBoard.css';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { truncateText } from '@/shared/utils/text/truncate-text';
@@ -28,6 +27,9 @@ import { useLiveTrackingFilters } from '../../hooks/useLiveTrackingFilters';
 import { LiveTrackingFilterPopover } from './LiveTrackingFilterPopover';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { FaDotCircle, FaRoute } from 'react-icons/fa';
+import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 
 export interface LiveTrackingBoardProps {
   assignments: RouteAssignment[];
@@ -54,11 +56,13 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
   onOpenReassign,
   onCancelAssignment,
   onResumeAssignment,
-  onRefresh,
+  onRefresh
 }) => {
   const { resumeRouteAssignmentUseCase } = useReadingRoutesContext();
   const [resumingId, setResumingId] = useState<number | null>(null);
-  const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(null);
+  const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(
+    null
+  );
   const isFilterOpen = Boolean(filterAnchorEl);
 
   // Hook desacoplado de filtrado y ordenamiento en tiempo real (SRP - Clean Architecture)
@@ -79,7 +83,7 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
     hasActiveFilters,
     activeFiltersCount,
     totalCount,
-    filteredCount,
+    filteredCount
   } = useLiveTrackingFilters(assignments);
 
   const handleResume = async (idAsignacion: number) => {
@@ -90,7 +94,9 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
     try {
       setResumingId(idAsignacion);
       const res = await resumeRouteAssignmentUseCase.execute(idAsignacion);
-      notify.success(res.message || `Asignación #${idAsignacion} reanudada con éxito.`);
+      notify.success(
+        res.message || `Asignación #${idAsignacion} reanudada con éxito.`
+      );
       onRefresh();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -105,20 +111,21 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
     let completadas = 0;
     let novedades = 0;
 
-    assignments.forEach(a => {
+    assignments.forEach((a) => {
       esperadas += a.lecturasEsperadas || 0;
       completadas += a.lecturasCompletadas || 0;
       novedades += a.lecturasNovedad || 0;
     });
 
-    const percent = esperadas > 0 ? Math.round((completadas / esperadas) * 100) : 0;
+    const percent =
+      esperadas > 0 ? Math.round((completadas / esperadas) * 100) : 0;
 
     return {
       total: assignments.length,
       esperadas,
       completadas,
       novedades,
-      percent,
+      percent
     };
   }, [assignments]);
 
@@ -130,7 +137,10 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
         return (
           <span
             className="status-pill"
-            style={{ backgroundColor: 'rgba(245, 158, 11, 0.15)', color: '#d97706' }}
+            style={{
+              backgroundColor: 'rgba(245, 158, 11, 0.15)',
+              color: '#d97706'
+            }}
           >
             En Progreso
           </span>
@@ -139,7 +149,11 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
         return (
           <span
             className="status-pill"
-            style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', fontWeight: 700 }}
+            style={{
+              backgroundColor: 'rgba(239, 68, 68, 0.15)',
+              color: '#ef4444',
+              fontWeight: 700
+            }}
           >
             Pausada
           </span>
@@ -148,7 +162,11 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
         return (
           <span
             className="status-pill"
-            style={{ backgroundColor: 'rgba(139, 92, 246, 0.15)', color: '#8b5cf6', fontWeight: 700 }}
+            style={{
+              backgroundColor: 'rgba(139, 92, 246, 0.15)',
+              color: '#8b5cf6',
+              fontWeight: 700
+            }}
           >
             Reasignada
           </span>
@@ -159,7 +177,10 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
         return (
           <span
             className="status-pill"
-            style={{ backgroundColor: 'rgba(107, 114, 128, 0.15)', color: 'var(--text-secondary)' }}
+            style={{
+              backgroundColor: 'rgba(107, 114, 128, 0.15)',
+              color: 'var(--text-secondary)'
+            }}
           >
             Asignada
           </span>
@@ -174,7 +195,7 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
         <div className="live-tracking-header-left">
           <h2 className="live-tracking-title">
             <Activity size={22} style={{ color: 'var(--accent)' }} />
-            Monitoreo en Vivo de Rutas
+            Monitoreo de Rutas
           </h2>
 
           <div className="live-tracking-inputs">
@@ -183,19 +204,18 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
               <span>Fecha:</span>
               <DatePicker
                 value={fecha}
-                onChange={e => onFechaChange(e)}
-                size='small'
+                onChange={(e) => onFechaChange(e)}
+                size="small"
               />
-
             </div>
 
             <div className="live-tracking-input-group">
               <span>Periodo:</span>
               <DatePicker
                 value={periodo}
-                onChange={e => onPeriodoChange(e)}
-                size='small'
-                view='month'
+                onChange={(e) => onPeriodoChange(e)}
+                size="small"
+                view="month"
               />
             </div>
           </div>
@@ -206,9 +226,14 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
             onClick={onRefresh}
             disabled={isLoading}
             title="Refrescar avance de operadores"
-            leftIcon={<RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />}
-            variant='dashed'
-            size='xs'
+            leftIcon={
+              <RefreshCw
+                size={14}
+                className={isLoading ? 'animate-spin' : ''}
+              />
+            }
+            variant="dashed"
+            size="xs"
           >
             Refrescar
           </Button>
@@ -216,11 +241,17 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
             onClick={onOpenMorningDispatch}
             title="Iniciar despacho masivo matutino automático para el día"
             leftIcon={<Send size={14} />}
-            size='xs'
+            size="xs"
           >
             Despacho Matutino
           </Button>
-          <Tooltip content={hasActiveFilters ? `${activeFiltersCount} filtro(s) activo(s)` : 'Abrir filtros de monitoreo'}>
+          <Tooltip
+            content={
+              hasActiveFilters
+                ? `${activeFiltersCount} filtro(s) activo(s)`
+                : 'Abrir filtros de monitoreo'
+            }
+          >
             <Button
               onClick={(e) => setFilterAnchorEl(e.currentTarget)}
               variant={hasActiveFilters ? 'primary' : 'dashed'}
@@ -281,7 +312,10 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
         </div>
 
         <div className="live-kpi-card">
-          <div className="live-kpi-icon-wrapper" style={{ color: 'var(--accent)' }}>
+          <div
+            className="live-kpi-icon-wrapper"
+            style={{ color: 'var(--accent)' }}
+          >
             <Activity size={22} />
           </div>
           <div className="live-kpi-info">
@@ -296,7 +330,8 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
         <div className="live-tracking-status-bar">
           <div className="live-tracking-status-bar-left">
             <span className="live-tracking-results-count">
-              Mostrando <strong>{filteredCount}</strong> de <strong>{totalCount}</strong> rutas
+              Mostrando <strong>{filteredCount}</strong> de{' '}
+              <strong>{totalCount}</strong> rutas
             </span>
 
             {hasActiveFilters && (
@@ -347,8 +382,9 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
                   <span className="live-filter-tag">
                     <span>
                       Lecturista:{' '}
-                      {availableOperators.find(o => o.id === filters.operatorId)?.name ||
-                        filters.operatorId}
+                      {availableOperators.find(
+                        (o) => o.id === filters.operatorId
+                      )?.name || filters.operatorId}
                     </span>
                     <button
                       type="button"
@@ -408,7 +444,9 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
               leftIcon={<SlidersHorizontal size={13} />}
               onClick={(e) => setFilterAnchorEl(e.currentTarget)}
             >
-              {hasActiveFilters ? `Filtros (${activeFiltersCount})` : 'Abrir Filtros'}
+              {hasActiveFilters
+                ? `Filtros (${activeFiltersCount})`
+                : 'Abrir Filtros'}
             </Button>
           </div>
         </div>
@@ -416,8 +454,18 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
 
       {/* Assignments Cards */}
       {isLoading ? (
-        <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
-          <RefreshCw size={32} className="animate-spin" style={{ margin: '0 auto 0.75rem' }} />
+        <div
+          style={{
+            textAlign: 'center',
+            padding: '4rem',
+            color: 'var(--text-muted)'
+          }}
+        >
+          <RefreshCw
+            size={32}
+            className="animate-spin"
+            style={{ margin: '0 auto 0.75rem' }}
+          />
           <div>Cargando asignaciones y avance de lecturistas en vivo...</div>
         </div>
       ) : assignments.length === 0 ? (
@@ -428,17 +476,28 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
             backgroundColor: 'var(--surface)',
             border: '1px solid var(--border-color)',
             borderRadius: '8px',
-            color: 'var(--text-muted)',
+            color: 'var(--text-muted)'
           }}
         >
           <Inbox size={40} style={{ margin: '0 auto 0.75rem', opacity: 0.5 }} />
-          <h3 style={{ fontSize: '1.05rem', color: 'var(--text-main)', marginBottom: '0.25rem' }}>
+          <h3
+            style={{
+              fontSize: '1.05rem',
+              color: 'var(--text-main)',
+              marginBottom: '0.25rem'
+            }}
+          >
             No hay despachos registrados para esta fecha
           </h3>
           <p style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
-            Utilice el botón de "Despacho Matutino" para asignar rutas a los lecturistas.
+            Utilice el botón de "Despacho Matutino" para asignar rutas a los
+            lecturistas.
           </p>
-          <Button onClick={onOpenMorningDispatch} leftIcon={<Send size={14} />} size='xs'>
+          <Button
+            onClick={onOpenMorningDispatch}
+            leftIcon={<Send size={14} />}
+            size="xs"
+          >
             Asignar Rutas Ahora
           </Button>
         </div>
@@ -450,42 +509,55 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
             backgroundColor: 'var(--surface)',
             border: '1px solid var(--border-color)',
             borderRadius: '8px',
-            color: 'var(--text-muted)',
+            color: 'var(--text-muted)'
           }}
         >
-          <FilterX size={44} style={{ margin: '0 auto 0.75rem', color: 'var(--accent)', opacity: 0.8 }} />
-          <h3 style={{ fontSize: '1.05rem', color: 'var(--text-main)', marginBottom: '0.35rem' }}>
+          <FilterX
+            size={44}
+            style={{
+              margin: '0 auto 0.75rem',
+              color: 'var(--accent)',
+              opacity: 0.8
+            }}
+          />
+          <h3
+            style={{
+              fontSize: '1.05rem',
+              color: 'var(--text-main)',
+              marginBottom: '0.35rem'
+            }}
+          >
             No hay asignaciones que coincidan con los filtros aplicados
           </h3>
-          <p style={{ fontSize: '0.85rem', marginBottom: '1.25rem', maxWidth: '480px', margin: '0 auto 1.25rem' }}>
-            Prueba ajustando el término de búsqueda, seleccionando otro estado o restableciendo los filtros para ver las {assignments.length} asignaciones del día.
+          <p
+            style={{
+              fontSize: '0.85rem',
+              marginBottom: '1.25rem',
+              maxWidth: '480px',
+              margin: '0 auto 1.25rem'
+            }}
+          >
+            Prueba ajustando el término de búsqueda, seleccionando otro estado o
+            restableciendo los filtros para ver las {assignments.length}{' '}
+            asignaciones del día.
           </p>
-          <Button onClick={resetFilters} leftIcon={<RotateCcw size={14} />} variant="outline" size="xs">
+          <Button
+            onClick={resetFilters}
+            leftIcon={<RotateCcw size={14} />}
+            variant="outline"
+            size="xs"
+          >
             Restablecer todos los filtros
           </Button>
         </div>
       ) : (
         <div className="live-assignments-grid">
-          {filteredAssignments.map(a => {
+          {filteredAssignments.map((a) => {
             const esperadas = a.lecturasEsperadas ?? a.totalPredios ?? 0;
             const completadas = a.lecturasCompletadas ?? a.prediosLeidos ?? 0;
             const pct =
               a.porcentajeAvance ??
-              (esperadas > 0
-                ? Math.round((completadas / esperadas) * 100)
-                : 0);
-
-            const initials = a.nombreLecturista
-              ? a.nombreLecturista
-                .split(' ')
-                .filter(Boolean)
-                .map((n: string) => n[0])
-                .slice(0, 2)
-                .join('')
-                .toUpperCase()
-              : a.usuarioId
-                ? a.usuarioId.substring(0, 2).toUpperCase()
-                : 'OP';
+              (esperadas > 0 ? Math.round((completadas / esperadas) * 100) : 0);
 
             const readerDisplayName =
               a.nombreLecturista ||
@@ -500,12 +572,29 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
                 {/* Header */}
                 <div className="live-assignment-header">
                   <div className="live-assignment-reader">
-                    <div className="live-reader-avatar">{initials}</div>
-                    <div className="live-reader-details">
-                      <span className="live-reader-name">
-                        {truncateText(readerDisplayName, 17)}
-                      </span>
-                      <span className="live-reader-role">Lecturista en campo</span>
+                    {/* User */}
+                    <div className="route-drawer-user">
+                      <Avatar
+                        size="sm"
+                        name={readerDisplayName || 'Consumidor desconocido'}
+                      />
+                      <div className="route-drawer-user-name">
+                        <Tooltip
+                          content={
+                            readerDisplayName || 'Consumidor desconocido'
+                          }
+                          followCursor={false}
+                          themeColor="indigo"
+                        >
+                          <span className="route-drawer-user-name-text">
+                            {truncateText(readerDisplayName, 25) ||
+                              'Consumidor desconocido'}
+                          </span>
+                        </Tooltip>
+                        <span className="route-drawer-user-id">
+                          {a.identificacionUsuario}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   {getStatusBadge(a.estado)}
@@ -513,13 +602,26 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
 
                 {/* Route Info */}
                 <div className="live-assignment-route-row">
-                  <span className="live-assignment-route-code">
-                    {a.codigoRuta || `R-${a.rutaId}`}
-                  </span>
-                  <span className="live-assignment-route-name" title={a.nombreRuta || ''}>
+                  <ColorChip
+                    label={a.codigoRuta || `R-${a.rutaId}`}
+                    color="#007bff"
+                    variant="soft"
+                    size="xs"
+                    icon={<FaRoute size={12} />}
+                  />
+                  <span
+                    className="live-assignment-route-name"
+                    title={a.nombreRuta || ''}
+                  >
                     {a.nombreRuta || 'Ruta sin nombre'}
                   </span>
-                  <RouteBadge sector={a.sector} />
+                  <ColorChip
+                    label={`Sector ${a.sector || 'N/A'}`}
+                    color="#6c757d"
+                    variant="soft"
+                    size="xs"
+                    icon={<FaDotCircle size={12} />}
+                  />
                 </div>
 
                 {/* Progress */}
@@ -531,23 +633,35 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
                     </span>
                   </div>
                   <div className="live-progress-track">
-                    <div className="live-progress-fill" style={{ width: `${Math.min(pct, 100)}%` }} />
+                    <div
+                      className="live-progress-fill"
+                      style={{ width: `${Math.min(pct, 100)}%` }}
+                    />
                   </div>
                   <div className="live-progress-stats">
                     <div className="live-stat-box">
-                      <span className="live-stat-val" style={{ color: '#10b981' }}>
+                      <span
+                        className="live-stat-val"
+                        style={{ color: '#10b981' }}
+                      >
                         {a.lecturasCompletadas}
                       </span>
                       <span className="live-stat-lbl">Leídas</span>
                     </div>
                     <div className="live-stat-box">
-                      <span className="live-stat-val" style={{ color: '#f59e0b' }}>
+                      <span
+                        className="live-stat-val"
+                        style={{ color: '#f59e0b' }}
+                      >
                         {a.lecturasPendientes}
                       </span>
                       <span className="live-stat-lbl">Pendientes</span>
                     </div>
                     <div className="live-stat-box">
-                      <span className="live-stat-val" style={{ color: '#ef4444' }}>
+                      <span
+                        className="live-stat-val"
+                        style={{ color: '#ef4444' }}
+                      >
                         {a.lecturasNovedad}
                       </span>
                       <span className="live-stat-lbl">Novedades</span>
@@ -565,7 +679,7 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
                       padding: '0.4rem 0.6rem',
                       borderRadius: '6px',
                       marginTop: '0.5rem',
-                      lineHeight: '1.25',
+                      lineHeight: '1.25'
                     }}
                   >
                     <strong>Transferida:</strong>{' '}
@@ -576,49 +690,70 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
                   <div className="live-assignment-actions">
                     {a.estado === 'PAUSADA' ? (
                       <Button
-                        variant='primary'
+                        variant="primary"
                         onClick={() => handleResume(a.idAsignacion)}
                         title="Reanudar el recorrido en campo para este mismo lecturista"
-                        size='xs'
+                        size="xs"
                         disabled={resumingId === a.idAsignacion}
-                        leftIcon={<Play size={13} className={resumingId === a.idAsignacion ? 'animate-spin' : ''} />}
+                        leftIcon={
+                          <Play
+                            size={13}
+                            className={
+                              resumingId === a.idAsignacion
+                                ? 'animate-spin'
+                                : ''
+                            }
+                          />
+                        }
                       >
-                        {resumingId === a.idAsignacion ? 'Reanudando...' : 'Reanudar'}
+                        {resumingId === a.idAsignacion
+                          ? 'Reanudando...'
+                          : 'Reanudar'}
                       </Button>
                     ) : (
                       a.estado !== 'CANCELADA' &&
                       a.estado !== 'COMPLETADA' && (
-                        <Button
-                          variant='danger'
-                          onClick={() => onCancelAssignment(a.idAsignacion)}
-                          title="Pausar temporalmente esta asignación"
-                          size='xs'
-                          leftIcon={<XCircle size={13} />}
+                        <Tooltip
+                          content="Pausar temporalmente esta asignación"
+                          themeColor="danger"
+                          followCursor={false}
                         >
-                          Pausar
-                        </Button>
+                          <Button
+                            variant="danger"
+                            onClick={() => onCancelAssignment(a.idAsignacion)}
+                            size="xs"
+                            leftIcon={<XCircle size={13} />}
+                          >
+                            Pausar
+                          </Button>
+                        </Tooltip>
                       )
                     )}
 
-                    <Button
-                      className="live-btn-action"
-                      onClick={() => onOpenReassign(a)}
-                      title={
+                    <Tooltip
+                      content={
                         (a.lecturasPendientes ?? 0) === 0
                           ? 'No hay lecturas pendientes para transferir'
                           : 'Transferir segmento de acometidas no leídas a otro lecturista'
                       }
-                      disabled={
-                        a.estado === 'COMPLETADA' ||
-                        a.estado === 'CANCELADA' ||
-                        (a.lecturasPendientes ?? 0) === 0
-                      }
-                      variant='ghost'
-                      size='xs'
-                      leftIcon={<ArrowRightLeft size={13} />}
+                      themeColor="info"
+                      followCursor={false}
                     >
-                      Reasignar Segmento
-                    </Button>
+                      <Button
+                        className="live-btn-action"
+                        onClick={() => onOpenReassign(a)}
+                        disabled={
+                          a.estado === 'COMPLETADA' ||
+                          a.estado === 'CANCELADA' ||
+                          (a.lecturasPendientes ?? 0) === 0
+                        }
+                        variant="ghost"
+                        size="xs"
+                        leftIcon={<ArrowRightLeft size={13} />}
+                      >
+                        Reasignar Segmento
+                      </Button>
+                    </Tooltip>
                   </div>
                 )}
               </div>
@@ -644,8 +779,8 @@ export const LiveTrackingBoard: React.FC<LiveTrackingBoardProps> = ({
         onEstadoChange={setEstado}
         onSectorChange={setSectorId}
         onOperatorChange={setOperatorId}
-        onToggleOnlyNovelties={() => setOnlyWithNovelties(prev => !prev)}
-        onToggleOnlyPending={() => setOnlyPending(prev => !prev)}
+        onToggleOnlyNovelties={() => setOnlyWithNovelties((prev) => !prev)}
+        onToggleOnlyPending={() => setOnlyPending((prev) => !prev)}
         onSortChange={setSortBy}
         onResetFilters={resetFilters}
       />
