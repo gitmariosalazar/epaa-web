@@ -3,6 +3,11 @@ import type { UpdateUserRequest } from '../models/UpdateUserRequest';
 import type { CreateUserEmployeeRequest } from '../models/CreateUserRequest';
 import type { ChangePasswordRequest } from '../models/ChangePasswordRequest';
 
+export interface UserPermissionBatchItem {
+  permissionId: number;
+  expirationDate?: string | Date | null;
+}
+
 export interface UserRepository {
   // Queries
   findAll(limit: number, offset: number): Promise<User[]>;
@@ -41,7 +46,15 @@ export interface UserRepository {
   getCustomerProfile(usernameOrEmail: string): Promise<User>;
   
   assignRoleToUser(userId: string, roleId: number): Promise<void>;
-  assignPermissionToUser(userId: string, permissionId: number): Promise<void>;
+  assignPermissionToUser(
+    userId: string,
+    permissionId: number,
+    expirationDate?: string | Date
+  ): Promise<void>;
+  assignPermissionsBatchToUser(
+    userId: string,
+    permissions: UserPermissionBatchItem[]
+  ): Promise<void>;
   removeRoleFromUser(userId: string, roleId: number): Promise<void>;
   removePermissionFromUser(userId: string, permissionId: number): Promise<void>;
   

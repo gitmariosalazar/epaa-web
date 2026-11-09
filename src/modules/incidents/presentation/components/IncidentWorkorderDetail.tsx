@@ -4,9 +4,25 @@
  * SRP: información general de la OT (tipo, departamento, dirección, cliente).
  */
 import React from 'react';
-import { MapPin, Building2, Wrench, User, Hash, Users, Package, ShieldCheck, FileText } from 'lucide-react';
+import {
+  MapPin,
+  Building2,
+  Wrench,
+  User,
+  Hash,
+  Users,
+  Package,
+  ShieldCheck,
+  FileText
+} from 'lucide-react';
 import { Card } from '@/shared/presentation/components/Card/Card';
-import type { AdjuntoEvidencia, CostoAdicional, MaterialUtilizado, OrdenTrabajoDetalle, TrabajadorAsignado } from '@/modules/work-orders/domain/schemas/dto/response/work-orders.get.response';
+import type {
+  AdjuntoEvidencia,
+  CostoAdicional,
+  MaterialUtilizado,
+  OrdenTrabajoDetalle,
+  TrabajadorAsignado
+} from '@/modules/work-orders/domain/schemas/dto/response/work-orders.get.response';
 import { TIPO_ASIGNACION_LABELS } from '@/modules/work-orders/presentation/components/WorkOrderConfig';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 
@@ -36,7 +52,10 @@ const getFilenameFromUrl = (url: string, fallback: string) => {
   if (!url) return fallback;
   try {
     const parts = url.split('?')[0].split('/').filter(Boolean);
-    if (parts[parts.length - 1] === 'preview' || parts[parts.length - 1] === 'download') {
+    if (
+      parts[parts.length - 1] === 'preview' ||
+      parts[parts.length - 1] === 'download'
+    ) {
       parts.pop();
     }
     return parts.pop() || fallback;
@@ -45,41 +64,57 @@ const getFilenameFromUrl = (url: string, fallback: string) => {
   }
 };
 
-export const IncidentWorkorderDetail: React.FC<IncidentWorkorderDetailProps> = ({ orden }) => {
+export const IncidentWorkorderDetail: React.FC<
+  IncidentWorkorderDetailProps
+> = ({ orden }) => {
   const tipoAsignacionLabel =
     TIPO_ASIGNACION_LABELS[orden.tipoAsignacion] ?? orden.tipoAsignacion;
 
-  const ejecutorLabel =
-    false
-      ? orden.inspectorNombre ?? '—'
-      : orden.inspectorNombre
-        ? `${orden.inspectorNombre} (${orden.inspectorUsername ?? '—'})`
-        : 'Sin asignar';
+  const ejecutorLabel = false
+    ? (orden.inspectorNombre ?? '—')
+    : orden.inspectorNombre
+      ? `${orden.inspectorNombre} (${orden.inspectorUsername ?? '—'})`
+      : 'Sin asignar';
 
   const materiales: MaterialUtilizado[] = orden.materiales;
   const costosAdicionales: CostoAdicional[] = orden.costosAdicionales;
   const personalAsignado: TrabajadorAsignado[] = orden.personalAsignado;
   const adjuntos: AdjuntoEvidencia[] = orden.adjuntos;
 
-  const totalMaterials = materiales.reduce((acc, m) => acc + (m.subtotal || 0), 0);
-  const totalAdicionales = costosAdicionales.reduce((acc, c) => acc + (c.total || 0), 0);
+  const totalMaterials = materiales.reduce(
+    (acc, m) => acc + (m.subtotal || 0),
+    0
+  );
+  const totalAdicionales = costosAdicionales.reduce(
+    (acc, c) => acc + (c.total || 0),
+    0
+  );
   const grandTotal = totalMaterials + totalAdicionales;
 
   return (
     <div className="incident-modal-left-inner">
-      <Card title={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Wrench size={14} />
-            Información General
-          </span>
-          <div className="order-code">
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              N° Orden: <strong style={{ marginLeft: '0.5rem', color: '#6366f1' }}>{orden.codigoOrden}</strong>
+      <Card
+        title={
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              justifyContent: 'space-between'
+            }}
+          >
+            <span
+              className="card__title"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              <Wrench size={14} />
+              Información General
             </span>
           </div>
-        </div>
-      } className="wo-detail-card">
+        }
+        subtitle={`N° Orden: ${orden.codigoOrden}`}
+        className="wo-detail-card"
+      >
         <div className="wo-info-grid">
           <InfoRow
             icon={<Wrench size={14} />}
@@ -150,7 +185,14 @@ export const IncidentWorkorderDetail: React.FC<IncidentWorkorderDetailProps> = (
               icon={<Users size={14} />}
               label="Personal Asignado"
               value={
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.15rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '0.25rem',
+                    marginTop: '0.15rem'
+                  }}
+                >
                   {orden.personalAsignado.map((w) => (
                     <span
                       key={w.idTrabajador}
@@ -162,12 +204,18 @@ export const IncidentWorkorderDetail: React.FC<IncidentWorkorderDetailProps> = (
                         padding: '0.15rem 0.4rem',
                         borderRadius: '0.25rem',
                         fontSize: '0.72rem',
-                        fontWeight: 500,
+                        fontWeight: 500
                       }}
                     >
                       {w.nombreTrabajador}
                       {w.esResponsable && (
-                        <span style={{ fontSize: '0.62rem', marginLeft: '0.25rem', opacity: 0.8 }}>
+                        <span
+                          style={{
+                            fontSize: '0.62rem',
+                            marginLeft: '0.25rem',
+                            opacity: 0.8
+                          }}
+                        >
                           (Resp.)
                         </span>
                       )}
@@ -185,9 +233,6 @@ export const IncidentWorkorderDetail: React.FC<IncidentWorkorderDetailProps> = (
             />
           )}
         </div>
-
-
-
       </Card>
       {/* ── SECTION: MATERIALES Y COSTOS ── */}
       <div className="idp-section">
@@ -197,18 +242,25 @@ export const IncidentWorkorderDetail: React.FC<IncidentWorkorderDetailProps> = (
         </h4>
 
         {materiales.length === 0 && costosAdicionales.length === 0 ? (
-          <div className="idp-empty">No hay materiales ni costos registrados.</div>
+          <div className="idp-empty">
+            No hay materiales ni costos registrados.
+          </div>
         ) : (
           <div className="idp-list">
             {materiales.map((m) => (
               <div key={m.idDetalle} className="idp-item">
                 <div className="idp-item__info">
-                  <span className="idp-item__name">{m.nombreMaterial || 'Material Sin Nombre'}</span>
+                  <span className="idp-item__name">
+                    {m.nombreMaterial || 'Material Sin Nombre'}
+                  </span>
                   <span className="idp-item__sub">
-                    {m.cantidad} ud(s) x {CurrencyFormatter.format(m.costoUnitario)}
+                    {m.cantidad} ud(s) x{' '}
+                    {CurrencyFormatter.format(m.costoUnitario)}
                   </span>
                 </div>
-                <div className="idp-item__value">{CurrencyFormatter.format(m.subtotal)}</div>
+                <div className="idp-item__value">
+                  {CurrencyFormatter.format(m.subtotal)}
+                </div>
               </div>
             ))}
 
@@ -217,16 +269,21 @@ export const IncidentWorkorderDetail: React.FC<IncidentWorkorderDetailProps> = (
                 <div className="idp-item__info">
                   <span className="idp-item__name">{c.concepto}</span>
                   <span className="idp-item__sub">
-                    {c.cantidad} ud(s) x {CurrencyFormatter.format(c.costoUnitario)}
+                    {c.cantidad} ud(s) x{' '}
+                    {CurrencyFormatter.format(c.costoUnitario)}
                   </span>
                 </div>
-                <div className="idp-item__value">{CurrencyFormatter.format(c.total)}</div>
+                <div className="idp-item__value">
+                  {CurrencyFormatter.format(c.total)}
+                </div>
               </div>
             ))}
 
             <div className="idp-total">
               <span className="idp-total__label">Total</span>
-              <span className="idp-total__value">{CurrencyFormatter.format(grandTotal)}</span>
+              <span className="idp-total__value">
+                {CurrencyFormatter.format(grandTotal)}
+              </span>
             </div>
           </div>
         )}
@@ -289,11 +346,27 @@ export const IncidentWorkorderDetail: React.FC<IncidentWorkorderDetailProps> = (
         {adjuntos.length === 0 ? (
           <div className="idp-empty">No hay evidencias adjuntas.</div>
         ) : (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '0.75rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '1rem',
+              marginTop: '0.75rem'
+            }}
+          >
             {adjuntos.map((a) => {
               const realFilename = getFilenameFromUrl(a.url, a.nombreArchivo);
               return (
-                <div key={a.idAdjunto} style={{ width: 90, height: 90, position: 'relative', borderRadius: '0.5rem', overflow: 'hidden' }}>
+                <div
+                  key={a.idAdjunto}
+                  style={{
+                    width: 90,
+                    height: 90,
+                    position: 'relative',
+                    borderRadius: '0.5rem',
+                    overflow: 'hidden'
+                  }}
+                >
                   <EvidenceFiles
                     fileId={a.idAdjunto}
                     filePath={realFilename}

@@ -10,6 +10,11 @@ import { GetProfileUseCase } from '@/modules/users/application/usecases/GetProfi
 import { ChangePasswordUseCase } from '@/modules/users/application/usecases/ChangePasswordUseCase';
 import { ExistsByUsernameUseCase } from '@/modules/users/application/usecases/ExistsByUsernameUseCase';
 import { AssignRoleToUserUseCase } from '@/modules/users/application/usecases/AssignRoleToUserUseCase';
+import { RemoveRoleFromUserUseCase } from '@/modules/users/application/usecases/RemoveRoleFromUserUseCase';
+import { AssignPermissionToUserUseCase } from '@/modules/users/application/usecases/AssignPermissionToUserUseCase';
+import { RemovePermissionFromUserUseCase } from '@/modules/users/application/usecases/RemovePermissionFromUserUseCase';
+import { GetPermissionsByUserUseCase } from '@/modules/users/application/usecases/GetPermissionsByUserUseCase';
+import { GetRolesByUserUseCase } from '@/modules/users/application/usecases/GetRolesByUserUseCase';
 import { FindByUsernameOrEmailUseCase } from '@/modules/users/application/usecases/FindByUsernameOrEmailUseCase';
 // Cross-module dependency: Customers module (DIP — depends on abstraction)
 import { CustomerRepositoryImpl } from '@/modules/customers/infrastructure/repositories/CustomerRepositoryImpl';
@@ -26,6 +31,11 @@ interface UsersContextType {
   getCustomerByIdentificationUseCase: GetCustomerByIdentificationUseCase;
   existsByUsernameUseCase: ExistsByUsernameUseCase;
   assignRoleToUserUseCase: AssignRoleToUserUseCase;
+  removeRoleFromUserUseCase: RemoveRoleFromUserUseCase;
+  assignPermissionToUserUseCase: AssignPermissionToUserUseCase;
+  removePermissionFromUserUseCase: RemovePermissionFromUserUseCase;
+  getPermissionsByUserUseCase: GetPermissionsByUserUseCase;
+  getRolesByUserUseCase: GetRolesByUserUseCase;
   findByUsernameOrEmailUseCase: FindByUsernameOrEmailUseCase;
 }
 
@@ -79,6 +89,26 @@ export const UsersProvider: React.FC<{ children: ReactNode }> = ({
     () => new AssignRoleToUserUseCase(userRepository),
     [userRepository]
   );
+  const removeRoleFromUserUseCase = useMemo(
+    () => new RemoveRoleFromUserUseCase(userRepository),
+    [userRepository]
+  );
+  const assignPermissionToUserUseCase = useMemo(
+    () => new AssignPermissionToUserUseCase(userRepository),
+    [userRepository]
+  );
+  const removePermissionFromUserUseCase = useMemo(
+    () => new RemovePermissionFromUserUseCase(userRepository),
+    [userRepository]
+  );
+  const getPermissionsByUserUseCase = useMemo(
+    () => new GetPermissionsByUserUseCase(userRepository),
+    [userRepository]
+  );
+  const getRolesByUserUseCase = useMemo(
+    () => new GetRolesByUserUseCase(userRepository),
+    [userRepository]
+  );
   const findByUsernameOrEmailUseCase = useMemo(
     () => new FindByUsernameOrEmailUseCase(userRepository),
     [userRepository]
@@ -95,6 +125,11 @@ export const UsersProvider: React.FC<{ children: ReactNode }> = ({
     getCustomerByIdentificationUseCase,
     existsByUsernameUseCase,
     assignRoleToUserUseCase,
+    removeRoleFromUserUseCase,
+    assignPermissionToUserUseCase,
+    removePermissionFromUserUseCase,
+    getPermissionsByUserUseCase,
+    getRolesByUserUseCase,
     findByUsernameOrEmailUseCase
   };
 

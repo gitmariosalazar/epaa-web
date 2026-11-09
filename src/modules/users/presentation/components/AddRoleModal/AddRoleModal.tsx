@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Modal } from "@/shared/presentation/components/Modal/Modal";
-import { Button } from "@/shared/presentation/components/Button/Button";
+import { Modal } from '@/shared/presentation/components/Modal/Modal';
+import { Button } from '@/shared/presentation/components/Button/Button';
 import { Shield, ShieldAlert, User, Star, CheckCircle2 } from 'lucide-react';
 import { GetRolesUseCase } from '@/modules/roles/application/usecases/GetRolesUseCase';
 import { RoleRepositoryImpl } from '@/modules/roles/infrastructure/repositories/RoleRepositoryImpl';
@@ -25,7 +25,7 @@ export default function AddRoleModal({
   isOpen,
   userSelected,
   onClose,
-  onSave,
+  onSave
 }: AddRoleModalProps) {
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -36,12 +36,20 @@ export default function AddRoleModal({
     if (isOpen) {
       setLoading(true);
       setError(null);
-      getRolesUseCase.execute(100, 0)
-        .then(data => {
+      getRolesUseCase
+        .execute(100, 0)
+        .then((data) => {
           // Guardar solo roles activos
-          setRoles(data.filter(r => r.isActive && r.rolId !== 9 && !userSelected.roles.map(role => role.id).includes(r.rolId)));
+          setRoles(
+            data.filter(
+              (r) =>
+                r.isActive &&
+                r.rolId !== 9 &&
+                !userSelected.roles.map((role) => role.id).includes(r.rolId)
+            )
+          );
         })
-        .catch(err => {
+        .catch((err) => {
           console.error('Error fetching roles:', err);
           setError('Error al cargar los roles desde la base de datos.');
         })
@@ -56,10 +64,10 @@ export default function AddRoleModal({
   // Función auxiliar para asignar ícono según el nombre del rol (dinámico)
   const getRoleIcon = (roleName: string) => {
     const upperName = roleName.toUpperCase();
-    if (upperName.includes('ADMIN')) return <ShieldAlert size={18} />;
-    if (upperName.includes('SUPERVISOR')) return <Star size={18} />;
-    if (upperName.includes('EMPLEAD')) return <User size={18} />;
-    return <Shield size={18} />;
+    if (upperName.includes('ADMIN')) return <ShieldAlert size={16} />;
+    if (upperName.includes('SUPERVISOR')) return <Star size={16} />;
+    if (upperName.includes('EMPLEAD')) return <User size={16} />;
+    return <Shield size={16} />;
   };
 
   // Footer con botones de acción
@@ -81,25 +89,39 @@ export default function AddRoleModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={<>
-        <div className="modal-title">
-          <span>Asignar Nuevo Rol al usuario {userSelected.firstName} {userSelected.lastName}</span>
-        </div>
-        <div className="current-roles">
-          {
-            userSelected.roles.length > 0 ? (
+      headerColor="indigo"
+      title={
+        <>
+          <div className="modal-title">
+            <span>
+              Asignar Nuevo Rol al usuario {userSelected.firstName}{' '}
+              {userSelected.lastName}
+            </span>
+          </div>
+          <div className="current-roles">
+            {userSelected.roles.length > 0 ? (
               <>
                 <span className="current-roles__title">Roles Actuales: </span>
-                {userSelected.roles.map(role => (
-                  <ColorChip className='color-chip-roles' key={role.id} color="yellow" label={role.name} size='xs' variant='soft' borderRadius={5} />
+                {userSelected.roles.map((role) => (
+                  <ColorChip
+                    className="color-chip-roles"
+                    key={role.id}
+                    color="yellow"
+                    label={role.name}
+                    size="xs"
+                    variant="soft"
+                    borderRadius={5}
+                  />
                 ))}
               </>
             ) : (
-              <p className="user-without-role">El usuario no tiene roles asignados actualmente</p>
-            )
-          }
-        </div>
-      </>}
+              <p className="user-without-role">
+                El usuario no tiene roles asignados actualmente
+              </p>
+            )}
+          </div>
+        </>
+      }
       description="Selecciona el rol que deseas otorgarle a este usuario. Esto definirá sus permisos de acceso y capacidades en la plataforma."
       footer={footerContent}
       size="lg" // Hacemos el modal más ancho
@@ -109,12 +131,10 @@ export default function AddRoleModal({
           <CircularProgress />
         </div>
       ) : error ? (
-        <div className="add-role-modal__error">
-          {error}
-        </div>
+        <div className="add-role-modal__error">{error}</div>
       ) : (
         <div className="add-role-modal__grid">
-          {roles.map(role => {
+          {roles.map((role) => {
             const isSelected = selectedRoleId === role.rolId;
 
             return (
@@ -125,7 +145,7 @@ export default function AddRoleModal({
               >
                 {isSelected && (
                   <div className="add-role-modal__check">
-                    <CheckCircle2 size={24} strokeWidth={2.5} />
+                    <CheckCircle2 size={20} strokeWidth={2.5} />
                   </div>
                 )}
 
@@ -135,9 +155,7 @@ export default function AddRoleModal({
                   </div>
 
                   <div className="add-role-modal__card-content">
-                    <h3 className="add-role-modal__card-title">
-                      {role.name}
-                    </h3>
+                    <h3 className="add-role-modal__card-title">{role.name}</h3>
                   </div>
                 </div>
               </div>

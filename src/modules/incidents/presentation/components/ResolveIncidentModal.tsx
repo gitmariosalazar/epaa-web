@@ -44,7 +44,12 @@ interface ResolveIncidentModalProps {
 }
 
 // Helper to compress images client-side before base64 conversion
-const compressImage = (file: File, maxWidth = 1024, maxHeight = 1024, quality = 0.7): Promise<string> => {
+const compressImage = (
+  file: File,
+  maxWidth = 1024,
+  maxHeight = 1024,
+  quality = 0.7
+): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -104,7 +109,8 @@ function useWorkOrderDetail(orderCode: string | null | undefined) {
     const repo = new ProcessWorkOrderRepositoryImpl();
     const useCase = new GetOrdenTrabajoDetalleByNumeroOrdenUseCase(repo);
 
-    useCase.execute(orderCode)
+    useCase
+      .execute(orderCode)
       .then((data) => {
         if (mounted) setWorkOrder(data);
       })
@@ -116,7 +122,9 @@ function useWorkOrderDetail(orderCode: string | null | undefined) {
         if (mounted) setLoadingOrder(false);
       });
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [orderCode]);
 
   return { workOrder, loadingOrder };
@@ -129,7 +137,7 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
   incidentCode,
   orderCode,
   onResolve,
-  onResolved,
+  onResolved
 }) => {
   const incidentCtx = useOptionalIncidentContext();
   const incidents = incidentCtx?.incidents ?? [];
@@ -159,8 +167,14 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
 
   const workOrderCost = React.useMemo(() => {
     if (!workOrder) return 0;
-    const matTotal = (workOrder.materiales || []).reduce((acc, m) => acc + (m.subtotal || 0), 0);
-    const addTotal = (workOrder.costosAdicionales || []).reduce((acc, c) => acc + (c.total || 0), 0);
+    const matTotal = (workOrder.materiales || []).reduce(
+      (acc, m) => acc + (m.subtotal || 0),
+      0
+    );
+    const addTotal = (workOrder.costosAdicionales || []).reduce(
+      (acc, c) => acc + (c.total || 0),
+      0
+    );
     return matTotal + addTotal;
   }, [workOrder]);
 
@@ -171,7 +185,7 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
   const [hiddenWoImages, setHiddenWoImages] = useState<Set<string>>(new Set());
 
   const handleRemoveWoImage = (idAdjunto: string) => {
-    setHiddenWoImages(prev => {
+    setHiddenWoImages((prev) => {
       const next = new Set(prev);
       next.add(idAdjunto);
       return next;
@@ -183,7 +197,10 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
     if (!url) return fallback;
     try {
       const parts = url.split('?')[0].split('/').filter(Boolean);
-      if (parts[parts.length - 1] === 'preview' || parts[parts.length - 1] === 'download') {
+      if (
+        parts[parts.length - 1] === 'preview' ||
+        parts[parts.length - 1] === 'download'
+      ) {
         parts.pop();
       }
       return parts.pop() || fallback;
@@ -231,9 +248,10 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
     setFormError(null);
 
     // Filter out hidden work order images and get their true filenames
-    const activeWoFilenames = workOrder?.adjuntos
-      ?.filter((a, idx) => !hiddenWoImages.has(a.idAdjunto || idx.toString()))
-      ?.map(a => getFilenameFromUrl(a.url, a.nombreArchivo)) || [];
+    const activeWoFilenames =
+      workOrder?.adjuntos
+        ?.filter((a, idx) => !hiddenWoImages.has(a.idAdjunto || idx.toString()))
+        ?.map((a) => getFilenameFromUrl(a.url, a.nombreArchivo)) || [];
 
     // Fetch the blobs for the active work order images and convert them to Base64
     let resolvedWoImagesBase64: string[] = [];
@@ -270,7 +288,10 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
         images: finalImages
       });
       onClose();
-      await onResolved?.({ newImages: [...images], description: description.trim() });
+      await onResolved?.({
+        newImages: [...images],
+        description: description.trim()
+      });
     } catch (err: any) {
       setFormError(err.message || 'Error al resolver el incidente.');
     } finally {
@@ -288,177 +309,208 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
       title={`Resolver Incidente ${incident?.incidentCode ?? incidentCode ?? ''}`}
       description="Registre la resolución del incidente"
     >
-        <div className="incident-resolve-modal-body">
-          {/* Left Panel - Work Order Info */}
-          <div className="incident-modal-content-left">
-            {loadingOrder ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                Cargando detalles de orden...
-              </div>
-            ) : workOrder ? (
-              <IncidentWorkorderDetail orden={workOrder} />
-            ) : effectiveOrderCode ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444' }}>
-                No se pudo cargar la orden de trabajo.
-              </div>
-            ) : (
-              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                Este incidente no tiene una orden de trabajo asociada.
-              </div>
-            )}
-          </div>
+      <div className="incident-resolve-modal-body">
+        {/* Left Panel - Work Order Info */}
+        <div className="incident-modal-content-left">
+          {loadingOrder ? (
+            <div
+              style={{
+                padding: '2rem',
+                textAlign: 'center',
+                color: 'var(--text-muted)'
+              }}
+            >
+              Cargando detalles de orden...
+            </div>
+          ) : workOrder ? (
+            <IncidentWorkorderDetail orden={workOrder} />
+          ) : effectiveOrderCode ? (
+            <div
+              style={{ padding: '2rem', textAlign: 'center', color: '#ef4444' }}
+            >
+              No se pudo cargar la orden de trabajo.
+            </div>
+          ) : (
+            <div
+              style={{
+                padding: '2rem',
+                textAlign: 'center',
+                color: 'var(--text-muted)'
+              }}
+            >
+              Este incidente no tiene una orden de trabajo asociada.
+            </div>
+          )}
+        </div>
 
-          {/* Right Panel - Resolution Form */}
-          <div className="incident-modal-content-right">
-            <form onSubmit={handleSubmit} className="incident-modal-body-form">
-
-              {/* Incident Details Card */}
-              {incident && (
-                <div className="incident-resolve-info-card" style={{ margin: 0 }}>
-                  <div className="info-card-header">
-                    <span className="info-card-title">Información del Incidente</span>
-                    {incident.suggestedPriority && (
-                      <span
-                        className={`priority-badge priority-${incident.suggestedPriority.toLowerCase()}`}
-                      >
-                        {incident.suggestedPriority}
+        {/* Right Panel - Resolution Form */}
+        <div className="incident-modal-content-right">
+          <form onSubmit={handleSubmit} className="incident-modal-body-form">
+            {/* Incident Details Card */}
+            {incident && (
+              <div className="incident-resolve-info-card" style={{ margin: 0 }}>
+                <div className="info-card-header">
+                  <span className="info-card-title">
+                    Información del Incidente
+                  </span>
+                  {incident.suggestedPriority && (
+                    <span
+                      className={`priority-badge priority-${incident.suggestedPriority.toLowerCase()}`}
+                    >
+                      {incident.suggestedPriority}
+                    </span>
+                  )}
+                </div>
+                <div className="info-card-grid">
+                  {incident.connectionId && (
+                    <div className="info-card-item">
+                      <span className="info-label">
+                        Clave Catastral / Conexión:
                       </span>
-                    )}
-                  </div>
-                  <div className="info-card-grid">
-                    {incident.connectionId && (
-                      <div className="info-card-item">
-                        <span className="info-label">Clave Catastral / Conexión:</span>
-                        <span className="info-value">{incident.connectionId}</span>
-                      </div>
-                    )}
-                    {(incident.categoryName || incident.incidentTypeName) && (
-                      <div className="info-card-item">
-                        <span className="info-label">Categoría / Tipo:</span>
-                        <span className="info-value">
-                          {incident.categoryName} - {incident.incidentTypeName}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  {incident.reportDescription && (
-                    <div className="info-card-desc">
-                      <span className="info-label">Descripción del Problema:</span>
-                      <p className="info-desc-text">{incident.reportDescription}</p>
+                      <span className="info-value">
+                        {incident.connectionId}
+                      </span>
+                    </div>
+                  )}
+                  {(incident.categoryName || incident.incidentTypeName) && (
+                    <div className="info-card-item">
+                      <span className="info-label">Categoría / Tipo:</span>
+                      <span className="info-value">
+                        {incident.categoryName} - {incident.incidentTypeName}
+                      </span>
                     </div>
                   )}
                 </div>
-              )}
-
-              <div className="form-group">
-                <TextArea
-                  label="Descripción del Trabajo Realizado / Resolución *"
-                  rows={4}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describa los trabajos de reparación o justifique la resolución..."
-                  required
-                />
+                {incident.reportDescription && (
+                  <div className="info-card-desc">
+                    <span className="info-label">
+                      Descripción del Problema:
+                    </span>
+                    <p className="info-desc-text">
+                      {incident.reportDescription}
+                    </p>
+                  </div>
+                )}
               </div>
+            )}
 
-              <div className="form-grid" style={{ gridTemplateColumns: '1fr 1fr', alignItems: 'center', gap: '1.25rem' }}>
-                <div className="form-group">
-                  <label className="input__label">Costo de Reparación ($)</label>
-                  <div style={{
+            <div className="form-group">
+              <TextArea
+                label="Descripción del Trabajo Realizado / Resolución *"
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describa los trabajos de reparación o justifique la resolución..."
+                required
+              />
+            </div>
+
+            <div
+              className="form-grid"
+              style={{
+                gridTemplateColumns: '1fr 1fr',
+                alignItems: 'center',
+                gap: '1.25rem'
+              }}
+            >
+              <div className="form-group">
+                <label className="input__label">Costo de Reparación ($)</label>
+                <div
+                  style={{
                     background: 'rgba(99, 102, 241, 0.08)',
                     border: '1px solid rgba(99, 102, 241, 0.2)',
                     borderRadius: '0.5rem',
                     padding: '0.6rem 1rem',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500, letterSpacing: '0.5px' }}>TOTAL OT</span>
-                    <span style={{ fontSize: '1.125rem', fontWeight: 600, color: '#818cf8' }}>
-                      ${workOrderCost.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="form-group" style={{ marginTop: '1.56rem' }}>
-                  <div className={`charge-checkbox-card ${chargeToUser ? 'is-checked' : ''}`}>
-                    <CheckBox
-                      checked={chargeToUser}
-                      onCheckedChange={setChargeToUser}
-                      label="Cobrar a la Planilla del Usuario"
-                      name="chargeToUser"
-                      value="charge"
-                    />
-                  </div>
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      color: 'var(--text-muted)',
+                      fontWeight: 500,
+                      letterSpacing: '0.5px'
+                    }}
+                  >
+                    TOTAL OT
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '1.125rem',
+                      fontWeight: 600,
+                      color: '#818cf8'
+                    }}
+                  >
+                    ${workOrderCost.toFixed(2)}
+                  </span>
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="input__label">Imágenes de Resolución / Reparación</label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileChange}
-                  style={{ display: 'none' }}
-                />
+              <div className="form-group" style={{ marginTop: '1.56rem' }}>
+                <div
+                  className={`charge-checkbox-card ${chargeToUser ? 'is-checked' : ''}`}
+                >
+                  <CheckBox
+                    checked={chargeToUser}
+                    onCheckedChange={setChargeToUser}
+                    label="Cobrar a la Planilla del Usuario"
+                    name="chargeToUser"
+                    value="charge"
+                  />
+                </div>
+              </div>
+            </div>
 
-                <div className="evidence-upload-container">
-                  {/* Uploader Box */}
-                  <div
-                    className="evidence-upload-trigger-box"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <UploadCloud size={20} className="upload-trigger-icon" />
-                    <span className="upload-trigger-text">Cargar</span>
-                  </div>
+            <div className="form-group">
+              <label className="input__label">
+                Imágenes de Resolución / Reparación
+              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
 
-                  {/* Existing Work Order Evidences */}
-                  {workOrder?.adjuntos?.map((a, idx) => {
-                    const idAdjunto = a.idAdjunto || idx.toString();
-                    if (hiddenWoImages.has(idAdjunto)) return null;
+              <div className="evidence-upload-container">
+                {/* Uploader Box */}
+                <div
+                  className="evidence-upload-trigger-box"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <UploadCloud size={20} className="upload-trigger-icon" />
+                  <span className="upload-trigger-text">Cargar</span>
+                </div>
 
-                    const realFilename = getFilenameFromUrl(a.url, a.nombreArchivo);
-                    return (
-                      <div key={`wo-img-wrapper-${idAdjunto}`} className="evidence-image-preview-wrapper" style={{ border: 'none', background: 'transparent' }}>
-                        <EvidenceFiles
-                          fileId={idAdjunto}
-                          filePath={realFilename}
-                          category="work_orders"
-                          type="OT"
-                          allowDownload={false}
-                          className="incident-evidence-thumb"
-                        />
-                        <Tooltip
-                          content="Ocultar imagen"
-                          position="top"
-                          style={{
-                            position: 'absolute',
-                            top: '4px',
-                            right: '4px',
-                            zIndex: 10
-                          }}
-                        >
-                          <button
-                            type="button"
-                            className="evidence-image-remove-btn"
-                            onClick={() => handleRemoveWoImage(idAdjunto)}
-                            title="Ocultar imagen"
-                          >
-                            <X size={12} />
-                          </button>
-                        </Tooltip>
-                      </div>
-                    );
-                  })}
+                {/* Existing Work Order Evidences */}
+                {workOrder?.adjuntos?.map((a, idx) => {
+                  const idAdjunto = a.idAdjunto || idx.toString();
+                  if (hiddenWoImages.has(idAdjunto)) return null;
 
-                  {/* New Image Previews */}
-                  {images.map((img, idx) => (
-                    <div key={idx} className="evidence-image-preview-wrapper">
-                      <img src={img} alt={`resolucion-${idx}`} className="evidence-image-preview" />
+                  const realFilename = getFilenameFromUrl(
+                    a.url,
+                    a.nombreArchivo
+                  );
+                  return (
+                    <div
+                      key={`wo-img-wrapper-${idAdjunto}`}
+                      className="evidence-image-preview-wrapper"
+                      style={{ border: 'none', background: 'transparent' }}
+                    >
+                      <EvidenceFiles
+                        fileId={idAdjunto}
+                        filePath={realFilename}
+                        category="work_orders"
+                        type="OT"
+                        allowDownload={false}
+                        className="incident-evidence-thumb"
+                      />
                       <Tooltip
-                        content="Eliminar imagen"
+                        content="Ocultar imagen"
                         position="top"
                         style={{
                           position: 'absolute',
@@ -470,39 +522,104 @@ export const ResolveIncidentModal: React.FC<ResolveIncidentModalProps> = ({
                         <button
                           type="button"
                           className="evidence-image-remove-btn"
-                          onClick={() => handleRemoveImage(idx)}
-                          title="Eliminar imagen"
+                          onClick={() => handleRemoveWoImage(idAdjunto)}
+                          title="Ocultar imagen"
                         >
                           <X size={12} />
                         </button>
                       </Tooltip>
                     </div>
-                  ))}
-                </div>
-              </div>
+                  );
+                })}
 
-              {formError && (
-                <div className="incident-error-banner" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-                  <AlertCircle size={16} />
-                  <span>{formError}</span>
-                </div>
-              )}
-
-              <div className="incident-modal-footer" style={{ marginTop: 'auto', padding: '1rem 0 0 0', borderTop: 'none', background: 'transparent' }}>
-                <Tooltip content="Cancelar" position="top">
-                  <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
-                    Cancelar
-                  </Button>
-                </Tooltip>
-                <Tooltip content="Resolver Incidente" position="top">
-                  <Button type="submit" variant="primary" disabled={isSubmitting}>
-                    {isSubmitting ? 'Guardando...' : 'Resolver Incidente'}
-                  </Button>
-                </Tooltip>
+                {/* New Image Previews */}
+                {images.map((img, idx) => (
+                  <div key={idx} className="evidence-image-preview-wrapper">
+                    <img
+                      src={img}
+                      alt={`resolucion-${idx}`}
+                      className="evidence-image-preview"
+                    />
+                    <Tooltip
+                      content="Eliminar imagen"
+                      position="top"
+                      style={{
+                        position: 'absolute',
+                        top: '4px',
+                        right: '4px',
+                        zIndex: 10
+                      }}
+                    >
+                      <button
+                        type="button"
+                        className="evidence-image-remove-btn"
+                        onClick={() => handleRemoveImage(idx)}
+                        title="Eliminar imagen"
+                      >
+                        <X size={12} />
+                      </button>
+                    </Tooltip>
+                  </div>
+                ))}
               </div>
-            </form>
-          </div>
+            </div>
+
+            {formError && (
+              <div
+                className="incident-error-banner"
+                style={{ marginTop: '1rem', marginBottom: '1rem' }}
+              >
+                <AlertCircle size={16} />
+                <span>{formError}</span>
+              </div>
+            )}
+
+            <div
+              className="incident-modal-footer"
+              style={{
+                marginTop: 'auto',
+                padding: '1rem 0 0 0',
+                borderTop: 'none',
+                background: 'transparent'
+              }}
+            >
+              <Tooltip
+                content="Cancelar"
+                position="top"
+                themeColor="red"
+                followCursor={false}
+              >
+                <Button
+                  type="button"
+                  variant="dashed"
+                  color="red"
+                  onClick={onClose}
+                  disabled={isSubmitting}
+                  size="sm"
+                >
+                  Cancelar
+                </Button>
+              </Tooltip>
+              <Tooltip
+                content="Resolver Incidente"
+                position="top"
+                themeColor="blue"
+                followCursor={false}
+              >
+                <Button
+                  type="submit"
+                  variant="action"
+                  color="blue"
+                  disabled={isSubmitting}
+                  size="sm"
+                >
+                  {isSubmitting ? 'Guardando...' : 'Resolver Incidente'}
+                </Button>
+              </Tooltip>
+            </div>
+          </form>
         </div>
+      </div>
     </Modal>
   );
 };

@@ -10,7 +10,14 @@
  *   - DIP: delega la acción de subida a través de la función `onAddAttachment`.
  */
 import React, { useState, useMemo } from 'react';
-import { Paperclip, FileText, ExternalLink, UploadCloud, X, Layers } from 'lucide-react';
+import {
+  Paperclip,
+  FileText,
+  ExternalLink,
+  UploadCloud,
+  X,
+  Layers
+} from 'lucide-react';
 import { Card } from '@/shared/presentation/components/Card/Card';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import type { AdjuntoEvidencia } from '../../../domain/schemas/dto/response/work-orders.get.response';
@@ -18,7 +25,10 @@ import './WorkOrderAttachmentsCard.css';
 import { EvidenceFiles } from '@/shared/files';
 import type { FileCategory } from '@/shared/files';
 import { PhotoLightbox } from '@/modules/incidents/presentation/components/PhotoLightbox';
-import { EVIDENCE_STAGES, type EvidenceStageCode } from '../../../domain/constants/evidence-stage';
+import {
+  EVIDENCE_STAGES,
+  type EvidenceStageCode
+} from '../../../domain/constants/evidence-stage';
 import { Select } from '@/shared/presentation/components/Input/Select';
 
 interface WorkOrderAttachmentsCardProps {
@@ -29,18 +39,39 @@ interface WorkOrderAttachmentsCardProps {
   defaultStage?: EvidenceStageCode;
 }
 
-const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'tiff', 'tif']);
+const IMAGE_EXTENSIONS = new Set([
+  'jpg',
+  'jpeg',
+  'png',
+  'gif',
+  'webp',
+  'bmp',
+  'svg',
+  'tiff',
+  'tif'
+]);
 
 const isImageAttachment = (adj: AdjuntoEvidencia): boolean => {
   if (!adj) return false;
 
-  const mime = (adj.mimeType || (adj as any).mime_type || (adj as any).type || '').toLowerCase();
+  const mime = (
+    adj.mimeType ||
+    (adj as any).mime_type ||
+    (adj as any).type ||
+    ''
+  ).toLowerCase();
   if (mime.startsWith('image/')) return true;
 
-  const tipo = (adj.tipoAdjunto || (adj as any).tipo_adjunto || '').toLowerCase();
-  if (tipo.startsWith('image/') || tipo === 'foto' || tipo === 'imagen') return true;
+  const tipo = (
+    adj.tipoAdjunto ||
+    (adj as any).tipo_adjunto ||
+    ''
+  ).toLowerCase();
+  if (tipo.startsWith('image/') || tipo === 'foto' || tipo === 'imagen')
+    return true;
 
-  const filename = adj.nombreArchivo || (adj as any).nombre_archivo || adj.url || '';
+  const filename =
+    adj.nombreArchivo || (adj as any).nombre_archivo || adj.url || '';
   const ext = filename.split('?')[0].split('.').pop()?.toLowerCase();
   return ext ? IMAGE_EXTENSIONS.has(ext) : false;
 };
@@ -50,7 +81,7 @@ const STAGE_LABELS: Record<string, string> = {
   [EVIDENCE_STAGES.SAFETY_INSPECTION]: 'Inspección Previa / Seguridad',
   [EVIDENCE_STAGES.IN_PROGRESS]: 'En Proceso',
   [EVIDENCE_STAGES.WORK_COMPLETED]: 'Trabajo Terminado',
-  [EVIDENCE_STAGES.CUSTOMER_APPROVAL]: 'Conformidad del Cliente',
+  [EVIDENCE_STAGES.CUSTOMER_APPROVAL]: 'Conformidad del Cliente'
 };
 
 const STAGE_ORDER: string[] = [
@@ -58,26 +89,31 @@ const STAGE_ORDER: string[] = [
   EVIDENCE_STAGES.SAFETY_INSPECTION,
   EVIDENCE_STAGES.IN_PROGRESS,
   EVIDENCE_STAGES.WORK_COMPLETED,
-  EVIDENCE_STAGES.CUSTOMER_APPROVAL,
+  EVIDENCE_STAGES.CUSTOMER_APPROVAL
 ];
 
-export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> = ({
+export const WorkOrderAttachmentsCard: React.FC<
+  WorkOrderAttachmentsCardProps
+> = ({
   adjuntos: adjuntosRaw,
   onAddAttachment,
   isLoading = false,
   category = 'work_orders',
-  defaultStage = EVIDENCE_STAGES.IN_PROGRESS,
+  defaultStage = EVIDENCE_STAGES.IN_PROGRESS
 }) => {
   const adjuntos = adjuntosRaw ?? [];
 
   // Form states
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
-  const [selectedStage, setSelectedStage] = useState<EvidenceStageCode>(defaultStage);
+  const [selectedStage, setSelectedStage] =
+    useState<EvidenceStageCode>(defaultStage);
   const [isDragging, setIsDragging] = useState(false);
 
   // Lightbox state
-  const [activeLightboxGroup, setActiveLightboxGroup] = useState<string | null>(null);
+  const [activeLightboxGroup, setActiveLightboxGroup] = useState<string | null>(
+    null
+  );
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const handleFilesSelected = (files: File[]) => {
@@ -187,16 +223,27 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
     return { map, keys };
   }, [adjuntos]);
 
-  const totalImagenes = useMemo(() => adjuntos.filter(isImageAttachment).length, [adjuntos]);
-  const totalDocumentos = useMemo(() => adjuntos.filter((a) => !isImageAttachment(a)).length, [adjuntos]);
+  const totalImagenes = useMemo(
+    () => adjuntos.filter(isImageAttachment).length,
+    [adjuntos]
+  );
+  const totalDocumentos = useMemo(
+    () => adjuntos.filter((a) => !isImageAttachment(a)).length,
+    [adjuntos]
+  );
 
   const currentLightboxPhotos = useMemo(() => {
-    if (!activeLightboxGroup || !groupedEvidence.map[activeLightboxGroup]) return [];
+    if (!activeLightboxGroup || !groupedEvidence.map[activeLightboxGroup])
+      return [];
     return groupedEvidence.map[activeLightboxGroup].filter(isImageAttachment);
   }, [activeLightboxGroup, groupedEvidence]);
 
   return (
-    <Card title={`Evidencias y Archivos Adjuntos (${adjuntos.length})`} className="wo-detail-card">
+    <Card
+      title={`Evidencias y Archivos Adjuntos (${adjuntos.length})`}
+      className="wo-detail-card"
+      icon={<Paperclip size={16} />}
+    >
       {adjuntos.length === 0 ? (
         <div
           style={{
@@ -205,10 +252,13 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
             background: 'rgba(0,0,0,0.01)',
             borderRadius: '0.375rem',
             border: '1px dashed rgba(0,0,0,0.06)',
-            marginBottom: onAddAttachment ? '1rem' : '0',
+            marginBottom: onAddAttachment ? '1rem' : '0'
           }}
         >
-          <p className="wo-empty-text" style={{ margin: 0, fontSize: '0.78rem' }}>
+          <p
+            className="wo-empty-text"
+            style={{ margin: 0, fontSize: '0.78rem' }}
+          >
             No hay adjuntos cargados para esta orden.
           </p>
         </div>
@@ -222,13 +272,17 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
             const label = STAGE_LABELS[stageKey] || stageKey;
 
             return (
-              <div key={stageKey} className="detail-section" style={{ marginBottom: '1.25rem' }}>
+              <div
+                key={stageKey}
+                className="detail-section"
+                style={{ marginBottom: '1.25rem' }}
+              >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.45rem',
-                    marginBottom: '0.65rem',
+                    marginBottom: '0.65rem'
                   }}
                 >
                   <Layers size={14} color="#0284c7" />
@@ -240,7 +294,7 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
                       color: '#0284c7',
                       textTransform: 'uppercase',
                       margin: 0,
-                      letterSpacing: '0.02em',
+                      letterSpacing: '0.02em'
                     }}
                   >
                     {label} ({items.length})
@@ -249,7 +303,10 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
 
                 {/* Galería de imágenes */}
                 {imgs.length > 0 && (
-                  <div className="photos-gallery" style={{ marginBottom: docs.length > 0 ? '0.75rem' : '0' }}>
+                  <div
+                    className="photos-gallery"
+                    style={{ marginBottom: docs.length > 0 ? '0.75rem' : '0' }}
+                  >
                     {imgs.map((photo, idx) => (
                       <EvidenceFiles
                         key={photo.idAdjunto}
@@ -282,7 +339,10 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
                         <span className="wo-attachment-doc-row__type">
                           {doc.tipoAdjunto || 'Documento'}
                         </span>
-                        <ExternalLink size={12} style={{ marginLeft: 'auto', opacity: 0.5 }} />
+                        <ExternalLink
+                          size={12}
+                          style={{ marginLeft: 'auto', opacity: 0.5 }}
+                        />
                       </a>
                     ))}
                   </div>
@@ -310,26 +370,38 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
               marginBottom: '0.85rem',
               fontSize: '0.85rem',
               fontWeight: 700,
-              color: 'var(--text-secondary)',
+              color: 'var(--text-secondary)'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            >
               <UploadCloud size={16} /> Subir Evidencia (Max. 10 archivos)
             </div>
 
             {/* Selector de Etapa de Evidencia */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <label
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: 'var(--text-secondary)'
+                }}
+              >
                 Etapa:
               </label>
               <Select
                 value={selectedStage}
-                onChange={(e) => setSelectedStage(e.target.value as EvidenceStageCode)}
+                onChange={(e) =>
+                  setSelectedStage(e.target.value as EvidenceStageCode)
+                }
                 size="small"
                 width={180}
                 options={STAGE_ORDER.map((stage) => ({
                   value: stage,
-                  label: STAGE_LABELS[stage] || stage,
+                  label: STAGE_LABELS[stage] || stage
                 }))}
               />
             </div>
@@ -338,9 +410,16 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
           <form onSubmit={handleSubmit} className="wo-attachments-upload-form">
             <div className="wo-attachments-upload-grid">
               {/* Box de Carga */}
-              <div className={`wo-attachments-upload-trigger ${isDragging ? 'dragging' : ''}`}>
-                <UploadCloud size={24} className="wo-attachments-upload-trigger__icon" />
-                <span className="wo-attachments-upload-trigger__text">CARGAR</span>
+              <div
+                className={`wo-attachments-upload-trigger ${isDragging ? 'dragging' : ''}`}
+              >
+                <UploadCloud
+                  size={24}
+                  className="wo-attachments-upload-trigger__icon"
+                />
+                <span className="wo-attachments-upload-trigger__text">
+                  CARGAR
+                </span>
                 <input
                   type="file"
                   className="wo-attachments-upload-trigger__input"
@@ -367,7 +446,10 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
                     />
                   ) : (
                     <div className="wo-attachments-preview-card__doc">
-                      <FileText size={24} className="wo-attachments-preview-card__doc-icon" />
+                      <FileText
+                        size={24}
+                        className="wo-attachments-preview-card__doc-icon"
+                      />
                       <span className="wo-attachments-preview-card__doc-name">
                         {file.name}
                       </span>
@@ -393,7 +475,11 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
                 disabled={selectedFiles.length === 0 || isLoading}
                 leftIcon={<UploadCloud size={14} />}
                 isLoading={isLoading}
-                style={{ padding: '0 1.5rem', background: '#0284c7', fontWeight: 600 }}
+                style={{
+                  padding: '0 1.5rem',
+                  background: '#0284c7',
+                  fontWeight: 600
+                }}
               >
                 Subir Archivos ({selectedFiles.length})
               </Button>
@@ -405,7 +491,9 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
       {adjuntos.length > 0 && (
         <div className="wo-attachments-legend" style={{ marginTop: '1rem' }}>
           <Paperclip size={11} />
-          <span>{totalImagenes} fotos · {totalDocumentos} documentos</span>
+          <span>
+            {totalImagenes} fotos · {totalDocumentos} documentos
+          </span>
         </div>
       )}
 
@@ -415,7 +503,7 @@ export const WorkOrderAttachmentsCard: React.FC<WorkOrderAttachmentsCardProps> =
           photos={currentLightboxPhotos.map((p) => ({
             photoId: p.idAdjunto,
             filePath: p.url,
-            type: p.mimeType,
+            type: p.mimeType
           }))}
           activeIndex={lightboxIndex}
           category={category}

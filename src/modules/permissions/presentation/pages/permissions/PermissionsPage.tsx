@@ -37,6 +37,20 @@ export const PermissionsPage: React.FC = () => {
     { header: 'Name', accessor: 'permissionName' },
     { header: 'Description', accessor: 'permissionDescription' },
     {
+      header: 'Scope',
+      accessor: (perm) =>
+        perm.scopes ? (
+          <ColorChip
+            color="var(--primary)"
+            label={perm.scopes}
+            size="xs"
+            variant="soft"
+          />
+        ) : (
+          <span style={{ color: 'var(--text-muted)' }}>-</span>
+        )
+    },
+    {
       header: 'Status',
       accessor: (perm) =>
         perm.isActive ? (
@@ -171,7 +185,15 @@ export const PermissionsPage: React.FC = () => {
             }
           />
           <Input
-            label="Module"
+            label="Scope"
+            value={formData.scopes || ''}
+            onChange={(e) =>
+              setFormData({ ...formData, scopes: e.target.value })
+            }
+            placeholder="e.g., ot:leer o users:create"
+          />
+          <Input
+            label="Module / Categoría ID"
             value={formData.categoryId || ''}
             onChange={(e) =>
               setFormData({ ...formData, categoryId: e.target.value })

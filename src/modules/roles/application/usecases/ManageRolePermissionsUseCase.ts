@@ -42,6 +42,16 @@ export class ManageRolePermissionsUseCase {
     );
   }
 
+  async assignPermissionsBatch(
+    rolId: number,
+    permissionIds: number[]
+  ): Promise<void> {
+    await this.rolePermissionRepository.assignPermissionsBatch(
+      rolId,
+      permissionIds
+    );
+  }
+
   async removePermission(rolId: number, permissionId: number): Promise<void> {
     const rolPermissionId =
       await this.rolePermissionRepository.findRolPermissionId(

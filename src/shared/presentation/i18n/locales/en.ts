@@ -352,8 +352,8 @@ export const en = {
       },
       exportPdf: 'Export PDF',
       table: {
-        totalRecords: 'Total Records: {{count}}',
-        rowsPerPage: 'Rows per page:',
+        totalRecords: 'Records: {{count}}',
+        rowsPerPage: 'Rows/Page:',
         loading: 'Loading...',
         noData: 'No data found'
       },

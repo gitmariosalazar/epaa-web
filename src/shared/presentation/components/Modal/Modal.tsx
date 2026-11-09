@@ -16,7 +16,14 @@ export interface ModalProps {
   footer?: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'full';
   icon?: React.ReactNode;
-  headerColor?: 'teal' | 'indigo' | 'purple' | 'pink' | 'green' | 'orange' | 'default';
+  headerColor?:
+    | 'teal'
+    | 'indigo'
+    | 'purple'
+    | 'pink'
+    | 'green'
+    | 'orange'
+    | 'default';
   anchorElement?: HTMLElement | null;
 }
 
@@ -59,7 +66,10 @@ export const Modal: React.FC<ModalProps> = ({
       };
 
       let isAbove = false;
-      if (rect.bottom + 8 + modalRect.height > window.innerHeight && spaceAbove > spaceBelow) {
+      if (
+        rect.bottom + 8 + modalRect.height > window.innerHeight &&
+        spaceAbove > spaceBelow
+      ) {
         isAbove = true;
       }
 
@@ -132,18 +142,25 @@ export const Modal: React.FC<ModalProps> = ({
         ref={modalRef}
         style={popoverStyle}
       >
-        <div className={`modal-header ${headerColor !== 'default' ? `modal-header--${headerColor}` : ''}`}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
+        <div
+          className={`modal-header ${headerColor !== 'default' ? `modal-header--${headerColor}` : ''}`}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              flex: 1
+            }}
+          >
             {icon ? (
-              <div className="modal-header-icon">
-                {icon}
-              </div>
+              <div className="modal-header-icon">{icon}</div>
             ) : (
               <div className="modal-header-icon-default">
                 <BsWindow size={24} />
               </div>
             )}
-            
+
             <div
               style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
               className="modal-header-content"
@@ -174,9 +191,14 @@ export const Modal: React.FC<ModalProps> = ({
             className="modal-header-actions"
           >
             {headerActions}
-            
+
             <div className="modal-close-container">
-              <Tooltip content="Cerrar modal" followCursor={false} position="bottom" themeColor="accent">
+              <Tooltip
+                content="Cerrar modal"
+                followCursor={false}
+                position="bottom"
+                themeColor="error"
+              >
                 <Button
                   className="modal-close-modern modal-close"
                   onClick={onClose}
@@ -184,6 +206,8 @@ export const Modal: React.FC<ModalProps> = ({
                   aria-label="Cerrar modal"
                   circle
                   size="xs"
+                  color="error"
+                  variant="dashed"
                 >
                   <X size={18} />
                 </Button>

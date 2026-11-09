@@ -52,6 +52,11 @@ interface AuthContextType {
   /** True while the initial POST /auth/verify call is in-flight on startup. */
   isVerifying: boolean;
   isModuleSpecialUnlocked: boolean;
+  /**
+   * Refreshes the user session and token against the backend to load new permissions/roles
+   * without logging out or re-entering credentials.
+   */
+  refreshSession: () => Promise<AuthSession>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -255,6 +260,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [token]);
 
+  // ── Sincronización Inmediata ante Revocación o Asignación de Permisos ───────
+  useEffect(() => {
+    if (!token) return;
+
+    const unsubscribe = realtimeService.on(
+      'permissions_updated',
+      (data?: { userId?: string }) => {
+        // Si el evento afecta al usuario actual o es un cambio global de roles
+        if (!data?.userId || data.userId === user?.userId) {
+          console.info(
+            '[AuthContext] El servidor notificó cambios en roles/permisos. Sincronizando sesión...'
+          );
+          tokenRefreshCoordinator
+            .refresh()
+            .then(persistSession)
+            .catch((err) => {
+              console.warn(
+                '[AuthContext] Error sincronizando permisos tras evento WebSocket',
+                err
+              );
+            });
+        }
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, [token, user?.userId]);
+
   useLayoutEffect(() => {
     // SECURITY: Initialize activity tracking
     userActivityService.init();
@@ -364,6 +399,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorageService.setItem('user', JSON.stringify(updatedUser));
   };
 
+  const refreshSession = async (): Promise<AuthSession> => {
+    const session = await tokenRefreshCoordinator.refresh();
+    persistSession(session);
+    return session;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -373,6 +414,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout,
         unlockModule,
         updateUserSession,
+        refreshSession,
         verifySessionIntegrity,
         isLoading,
         isVerifying,

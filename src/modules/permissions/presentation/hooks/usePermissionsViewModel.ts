@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Permission } from '@/modules/permissions/domain/models/Permission';
 import { usePermissionsContext } from '../context/PermissionsContext';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
 export const usePermissionsViewModel = () => {
   const {
@@ -19,6 +20,7 @@ export const usePermissionsViewModel = () => {
   const [formData, setFormData] = useState<Partial<Permission>>({
     permissionName: '',
     permissionDescription: '',
+    scopes: '',
     categoryId: '',
     isActive: true
   });
@@ -30,6 +32,7 @@ export const usePermissionsViewModel = () => {
       setPermissions(data);
     } catch (error) {
       console.error('Error fetching permissions', error);
+      MessageToastCustom('error', 'Error al cargar permisos', 'Error');
     } finally {
       setIsLoading(false);
     }
@@ -46,20 +49,23 @@ export const usePermissionsViewModel = () => {
           selectedPerm.permissionId,
           formData
         );
+        MessageToastCustom('success', 'Permiso actualizado correctamente', 'Éxito');
       } else {
         await createPermissionUseCase.execute({
           permissionName: formData.permissionName!,
           permissionDescription: formData.permissionDescription || '',
+          scopes: formData.scopes || '',
           categoryId: formData.categoryId || 'General',
           isActive: true
         });
+        MessageToastCustom('success', 'Permiso creado correctamente', 'Éxito');
       }
       setIsCreateOpen(false);
       resetForm();
       loadPermissions();
     } catch (error) {
       console.error('Failed to save permission', error);
-      alert('Failed to save permission');
+      MessageToastCustom('error', 'Error al guardar el permiso', 'Error');
     }
   }, [
     createPermissionUseCase,
@@ -71,13 +77,14 @@ export const usePermissionsViewModel = () => {
 
   const handleDelete = useCallback(
     async (id: number) => {
-      if (!confirm('Are you sure you want to delete this permission?')) return;
+      if (!confirm('¿Está seguro de que desea eliminar este permiso?')) return;
       try {
         await deletePermissionUseCase.execute(id);
+        MessageToastCustom('success', 'Permiso eliminado correctamente', 'Éxito');
         loadPermissions();
       } catch (error) {
         console.error('Failed to delete', error);
-        alert('Failed to delete permission');
+        MessageToastCustom('error', 'Error al eliminar el permiso', 'Error');
       }
     },
     [deletePermissionUseCase, loadPermissions]
@@ -88,6 +95,7 @@ export const usePermissionsViewModel = () => {
     setFormData({
       permissionName: perm.permissionName,
       permissionDescription: perm.permissionDescription,
+      scopes: perm.scopes || '',
       categoryId: perm.categoryId,
       isActive: perm.isActive
     });
@@ -108,6 +116,7 @@ export const usePermissionsViewModel = () => {
     setFormData({
       permissionName: '',
       permissionDescription: '',
+      scopes: '',
       categoryId: '',
       isActive: true
     });
@@ -122,7 +131,8 @@ export const usePermissionsViewModel = () => {
       (p.permissionDescription?.toLowerCase() || '').includes(
         searchTerm.toLowerCase()
       ) ||
-      (p.categoryId?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+      (p.scopes?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (String(p.categoryId || '')?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
   return {

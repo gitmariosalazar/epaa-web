@@ -114,13 +114,13 @@ export const RolesPage: React.FC = () => {
               </Button>
             </Tooltip>
 
-            <Tooltip content="Remove Role" followCursor={false}>
+            <Tooltip content={role.isActive ? 'Desactivar Rol' : 'Activar Rol'} followCursor={false}>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={() => handleDelete(role)}
                 circle
-                style={{ color: 'var(--error)' }}
+                style={{ color: role.isActive ? 'var(--error)' : 'var(--success)' }}
               >
                 <MdClose size={iconSize} />
               </Button>

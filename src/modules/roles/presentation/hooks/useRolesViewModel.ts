@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Role } from '@/modules/roles/domain/models/Role';
 import { useRolesContext } from '../context/RolesContext';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
 export const useRolesViewModel = () => {
   const {
@@ -34,6 +35,7 @@ export const useRolesViewModel = () => {
       setRoles(data);
     } catch (error) {
       console.error(error);
+      MessageToastCustom('error', 'Error al cargar roles', 'Error');
     } finally {
       setLoading(false);
     }
@@ -48,6 +50,7 @@ export const useRolesViewModel = () => {
       if (selectedRole) {
         // Update
         await updateRoleUseCase.execute(selectedRole.rolId, formData);
+        MessageToastCustom('success', 'Rol actualizado correctamente', 'Éxito');
       } else {
         // Create
         await createRoleUseCase.execute({
@@ -56,24 +59,35 @@ export const useRolesViewModel = () => {
           isActive: formData.isActive ?? true,
           rolId: 0
         });
+        MessageToastCustom('success', 'Rol creado correctamente', 'Éxito');
       }
       setIsCreateOpen(false);
       resetForm();
       loadRoles();
     } catch (error) {
       console.error('Failed to save role', error);
-      alert('Failed to save role');
+      MessageToastCustom('error', 'Error al guardar el rol', 'Error');
     }
   };
 
   const handleDelete = async (role: Role) => {
-    if (confirm('Are you sure you want to delete this role?')) {
+    const nextStatus = !role.isActive;
+    const action = nextStatus ? 'activar' : 'desactivar';
+    if (confirm(`¿Está seguro de que desea ${action} el rol "${role.name}"?`)) {
       try {
-        await deleteRoleUseCase.execute(role.rolId);
+        await updateRoleUseCase.execute(role.rolId, { isActive: nextStatus });
+        MessageToastCustom('success', `Rol ${nextStatus ? 'activado' : 'desactivado'} correctamente`, 'Éxito');
         loadRoles();
       } catch (error) {
-        console.error('Failed to delete role', error);
-        alert('Failed to delete role');
+        // Try fallback to deleteRoleUseCase
+        try {
+          await deleteRoleUseCase.execute(role.rolId);
+          MessageToastCustom('success', 'Rol eliminado correctamente', 'Éxito');
+          loadRoles();
+        } catch (delError) {
+          console.error('Failed to change role status/delete', delError);
+          MessageToastCustom('error', 'No se pudo cambiar el estado del rol', 'Error');
+        }
       }
     }
   };

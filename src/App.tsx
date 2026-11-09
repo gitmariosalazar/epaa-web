@@ -104,7 +104,7 @@ import { ReadingReports } from './modules/readings/presentation/pages/ReadingRep
 import { ReadingsWithErrors } from './modules/readings/presentation/pages/ReadingsWithErrors';
 import { RequireElevatedToken } from './modules/auth/presentation/components/RequireElevatedToken';
 import { UpdateSpecialReadingPage } from './modules/readings/presentation/pages/UpdateSpecialReadingPage';
-import { ReadingsReconciliationPage } from './modules/readings/presentation/pages';
+import { ReadingsReconciliationPage, ReadingsAnalyticsPage } from './modules/readings/presentation/pages';
 import { ReadingsDashboardPage } from './modules/readings/presentation/pages/ReadingsDashboardPage';
 import { ReadingRoutesProvider } from '@/modules/reading-routes/presentation/context/ReadingRoutesContext';
 import { ReadingRoutesPage } from '@/modules/reading-routes/presentation/pages/ReadingRoutesPage/ReadingRoutesPage';
@@ -366,6 +366,7 @@ function App() {
                           <Route path="audit" element={<ReadingAuditPage />} />
                           <Route path="report" element={<ReadingReports />} />
                           <Route path="dashboard" element={<ReadingsDashboardPage />} />
+                          <Route path="analytics" element={<ReadingsAnalyticsPage />} />
                           <Route
                             path="report-errors"
                             element={

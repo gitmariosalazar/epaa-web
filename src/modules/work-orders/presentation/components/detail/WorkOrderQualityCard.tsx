@@ -12,13 +12,17 @@ interface WorkOrderQualityCardProps {
   orden: OrdenTrabajoDetalle;
 }
 
-const StatusBadge: React.FC<{ value: boolean | null; labelTrue: string; labelFalse: string }> = ({
-  value,
-  labelTrue,
-  labelFalse,
-}) => {
+const StatusBadge: React.FC<{
+  value: boolean | null;
+  labelTrue: string;
+  labelFalse: string;
+}> = ({ value, labelTrue, labelFalse }) => {
   if (value === null || value === undefined) {
-    return <span className="wo-quality-badge wo-quality-badge--pending">Sin evaluar</span>;
+    return (
+      <span className="wo-quality-badge wo-quality-badge--pending">
+        Sin evaluar
+      </span>
+    );
   }
   return value ? (
     <span className="wo-quality-badge wo-quality-badge--ok">
@@ -31,7 +35,9 @@ const StatusBadge: React.FC<{ value: boolean | null; labelTrue: string; labelFal
   );
 };
 
-export const WorkOrderQualityCard: React.FC<WorkOrderQualityCardProps> = ({ orden }) => {
+export const WorkOrderQualityCard: React.FC<WorkOrderQualityCardProps> = ({
+  orden
+}) => {
   const sinDatos =
     orden.checklistAprobado === null &&
     orden.calidadAprobada === null &&
@@ -40,16 +46,25 @@ export const WorkOrderQualityCard: React.FC<WorkOrderQualityCardProps> = ({ orde
 
   if (sinDatos) {
     return (
-      <Card title="Control de Calidad" className="wo-detail-card">
-        <p className="wo-empty-text">Aún no se ha realizado el control de calidad.</p>
+      <Card
+        title="Control de Calidad"
+        className="wo-detail-card"
+        icon={<ShieldCheck size={16} />}
+      >
+        <p className="wo-empty-text">
+          Aún no se ha realizado el control de calidad.
+        </p>
       </Card>
     );
   }
 
   return (
-    <Card title="Control de Calidad" className="wo-detail-card">
+    <Card
+      title="Control de Calidad"
+      className="wo-detail-card"
+      icon={<ShieldCheck size={16} />}
+    >
       <div className="wo-quality-grid">
-
         {/* Checklist de preparación */}
         {orden.idInspeccion && (
           <div className="wo-quality-section">
@@ -93,7 +108,6 @@ export const WorkOrderQualityCard: React.FC<WorkOrderQualityCardProps> = ({ orde
             )}
           </div>
         )}
-
       </div>
     </Card>
   );

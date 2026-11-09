@@ -1,0 +1,182 @@
+/* ==========================================================================
+   UsersPage.css - Modern Enterprise Styling for Users Directory
+   ========================================================================== */
+
+/* Page Container */
+.users-page {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  flex: 1 !important;
+  gap: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   Filter Toolbar
+   -------------------------------------------------------------------------- */
+.users-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.users-toolbar__search-group {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 260px;
+  max-width: 420px;
+}
+
+.users-toolbar__search-input {
+  width: 100%;
+}
+
+.users-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.users-toolbar__btn {
+  height: 32px !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Table & Cell Components
+   -------------------------------------------------------------------------- */
+.users-table-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* User Identity Cell */
+.users-cell-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.users-cell-user__details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.users-cell-user__username {
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 0.875rem;
+}
+
+.users-cell-user__fullname {
+  font-size: 0.775rem;
+  color: var(--text-secondary);
+}
+
+/* Roles Cell */
+.users-cell-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+}
+
+/* Status Pill */
+.users-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.users-status-badge--active {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.users-status-badge--inactive {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+/* Actions Cell */
+.users-cell-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+}
+
+.users-cell-actions .btn {
+  transition: transform var(--transition-fast, 0.15s ease),
+              background var(--transition-fast, 0.15s ease);
+}
+
+.users-cell-actions .btn:hover {
+  transform: scale(1.08);
+}
+
+.users-btn--delete {
+  color: var(--error, #ef4444) !important;
+}
+
+.users-btn--delete:hover {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Modal Stepper & Wizard Enhancements
+   -------------------------------------------------------------------------- */
+.users-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0.5rem 0;
+}
+
+.users-modal__footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.users-modal__footer-delete {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+}
+
+.users-modal__alert-wrapper {
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.users-delete-confirm-text {
+  font-size: 0.95rem;
+  color: var(--text-main);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.users-delete-confirm-text strong {
+  color: var(--primary, #3b82f6);
+}

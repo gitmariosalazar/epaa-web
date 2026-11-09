@@ -3,7 +3,16 @@ import type { User } from '@/modules/users/domain/models/User';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
-import { CheckCircle, XCircle, Shield, Key, FileUser, Mail, Calendar, Clock } from 'lucide-react';
+import {
+  CheckCircle,
+  XCircle,
+  Shield,
+  Key,
+  FileUser,
+  Mail,
+  Calendar,
+  Clock
+} from 'lucide-react';
 import './UserDetailModal.css';
 import { ConverDateTimeToText } from '@/shared/utils/datetime/ConverDate';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
@@ -28,8 +37,6 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     console.warn('UserDetailModal: User is null and not loading');
     return null;
   }
-
-
 
   return (
     <Modal
@@ -79,22 +86,30 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
           </div>
 
           <div className="user-detail__section">
-            <h3>Información General</h3>
+            <h3 className="card__title">Información General</h3>
             <div className="user-detail__grid">
               <div className="user-detail__item">
-                <label><FileUser size={16} /> Nombre de Usuario</label>
+                <label>
+                  <FileUser size={16} /> Nombre de Usuario
+                </label>
                 <span>{user.username}</span>
               </div>
               <div className="user-detail__item">
-                <label><Mail size={16} /> Correo Electrónico</label>
+                <label>
+                  <Mail size={16} /> Correo Electrónico
+                </label>
                 <span>{user.email}</span>
               </div>
               <div className="user-detail__item">
-                <label><Calendar size={16} /> Fecha de Registro</label>
+                <label>
+                  <Calendar size={16} /> Fecha de Registro
+                </label>
                 <span>{ConverDateTimeToText(user.registeredAt)}</span>
               </div>
               <div className="user-detail__item">
-                <label><Clock size={16} /> Último Inicio de Sesión</label>
+                <label>
+                  <Clock size={16} /> Último Inicio de Sesión
+                </label>
                 <span>{ConverDateTimeToText(user.lastLogin)}</span>
               </div>
             </div>
@@ -167,20 +182,20 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
           {(typeof user.failedAttempts === 'number' ||
             user.twoFactorEnabled !== undefined) && (
-              <div className="user-detail__section">
-                <h3>Seguridad y Auditoría</h3>
-                <div className="user-detail__grid">
-                  <div className="user-detail__item">
-                    <label>Intentos de Inicio de Sesión Fallidos</label>
-                    <span>{user.failedAttempts || 0}</span>
-                  </div>
-                  <div className="user-detail__item">
-                    <label>Autenticación de Dos Factores</label>
-                    <span>{user.twoFactorEnabled ? 'Sí' : 'No'}</span>
-                  </div>
+            <div className="user-detail__section">
+              <h3>Seguridad y Auditoría</h3>
+              <div className="user-detail__grid">
+                <div className="user-detail__item">
+                  <label>Intentos de Inicio de Sesión Fallidos</label>
+                  <span>{user.failedAttempts || 0}</span>
+                </div>
+                <div className="user-detail__item">
+                  <label>Autenticación de Dos Factores</label>
+                  <span>{user.twoFactorEnabled ? 'Sí' : 'No'}</span>
                 </div>
               </div>
-            )}
+            </div>
+          )}
         </div>
       ) : (
         <div>Usuario no encontrado</div>

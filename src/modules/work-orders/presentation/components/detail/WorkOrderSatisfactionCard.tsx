@@ -25,25 +25,41 @@ const StarRating: React.FC<{ value: number }> = ({ value }) => (
   </div>
 );
 
-export const WorkOrderSatisfactionCard: React.FC<WorkOrderSatisfactionCardProps> = ({ orden }) => {
+export const WorkOrderSatisfactionCard: React.FC<
+  WorkOrderSatisfactionCardProps
+> = ({ orden }) => {
   if (!orden.idEncuesta && orden.calificacionSatisfaccion === null) {
     return (
-      <Card title="Encuesta de Satisfacción" className="wo-detail-card">
-        <p className="wo-empty-text">El cliente aún no ha calificado este servicio.</p>
+      <Card
+        title="Encuesta de Satisfacción"
+        className="wo-detail-card"
+        icon={<Star size={16} />}
+      >
+        <p className="wo-empty-text">
+          El cliente aún no ha calificado este servicio.
+        </p>
       </Card>
     );
   }
 
   const calificacion = orden.calificacionSatisfaccion ?? 0;
   const label =
-    calificacion >= 5 ? 'Excelente' :
-    calificacion >= 4 ? 'Muy bueno' :
-    calificacion >= 3 ? 'Aceptable' :
-    calificacion >= 2 ? 'Regular' :
-    'Deficiente';
+    calificacion >= 5
+      ? 'Excelente'
+      : calificacion >= 4
+        ? 'Muy bueno'
+        : calificacion >= 3
+          ? 'Aceptable'
+          : calificacion >= 2
+            ? 'Regular'
+            : 'Deficiente';
 
   return (
-    <Card title="Encuesta de Satisfacción" className="wo-detail-card">
+    <Card
+      title="Encuesta de Satisfacción"
+      className="wo-detail-card"
+      icon={<Star size={16} />}
+    >
       <div className="wo-satisfaction">
         <StarRating value={calificacion} />
         <div className="wo-satisfaction__label" style={{ color: '#f59e0b' }}>

@@ -17,6 +17,8 @@ import { Card } from '@/shared/presentation/components/Card/Card';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import type { OrdenTrabajoDetalle } from '../../../domain/schemas/dto/response/work-orders.get.response';
 import { TIPO_ASIGNACION_LABELS } from '../WorkOrderConfig';
+import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
 interface WorkOrderInfoCardProps {
   orden: OrdenTrabajoDetalle;
@@ -55,7 +57,24 @@ export const WorkOrderInfoCard: React.FC<WorkOrderInfoCardProps> = ({
       title="Información General"
       className="wo-detail-card"
       accordion
-      icon={<Info size={15} />}
+      icon={<Info size={25} />}
+      subtitle={
+        <Tooltip
+          themeColor="blue"
+          content={`Usuario Asignado: ${orden.inspectorUsername} - Nombre: ${orden.inspectorNombre}`}
+          followCursor={false}
+          position="bottom"
+        >
+          <ColorChip
+            label={`${orden.inspectorNombre}`}
+            variant="soft"
+            size="xs"
+            color="#0284c7"
+            icon={<User size={14} />}
+            borderRadius={4}
+          />
+        </Tooltip>
+      }
     >
       <div className="wo-info-grid">
         <InfoRow

@@ -24,8 +24,8 @@ import {
 import { UserDetailModal } from '../../components/UserDetailModal/UserDetailModal';
 import AddRoleModal from '../../components/AddRoleModal/AddRoleModal';
 import '@/shared/presentation/styles/Table.css';
-import '@/modules/accounting/presentation/styles/entry-data/EntryDataFilters.css';
 import '@/shared/presentation/styles/Users.css';
+import './UsersPage.css';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { useUsersViewModel } from '../../hooks/useUsersViewModel';
 import { UserFormWizard } from '../../components/UserFormWizard/UserFormWizard';
@@ -98,7 +98,7 @@ const UsersLayout: React.FC = () => {
     {
       header: 'Username',
       accessor: (user: User) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="users-cell-user">
           <Avatar
             name={
               user.firstName && user.lastName
@@ -107,9 +107,9 @@ const UsersLayout: React.FC = () => {
             }
             size="sm"
           />
-          <div>
-            <div style={{ fontWeight: 500 }}>{user.username}</div>
-            <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+          <div className="users-cell-user__details">
+            <div className="users-cell-user__username">{user.username}</div>
+            <div className="users-cell-user__fullname">
               {user.firstName} {user.lastName}
             </div>
           </div>
@@ -120,7 +120,7 @@ const UsersLayout: React.FC = () => {
     {
       header: 'Roles',
       accessor: (user: User) => (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+        <div className="users-cell-roles">
           {user.roles && user.roles.length > 0 ? (
             user.roles.map((role: RolOrPermission) => {
               const roleName: string = role.name;
@@ -158,29 +158,26 @@ const UsersLayout: React.FC = () => {
       )
     },
     {
-      header: 'Status',
+      header: 'Estado',
       accessor: (user: User) => (
         <span
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
-            color: user.isActive ? 'var(--success)' : 'var(--error)',
-            fontWeight: 600,
-            fontSize: '0.9rem'
-          }}
+          className={`users-status-badge ${
+            user.isActive
+              ? 'users-status-badge--active'
+              : 'users-status-badge--inactive'
+          }`}
         >
-          {user.isActive ? <CheckCircle size={14} /> : <XCircle size={14} />}
-          {user.isActive ? 'Active' : 'Inactive'}
+          {user.isActive ? <CheckCircle size={13} /> : <XCircle size={13} />}
+          {user.isActive ? 'Activo' : 'Inactivo'}
         </span>
       )
     },
     {
-      header: 'Actions',
+      header: 'Acciones',
       accessor: (user: User) => {
         const iconSize: number = 13;
         return (
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
+          <div className="users-cell-actions">
             <Tooltip content="Ver detalles" position="top" followCursor={false}>
               <Button
                 size="sm"
@@ -223,12 +220,11 @@ const UsersLayout: React.FC = () => {
               <Button
                 size="sm"
                 variant="ghost"
-                style={{ color: 'var(--error)' }}
                 disabled={user.username === 'root'}
                 className={
                   user.username === 'root'
                     ? `disabled:opacity-50 disabled:cursor-not-allowed`
-                    : ''
+                    : 'users-btn--delete'
                 }
                 onClick={() => {
                   setSelectedUser(user);
@@ -254,7 +250,7 @@ const UsersLayout: React.FC = () => {
               </Button>
             </Tooltip>
           </div>
-        )
+        );
       }
     }
   ];
@@ -263,58 +259,46 @@ const UsersLayout: React.FC = () => {
     <PageLayout
       className="users-page"
       filters={
-        <div className="entry-filters">
-          <div className="entry-filter-group entry-filter-group--search">
-            <div className="entry-filter-input-wrapper">
-              <Input
-                type="text"
-                placeholder="Search users..."
-                value={searchTerm}
-                leftIcon={<Search size={18} />}
-                size="small"
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+        <div className="users-toolbar">
+          <div className="users-toolbar__search-group">
+            <Input
+              type="text"
+              placeholder="Buscar usuarios..."
+              value={searchTerm}
+              leftIcon={<Search size={18} />}
+              size="small"
+              className="users-toolbar__search-input"
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-          <div
-            className="entry-filter-group trash-report-filter-right"
-            style={{ flex: '0 1 auto', width: 'auto' }}
-          >
+          <div className="users-toolbar__actions">
             <Button
               variant="outline"
               onClick={refresh}
-              leftIcon={<RefreshCw size={16} />}
+              leftIcon={<RefreshCw size={15} />}
               size="small"
-              style={{ height: '30px' }}
+              className="users-toolbar__btn"
             >
-              Refresh
+              Refrescar
             </Button>
             <Button
               onClick={() => {
                 resetForm();
                 setIsCreateOpen(true);
               }}
-              leftIcon={<Plus size={14} />}
+              leftIcon={<Plus size={15} />}
               size="small"
-              style={{ height: '30px' }}
+              className="users-toolbar__btn"
               variant="dashed"
               color="green"
             >
-              New User
+              Nuevo Usuario
             </Button>
           </div>
         </div>
       }
     >
-      <div
-        className="table-responsive-wrapper"
-        style={{
-          flex: 1,
-          minHeight: 0,
-          display: 'flex',
-          flexDirection: 'column'
-        }}
-      >
+      <div className="users-table-container">
         <Table
           data={filteredUsers}
           columns={columns}
@@ -340,44 +324,36 @@ const UsersLayout: React.FC = () => {
         title="Nuevo Usuario"
         size="lg"
         footer={
-          <div style={{ width: '100%' }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                width: '100%'
+          <div className="users-modal__footer-row">
+            <Button
+              variant="outline"
+              disabled={isSubmitting}
+              onClick={() => {
+                setValidationError(null);
+                if (currentStep > 0) setCurrentStep(currentStep - 1);
+                else setIsCreateOpen(false);
               }}
             >
-              <Button
-                variant="outline"
-                disabled={isSubmitting}
-                onClick={() => {
-                  setValidationError(null);
-                  if (currentStep > 0) setCurrentStep(currentStep - 1);
-                  else setIsCreateOpen(false);
-                }}
-              >
-                Atrás
-              </Button>
-              <Button
-                isLoading={isSubmitting}
-                onClick={() => {
-                  const error = validateCurrentStep();
-                  if (error) {
-                    setValidationError(error);
-                    return;
-                  }
-                  setValidationError(null);
-                  if (currentStep < steps.length - 1)
-                    setCurrentStep(currentStep + 1);
-                  else handleCreate();
-                }}
-              >
-                {currentStep === steps.length - 1
-                  ? 'Crear Empleado'
-                  : 'Siguiente'}
-              </Button>
-            </div>
+              Atrás
+            </Button>
+            <Button
+              isLoading={isSubmitting}
+              onClick={() => {
+                const error = validateCurrentStep();
+                if (error) {
+                  setValidationError(error);
+                  return;
+                }
+                setValidationError(null);
+                if (currentStep < steps.length - 1)
+                  setCurrentStep(currentStep + 1);
+                else handleCreate();
+              }}
+            >
+              {currentStep === steps.length - 1
+                ? 'Crear Empleado'
+                : 'Siguiente'}
+            </Button>
           </div>
         }
       >
@@ -386,10 +362,13 @@ const UsersLayout: React.FC = () => {
             {steps.map((step, idx) => (
               <React.Fragment key={step}>
                 <div
-                  className={`users-wizard__step-item${idx === currentStep
-                    ? ' users-wizard__step-item--active'
-                    : ''
-                    }${idx < currentStep ? ' users-wizard__step-item--completed' : ''}`}
+                  className={`users-wizard__step-item${
+                    idx === currentStep
+                      ? ' users-wizard__step-item--active'
+                      : ''
+                  }${
+                    idx < currentStep ? ' users-wizard__step-item--completed' : ''
+                  }`}
                 >
                   <div className="users-wizard__step-number">
                     {idx < currentStep ? <Check size={16} /> : idx + 1}
@@ -398,10 +377,11 @@ const UsersLayout: React.FC = () => {
                 </div>
                 {idx < steps.length - 1 && (
                   <div
-                    className={`users-wizard__step-connector${idx < currentStep
-                      ? ' users-wizard__step-connector--active'
-                      : ''
-                      }`}
+                    className={`users-wizard__step-connector${
+                      idx < currentStep
+                        ? ' users-wizard__step-connector--active'
+                        : ''
+                    }`}
                   />
                 )}
               </React.Fragment>
@@ -418,7 +398,7 @@ const UsersLayout: React.FC = () => {
             autoFillMessage={autoFillMessage}
           />
           {validationError && (
-            <div style={{ marginBottom: '12px', marginTop: '12px' }}>
+            <div className="users-modal__alert-wrapper">
               <Alert
                 type="error"
                 message={validationError}
@@ -437,43 +417,35 @@ const UsersLayout: React.FC = () => {
         title="Editar Usuario"
         size="lg"
         footer={
-          <div style={{ width: '100%' }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                width: '100%'
+          <div className="users-modal__footer-row">
+            <Button
+              variant="outline"
+              disabled={currentStep === 0 || isSubmitting}
+              onClick={() => {
+                setValidationError(null);
+                if (currentStep > 0) setCurrentStep(currentStep - 1);
               }}
             >
-              <Button
-                variant="outline"
-                disabled={currentStep === 0 || isSubmitting}
-                onClick={() => {
-                  setValidationError(null);
-                  if (currentStep > 0) setCurrentStep(currentStep - 1);
-                }}
-              >
-                Atrás
-              </Button>
-              <Button
-                isLoading={isSubmitting}
-                onClick={() => {
-                  const error = validateCurrentStep();
-                  if (error) {
-                    setValidationError(error);
-                    return;
-                  }
-                  setValidationError(null);
-                  if (currentStep < steps.length - 1)
-                    setCurrentStep(currentStep + 1);
-                  else handleUpdate();
-                }}
-              >
-                {currentStep === steps.length - 1
-                  ? 'Guardar Cambios'
-                  : 'Siguiente'}
-              </Button>
-            </div>
+              Atrás
+            </Button>
+            <Button
+              isLoading={isSubmitting}
+              onClick={() => {
+                const error = validateCurrentStep();
+                if (error) {
+                  setValidationError(error);
+                  return;
+                }
+                setValidationError(null);
+                if (currentStep < steps.length - 1)
+                  setCurrentStep(currentStep + 1);
+                else handleUpdate();
+              }}
+            >
+              {currentStep === steps.length - 1
+                ? 'Guardar Cambios'
+                : 'Siguiente'}
+            </Button>
           </div>
         }
       >
@@ -482,10 +454,13 @@ const UsersLayout: React.FC = () => {
             {steps.map((step, idx) => (
               <React.Fragment key={step}>
                 <div
-                  className={`users-wizard__step-item${idx === currentStep
-                    ? ' users-wizard__step-item--active'
-                    : ''
-                    }${idx < currentStep ? ' users-wizard__step-item--completed' : ''}`}
+                  className={`users-wizard__step-item${
+                    idx === currentStep
+                      ? ' users-wizard__step-item--active'
+                      : ''
+                  }${
+                    idx < currentStep ? ' users-wizard__step-item--completed' : ''
+                  }`}
                 >
                   <div className="users-wizard__step-number">
                     {idx < currentStep ? <Check size={16} /> : idx + 1}
@@ -494,10 +469,11 @@ const UsersLayout: React.FC = () => {
                 </div>
                 {idx < steps.length - 1 && (
                   <div
-                    className={`users-wizard__step-connector${idx < currentStep
-                      ? ' users-wizard__step-connector--active'
-                      : ''
-                      }`}
+                    className={`users-wizard__step-connector${
+                      idx < currentStep
+                        ? ' users-wizard__step-connector--active'
+                        : ''
+                    }`}
                   />
                 )}
               </React.Fragment>
@@ -512,7 +488,7 @@ const UsersLayout: React.FC = () => {
           />
 
           {validationError && (
-            <div style={{ marginBottom: '12px' }}>
+            <div className="users-modal__alert-wrapper">
               <Alert
                 type="error"
                 message={validationError}
@@ -528,28 +504,25 @@ const UsersLayout: React.FC = () => {
       <Modal
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
-        title="Confirm Deletion"
+        title="Confirmar Eliminación"
         size="sm"
         footer={
-          <div
-            style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}
-          >
+          <div className="users-modal__footer-delete">
             <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
-              Cancel
+              Cancelar
             </Button>
             <Button
-              style={{ backgroundColor: 'var(--error)', color: 'white' }}
+              className="users-btn--delete"
               onClick={handleDelete}
             >
-              Delete
+              Eliminar
             </Button>
           </div>
         }
       >
-        <p>
-          Are you sure you want to delete user{' '}
-          <strong>{selectedUser?.username}</strong>? This action cannot be
-          undone.
+        <p className="users-delete-confirm-text">
+          ¿Está seguro de que desea eliminar al usuario{' '}
+          <strong>{selectedUser?.username}</strong>? Esta acción no se puede deshacer.
         </p>
       </Modal>
 

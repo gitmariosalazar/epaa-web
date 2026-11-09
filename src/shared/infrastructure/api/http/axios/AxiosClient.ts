@@ -49,13 +49,18 @@ export class AxiosHttpClient implements HttpClientInterface {
           _retry?: boolean;
         };
 
-        if (error.response?.status !== 401 || originalRequest._retry) {
+        const status = error.response?.status;
+        const isUnauthorized = status === 401;
+        const isForbidden = status === 403;
+
+        // Only handle 401 (expired/invalid token) or 403 (permissions updated on server)
+        if ((!isUnauthorized && !isForbidden) || originalRequest._retry) {
           return Promise.reject(error);
         }
 
-        // Don't try to refresh if the refresh endpoint itself returns 401
+        // Don't try to refresh if the refresh endpoint itself returns 401 or 403
         if (originalRequest.url?.includes('/auth/refresh')) {
-          if (this.unauthorizedHandler) {
+          if (this.unauthorizedHandler && isUnauthorized) {
             await this.unauthorizedHandler(error);
           }
           return Promise.reject(error);
@@ -75,14 +80,20 @@ export class AxiosHttpClient implements HttpClientInterface {
           };
           return this.axiosInstance(originalRequest);
         } catch (refreshError) {
-          localStorageService.removeItem('token');
-          localStorageService.removeItem('refreshToken');
-          localStorageService.removeItem('user');
+          // Only clear session on 401 when the refresh token itself is invalid.
+          // On 403, keep the session intact and return the permission denied error.
+          if (isUnauthorized) {
+            localStorageService.removeItem('token');
+            localStorageService.removeItem('refreshToken');
+            localStorageService.removeItem('user');
 
-          if (this.unauthorizedHandler) {
-            await this.unauthorizedHandler(refreshError);
+            if (this.unauthorizedHandler) {
+              await this.unauthorizedHandler(refreshError);
+            }
+            return Promise.reject(refreshError);
           }
-          return Promise.reject(refreshError);
+
+          return Promise.reject(error);
         }
       }
     );

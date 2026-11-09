@@ -2,7 +2,10 @@ import type { User } from '@/modules/users/domain/models/User';
 import type { UpdateUserRequest } from '@/modules/users/domain/models/UpdateUserRequest';
 import type { ChangePasswordRequest } from '@/modules/users/domain/models/ChangePasswordRequest';
 import type { CreateUserEmployeeRequest } from '@/modules/users/domain/models/CreateUserRequest';
-import type { UserRepository } from '@/modules/users/domain/repositories/UserRepository';
+import type {
+  UserRepository,
+  UserPermissionBatchItem,
+} from '@/modules/users/domain/repositories/UserRepository';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 import type { HttpClientInterface } from '@/shared/infrastructure/api/interfaces/HttpClientInterface';
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
@@ -231,11 +234,40 @@ export class UserRepositoryImpl implements UserRepository {
     );
   }
 
-  async assignPermissionToUser(userId: string, permissionId: number): Promise<void> {
+  async assignPermissionToUser(
+    userId: string,
+    permissionId: number,
+    expirationDate?: string | Date
+  ): Promise<void> {
     await this.client.post<ApiResponse<void>>(
       `/users-gateway/assign-permission-to-user`,
-      { userId, permissionId }
+      { userId, permissionId, expirationDate: expirationDate || null }
     );
+  }
+
+  async assignPermissionsBatchToUser(
+    userId: string,
+    permissions: UserPermissionBatchItem[]
+  ): Promise<void> {
+    try {
+      await this.client.post<ApiResponse<void>>(
+        `/users-gateway/assign-permissions-batch-to-user`,
+        {
+          userId,
+          permissions: permissions.map((p) => ({
+            permissionId: p.permissionId,
+            expirationDate: p.expirationDate || null
+          }))
+        }
+      );
+    } catch {
+      // Fallback: assign in parallel if batch endpoint encounters any issue
+      await Promise.all(
+        permissions.map((p) =>
+          this.assignPermissionToUser(userId, p.permissionId, p.expirationDate || undefined)
+        )
+      );
+    }
   }
 
   async removeRoleFromUser(userId: string, roleId: number): Promise<void> {
@@ -251,17 +283,33 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async getRolesByUser(userId: string): Promise<{ id: number; name: string }[]> {
-    const response = await this.client.get<ApiResponse<{ id: number; name: string }[]>>(
+    const response = await this.client.get<ApiResponse<unknown>>(
       `/users-gateway/get-roles-by-user/${userId}`
     );
-    return response.data.data;
+    const data = response.data.data;
+    if (Array.isArray(data) && data.length > 0) {
+      const first = data[0] as Record<string, unknown>;
+      if (first && Array.isArray(first.roles)) {
+        return first.roles as { id: number; name: string }[];
+      }
+      return data as { id: number; name: string }[];
+    }
+    return [];
   }
 
   async getPermissionsByUser(userId: string): Promise<{ id: number; name: string }[]> {
-    const response = await this.client.get<ApiResponse<{ id: number; name: string }[]>>(
+    const response = await this.client.get<ApiResponse<unknown>>(
       `/users-gateway/get-permissions-by-user/${userId}`
     );
-    return response.data.data;
+    const data = response.data.data;
+    if (Array.isArray(data) && data.length > 0) {
+      const first = data[0] as Record<string, unknown>;
+      if (first && Array.isArray(first.permissions)) {
+        return first.permissions as { id: number; name: string }[];
+      }
+      return data as { id: number; name: string }[];
+    }
+    return [];
   }
 
   async getUsersByPermission(permissionId: number): Promise<User[]> {

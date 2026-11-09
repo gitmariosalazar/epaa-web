@@ -1,0 +1,567 @@
+/* ==========================================================================
+   UserDetailPage.css - Premium Enterprise User Profile & Management View
+   ========================================================================== */
+
+/* Main Page Container */
+.user-detail-page {
+  padding: 1.5rem 2rem 3rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  animation: userDetailFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--text-main);
+  box-sizing: border-box;
+}
+
+@keyframes userDetailFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Top Navigation & Breadcrumbs
+   -------------------------------------------------------------------------- */
+.user-detail-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.user-detail-nav__breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.user-detail-nav__link {
+  color: var(--primary, #3b82f6);
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.user-detail-nav__link:hover {
+  text-decoration: underline;
+}
+
+.user-detail-nav__sep {
+  opacity: 0.4;
+  font-size: 0.75rem;
+}
+
+.user-detail-nav__current {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   Hero Card - Profile Identity
+   -------------------------------------------------------------------------- */
+.user-detail-hero {
+  position: relative;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 16px;
+  padding: 2rem 2.25rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05),
+              0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+  overflow: hidden;
+}
+
+/* Top decorative accent gradient */
+.user-detail-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #2563eb 0%, #7c3aed 50%, #ec4899 100%);
+}
+
+.user-detail-hero__identity {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+  min-width: 280px;
+}
+
+.user-detail-hero__avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.user-detail-hero__avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--primary, #2563eb), #60a5fa);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.25);
+  border: 3px solid var(--surface, #ffffff);
+}
+
+.user-detail-hero__status-indicator {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid var(--surface, #ffffff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-detail-hero__status-indicator--active {
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+}
+
+.user-detail-hero__status-indicator--inactive {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
+}
+
+.user-detail-hero__details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-detail-hero__name {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--text-main, #0f172a);
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.user-detail-hero__meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.user-detail-hero__username-pill {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--primary, #2563eb);
+  background: rgba(37, 99, 235, 0.08);
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.user-detail-hero__meta-item {
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #64748b);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-detail-hero__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+  min-width: 170px;
+}
+
+.user-detail-hero__actions .btn {
+  justify-content: flex-start;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   Profile Cards Grid
+   -------------------------------------------------------------------------- */
+.user-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.75rem;
+}
+
+@media (max-width: 900px) {
+  .user-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.user-detail-card {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 14px;
+  padding: 1.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-detail-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+.user-detail-card--full {
+  grid-column: 1 / -1;
+}
+
+/* Card Header */
+.user-detail-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color, #f1f5f9);
+}
+
+.user-detail-card__title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-detail-card__icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-detail-card__icon-badge--blue {
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+}
+
+.user-detail-card__icon-badge--purple {
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+}
+
+.user-detail-card__icon-badge--emerald {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.user-detail-card__icon-badge--amber {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.user-detail-card__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+  margin: 0;
+}
+
+/* Info List Inside Cards */
+.user-detail-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+.user-detail-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  background: var(--surface-hover, #f8fafc);
+  transition: background 0.15s ease;
+}
+
+.user-detail-info-row:hover {
+  background: rgba(37, 99, 235, 0.04);
+}
+
+.user-detail-info-row__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+}
+
+.user-detail-info-row__value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main, #1e293b);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-align: right;
+}
+
+/* --------------------------------------------------------------------------
+   Tables for Roles & Direct Permissions
+   -------------------------------------------------------------------------- */
+.user-detail-table-card {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  grid-column: 1 / -1;
+  transition: box-shadow 0.2s ease;
+}
+
+.user-detail-table-card:hover {
+  box-shadow: 0 8px 12px -3px rgba(0, 0, 0, 0.06);
+}
+
+.user-detail-table-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.75rem;
+  background: var(--surface-hover, #f8fafc);
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.user-detail-table-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-detail-table-card__title-row h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-detail-table-card__count-badge {
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+}
+
+.user-detail-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.user-detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.user-detail-table thead tr {
+  background: var(--surface-hover, #f8fafc);
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+}
+
+.user-detail-table th {
+  padding: 0.875rem 1.25rem;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary, #64748b);
+  white-space: nowrap;
+}
+
+.user-detail-table td {
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  color: var(--text-main, #1e293b);
+  vertical-align: middle;
+  transition: background 0.15s ease;
+}
+
+.user-detail-table tbody tr:hover td {
+  background: var(--surface-hover, #f8fafc);
+}
+
+.user-detail-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Role item pill & details */
+.user-detail-role-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-detail-role-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-detail-role-name {
+  font-weight: 600;
+  color: var(--text-main, #0f172a);
+}
+
+/* Permission item cell */
+.user-detail-perm-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-detail-perm-name {
+  font-weight: 600;
+  color: var(--text-main, #0f172a);
+}
+
+.user-detail-perm-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.user-detail-perm-badge-scope {
+  font-size: 0.7rem;
+  font-family: monospace;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(124, 58, 237, 0.09);
+  color: #7c3aed;
+  border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.user-detail-perm-badge-cat {
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--surface-hover, #f1f5f9);
+  color: var(--text-secondary, #64748b);
+  border: 1px solid var(--border-color, #cbd5e1);
+}
+
+/* Action icons */
+.user-detail-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-detail-btn-danger {
+  color: var(--error, #ef4444) !important;
+}
+
+.user-detail-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+
+/* Empty State inside table card */
+.user-detail-table-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  color: var(--text-secondary, #94a3b8);
+  text-align: center;
+}
+
+.user-detail-table-empty p {
+  margin: 0.75rem 0 0 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   Loading & Error States
+   -------------------------------------------------------------------------- */
+.user-detail-loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  gap: 12px;
+  color: var(--text-secondary, #64748b);
+}
+
+.user-detail-error-container {
+  padding: 2.5rem;
+  max-width: 600px;
+  margin: 3rem auto;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.user-detail-error-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

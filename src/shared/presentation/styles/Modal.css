@@ -67,7 +67,7 @@
 }
 
 .modal--full .modal-body {
-  padding: 0 1.5rem 1.5rem 1.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 0.5rem;
 }
 
 .modal-header {
@@ -247,7 +247,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--error);
   transition: all 0.2s;
   padding: 0.5rem;
   border-radius: 9999px;
@@ -266,10 +266,12 @@
 .modal-body {
   flex: 1;
   overflow-y: auto;
+  min-height: 0;
+  padding: 0.5rem;
 }
 
 .modal-footer {
-  margin-top: 0.1rem;
+  margin-top: 0rem;
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;

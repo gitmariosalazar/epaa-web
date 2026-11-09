@@ -5,15 +5,17 @@
 // ─ OCP  : agregar un evento = solo ampliar WsEventMap, sin tocar consumidores.
 // ─ ISP  : interfaz mínima — connect/disconnect/on. Nada más.
 
+export interface PermissionsUpdatedEventPayload {
+  userId?: string;
+  roleId?: number;
+}
+
 // ── Mapa de eventos tipado (Abierto a extensión) ─────────────────────────────
-// Usa Declaration Merging: cada módulo debe extender esta interfaz para
+// Usa Declaration Merging: cada módulo puede extender esta interfaz para
 // agregar sus propios eventos.
-// Ejemplo en un módulo externo:
-// declare module '@/shared/domain/services/IRealtimeService' {
-//   interface WsEventMap { 'mi:evento': MiPayload; }
-// }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WsEventMap {}
+export interface WsEventMap {
+  permissions_updated: PermissionsUpdatedEventPayload;
+}
 
 // ── Interfaz pública del servicio ─────────────────────────────────────────────
 export interface IRealtimeService {

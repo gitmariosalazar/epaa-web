@@ -7,6 +7,7 @@ import { Input } from '../Input/Input';
 import { ManageRolePermissionsUseCase } from '@/modules/roles/application/usecases/ManageRolePermissionsUseCase';
 import { RolePermissionRepositoryImpl } from '@/modules/roles/infrastructure/repositories/RolePermissionRepositoryImpl';
 import { PermissionRepositoryImpl } from '@/modules/permissions/infrastructure/repositories/PermissionRepositoryImpl';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 import './RolePermissionModal.css';
 import { CircularProgress } from '../CircularProgress';
 
@@ -24,6 +25,7 @@ export const RolePermissionModal: React.FC<RolePermissionModalProps> = ({
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [assignedIds, setAssignedIds] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
+  const [isSavingBatch, setIsSavingBatch] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Dependencies
@@ -53,7 +55,7 @@ export const RolePermissionModal: React.FC<RolePermissionModalProps> = ({
       setAssignedIds(new Set(assigned.map((p) => p.permissionId)));
     } catch (error) {
       console.error('Failed to load permissions', error);
-      alert('Failed to load permissions');
+      MessageToastCustom('error', 'Error al cargar los permisos del rol', 'Error');
     } finally {
       setIsLoading(false);
     }
@@ -74,9 +76,11 @@ export const RolePermissionModal: React.FC<RolePermissionModalProps> = ({
       if (currentStatus) {
         // Removing
         await useCase.removePermission(role.rolId, permissionId);
+        MessageToastCustom('info', 'Permiso removido del rol', 'Actualizado');
       } else {
         // Adding
         await useCase.assignPermission(role.rolId, permissionId);
+        MessageToastCustom('success', 'Permiso asignado al rol', 'Actualizado');
       }
     } catch (error) {
       console.error('Failed to update permission', error);
@@ -87,7 +91,27 @@ export const RolePermissionModal: React.FC<RolePermissionModalProps> = ({
         else revertSet.delete(permissionId);
         return revertSet;
       });
-      alert('Failed to save assignment');
+      MessageToastCustom('error', 'Error al guardar la asignación', 'Error');
+    }
+  };
+
+  const handleSaveAllBatch = async () => {
+    if (!role) return;
+    setIsSavingBatch(true);
+    try {
+      const ids = Array.from(assignedIds);
+      await useCase.assignPermissionsBatch(role.rolId, ids);
+      MessageToastCustom(
+        'success',
+        `Se sincronizaron ${ids.length} permisos exitosamente`,
+        'Éxito'
+      );
+      onClose();
+    } catch (error) {
+      console.error('Failed to save permissions batch', error);
+      MessageToastCustom('error', 'Error al sincronizar permisos en lote', 'Error');
+    } finally {
+      setIsSavingBatch(false);
     }
   };
 
@@ -98,30 +122,42 @@ export const RolePermissionModal: React.FC<RolePermissionModalProps> = ({
       ) ||
       (p.permissionDescription?.toLowerCase() || '').includes(
         searchTerm.toLowerCase()
-      )
+      ) ||
+      (p.scopes?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Manage Permissions: ${role?.name}`}
+      title={`Administrar Permisos: ${role?.name}`}
       size="lg"
-      footer={<Button onClick={onClose}>Done</Button>}
+      footer={
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', width: '100%' }}>
+          <Button variant="subtle" onClick={onClose}>
+            Cerrar
+          </Button>
+          <Button
+            onClick={handleSaveAllBatch}
+            disabled={isSavingBatch || isLoading}
+          >
+            {isSavingBatch ? 'Guardando...' : `Guardar Todos (${assignedIds.size})`}
+          </Button>
+        </div>
+      }
     >
       <div className="role-permission-modal">
         <div className="role-permission__search">
           <Input
             name="search"
-            placeholder="Search permissions..."
+            placeholder="Buscar por nombre, descripción o scope (ej: ot:leer)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            // icon={<Search size={16}/>}
           />
         </div>
 
         {isLoading ? (
-          <CircularProgress label="Loading..." />
+          <CircularProgress label="Cargando permisos..." />
         ) : (
           <div className="role-permission__list">
             {filteredPermissions.map((perm, index) => {
@@ -143,6 +179,22 @@ export const RolePermissionModal: React.FC<RolePermissionModalProps> = ({
                     <span className="role-permission__desc">
                       {perm.permissionDescription}
                     </span>
+                    {perm.scopes && (
+                      <span
+                        style={{
+                          fontSize: '0.75rem',
+                          background: 'var(--primary-light-10, rgba(59, 130, 246, 0.1))',
+                          color: 'var(--primary, #3b82f6)',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          display: 'inline-block',
+                          marginTop: '2px',
+                          width: 'fit-content'
+                        }}
+                      >
+                        Scope: {perm.scopes}
+                      </span>
+                    )}
                   </div>
                   <span className="role-permission__module">
                     {perm.categoryId || 'General'}
@@ -158,7 +210,7 @@ export const RolePermissionModal: React.FC<RolePermissionModalProps> = ({
                   padding: '20px'
                 }}
               >
-                No permissions found.
+                No se encontraron permisos.
               </div>
             )}
           </div>

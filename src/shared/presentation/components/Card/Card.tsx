@@ -19,6 +19,7 @@ export interface CardProps {
   children: React.ReactNode;
   className?: string;
   title?: string | React.ReactNode;
+  subtitle?: string | React.ReactNode;
   footer?: React.ReactNode;
   style?: React.CSSProperties;
 
@@ -48,6 +49,7 @@ export const Card: React.FC<CardProps> = ({
   children,
   className = '',
   title,
+  subtitle,
   footer,
   style,
   accordion,
@@ -55,14 +57,15 @@ export const Card: React.FC<CardProps> = ({
   isOpen: isOpenProp,
   onToggle: onToggleProp,
   icon: iconProp,
-  extra: extraProp,
+  extra: extraProp
 }) => {
   const isAccordion = Boolean(accordion);
   const accordionConfig: CardAccordionOptions =
     typeof accordion === 'object' && accordion !== null ? accordion : {};
 
   const defaultOpen = accordionConfig.defaultOpen ?? defaultOpenProp ?? false;
-  const isControlled = accordionConfig.isOpen !== undefined || isOpenProp !== undefined;
+  const isControlled =
+    accordionConfig.isOpen !== undefined || isOpenProp !== undefined;
   const controlledOpen = accordionConfig.isOpen ?? isOpenProp;
 
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
@@ -85,7 +88,11 @@ export const Card: React.FC<CardProps> = ({
     if (!isAccordion) return;
     const target = e.target as HTMLElement;
     // Evita alternar el acordeón si se hace click en elementos interactivos dentro del header
-    if (target.closest('button, a, input, select, textarea, [data-prevent-accordion]')) {
+    if (
+      target.closest(
+        'button, a, input, select, textarea, [data-prevent-accordion]'
+      )
+    ) {
       return;
     }
     handleToggle();
@@ -95,7 +102,11 @@ export const Card: React.FC<CardProps> = ({
     if (!isAccordion) return;
     if (e.key === 'Enter' || e.key === ' ') {
       const target = e.target as HTMLElement;
-      if (target.closest('button, a, input, select, textarea, [data-prevent-accordion]')) {
+      if (
+        target.closest(
+          'button, a, input, select, textarea, [data-prevent-accordion]'
+        )
+      ) {
         return;
       }
       e.preventDefault();
@@ -110,7 +121,7 @@ export const Card: React.FC<CardProps> = ({
     'card',
     isAccordion ? 'card--accordion' : '',
     isAccordion ? (isOpen ? 'card--expanded' : 'card--collapsed') : '',
-    className,
+    className
   ]
     .filter(Boolean)
     .join(' ');
@@ -118,7 +129,7 @@ export const Card: React.FC<CardProps> = ({
   const headerClassName = [
     'card__header',
     isHeaderFlex ? 'card__header--flex' : '',
-    isAccordion ? 'card__header--clickable' : '',
+    isAccordion ? 'card__header--clickable' : ''
   ]
     .filter(Boolean)
     .join(' ');
@@ -141,10 +152,23 @@ export const Card: React.FC<CardProps> = ({
             <>
               <div className="card__header-left">
                 {icon && <span className="card__header-icon-wrap">{icon}</span>}
-                {typeof title === 'string' ? (
-                  <h3 className="card__title">{title}</h3>
-                ) : (
-                  title
+
+                {(title || subtitle) && (
+                  <div className="card__header-title">
+                    {/* Título */}
+                    {typeof title === 'string' ? (
+                      <h3 className="card__title">{title}</h3>
+                    ) : (
+                      title
+                    )}
+
+                    {/* Subtítulo */}
+                    {typeof subtitle === 'string' ? (
+                      <p className="card__subtitle">{subtitle}</p>
+                    ) : (
+                      subtitle
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -153,7 +177,11 @@ export const Card: React.FC<CardProps> = ({
                   {extra}
                   {isAccordion && (
                     <span className="card__chevron" aria-hidden="true">
-                      {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                      {isOpen ? (
+                        <ChevronUp size={18} />
+                      ) : (
+                        <ChevronDown size={18} />
+                      )}
                     </span>
                   )}
                 </div>
@@ -173,4 +201,3 @@ export const Card: React.FC<CardProps> = ({
     </div>
   );
 };
-

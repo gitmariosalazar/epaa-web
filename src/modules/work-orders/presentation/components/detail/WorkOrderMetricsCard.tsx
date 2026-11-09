@@ -4,7 +4,15 @@
  * SRP: métricas numéricas de la OT (tiempos, costos, SLA, conteos).
  */
 import React from 'react';
-import { Clock, DollarSign, Package, Paperclip, MessageSquare, ShieldCheck } from 'lucide-react';
+import {
+  Clock,
+  DollarSign,
+  Package,
+  Paperclip,
+  MessageSquare,
+  ShieldCheck,
+  ChartBar
+} from 'lucide-react';
 import { Card } from '@/shared/presentation/components/Card/Card';
 import type { OrdenTrabajoDetalle } from '../../../domain/schemas/dto/response/work-orders.get.response';
 import { getSlaColor, formatSlaHoras } from '../WorkOrderConfig';
@@ -21,9 +29,18 @@ interface MetricTileProps {
   sublabel?: string;
 }
 
-const MetricTile: React.FC<MetricTileProps> = ({ icon, label, value, color, sublabel }) => (
+const MetricTile: React.FC<MetricTileProps> = ({
+  icon,
+  label,
+  value,
+  color,
+  sublabel
+}) => (
   <div className="wo-metric-tile">
-    <div className="wo-metric-tile__icon" style={{ color: color ?? 'var(--text-secondary)' }}>
+    <div
+      className="wo-metric-tile__icon"
+      style={{ color: color ?? 'var(--text-secondary)' }}
+    >
       {icon}
     </div>
     <div className="wo-metric-tile__body">
@@ -36,10 +53,12 @@ const MetricTile: React.FC<MetricTileProps> = ({ icon, label, value, color, subl
   </div>
 );
 
-export const WorkOrderMetricsCard: React.FC<WorkOrderMetricsCardProps> = ({ orden }) => {
+export const WorkOrderMetricsCard: React.FC<WorkOrderMetricsCardProps> = ({
+  orden
+}) => {
   const slaColor = getSlaColor(
     orden.cumpleSla ?? false,
-    parseFloat(orden.horasRestantesSla as any) || 0,
+    parseFloat(orden.horasRestantesSla as any) || 0
   );
 
   // Backend may return numbers as strings — parseFloat handles both cases safely
@@ -60,9 +79,12 @@ export const WorkOrderMetricsCard: React.FC<WorkOrderMetricsCardProps> = ({ orde
   };
 
   return (
-    <Card title="Métricas del Servicio" className="wo-detail-card wo-detail-card--metrics">
+    <Card
+      title="Métricas del Servicio"
+      className="wo-detail-card wo-detail-card--metrics"
+      icon={<ChartBar size={16} />}
+    >
       <div className="wo-metrics-grid">
-
         {/* Tiempos */}
         <MetricTile
           icon={<Clock size={16} />}
@@ -94,7 +116,9 @@ export const WorkOrderMetricsCard: React.FC<WorkOrderMetricsCardProps> = ({ orde
           label="Horas Restantes SLA"
           value={
             (orden.cumpleSla ?? false)
-              ? fmtSla(Math.max(0, parseFloat(orden.horasRestantesSla as any) || 0))
+              ? fmtSla(
+                  Math.max(0, parseFloat(orden.horasRestantesSla as any) || 0)
+                )
               : 'Vencido'
           }
           color={slaColor}
