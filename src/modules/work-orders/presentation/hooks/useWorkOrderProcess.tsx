@@ -23,10 +23,10 @@ import type { OrdenTrabajoTracking } from '../../domain/schemas/dto/response/wor
 
 const PHASE_LABELS: Record<WorkOrderPhaseId, string> = {
   all: 'Todas las fases',
-  'phase-1': 'Fase 1 - Creacion',
-  'phase-2': 'Fase 2 - Recepcion y asignacion',
-  'phase-3': 'Fase 3 - Preparacion',
-  'phase-4': 'Fase 4 - Ejecucion',
+  'phase-1': 'Fase 1 - Creación',
+  'phase-2': 'Fase 2 - Recepcion y asignación',
+  'phase-3': 'Fase 3 - Preparación',
+  'phase-4': 'Fase 4 - Ejecución',
   'phase-5': 'Fase 5 - Calidad',
   'phase-6': 'Fase 6 - Cierre'
 };
@@ -427,8 +427,10 @@ export const useWorkOrderProcess = (
         );
       const tracking = Array.isArray(trackingResult)
         ? (trackingResult.find(
-          (item) => item.codigoOrden?.toUpperCase() === numero.toUpperCase()
-        ) ?? trackingResult[0] ?? null)
+            (item) => item.codigoOrden?.toUpperCase() === numero.toUpperCase()
+          ) ??
+          trackingResult[0] ??
+          null)
         : (trackingResult as OrdenTrabajoTracking | null);
 
       setState((current) => ({

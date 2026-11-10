@@ -18,6 +18,12 @@ export interface ExecutiveDashboardAnalytics {
   weightedAverageEffectiveTariffUsdPerM3: number;
   totalReadingsWithNovelty: number;
   operativeNoveltyPercentage: number;
+  totalTitleUsd?: number;
+  totalTrashTaxUsd?: number;
+  totalThirdPartiesUsd?: number;
+  totalInterestUsd?: number;
+  totalSurchargesUsd?: number;
+  totalBilledEpaaUsd?: number;
 }
 
 export interface SectorPerformanceAnalytics {
@@ -35,6 +41,12 @@ export interface SectorPerformanceAnalytics {
   noveltyPercentage: number;
   revenueRank: number;
   volumeRank: number;
+  totalTitleUsd?: number;
+  totalTrashTaxUsd?: number;
+  totalThirdPartiesUsd?: number;
+  totalInterestUsd?: number;
+  totalSurchargesUsd?: number;
+  totalBilledEpaaUsd?: number;
 }
 
 export interface MonthlyTrendAnalytics {
@@ -51,6 +63,12 @@ export interface MonthlyTrendAnalytics {
   totalBilledUsd: number;
   deltaRevenueUsd: number | null;
   growthRevenuePercentage: number | null;
+  totalTitleUsd?: number;
+  totalTrashTaxUsd?: number;
+  totalThirdPartiesUsd?: number;
+  totalInterestUsd?: number;
+  totalSurchargesUsd?: number;
+  totalBilledEpaaUsd?: number;
 }
 
 export interface NoveltyEconomicImpactAnalytics {
@@ -62,6 +80,12 @@ export interface NoveltyEconomicImpactAnalytics {
   waterBilledUsd: number;
   sewerBilledUsd: number;
   totalBilledUsd: number;
+  totalTitleUsd?: number;
+  totalTrashTaxUsd?: number;
+  totalThirdPartiesUsd?: number;
+  totalInterestUsd?: number;
+  totalSurchargesUsd?: number;
+  totalBilledEpaaUsd?: number;
 }
 
 export interface TopConsumerAnalytics {
@@ -84,6 +108,12 @@ export interface TopConsumerAnalytics {
   gpsCoordinates?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  titleBilledUsd?: number;
+  trashTaxBilledUsd?: number;
+  thirdPartiesBilledUsd?: number;
+  interestBilledUsd?: number;
+  surchargesBilledUsd?: number;
+  totalBilledEpaaUsd?: number;
 }
 
 export interface InterannualComparisonAnalytics {
@@ -101,6 +131,24 @@ export interface InterannualComparisonAnalytics {
   deltaBilledUsd: number;
   varianceBilledPercentage: number;
   managementDiagnostic: string;
+  titleBaseYearUsd?: number;
+  titleTargetYearUsd?: number;
+  interestBaseYearUsd?: number;
+  interestTargetYearUsd?: number;
+  surchargesBaseYearUsd?: number;
+  surchargesTargetYearUsd?: number;
+}
+
+export interface MonthlyConnectionGrowthAnalytics {
+  monthNumber: number;
+  monthName: string;
+  connectionsBaseYear: number;
+  increaseBaseYear: number;
+  connectionsTargetYear: number;
+  increaseTargetYear: number;
+  differenceTargetVsBase: number;
+  growthPercentage: number;
+  statusTargetYear: string;
 }
 
 export interface AnalyticsFilterParams {

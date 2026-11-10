@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
 import {
-  Wrench, CheckCircle, XCircle, ChevronDown, ChevronUp,
-  MapPin, Calendar, User, Eye, ShieldCheck, AlertTriangle
+  Wrench,
+  CheckCircle,
+  XCircle,
+  ChevronDown,
+  ChevronUp,
+  MapPin,
+  Calendar,
+  User,
+  Eye,
+  ShieldCheck,
+  AlertTriangle
 } from 'lucide-react';
 import type { OrdenTrabajoVistaCliente } from '../../domain/schemas/dto/response/work-orders.get.response';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
@@ -13,7 +22,7 @@ import {
   getPrioridadConfig,
   TIPO_ORDEN_LABELS,
   formatSlaHoras,
-  getSlaColor,
+  getSlaColor
 } from './WorkOrderConfig';
 import { WorkOrderProcessSteps } from './WorkOrderProcessSteps';
 
@@ -29,10 +38,15 @@ const TIPO_ICON: Record<string, React.ReactNode> = {
   INSTALACION: <Wrench size={20} />,
   MANTENIMIENTO: <Wrench size={20} />,
   REPARACION: <Wrench size={20} />,
-  EMERGENCIA: <AlertTriangle size={20} />,
+  EMERGENCIA: <AlertTriangle size={20} />
 };
 
-export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onPrintPdf, style }) => {
+export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({
+  orden,
+  onView,
+  onPrintPdf,
+  style
+}) => {
   const [expanded, setExpanded] = useState(false);
 
   const estadoConfig = getEstadoOrdenConfig(orden.estadoCodigo);
@@ -43,26 +57,29 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onP
 
   const fechaStr = orden.fechaCreacion
     ? new Date(orden.fechaCreacion).toLocaleDateString('es-EC', {
-      day: '2-digit', month: 'short', year: 'numeric',
-    })
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      })
     : '—';
 
-  const ejecutorLabel =
-    false
-      ? orden.tecnicoNombre ?? '—'
-      : orden.tecnicoNombre ?? 'Sin asignar';
+  const ejecutorLabel = false
+    ? (orden.tecnicoNombre ?? '—')
+    : (orden.tecnicoNombre ?? 'Sin asignar');
 
   const toggle = () => setExpanded((p) => !p);
 
   return (
     <div
       className={`wo-card wo-card--expandable${expanded ? ' wo-card--open' : ''}`}
-      style={{
-        '--wo-accent': estadoConfig.cardAccent,
-        '--wo-icon-bg': estadoConfig.iconBg,
-        '--wo-icon-color': estadoConfig.iconColor,
-        ...style,
-      } as React.CSSProperties}
+      style={
+        {
+          '--wo-accent': estadoConfig.cardAccent,
+          '--wo-icon-bg': estadoConfig.iconBg,
+          '--wo-icon-color': estadoConfig.iconColor,
+          ...style
+        } as React.CSSProperties
+      }
       role="article"
       aria-label={`Orden ${orden.codigoOrden}`}
     >
@@ -80,7 +97,11 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onP
           <div className="wo-card__top">
             <span className="wo-card__num">{orden.codigoOrden}</span>
 
-            <Tooltip content="Estado de la OT" position="bottom" themeColor="info">
+            <Tooltip
+              content="Estado de la OT"
+              position="bottom"
+              themeColor="info"
+            >
               <ColorChip
                 color={estadoConfig.color}
                 label={orden.estadoLabel}
@@ -90,7 +111,11 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onP
               />
             </Tooltip>
 
-            <Tooltip content="Tipo de Orden" position="bottom" themeColor="info">
+            <Tooltip
+              content="Tipo de Orden"
+              position="bottom"
+              themeColor="info"
+            >
               <ColorChip
                 label={tipoLabel}
                 variant="soft"
@@ -110,7 +135,10 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onP
               />
             </Tooltip>
 
-            <WorkOrderProcessSteps estadoCodigo={orden.estadoCodigo} variant="mini" />
+            <WorkOrderProcessSteps
+              estadoCodigo={orden.estadoCodigo}
+              variant="mini"
+            />
           </div>
 
           <div className="wo-card__meta">
@@ -145,7 +173,13 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onP
 
             <ColorChip
               label={orden.cumpleSla ? 'SLA OK' : 'SLA Vencido'}
-              icon={orden.cumpleSla ? <CheckCircle size={10} /> : <XCircle size={10} />}
+              icon={
+                orden.cumpleSla ? (
+                  <CheckCircle size={10} />
+                ) : (
+                  <XCircle size={10} />
+                )
+              }
               variant="soft"
               size="xs"
               color={slaColor}
@@ -166,7 +200,11 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onP
           </Button>
 
           {onPrintPdf && (
-            <Tooltip content="Imprimir Orden de Trabajo" position="bottom" themeColor="info">
+            <Tooltip
+              content="Imprimir Orden de Trabajo"
+              position="bottom"
+              themeColor="info"
+            >
               <Button
                 onClick={() => onPrintPdf(orden)}
                 variant="dashed"
@@ -191,12 +229,16 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onP
       </div>
 
       {/* ── EXPAND PANEL ── */}
-      <div className={`wo-card__expand-panel${expanded ? ' wo-card__expand-panel--open' : ''}`}>
+      <div
+        className={`wo-card__expand-panel${expanded ? ' wo-card__expand-panel--open' : ''}`}
+      >
         <div className="wo-card__expand-inner">
-
           {/* Stepper Proceso Completo de la OT */}
           <div style={{ gridColumn: '1 / -1', marginBottom: '0.35rem' }}>
-            <WorkOrderProcessSteps estadoCodigo={orden.estadoCodigo} variant="full" />
+            <WorkOrderProcessSteps
+              estadoCodigo={orden.estadoCodigo}
+              variant="full"
+            />
           </div>
 
           <div className="wo-expand__group">
@@ -205,9 +247,14 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onP
               Trabajo
             </span>
             <span className="wo-expand__value">{orden.tipoTrabajo}</span>
-            <span className="wo-expand__value">Dpto: <strong>{orden.departamentoEjecutor}</strong></span>
+            <span className="wo-expand__value">
+              Dpto: <strong>{orden.departamentoEjecutor}</strong>
+            </span>
             {orden.descripcion && (
-              <span className="wo-expand__value" style={{ fontSize: '0.78rem', opacity: 0.85 }}>
+              <span
+                className="wo-expand__value"
+                style={{ fontSize: '0.78rem', opacity: 0.85 }}
+              >
                 {orden.descripcion}
               </span>
             )}
@@ -215,7 +262,10 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onP
 
           <div className="wo-expand__group">
             <span className="wo-expand__label">
-              <Calendar size={10} style={{ display: 'inline', marginRight: 3 }} />
+              <Calendar
+                size={10}
+                style={{ display: 'inline', marginRight: 3 }}
+              />
               Fechas
             </span>
             <span className="wo-expand__value">
@@ -223,34 +273,49 @@ export const WorkOrderCard: React.FC<WorkOrderCardProps> = ({ orden, onView, onP
             </span>
             {orden.fechaAsignacion && (
               <span className="wo-expand__value">
-                Asignación: <strong>{new Date(orden.fechaAsignacion).toLocaleDateString('es-EC')}</strong>
+                Asignación:{' '}
+                <strong>
+                  {new Date(orden.fechaAsignacion).toLocaleDateString('es-EC')}
+                </strong>
               </span>
             )}
             {orden.fechaCompletada && (
               <span className="wo-expand__value">
-                Completada: <strong>{new Date(orden.fechaCompletada).toLocaleDateString('es-EC')}</strong>
+                Completada:{' '}
+                <strong>
+                  {new Date(orden.fechaCompletada).toLocaleDateString('es-EC')}
+                </strong>
               </span>
             )}
           </div>
 
           <div className="wo-expand__group">
             <span className="wo-expand__label">
-              <ShieldCheck size={10} style={{ display: 'inline', marginRight: 3 }} />
+              <ShieldCheck
+                size={10}
+                style={{ display: 'inline', marginRight: 3 }}
+              />
               SLA
             </span>
             <span className="wo-expand__value">
-              Límite: <strong style={{ color: slaColor }}>{formatSlaHoras(orden.slaHoras)}</strong>
+              Límite:{' '}
+              <strong style={{ color: slaColor }}>
+                {formatSlaHoras(orden.slaHoras)}
+              </strong>
             </span>
             <span className="wo-expand__value" style={{ color: slaColor }}>
               {orden.cumpleSla ? '✓ Cumplido' : '✗ Vencido'}
             </span>
             {orden.ultimaActualizacion && (
-              <span className="wo-expand__value" style={{ fontSize: '0.76rem', opacity: 0.8 }}>
-                Última act.: {new Date(orden.ultimaActualizacion).toLocaleString('es-EC')}
+              <span
+                className="wo-expand__value"
+                style={{ fontSize: '0.76rem', opacity: 0.8 }}
+              >
+                Última act.:{' '}
+                {new Date(orden.ultimaActualizacion).toLocaleString('es-EC')}
               </span>
             )}
           </div>
-
         </div>
       </div>
     </div>

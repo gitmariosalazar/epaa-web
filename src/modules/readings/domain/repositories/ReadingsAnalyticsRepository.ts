@@ -3,6 +3,7 @@ import type {
   AnalyticsSystemType,
   ExecutiveDashboardAnalytics,
   InterannualComparisonAnalytics,
+  MonthlyConnectionGrowthAnalytics,
   MonthlyTrendAnalytics,
   NoveltyEconomicImpactAnalytics,
   SectorPerformanceAnalytics,
@@ -39,4 +40,9 @@ export interface ReadingsAnalyticsRepository {
     filter: AnalyticsFilterParams,
     system: AnalyticsSystemType,
   ): Promise<InterannualComparisonAnalytics[]>;
+
+  getMonthlyConnectionGrowth(
+    filter: AnalyticsFilterParams,
+    system: AnalyticsSystemType,
+  ): Promise<MonthlyConnectionGrowthAnalytics[]>;
 }

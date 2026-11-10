@@ -487,6 +487,11 @@
     var(--wo-card-accent, var(--accent)) 50%,
     var(--border-color)
   );
+  background: color-mix(
+    in srgb,
+    var(--wo-card-accent, var(--accent)) 10%,
+    var(--surface)
+  );
 }
 
 /* ── Main row ─────────────────────────────────────────────────────────────── */
@@ -525,9 +530,11 @@
 /* Top row: code + badges */
 .wo-list-card__top {
   display: flex;
-  align-items: center;
+  align-items: baseline; /* Alinea los textos por su línea de lectura */
   gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* Evita que salten de línea */
+  margin-bottom: 0.35rem;
+  padding: 0.35rem 0.5rem;
 }
 
 .wo-list-card__code {
@@ -577,9 +584,20 @@
 .wo-list-card__footer-item {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.25rem;
   font-size: 0.75rem;
+  line-height: 1; /* 1. Elimina el espacio extra vertical que añade el texto */
   color: var(--text-muted);
+  border-radius: 0.25rem;
+}
+
+/* 2. Asegura que el SVG no se comporte como elemento inline ni se deforme */
+.wo-list-card__footer-item svg {
+  display: block;
+  flex-shrink: 0;
+  position: relative;
+  top: -2px; /* o -0.5px / 1px según el ajuste óptico que pida tu fuente */
 }
 
 /* Actions */

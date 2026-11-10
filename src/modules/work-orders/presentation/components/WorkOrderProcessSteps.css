@@ -11,6 +11,19 @@
   padding: 2px 4px;
 }
 
+.wo-mini-stepper:hover {
+  background: color-mix(
+    in srgb,
+    var(--wo-card-accent, var(--accent)) 10%,
+    var(--surface)
+  ) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--wo-card-accent, var(--accent)) 50%,
+    var(--border-color)
+  ) !important;
+}
+
 .wo-mini-step-circle {
   width: 20px;
   height: 20px;
@@ -75,12 +88,29 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 0.85rem;
-  background: var(--surface);
+  background: color-mix(
+    in srgb,
+    var(--wo-card-accent, var(--accent)) 10%,
+    var(--surface)
+  );
   border: 1px solid var(--border-color);
   border-radius: 12px;
   width: 100%;
   overflow-x: auto;
   gap: 0.25rem;
+}
+
+.wo-card-stepper:hover {
+  background: color-mix(
+    in srgb,
+    var(--wo-card-accent, var(--accent)) 10%,
+    var(--surface)
+  ) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--wo-card-accent, var(--accent)) 50%,
+    var(--border-color)
+  ) !important;
 }
 
 .wo-card-step-item {

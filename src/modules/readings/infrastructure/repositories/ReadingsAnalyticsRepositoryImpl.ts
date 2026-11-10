@@ -3,6 +3,7 @@ import type {
   AnalyticsSystemType,
   ExecutiveDashboardAnalytics,
   InterannualComparisonAnalytics,
+  MonthlyConnectionGrowthAnalytics,
   MonthlyTrendAnalytics,
   NoveltyEconomicImpactAnalytics,
   SectorPerformanceAnalytics,
@@ -228,5 +229,20 @@ export class ReadingsAnalyticsRepositoryImpl implements ReadingsAnalyticsReposit
       );
       return response.data.data;
     }
+  }
+
+  async getMonthlyConnectionGrowth(
+    filter: AnalyticsFilterParams,
+    system: AnalyticsSystemType,
+  ): Promise<MonthlyConnectionGrowthAnalytics[]> {
+    const query = this.buildQueryString({
+      baseYear: filter.baseYear ?? 2025,
+      targetYear: filter.targetYear ?? 2026,
+    });
+    const prefix = system === 'modern' ? '/Readings-Analytics' : '/Readings-Legacy-Analytics';
+    const response = await this.client.get<ApiResponse<MonthlyConnectionGrowthAnalytics[]>>(
+      `${prefix}/monthly-connection-growth${query}`,
+    );
+    return response.data.data;
   }
 }

@@ -8,7 +8,9 @@ import {
   TrendingUp,
   Gauge,
   AlertTriangle,
-  Activity
+  Activity,
+  Landmark,
+  FileText
 } from 'lucide-react';
 import type { ExecutiveDashboardAnalytics } from '../../../domain/models/readings-analytics';
 import { KPICard } from '@/shared/presentation/components/Card/KPICard';
@@ -54,14 +56,21 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
     );
   }
 
+  const hasRentasBreakdown =
+    data.totalTitleUsd !== undefined || data.totalBilledEpaaUsd !== undefined;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Primary KPI Grid */}
       <div className="analytics-kpi-grid">
         <KPICard
-          label="Facturación Total Facturada"
-          value={formatCurrency(data.totalBilledUsd)}
-          description="Total facturado en el periodo"
+          label="Facturación Total Institucional (EPAA)"
+          value={formatCurrency(data.totalBilledEpaaUsd ?? data.totalBilledUsd)}
+          description={
+            hasRentasBreakdown
+              ? 'Títulos + Recargos + Intereses (Datos_ingreso)'
+              : 'Total facturado en el periodo'
+          }
           icon={<DollarSign size={20} />}
           color="primary"
         />
@@ -100,7 +109,7 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
         <KPICard
           label="Tarifa Media Ponderada"
           value={`${formatCurrency(data.weightedAverageEffectiveTariffUsdPerM3)}/m³`}
-          description="Tarifa efectiva neta"
+          description="Tarifa efectiva neta (Agua / m³)"
           icon={<TrendingUp size={20} />}
           color="amber"
         />
@@ -124,27 +133,151 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
           gap: '1.25rem'
         }}
       >
-        {/* Revenue Breakdown */}
+        {/* Institutional Revenue Breakdown (Rentas / EPAA) */}
+        {hasRentasBreakdown && (
+          <div className="analytics-card-section">
+            <div className="analytics-card-header">
+              <h4 className="analytics-card-title">
+                <Landmark size={18} color="var(--primary-color, #2563eb)" />
+                Liquidación de Rentas EPAA
+              </h4>
+              <span className="analytics-card-badge">Títulos & Cargos</span>
+            </div>
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'var(--surface-subtle, #f8fafc)'
+                }}
+              >
+                <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                  Total Títulos de Ingreso
+                </span>
+                <strong style={{ color: 'var(--text-primary, #0f172a)' }}>
+                  {formatCurrency(data.totalTitleUsd)}
+                </strong>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'var(--surface-subtle, #f8fafc)'
+                }}
+              >
+                <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                  Tasa de Recolección de Basura
+                </span>
+                <strong style={{ color: 'var(--text-primary, #0f172a)' }}>
+                  {formatCurrency(data.totalTrashTaxUsd)}
+                </strong>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'var(--surface-subtle, #f8fafc)'
+                }}
+              >
+                <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                  Valores de Terceros
+                </span>
+                <strong style={{ color: 'var(--text-primary, #0f172a)' }}>
+                  {formatCurrency(data.totalThirdPartiesUsd)}
+                </strong>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'var(--surface-subtle, #f8fafc)'
+                }}
+              >
+                <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                  Intereses Devengados (Caché)
+                </span>
+                <strong style={{ color: 'var(--text-primary, #0f172a)' }}>
+                  {formatCurrency(data.totalInterestUsd)}
+                </strong>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'var(--surface-subtle, #f8fafc)'
+                }}
+              >
+                <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                  Recargos por Mora
+                </span>
+                <strong style={{ color: 'var(--text-primary, #0f172a)' }}>
+                  {formatCurrency(data.totalSurchargesUsd)}
+                </strong>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  borderTop: '2px solid var(--border-color, #e2e8f0)',
+                  background: 'rgba(37, 99, 235, 0.04)'
+                }}
+              >
+                <span
+                  style={{
+                    fontWeight: 700,
+                    color: 'var(--text-primary, #0f172a)'
+                  }}
+                >
+                  Facturación Total EPAA
+                </span>
+                <strong
+                  style={{
+                    fontSize: '1.15rem',
+                    color: 'var(--primary-color, #2563eb)'
+                  }}
+                >
+                  {formatCurrency(data.totalBilledEpaaUsd ?? data.totalBilledUsd)}
+                </strong>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Micromedición Tariff Breakdown */}
         <div className="analytics-card-section">
           <div className="analytics-card-header">
             <h4 className="analytics-card-title">
-              <DollarSign size={18} color="var(--primary-color, #2563eb)" />
-              Composición de Ingresos Facturados
+              <FileText size={18} color="#059669" />
+              Composición Tarifaria (Micromedición)
             </h4>
-            <span className="analytics-card-badge">Estructura Tarifaria</span>
+            <span className="analytics-card-badge">Lecturas de Red</span>
           </div>
           <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+            style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
           >
             <div
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                padding: '0.75rem',
+                padding: '0.65rem 0.75rem',
                 borderRadius: '8px',
                 background: 'var(--surface-subtle, #f8fafc)'
               }}
@@ -160,7 +293,7 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                padding: '0.75rem',
+                padding: '0.65rem 0.75rem',
                 borderRadius: '8px',
                 background: 'var(--surface-subtle, #f8fafc)'
               }}
@@ -178,24 +311,25 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
                 justifyContent: 'space-between',
                 padding: '0.75rem',
                 borderRadius: '8px',
-                borderTop: '2px solid var(--border-color, #e2e8f0)'
+                borderTop: '2px solid var(--border-color, #e2e8f0)',
+                background: 'rgba(5, 150, 105, 0.04)'
               }}
             >
               <span
                 style={{
-                  fontWeight: 600,
+                  fontWeight: 700,
                   color: 'var(--text-primary, #0f172a)'
                 }}
               >
-                Total Facturado
+                Subtotal Tarifa Medida
               </span>
               <strong
                 style={{
-                  fontSize: '1.1rem',
-                  color: 'var(--primary-color, #2563eb)'
+                  fontSize: '1.15rem',
+                  color: '#059669'
                 }}
               >
-                {formatCurrency(data.totalBilledUsd)}
+                {formatCurrency(data.waterBilledUsd + data.sewerBilledUsd)}
               </strong>
             </div>
           </div>
@@ -211,13 +345,13 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
             <span className="analytics-card-badge">Comportamiento Físico</span>
           </div>
           <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+            style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
           >
             <div
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                padding: '0.75rem',
+                padding: '0.65rem 0.75rem',
                 borderRadius: '8px',
                 background: 'var(--surface-subtle, #f8fafc)'
               }}
@@ -233,7 +367,7 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                padding: '0.75rem',
+                padding: '0.65rem 0.75rem',
                 borderRadius: '8px',
                 background: 'var(--surface-subtle, #f8fafc)'
               }}
@@ -249,7 +383,7 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                padding: '0.75rem',
+                padding: '0.65rem 0.75rem',
                 borderRadius: '8px',
                 background: 'var(--surface-subtle, #f8fafc)'
               }}

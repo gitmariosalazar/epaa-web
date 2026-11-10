@@ -458,7 +458,7 @@ const WorkOrderMaterialsCardInner: React.FC<WorkOrderMaterialsCardProps> = ({
             <div
               className="wo-materials-inline-form-box"
               style={{
-                background: 'var(--surface-hover)',
+                background: 'var(--surface)',
                 padding: '0.75rem',
                 borderRadius: '8px',
                 border: '1px solid var(--border-color)',
@@ -664,7 +664,7 @@ const WorkOrderMaterialsCardInner: React.FC<WorkOrderMaterialsCardProps> = ({
             <div
               className="wo-costs-inline-form-box"
               style={{
-                background: 'var(--surface-hover)',
+                background: 'var(--surface)',
                 padding: '0.75rem',
                 borderRadius: '8px',
                 border: '1px solid var(--border-color)',

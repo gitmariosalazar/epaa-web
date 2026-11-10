@@ -4,6 +4,7 @@ import type {
   AnalyticsSystemType,
   ExecutiveDashboardAnalytics,
   InterannualComparisonAnalytics,
+  MonthlyConnectionGrowthAnalytics,
   MonthlyTrendAnalytics,
   NoveltyEconomicImpactAnalytics,
   SectorPerformanceAnalytics,
@@ -17,6 +18,7 @@ import {
   GetNoveltyEconomicImpactAnalyticsUseCase,
   GetTopConsumersAnalyticsUseCase,
   GetInterannualComparisonAnalyticsUseCase,
+  GetMonthlyConnectionGrowthAnalyticsUseCase,
 } from '../../application/usecases/analytics';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
@@ -26,7 +28,8 @@ export type AnalyticsTabType =
   | 'trend'
   | 'novelties'
   | 'consumers'
-  | 'interannual';
+  | 'interannual'
+  | 'connection-growth';
 
 export const useReadingsAnalyticsViewModel = () => {
   const repository = useMemo(() => new ReadingsAnalyticsRepositoryImpl(), []);
@@ -55,9 +58,13 @@ export const useReadingsAnalyticsViewModel = () => {
     () => new GetInterannualComparisonAnalyticsUseCase(repository),
     [repository],
   );
+  const connectionGrowthUseCase = useMemo(
+    () => new GetMonthlyConnectionGrowthAnalyticsUseCase(repository),
+    [repository],
+  );
 
   // Tab & Engine System
-  const [system, setSystem] = useState<AnalyticsSystemType>('modern');
+  const [system, setSystem] = useState<AnalyticsSystemType>('legacy');
   const [activeTab, setActiveTab] = useState<AnalyticsTabType>('executive');
 
   // Filters
@@ -91,6 +98,9 @@ export const useReadingsAnalyticsViewModel = () => {
   >(null);
   const [interannualData, setInterannualData] = useState<
     InterannualComparisonAnalytics[] | null
+  >(null);
+  const [connectionGrowthData, setConnectionGrowthData] = useState<
+    MonthlyConnectionGrowthAnalytics[] | null
   >(null);
 
   // Status
@@ -234,6 +244,24 @@ export const useReadingsAnalyticsViewModel = () => {
     }
   }, [interannualUseCase, buildCurrentFilter, system]);
 
+  const fetchMonthlyConnectionGrowth = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await connectionGrowthUseCase.execute(buildCurrentFilter(), system);
+      setConnectionGrowthData(data);
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Error al cargar crecimiento de acometidas';
+      setError(message);
+      MessageToastCustom('error', message, 'Error Analítica');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [connectionGrowthUseCase, buildCurrentFilter, system]);
+
   const refreshActiveTab = useCallback(() => {
     switch (activeTab) {
       case 'executive':
@@ -254,6 +282,9 @@ export const useReadingsAnalyticsViewModel = () => {
       case 'interannual':
         fetchInterannualComparison();
         break;
+      case 'connection-growth':
+        fetchMonthlyConnectionGrowth();
+        break;
     }
   }, [
     activeTab,
@@ -263,6 +294,7 @@ export const useReadingsAnalyticsViewModel = () => {
     fetchNoveltiesEconomicImpact,
     fetchTopConsumers,
     fetchInterannualComparison,
+    fetchMonthlyConnectionGrowth,
   ]);
 
   // Trigger fetch when tab or critical filter changes
@@ -316,6 +348,7 @@ export const useReadingsAnalyticsViewModel = () => {
     noveltiesData,
     topConsumersData,
     interannualData,
+    connectionGrowthData,
 
     // Status & Actions
     isLoading,
@@ -327,5 +360,6 @@ export const useReadingsAnalyticsViewModel = () => {
     fetchNoveltiesEconomicImpact,
     fetchTopConsumers,
     fetchInterannualComparison,
+    fetchMonthlyConnectionGrowth,
   };
 };

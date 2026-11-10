@@ -79,11 +79,14 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
 
   const fechaStr = orden.creationDate
     ? new Date(orden.creationDate).toLocaleDateString('es-EC', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    })
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      })
     : '—';
+
+  console.log(orden);
+  console.log(orden.assignedUserId);
 
   return (
     <article
@@ -112,29 +115,62 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
           {/* Top row: code + badges */}
           <div className="wo-list-card__top">
             <span className="wo-list-card__code">{orden.orderCode}</span>
-            <ColorChip
-              label={estadoConfig.label}
-              color={estadoConfig.color}
-              variant="soft"
-              size="xs"
-            />
-            <ColorChip
-              label={priorityInfo.label}
-              color={priorityInfo.color}
-              variant="soft"
-              size="xs"
-            />
+            <Tooltip
+              content={`Estado de la OT: ${estadoConfig.label}`}
+              position="top"
+              followCursor={false}
+              themeColor={estadoConfig.color ? 'info' : 'slate'}
+            >
+              <ColorChip
+                label={estadoConfig.label}
+                color={estadoConfig.color}
+                variant="soft"
+                size="xs"
+              />
+            </Tooltip>
+
+            <Tooltip
+              content={`Prioridad de la OT: ${priorityInfo.label}`}
+              position="top"
+              themeColor={priorityInfo.color ? 'info' : 'slate'}
+              followCursor={false}
+            >
+              <ColorChip
+                label={priorityInfo.label}
+                color={priorityInfo.color}
+                variant="soft"
+                size="xs"
+              />
+            </Tooltip>
+            {orden.assignedUserId && (
+              <Tooltip
+                content={`Asignado a: ${orden.assignedNames ?? 'Sin asignar'}`}
+                position="top"
+                themeColor={orden.assignedUsername ? 'info' : 'slate'}
+                followCursor={false}
+              >
+                <ColorChip
+                  label={orden.assignedUsername ?? 'Sin asignar'}
+                  icon={<User size={12} />}
+                  variant="soft"
+                  size="xs"
+                />
+              </Tooltip>
+            )}
             <WorkOrderProcessSteps estadoCodigo={orden.status} variant="mini" />
           </div>
 
           {/* Client + work type */}
           <div className="wo-list-card__meta">
-            <Tooltip followCursor={false}
+            <Tooltip
+              followCursor={false}
               content={
                 orden.personType === 'JURIDICA'
-                  ? 'Persona Jurídica'
-                  : 'Persona Natural'
+                  ? 'Cliente: Persona Jurídica'
+                  : 'Cliente: Persona Natural'
               }
+              position="top"
+              themeColor="info"
             >
               <span className="wo-list-card__meta-item">
                 {personIcon}
@@ -175,7 +211,12 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
             size="sm"
             leftIcon={<Settings2 size={14} />}
             onClick={() => onProcess(orden.orderCode)}
-            disabled={orden.status === 'COMPLETADA' || orden.status === 'CANCELADA' || orden.status === 'INSPECCION_COMPLETADA' || orden.status === 'INSTALACION_COMPLETADA'}
+            disabled={
+              orden.status === 'COMPLETADA' ||
+              orden.status === 'CANCELADA' ||
+              orden.status === 'INSPECCION_COMPLETADA' ||
+              orden.status === 'INSTALACION_COMPLETADA'
+            }
           >
             Procesar
           </Button>
@@ -191,42 +232,39 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
 
           <Tooltip
             content={'Imprimir detalle de orden de trabajo'}
-            position='top'
+            position="top"
             followCursor={false}
           >
             <Button
               onClick={() => onPrintPdf?.(orden)}
-              size='sm'
-              variant='dashed'
+              size="sm"
+              variant="dashed"
               aria-label={'Imprimir detalle de orden de trabajo'}
-              color='orange'
+              color="orange"
             >
               {<FaPrint size={16} />}
             </Button>
           </Tooltip>
 
           <Tooltip
-            content={
-              expanded ? 'Ocultar detalles' : 'Ver más detalles'
-            }
-            position='top'
+            content={expanded ? 'Ocultar detalles' : 'Ver más detalles'}
+            position="top"
             followCursor={false}
           >
             <Button
               onClick={() => setExpanded((e) => !e)}
-              size='sm'
-              variant='dashed'
+              size="sm"
+              variant="dashed"
               aria-label={expanded ? 'Ocultar detalles' : 'Ver más detalles'}
               aria-expanded={expanded}
             >
               {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </Button>
           </Tooltip>
-
-
         </div>
         <div className="department-chip">
-          <Tooltip followCursor={false}
+          <Tooltip
+            followCursor={false}
             content={DepartmentHelper.getDepartmentDescription(
               orden.departmentId ?? 0,
               orden.departmentName
@@ -246,8 +284,8 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
                 orden.departmentId ?? 0,
                 orden.departmentName
               )}
-              variant='soft'
-              size='xs'
+              variant="soft"
+              size="xs"
             />
           </Tooltip>
         </div>
@@ -262,34 +300,44 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
           <div className="wo-list-card__expanded-grid">
             {orden.assignationDate && (
               <div className="wo-list-card__exp-item">
-                <span className="wo-list-card__exp-label">Fecha de asignación</span>
-                <ColorChip label={ConverDateTimeToText(orden.assignationDate)} icon={<Calendar size={12} />}
+                <span className="wo-list-card__exp-label">
+                  Fecha de asignación
+                </span>
+                <ColorChip
+                  label={ConverDateTimeToText(orden.assignationDate)}
+                  icon={<Calendar size={12} />}
                   variant="ghost"
                   color="var(--info, #10b981)"
                   borderRadius={4}
-                  size='sm'
+                  size="sm"
                 />
               </div>
             )}
             {orden.completionDate && (
               <div className="wo-list-card__exp-item">
-                <span className="wo-list-card__exp-label">Fecha de finalización</span>
-                <ColorChip label={ConverDateTimeToText(orden.completionDate)} icon={<Calendar size={12} />}
+                <span className="wo-list-card__exp-label">
+                  Fecha de finalización
+                </span>
+                <ColorChip
+                  label={ConverDateTimeToText(orden.completionDate)}
+                  icon={<Calendar size={12} />}
                   variant="ghost"
                   color="var(--success, #3b82f6)"
                   borderRadius={4}
-                  size='sm'
+                  size="sm"
                 />
               </div>
             )}
             {orden.cadastralKey && (
               <div className="wo-list-card__exp-item">
                 <span className="wo-list-card__exp-label">Clave Catastral</span>
-                <ColorChip label={orden.cadastralKey} icon={<Tag size={12} />}
+                <ColorChip
+                  label={orden.cadastralKey}
+                  icon={<Tag size={12} />}
                   variant="ghost"
                   color="var(--info, #3b82f6)"
                   borderRadius={4}
-                  size='sm'
+                  size="sm"
                 />
               </div>
             )}
@@ -298,7 +346,7 @@ export const AllWorkOrderCard: React.FC<AllWorkOrderCardProps> = ({
                 <span className="wo-list-card__exp-label">Descripción</span>
                 <Alert
                   message={orden.description}
-                  type='gray'
+                  type="gray"
                   icon={<MdOutlineDescription size={25} />}
                   dismissible={false}
                 />
