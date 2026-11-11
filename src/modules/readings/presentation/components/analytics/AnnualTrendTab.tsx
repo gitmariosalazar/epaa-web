@@ -34,6 +34,8 @@ import {
   formatPercent,
   formatVolume
 } from '../../utils/analytics-formatters';
+import { useTheme } from '@/shared/presentation/context/ThemeContext';
+import '../../styles/AnnualTrendTab.css';
 
 interface AnnualTrendTabProps {
   data: AnnualTrendAnalytics[] | null;
@@ -44,6 +46,8 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
   data,
   isLoading
 }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const chartData = useMemo(() => {
     if (!data) return [];
     return data.map((item) => ({
@@ -58,7 +62,10 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
   const kpis = useMemo(() => {
     if (!data || data.length === 0) return null;
     const totalVolume = data.reduce((acc, curr) => acc + curr.totalVolumeM3, 0);
-    const totalBilled = data.reduce((acc, curr) => acc + curr.totalBilledUsd, 0);
+    const totalBilled = data.reduce(
+      (acc, curr) => acc + curr.totalBilledUsd,
+      0
+    );
     const totalCollected = data.reduce(
       (acc, curr) => acc + (curr.totalCollectedUsd ?? 0),
       0
@@ -109,9 +116,7 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
         id: 'year',
         header: 'Año / Periodo',
         accessor: (item) => (
-          <span
-            style={{ fontWeight: 700, color: 'var(--text-primary, #0f172a)' }}
-          >
+          <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
             {item.year}
           </span>
         )
@@ -149,7 +154,9 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
           const isPos = item.deltaVolumeM3 >= 0;
           return (
             <span
-              style={{ color: isPos ? '#10b981' : '#ef4444', fontWeight: 600 }}
+              className={
+                isPos ? 'annual-trend-growth--pos' : 'annual-trend-growth--neg'
+              }
             >
               {isPos ? '+' : ''}
               {formatVolume(item.deltaVolumeM3)}
@@ -170,13 +177,9 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
           const isPos = item.growthVolumePercentage >= 0;
           return (
             <span
-              style={{
-                color: isPos ? '#10b981' : '#ef4444',
-                fontWeight: 600,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '2px'
-              }}
+              className={
+                isPos ? 'annual-trend-growth--pos' : 'annual-trend-growth--neg'
+              }
             >
               {isPos ? (
                 <ArrowUpRight size={14} />
@@ -205,7 +208,7 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
         id: 'totalBilledUsd',
         header: 'Total Facturado ($)',
         accessor: (item) => (
-          <span style={{ fontWeight: 700, color: '#059669' }}>
+          <span className="annual-trend-text-billed">
             {formatCurrency(item.totalBilledUsd)}
           </span>
         ),
@@ -223,7 +226,9 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
           const isPos = item.deltaRevenueUsd >= 0;
           return (
             <span
-              style={{ color: isPos ? '#10b981' : '#ef4444', fontWeight: 600 }}
+              className={
+                isPos ? 'annual-trend-growth--pos' : 'annual-trend-growth--neg'
+              }
             >
               {isPos ? '+' : ''}
               {formatCurrency(item.deltaRevenueUsd)}
@@ -244,13 +249,9 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
           const isPos = item.growthRevenuePercentage >= 0;
           return (
             <span
-              style={{
-                color: isPos ? '#10b981' : '#ef4444',
-                fontWeight: 600,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '2px'
-              }}
+              className={
+                isPos ? 'annual-trend-growth--pos' : 'annual-trend-growth--neg'
+              }
             >
               {isPos ? (
                 <ArrowUpRight size={14} />
@@ -266,7 +267,8 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
       {
         id: 'effectiveAverageTariffUsdPerM3',
         header: 'Tarifa Media ($/m³)',
-        accessor: (item) => `$${item.effectiveAverageTariffUsdPerM3.toFixed(4)}`,
+        accessor: (item) =>
+          `$${item.effectiveAverageTariffUsdPerM3.toFixed(4)}`,
         isNumeric: true
       },
       ...(data?.some((d) => d.totalCollectedUsd !== undefined)
@@ -275,7 +277,7 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
               id: 'totalCollectedUsd',
               header: 'Cobrado ($)',
               accessor: (item: AnnualTrendAnalytics) => (
-                <span style={{ fontWeight: 600, color: '#059669' }}>
+                <span className="annual-trend-text-collected">
                   {formatCurrency(item.totalCollectedUsd ?? 0)}
                 </span>
               ),
@@ -285,7 +287,7 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
               id: 'totalPendingDebtUsd',
               header: 'Pendiente ($)',
               accessor: (item: AnnualTrendAnalytics) => (
-                <span style={{ fontWeight: 600, color: '#f59e0b' }}>
+                <span className="annual-trend-text-pending">
                   {formatCurrency(item.totalPendingDebtUsd ?? 0)}
                 </span>
               ),
@@ -295,7 +297,7 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
               id: 'totalOverdueDebtUsd',
               header: 'En Mora ($)',
               accessor: (item: AnnualTrendAnalytics) => (
-                <span style={{ fontWeight: 600, color: '#dc2626' }}>
+                <span className="annual-trend-text-overdue">
                   {formatCurrency(item.totalOverdueDebtUsd ?? 0)}
                 </span>
               ),
@@ -315,25 +317,13 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
                 const isWarning = eff >= 50 && eff < 80;
                 return (
                   <span
-                    style={{
-                      padding: '2px 8px',
-                      borderRadius: '12px',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      backgroundColor: isGood
-                        ? '#dcfce7'
+                    className={`annual-trend-badge ${
+                      isGood
+                        ? 'annual-trend-badge--good'
                         : isWarning
-                          ? '#fef3c7'
-                          : '#fee2e2',
-                      color: isGood
-                        ? '#166534'
-                        : isWarning
-                          ? '#b45309'
-                          : '#991b1b',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
+                          ? 'annual-trend-badge--warning'
+                          : 'annual-trend-badge--danger'
+                    }`}
                   >
                     {isGood ? (
                       <CheckCircle2 size={12} />
@@ -393,7 +383,9 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
         ? (netDeltaVolume / firstItem.totalVolumeM3) * 100
         : null;
     const netDeltaRevenue =
-      data.length > 1 ? lastItem.totalBilledUsd - firstItem.totalBilledUsd : null;
+      data.length > 1
+        ? lastItem.totalBilledUsd - firstItem.totalBilledUsd
+        : null;
     const netGrowthRevenue =
       netDeltaRevenue !== null && firstItem.totalBilledUsd > 0
         ? (netDeltaRevenue / firstItem.totalBilledUsd) * 100
@@ -505,14 +497,7 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
 
   if (isLoading) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '400px'
-        }}
-      >
+      <div className="circular-progress">
         <CircularProgress />
       </div>
     );
@@ -528,133 +513,210 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div className="annual-trend-container">
       {/* KPI Highlights */}
       {kpis && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: '1rem'
-          }}
-        >
-          <div className="analytics-card" style={{ padding: '1.25rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#ecfdf5', color: '#059669' }}>
+        <div className="annual-trend-kpi-grid">
+          {/* Facturación Total */}
+          <div className="annual-trend-kpi-card">
+            <div className="annual-trend-kpi-header">
+              <div className="annual-trend-icon-wrapper annual-trend-icon-wrapper--billed">
                 <DollarSign size={20} />
               </div>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>
+              <span className="annual-trend-kpi-title">
                 Facturación Total Histórica
               </span>
             </div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>
+            <div className="annual-trend-kpi-value">
               {formatCurrency(kpis.totalBilled)}
             </div>
-            <div style={{ fontSize: '0.78rem', color: kpis.netRevenueGrowth >= 0 ? '#10b981' : '#ef4444', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              {kpis.netRevenueGrowth >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-              <span>{formatPercent(kpis.netRevenueGrowth)} crecimiento neto ({kpis.firstYear} → {kpis.lastYear})</span>
+            <div className="annual-trend-kpi-footer">
+              <span
+                className={
+                  kpis.netRevenueGrowth >= 0
+                    ? 'annual-trend-growth--pos'
+                    : 'annual-trend-growth--neg'
+                }
+              >
+                {kpis.netRevenueGrowth >= 0 ? (
+                  <ArrowUpRight size={14} />
+                ) : (
+                  <ArrowDownRight size={14} />
+                )}
+                {formatPercent(kpis.netRevenueGrowth)}
+              </span>
+              <span>
+                crecimiento neto ({kpis.firstYear} → {kpis.lastYear})
+              </span>
             </div>
           </div>
 
-          <div className="analytics-card" style={{ padding: '1.25rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#eff6ff', color: '#2563eb' }}>
+          {/* Volumen Total */}
+          <div className="annual-trend-kpi-card">
+            <div className="annual-trend-kpi-header">
+              <div className="annual-trend-icon-wrapper annual-trend-icon-wrapper--volume">
                 <Droplets size={20} />
               </div>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>
+              <span className="annual-trend-kpi-title">
                 Volumen Total Suministrado
               </span>
             </div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>
+            <div className="annual-trend-kpi-value">
               {formatVolume(kpis.totalVolume)}
             </div>
-            <div style={{ fontSize: '0.78rem', color: kpis.netVolumeGrowth >= 0 ? '#10b981' : '#ef4444', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              {kpis.netVolumeGrowth >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-              <span>{formatPercent(kpis.netVolumeGrowth)} variación de consumo ({kpis.firstYear} → {kpis.lastYear})</span>
+            <div className="annual-trend-kpi-footer">
+              <span
+                className={
+                  kpis.netVolumeGrowth >= 0
+                    ? 'annual-trend-growth--pos'
+                    : 'annual-trend-growth--neg'
+                }
+              >
+                {kpis.netVolumeGrowth >= 0 ? (
+                  <ArrowUpRight size={14} />
+                ) : (
+                  <ArrowDownRight size={14} />
+                )}
+                {formatPercent(kpis.netVolumeGrowth)}
+              </span>
+              <span>
+                variación de consumo ({kpis.firstYear} → {kpis.lastYear})
+              </span>
             </div>
           </div>
 
-          <div className="analytics-card" style={{ padding: '1.25rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#f0fdf4', color: '#16a34a' }}>
+          {/* Recaudación Cobrada */}
+          <div className="annual-trend-kpi-card">
+            <div className="annual-trend-kpi-header">
+              <div className="annual-trend-icon-wrapper annual-trend-icon-wrapper--collected">
                 <CheckCircle2 size={20} />
               </div>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>
+              <span className="annual-trend-kpi-title">
                 Recaudación Cobrada
               </span>
             </div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#16a34a' }}>
+            <div className="annual-trend-kpi-value annual-trend-kpi-value--collected">
               {formatCurrency(kpis.totalCollected)}
             </div>
-            <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem' }}>
-              Eficiencia global: <strong>{formatPercent(kpis.overallCollectionEfficiency)}</strong>
+            <div className="annual-trend-kpi-footer">
+              <span>Eficiencia global:</span>
+              <strong style={{ color: 'var(--text-primary)' }}>
+                {formatPercent(kpis.overallCollectionEfficiency)}
+              </strong>
             </div>
           </div>
 
-          <div className="analytics-card" style={{ padding: '1.25rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#fffbeb', color: '#d97706' }}>
+          {/* Cartera Pendiente */}
+          <div className="annual-trend-kpi-card">
+            <div className="annual-trend-kpi-header">
+              <div className="annual-trend-icon-wrapper annual-trend-icon-wrapper--pending">
                 <Activity size={20} />
               </div>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>
-                Cartera Pendiente
-              </span>
+              <span className="annual-trend-kpi-title">Cartera Pendiente</span>
             </div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#d97706' }}>
+            <div className="annual-trend-kpi-value annual-trend-kpi-value--pending">
               {formatCurrency(kpis.totalPending)}
             </div>
-            <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem' }}>
-              Saldo no liquidado en el periodo analizado
+            <div className="annual-trend-kpi-footer">
+              <span>Saldo no liquidado en el periodo analizado</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Chart */}
-      <div className="analytics-card" style={{ padding: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
-          <TrendingUp size={18} color="var(--primary-color, #2563eb)" />
-          <h4 style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary, #0f172a)' }}>
-            Evolución Multianual de Facturación, Recaudación y Volumen Suministrado
+      {/* Chart Section */}
+      <div className="analytics-card-section">
+        <div className="analytics-card-header">
+          <h4 className="analytics-card-title">
+            <TrendingUp size={18} color="var(--primary-color, #2563eb)" />
+            Evolución Multianual de Facturación, Recaudación y Volumen
+            Suministrado
           </h4>
+          <span className="analytics-card-badge">Histórico Anual</span>
         </div>
 
-        <div style={{ width: '100%', height: '350px' }}>
+        <div style={{ width: '100%', height: '350px', marginTop: '1rem' }}>
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={chartData}
               margin={{ top: 10, right: 30, left: 20, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
-              <XAxis dataKey="anio" stroke="#64748b" tick={{ fontSize: 12, fontWeight: 600 }} />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                stroke={isDark ? '#334155' : '#e2e8f0'}
+                opacity={isDark ? 0.6 : 0.8}
+              />
+              <XAxis
+                dataKey="anio"
+                stroke={isDark ? '#475569' : '#cbd5e1'}
+                tick={{
+                  fill: isDark ? '#94a3b8' : '#64748b',
+                  fontSize: 12,
+                  fontWeight: 600
+                }}
+              />
               <YAxis
                 yAxisId="left"
-                stroke="#059669"
-                tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
-                tick={{ fontSize: 11 }}
+                stroke={isDark ? '#10b981' : '#059669'}
+                tickFormatter={(val: number) => `$${(val / 1000).toFixed(0)}k`}
+                tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 11 }}
               />
               <YAxis
                 yAxisId="right"
                 orientation="right"
-                stroke="#2563eb"
-                tickFormatter={(val) => `${(val / 1000).toFixed(0)}k m³`}
-                tick={{ fontSize: 11 }}
+                stroke={isDark ? '#3b82f6' : '#2563eb'}
+                tickFormatter={(val: number) =>
+                  `${(val / 1000).toFixed(0)}k m³`
+                }
+                tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 11 }}
               />
               <RechartsTooltip
-                formatter={(value: any, name: any) => {
-                  if (name === 'Facturado Total' || name === 'Recaudado Cobrado')
-                    return [formatCurrency(Number(value)), name];
-                  if (name === 'Volumen Consumido')
-                    return [formatVolume(Number(value)), name];
-                  return [formatNumber(Number(value)), name];
+                formatter={(value: unknown, name: unknown) => {
+                  const strName = String(name ?? '');
+                  const numVal = Number(value ?? 0);
+                  if (
+                    strName === 'Facturado Total' ||
+                    strName === 'Recaudado Cobrado'
+                  ) {
+                    return [formatCurrency(numVal), strName];
+                  }
+                  if (strName === 'Volumen Consumido') {
+                    return [formatVolume(numVal), strName];
+                  }
+                  return [formatNumber(numVal), strName];
+                }}
+                contentStyle={{
+                  backgroundColor: 'var(--surface)', // o var(--bg-card) según tu CSS
+                  borderColor: 'var(--border-color)',
+                  borderRadius: '8px',
+                  color: 'hsl(var(--popover-foreground))',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                }}
+                labelStyle={{
+                  color: 'hsl(var(--foreground))',
+                  fontWeight: 600,
+                  marginBottom: '4px'
+                }}
+                itemStyle={{
+                  fontSize: '13px'
+                }}
+                cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }}
+              />
+              <Legend
+                verticalAlign="top"
+                height={36}
+                wrapperStyle={{
+                  color: isDark ? '#cbd5e1' : '#475569',
+                  fontSize: '13px',
+                  fontWeight: 500
                 }}
               />
-              <Legend verticalAlign="top" height={36} />
               <Bar
                 yAxisId="left"
                 dataKey="facturado"
                 name="Facturado Total"
-                fill="#10b981"
+                fill={isDark ? '#f59e0b' : '#d97706'}
                 radius={[4, 4, 0, 0]}
                 barSize={24}
               />
@@ -662,7 +724,7 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
                 yAxisId="left"
                 dataKey="cobrado"
                 name="Recaudado Cobrado"
-                fill="#059669"
+                fill={isDark ? '#10b981' : '#059669'}
                 radius={[4, 4, 0, 0]}
                 barSize={24}
               />
@@ -671,35 +733,42 @@ export const AnnualTrendTab: React.FC<AnnualTrendTabProps> = ({
                 type="monotone"
                 dataKey="volumen"
                 name="Volumen Consumido"
-                stroke="#2563eb"
+                stroke={isDark ? '#60a5fa' : '#2563eb'}
                 strokeWidth={3}
-                dot={{ r: 5, fill: '#2563eb' }}
+                dot={{ r: 5, fill: isDark ? '#60a5fa' : '#2563eb' }}
               />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="analytics-card" style={{ padding: '1.25rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+      {/* Table Section */}
+      <div className="analytics-card-section">
+        <div className="analytics-card-header">
           <div>
-            <h4 style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary, #0f172a)' }}>
+            <h4 className="analytics-card-title">
+              <Activity size={18} color="var(--primary-color, #2563eb)" />
               Matriz Consolidada de Crecimiento y Desempeño Interanual
             </h4>
-            <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#64748b' }}>
-              Auditoría histórica con desglose de acometidas, consumos m³, facturación agua/tasas, recaudación y eficiencia de cobranza.
+            <p className="annual-trend-subtitle">
+              Auditoría histórica con desglose de acometidas, consumos m³,
+              facturación agua/tasas, recaudación y eficiencia de cobranza.
             </p>
           </div>
+          <span className="analytics-card-badge">
+            {data.length} {data.length === 1 ? 'Año' : 'Años'}
+          </span>
         </div>
 
-        <Table<AnnualTrendAnalytics>
-          columns={columns}
-          data={data}
-          totalRows={totalRows}
-          pagination={false}
-          width="100"
-        />
+        <div style={{ marginTop: '1rem' }}>
+          <Table<AnnualTrendAnalytics>
+            columns={columns}
+            data={data}
+            totalRows={totalRows}
+            pagination={false}
+            width="100"
+          />
+        </div>
       </div>
     </div>
   );
