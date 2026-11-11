@@ -12,18 +12,28 @@ export type ScadaNodeType =
   | 'SOURCE'
   | 'CAPTACION'
   | 'CONNECTION'
-  | 'VIRTUAL_LINK';
+  | 'VIRTUAL_LINK'
+  | 'TRANSMISSION_LINK'
+  | 'PIPELINE';
 
 export interface GeoJsonFeatureProperties {
   nodeType: ScadaNodeType | (string & {});
   name?: string;
   code?: string;
+  facilityType?: string;
   colorMarker?: string;
   connectionId?: string;
   cadastralKey?: string;
   suppliedByTank?: string;
+  supplierType?: string;
   source?: string;
+  sourceCode?: string;
+  sourceType?: string;
   destination?: string;
+  destinationCode?: string;
+  destinationType?: string;
+  pipelineMaterial?: string;
+  pipelineDiameterMm?: number;
   distanceInMeters?: number;
 }
 

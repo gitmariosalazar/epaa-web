@@ -88,7 +88,19 @@ const DeckGlOverlay: React.FC<DeckGlOverlayProps> = ({ layers }) => {
           const config = NodeVisualConfigProvider.getConfig(object);
           let html = '';
 
-          if (NodeClassifier.isPlant(object)) {
+          if (object.properties?.nodeType === 'TRANSMISSION_LINK' || object.properties?.nodeType === 'PIPELINE') {
+            html = `<strong>⚡ Línea de Impulsión / Conducción:</strong> ${object.properties.name || ''}`;
+            if (object.properties.source && object.properties.destination) {
+              html += `<div style="color:#f97316;font-size:12px;margin-top:2px">${object.properties.source} ➔ ${object.properties.destination}</div>`;
+            }
+            const details: string[] = [];
+            if (object.properties.pipelineMaterial) details.push(`Mat: ${object.properties.pipelineMaterial}`);
+            if (object.properties.pipelineDiameterMm) details.push(`Ø ${object.properties.pipelineDiameterMm} mm`);
+            if (object.properties.distanceInMeters) details.push(`${Math.round(object.properties.distanceInMeters)} m`);
+            if (details.length > 0) {
+              html += `<div style="color:#94a3b8;font-size:11px;margin-top:2px">${details.join(' | ')}</div>`;
+            }
+          } else if (NodeClassifier.isPlant(object)) {
             html = `<strong>🏭 Planta de Tratamiento:</strong> ${object.properties?.name || 'Desconocido'}`;
             if (object.properties?.code) {
               html += `<div style="color:#94a3b8;font-size:11px;margin-top:2px">Código: ${object.properties.code}</div>`;
@@ -156,21 +168,21 @@ export const ScadaMap: React.FC<ScadaMapProps> = ({
     setInternalFilter(tank);
   };
 
-  // Extraer todos los tanques disponibles con su conteo de acometidas
+  // Extraer todos los tanques y plantas disponibles con su conteo de acometidas
   const tankOptions = useMemo<TankOption[]>(() => {
     if (!geoJsonData?.features) return [];
     const tankRecord: Record<string, TankOption> = {};
 
-    // Identificar tanques
+    // Identificar tanques y plantas
     geoJsonData.features.forEach((f) => {
-      if (NodeClassifier.isTank(f) && f.properties?.name) {
+      if ((NodeClassifier.isTank(f) || NodeClassifier.isPlant(f)) && f.properties?.name) {
         if (!tankRecord[f.properties.name]) {
           tankRecord[f.properties.name] = { name: f.properties.name, count: 0 };
         }
       }
     });
 
-    // Contar las acometidas abastecidas por cada tanque
+    // Contar las acometidas abastecidas por cada instalación
     geoJsonData.features.forEach((f) => {
       const tankName = f.properties?.suppliedByTank;
       if (tankName) {
@@ -185,7 +197,7 @@ export const ScadaMap: React.FC<ScadaMapProps> = ({
     return Object.values(tankRecord).sort((a, b) => a.name.localeCompare(b.name));
   }, [geoJsonData]);
 
-  // Features filtradas según el tanque seleccionado
+  // Features filtradas según el tanque/planta seleccionado
   const filteredFeatures = useMemo(() => {
     if (!geoJsonData?.features) return [];
     if (!activeTankFilter) return geoJsonData.features;
@@ -194,17 +206,25 @@ export const ScadaMap: React.FC<ScadaMapProps> = ({
       // 1. Plantas de tratamiento y estaciones de bombeo siempre visibles
       if (NodeClassifier.isPlant(f) || NodeClassifier.isPump(f)) return true;
 
+      // 1.1 Tuberías de impulsión/conducción (Bombeo -> Planta)
+      if (f.properties?.nodeType === 'TRANSMISSION_LINK' || f.properties?.nodeType === 'PIPELINE') {
+        return (
+          f.properties?.source === activeTankFilter ||
+          f.properties?.destination === activeTankFilter
+        );
+      }
+
       // 2. Tanques: conservar el seleccionado
       if (NodeClassifier.isTank(f)) {
         return f.properties?.name === activeTankFilter;
       }
 
-      // 3. Acometidas abastecidas por este tanque
+      // 3. Acometidas abastecidas por este tanque o planta
       if (f.properties?.nodeType === 'CONNECTION') {
         return f.properties?.suppliedByTank === activeTankFilter;
       }
 
-      // 4. Enlaces virtuales correspondientes a este tanque
+      // 4. Enlaces virtuales correspondientes a este tanque o planta
       if (f.properties?.nodeType === 'VIRTUAL_LINK') {
         return f.properties?.source === activeTankFilter;
       }
@@ -237,13 +257,15 @@ export const ScadaMap: React.FC<ScadaMapProps> = ({
     };
   }, [filteredFeatures, geoJsonData]);
 
-  // Encontrar el tanque abastecedor si la selección es una acometida
+  // Encontrar la instalación abastecedora si la selección es una acometida
   const selectedTankFeature = useMemo(() => {
     if (!selectedNode || !geoJsonData) return null;
     if (selectedNode.properties?.nodeType === 'CONNECTION' && selectedNode.properties?.suppliedByTank) {
       return (
         geoJsonData.features.find(
-          (f) => NodeClassifier.isTank(f) && f.properties?.name === selectedNode.properties?.suppliedByTank
+          (f) =>
+            (NodeClassifier.isTank(f) || NodeClassifier.isPlant(f)) &&
+            f.properties?.name === selectedNode.properties?.suppliedByTank
         ) || null
       );
     }

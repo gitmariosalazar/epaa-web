@@ -79,10 +79,25 @@ export class NodeVisualConfigProvider {
   }
 
   private static getLineConfig(feature: GeoJsonFeature): NodeVisualConfig {
+    const nodeType = feature.properties?.nodeType?.toUpperCase() || '';
     const colorMarker = feature.properties?.colorMarker?.toLowerCase() || '';
+
+    if (nodeType === 'TRANSMISSION_LINK' || nodeType === 'PIPELINE') {
+      return {
+        fillColor: [0, 0, 0, 0],
+        lineColor: [249, 115, 22, 255], // Orange-500 impulsión SCADA
+        radius: 0,
+        lineWidth: 5,
+        labelPrefix: '⚡',
+        tooltipCategory: 'Línea de Impulsión / Conducción'
+      };
+    }
+
     let lineColor: RgbaColor = [71, 85, 105, 255];
 
-    if (colorMarker.includes('green') || colorMarker === '#00ff00') {
+    if (colorMarker.includes('orange') || colorMarker === '#f97316') {
+      lineColor = [249, 115, 22, 255];
+    } else if (colorMarker.includes('green') || colorMarker === '#00ff00') {
       lineColor = [34, 197, 94, 255];
     } else if (colorMarker.includes('red') || colorMarker === '#ff0000') {
       lineColor = [239, 68, 68, 255];

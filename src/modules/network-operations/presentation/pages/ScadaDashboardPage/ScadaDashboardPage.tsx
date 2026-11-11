@@ -24,25 +24,34 @@ export const ScadaDashboardPage: React.FC = () => {
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false);
   const { theme } = useTheme();
 
-  // Activación automática de "Detalle del Nodo" al seleccionar un filtro de tanque
+  // Activación automática de "Detalle del Nodo" al seleccionar un filtro de tanque o planta
   const handleTankFilterChange = useCallback((tankName: string | null) => {
     setSelectedTankFilter(tankName);
 
     if (tankName && geoJsonData?.features) {
-      const tankFeature = geoJsonData.features.find(
-        (f) => NodeClassifier.isTank(f) && f.properties?.name === tankName
+      const facilityFeature = geoJsonData.features.find(
+        (f) =>
+          (NodeClassifier.isTank(f) || NodeClassifier.isPlant(f)) &&
+          f.properties?.name === tankName
       );
-      if (tankFeature) {
-        setSelectedNode(tankFeature);
+      if (facilityFeature) {
+        setSelectedNode(facilityFeature);
       }
     } else if (!tankName) {
-      setSelectedNode((prev) => (prev && NodeClassifier.isTank(prev) ? null : prev));
+      setSelectedNode((prev) =>
+        prev && (NodeClassifier.isTank(prev) || NodeClassifier.isPlant(prev))
+          ? null
+          : prev
+      );
     }
   }, [geoJsonData]);
 
-  // Obtener nombre del tanque actualmente activo (por filtro o por nodo seleccionado)
+  // Obtener nombre del tanque/planta actualmente activo (por filtro o por nodo seleccionado)
   const activeTankName = useMemo(() => {
-    if (selectedNode && NodeClassifier.isTank(selectedNode)) {
+    if (
+      selectedNode &&
+      (NodeClassifier.isTank(selectedNode) || NodeClassifier.isPlant(selectedNode))
+    ) {
       return selectedNode.properties?.name || null;
     }
     return selectedTankFilter || null;
@@ -203,8 +212,48 @@ export const ScadaDashboardPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Botón para ver acometidas abastecidas por este tanque */}
-              {NodeClassifier.isTank(selectedNode) && (
+              {/* Línea de Impulsión / Conducción Detalles */}
+              {(selectedNode.properties.nodeType === 'TRANSMISSION_LINK' ||
+                selectedNode.properties.nodeType === 'PIPELINE') && (
+                <>
+                  <div className={styles.statRow}>
+                    <span>Nodo Origen</span>
+                    <span className={styles.highlightGlow}>
+                      {selectedNode.properties.source || 'N/A'}
+                    </span>
+                  </div>
+                  <div className={styles.statRow}>
+                    <span>Nodo Destino</span>
+                    <span className={styles.highlightBlue}>
+                      {selectedNode.properties.destination || 'N/A'}
+                    </span>
+                  </div>
+                  {selectedNode.properties.pipelineMaterial && (
+                    <div className={styles.statRow}>
+                      <span>Material Tubería</span>
+                      <span>{selectedNode.properties.pipelineMaterial}</span>
+                    </div>
+                  )}
+                  {selectedNode.properties.pipelineDiameterMm && (
+                    <div className={styles.statRow}>
+                      <span>Diámetro Nominal</span>
+                      <span>{selectedNode.properties.pipelineDiameterMm} mm</span>
+                    </div>
+                  )}
+                  {selectedNode.properties.distanceInMeters && (
+                    <div className={styles.statRow}>
+                      <span>Longitud Conducción</span>
+                      <span>
+                        {Math.round(selectedNode.properties.distanceInMeters)} m
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Botón para ver acometidas abastecidas por este tanque o planta */}
+              {(NodeClassifier.isTank(selectedNode) ||
+                NodeClassifier.isPlant(selectedNode)) && (
                 <>
                   <div className={styles.statRow}>
                     <span>Acometidas Abastecidas</span>
