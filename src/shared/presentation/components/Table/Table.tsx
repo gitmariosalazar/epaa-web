@@ -58,14 +58,18 @@ export interface Column<T> {
 
 export interface SummaryRow {
   label: string;
-  value: string | number;
+  value: string | number | React.ReactNode;
   highlight?: boolean;
   percentage?: string;
+  icon?: React.ReactNode;
+  description?: string;
+  color?: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'purple' | 'neutral';
+  tooltip?: string;
 }
 
 export type RowColor = 'success' | 'warning' | 'error' | 'info' | 'neutral';
 
-interface TotalRow {
+export interface TotalRow {
   label: string;
   value: string | number | React.ReactNode;
   highlight?: boolean;
@@ -87,6 +91,7 @@ interface TableProps<T> {
   sortConfig?: { key: keyof T | string; direction: 'asc' | 'desc' } | null;
   onSort?: (key: keyof T | string, direction: 'asc' | 'desc') => void;
   summaryRows?: SummaryRow[];
+  summaryLayout?: 'vertical' | 'horizontal';
   totalRows?: TotalRow[];
   width?: '100' | '70' | '50' | 'auto';
   fullHeight?: boolean;
@@ -125,6 +130,7 @@ export const Table = <T extends { [key: string]: any }>({
   sortConfig,
   onSort,
   summaryRows = [],
+  summaryLayout = 'vertical',
   totalRows = [],
   width = '100',
   fullHeight = true,
@@ -531,8 +537,24 @@ export const Table = <T extends { [key: string]: any }>({
                   let className = col.className || '';
                   let matchingTotal: TotalRow | undefined = undefined;
 
+                  const colId = col.id;
+                  const colAccessor =
+                    typeof col.accessor === 'string' ? col.accessor : '';
+
                   if (colIndex === 0) {
-                    totalContent = 'Total';
+                    matchingTotal =
+                      totalRows.find(
+                        (r) => r.columnId && colId && r.columnId === colId
+                      ) ||
+                      totalRows.find(
+                        (r) =>
+                          r.columnId &&
+                          colAccessor &&
+                          r.columnId === colAccessor
+                      ) ||
+                      totalRows.find((r) => r.label === col.header);
+
+                    totalContent = matchingTotal ? matchingTotal.value : 'Total';
                     className += ' total-label';
                   } else {
                     // Very simple matching heuristic: if the column isNumeric, find the corresponding total row
@@ -541,9 +563,6 @@ export const Table = <T extends { [key: string]: any }>({
                       typeof col.header === 'string'
                         ? col.header.toLowerCase()
                         : '';
-                    const colId = col.id;
-                    const colAccessor =
-                      typeof col.accessor === 'string' ? col.accessor : '';
 
                     matchingTotal =
                       totalRows.find(
@@ -632,15 +651,28 @@ export const Table = <T extends { [key: string]: any }>({
       </div>
 
       {summaryRows.length > 0 && (
-        <div className="table-summary-block">
-          <div className="table-summary-content">
+        <div
+          className={`table-summary-block ${
+            summaryLayout === 'horizontal' ? 'table-summary-block--horizontal' : ''
+          }`}
+        >
+          <div
+            className={`table-summary-content ${
+              summaryLayout === 'horizontal' ? 'table-summary-content--horizontal' : ''
+            }`}
+          >
             {summaryRows.map((row, idx) => (
               <div
                 key={idx}
-                className={`table-summary-row ${row.highlight ? 'table-summary-row--highlight' : ''
-                  }`}
+                className={`table-summary-row ${
+                  row.highlight ? 'table-summary-row--highlight' : ''
+                } ${
+                  summaryLayout === 'horizontal' ? 'table-summary-row--horizontal' : ''
+                } ${row.color ? `table-summary-row--color-${row.color}` : ''}`}
+                title={row.tooltip}
               >
                 <div className="table-summary-label">
+                  {row.icon && <span className="table-summary-icon">{row.icon}</span>}
                   <span>{row.label}</span>
                   {row.percentage && (
                     <span className="table-summary-percentage">
@@ -651,11 +683,16 @@ export const Table = <T extends { [key: string]: any }>({
                 <div className="table-summary-value">
                   {typeof row.value === 'number'
                     ? new Intl.NumberFormat('en-US', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    }).format(row.value)
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      }).format(row.value)
                     : row.value}
                 </div>
+                {row.description && (
+                  <div className="table-summary-description">
+                    {row.description}
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -5,17 +5,22 @@ import {
   Cell,
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
-  Legend,
+  Legend
 } from 'recharts';
 import { AlertCircle, AlertTriangle } from 'lucide-react';
 import type { NoveltyEconomicImpactAnalytics } from '../../../domain/models/readings-analytics';
-import { Table, type Column, type SummaryRow } from '@/shared/presentation/components/Table/Table';
+import {
+  Table,
+  type Column,
+  type SummaryRow,
+  type TotalRow
+} from '@/shared/presentation/components/Table/Table';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import {
   formatCurrency,
   formatNumber,
-  formatVolume,
+  formatVolume
 } from '../../utils/analytics-formatters';
 
 interface NoveltyEconomicImpactTabProps {
@@ -33,110 +38,180 @@ const PALETTE = [
   '#06b6d4',
   '#84cc16',
   '#6366f1',
-  '#14b8a6',
+  '#14b8a6'
 ];
 
-export const NoveltyEconomicImpactTab: React.FC<NoveltyEconomicImpactTabProps> = ({
-  data,
-  isLoading,
-}) => {
+export const NoveltyEconomicImpactTab: React.FC<
+  NoveltyEconomicImpactTabProps
+> = ({ data, isLoading }) => {
   const pieData = useMemo(() => {
     if (!data) return [];
     return data.slice(0, 8).map((item) => ({
       name: item.novelty || 'SIN NOVEDAD',
       value: item.totalBilledUsd,
-      cases: item.casesCount,
+      cases: item.casesCount
     }));
   }, [data]);
 
   const columns: Column<NoveltyEconomicImpactAnalytics>[] = useMemo(
     () => [
       {
+        id: 'novelty',
         header: 'Tipo de Novedad',
         accessor: (item) => (
-          <span style={{ fontWeight: 600, color: 'var(--text-primary, #0f172a)' }}>
+          <span
+            style={{ fontWeight: 600, color: 'var(--text-primary, #0f172a)' }}
+          >
             {item.novelty || 'SIN NOVEDAD'}
           </span>
-        ),
+        )
       },
       {
+        id: 'casesCount',
         header: 'Casos',
         accessor: (item) => formatNumber(item.casesCount),
-        isNumeric: true,
+        isNumeric: true
       },
       {
+        id: 'shareOfTotalReadingsPercentage',
         header: '% Participación',
-        accessor: (item) => `${item.shareOfTotalReadingsPercentage?.toFixed(2) ?? '0.00'}%`,
-        isNumeric: true,
+        accessor: (item) =>
+          `${item.shareOfTotalReadingsPercentage?.toFixed(2) ?? '0.00'}%`,
+        isNumeric: true
       },
       {
+        id: 'totalVolumeM3',
         header: 'Volumen Total',
         accessor: (item) => formatVolume(item.totalVolumeM3),
-        isNumeric: true,
+        isNumeric: true
       },
       {
+        id: 'averageVolumePerCaseM3',
         header: 'Volumen Medio / Caso',
-        accessor: (item) => `${item.averageVolumePerCaseM3?.toFixed(2) ?? '0.00'} m³`,
-        isNumeric: true,
+        accessor: (item) =>
+          `${item.averageVolumePerCaseM3?.toFixed(2) ?? '0.00'} m³`,
+        isNumeric: true
       },
       {
+        id: 'waterBilledUsd',
         header: 'Agua ($)',
         accessor: (item) => formatCurrency(item.waterBilledUsd),
-        isNumeric: true,
+        isNumeric: true
       },
       {
+        id: 'sewerBilledUsd',
         header: 'Alcantarillado ($)',
         accessor: (item) => formatCurrency(item.sewerBilledUsd),
-        isNumeric: true,
+        isNumeric: true
       },
       {
+        id: 'totalBilledUsd',
         header: 'Facturado Total ($)',
         accessor: (item) => (
           <span style={{ fontWeight: 700, color: '#059669' }}>
             {formatCurrency(item.totalBilledUsd)}
           </span>
         ),
-        isNumeric: true,
-      },
+        isNumeric: true
+      }
     ],
-    [],
+    []
   );
+
+  const totalRows: TotalRow[] = useMemo(() => {
+    if (!data || data.length === 0) return [];
+    const totalCases = data.reduce((acc, curr) => acc + curr.casesCount, 0);
+    const totalVolume = data.reduce(
+      (acc, curr) => acc + curr.totalVolumeM3,
+      0
+    );
+    const totalWater = data.reduce(
+      (acc, curr) => acc + curr.waterBilledUsd,
+      0
+    );
+    const totalSewer = data.reduce(
+      (acc, curr) => acc + curr.sewerBilledUsd,
+      0
+    );
+    const totalBilled = data.reduce(
+      (acc, curr) => acc + curr.totalBilledUsd,
+      0
+    );
+    const avgVolumePerCase =
+      totalCases > 0 ? totalVolume / totalCases : 0;
+
+    return [
+      { columnId: 'novelty', label: 'Tipo de Novedad', value: 'TOTAL' },
+      {
+        columnId: 'casesCount',
+        label: 'Casos',
+        value: formatNumber(totalCases)
+      },
+      {
+        columnId: 'shareOfTotalReadingsPercentage',
+        label: '% Participación',
+        value: '100.00%'
+      },
+      {
+        columnId: 'totalVolumeM3',
+        label: 'Volumen Total',
+        value: formatVolume(totalVolume)
+      },
+      {
+        columnId: 'averageVolumePerCaseM3',
+        label: 'Volumen Medio / Caso',
+        value: `${avgVolumePerCase.toFixed(2)} m³`
+      },
+      {
+        columnId: 'waterBilledUsd',
+        label: 'Agua ($)',
+        value: formatCurrency(totalWater)
+      },
+      {
+        columnId: 'sewerBilledUsd',
+        label: 'Alcantarillado ($)',
+        value: formatCurrency(totalSewer)
+      },
+      {
+        columnId: 'totalBilledUsd',
+        label: 'Facturado Total ($)',
+        value: formatCurrency(totalBilled),
+        highlight: true
+      }
+    ];
+  }, [data]);
 
   const summaryRows: SummaryRow[] = useMemo(() => {
     if (!data || data.length === 0) return [];
     const totalCases = data.reduce((acc, curr) => acc + curr.casesCount, 0);
     const totalVolume = data.reduce((acc, curr) => acc + curr.totalVolumeM3, 0);
-    const totalBilled = data.reduce((acc, curr) => acc + curr.totalBilledUsd, 0);
+    const totalBilled = data.reduce(
+      (acc, curr) => acc + curr.totalBilledUsd,
+      0
+    );
 
     return [
       {
         label: 'Casos Totales Registrados',
         value: formatNumber(totalCases),
-        highlight: true,
+        highlight: true
       },
       {
         label: 'Volumen Total Asociado',
         value: formatVolume(totalVolume),
-        highlight: true,
+        highlight: true
       },
       {
         label: 'Facturación Total Asociada',
         value: formatCurrency(totalBilled),
-        highlight: true,
-      },
+        highlight: true
+      }
     ];
   }, [data]);
 
   if (isLoading) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '350px',
-        }}
-      >
+      <div className="circular-progress">
         <CircularProgress size={40} />
       </div>
     );
@@ -176,11 +251,17 @@ export const NoveltyEconomicImpactTab: React.FC<NoveltyEconomicImpactTabProps> =
                 paddingAngle={3}
               >
                 {pieData.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={PALETTE[index % PALETTE.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={PALETTE[index % PALETTE.length]}
+                  />
                 ))}
               </Pie>
               <RechartsTooltip
-                formatter={(value: any) => [formatCurrency(Number(value)), 'Facturado ($)']}
+                formatter={(value: any) => [
+                  formatCurrency(Number(value)),
+                  'Facturado ($)'
+                ]}
               />
               <Legend verticalAlign="bottom" height={40} />
             </PieChart>
@@ -200,8 +281,10 @@ export const NoveltyEconomicImpactTab: React.FC<NoveltyEconomicImpactTabProps> =
         <Table<NoveltyEconomicImpactAnalytics>
           data={data}
           columns={columns}
+          totalRows={totalRows}
           summaryRows={summaryRows}
-          pagination={false}
+          pagination={true}
+          summaryLayout="horizontal"
           width="100"
         />
       </div>

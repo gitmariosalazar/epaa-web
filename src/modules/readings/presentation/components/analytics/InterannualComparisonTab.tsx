@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   BarChart,
   Bar,
@@ -15,13 +15,19 @@ import {
   GitCompare,
   ArrowUpRight,
   ArrowDownRight,
-  CheckCircle2
+  CheckCircle2,
+  Columns3,
+  Rows3,
+  Users,
+  Droplets,
+  DollarSign
 } from 'lucide-react';
 import type { InterannualComparisonAnalytics } from '../../../domain/models/readings-analytics';
 import {
   Table,
   type Column,
-  type SummaryRow
+  type SummaryRow,
+  type TotalRow
 } from '@/shared/presentation/components/Table/Table';
 import { KPICard } from '@/shared/presentation/components/Card/KPICard';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
@@ -45,6 +51,10 @@ interface InterannualComparisonTabProps {
 export const InterannualComparisonTab: React.FC<
   InterannualComparisonTabProps
 > = ({ data, isLoading, baseYear = 2025, targetYear = 2026 }) => {
+  const [summaryLayout, setSummaryLayout] = useState<'horizontal' | 'vertical'>(
+    'horizontal'
+  );
+
   const chartData = useMemo(() => {
     if (!data) return [];
     return [...data]
@@ -105,6 +115,7 @@ export const InterannualComparisonTab: React.FC<
   const columns: Column<InterannualComparisonAnalytics>[] = useMemo(
     () => [
       {
+        id: 'sector',
         header: 'Sector',
         accessor: (item) => (
           <span
@@ -117,16 +128,19 @@ export const InterannualComparisonTab: React.FC<
         sortKey: 'sector'
       },
       {
+        id: 'readingsBaseYear',
         header: `Lecturas ${baseYear}`,
         accessor: (item) => formatNumber(item.readingsBaseYear),
         isNumeric: true
       },
       {
+        id: 'readingsTargetYear',
         header: `Lecturas ${targetYear}`,
         accessor: (item) => formatNumber(item.readingsTargetYear),
         isNumeric: true
       },
       {
+        id: 'deltaReadings',
         header: 'Δ Lecturas',
         accessor: (item) => {
           const isPos = item.deltaReadings >= 0;
@@ -142,16 +156,19 @@ export const InterannualComparisonTab: React.FC<
         isNumeric: true
       },
       {
+        id: 'volumeBaseYearM3',
         header: `m³ ${baseYear}`,
         accessor: (item) => formatVolume(item.volumeBaseYearM3),
         isNumeric: true
       },
       {
+        id: 'volumeTargetYearM3',
         header: `m³ ${targetYear}`,
         accessor: (item) => formatVolume(item.volumeTargetYearM3),
         isNumeric: true
       },
       {
+        id: 'deltaVolumeM3',
         header: 'Δ m³',
         accessor: (item) => {
           const isPos = item.deltaVolumeM3 >= 0;
@@ -167,6 +184,7 @@ export const InterannualComparisonTab: React.FC<
         isNumeric: true
       },
       {
+        id: 'varianceVolumePercentage',
         header: '% Var m³',
         accessor: (item) => {
           const isPos = item.varianceVolumePercentage >= 0;
@@ -192,11 +210,13 @@ export const InterannualComparisonTab: React.FC<
         isNumeric: true
       },
       {
+        id: 'billedBaseYearUsd',
         header: `Facturado ${baseYear} ($)`,
         accessor: (item) => formatCurrency(item.billedBaseYearUsd),
         isNumeric: true
       },
       {
+        id: 'billedTargetYearUsd',
         header: `Facturado ${targetYear} ($)`,
         accessor: (item) => (
           <span style={{ fontWeight: 600 }}>
@@ -206,6 +226,7 @@ export const InterannualComparisonTab: React.FC<
         isNumeric: true
       },
       {
+        id: 'deltaBilledUsd',
         header: 'Δ USD ($)',
         accessor: (item) => {
           const isPos = item.deltaBilledUsd >= 0;
@@ -221,6 +242,7 @@ export const InterannualComparisonTab: React.FC<
         isNumeric: true
       },
       {
+        id: 'varianceBilledPercentage',
         header: '% Var USD',
         accessor: (item) => {
           const isPos = item.varianceBilledPercentage >= 0;
@@ -246,6 +268,7 @@ export const InterannualComparisonTab: React.FC<
         isNumeric: true
       },
       {
+        id: 'managementDiagnostic',
         header: 'Diagnóstico de Gestión',
         accessor: (item) => (
           <ColorChip
@@ -260,47 +283,137 @@ export const InterannualComparisonTab: React.FC<
     [baseYear, targetYear]
   );
 
+  const totalRows: TotalRow[] = useMemo(() => {
+    if (!data || data.length === 0) return [];
+    const readingsBase = data.reduce((acc, c) => acc + c.readingsBaseYear, 0);
+    const readingsTarget = data.reduce(
+      (acc, c) => acc + c.readingsTargetYear,
+      0
+    );
+    const deltaReadings = readingsTarget - readingsBase;
+
+    return [
+      { columnId: 'sector', label: 'Sector', value: 'TOTAL' },
+      {
+        columnId: 'readingsBaseYear',
+        label: `Lecturas ${baseYear}`,
+        value: formatNumber(readingsBase)
+      },
+      {
+        columnId: 'readingsTargetYear',
+        label: `Lecturas ${targetYear}`,
+        value: formatNumber(readingsTarget)
+      },
+      {
+        columnId: 'deltaReadings',
+        label: 'Δ Lecturas',
+        value: `${deltaReadings >= 0 ? '+' : ''}${formatNumber(deltaReadings)}`
+      },
+      {
+        columnId: 'volumeBaseYearM3',
+        label: `m³ ${baseYear}`,
+        value: formatVolume(totals.volumeBase)
+      },
+      {
+        columnId: 'volumeTargetYearM3',
+        label: `m³ ${targetYear}`,
+        value: formatVolume(totals.volumeTarget)
+      },
+      {
+        columnId: 'deltaVolumeM3',
+        label: 'Δ m³',
+        value: `${totals.deltaVolume >= 0 ? '+' : ''}${formatVolume(totals.deltaVolume)}`
+      },
+      {
+        columnId: 'varianceVolumePercentage',
+        label: '% Var m³',
+        value: formatPercent(totals.pctVolume)
+      },
+      {
+        columnId: 'billedBaseYearUsd',
+        label: `Facturado ${baseYear} ($)`,
+        value: formatCurrency(totals.billedBase)
+      },
+      {
+        columnId: 'billedTargetYearUsd',
+        label: `Facturado ${targetYear} ($)`,
+        value: formatCurrency(totals.billedTarget)
+      },
+      {
+        columnId: 'deltaBilledUsd',
+        label: 'Δ USD ($)',
+        value: `${totals.deltaBilled >= 0 ? '+' : ''}${formatCurrency(totals.deltaBilled)}`,
+        highlight: true
+      },
+      {
+        columnId: 'varianceBilledPercentage',
+        label: '% Var USD',
+        value: formatPercent(totals.pctBilled)
+      },
+      {
+        columnId: 'managementDiagnostic',
+        label: 'Diagnóstico de Gestión',
+        value: '-'
+      }
+    ];
+  }, [data, baseYear, targetYear, totals]);
+
   const summaryRows: SummaryRow[] = useMemo(() => {
     if (!data || data.length === 0) return [];
     return [
       {
-        label: 'Cuentas Homólogas Consolidadas',
+        label: 'Cuentas Homólogas Auditadas',
         value: formatNumber(totals.totalHomologous),
-        highlight: true
+        highlight: true,
+        icon: <Users size={16} />,
+        description: 'Emparejamiento 1 a 1 verificado',
+        color: 'primary'
       },
       {
-        label: `Volumen Total ${targetYear}`,
+        label: `Volumen Total (${targetYear})`,
         value: formatVolume(totals.volumeTarget),
-        highlight: true
+        highlight: true,
+        icon: <Droplets size={16} />,
+        description: `Base ${baseYear}: ${formatVolume(totals.volumeBase)}`,
+        color: 'info'
       },
       {
         label: 'Variación Neta Consumo (Δ m³)',
-        value: `${totals.deltaVolume >= 0 ? '+' : ''}${formatVolume(totals.deltaVolume)} (${formatPercent(totals.pctVolume)})`,
-        highlight: true
+        value: `${totals.deltaVolume >= 0 ? '+' : ''}${formatVolume(totals.deltaVolume)}`,
+        percentage: formatPercent(totals.pctVolume),
+        highlight: true,
+        icon:
+          totals.deltaVolume >= 0 ? (
+            <ArrowUpRight size={16} />
+          ) : (
+            <ArrowDownRight size={16} />
+          ),
+        description: 'Balance de extracción y consumo',
+        color: totals.deltaVolume >= 0 ? 'success' : 'warning'
       },
       {
-        label: `Facturación Total ${targetYear}`,
+        label: `Facturación Total (${targetYear})`,
         value: formatCurrency(totals.billedTarget),
-        highlight: true
+        highlight: true,
+        icon: <DollarSign size={16} />,
+        description: `Base ${baseYear}: ${formatCurrency(totals.billedBase)}`,
+        color: 'purple'
       },
       {
-        label: 'Crecimiento Neto Facturación (Δ USD)',
-        value: `${totals.deltaBilled >= 0 ? '+' : ''}${formatCurrency(totals.deltaBilled)} (${formatPercent(totals.pctBilled)})`,
-        highlight: true
+        label: 'Crecimiento Facturación (Δ USD)',
+        value: `${totals.deltaBilled >= 0 ? '+' : ''}${formatCurrency(totals.deltaBilled)}`,
+        percentage: formatPercent(totals.pctBilled),
+        highlight: true,
+        icon: <TrendingUp size={16} />,
+        description: 'Variación económica interanual',
+        color: totals.deltaBilled >= 0 ? 'success' : 'danger'
       }
     ];
-  }, [data, targetYear, totals]);
+  }, [data, baseYear, targetYear, totals]);
 
   if (isLoading) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '350px'
-        }}
-      >
+      <div className="circular-progress">
         <CircularProgress size={40} />
       </div>
     );
@@ -383,11 +496,27 @@ export const InterannualComparisonTab: React.FC<
                     formatCurrency(Number(value)),
                     name
                   ]}
+                  contentStyle={{
+                    backgroundColor: 'var(--surface)', // o var(--bg-card) según tu CSS
+                    borderColor: 'var(--border-color)',
+                    borderRadius: '8px',
+                    color: 'hsl(var(--popover-foreground))',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                  }}
+                  labelStyle={{
+                    color: 'hsl(var(--foreground))',
+                    fontWeight: 600,
+                    marginBottom: '4px'
+                  }}
+                  itemStyle={{
+                    fontSize: '13px'
+                  }}
+                  cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }}
                 />
                 <Legend verticalAlign="top" height={36} />
                 <Bar
                   dataKey="facturadoBase"
-                  fill="#94a3b8"
+                  fill="var(--warning)"
                   radius={[4, 4, 0, 0]}
                   name={`Facturado ${baseYear} ($)`}
                 />
@@ -429,11 +558,20 @@ export const InterannualComparisonTab: React.FC<
                     formatVolume(Number(value)),
                     name
                   ]}
+                  cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }}
+                  contentStyle={{
+                    fontSize: '13px',
+                    backgroundColor: 'var(--surface)',
+                    borderColor: 'var(--border-color)',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                  }}
+                  labelStyle={{ fontSize: '13px' }}
                 />
                 <Legend verticalAlign="top" height={36} />
                 <Bar
                   dataKey="volumenBase"
-                  fill="#cbd5e1"
+                  fill="var(--info)"
                   radius={[4, 4, 0, 0]}
                   name={`Volumen ${baseYear} (m³)`}
                 />
@@ -452,21 +590,112 @@ export const InterannualComparisonTab: React.FC<
       {/* 1-to-1 Homologous Comparison Table */}
       <div className="analytics-card-section">
         <div className="analytics-card-header">
-          <h4 className="analytics-card-title">
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}
+          >
             <GitCompare size={18} color="var(--primary-color, #2563eb)" />
-            Comparativa Interanual 1 a 1 de Cuentas Homólogas ({
-              baseYear
-            } vs {targetYear})
-          </h4>
-          <span className="analytics-card-badge">
-            Auditoría 100% Homóloga (Cuenta, Sector, Catastro)
-          </span>
+            <h4 className="analytics-card-title" style={{ margin: 0 }}>
+              Comparativa Interanual 1 a 1 de Cuentas Homólogas ({baseYear} vs{' '}
+              {targetYear})
+            </h4>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              flexWrap: 'wrap'
+            }}
+          >
+            <span className="analytics-card-badge">
+              Auditoría 100% Homóloga (Cuenta, Sector, Catastro)
+            </span>
+            {/* Optional Layout Toggle for summaryRows */}
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                background: 'var(--surface-subtle, #f1f5f9)',
+                borderRadius: '8px',
+                padding: '2px',
+                border: '1px solid var(--border-color, #e2e8f0)',
+                gap: '2px'
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setSummaryLayout('horizontal')}
+                title="Vista de totales en tarjetas horizontales"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '4px 10px',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  background:
+                    summaryLayout === 'horizontal'
+                      ? 'var(--surface, #ffffff)'
+                      : 'transparent',
+                  color:
+                    summaryLayout === 'horizontal'
+                      ? 'var(--primary-color, #2563eb)'
+                      : 'var(--text-secondary, #64748b)',
+                  boxShadow:
+                    summaryLayout === 'horizontal'
+                      ? '0 1px 3px rgba(0,0,0,0.08)'
+                      : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Columns3 size={14} />
+                <span>Horizontal</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSummaryLayout('vertical')}
+                title="Vista de totales vertical clásica"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '4px 10px',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  background:
+                    summaryLayout === 'vertical'
+                      ? 'var(--surface, #ffffff)'
+                      : 'transparent',
+                  color:
+                    summaryLayout === 'vertical'
+                      ? 'var(--primary-color, #2563eb)'
+                      : 'var(--text-secondary, #64748b)',
+                  boxShadow:
+                    summaryLayout === 'vertical'
+                      ? '0 1px 3px rgba(0,0,0,0.08)'
+                      : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Rows3 size={14} />
+                <span>Vertical</span>
+              </button>
+            </div>
+          </div>
         </div>
         <Table<InterannualComparisonAnalytics>
           data={data}
           columns={columns}
+          totalRows={totalRows}
           summaryRows={summaryRows}
-          pagination={false}
+          summaryLayout={summaryLayout}
+          pagination={true}
           width="100"
         />
       </div>

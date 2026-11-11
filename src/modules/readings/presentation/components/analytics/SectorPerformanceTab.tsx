@@ -13,7 +13,8 @@ import type { SectorPerformanceAnalytics } from '../../../domain/models/readings
 import {
   Table,
   type Column,
-  type SummaryRow
+  type SummaryRow,
+  type TotalRow
 } from '@/shared/presentation/components/Table/Table';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
@@ -46,6 +47,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
   const columns: Column<SectorPerformanceAnalytics>[] = useMemo(
     () => [
       {
+        id: 'sector',
         header: 'Sector',
         accessor: (item) => (
           <span
@@ -58,6 +60,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
         sortKey: 'sector'
       },
       {
+        id: 'totalReadings',
         header: 'Lecturas',
         accessor: (item) => formatNumber(item.totalReadings),
         sortable: true,
@@ -65,6 +68,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
         isNumeric: true
       },
       {
+        id: 'consumedVolumeM3',
         header: 'Volumen',
         accessor: (item) => formatVolume(item.consumedVolumeM3),
         sortable: true,
@@ -72,6 +76,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
         isNumeric: true
       },
       {
+        id: 'averageConsumptionM3',
         header: 'Promedio m³',
         accessor: (item) =>
           `${item.averageConsumptionM3?.toFixed(2) ?? '0.00'} m³`,
@@ -80,6 +85,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
         isNumeric: true
       },
       {
+        id: 'waterBilledUsd',
         header: 'Agua ($)',
         accessor: (item) => formatCurrency(item.waterBilledUsd),
         sortable: true,
@@ -87,6 +93,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
         isNumeric: true
       },
       {
+        id: 'sewerBilledUsd',
         header: 'Alcantarillado ($)',
         accessor: (item) => formatCurrency(item.sewerBilledUsd),
         sortable: true,
@@ -94,6 +101,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
         isNumeric: true
       },
       {
+        id: 'totalBilledUsd',
         header: 'Total Facturado ($)',
         accessor: (item) => (
           <span style={{ fontWeight: 700, color: '#059669' }}>
@@ -107,6 +115,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
       ...(data?.some((d) => d.totalCollectedUsd !== undefined)
         ? ([
             {
+              id: 'totalCollectedUsd',
               header: 'Cobrado ($)',
               accessor: (item: SectorPerformanceAnalytics) => (
                 <span style={{ fontWeight: 600, color: '#059669' }}>
@@ -118,6 +127,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
               isNumeric: true
             },
             {
+              id: 'totalOverdueDebtUsd',
               header: 'En Mora ($)',
               accessor: (item: SectorPerformanceAnalytics) => (
                 <span style={{ fontWeight: 600, color: '#dc2626' }}>
@@ -132,6 +142,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
           ] as Column<SectorPerformanceAnalytics>[])
         : []),
       {
+        id: 'revenueSharePercentage',
         header: '% Cuota USD',
         accessor: (item) =>
           `${item.revenueSharePercentage?.toFixed(2) ?? '0.00'}%`,
@@ -140,6 +151,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
         isNumeric: true
       },
       {
+        id: 'volumeSharePercentage',
         header: '% Cuota m³',
         accessor: (item) =>
           `${item.volumeSharePercentage?.toFixed(2) ?? '0.00'}%`,
@@ -148,6 +160,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
         isNumeric: true
       },
       {
+        id: 'averageTariffUsdPerM3',
         header: 'Tarifa Media ($/m³)',
         accessor: (item) =>
           `$${item.averageTariffUsdPerM3?.toFixed(3) ?? '0.000'}`,
@@ -156,6 +169,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
         isNumeric: true
       },
       {
+        id: 'noveltiesCount',
         header: 'Novedades',
         accessor: (item) => (
           <span>
@@ -170,6 +184,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
         isNumeric: true
       },
       {
+        id: 'revenueRank',
         header: 'Rank USD',
         accessor: (item) => `#${item.revenueRank}`,
         sortable: true,
@@ -177,8 +192,114 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
         isNumeric: true
       }
     ],
-    []
+    [data]
   );
+
+  const totalRows: TotalRow[] = useMemo(() => {
+    if (!data || data.length === 0) return [];
+    const totalReadings = data.reduce(
+      (acc, curr) => acc + curr.totalReadings,
+      0
+    );
+    const totalVolume = data.reduce(
+      (acc, curr) => acc + curr.consumedVolumeM3,
+      0
+    );
+    const totalWater = data.reduce((acc, curr) => acc + curr.waterBilledUsd, 0);
+    const totalSewer = data.reduce((acc, curr) => acc + curr.sewerBilledUsd, 0);
+    const totalBilled = data.reduce(
+      (acc, curr) => acc + curr.totalBilledUsd,
+      0
+    );
+    const totalCollected = data.reduce(
+      (acc, curr) => acc + (curr.totalCollectedUsd ?? 0),
+      0
+    );
+    const totalOverdue = data.reduce(
+      (acc, curr) => acc + (curr.totalOverdueDebtUsd ?? 0),
+      0
+    );
+    const totalNovelties = data.reduce(
+      (acc, curr) => acc + curr.noveltiesCount,
+      0
+    );
+    const avgConsumption = totalReadings > 0 ? totalVolume / totalReadings : 0;
+    const avgTariff =
+      totalVolume > 0 ? (totalWater + totalSewer) / totalVolume : 0;
+
+    const rows: TotalRow[] = [
+      { columnId: 'sector', label: 'Sector', value: 'TOTAL' },
+      {
+        columnId: 'totalReadings',
+        label: 'Lecturas',
+        value: formatNumber(totalReadings)
+      },
+      {
+        columnId: 'consumedVolumeM3',
+        label: 'Volumen',
+        value: formatVolume(totalVolume)
+      },
+      {
+        columnId: 'averageConsumptionM3',
+        label: 'Promedio m³',
+        value: `${avgConsumption.toFixed(2)} m³`
+      },
+      {
+        columnId: 'waterBilledUsd',
+        label: 'Agua ($)',
+        value: formatCurrency(totalWater)
+      },
+      {
+        columnId: 'sewerBilledUsd',
+        label: 'Alcantarillado ($)',
+        value: formatCurrency(totalSewer)
+      },
+      {
+        columnId: 'totalBilledUsd',
+        label: 'Total Facturado ($)',
+        value: formatCurrency(totalBilled),
+        highlight: true
+      },
+      {
+        columnId: 'revenueSharePercentage',
+        label: '% Cuota USD',
+        value: '100.00%'
+      },
+      {
+        columnId: 'volumeSharePercentage',
+        label: '% Cuota m³',
+        value: '100.00%'
+      },
+      {
+        columnId: 'averageTariffUsdPerM3',
+        label: 'Tarifa Media ($/m³)',
+        value: `$${avgTariff.toFixed(3)}`
+      },
+      {
+        columnId: 'noveltiesCount',
+        label: 'Novedades',
+        value: formatNumber(totalNovelties)
+      },
+      { columnId: 'revenueRank', label: 'Rank USD', value: '-' }
+    ];
+
+    if (data.some((d) => d.totalCollectedUsd !== undefined)) {
+      rows.push({
+        columnId: 'totalCollectedUsd',
+        label: 'Cobrado ($)',
+        value: formatCurrency(totalCollected)
+      });
+    }
+    if (data.some((d) => d.totalOverdueDebtUsd !== undefined)) {
+      rows.push({
+        columnId: 'totalOverdueDebtUsd',
+        label: 'En Mora ($)',
+        value: formatCurrency(totalOverdue)
+      });
+    }
+
+    return rows;
+  }, [data]);
 
   const summaryRows: SummaryRow[] = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -216,14 +337,7 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
 
   if (isLoading) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '350px'
-        }}
-      >
+      <div className="circular-progress">
         <CircularProgress size={40} />
       </div>
     );
@@ -274,6 +388,15 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
                     formatCurrency(Number(value)),
                     'Facturado Total'
                   ]}
+                  contentStyle={{
+                    backgroundColor: 'var(--surface)',
+                    borderColor: 'var(--border-color)',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                  }}
+                  labelStyle={{ fontSize: '13px' }}
+                  itemStyle={{ fontSize: '13px' }}
+                  cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }}
                 />
                 <Bar
                   dataKey="facturado"
@@ -311,6 +434,15 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
                     formatVolume(Number(value)),
                     'Volumen Consumido'
                   ]}
+                  contentStyle={{
+                    backgroundColor: 'var(--surface)',
+                    borderColor: 'var(--border-color)',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                  }}
+                  labelStyle={{ fontSize: '13px' }}
+                  itemStyle={{ fontSize: '13px' }}
+                  cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }}
                 />
                 <Bar
                   dataKey="volumen"
@@ -338,8 +470,10 @@ export const SectorPerformanceTab: React.FC<SectorPerformanceTabProps> = ({
         <Table<SectorPerformanceAnalytics>
           data={data}
           columns={columns}
+          totalRows={totalRows}
           summaryRows={summaryRows}
-          pagination={false}
+          pagination={true}
+          summaryLayout="horizontal"
           width="100"
         />
       </div>

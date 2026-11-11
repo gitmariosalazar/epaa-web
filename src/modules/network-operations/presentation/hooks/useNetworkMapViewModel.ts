@@ -15,8 +15,9 @@ export function useNetworkMapViewModel() {
     try {
       const data = await getNetworkMapGeoJsonUseCase.execute();
       setGeoJsonData(data);
-    } catch (err: any) {
-      setError(err.message || 'Error fetching network map data');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error fetching network map data';
+      setError(message);
     } finally {
       setLoading(false);
     }

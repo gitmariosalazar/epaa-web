@@ -39,14 +39,7 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '350px'
-        }}
-      >
+      <div className="circular-progress">
         <CircularProgress size={40} />
       </div>
     );
@@ -180,8 +173,8 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
               (collectionEfficiencyPercentage ?? 0) >= 80
                 ? 'success'
                 : (collectionEfficiencyPercentage ?? 0) >= 50
-                ? 'warning'
-                : 'danger'
+                  ? 'warning'
+                  : 'danger'
             }
           />
         </div>
@@ -192,7 +185,7 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-          gap: '1.25rem'
+          gap: '0.5rem'
         }}
       >
         {/* Institutional Revenue Breakdown (Rentas / EPAA) */}
@@ -409,24 +402,25 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
                   {formatCurrency(data.totalInterestImprovementsUsd)}
                 </strong>
               </div>
-              {data.totalCanceledUsd !== undefined && data.totalCanceledUsd > 0 && (
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '0.65rem 0.75rem',
-                    borderRadius: '8px',
-                    background: 'var(--surface-subtle, #f8fafc)'
-                  }}
-                >
-                  <span style={{ color: 'var(--text-secondary, #64748b)' }}>
-                    Cartera Anulada / Baja
-                  </span>
-                  <strong style={{ color: '#64748b' }}>
-                    {formatCurrency(data.totalCanceledUsd)}
-                  </strong>
-                </div>
-              )}
+              {data.totalCanceledUsd !== undefined &&
+                data.totalCanceledUsd > 0 && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: '0.65rem 0.75rem',
+                      borderRadius: '8px',
+                      background: 'var(--surface-subtle, #f8fafc)'
+                    }}
+                  >
+                    <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                      Cartera Anulada / Baja
+                    </span>
+                    <strong style={{ color: '#64748b' }}>
+                      {formatCurrency(data.totalCanceledUsd)}
+                    </strong>
+                  </div>
+                )}
               <div
                 style={{
                   display: 'flex',
@@ -534,24 +528,25 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
                   {formatNumber(data.upcomingBillsCount)}
                 </strong>
               </div>
-              {data.canceledBillsCount !== undefined && data.canceledBillsCount > 0 && (
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '0.65rem 0.75rem',
-                    borderRadius: '8px',
-                    background: 'var(--surface-subtle, #f8fafc)'
-                  }}
-                >
-                  <span style={{ color: 'var(--text-secondary, #64748b)' }}>
-                    Títulos Anulados
-                  </span>
-                  <strong style={{ color: '#64748b' }}>
-                    {formatNumber(data.canceledBillsCount)}
-                  </strong>
-                </div>
-              )}
+              {data.canceledBillsCount !== undefined &&
+                data.canceledBillsCount > 0 && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: '0.65rem 0.75rem',
+                      borderRadius: '8px',
+                      background: 'var(--surface-subtle, #f8fafc)'
+                    }}
+                  >
+                    <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                      Títulos Anulados
+                    </span>
+                    <strong style={{ color: '#64748b' }}>
+                      {formatNumber(data.canceledBillsCount)}
+                    </strong>
+                  </div>
+                )}
               <div
                 style={{
                   display: 'flex',

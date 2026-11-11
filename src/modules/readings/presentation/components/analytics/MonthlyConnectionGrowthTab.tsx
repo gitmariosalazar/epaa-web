@@ -21,7 +21,8 @@ import {
 import type { MonthlyConnectionGrowthAnalytics } from '../../../domain/models/readings-analytics';
 import {
   Table,
-  type Column
+  type Column,
+  type TotalRow
 } from '@/shared/presentation/components/Table/Table';
 import { KPICard } from '@/shared/presentation/components/Card/KPICard';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
@@ -96,6 +97,7 @@ export const MonthlyConnectionGrowthTab: React.FC<
   const columns: Column<MonthlyConnectionGrowthAnalytics>[] = useMemo(
     () => [
       {
+        id: 'monthNumber',
         header: '#',
         accessor: (item) => (
           <span
@@ -106,6 +108,7 @@ export const MonthlyConnectionGrowthTab: React.FC<
         )
       },
       {
+        id: 'monthName',
         header: 'Mes',
         accessor: (item) => (
           <span
@@ -116,11 +119,13 @@ export const MonthlyConnectionGrowthTab: React.FC<
         )
       },
       {
+        id: 'connectionsBaseYear',
         header: `Acometidas ${baseYear}`,
         accessor: (item) => formatNumber(item.connectionsBaseYear),
         isNumeric: true
       },
       {
+        id: 'increaseBaseYear',
         header: `Aumento Mes ${baseYear}`,
         accessor: (item) => {
           if (item.increaseBaseYear === 0) return '-';
@@ -138,6 +143,7 @@ export const MonthlyConnectionGrowthTab: React.FC<
         isNumeric: true
       },
       {
+        id: 'connectionsTargetYear',
         header: `Acometidas ${targetYear}`,
         accessor: (item) => (
           <span style={{ fontWeight: 700, color: '#2563eb' }}>
@@ -149,6 +155,7 @@ export const MonthlyConnectionGrowthTab: React.FC<
         isNumeric: true
       },
       {
+        id: 'increaseTargetYear',
         header: `Aumento Mes ${targetYear}`,
         accessor: (item) => {
           if (item.connectionsTargetYear === 0 || item.increaseTargetYear === 0)
@@ -167,6 +174,7 @@ export const MonthlyConnectionGrowthTab: React.FC<
         isNumeric: true
       },
       {
+        id: 'differenceTargetVsBase',
         header: `Dif. (${targetYear} vs ${baseYear})`,
         accessor: (item) => {
           if (item.connectionsTargetYear === 0) return '-';
@@ -184,6 +192,7 @@ export const MonthlyConnectionGrowthTab: React.FC<
         isNumeric: true
       },
       {
+        id: 'growthPercentage',
         header: 'Crecimiento (%)',
         accessor: (item) => {
           if (item.connectionsTargetYear === 0) return '-';
@@ -210,6 +219,7 @@ export const MonthlyConnectionGrowthTab: React.FC<
         isNumeric: true
       },
       {
+        id: 'statusTargetYear',
         header: 'Estado',
         accessor: (item) => {
           if (item.statusTargetYear === 'CERRADO / FACTURADO') {
@@ -243,16 +253,64 @@ export const MonthlyConnectionGrowthTab: React.FC<
     [baseYear, targetYear]
   );
 
+  const totalRows: TotalRow[] = useMemo(() => {
+    if (!data || data.length === 0) return [];
+    const totalIncreaseBase = data.reduce(
+      (acc, c) => acc + c.increaseBaseYear,
+      0
+    );
+    const totalIncreaseTarget = data.reduce(
+      (acc, c) => acc + c.increaseTargetYear,
+      0
+    );
+
+    return [
+      { columnId: 'monthNumber', label: '#', value: 'TOTAL' },
+      { columnId: 'monthName', label: 'Mes', value: '12 MESES' },
+      {
+        columnId: 'connectionsBaseYear',
+        label: `Acometidas ${baseYear}`,
+        value: formatNumber(summary.lastClosedBase)
+      },
+      {
+        columnId: 'increaseBaseYear',
+        label: `Aumento Mes ${baseYear}`,
+        value: `+${formatNumber(totalIncreaseBase)}`
+      },
+      {
+        columnId: 'connectionsTargetYear',
+        label: `Acometidas ${targetYear}`,
+        value:
+          summary.lastClosedTarget > 0
+            ? formatNumber(summary.lastClosedTarget)
+            : '-'
+      },
+      {
+        columnId: 'increaseTargetYear',
+        label: `Aumento Mes ${targetYear}`,
+        value:
+          totalIncreaseTarget !== 0
+            ? `${totalIncreaseTarget >= 0 ? '+' : ''}${formatNumber(totalIncreaseTarget)}`
+            : '-'
+      },
+      {
+        columnId: 'differenceTargetVsBase',
+        label: `Dif. (${targetYear} vs ${baseYear})`,
+        value: `${summary.netGrowth >= 0 ? '+' : ''}${formatNumber(summary.netGrowth)}`,
+        highlight: true
+      },
+      {
+        columnId: 'growthPercentage',
+        label: 'Crecimiento (%)',
+        value: formatPercent(summary.growthPct)
+      },
+      { columnId: 'statusTargetYear', label: 'Estado', value: '-' }
+    ];
+  }, [data, baseYear, targetYear, summary]);
+
   if (isLoading) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '350px'
-        }}
-      >
+      <div className="circular-progress">
         <CircularProgress />
       </div>
     );
@@ -268,13 +326,14 @@ export const MonthlyConnectionGrowthTab: React.FC<
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
       {/* KPI Cards */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-          gap: '1rem'
+          gap: '0.5rem',
+          marginTop: '0.3rem'
         }}
       >
         <KPICard
@@ -314,7 +373,7 @@ export const MonthlyConnectionGrowthTab: React.FC<
       {/* Gráfico comparativo */}
       <div
         style={{
-          background: 'var(--surface-color, #ffffff)',
+          background: 'var(--surface, #ffffff)',
           border: '1px solid var(--border-color, #e2e8f0)',
           borderRadius: '12px',
           padding: '1.25rem'
@@ -354,11 +413,24 @@ export const MonthlyConnectionGrowthTab: React.FC<
                   : String(val ?? '-'),
                 'Acometidas'
               ]}
+              contentStyle={{
+                backgroundColor: 'var(--surface)',
+                borderColor: 'var(--border-color)',
+                borderRadius: '8px',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+              }}
+              labelStyle={{
+                fontSize: '13px'
+              }}
+              itemStyle={{
+                fontSize: '13px'
+              }}
+              cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }}
             />
             <Legend />
             <Bar
               dataKey={String(baseYear)}
-              fill="#94a3b8"
+              fill="var(--warning)"
               radius={[4, 4, 0, 0]}
               name={`Año ${baseYear}`}
             />
@@ -375,7 +447,7 @@ export const MonthlyConnectionGrowthTab: React.FC<
       {/* Tabla detallada */}
       <div
         style={{
-          background: 'var(--surface-color, #ffffff)',
+          background: 'var(--surface, #ffffff)',
           border: '1px solid var(--border-color, #e2e8f0)',
           borderRadius: '12px',
           padding: '1.25rem'
@@ -399,6 +471,7 @@ export const MonthlyConnectionGrowthTab: React.FC<
         <Table<MonthlyConnectionGrowthAnalytics>
           data={data}
           columns={columns}
+          totalRows={totalRows}
           emptyState={
             <EmptyState
               message="Sin registros"

@@ -1,38 +1,108 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { useNetworkMapViewModel } from '../../hooks/useNetworkMapViewModel';
 import { useScadaTelemetryViewModel } from '../../hooks/useScadaTelemetryViewModel';
 import { useScadaConnectionDetails } from '../../hooks/useScadaConnectionDetails';
 import { Button } from '@/shared/presentation/components/Button/Button';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Home } from 'lucide-react';
 import { useTheme } from '@/shared/presentation/context/ThemeContext';
 
 import styles from './ScadaDashboardPage.module.css';
 import { ScadaMap } from '../../components/Map/ScadaMap';
+import type { GeoJsonFeature } from '../../../domain/models/GeoJsonFeature';
+import { NodeClassifier } from '../../../domain/services/NodeClassifier';
+import { TankConnectionsModal } from '../../components/Modal/TankConnectionsModal';
 
 export const ScadaDashboardPage: React.FC = () => {
-  const { geoJsonData, loading, error, fetchMapData } = useNetworkMapViewModel();
-  const { scadaData, loadingScada, errorScada, fetchScadaData } = useScadaTelemetryViewModel();
+  const { geoJsonData, loading, error, fetchMapData } =
+    useNetworkMapViewModel();
+  const { scadaData, loadingScada, errorScada, fetchScadaData } =
+    useScadaTelemetryViewModel();
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  const [selectedNode, setSelectedNode] = useState<any>(null);
+  const [selectedNode, setSelectedNode] = useState<GeoJsonFeature | null>(null);
+  const [selectedTankFilter, setSelectedTankFilter] = useState<string | null>(null);
+  const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false);
   const { theme } = useTheme();
 
-  const { connectionDetails, loadingConnection, errorConnection } = useScadaConnectionDetails(
-    selectedNode?.properties?.nodeType === 'CONNECTION' ? selectedNode?.properties?.cadastralKey : null
-  );
+  // Activación automática de "Detalle del Nodo" al seleccionar un filtro de tanque
+  const handleTankFilterChange = useCallback((tankName: string | null) => {
+    setSelectedTankFilter(tankName);
+
+    if (tankName && geoJsonData?.features) {
+      const tankFeature = geoJsonData.features.find(
+        (f) => NodeClassifier.isTank(f) && f.properties?.name === tankName
+      );
+      if (tankFeature) {
+        setSelectedNode(tankFeature);
+      }
+    } else if (!tankName) {
+      setSelectedNode((prev) => (prev && NodeClassifier.isTank(prev) ? null : prev));
+    }
+  }, [geoJsonData]);
+
+  // Obtener nombre del tanque actualmente activo (por filtro o por nodo seleccionado)
+  const activeTankName = useMemo(() => {
+    if (selectedNode && NodeClassifier.isTank(selectedNode)) {
+      return selectedNode.properties?.name || null;
+    }
+    return selectedTankFilter || null;
+  }, [selectedNode, selectedTankFilter]);
+
+  // Acometidas abastecidas por el tanque filtrado o seleccionado
+  const relatedConnections = useMemo(() => {
+    if (!activeTankName || !geoJsonData?.features) return [];
+    return geoJsonData.features.filter(
+      (f) =>
+        f.properties?.nodeType === 'CONNECTION' &&
+        f.properties?.suppliedByTank === activeTankName
+    );
+  }, [activeTankName, geoJsonData]);
+
+  // Todas las acometidas registradas en la red
+  const allConnections = useMemo(() => {
+    if (!geoJsonData?.features) return [];
+    return geoJsonData.features.filter(
+      (f) => f.properties?.nodeType === 'CONNECTION'
+    );
+  }, [geoJsonData]);
+
+  // Acometidas activas a visualizar en el modal (filtradas o generales)
+  const connectionsToShow = useMemo(() => {
+    if (activeTankName) {
+      return relatedConnections;
+    }
+    return allConnections;
+  }, [activeTankName, relatedConnections, allConnections]);
+
+  const { connectionDetails, loadingConnection, errorConnection } =
+    useScadaConnectionDetails(
+      selectedNode?.properties?.nodeType === 'CONNECTION'
+        ? selectedNode?.properties?.cadastralKey
+        : null
+    );
 
   useEffect(() => {
     fetchMapData();
     fetchScadaData();
   }, [fetchMapData, fetchScadaData]);
 
+  console.log(geoJsonData);
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
         <h1>Red de Distribución de Agua</h1>
         <Button
-          leftIcon={<RefreshCw size={18} className={(loading || loadingScada) ? styles.spin : ''} />}
-          onClick={() => { fetchMapData(); fetchScadaData(); }}
+          leftIcon={
+            <RefreshCw
+              size={18}
+              className={loading || loadingScada ? styles.spin : ''}
+            />
+          }
+          onClick={() => {
+            fetchMapData();
+            fetchScadaData();
+          }}
           disabled={loading || loadingScada}
           variant="outline"
           size="sm"
@@ -42,8 +112,12 @@ export const ScadaDashboardPage: React.FC = () => {
       </header>
 
       <div className={styles.content}>
-        {(loading || loadingScada) && <div className={styles.loading}>Loading telemetry...</div>}
-        {(error || errorScada) && <div className={styles.error}>{error || errorScada}</div>}
+        {(loading || loadingScada) && (
+          <div className={styles.loading}>Loading telemetry...</div>
+        )}
+        {(error || errorScada) && (
+          <div className={styles.error}>{error || errorScada}</div>
+        )}
 
         <div className={styles.mapContainer}>
           <APIProvider apiKey={apiKey} libraries={['marker']}>
@@ -52,6 +126,8 @@ export const ScadaDashboardPage: React.FC = () => {
               geoJsonData={geoJsonData}
               onNodeSelect={setSelectedNode}
               selectedNode={selectedNode}
+              selectedTankFilter={selectedTankFilter}
+              onTankFilterChange={handleTankFilterChange}
             />
           </APIProvider>
         </div>
@@ -67,6 +143,24 @@ export const ScadaDashboardPage: React.FC = () => {
               <span>Conexiones Activas</span>
               <span>Online</span>
             </div>
+            <div className={styles.statRow}>
+              <span>{activeTankName ? `Sector: ${activeTankName}` : 'Acometidas en Red'}</span>
+              <span className={styles.highlightGlow}>{connectionsToShow.length}</span>
+            </div>
+
+            <Button
+              className={styles.actionBtn}
+              variant="outline"
+              size="sm"
+              leftIcon={<Home size={15} />}
+              onClick={() => setIsConnectionsModalOpen(true)}
+              disabled={connectionsToShow.length === 0}
+              style={{ marginTop: '0.75rem', width: '100%' }}
+            >
+              {activeTankName
+                ? `Ver Acometidas (${connectionsToShow.length})`
+                : `Ver Todas las Acometidas (${connectionsToShow.length})`}
+            </Button>
           </div>
 
           {selectedNode ? (
@@ -74,11 +168,17 @@ export const ScadaDashboardPage: React.FC = () => {
               <h3>Detalle del Nodo</h3>
               <div className={styles.statRow}>
                 <span>Tipo</span>
-                <span className={styles.highlightBlue}>{selectedNode.properties.nodeType}</span>
+                <span className={styles.highlightBlue}>
+                  {NodeClassifier.getDisplayName(selectedNode)}
+                </span>
               </div>
               <div className={styles.statRow}>
                 <span>Nombre:</span>
-                <span>{selectedNode.properties.name || selectedNode.properties.code || 'N/A'}</span>
+                <span>
+                  {selectedNode.properties.name ||
+                    selectedNode.properties.code ||
+                    'N/A'}
+                </span>
               </div>
               {selectedNode.properties.cadastralKey && (
                 <div className={styles.statRow}>
@@ -89,51 +189,128 @@ export const ScadaDashboardPage: React.FC = () => {
               {selectedNode.properties.suppliedByTank && (
                 <div className={styles.statRow}>
                   <span>Abastecido Por</span>
-                  <span className={styles.highlightGlow}>{selectedNode.properties.suppliedByTank}</span>
+                  <span className={styles.highlightGlow}>
+                    {selectedNode.properties.suppliedByTank}
+                  </span>
                 </div>
               )}
               {selectedNode.properties.distanceInMeters && (
                 <div className={styles.statRow}>
                   <span>Distancia</span>
-                  <span>{Math.round(selectedNode.properties.distanceInMeters)} m</span>
+                  <span>
+                    {Math.round(selectedNode.properties.distanceInMeters)} m
+                  </span>
                 </div>
+              )}
+
+              {/* Botón para ver acometidas abastecidas por este tanque */}
+              {NodeClassifier.isTank(selectedNode) && (
+                <>
+                  <div className={styles.statRow}>
+                    <span>Acometidas Abastecidas</span>
+                    <span className={styles.highlightGlow}>
+                      {relatedConnections.length} predios
+                    </span>
+                  </div>
+                  <Button
+                    className={styles.actionBtn}
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<Home size={15} />}
+                    onClick={() => setIsConnectionsModalOpen(true)}
+                    disabled={relatedConnections.length === 0}
+                    style={{ marginTop: '0.6rem', width: '100%' }}
+                  >
+                    Ver Acometidas del Sector ({relatedConnections.length})
+                  </Button>
+                </>
               )}
 
               {/* Basic Connection Details */}
               {selectedNode.properties.nodeType === 'CONNECTION' && (
                 <>
-                  <div style={{ marginTop: '0.25rem', paddingTop: '0.25rem', borderTop: '1px dashed var(--border-color)' }}></div>
+                  <div
+                    style={{
+                      marginTop: '0.25rem',
+                      paddingTop: '0.25rem',
+                      borderTop: '1px dashed var(--border-color)'
+                    }}
+                  ></div>
                   {loadingConnection ? (
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Cargando datos del cliente...</div>
+                    <div
+                      style={{
+                        fontSize: '0.8rem',
+                        color: 'var(--text-secondary)'
+                      }}
+                    >
+                      Cargando datos del cliente...
+                    </div>
                   ) : errorConnection ? (
-                    <div style={{ fontSize: '0.8rem', color: '#f87171' }}>{errorConnection}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#f87171' }}>
+                      {errorConnection}
+                    </div>
                   ) : connectionDetails ? (
                     <>
                       <div className={styles.statRow}>
                         <span>Titular</span>
-                        <span style={{ fontWeight: 600, color: 'var(--text-primary)', textAlign: 'right', maxWidth: '65%' }}>
-                          {connectionDetails.person ? `${connectionDetails.person.firstName} ${connectionDetails.person.lastName}` : connectionDetails.company ? connectionDetails.company.businessName : 'N/A'}
+                        <span
+                          style={{
+                            fontWeight: 600,
+                            color: 'var(--text-primary)',
+                            textAlign: 'right',
+                            maxWidth: '65%'
+                          }}
+                        >
+                          {connectionDetails.person
+                            ? `${connectionDetails.person.firstName} ${connectionDetails.person.lastName}`
+                            : connectionDetails.company
+                              ? connectionDetails.company.businessName
+                              : 'N/A'}
                         </span>
                       </div>
                       <div className={styles.statRow}>
                         <span>Estado</span>
-                        <span className={connectionDetails.connectionStatus === 'ACTIVO' ? styles.statusOk : ''} style={{ fontWeight: 600 }}>
+                        <span
+                          className={
+                            connectionDetails.connectionStatus === 'ACTIVO'
+                              ? styles.statusOk
+                              : ''
+                          }
+                          style={{ fontWeight: 600 }}
+                        >
                           {connectionDetails.connectionStatus}
                         </span>
                       </div>
                       <div className={styles.statRow}>
                         <span>Tarifa</span>
-                        <span>{connectionDetails.connectionRateName || 'N/A'}</span>
+                        <span>
+                          {connectionDetails.connectionRateName || 'N/A'}
+                        </span>
                       </div>
                       {connectionDetails.connectionMeterNumber && (
                         <div className={styles.statRow}>
                           <span>Medidor</span>
-                          <span style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--text-primary)' }}>{connectionDetails.connectionMeterNumber}</span>
+                          <span
+                            style={{
+                              fontFamily: 'monospace',
+                              fontWeight: 600,
+                              color: 'var(--text-primary)'
+                            }}
+                          >
+                            {connectionDetails.connectionMeterNumber}
+                          </span>
                         </div>
                       )}
                     </>
                   ) : (
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>No se encontraron datos para esta clave.</div>
+                    <div
+                      style={{
+                        fontSize: '0.8rem',
+                        color: 'var(--text-secondary)'
+                      }}
+                    >
+                      No se encontraron datos para esta clave.
+                    </div>
                   )}
                 </>
               )}
@@ -141,14 +318,25 @@ export const ScadaDashboardPage: React.FC = () => {
               {/* SCADA Telemetry UI for Tanks/Plants and Connections */}
               {(() => {
                 const nodeType = selectedNode.properties.nodeType;
+                const isFacility =
+                  NodeClassifier.isPlant(selectedNode) ||
+                  NodeClassifier.isTank(selectedNode) ||
+                  NodeClassifier.isPump(selectedNode);
                 let scadaInfo = null;
 
-                if (['TANK', 'PUMP', 'PLANT'].includes(nodeType) && selectedNode.id) {
-                  const nodeIdStr = selectedNode.id.split('_')[1];
-                  scadaInfo = scadaData.find((s) => s.tankId.toString() === nodeIdStr);
-                } else if (nodeType === 'CONNECTION' && selectedNode.properties.suppliedByTank) {
+                if (isFacility && selectedNode.id !== undefined) {
+                  const nodeIdStr = String(selectedNode.id).split('_')[1];
+                  scadaInfo = scadaData.find(
+                    (s) => s.tankId.toString() === nodeIdStr
+                  );
+                } else if (
+                  nodeType === 'CONNECTION' &&
+                  selectedNode.properties.suppliedByTank
+                ) {
                   // Muestra el SCADA del tanque que abastece a esta acometida
-                  scadaInfo = scadaData.find((s) => s.tankName === selectedNode.properties.suppliedByTank);
+                  scadaInfo = scadaData.find(
+                    (s) => s.tankName === selectedNode.properties.suppliedByTank
+                  );
                 }
 
                 if (!scadaInfo) return null;
@@ -159,7 +347,9 @@ export const ScadaDashboardPage: React.FC = () => {
                       <div className={styles.tankContainer}>
                         <div
                           className={styles.tankFill}
-                          style={{ height: `${scadaInfo.levelTelemetry.percentage}%` }}
+                          style={{
+                            height: `${scadaInfo.levelTelemetry.percentage}%`
+                          }}
                         ></div>
                       </div>
                     )}
@@ -169,21 +359,29 @@ export const ScadaDashboardPage: React.FC = () => {
                           <div className={styles.tankValue}>
                             {scadaInfo.levelTelemetry.percentage}%
                           </div>
-                          <div className={styles.tankLabel}>Nivel de Llenado</div>
+                          <div className={styles.tankLabel}>
+                            Nivel de Llenado
+                          </div>
                         </div>
                       )}
                       {scadaInfo.flowTelemetry && (
                         <div>
-                          <div className={`${styles.tankValue} ${styles.tankValueBlue}`}>
-                            {scadaInfo.flowTelemetry.value} {scadaInfo.flowTelemetry.unit}
+                          <div
+                            className={`${styles.tankValue} ${styles.tankValueBlue}`}
+                          >
+                            {scadaInfo.flowTelemetry.value}{' '}
+                            {scadaInfo.flowTelemetry.unit}
                           </div>
                           <div className={styles.tankLabel}>Caudal Salida</div>
                         </div>
                       )}
                       {scadaInfo.pressureTelemetry && (
                         <div>
-                          <div className={`${styles.tankValue} ${styles.tankValuePurple}`}>
-                            {scadaInfo.pressureTelemetry.value} {scadaInfo.pressureTelemetry.unit}
+                          <div
+                            className={`${styles.tankValue} ${styles.tankValuePurple}`}
+                          >
+                            {scadaInfo.pressureTelemetry.value}{' '}
+                            {scadaInfo.pressureTelemetry.unit}
                           </div>
                           <div className={styles.tankLabel}>Presión Media</div>
                         </div>
@@ -193,13 +391,27 @@ export const ScadaDashboardPage: React.FC = () => {
                 );
               })()}
 
-              <Button className={styles.actionBtn} onClick={() => setSelectedNode(null)} variant="dashed" size="sm">Cerrar</Button>
+              <Button
+                className={styles.actionBtn}
+                onClick={() => setSelectedNode(null)}
+                variant="dashed"
+                size="sm"
+              >
+                Cerrar
+              </Button>
             </div>
           ) : (
             <div className={styles.glassPanel}>
               <h3>Selección</h3>
-              <p style={{ color: '#94a3b8', fontSize: '0.9rem', textAlign: 'center' }}>
-                Haz clic en un nodo o enlace en el mapa para ver sus detalles de telemetría.
+              <p
+                style={{
+                  color: '#94a3b8',
+                  fontSize: '0.9rem',
+                  textAlign: 'center'
+                }}
+              >
+                Haz clic en un nodo o enlace en el mapa para ver sus detalles de
+                telemetría.
               </p>
             </div>
           )}
@@ -212,6 +424,12 @@ export const ScadaDashboardPage: React.FC = () => {
             <div className={styles.legendCol}>Sistemas</div>
           </div>
           <div className={styles.legendBody}>
+            <div className={styles.legendRow}>
+              <span className={styles.dotPlant}></span> Planta de Tratamiento
+            </div>
+            <div className={styles.legendRow}>
+              <span className={styles.dotTank}></span> Tanque de Reserva
+            </div>
             <div className={styles.legendRow}>
               <span className={styles.lineGreen}></span> Red de Distribución Principal
             </div>
@@ -230,6 +448,17 @@ export const ScadaDashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal interactivo de Acometidas del Sector */}
+      <TankConnectionsModal
+        isOpen={isConnectionsModalOpen}
+        onClose={() => setIsConnectionsModalOpen(false)}
+        tankName={activeTankName || 'Toda la Red (Antonio Ante)'}
+        connections={connectionsToShow}
+        onSelectConnection={(conn) => {
+          setSelectedNode(conn);
+        }}
+      />
     </div>
   );
 };

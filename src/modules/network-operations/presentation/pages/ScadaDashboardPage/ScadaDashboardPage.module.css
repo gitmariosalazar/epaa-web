@@ -63,6 +63,30 @@
   border-radius: 2px;
 }
 
+.dotPlant,
+.dotTank,
+.dotPump {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dotPlant {
+  background-color: #10b981;
+}
+
+.dotTank {
+  background-color: #475569;
+}
+
+.dotPump {
+  background-color: #f97316;
+}
+
 .lineGreen {
   background-color: #22c55e;
 }

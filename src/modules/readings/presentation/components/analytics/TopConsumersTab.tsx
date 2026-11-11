@@ -3,7 +3,8 @@ import { Search, Trophy, Droplets, DollarSign } from 'lucide-react';
 import type { TopConsumerAnalytics } from '../../../domain/models/readings-analytics';
 import {
   Table,
-  type Column
+  type Column,
+  type TotalRow
 } from '@/shared/presentation/components/Table/Table';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
@@ -57,6 +58,7 @@ export const TopConsumersTab: React.FC<TopConsumersTabProps> = ({
   const columns: Column<TopConsumerAnalytics>[] = useMemo(
     () => [
       {
+        id: 'rank',
         header: '#',
         accessor: (_item, index?: number) => (
           <span
@@ -67,6 +69,7 @@ export const TopConsumersTab: React.FC<TopConsumersTabProps> = ({
         )
       },
       {
+        id: 'sector',
         header: 'Sector',
         accessor: (item) => (
           <span
@@ -79,6 +82,7 @@ export const TopConsumersTab: React.FC<TopConsumersTabProps> = ({
         sortKey: 'sector'
       },
       {
+        id: 'account',
         header: 'Cuenta',
         accessor: (item) => (
           <span
@@ -91,14 +95,17 @@ export const TopConsumersTab: React.FC<TopConsumersTabProps> = ({
         sortKey: 'account'
       },
       {
+        id: 'cadastralKey',
         header: 'Clave Catastral',
         accessor: (item) => item.cadastralKey || '-'
       },
       {
+        id: 'meterNumber',
         header: 'Medidor',
         accessor: (item) => item.meterNumber || '-'
       },
       {
+        id: 'clientName',
         header: 'Cliente / Abonado',
         accessor: (item) => (
           <span style={{ fontWeight: 500 }}>
@@ -107,16 +114,19 @@ export const TopConsumersTab: React.FC<TopConsumersTabProps> = ({
         )
       },
       {
+        id: 'previousReading',
         header: 'Lect. Ant.',
         accessor: (item) => formatNumber(item.previousReading),
         isNumeric: true
       },
       {
+        id: 'currentReading',
         header: 'Lect. Act.',
         accessor: (item) => formatNumber(item.currentReading),
         isNumeric: true
       },
       {
+        id: 'consumedVolumeM3',
         header: 'Consumo',
         accessor: (item) => (
           <span style={{ fontWeight: 700, color: '#2563eb' }}>
@@ -128,6 +138,7 @@ export const TopConsumersTab: React.FC<TopConsumersTabProps> = ({
         isNumeric: true
       },
       {
+        id: 'totalBilledUsd',
         header: 'Total Facturado ($)',
         accessor: (item) => (
           <span style={{ fontWeight: 700, color: '#059669' }}>
@@ -139,6 +150,7 @@ export const TopConsumersTab: React.FC<TopConsumersTabProps> = ({
         isNumeric: true
       },
       {
+        id: 'novelty',
         header: 'Novedad',
         accessor: (item: TopConsumerAnalytics) => (
           <span
@@ -152,6 +164,7 @@ export const TopConsumersTab: React.FC<TopConsumersTabProps> = ({
         )
       },
       {
+        id: 'readingDate',
         header: 'Fecha',
         accessor: (item) =>
           item.readingDate ? item.readingDate.substring(0, 10) : '-'
@@ -160,16 +173,32 @@ export const TopConsumersTab: React.FC<TopConsumersTabProps> = ({
     []
   );
 
+  const totalRows: TotalRow[] = useMemo(() => {
+    if (!filteredData || filteredData.length === 0) return [];
+    return [
+      { columnId: 'rank', label: '#', value: 'TOTAL' },
+      {
+        columnId: 'clientName',
+        label: 'Cliente / Abonado',
+        value: `${filteredData.length} abonados`
+      },
+      {
+        columnId: 'consumedVolumeM3',
+        label: 'Consumo',
+        value: formatVolume(summary.totalVolume)
+      },
+      {
+        columnId: 'totalBilledUsd',
+        label: 'Total Facturado ($)',
+        value: formatCurrency(summary.totalBilled),
+        highlight: true
+      }
+    ];
+  }, [filteredData, summary]);
+
   if (isLoading) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '350px'
-        }}
-      >
+      <div className="circular-progress">
         <CircularProgress size={40} />
       </div>
     );
@@ -185,7 +214,7 @@ export const TopConsumersTab: React.FC<TopConsumersTabProps> = ({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
       {/* Top Banner & Quick stats */}
       <div
         style={{
@@ -193,7 +222,7 @@ export const TopConsumersTab: React.FC<TopConsumersTabProps> = ({
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '0.5rem',
           background: 'var(--surface, #ffffff)',
           border: '1px solid var(--border-color, #e2e8f0)',
           borderRadius: '12px',
@@ -251,6 +280,7 @@ export const TopConsumersTab: React.FC<TopConsumersTabProps> = ({
         <Table<TopConsumerAnalytics>
           data={filteredData}
           columns={columns}
+          totalRows={totalRows}
           pagination={true}
           pageSize={15}
           width="100"

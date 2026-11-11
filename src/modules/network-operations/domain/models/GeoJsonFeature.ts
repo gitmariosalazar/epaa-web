@@ -1,15 +1,21 @@
+import type { Feature, FeatureCollection, Geometry } from 'geojson';
+
 export type GeoJsonCoordinates = number[] | number[][] | number[][][];
 
-export type GeoJsonGeometry =
-  | { type: 'Point'; coordinates: number[] }
-  | { type: 'LineString'; coordinates: number[][] }
-  | { type: 'Polygon'; coordinates: number[][][] }
-  | { type: 'MultiPoint'; coordinates: number[][] }
-  | { type: 'MultiLineString'; coordinates: number[][][] }
-  | { type: 'MultiPolygon'; coordinates: number[][][][] };
+export type ScadaNodeType =
+  | 'TANK'
+  | 'TANQUE'
+  | 'PLANT'
+  | 'PLANTA'
+  | 'PUMP'
+  | 'BOMBEO'
+  | 'SOURCE'
+  | 'CAPTACION'
+  | 'CONNECTION'
+  | 'VIRTUAL_LINK';
 
 export interface GeoJsonFeatureProperties {
-  nodeType: 'TANK' | 'CONNECTION' | 'VIRTUAL_LINK';
+  nodeType: ScadaNodeType | (string & {});
   name?: string;
   code?: string;
   colorMarker?: string;
@@ -21,14 +27,8 @@ export interface GeoJsonFeatureProperties {
   distanceInMeters?: number;
 }
 
-export interface GeoJsonFeature {
-  type: 'Feature';
-  id?: string;
-  geometry: GeoJsonGeometry;
-  properties: GeoJsonFeatureProperties;
-}
+export type GeoJsonGeometry = Geometry;
 
-export interface MapGeojsonResponse {
-  type: 'FeatureCollection';
-  features: GeoJsonFeature[];
-}
+export type GeoJsonFeature = Feature<Geometry, GeoJsonFeatureProperties>;
+
+export type MapGeojsonResponse = FeatureCollection<Geometry, GeoJsonFeatureProperties>;
