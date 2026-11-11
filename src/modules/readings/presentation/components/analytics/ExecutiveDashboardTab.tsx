@@ -10,7 +10,12 @@ import {
   AlertTriangle,
   Activity,
   Landmark,
-  FileText
+  FileText,
+  Wallet,
+  CheckCircle2,
+  Clock,
+  ShieldAlert,
+  FileSpreadsheet
 } from 'lucide-react';
 import type { ExecutiveDashboardAnalytics } from '../../../domain/models/readings-analytics';
 import { KPICard } from '@/shared/presentation/components/Card/KPICard';
@@ -59,6 +64,19 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
   const hasRentasBreakdown =
     data.totalTitleUsd !== undefined || data.totalBilledEpaaUsd !== undefined;
 
+  const hasCollectionBreakdown =
+    data.totalCollectedUsd !== undefined ||
+    data.totalPendingDebtUsd !== undefined ||
+    data.totalOverdueDebtUsd !== undefined ||
+    data.totalBillsGenerated !== undefined;
+
+  const totalEvaluated =
+    (data.totalCollectedUsd ?? 0) + (data.totalPendingDebtUsd ?? 0);
+  const collectionEfficiencyPercentage =
+    totalEvaluated > 0
+      ? ((data.totalCollectedUsd ?? 0) / totalEvaluated) * 100
+      : undefined;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Primary KPI Grid */}
@@ -100,7 +118,7 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
       {/* Secondary KPI Grid */}
       <div className="analytics-kpi-grid">
         <KPICard
-          label="Ticket Promedio por Cuenta"
+          label="Valor Promedio por Acometida"
           value={formatCurrency(data.averageTicketPerAccountUsd)}
           description="Ingreso medio mensual por cliente"
           icon={<Receipt size={20} />}
@@ -129,6 +147,46 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
         />
       </div>
 
+      {/* Collection & Debt Financial Health KPI Grid */}
+      {hasCollectionBreakdown && (
+        <div className="analytics-kpi-grid">
+          <KPICard
+            label="Total Recaudado (Cobrado)"
+            value={formatCurrency(data.totalCollectedUsd)}
+            description={`${formatNumber(data.paidBillsCount ?? 0)} facturas cobradas`}
+            icon={<CheckCircle2 size={20} />}
+            color="success"
+          />
+          <KPICard
+            label="Cartera Vencida (En Mora)"
+            value={formatCurrency(data.totalOverdueDebtUsd)}
+            description={`${formatNumber(data.overdueBillsCount ?? 0)} facturas vencidas`}
+            icon={<ShieldAlert size={20} />}
+            color="danger"
+          />
+          <KPICard
+            label="Cartera Próxima a Vencer"
+            value={formatCurrency(data.totalUpcomingDebtUsd)}
+            description={`${formatNumber(data.upcomingBillsCount ?? 0)} facturas vigentes`}
+            icon={<Clock size={20} />}
+            color="info"
+          />
+          <KPICard
+            label="Efectividad de Recaudación"
+            value={`${collectionEfficiencyPercentage?.toFixed(2) ?? '0.00'}%`}
+            description={`Deuda pendiente: ${formatCurrency(data.totalPendingDebtUsd)}`}
+            icon={<TrendingUp size={20} />}
+            color={
+              (collectionEfficiencyPercentage ?? 0) >= 80
+                ? 'success'
+                : (collectionEfficiencyPercentage ?? 0) >= 50
+                ? 'warning'
+                : 'danger'
+            }
+          />
+        </div>
+      )}
+
       {/* Detailed Analysis Cards */}
       <div
         style={{
@@ -143,12 +201,16 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
             <div className="analytics-card-header">
               <h4 className="analytics-card-title">
                 <Landmark size={18} color="var(--primary-color, #2563eb)" />
-                Liquidación de Rentas EPAA
+                Liquidación EPAA-AA
               </h4>
               <span className="analytics-card-badge">Títulos & Cargos</span>
             </div>
             <div
-              style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
+              }}
             >
               <div
                 style={{
@@ -160,7 +222,7 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
                 }}
               >
                 <span style={{ color: 'var(--text-secondary, #64748b)' }}>
-                  Total Títulos de Ingreso
+                  Total EPAA-AA
                 </span>
                 <strong style={{ color: 'var(--text-primary, #0f172a)' }}>
                   {formatCurrency(data.totalTitleUsd)}
@@ -208,7 +270,7 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
                 }}
               >
                 <span style={{ color: 'var(--text-secondary, #64748b)' }}>
-                  Intereses Devengados (Caché)
+                  Intereses
                 </span>
                 <strong style={{ color: 'var(--text-primary, #0f172a)' }}>
                   {formatCurrency(data.totalInterestUsd)}
@@ -254,7 +316,262 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
                     color: 'var(--primary-color, #2563eb)'
                   }}
                 >
-                  {formatCurrency(data.totalBilledEpaaUsd ?? data.totalBilledUsd)}
+                  {formatCurrency(
+                    data.totalBilledEpaaUsd ?? data.totalBilledUsd
+                  )}
+                </strong>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Collection & Debt Breakdown Card */}
+        {hasCollectionBreakdown && (
+          <div className="analytics-card-section">
+            <div className="analytics-card-header">
+              <h4 className="analytics-card-title">
+                <Wallet size={18} color="#059669" />
+                Recaudación y Gestión de Cartera
+              </h4>
+              <span className="analytics-card-badge">Financiero EPAA</span>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'rgba(16, 185, 129, 0.08)',
+                  borderLeft: '4px solid #10b981'
+                }}
+              >
+                <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                  Total Cobrado (Pagado)
+                </span>
+                <strong style={{ color: '#059669', fontSize: '1rem' }}>
+                  {formatCurrency(data.totalCollectedUsd)}
+                </strong>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'rgba(239, 68, 68, 0.08)',
+                  borderLeft: '4px solid #ef4444'
+                }}
+              >
+                <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                  Cartera Vencida (En Mora)
+                </span>
+                <strong style={{ color: '#dc2626', fontSize: '1rem' }}>
+                  {formatCurrency(data.totalOverdueDebtUsd)}
+                </strong>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'rgba(59, 130, 246, 0.08)',
+                  borderLeft: '4px solid #3b82f6'
+                }}
+              >
+                <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                  Cartera Próxima a Vencer (Vigente)
+                </span>
+                <strong style={{ color: '#2563eb', fontSize: '1rem' }}>
+                  {formatCurrency(data.totalUpcomingDebtUsd)}
+                </strong>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'var(--surface-subtle, #f8fafc)'
+                }}
+              >
+                <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                  Interés por Mejoras
+                </span>
+                <strong style={{ color: 'var(--text-primary, #0f172a)' }}>
+                  {formatCurrency(data.totalInterestImprovementsUsd)}
+                </strong>
+              </div>
+              {data.totalCanceledUsd !== undefined && data.totalCanceledUsd > 0 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '0.65rem 0.75rem',
+                    borderRadius: '8px',
+                    background: 'var(--surface-subtle, #f8fafc)'
+                  }}
+                >
+                  <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                    Cartera Anulada / Baja
+                  </span>
+                  <strong style={{ color: '#64748b' }}>
+                    {formatCurrency(data.totalCanceledUsd)}
+                  </strong>
+                </div>
+              )}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  borderTop: '2px solid var(--border-color, #e2e8f0)',
+                  background: 'rgba(15, 23, 42, 0.03)'
+                }}
+              >
+                <span
+                  style={{
+                    fontWeight: 700,
+                    color: 'var(--text-primary, #0f172a)'
+                  }}
+                >
+                  Deuda Pendiente Total
+                </span>
+                <strong style={{ fontSize: '1.15rem', color: '#dc2626' }}>
+                  {formatCurrency(data.totalPendingDebtUsd)}
+                </strong>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Invoicing and Bill Volume Card */}
+        {hasCollectionBreakdown && (
+          <div className="analytics-card-section">
+            <div className="analytics-card-header">
+              <h4 className="analytics-card-title">
+                <FileSpreadsheet size={18} color="#6366f1" />
+                Control de Emisión y Títulos
+              </h4>
+              <span className="analytics-card-badge">Auditoría Emisiones</span>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'var(--surface-subtle, #f8fafc)'
+                }}
+              >
+                <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                  Total Títulos Generados
+                </span>
+                <strong style={{ color: 'var(--text-primary, #0f172a)' }}>
+                  {formatNumber(data.totalBillsGenerated)}
+                </strong>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'rgba(16, 185, 129, 0.08)'
+                }}
+              >
+                <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                  Títulos Cobrados / Pagados
+                </span>
+                <strong style={{ color: '#059669' }}>
+                  {formatNumber(data.paidBillsCount)}
+                </strong>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'rgba(239, 68, 68, 0.08)'
+                }}
+              >
+                <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                  Títulos en Mora (Vencidos)
+                </span>
+                <strong style={{ color: '#dc2626' }}>
+                  {formatNumber(data.overdueBillsCount)}
+                </strong>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'rgba(59, 130, 246, 0.08)'
+                }}
+              >
+                <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                  Títulos Próximos a Vencer
+                </span>
+                <strong style={{ color: '#2563eb' }}>
+                  {formatNumber(data.upcomingBillsCount)}
+                </strong>
+              </div>
+              {data.canceledBillsCount !== undefined && data.canceledBillsCount > 0 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '0.65rem 0.75rem',
+                    borderRadius: '8px',
+                    background: 'var(--surface-subtle, #f8fafc)'
+                  }}
+                >
+                  <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                    Títulos Anulados
+                  </span>
+                  <strong style={{ color: '#64748b' }}>
+                    {formatNumber(data.canceledBillsCount)}
+                  </strong>
+                </div>
+              )}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  borderTop: '2px solid var(--border-color, #e2e8f0)',
+                  background: 'rgba(99, 102, 241, 0.05)'
+                }}
+              >
+                <span
+                  style={{
+                    fontWeight: 700,
+                    color: 'var(--text-primary, #0f172a)'
+                  }}
+                >
+                  Total Pendientes de Cobro
+                </span>
+                <strong style={{ fontSize: '1.15rem', color: '#4f46e5' }}>
+                  {formatNumber(data.unpaidBillsCount)}
                 </strong>
               </div>
             </div>
@@ -266,7 +583,7 @@ export const ExecutiveDashboardTab: React.FC<ExecutiveDashboardTabProps> = ({
           <div className="analytics-card-header">
             <h4 className="analytics-card-title">
               <FileText size={18} color="#059669" />
-              Composición Tarifaria (Micromedición)
+              Composición Tarifaria
             </h4>
             <span className="analytics-card-badge">Lecturas de Red</span>
           </div>

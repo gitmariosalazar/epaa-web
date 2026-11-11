@@ -7,7 +7,7 @@ import {
   CartesianGrid,
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
-  Legend,
+  Legend
 } from 'recharts';
 import {
   TrendingUp,
@@ -15,10 +15,14 @@ import {
   GitCompare,
   ArrowUpRight,
   ArrowDownRight,
-  CheckCircle2,
+  CheckCircle2
 } from 'lucide-react';
 import type { InterannualComparisonAnalytics } from '../../../domain/models/readings-analytics';
-import { Table, type Column, type SummaryRow } from '@/shared/presentation/components/Table/Table';
+import {
+  Table,
+  type Column,
+  type SummaryRow
+} from '@/shared/presentation/components/Table/Table';
 import { KPICard } from '@/shared/presentation/components/Card/KPICard';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
@@ -28,7 +32,7 @@ import {
   formatNumber,
   formatPercent,
   formatVolume,
-  getDiagnosticStatus,
+  getDiagnosticStatus
 } from '../../utils/analytics-formatters';
 
 interface InterannualComparisonTabProps {
@@ -38,12 +42,9 @@ interface InterannualComparisonTabProps {
   targetYear?: number;
 }
 
-export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> = ({
-  data,
-  isLoading,
-  baseYear = 2025,
-  targetYear = 2026,
-}) => {
+export const InterannualComparisonTab: React.FC<
+  InterannualComparisonTabProps
+> = ({ data, isLoading, baseYear = 2025, targetYear = 2026 }) => {
   const chartData = useMemo(() => {
     if (!data) return [];
     return [...data]
@@ -53,7 +54,7 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
         facturadoBase: item.billedBaseYearUsd,
         facturadoTarget: item.billedTargetYearUsd,
         volumenBase: item.volumeBaseYearM3,
-        volumenTarget: item.volumeTargetYearM3,
+        volumenTarget: item.volumeTargetYearM3
       }));
   }, [data]);
 
@@ -68,17 +69,23 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
         billedBase: 0,
         billedTarget: 0,
         deltaBilled: 0,
-        pctBilled: 0,
+        pctBilled: 0
       };
     }
-    const totalHomologous = data.reduce((acc, c) => acc + c.homologousAccountsCount, 0);
+    const totalHomologous = data.reduce(
+      (acc, c) => acc + c.homologousAccountsCount,
+      0
+    );
     const volumeBase = data.reduce((acc, c) => acc + c.volumeBaseYearM3, 0);
     const volumeTarget = data.reduce((acc, c) => acc + c.volumeTargetYearM3, 0);
     const deltaVolume = volumeTarget - volumeBase;
     const pctVolume = volumeBase > 0 ? (deltaVolume / volumeBase) * 100 : 0;
 
     const billedBase = data.reduce((acc, c) => acc + c.billedBaseYearUsd, 0);
-    const billedTarget = data.reduce((acc, c) => acc + c.billedTargetYearUsd, 0);
+    const billedTarget = data.reduce(
+      (acc, c) => acc + c.billedTargetYearUsd,
+      0
+    );
     const deltaBilled = billedTarget - billedBase;
     const pctBilled = billedBase > 0 ? (deltaBilled / billedBase) * 100 : 0;
 
@@ -91,7 +98,7 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
       billedBase,
       billedTarget,
       deltaBilled,
-      pctBilled,
+      pctBilled
     };
   }, [data]);
 
@@ -100,58 +107,64 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
       {
         header: 'Sector',
         accessor: (item) => (
-          <span style={{ fontWeight: 700, color: 'var(--primary-color, #2563eb)' }}>
+          <span
+            style={{ fontWeight: 700, color: 'var(--primary-color, #2563eb)' }}
+          >
             Sector {item.sector}
           </span>
         ),
         sortable: true,
-        sortKey: 'sector',
+        sortKey: 'sector'
       },
       {
         header: `Lecturas ${baseYear}`,
         accessor: (item) => formatNumber(item.readingsBaseYear),
-        isNumeric: true,
+        isNumeric: true
       },
       {
         header: `Lecturas ${targetYear}`,
         accessor: (item) => formatNumber(item.readingsTargetYear),
-        isNumeric: true,
+        isNumeric: true
       },
       {
         header: 'Δ Lecturas',
         accessor: (item) => {
           const isPos = item.deltaReadings >= 0;
           return (
-            <span style={{ color: isPos ? '#10b981' : '#ef4444', fontWeight: 600 }}>
+            <span
+              style={{ color: isPos ? '#10b981' : '#ef4444', fontWeight: 600 }}
+            >
               {isPos ? '+' : ''}
               {formatNumber(item.deltaReadings)}
             </span>
           );
         },
-        isNumeric: true,
+        isNumeric: true
       },
       {
         header: `m³ ${baseYear}`,
         accessor: (item) => formatVolume(item.volumeBaseYearM3),
-        isNumeric: true,
+        isNumeric: true
       },
       {
         header: `m³ ${targetYear}`,
         accessor: (item) => formatVolume(item.volumeTargetYearM3),
-        isNumeric: true,
+        isNumeric: true
       },
       {
         header: 'Δ m³',
         accessor: (item) => {
           const isPos = item.deltaVolumeM3 >= 0;
           return (
-            <span style={{ color: isPos ? '#10b981' : '#ef4444', fontWeight: 600 }}>
+            <span
+              style={{ color: isPos ? '#10b981' : '#ef4444', fontWeight: 600 }}
+            >
               {isPos ? '+' : ''}
               {formatVolume(item.deltaVolumeM3)}
             </span>
           );
         },
-        isNumeric: true,
+        isNumeric: true
       },
       {
         header: '% Var m³',
@@ -164,20 +177,24 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
                 fontWeight: 600,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '2px',
+                gap: '2px'
               }}
             >
-              {isPos ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+              {isPos ? (
+                <ArrowUpRight size={14} />
+              ) : (
+                <ArrowDownRight size={14} />
+              )}
               {formatPercent(item.varianceVolumePercentage)}
             </span>
           );
         },
-        isNumeric: true,
+        isNumeric: true
       },
       {
         header: `Facturado ${baseYear} ($)`,
         accessor: (item) => formatCurrency(item.billedBaseYearUsd),
-        isNumeric: true,
+        isNumeric: true
       },
       {
         header: `Facturado ${targetYear} ($)`,
@@ -186,20 +203,22 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
             {formatCurrency(item.billedTargetYearUsd)}
           </span>
         ),
-        isNumeric: true,
+        isNumeric: true
       },
       {
         header: 'Δ USD ($)',
         accessor: (item) => {
           const isPos = item.deltaBilledUsd >= 0;
           return (
-            <span style={{ color: isPos ? '#10b981' : '#ef4444', fontWeight: 700 }}>
+            <span
+              style={{ color: isPos ? '#10b981' : '#ef4444', fontWeight: 700 }}
+            >
               {isPos ? '+' : ''}
               {formatCurrency(item.deltaBilledUsd)}
             </span>
           );
         },
-        isNumeric: true,
+        isNumeric: true
       },
       {
         header: '% Var USD',
@@ -212,15 +231,19 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
                 fontWeight: 700,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '2px',
+                gap: '2px'
               }}
             >
-              {isPos ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+              {isPos ? (
+                <ArrowUpRight size={14} />
+              ) : (
+                <ArrowDownRight size={14} />
+              )}
               {formatPercent(item.varianceBilledPercentage)}
             </span>
           );
         },
-        isNumeric: true,
+        isNumeric: true
       },
       {
         header: 'Diagnóstico de Gestión',
@@ -231,10 +254,10 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
             size="sm"
             variant="filled"
           />
-        ),
-      },
+        )
+      }
     ],
-    [baseYear, targetYear],
+    [baseYear, targetYear]
   );
 
   const summaryRows: SummaryRow[] = useMemo(() => {
@@ -243,28 +266,28 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
       {
         label: 'Cuentas Homólogas Consolidadas',
         value: formatNumber(totals.totalHomologous),
-        highlight: true,
+        highlight: true
       },
       {
         label: `Volumen Total ${targetYear}`,
         value: formatVolume(totals.volumeTarget),
-        highlight: true,
+        highlight: true
       },
       {
         label: 'Variación Neta Consumo (Δ m³)',
         value: `${totals.deltaVolume >= 0 ? '+' : ''}${formatVolume(totals.deltaVolume)} (${formatPercent(totals.pctVolume)})`,
-        highlight: true,
+        highlight: true
       },
       {
         label: `Facturación Total ${targetYear}`,
         value: formatCurrency(totals.billedTarget),
-        highlight: true,
+        highlight: true
       },
       {
         label: 'Crecimiento Neto Facturación (Δ USD)',
         value: `${totals.deltaBilled >= 0 ? '+' : ''}${formatCurrency(totals.deltaBilled)} (${formatPercent(totals.pctBilled)})`,
-        highlight: true,
-      },
+        highlight: true
+      }
     ];
   }, [data, targetYear, totals]);
 
@@ -275,7 +298,7 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          minHeight: '350px',
+          minHeight: '350px'
         }}
       >
         <CircularProgress size={40} />
@@ -329,9 +352,8 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
       {/* Side-by-side Comparative Charts */}
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(440px, 1fr))',
-          gap: '1.25rem',
+          display: 'column',
+          gap: '1.25rem'
         }}
       >
         <div className="analytics-card-section">
@@ -344,15 +366,23 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
           </div>
           <div className="analytics-chart-wrapper" style={{ height: 280 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
+              <BarChart
+                data={chartData}
+                margin={{ top: 10, right: 20, left: 0, bottom: 20 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                 <XAxis dataKey="sector" tick={{ fontSize: 12 }} />
                 <YAxis
                   tick={{ fontSize: 11 }}
-                  tickFormatter={(val: number) => `$${(val / 1000).toFixed(0)}k`}
+                  tickFormatter={(val: number) =>
+                    `$${(val / 1000).toFixed(0)}k`
+                  }
                 />
                 <RechartsTooltip
-                  formatter={(value: any, name: string) => [formatCurrency(Number(value)), name]}
+                  formatter={(value: any, name: string) => [
+                    formatCurrency(Number(value)),
+                    name
+                  ]}
                 />
                 <Legend verticalAlign="top" height={36} />
                 <Bar
@@ -378,11 +408,16 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
               <BarChart2 size={18} color="#059669" />
               Comparativa Volumen (m³) {baseYear} vs {targetYear}
             </h4>
-            <span className="analytics-card-badge">Demanda Física Homóloga</span>
+            <span className="analytics-card-badge">
+              Demanda Física Homóloga
+            </span>
           </div>
           <div className="analytics-chart-wrapper" style={{ height: 280 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
+              <BarChart
+                data={chartData}
+                margin={{ top: 10, right: 20, left: 0, bottom: 20 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                 <XAxis dataKey="sector" tick={{ fontSize: 12 }} />
                 <YAxis
@@ -390,7 +425,10 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
                   tickFormatter={(val: number) => `${(val / 1000).toFixed(0)}k`}
                 />
                 <RechartsTooltip
-                  formatter={(value: any, name: string) => [formatVolume(Number(value)), name]}
+                  formatter={(value: any, name: string) => [
+                    formatVolume(Number(value)),
+                    name
+                  ]}
                 />
                 <Legend verticalAlign="top" height={36} />
                 <Bar
@@ -416,7 +454,9 @@ export const InterannualComparisonTab: React.FC<InterannualComparisonTabProps> =
         <div className="analytics-card-header">
           <h4 className="analytics-card-title">
             <GitCompare size={18} color="var(--primary-color, #2563eb)" />
-            Comparativa Interanual 1 a 1 de Cuentas Homólogas ({baseYear} vs {targetYear})
+            Comparativa Interanual 1 a 1 de Cuentas Homólogas ({
+              baseYear
+            } vs {targetYear})
           </h4>
           <span className="analytics-card-badge">
             Auditoría 100% Homóloga (Cuenta, Sector, Catastro)

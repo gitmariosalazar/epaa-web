@@ -108,6 +108,28 @@ export const MonthlyTrendTab: React.FC<MonthlyTrendTabProps> = ({
         ),
         isNumeric: true,
       },
+      ...(data?.some((d) => d.totalCollectedUsd !== undefined)
+        ? ([
+            {
+              header: 'Cobrado ($)',
+              accessor: (item: MonthlyTrendAnalytics) => (
+                <span style={{ fontWeight: 600, color: '#059669' }}>
+                  {formatCurrency(item.totalCollectedUsd ?? 0)}
+                </span>
+              ),
+              isNumeric: true,
+            },
+            {
+              header: 'En Mora ($)',
+              accessor: (item: MonthlyTrendAnalytics) => (
+                <span style={{ fontWeight: 600, color: '#dc2626' }}>
+                  {formatCurrency(item.totalOverdueDebtUsd ?? 0)}
+                </span>
+              ),
+              isNumeric: true,
+            },
+          ] as Column<MonthlyTrendAnalytics>[])
+        : []),
       {
         header: 'Δ Facturación ($)',
         accessor: (item) => {

@@ -24,6 +24,21 @@ export interface ExecutiveDashboardAnalytics {
   totalInterestUsd?: number;
   totalSurchargesUsd?: number;
   totalBilledEpaaUsd?: number;
+  totalInterestImprovementsUsd?: number;
+  totalPaidWaterUsd?: number;
+  totalUnpaidWaterUsd?: number;
+  totalBillsGenerated?: number;
+  paidBillsCount?: number;
+  unpaidBillsCount?: number;
+  overdueBillsCount?: number;
+  upcomingBillsCount?: number;
+  canceledBillsCount?: number;
+  totalGeneralEmissionUsd?: number;
+  totalCollectedUsd?: number;
+  totalPendingDebtUsd?: number;
+  totalOverdueDebtUsd?: number;
+  totalUpcomingDebtUsd?: number;
+  totalCanceledUsd?: number;
 }
 
 export interface SectorPerformanceAnalytics {
@@ -47,6 +62,21 @@ export interface SectorPerformanceAnalytics {
   totalInterestUsd?: number;
   totalSurchargesUsd?: number;
   totalBilledEpaaUsd?: number;
+  totalInterestImprovementsUsd?: number;
+  totalPaidWaterUsd?: number;
+  totalUnpaidWaterUsd?: number;
+  totalBillsGenerated?: number;
+  paidBillsCount?: number;
+  unpaidBillsCount?: number;
+  overdueBillsCount?: number;
+  upcomingBillsCount?: number;
+  canceledBillsCount?: number;
+  totalGeneralEmissionUsd?: number;
+  totalCollectedUsd?: number;
+  totalPendingDebtUsd?: number;
+  totalOverdueDebtUsd?: number;
+  totalUpcomingDebtUsd?: number;
+  totalCanceledUsd?: number;
 }
 
 export interface MonthlyTrendAnalytics {
@@ -69,6 +99,21 @@ export interface MonthlyTrendAnalytics {
   totalInterestUsd?: number;
   totalSurchargesUsd?: number;
   totalBilledEpaaUsd?: number;
+  totalInterestImprovementsUsd?: number;
+  totalPaidWaterUsd?: number;
+  totalUnpaidWaterUsd?: number;
+  totalBillsGenerated?: number;
+  paidBillsCount?: number;
+  unpaidBillsCount?: number;
+  overdueBillsCount?: number;
+  upcomingBillsCount?: number;
+  canceledBillsCount?: number;
+  totalGeneralEmissionUsd?: number;
+  totalCollectedUsd?: number;
+  totalPendingDebtUsd?: number;
+  totalOverdueDebtUsd?: number;
+  totalUpcomingDebtUsd?: number;
+  totalCanceledUsd?: number;
 }
 
 export interface NoveltyEconomicImpactAnalytics {
@@ -86,6 +131,21 @@ export interface NoveltyEconomicImpactAnalytics {
   totalInterestUsd?: number;
   totalSurchargesUsd?: number;
   totalBilledEpaaUsd?: number;
+  totalInterestImprovementsUsd?: number;
+  totalPaidWaterUsd?: number;
+  totalUnpaidWaterUsd?: number;
+  totalBillsGenerated?: number;
+  paidBillsCount?: number;
+  unpaidBillsCount?: number;
+  overdueBillsCount?: number;
+  upcomingBillsCount?: number;
+  canceledBillsCount?: number;
+  totalGeneralEmissionUsd?: number;
+  totalCollectedUsd?: number;
+  totalPendingDebtUsd?: number;
+  totalOverdueDebtUsd?: number;
+  totalUpcomingDebtUsd?: number;
+  totalCanceledUsd?: number;
 }
 
 export interface TopConsumerAnalytics {
@@ -114,6 +174,12 @@ export interface TopConsumerAnalytics {
   interestBilledUsd?: number;
   surchargesBilledUsd?: number;
   totalBilledEpaaUsd?: number;
+  paymentDate?: string | null;
+  expirationDate?: string | null;
+  paymentStatus?: string;
+  interestImprovementsUsd?: number;
+  totalPaidAmountUsd?: number;
+  totalPendingAmountUsd?: number;
 }
 
 export interface InterannualComparisonAnalytics {
@@ -137,6 +203,16 @@ export interface InterannualComparisonAnalytics {
   interestTargetYearUsd?: number;
   surchargesBaseYearUsd?: number;
   surchargesTargetYearUsd?: number;
+  collectedBaseYearUsd?: number;
+  collectedTargetYearUsd?: number;
+  deltaCollectedUsd?: number;
+  pendingBaseYearUsd?: number;
+  pendingTargetYearUsd?: number;
+  deltaPendingUsd?: number;
+  overdueBaseYearUsd?: number;
+  overdueTargetYearUsd?: number;
+  interestImprovementsBaseYearUsd?: number;
+  interestImprovementsTargetYearUsd?: number;
 }
 
 export interface MonthlyConnectionGrowthAnalytics {
