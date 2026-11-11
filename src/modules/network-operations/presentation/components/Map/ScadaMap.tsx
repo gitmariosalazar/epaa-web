@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Map, useMap, AdvancedMarker, ControlPosition } from '@vis.gl/react-google-maps';
 import { GoogleMapsOverlay } from '@deck.gl/google-maps';
 import type { LayersList, PickingInfo } from '@deck.gl/core';
-import { GeoJsonLayer, TextLayer, ArcLayer } from '@deck.gl/layers';
+import { GeoJsonLayer, TextLayer } from '@deck.gl/layers';
 import type {
   GeoJsonFeature,
   GeoJsonFeatureProperties,
@@ -277,47 +277,11 @@ export const ScadaMap: React.FC<ScadaMapProps> = ({
 
     const nodesData = filteredFeatures.filter((f) => f.geometry.type === 'Point');
 
-    // Separar los virtual links (líneas rectas) para dibujarlos como arcos
-    const virtualLinksData = filteredFeatures.filter(
-      (f) => f.properties?.nodeType === 'VIRTUAL_LINK' && f.geometry.type === 'LineString'
-    );
-
-    // Filtrar los datos para el layer normal (excluyendo los virtual links que ahora son arcos)
-    const standardGeoJsonFeatures = filteredFeatures.filter(
-      (f) => !(f.properties?.nodeType === 'VIRTUAL_LINK' && f.geometry.type === 'LineString')
-    );
-
     return [
-      // 0. ArcLayer para conexiones (VIRTUAL_LINK)
-      new ArcLayer<GeoJsonFeature>({
-        id: 'scada-arc-layer',
-        data: virtualLinksData,
-        pickable: true,
-        getSourcePosition: (d: GeoJsonFeature): [number, number] => {
-          if (d.geometry.type === 'LineString' && d.geometry.coordinates.length > 0) {
-            const coord = d.geometry.coordinates[0];
-            return [coord[0], coord[1]];
-          }
-          return [0, 0];
-        },
-        getTargetPosition: (d: GeoJsonFeature): [number, number] => {
-          if (d.geometry.type === 'LineString' && d.geometry.coordinates.length > 0) {
-            const coord = d.geometry.coordinates[d.geometry.coordinates.length - 1];
-            return [coord[0], coord[1]];
-          }
-          return [0, 0];
-        },
-        getSourceColor: [14, 165, 233, 200],
-        getTargetColor: [139, 92, 246, 255],
-        getWidth: 3,
-        getHeight: 0.15,
-        getTilt: 15
-      }),
-
-      // 1. Line/Polygon/Node Layer (Configurado con NodeVisualConfigProvider - OCP)
+      // 1. Layer de nodos/puntos (Configurado con NodeVisualConfigProvider - OCP)
       new GeoJsonLayer<GeoJsonFeatureProperties>({
         id: 'scada-network-layer',
-        data: standardGeoJsonFeatures,
+        data: nodesData,
         pickable: true,
         stroked: true,
         filled: true,
