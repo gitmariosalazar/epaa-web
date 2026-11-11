@@ -9,7 +9,8 @@ import {
   Database,
   RefreshCw,
   Filter,
-  Users
+  Users,
+  Calendar
 } from 'lucide-react';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
 import { Tabs, type TabItem } from '@/shared/presentation/components/Tabs';
@@ -26,6 +27,7 @@ import { NoveltyEconomicImpactTab } from '../components/analytics/NoveltyEconomi
 import { TopConsumersTab } from '../components/analytics/TopConsumersTab';
 import { InterannualComparisonTab } from '../components/analytics/InterannualComparisonTab';
 import { MonthlyConnectionGrowthTab } from '../components/analytics/MonthlyConnectionGrowthTab';
+import { AnnualTrendTab } from '../components/analytics/AnnualTrendTab';
 import '../styles/ReadingsAnalytics.css';
 
 const MONTH_OPTIONS = [
@@ -83,6 +85,13 @@ const MIN_M3_OPTIONS = [
   { value: 500, label: '≥ 500 m³' }
 ];
 
+const LIMIT_YEARS_OPTIONS = [
+  { value: 3, label: 'Últimos 3 años' },
+  { value: 5, label: 'Últimos 5 años' },
+  { value: 7, label: 'Últimos 7 años' },
+  { value: 10, label: 'Últimos 10 años' }
+];
+
 export const ReadingsAnalyticsPage: React.FC = () => {
   const vm = useReadingsAnalyticsViewModel();
 
@@ -102,6 +111,11 @@ export const ReadingsAnalyticsPage: React.FC = () => {
         id: 'trend',
         label: 'Tendencia Mensual',
         icon: <TrendingUp size={16} />
+      },
+      {
+        id: 'annual-trend',
+        label: 'Tendencia Multianual',
+        icon: <Calendar size={16} />
       },
       {
         id: 'novelties',
@@ -134,7 +148,7 @@ export const ReadingsAnalyticsPage: React.FC = () => {
           <ExecutiveDashboardTab
             data={vm.executiveData}
             isLoading={vm.isLoading}
-            onRefresh={vm.refreshActiveTab}
+            onRefresh={() => vm.refreshActiveTab(true)}
           />
         );
       case 'sectors':
@@ -143,6 +157,13 @@ export const ReadingsAnalyticsPage: React.FC = () => {
         );
       case 'trend':
         return <MonthlyTrendTab data={vm.trendData} isLoading={vm.isLoading} />;
+      case 'annual-trend':
+        return (
+          <AnnualTrendTab
+            data={vm.annualTrendData}
+            isLoading={vm.isLoading}
+          />
+        );
       case 'novelties':
         return (
           <NoveltyEconomicImpactTab
@@ -238,7 +259,7 @@ export const ReadingsAnalyticsPage: React.FC = () => {
 
               <Button
                 variant="outline"
-                onClick={vm.refreshActiveTab}
+                onClick={() => vm.refreshActiveTab(true)}
                 disabled={vm.isLoading}
                 title="Actualizar datos"
               >
@@ -281,7 +302,8 @@ export const ReadingsAnalyticsPage: React.FC = () => {
 
             {/* Standard Filters: Year, Month, Sector */}
             {vm.activeTab !== 'interannual' &&
-              vm.activeTab !== 'connection-growth' && (
+              vm.activeTab !== 'connection-growth' &&
+              vm.activeTab !== 'annual-trend' && (
                 <>
                   <div className="analytics-filter-item">
                     <Select
@@ -306,6 +328,34 @@ export const ReadingsAnalyticsPage: React.FC = () => {
                   </div>
                 </>
               )}
+
+            {vm.activeTab === 'annual-trend' && (
+              <>
+                <div className="analytics-filter-item">
+                  <Select
+                    label="Rango Histórico"
+                    options={LIMIT_YEARS_OPTIONS}
+                    value={vm.annualLimitYears}
+                    onChange={(e) =>
+                      vm.setAnnualLimitYears(parseInt(e.target.value, 10))
+                    }
+                    size="small"
+                  />
+                </div>
+
+                <div className="analytics-filter-item">
+                  <Select
+                    label="Año Hasta"
+                    options={YEAR_OPTIONS}
+                    value={vm.annualEndYear}
+                    onChange={(e) =>
+                      vm.setAnnualEndYear(parseInt(e.target.value, 10))
+                    }
+                    size="small"
+                  />
+                </div>
+              </>
+            )}
 
             {vm.activeTab !== 'connection-growth' && (
               <div className="analytics-filter-item">

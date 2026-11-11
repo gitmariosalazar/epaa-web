@@ -33,6 +33,7 @@ import {
 import { userActivityService } from '@/shared/infrastructure/services/UserActivityService';
 import { realtimeService } from '@/shared/infrastructure/services/WebSocketService';
 import { environments } from '@/settings/environments/environments';
+import { readingsAnalyticsCacheService } from '@/modules/readings/infrastructure/cache/ReadingsAnalyticsCacheService';
 
 interface AuthContextType {
   user: AuthSession['user'] | null;
@@ -179,6 +180,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorageService.removeItem('token');
     localStorageService.removeItem('refreshToken');
     localStorageService.removeItem('user');
+    readingsAnalyticsCacheService.clear();
   };
 
   /**

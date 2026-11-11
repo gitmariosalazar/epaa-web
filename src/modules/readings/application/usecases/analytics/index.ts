@@ -5,3 +5,5 @@ export * from './GetNoveltyEconomicImpactAnalyticsUseCase';
 export * from './GetTopConsumersAnalyticsUseCase';
 export * from './GetInterannualComparisonAnalyticsUseCase';
 export * from './GetMonthlyConnectionGrowthAnalyticsUseCase';
+export * from './GetAnnualTrendAnalyticsUseCase';
+export * from './PrefetchReadingsAnalyticsUseCase';

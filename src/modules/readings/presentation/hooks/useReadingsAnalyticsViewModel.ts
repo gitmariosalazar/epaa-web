@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import type {
   AnalyticsFilterParams,
   AnalyticsSystemType,
+  AnnualTrendAnalytics,
   ExecutiveDashboardAnalytics,
   InterannualComparisonAnalytics,
   MonthlyConnectionGrowthAnalytics,
@@ -10,7 +11,8 @@ import type {
   SectorPerformanceAnalytics,
   TopConsumerAnalytics,
 } from '../../domain/models/readings-analytics';
-import { ReadingsAnalyticsRepositoryImpl } from '../../infrastructure/repositories/ReadingsAnalyticsRepositoryImpl';
+import { cachedReadingsAnalyticsRepository } from '../../infrastructure/repositories/CachedReadingsAnalyticsRepository';
+import { readingsAnalyticsCacheService } from '../../infrastructure/cache/ReadingsAnalyticsCacheService';
 import {
   GetExecutiveDashboardAnalyticsUseCase,
   GetSectorPerformanceAnalyticsUseCase,
@@ -19,6 +21,7 @@ import {
   GetTopConsumersAnalyticsUseCase,
   GetInterannualComparisonAnalyticsUseCase,
   GetMonthlyConnectionGrowthAnalyticsUseCase,
+  GetAnnualTrendAnalyticsUseCase,
 } from '../../application/usecases/analytics';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
@@ -29,10 +32,11 @@ export type AnalyticsTabType =
   | 'novelties'
   | 'consumers'
   | 'interannual'
-  | 'connection-growth';
+  | 'connection-growth'
+  | 'annual-trend';
 
 export const useReadingsAnalyticsViewModel = () => {
-  const repository = useMemo(() => new ReadingsAnalyticsRepositoryImpl(), []);
+  const repository = useMemo(() => cachedReadingsAnalyticsRepository, []);
 
   const executiveUseCase = useMemo(
     () => new GetExecutiveDashboardAnalyticsUseCase(repository),
@@ -62,6 +66,10 @@ export const useReadingsAnalyticsViewModel = () => {
     () => new GetMonthlyConnectionGrowthAnalyticsUseCase(repository),
     [repository],
   );
+  const annualTrendUseCase = useMemo(
+    () => new GetAnnualTrendAnalyticsUseCase(repository),
+    [repository],
+  );
 
   // Tab & Engine System
   const [system, setSystem] = useState<AnalyticsSystemType>('legacy');
@@ -80,6 +88,9 @@ export const useReadingsAnalyticsViewModel = () => {
   const [baseYear, setBaseYear] = useState<number>(2025);
   const [targetYear, setTargetYear] = useState<number>(2026);
   const [onlyHomologous, setOnlyHomologous] = useState<boolean>(true);
+  const [annualLimitYears, setAnnualLimitYears] = useState<number>(5);
+  const [annualStartYear, setAnnualStartYear] = useState<number>(2022);
+  const [annualEndYear, setAnnualEndYear] = useState<number>(2026);
 
   // Data
   const [executiveData, setExecutiveData] =
@@ -101,6 +112,9 @@ export const useReadingsAnalyticsViewModel = () => {
   >(null);
   const [connectionGrowthData, setConnectionGrowthData] = useState<
     MonthlyConnectionGrowthAnalytics[] | null
+  >(null);
+  const [annualTrendData, setAnnualTrendData] = useState<
+    AnnualTrendAnalytics[] | null
   >(null);
 
   // Status
@@ -124,6 +138,9 @@ export const useReadingsAnalyticsViewModel = () => {
       baseYear,
       targetYear,
       onlyHomologous,
+      startYear: annualStartYear,
+      endYear: annualEndYear,
+      limitYears: annualLimitYears,
     };
   }, [
     selectedYear,
@@ -136,170 +153,284 @@ export const useReadingsAnalyticsViewModel = () => {
     baseYear,
     targetYear,
     onlyHomologous,
+    annualStartYear,
+    annualEndYear,
+    annualLimitYears,
   ]);
 
-  const fetchExecutiveDashboard = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await executiveUseCase.execute(buildCurrentFilter(), system);
-      setExecutiveData(data);
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : 'Error al cargar el tablero ejecutivo';
-      setError(message);
-      MessageToastCustom('error', message, 'Error Analítica');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [executiveUseCase, buildCurrentFilter, system]);
+  const fetchExecutiveDashboard = useCallback(
+    async (forceRefresh = false) => {
+      const filter = { ...buildCurrentFilter(), forceRefresh };
+      const key = readingsAnalyticsCacheService.generateKey(
+        'executive-dashboard',
+        filter,
+        system,
+      );
+      if (forceRefresh || !readingsAnalyticsCacheService.has(key)) {
+        setIsLoading(true);
+      }
+      setError(null);
+      try {
+        const data = await executiveUseCase.execute(filter, system);
+        setExecutiveData(data);
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Error al cargar el tablero ejecutivo';
+        setError(message);
+        MessageToastCustom('error', message, 'Error Analítica');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [executiveUseCase, buildCurrentFilter, system],
+  );
 
-  const fetchSectorPerformance = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await sectorUseCase.execute(buildCurrentFilter(), system);
-      setSectorData(data);
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : 'Error al cargar matriz de sectores';
-      setError(message);
-      MessageToastCustom('error', message, 'Error Analítica');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [sectorUseCase, buildCurrentFilter, system]);
+  const fetchSectorPerformance = useCallback(
+    async (forceRefresh = false) => {
+      const filter = { ...buildCurrentFilter(), forceRefresh };
+      const key = readingsAnalyticsCacheService.generateKey(
+        'sector-performance',
+        filter,
+        system,
+      );
+      if (forceRefresh || !readingsAnalyticsCacheService.has(key)) {
+        setIsLoading(true);
+      }
+      setError(null);
+      try {
+        const data = await sectorUseCase.execute(filter, system);
+        setSectorData(data);
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Error al cargar matriz de sectores';
+        setError(message);
+        MessageToastCustom('error', message, 'Error Analítica');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [sectorUseCase, buildCurrentFilter, system],
+  );
 
-  const fetchMonthlyTrend = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await trendUseCase.execute(buildCurrentFilter(), system);
-      setTrendData(data);
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Error al cargar tendencia mensual';
-      setError(message);
-      MessageToastCustom('error', message, 'Error Analítica');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [trendUseCase, buildCurrentFilter, system]);
+  const fetchMonthlyTrend = useCallback(
+    async (forceRefresh = false) => {
+      const filter = { ...buildCurrentFilter(), forceRefresh };
+      const key = readingsAnalyticsCacheService.generateKey(
+        'monthly-trend',
+        filter,
+        system,
+      );
+      if (forceRefresh || !readingsAnalyticsCacheService.has(key)) {
+        setIsLoading(true);
+      }
+      setError(null);
+      try {
+        const data = await trendUseCase.execute(filter, system);
+        setTrendData(data);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : 'Error al cargar tendencia mensual';
+        setError(message);
+        MessageToastCustom('error', message, 'Error Analítica');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [trendUseCase, buildCurrentFilter, system],
+  );
 
-  const fetchNoveltiesEconomicImpact = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await noveltyUseCase.execute(buildCurrentFilter(), system);
-      setNoveltiesData(data);
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : 'Error al cargar impacto de novedades';
-      setError(message);
-      MessageToastCustom('error', message, 'Error Analítica');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [noveltyUseCase, buildCurrentFilter, system]);
+  const fetchNoveltiesEconomicImpact = useCallback(
+    async (forceRefresh = false) => {
+      const filter = { ...buildCurrentFilter(), forceRefresh };
+      const key = readingsAnalyticsCacheService.generateKey(
+        'novelty-economic-impact',
+        filter,
+        system,
+      );
+      if (forceRefresh || !readingsAnalyticsCacheService.has(key)) {
+        setIsLoading(true);
+      }
+      setError(null);
+      try {
+        const data = await noveltyUseCase.execute(filter, system);
+        setNoveltiesData(data);
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Error al cargar impacto de novedades';
+        setError(message);
+        MessageToastCustom('error', message, 'Error Analítica');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [noveltyUseCase, buildCurrentFilter, system],
+  );
 
-  const fetchTopConsumers = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await topConsumersUseCase.execute(buildCurrentFilter(), system);
-      setTopConsumersData(data);
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : 'Error al cargar mayores consumidores';
-      setError(message);
-      MessageToastCustom('error', message, 'Error Analítica');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [topConsumersUseCase, buildCurrentFilter, system]);
+  const fetchTopConsumers = useCallback(
+    async (forceRefresh = false) => {
+      const filter = { ...buildCurrentFilter(), forceRefresh };
+      const key = readingsAnalyticsCacheService.generateKey(
+        'top-consumers',
+        filter,
+        system,
+      );
+      if (forceRefresh || !readingsAnalyticsCacheService.has(key)) {
+        setIsLoading(true);
+      }
+      setError(null);
+      try {
+        const data = await topConsumersUseCase.execute(filter, system);
+        setTopConsumersData(data);
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Error al cargar mayores consumidores';
+        setError(message);
+        MessageToastCustom('error', message, 'Error Analítica');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [topConsumersUseCase, buildCurrentFilter, system],
+  );
 
-  const fetchInterannualComparison = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await interannualUseCase.execute(buildCurrentFilter(), system);
-      setInterannualData(data);
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : 'Error al cargar comparativa interanual';
-      setError(message);
-      MessageToastCustom('error', message, 'Error Analítica');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [interannualUseCase, buildCurrentFilter, system]);
+  const fetchInterannualComparison = useCallback(
+    async (forceRefresh = false) => {
+      const filter = { ...buildCurrentFilter(), forceRefresh };
+      const key = readingsAnalyticsCacheService.generateKey(
+        'interannual-comparison',
+        filter,
+        system,
+      );
+      if (forceRefresh || !readingsAnalyticsCacheService.has(key)) {
+        setIsLoading(true);
+      }
+      setError(null);
+      try {
+        const data = await interannualUseCase.execute(filter, system);
+        setInterannualData(data);
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Error al cargar comparativa interanual';
+        setError(message);
+        MessageToastCustom('error', message, 'Error Analítica');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [interannualUseCase, buildCurrentFilter, system],
+  );
 
-  const fetchMonthlyConnectionGrowth = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await connectionGrowthUseCase.execute(buildCurrentFilter(), system);
-      setConnectionGrowthData(data);
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : 'Error al cargar crecimiento de acometidas';
-      setError(message);
-      MessageToastCustom('error', message, 'Error Analítica');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [connectionGrowthUseCase, buildCurrentFilter, system]);
+  const fetchMonthlyConnectionGrowth = useCallback(
+    async (forceRefresh = false) => {
+      const filter = { ...buildCurrentFilter(), forceRefresh };
+      const key = readingsAnalyticsCacheService.generateKey(
+        'monthly-connection-growth',
+        filter,
+        system,
+      );
+      if (forceRefresh || !readingsAnalyticsCacheService.has(key)) {
+        setIsLoading(true);
+      }
+      setError(null);
+      try {
+        const data = await connectionGrowthUseCase.execute(filter, system);
+        setConnectionGrowthData(data);
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Error al cargar crecimiento de acometidas';
+        setError(message);
+        MessageToastCustom('error', message, 'Error Analítica');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [connectionGrowthUseCase, buildCurrentFilter, system],
+  );
 
-  const refreshActiveTab = useCallback(() => {
-    switch (activeTab) {
-      case 'executive':
-        fetchExecutiveDashboard();
-        break;
-      case 'sectors':
-        fetchSectorPerformance();
-        break;
-      case 'trend':
-        fetchMonthlyTrend();
-        break;
-      case 'novelties':
-        fetchNoveltiesEconomicImpact();
-        break;
-      case 'consumers':
-        fetchTopConsumers();
-        break;
-      case 'interannual':
-        fetchInterannualComparison();
-        break;
-      case 'connection-growth':
-        fetchMonthlyConnectionGrowth();
-        break;
-    }
-  }, [
-    activeTab,
-    fetchExecutiveDashboard,
-    fetchSectorPerformance,
-    fetchMonthlyTrend,
-    fetchNoveltiesEconomicImpact,
-    fetchTopConsumers,
-    fetchInterannualComparison,
-    fetchMonthlyConnectionGrowth,
-  ]);
+  const fetchAnnualTrend = useCallback(
+    async (forceRefresh = false) => {
+      const filter = { ...buildCurrentFilter(), forceRefresh };
+      const key = readingsAnalyticsCacheService.generateKey(
+        'annual-trend',
+        filter,
+        system,
+      );
+      if (forceRefresh || !readingsAnalyticsCacheService.has(key)) {
+        setIsLoading(true);
+      }
+      setError(null);
+      try {
+        const data = await annualTrendUseCase.execute(filter, system);
+        setAnnualTrendData(data);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : 'Error al cargar tendencia anual';
+        setError(message);
+        MessageToastCustom('error', message, 'Error Analítica');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [annualTrendUseCase, buildCurrentFilter, system],
+  );
+
+  const refreshActiveTab = useCallback(
+    (forceRefresh = false) => {
+      switch (activeTab) {
+        case 'executive':
+          fetchExecutiveDashboard(forceRefresh);
+          break;
+        case 'sectors':
+          fetchSectorPerformance(forceRefresh);
+          break;
+        case 'trend':
+          fetchMonthlyTrend(forceRefresh);
+          break;
+        case 'novelties':
+          fetchNoveltiesEconomicImpact(forceRefresh);
+          break;
+        case 'consumers':
+          fetchTopConsumers(forceRefresh);
+          break;
+        case 'interannual':
+          fetchInterannualComparison(forceRefresh);
+          break;
+        case 'connection-growth':
+          fetchMonthlyConnectionGrowth(forceRefresh);
+          break;
+        case 'annual-trend':
+          fetchAnnualTrend(forceRefresh);
+          break;
+      }
+    },
+    [
+      activeTab,
+      fetchExecutiveDashboard,
+      fetchSectorPerformance,
+      fetchMonthlyTrend,
+      fetchNoveltiesEconomicImpact,
+      fetchTopConsumers,
+      fetchInterannualComparison,
+      fetchMonthlyConnectionGrowth,
+      fetchAnnualTrend,
+    ],
+  );
 
   // Trigger fetch when tab or critical filter changes
   useEffect(() => {
-    refreshActiveTab();
+    refreshActiveTab(false);
   }, [
     activeTab,
     system,
@@ -310,6 +441,10 @@ export const useReadingsAnalyticsViewModel = () => {
     baseYear,
     targetYear,
     onlyHomologous,
+    annualLimitYears,
+    annualStartYear,
+    annualEndYear,
+    refreshActiveTab,
   ]);
 
   return {
@@ -340,6 +475,12 @@ export const useReadingsAnalyticsViewModel = () => {
     setTargetYear,
     onlyHomologous,
     setOnlyHomologous,
+    annualLimitYears,
+    setAnnualLimitYears,
+    annualStartYear,
+    setAnnualStartYear,
+    annualEndYear,
+    setAnnualEndYear,
 
     // Data
     executiveData,
@@ -349,6 +490,7 @@ export const useReadingsAnalyticsViewModel = () => {
     topConsumersData,
     interannualData,
     connectionGrowthData,
+    annualTrendData,
 
     // Status & Actions
     isLoading,
@@ -361,5 +503,6 @@ export const useReadingsAnalyticsViewModel = () => {
     fetchTopConsumers,
     fetchInterannualComparison,
     fetchMonthlyConnectionGrowth,
+    fetchAnnualTrend,
   };
 };

@@ -2,9 +2,11 @@ import React from 'react';
 import { Sidebar } from '../Sidebar/Sidebar';
 import { Header } from '../Header/Header';
 import { Outlet } from 'react-router-dom';
+import { useReadingsAnalyticsPrefetch } from '@/modules/readings/presentation/hooks/useReadingsAnalyticsPrefetch';
 import '@/shared/presentation/styles/Layout.css';
 
 export const DashboardLayout: React.FC = () => {
+  useReadingsAnalyticsPrefetch();
   const [isCollapsed, setIsCollapsed] = React.useState(window.innerWidth < 768);
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);

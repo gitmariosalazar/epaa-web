@@ -1,6 +1,7 @@
 import type {
   AnalyticsFilterParams,
   AnalyticsSystemType,
+  AnnualTrendAnalytics,
   ExecutiveDashboardAnalytics,
   InterannualComparisonAnalytics,
   MonthlyConnectionGrowthAnalytics,
@@ -45,4 +46,9 @@ export interface ReadingsAnalyticsRepository {
     filter: AnalyticsFilterParams,
     system: AnalyticsSystemType,
   ): Promise<MonthlyConnectionGrowthAnalytics[]>;
+
+  getAnnualTrend(
+    filter: AnalyticsFilterParams,
+    system: AnalyticsSystemType,
+  ): Promise<AnnualTrendAnalytics[]>;
 }

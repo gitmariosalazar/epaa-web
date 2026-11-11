@@ -1,6 +1,7 @@
 import type {
   AnalyticsFilterParams,
   AnalyticsSystemType,
+  AnnualTrendAnalytics,
   ExecutiveDashboardAnalytics,
   InterannualComparisonAnalytics,
   MonthlyConnectionGrowthAnalytics,
@@ -242,6 +243,23 @@ export class ReadingsAnalyticsRepositoryImpl implements ReadingsAnalyticsReposit
     const prefix = system === 'modern' ? '/Readings-Analytics' : '/Readings-Legacy-Analytics';
     const response = await this.client.get<ApiResponse<MonthlyConnectionGrowthAnalytics[]>>(
       `${prefix}/monthly-connection-growth${query}`,
+    );
+    return response.data.data;
+  }
+
+  async getAnnualTrend(
+    filter: AnalyticsFilterParams,
+    system: AnalyticsSystemType,
+  ): Promise<AnnualTrendAnalytics[]> {
+    const query = this.buildQueryString({
+      startYear: filter.startYear,
+      endYear: filter.endYear ?? 2026,
+      sector: filter.sector,
+      limitYears: filter.limitYears ?? 5,
+    });
+    const prefix = system === 'modern' ? '/Readings-Analytics' : '/Readings-Legacy-Analytics';
+    const response = await this.client.get<ApiResponse<AnnualTrendAnalytics[]>>(
+      `${prefix}/annual-trend${query}`,
     );
     return response.data.data;
   }
