@@ -494,7 +494,7 @@ export const es = {
         client: 'Por Cliente'
       },
       wizard: {
-        title: 'Asistente de Nueva Acometida',
+        title: 'Asistente de Actualización de Acometida',
         stepInfo: 'Paso {{current}} de {{total}}',
         steps: {
           client: 'Cliente',
@@ -549,7 +549,7 @@ export const es = {
           latitude: 'Latitud',
           zoneId: 'ID de Zona',
           cadastralKey: 'Clave Catastral',
-          cadastralInfo: "Formato: 1-400 seguido de '-' y >5000",
+          cadastralInfo: "Formato: 1-40 seguido de '-' y > 1",
           geometricZone: 'Zona Geométrica',
           altitude: 'Altitud',
           precision: 'Precisión',
@@ -560,8 +560,8 @@ export const es = {
           'Selecciona una propiedad existente o continúa sin asignar una.',
         noProperties:
           'El cliente seleccionado no tiene propiedades registradas.',
-        saveWithProperty: 'Crear con propiedad',
-        saveWithoutProperty: 'Crear sin propiedad'
+        saveWithProperty: 'Guardar con propiedad',
+        saveWithoutProperty: 'Guardar sin propiedad'
       }
     },
     trashRate: {

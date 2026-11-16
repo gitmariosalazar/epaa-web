@@ -14,6 +14,55 @@ import type {
 import type { Customer } from '@/modules/customers/domain/models/Customer';
 import type { Company } from '@/modules/customers/domain/models/Company';
 import { decodeEWKBPoint, type Coordinate } from '@/shared/utils/geoUtils';
+import type { Property } from '@/modules/properties/domain/models/Property';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
+
+// ── Coordinate extraction helper ──────────────────────────────────────────────
+function extractCoordinates(
+  latCandidate: unknown,
+  lngCandidate: unknown,
+  coordsCandidate: unknown,
+  properties?: Property[]
+): { lat: number; lng: number } | null {
+  const numLat = Number(latCandidate);
+  const numLng = Number(lngCandidate);
+  if (!isNaN(numLat) && !isNaN(numLng) && !(numLat === 0 && numLng === 0)) {
+    return { lat: numLat, lng: numLng };
+  }
+
+  if (coordsCandidate) {
+    const decoded = decodeEWKBPoint(coordsCandidate);
+    if (decoded) return decoded;
+    if (typeof coordsCandidate === 'string' && coordsCandidate.includes(',')) {
+      const parts = coordsCandidate.split(',').map((p) => Number(p.trim()));
+      if (!isNaN(parts[0]) && !isNaN(parts[1]) && !(parts[0] === 0 && parts[1] === 0)) {
+        return { lat: parts[0], lng: parts[1] };
+      }
+    }
+  }
+
+  if (properties && properties.length > 0) {
+    for (const prop of properties) {
+      if (prop.propertyCoordinates) {
+        const decoded = decodeEWKBPoint(prop.propertyCoordinates);
+        if (decoded) return decoded;
+        if (
+          typeof prop.propertyCoordinates === 'string' &&
+          prop.propertyCoordinates.includes(',')
+        ) {
+          const parts = prop.propertyCoordinates
+            .split(',')
+            .map((p) => Number(p.trim()));
+          if (!isNaN(parts[0]) && !isNaN(parts[1]) && !(parts[0] === 0 && parts[1] === 0)) {
+            return { lat: parts[0], lng: parts[1] };
+          }
+        }
+      }
+    }
+  }
+
+  return null;
+}
 
 // -- Derived Client Types --
 export type ClientData = Customer | Company;
@@ -432,8 +481,11 @@ export const useConnectionsViewModel = () => {
       // 2. Map Client Data
       if (fullData.person) {
         const p = fullData.person;
+        const rawCedula = (fullData.clientId || p.personId || connection.clientId || '').toString().trim();
+        const formattedCedula = rawCedula.length === 9 ? rawCedula.padStart(10, '0') : rawCedula;
+
         const clientData: Customer = {
-          customerId: p.personId,
+          customerId: formattedCedula,
           firstName: p.firstName,
           lastName: p.lastName,
           emails:
@@ -447,7 +499,7 @@ export const useConnectionsViewModel = () => {
           sexId: p.genderId,
           civilStatus: p.civilStatusId,
           address: p.address,
-          originCountry: p.country,
+          originCountry: p.country || 'Ecuador',
           parishId: p.parishId,
           professionId: p.professionId || 1,
           deceased: p.isDeceased,
@@ -456,7 +508,7 @@ export const useConnectionsViewModel = () => {
         setFoundClient(clientData);
         setPendingClientData({
           ...clientData,
-          customerId: Number(clientData.customerId),
+          customerId: formattedCedula as any,
           dateOfBirth: new Date(clientData.dateOfBirth || new Date()),
           phoneNumbers: clientData.phoneNumbers,
           emails: clientData.emails
@@ -469,9 +521,9 @@ export const useConnectionsViewModel = () => {
           companyRuc: c.ruc,
           companyName: c.businessName,
           socialReason: c.commercialName,
-          companyAddress: c.address,
-          companyParishId: c.parishId,
-          companyCountry: c.country,
+          companyAddress: c.address || '',
+          companyParishId: c.parishId || '1',
+          companyCountry: c.country || 'Ecuador',
           companyEmails:
             c.emails?.map((e) => ({
               correo: typeof e === 'string' ? e : e.email || '',
@@ -491,8 +543,8 @@ export const useConnectionsViewModel = () => {
           socialReason: companyData.socialReason || '',
           companyRuc: companyData.companyRuc,
           companyAddress: companyData.companyAddress || '',
-          companyParishId: companyData.companyParishId,
-          companyCountry: companyData.companyCountry || '',
+          companyParishId: companyData.companyParishId || '1',
+          companyCountry: companyData.companyCountry || 'Ecuador',
           companyEmails: companyData.companyEmails.map((e) => e.correo),
           companyPhones: companyData.companyPhones.map((p) => p.numero),
           identificationType: companyData.identificationType
@@ -503,7 +555,23 @@ export const useConnectionsViewModel = () => {
       setIsClientExisting(true);
 
       // 3. Map Connection Data
-      // Prefer fullData values, fallback to connection properties
+      // Prefer fullData values, fallback to connection properties or decoded connectionCoordinates
+      const resolvedCoords =
+        extractCoordinates(
+          fullData.latitude,
+          fullData.longitude,
+          fullData.connectionCoordinates,
+          fullData.properties
+        ) ||
+        extractCoordinates(
+          connection.latitude,
+          connection.longitude,
+          connection.connectionCoordinates
+        );
+
+      const resolvedLat = resolvedCoords?.lat ?? 0;
+      const resolvedLng = resolvedCoords?.lng ?? 0;
+
       const mappedFormData: Omit<Connection, 'connectionId'> = {
         clientId: fullData.clientId,
         connectionRateId: Number(fullData.connectionRateId),
@@ -521,9 +589,12 @@ export const useConnectionsViewModel = () => {
           : new Date(),
         connectionPeopleNumber: fullData.connectionPeopleNumber ?? 0,
         connectionZone: Number(fullData.connectionZone ?? 0),
-        longitude: fullData.longitude || 0,
-        latitude: fullData.latitude || 0,
-        connectionCoordinates: fullData.connectionCoordinates ?? '',
+        longitude: resolvedLng,
+        latitude: resolvedLat,
+        connectionCoordinates:
+          resolvedLat && resolvedLng
+            ? `${resolvedLat}, ${resolvedLng}`
+            : fullData.connectionCoordinates || connection.connectionCoordinates || '',
         connectionReference: fullData.connectionReference ?? '',
         ConnectionMetaData: fullData.connectionMetadata || {},
         connectionAltitude: fullData.connectionAltitude ?? 0,
@@ -581,6 +652,15 @@ export const useConnectionsViewModel = () => {
       }
 
       // 1. Convert to a base Connection for selectedConnection
+      const resolvedCoords = extractCoordinates(
+        fullData.latitude,
+        fullData.longitude,
+        fullData.connectionCoordinates,
+        fullData.properties
+      );
+      const resolvedLat = resolvedCoords?.lat ?? 0;
+      const resolvedLng = resolvedCoords?.lng ?? 0;
+
       const conn: Connection = {
         connectionId: fullData.connectionId,
         clientId: fullData.clientId,
@@ -599,9 +679,12 @@ export const useConnectionsViewModel = () => {
           : new Date(),
         connectionPeopleNumber: fullData.connectionPeopleNumber || 0,
         connectionZone: Number(fullData.connectionZone || 0),
-        longitude: fullData.longitude || 0,
-        latitude: fullData.latitude || 0,
-        connectionCoordinates: fullData.connectionCoordinates || '',
+        longitude: resolvedLng,
+        latitude: resolvedLat,
+        connectionCoordinates:
+          resolvedLat && resolvedLng
+            ? `${resolvedLat}, ${resolvedLng}`
+            : fullData.connectionCoordinates || '',
         connectionReference: fullData.connectionReference || '',
         ConnectionMetaData: fullData.connectionMetadata || {},
         connectionAltitude: fullData.connectionAltitude || 0,
@@ -668,9 +751,19 @@ export const useConnectionsViewModel = () => {
           HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
         >
       | { name: string; value: string | number | boolean | Date | object }
+      | Record<string, any>
   ) => {
+    // Support batch update object (e.g. handleInputChange({ latitude: -0.35, longitude: -78.19, ... }))
+    if (!('target' in e) && !('name' in e) && typeof e === 'object' && e !== null) {
+      setFormData((prev) => ({
+        ...prev,
+        ...e
+      }));
+      return;
+    }
+
     let name: string;
-    let value: string | number | boolean | Date | object;
+    let value: any;
 
     if ('target' in e) {
       name = e.target.name;
@@ -686,21 +779,23 @@ export const useConnectionsViewModel = () => {
       value = e.value;
     }
 
-    let updatedData = { ...formData, [name]: value };
+    setFormData((prev) => {
+      let updatedData = { ...prev, [name]: value };
 
-    if (name === 'connectionRateId' || name === 'rateId') {
-      const rateId = Number(value);
-      const selectedRate = rates.find((r) => r.rateId === rateId);
-      if (selectedRate) {
-        updatedData = {
-          ...updatedData,
-          connectionRateId: rateId,
-          connectionRateName: selectedRate.rateName
-        };
+      if (name === 'connectionRateId' || name === 'rateId') {
+        const rateId = Number(value);
+        const selectedRate = rates.find((r) => r.rateId === rateId);
+        if (selectedRate) {
+          updatedData = {
+            ...updatedData,
+            connectionRateId: rateId,
+            connectionRateName: selectedRate.rateName
+          };
+        }
       }
-    }
 
-    setFormData(updatedData);
+      return updatedData;
+    });
   };
 
   const searchClient = async (identification: string) => {
@@ -733,8 +828,10 @@ export const useConnectionsViewModel = () => {
     // Map to ClientData for state
     if (type === 'person') {
       const d = data as CreateCustomerRequest;
+      const rawId = (d.customerId || '').toString().trim();
+      const formattedId = rawId.length === 9 ? rawId.padStart(10, '0') : rawId;
       const customer: Customer = {
-        customerId: d.customerId.toString(),
+        customerId: formattedId,
         firstName: d.firstName,
         lastName: d.lastName,
         emails: d.emails,
@@ -744,9 +841,9 @@ export const useConnectionsViewModel = () => {
         civilStatus: d.civilStatus,
         address: d.address,
         professionId: d.professionId,
-        originCountry: d.originCountry,
-        identificationType: d.identificationType,
-        parishId: d.parishId,
+        originCountry: d.originCountry || 'Ecuador',
+        identificationType: d.identificationType || 'CED',
+        parishId: d.parishId || '1',
         deceased: d.deceased || false
       };
       setFoundClient(customer);
@@ -758,8 +855,8 @@ export const useConnectionsViewModel = () => {
         socialReason: d.socialReason,
         companyRuc: d.companyRuc,
         companyAddress: d.companyAddress,
-        companyParishId: d.companyParishId,
-        companyCountry: d.companyCountry,
+        companyParishId: d.companyParishId || '1',
+        companyCountry: d.companyCountry || 'Ecuador',
         companyEmails: d.companyEmails.map((e) => ({
           correo: e,
           correo_electronico_id: 0
@@ -779,31 +876,51 @@ export const useConnectionsViewModel = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // 1. Process Client Registration/Update
+      // 1. Process Client Registration/Update (non-blocking when updating connection)
       if (pendingClientData) {
-        if (clientType === 'person' && pendingClientData) {
+        if (clientType === 'person') {
           const personData = pendingClientData as CreateCustomerRequest;
+          const rawId = (
+            (foundClient as Customer | null)?.customerId ||
+            formData.clientId ||
+            selectedConnection?.clientId ||
+            String(personData.customerId || '')
+          ).toString().trim();
+          const targetCustomerId = rawId.length === 9 ? rawId.padStart(10, '0') : rawId;
+
           if (isClientExisting) {
             const updateData: UpdateCustomerRequest = {
-              customerId: Number(personData.customerId),
-              firstName: personData.firstName,
-              lastName: personData.lastName,
-              emails: personData.emails,
-              phoneNumbers: personData.phoneNumbers,
-              dateOfBirth: new Date(personData.dateOfBirth),
-              sexId: personData.sexId,
-              civilStatus: personData.civilStatus,
-              address: personData.address,
+              customerId: Number(targetCustomerId),
+              firstName: personData.firstName || '',
+              lastName: personData.lastName || '',
+              emails: personData.emails || [],
+              phoneNumbers: personData.phoneNumbers || [],
+              dateOfBirth: new Date(personData.dateOfBirth || new Date()),
+              sexId: personData.sexId || 1,
+              civilStatus: personData.civilStatus || 1,
+              address: personData.address || '',
               professionId: personData.professionId || 1,
-              originCountry: personData.originCountry,
-              identificationType: personData.identificationType,
-              parishId: personData.parishId,
-              deceased: personData.deceased
+              originCountry:
+                personData.originCountry ||
+                (foundClient as any)?.originCountry ||
+                (foundClient as any)?.country ||
+                'Ecuador',
+              identificationType: personData.identificationType || 'CED',
+              parishId: String(personData.parishId || '1'),
+              deceased: Boolean(personData.deceased)
             };
-            await updateCustomerUseCase.execute(
-              personData.customerId.toString(),
-              updateData
-            );
+            try {
+              await updateCustomerUseCase.execute(
+                targetCustomerId,
+                updateData
+              );
+            } catch (custErr) {
+              console.warn('Customer update skipped or non-blocking:', custErr);
+              // Do not abort connection save if editing existing connection
+              if (!selectedConnection) {
+                throw custErr;
+              }
+            }
           } else {
             try {
               await createCustomerUseCase.execute(
@@ -829,17 +946,24 @@ export const useConnectionsViewModel = () => {
           if (isClientExisting) {
             const data = pendingClientData as CreateCompanyRequest;
             const updateData: UpdateCompanyRequest = {
-              companyName: data.companyName,
-              socialReason: data.socialReason,
+              companyName: data.companyName || '',
+              socialReason: data.socialReason || '',
               companyRuc: data.companyRuc,
-              companyAddress: data.companyAddress,
-              companyParishId: data.companyParishId,
-              companyCountry: data.companyCountry,
-              companyEmails: data.companyEmails,
-              companyPhones: data.companyPhones,
-              identificationType: data.identificationType
+              companyAddress: data.companyAddress || '',
+              companyParishId: data.companyParishId || '1',
+              companyCountry: data.companyCountry || 'Ecuador',
+              companyEmails: data.companyEmails || [],
+              companyPhones: data.companyPhones || [],
+              identificationType: data.identificationType || 'RUC'
             };
-            await updateCompanyUseCase.execute(data.companyRuc, updateData);
+            try {
+              await updateCompanyUseCase.execute(data.companyRuc, updateData);
+            } catch (compErr) {
+              console.warn('Company update skipped or non-blocking:', compErr);
+              if (!selectedConnection) {
+                throw compErr;
+              }
+            }
           } else {
             await createCompanyUseCase.execute(
               pendingClientData as CreateCompanyRequest
@@ -849,10 +973,19 @@ export const useConnectionsViewModel = () => {
       }
 
       // 2. Format Payload (Sanitization)
-      const clientId =
+      let clientId =
         clientType === 'person'
-          ? (pendingClientData as CreateCustomerRequest).customerId.toString()
-          : (pendingClientData as CreateCompanyRequest).companyRuc;
+          ? (
+              (foundClient as Customer | null)?.customerId ||
+              formData.clientId ||
+              selectedConnection?.clientId ||
+              String((pendingClientData as CreateCustomerRequest)?.customerId || '')
+            ).toString().trim()
+          : (pendingClientData as CreateCompanyRequest)?.companyRuc || formData.clientId;
+
+      if (clientType === 'person' && clientId.length === 9) {
+        clientId = clientId.padStart(10, '0');
+      }
 
       const {
         connectionCoordinates: _unusedCoord,
@@ -875,8 +1008,18 @@ export const useConnectionsViewModel = () => {
           selectedConnection.connectionId,
           finalData as any // Use case expects specific type, but we ensured structure
         );
+        MessageToastCustom(
+          'success',
+          'Acometida actualizada correctamente.',
+          'Operación Exitosa'
+        );
       } else {
         await createConnectionUseCase.execute(finalData as any);
+        MessageToastCustom(
+          'success',
+          'Nueva acometida creada con éxito.',
+          'Operación Exitosa'
+        );
       }
 
       setIsFormOpen(false);
@@ -889,6 +1032,7 @@ export const useConnectionsViewModel = () => {
           ? err.message
           : 'Error occurred while creating connection';
       setError(message);
+      MessageToastCustom('error', message, 'Error al Guardar');
     } finally {
       setIsLoading(false);
     }

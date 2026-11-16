@@ -3,6 +3,7 @@ import type { Customer } from '@/modules/customers/domain/models/Customer';
 import type { Company } from '@/modules/customers/domain/models/Company';
 import { CustomerRepositoryImpl } from '@/modules/customers/infrastructure/repositories/CustomerRepositoryImpl';
 import { CompanyRepositoryImpl } from '@/modules/customers/infrastructure/repositories/CompanyRepositoryImpl';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
 const customerRepo = new CustomerRepositoryImpl();
 const companyRepo = new CompanyRepositoryImpl();
@@ -205,15 +206,31 @@ export const useClientSelectionForm = ({
           originCountry: customer.originCountry || 'Ecuador',
           deceased: customer.deceased || false
         });
-        setSuccessMsg('Existing person found. Fields populated.');
+        const clientName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
+        setSuccessMsg(`Cliente encontrado: ${clientName || customer.customerId}`);
+        MessageToastCustom(
+          'info',
+          `Cliente registrado encontrado: ${clientName || customer.customerId}`,
+          'Cliente Encontrado'
+        );
       } else {
         setFoundClient(null);
         setIsExisting(false);
         setSuccessMsg(null);
+        MessageToastCustom(
+          'info',
+          'Cédula no registrada. Ingrese los datos para registrar un nuevo cliente.',
+          'Nuevo Cliente'
+        );
       }
-    } catch (err) {
+    } catch (err: any) {
       setFoundClient(null);
       setIsExisting(false);
+      MessageToastCustom(
+        'error',
+        err?.message || 'Error al consultar la identificación del cliente.',
+        'Búsqueda de Cliente'
+      );
     } finally {
       setLoading(false);
     }
@@ -250,15 +267,31 @@ export const useClientSelectionForm = ({
           companyParishId: company.companyParishId || '1',
           companyCountry: company.companyCountry || 'Ecuador'
         });
-        setSuccessMsg('Existing company found. Fields populated.');
+        const compName = company.companyName || company.socialReason || company.companyRuc;
+        setSuccessMsg(`Empresa encontrada: ${compName}`);
+        MessageToastCustom(
+          'info',
+          `Empresa registrada encontrada: ${compName}`,
+          'Empresa Encontrada'
+        );
       } else {
         setFoundClient(null);
         setIsExisting(false);
         setSuccessMsg(null);
+        MessageToastCustom(
+          'info',
+          'RUC no registrado. Ingrese los datos para registrar la nueva empresa.',
+          'Nueva Empresa'
+        );
       }
-    } catch (err) {
+    } catch (err: any) {
       setFoundClient(null);
       setIsExisting(false);
+      MessageToastCustom(
+        'error',
+        err?.message || 'Error al consultar el RUC de la empresa.',
+        'Búsqueda de Empresa'
+      );
     } finally {
       setLoading(false);
     }
@@ -271,6 +304,13 @@ export const useClientSelectionForm = ({
       emails: personForm.emails.filter((e_item) => e_item.trim() !== ''),
       phoneNumbers: personForm.phoneNumbers.filter((p) => p.trim() !== '')
     };
+    MessageToastCustom(
+      'success',
+      isExisting
+        ? 'Cliente confirmado. Continuando a detalles básicos...'
+        : 'Nuevo cliente preparado. Continuando a detalles básicos...',
+      'Cliente Confirmado'
+    );
     onConfirm(cleanedData, isExisting, 'person');
   };
 
@@ -283,6 +323,13 @@ export const useClientSelectionForm = ({
       ),
       companyPhones: companyForm.companyPhones.filter((p) => p.trim() !== '')
     };
+    MessageToastCustom(
+      'success',
+      isExisting
+        ? 'Empresa confirmada. Continuando a detalles básicos...'
+        : 'Nueva empresa preparada. Continuando a detalles básicos...',
+      'Empresa Confirmada'
+    );
     onConfirm(cleanedData, isExisting, 'company');
   };
 

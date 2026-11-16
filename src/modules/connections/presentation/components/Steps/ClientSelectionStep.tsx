@@ -70,7 +70,9 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
   return (
     <div className="step-animation">
       <div className="step-container">
-        <h3 className="step-title">{t('connections.wizard.clientSelection.title')}</h3>
+        <h3 className="step-title">
+          {t('connections.wizard.clientSelection.title')}
+        </h3>
         <p className="step-description">
           {t('connections.wizard.clientSelection.description')}
         </p>
@@ -117,7 +119,9 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
                     handleIdBlur();
                   }
                 }}
-                placeholder={t('connections.wizard.clientSelection.idPlaceholder')}
+                placeholder={t(
+                  'connections.wizard.clientSelection.idPlaceholder'
+                )}
                 label={t('connections.wizard.clientSelection.idCed')}
                 leftIcon={<FaIdCard size={14} />}
               />
@@ -162,20 +166,32 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
               />
             </div>
 
-            <div className="form-group explorer-row" style={{ gridColumn: '1 / -1' }}>
+            <div
+              className="form-group explorer-row"
+              style={{ gridColumn: '1 / -1' }}
+            >
               <div className="input-component input--small">
-                <label className="input__label">{t('connections.wizard.clientSelection.dob')}</label>
+                <label className="input__label">
+                  {t('connections.wizard.clientSelection.dob')}
+                </label>
                 <DatePicker
                   size="small"
                   value={personForm.dateOfBirth}
-                  onChange={(date) => setPersonForm({ ...personForm, dateOfBirth: date })}
+                  onChange={(date) =>
+                    setPersonForm({ ...personForm, dateOfBirth: date })
+                  }
                 />
               </div>
               <Select
                 label={t('connections.wizard.clientSelection.gender')}
                 size="small"
                 value={personForm.sexId}
-                onChange={(e) => setPersonForm({ ...personForm, sexId: parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setPersonForm({
+                    ...personForm,
+                    sexId: parseInt(e.target.value)
+                  })
+                }
                 options={[
                   { value: 1, label: t('customers.form.male') },
                   { value: 2, label: t('customers.form.female') }
@@ -186,7 +202,12 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
                 label={t('connections.wizard.clientSelection.civilStatus')}
                 size="small"
                 value={personForm.civilStatus}
-                onChange={(e) => setPersonForm({ ...personForm, civilStatus: parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setPersonForm({
+                    ...personForm,
+                    civilStatus: parseInt(e.target.value)
+                  })
+                }
                 options={[
                   { value: 1, label: t('customers.form.single') },
                   { value: 2, label: t('customers.form.married') },
@@ -198,8 +219,20 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
               />
             </div>
 
-            <div className="form-section-title" style={{ gridColumn: '1 / -1', marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-              <MapPin size={14} /> {t('connections.wizard.clientSelection.location')}
+            <div
+              className="form-section-title"
+              style={{
+                gridColumn: '1 / -1',
+                marginTop: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: 'var(--text-muted)',
+                fontSize: '0.8rem'
+              }}
+            >
+              <MapPin size={14} />{' '}
+              {t('connections.wizard.clientSelection.location')}
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
               <LocationSelector
@@ -208,13 +241,15 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
                 provinceId={personForm.provinceId}
                 cantonId={personForm.cantonId}
                 parishId={personForm.parishId}
-                onLocationChange={(loc) => setPersonForm({
-                  ...personForm,
-                  countryId: loc.countryId,
-                  provinceId: loc.provinceId,
-                  cantonId: loc.cantonId,
-                  parishId: loc.parishId
-                })}
+                onLocationChange={(loc) =>
+                  setPersonForm({
+                    ...personForm,
+                    countryId: loc.countryId,
+                    provinceId: loc.provinceId,
+                    cantonId: loc.cantonId,
+                    parishId: loc.parishId
+                  })
+                }
               />
             </div>
 
@@ -224,17 +259,41 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
                 size="small"
                 label={t('connections.wizard.clientSelection.profession')}
                 value={personForm.professionId || 1}
-                onChange={(e) => setPersonForm({ ...personForm, professionId: parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setPersonForm({
+                    ...personForm,
+                    professionId: parseInt(e.target.value)
+                  })
+                }
                 leftIcon={<Users size={14} />}
               />
             </div>
 
-            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', height: '100%', paddingTop: '1.5rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+            <div
+              className="form-group"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                height: '100%',
+                paddingTop: '1.5rem'
+              }}
+            >
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem'
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={personForm.deceased}
-                  onChange={(e) => setPersonForm({ ...personForm, deceased: e.target.checked })}
+                  onChange={(e) =>
+                    setPersonForm({ ...personForm, deceased: e.target.checked })
+                  }
                   style={{ width: '16px', height: '16px' }}
                 />
                 {t('connections.wizard.clientSelection.deceased')}
@@ -242,7 +301,14 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
             </div>
 
             <div className="form-group">
-              <label className="input__label" style={{ marginBottom: '8px', display: 'block', fontSize: '0.65rem' }}>
+              <label
+                className="input__label"
+                style={{
+                  marginBottom: '8px',
+                  display: 'block',
+                  fontSize: '0.65rem'
+                }}
+              >
                 <FaMailBulk size={12} style={{ marginRight: '4px' }} />
                 {t('connections.wizard.clientSelection.emails')}
               </label>
@@ -286,12 +352,20 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
                 }
                 className="add-btn-minimal"
               >
-                <Plus size={14} /> {t('connections.wizard.clientSelection.addEmail')}
+                <Plus size={14} />{' '}
+                {t('connections.wizard.clientSelection.addEmail')}
               </button>
             </div>
 
             <div className="form-group">
-              <label className="input__label" style={{ marginBottom: '8px', display: 'block', fontSize: '0.65rem' }}>
+              <label
+                className="input__label"
+                style={{
+                  marginBottom: '8px',
+                  display: 'block',
+                  fontSize: '0.65rem'
+                }}
+              >
                 <FaPhone size={12} style={{ marginRight: '4px' }} />
                 {t('connections.wizard.clientSelection.phones')}
               </label>
@@ -340,14 +414,12 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
                 }
                 className="add-btn-minimal"
               >
-                <Plus size={14} /> {t('connections.wizard.clientSelection.addPhone')}
+                <Plus size={14} />{' '}
+                {t('connections.wizard.clientSelection.addPhone')}
               </button>
             </div>
 
-            <div
-              className="form-action-row"
-              style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}
-            >
+            <div className="form-action-row sticky-wizard-footer">
               <Button
                 type="button"
                 variant="outline"
@@ -396,7 +468,9 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
                     handleRucBlur();
                   }
                 }}
-                placeholder={t('connections.wizard.clientSelection.rucPlaceholder')}
+                placeholder={t(
+                  'connections.wizard.clientSelection.rucPlaceholder'
+                )}
                 label={t('connections.wizard.clientSelection.rucNumber')}
                 leftIcon={<FaBuilding size={14} />}
               />
@@ -447,8 +521,20 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
               />
             </div>
 
-            <div className="form-section-title" style={{ gridColumn: '1 / -1', marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-              <MapPin size={14} /> {t('connections.wizard.clientSelection.location')}
+            <div
+              className="form-section-title"
+              style={{
+                gridColumn: '1 / -1',
+                marginTop: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: 'var(--text-muted)',
+                fontSize: '0.8rem'
+              }}
+            >
+              <MapPin size={14} />{' '}
+              {t('connections.wizard.clientSelection.location')}
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
               <LocationSelector
@@ -457,18 +543,27 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
                 provinceId={companyForm.companyProvinceId}
                 cantonId={companyForm.companyCantonId}
                 parishId={companyForm.companyParishId}
-                onLocationChange={(loc) => setCompanyForm({
-                  ...companyForm,
-                  companyCountryId: loc.countryId,
-                  companyProvinceId: loc.provinceId,
-                  companyCantonId: loc.cantonId,
-                  companyParishId: loc.parishId
-                })}
+                onLocationChange={(loc) =>
+                  setCompanyForm({
+                    ...companyForm,
+                    companyCountryId: loc.countryId,
+                    companyProvinceId: loc.provinceId,
+                    companyCantonId: loc.cantonId,
+                    companyParishId: loc.parishId
+                  })
+                }
               />
             </div>
 
             <div className="form-group">
-              <label className="input__label" style={{ marginBottom: '8px', display: 'block', fontSize: '0.65rem' }}>
+              <label
+                className="input__label"
+                style={{
+                  marginBottom: '8px',
+                  display: 'block',
+                  fontSize: '0.65rem'
+                }}
+              >
                 <FaMailBulk size={12} style={{ marginRight: '4px' }} />
                 {t('connections.wizard.clientSelection.emails')}
               </label>
@@ -518,12 +613,20 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
                 }
                 className="add-btn-minimal"
               >
-                <Plus size={14} /> {t('connections.wizard.clientSelection.addEmail')}
+                <Plus size={14} />{' '}
+                {t('connections.wizard.clientSelection.addEmail')}
               </button>
             </div>
 
             <div className="form-group">
-              <label className="input__label" style={{ marginBottom: '8px', display: 'block', fontSize: '0.65rem' }}>
+              <label
+                className="input__label"
+                style={{
+                  marginBottom: '8px',
+                  display: 'block',
+                  fontSize: '0.65rem'
+                }}
+              >
                 <FaPhone size={12} style={{ marginRight: '4px' }} />
                 {t('connections.wizard.clientSelection.phones')}
               </label>
@@ -572,14 +675,12 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
                 }
                 className="add-btn-minimal"
               >
-                <Plus size={14} /> {t('connections.wizard.clientSelection.addPhone')}
+                <Plus size={14} />{' '}
+                {t('connections.wizard.clientSelection.addPhone')}
               </button>
             </div>
 
-            <div
-              className="form-action-row"
-              style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}
-            >
+            <div className="form-action-row sticky-wizard-footer">
               <Button
                 type="button"
                 variant="outline"

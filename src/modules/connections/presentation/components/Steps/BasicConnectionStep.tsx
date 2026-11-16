@@ -15,6 +15,7 @@ import {
   FaMapMarkerAlt, 
   FaTag 
 } from 'react-icons/fa';
+import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
 interface BasicConnectionStepProps {
   formData: Omit<Connection, 'connectionId'>;
@@ -36,6 +37,11 @@ export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
   const { t } = useTranslation();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    MessageToastCustom(
+      'info',
+      'Detalles básicos guardados. Continuando a detalles técnicos...',
+      'Detalles Básicos'
+    );
     nextStep();
   };
 
@@ -133,7 +139,7 @@ export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
         </div>
       </div>
 
-      <div className="step-actions">
+      <div className="step-actions sticky-wizard-footer">
         <Button type="button" variant="ghost" onClick={prevStep}>
           {t('common.back')}
         </Button>
