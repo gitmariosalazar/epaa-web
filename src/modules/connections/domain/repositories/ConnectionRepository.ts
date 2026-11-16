@@ -10,6 +10,7 @@ import type {
   LiveMapConnectionResponse
 } from '../models/DashboardStats';
 import type { ChangeMeterRequest } from '../models/MeterChange';
+import type { UpdateConnectionBasicRequest } from '../models/UpdateConnectionBasic';
 
 export interface ConnectionRepository {
   getAdvanceDashboardStats(): Promise<DashboardAdvanceResponse>;
@@ -54,6 +55,7 @@ export interface ConnectionRepository {
     query?: string;
   }): Promise<ConnectionWithoutProperty[]>;
   changeMeter(request: ChangeMeterRequest): Promise<void>;
+  updateConnectionBasic(request: UpdateConnectionBasicRequest): Promise<void>;
 }
 
 export interface CreateConnectionRequest {

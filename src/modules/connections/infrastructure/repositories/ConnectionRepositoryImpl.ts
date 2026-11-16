@@ -18,6 +18,7 @@ import type {
 import type { ApiResponse } from '@/shared/infrastructure/api/response/ApiResponse';
 import { apiClient } from '@/shared/infrastructure/api/client/ApiClient';
 import type { ChangeMeterRequest } from '../../domain/models/MeterChange';
+import type { UpdateConnectionBasicRequest } from '../../domain/models/UpdateConnectionBasic';
 
 export class ConnectionRepositoryImpl implements ConnectionRepository {
   private readonly client: HttpClientInterface;
@@ -190,6 +191,58 @@ export class ConnectionRepositoryImpl implements ConnectionRepository {
 
     await this.client.post<ApiResponse<void>>(
       `/connections/change-meter/${request.connectionId}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+  }
+
+  async updateConnectionBasic(
+    request: UpdateConnectionBasicRequest
+  ): Promise<void> {
+    const formData = new FormData();
+
+    if (request.meterNumber && request.meterNumber.trim().length > 0) {
+      formData.append('meterNumber', request.meterNumber.trim());
+    }
+
+    if (
+      request.photosFacadeDescriptions &&
+      request.photosFacadeDescriptions.length > 0
+    ) {
+      formData.append(
+        'photosFacadeDescriptions',
+        JSON.stringify(request.photosFacadeDescriptions)
+      );
+    }
+
+    if (
+      request.photosMeterDescriptions &&
+      request.photosMeterDescriptions.length > 0
+    ) {
+      formData.append(
+        'photosMeterDescriptions',
+        JSON.stringify(request.photosMeterDescriptions)
+      );
+    }
+
+    if (request.photosFacade && request.photosFacade.length > 0) {
+      request.photosFacade.forEach((file) => {
+        formData.append('photosFacade', file);
+      });
+    }
+
+    if (request.photosMeter && request.photosMeter.length > 0) {
+      request.photosMeter.forEach((file) => {
+        formData.append('photosMeter', file);
+      });
+    }
+
+    await this.client.put<ApiResponse<void>>(
+      `/connections/update-connection-basic/${request.connectionId}`,
       formData,
       {
         headers: {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
@@ -9,11 +10,11 @@ import { Input } from '@/shared/presentation/components/Input/Input';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { CheckBox } from '@/shared/presentation/components/Input/CheckBox';
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
-import { 
-  FaFileContract, 
-  FaHashtag, 
-  FaMapMarkerAlt, 
-  FaTag 
+import {
+  FaFileContract,
+  FaHashtag,
+  FaMapMarkerAlt,
+  FaTag
 } from 'react-icons/fa';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 
@@ -25,6 +26,7 @@ interface BasicConnectionStepProps {
   ) => void;
   nextStep: () => void;
   prevStep: () => void;
+  hideFooterActions?: boolean;
 }
 
 export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
@@ -32,7 +34,8 @@ export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
   rates,
   handleInputChange,
   nextStep,
-  prevStep
+  prevStep,
+  hideFooterActions = false
 }) => {
   const { t } = useTranslation();
   const handleSubmit = (e: React.FormEvent) => {
@@ -40,18 +43,24 @@ export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
     MessageToastCustom(
       'info',
       'Detalles básicos guardados. Continuando a detalles técnicos...',
-      'Detalles Básicos'
+      'Detalles Básicos',
+      {
+        position: 'top-right'
+      }
     );
     nextStep();
   };
 
   return (
     <form
+      id="basic-connection-form"
       onSubmit={handleSubmit}
       onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
       className="step-container step-animation"
     >
-      <h3 className="step-title">{t('connections.wizard.basicDetails.title')}</h3>
+      <h3 className="step-title">
+        {t('connections.wizard.basicDetails.title')}
+      </h3>
 
       <div className="form-grid">
         <div className="form-group">
@@ -64,7 +73,9 @@ export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
             required
             leftIcon={<FaTag size={14} />}
           >
-            <option value="">{t('connections.wizard.basicDetails.selectRate')}</option>
+            <option value="">
+              {t('connections.wizard.basicDetails.selectRate')}
+            </option>
             {rates.map((rate: Rate) => (
               <option key={rate.rateId} value={rate.rateId}>
                 {rate.rateName}
@@ -100,7 +111,9 @@ export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
           leftIcon={<FaMapMarkerAlt size={14} />}
         />
         <div className="input-component input--small">
-          <label className="input__label">{t('connections.wizard.basicDetails.installationDate')}</label>
+          <label className="input__label">
+            {t('connections.wizard.basicDetails.installationDate')}
+          </label>
           <DatePicker
             size="small"
             value={
@@ -110,10 +123,17 @@ export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
                     .split('T')[0]
                 : ''
             }
-            onChange={(date) => handleInputChange({ target: { name: 'connectionInstallationDate', value: date } } as any)}
+            onChange={(date) =>
+              handleInputChange({
+                target: { name: 'connectionInstallationDate', value: date }
+              } as any)
+            }
           />
         </div>
-        <div className="checkbox-group" style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+        <div
+          className="checkbox-group"
+          style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}
+        >
           <CheckBox
             label={t('connections.wizard.basicDetails.sewerage')}
             name="connectionSewerage"
@@ -121,7 +141,11 @@ export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
             checked={formData.connectionSewerage}
             onCheckedChange={(checked) =>
               handleInputChange({
-                target: { name: 'connectionSewerage', checked, type: 'checkbox' }
+                target: {
+                  name: 'connectionSewerage',
+                  checked,
+                  type: 'checkbox'
+                }
               } as any)
             }
           />
@@ -139,12 +163,16 @@ export const BasicConnectionStep: React.FC<BasicConnectionStepProps> = ({
         </div>
       </div>
 
-      <div className="step-actions sticky-wizard-footer">
-        <Button type="button" variant="ghost" onClick={prevStep}>
-          {t('common.back')}
-        </Button>
-        <Button type="submit">{t('connections.wizard.basicDetails.nextTechnical')}</Button>
-      </div>
+      {!hideFooterActions && (
+        <div className="step-actions sticky-wizard-footer">
+          <Button type="button" variant="ghost" onClick={prevStep}>
+            {t('common.back')}
+          </Button>
+          <Button type="submit">
+            {t('connections.wizard.basicDetails.nextTechnical')}
+          </Button>
+        </div>
+      )}
     </form>
   );
 };

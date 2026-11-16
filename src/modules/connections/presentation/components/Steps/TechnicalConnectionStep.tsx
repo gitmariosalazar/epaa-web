@@ -118,11 +118,18 @@ interface TechnicalConnectionStepProps {
   ) => void;
   nextStep: () => void;
   prevStep: () => void;
+  hideFooterActions?: boolean;
 }
 
 export const TechnicalConnectionStep: React.FC<
   TechnicalConnectionStepProps
-> = ({ formData, handleInputChange, nextStep, prevStep }) => {
+> = ({
+  formData,
+  handleInputChange,
+  nextStep,
+  prevStep,
+  hideFooterActions = false
+}) => {
   const { t } = useTranslation();
 
   // Map is visible by default so the user can immediately locate the connection
@@ -137,25 +144,43 @@ export const TechnicalConnectionStep: React.FC<
   // Coordinates are valid when both latitude and longitude are numbers and not (0,0)
   const hasValidCoords = Boolean(
     isValidCoordinate(formData.latitude) &&
-      isValidCoordinate(formData.longitude) &&
-      !(Number(formData.latitude) === 0 && Number(formData.longitude) === 0)
+    isValidCoordinate(formData.longitude) &&
+    !(Number(formData.latitude) === 0 && Number(formData.longitude) === 0)
   );
 
-  // Preserve initial coordinates (e.g. from existing connection) to allow restoring
-  const [initialLocation, setInitialLocation] = useState<{ lat: number; lng: number } | null>(() =>
-    hasValidCoords
-      ? { lat: Number(formData.latitude), lng: Number(formData.longitude) }
-      : null
-  );
-
-  useEffect(() => {
-    if (hasValidCoords && !initialLocation) {
-      setInitialLocation({
-        lat: Number(formData.latitude),
-        lng: Number(formData.longitude)
-      });
+  // Preserve initial coordinates (e.g. from existing connection) to allow restoring or conserving
+  const [initialLocation] = useState<{ lat: number; lng: number } | null>(
+    () => {
+      if (
+        isValidCoordinate(formData.latitude) &&
+        isValidCoordinate(formData.longitude) &&
+        !(Number(formData.latitude) === 0 && Number(formData.longitude) === 0)
+      ) {
+        return {
+          lat: Number(formData.latitude),
+          lng: Number(formData.longitude)
+        };
+      }
+      if (formData.connectionCoordinates) {
+        const decoded = decodeEWKBPoint(formData.connectionCoordinates);
+        if (decoded && !(decoded.lat === 0 && decoded.lng === 0)) {
+          return decoded;
+        }
+        if (
+          typeof formData.connectionCoordinates === 'string' &&
+          formData.connectionCoordinates.includes(',')
+        ) {
+          const [p1, p2] = formData.connectionCoordinates
+            .split(',')
+            .map((n) => Number(n.trim()));
+          if (!isNaN(p1) && !isNaN(p2) && !(p1 === 0 && p2 === 0)) {
+            return { lat: p1, lng: p2 };
+          }
+        }
+      }
+      return null;
     }
-  }, [hasValidCoords, formData.latitude, formData.longitude, initialLocation]);
+  );
 
   // Unified location update handler (Single Responsibility & Atomic updates)
   const handleLocationUpdate = useCallback(
@@ -206,14 +231,14 @@ export const TechnicalConnectionStep: React.FC<
     }
   }, [hasValidCoords, formData.connectionCoordinates, handleLocationUpdate]);
 
-  // Clear location: allows coordinates to be optional and left empty
+  // Clear location: allows coordinates to be optional and left empty (null, not 0,0)
   const handleClearLocation = useCallback(() => {
     handleInputChange({
-      latitude: 0,
-      longitude: 0,
+      latitude: null,
+      longitude: null,
       connectionCoordinates: '',
-      connectionAltitude: 0,
-      connectionPrecision: 0
+      connectionAltitude: null,
+      connectionPrecision: null
     } as any);
 
     if (markerRef.current && mapRef.current) {
@@ -227,9 +252,35 @@ export const TechnicalConnectionStep: React.FC<
     MessageToastCustom(
       'warning',
       'Ubicación eliminada. Las coordenadas se guardarán vacías.',
-      'Ubicación Limpiada'
+      'Ubicación Limpiada',
+      {
+        position: 'top-right'
+      }
     );
   }, [handleInputChange]);
+
+  // Handle coordinate input without coercing empty string to 0
+  const handleCoordinateInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      if (value === '' || value === null || value === undefined) {
+        handleInputChange({
+          name,
+          value: null as any
+        });
+        return;
+      }
+
+      const num = Number(value);
+      if (!isNaN(num)) {
+        handleInputChange({
+          name,
+          value: num
+        });
+      }
+    },
+    [handleInputChange]
+  );
 
   // Capture location from browser GPS (supports silent auto-mode on mount)
   const handleGetLocation = useCallback(
@@ -238,7 +289,9 @@ export const TechnicalConnectionStep: React.FC<
         if (!isSilent) {
           const msg = 'La geolocalización no es soportada por este navegador.';
           setFormError(msg);
-          MessageToastCustom('error', msg, 'Geolocalización');
+          MessageToastCustom('error', msg, 'Geolocalización', {
+            position: 'top-right'
+          });
         }
         return;
       }
@@ -249,7 +302,10 @@ export const TechnicalConnectionStep: React.FC<
         MessageToastCustom(
           'info',
           'Obteniendo coordenadas GPS del dispositivo...',
-          'Geolocalización'
+          'Geolocalización',
+          {
+            position: 'top-right'
+          }
         );
       }
 
@@ -269,7 +325,10 @@ export const TechnicalConnectionStep: React.FC<
             MessageToastCustom(
               'success',
               `Ubicación capturada con éxito: (${lat}, ${lng})`,
-              'GPS Actual'
+              'GPS Actual',
+              {
+                position: 'top-right'
+              }
             );
           }
         },
@@ -279,7 +338,8 @@ export const TechnicalConnectionStep: React.FC<
             let errorMsg = 'Error al obtener la ubicación actual.';
             switch (error.code) {
               case error.PERMISSION_DENIED:
-                errorMsg = 'Permiso de geolocalización denegado en el navegador.';
+                errorMsg =
+                  'Permiso de geolocalización denegado en el navegador.';
                 break;
               case error.POSITION_UNAVAILABLE:
                 errorMsg = 'La ubicación actual no está disponible.';
@@ -289,7 +349,9 @@ export const TechnicalConnectionStep: React.FC<
                 break;
             }
             setFormError(errorMsg);
-            MessageToastCustom('error', errorMsg, 'Error GPS');
+            MessageToastCustom('error', errorMsg, 'Error GPS', {
+              position: 'top-right'
+            });
           }
         },
         { enableHighAccuracy: true, timeout: 10000 }
@@ -303,7 +365,11 @@ export const TechnicalConnectionStep: React.FC<
     if (hasAutoLocatedRef.current) return;
     hasAutoLocatedRef.current = true;
 
-    if (!hasValidCoords && typeof navigator !== 'undefined' && navigator.geolocation) {
+    if (
+      !hasValidCoords &&
+      typeof navigator !== 'undefined' &&
+      navigator.geolocation
+    ) {
       const timer = setTimeout(() => {
         handleGetLocation(true);
       }, 100);
@@ -328,7 +394,10 @@ export const TechnicalConnectionStep: React.FC<
         // Center map on existing coordinates or default fallback Antonio Ante
         const center: [number, number] = hasValidCoords
           ? [Number(formData.latitude), Number(formData.longitude)]
-          : [FALLBACK_CENTER_ANTONIO_ANTE.lat, FALLBACK_CENTER_ANTONIO_ANTE.lng];
+          : [
+              FALLBACK_CENTER_ANTONIO_ANTE.lat,
+              FALLBACK_CENTER_ANTONIO_ANTE.lng
+            ];
         const zoom = hasValidCoords ? 16 : 14;
 
         mapInstance = L.map('technical-connection-map').setView(center, zoom);
@@ -436,7 +505,12 @@ export const TechnicalConnectionStep: React.FC<
         markerRef.current = null;
       }
     }
-  }, [formData.latitude, formData.longitude, hasValidCoords, handleLocationUpdate]);
+  }, [
+    formData.latitude,
+    formData.longitude,
+    hasValidCoords,
+    handleLocationUpdate
+  ]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -444,14 +518,44 @@ export const TechnicalConnectionStep: React.FC<
       MessageToastCustom(
         'success',
         'Detalles técnicos y ubicación validados. Continuando...',
-        'Detalles Técnicos'
+        'Detalles Técnicos',
+        {
+          position: 'top-right'
+        }
       );
     } else {
-      MessageToastCustom(
-        'info',
-        'Continuando sin coordenadas geográficas registradas.',
-        'Ubicación Opcional'
-      );
+      // Si envía vacío no debe actualizar las coordenadas: conservar original o null, nunca 0,0
+      if (initialLocation && initialLocation.lat && initialLocation.lng) {
+        handleInputChange({
+          latitude: initialLocation.lat,
+          longitude: initialLocation.lng,
+          connectionCoordinates: `${initialLocation.lat}, ${initialLocation.lng}`
+        } as any);
+        MessageToastCustom(
+          'info',
+          `Conservando la ubicación original de la acometida (${initialLocation.lat}, ${initialLocation.lng}).`,
+          'Ubicación Conservada',
+          {
+            position: 'top-right'
+          }
+        );
+      } else {
+        handleInputChange({
+          latitude: null,
+          longitude: null,
+          connectionCoordinates: '',
+          connectionAltitude: null,
+          connectionPrecision: null
+        } as any);
+        MessageToastCustom(
+          'info',
+          'Continuando sin coordenadas geográficas registradas.',
+          'Ubicación Opcional',
+          {
+            position: 'top-right'
+          }
+        );
+      }
     }
     nextStep();
   };
@@ -473,6 +577,7 @@ export const TechnicalConnectionStep: React.FC<
 
   return (
     <form
+      id="technical-connection-form"
       onSubmit={handleSubmit}
       onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
       className="step-container step-animation"
@@ -494,7 +599,7 @@ export const TechnicalConnectionStep: React.FC<
             name="latitude"
             size="small"
             value={displayLatitude}
-            onChange={handleInputChange}
+            onChange={handleCoordinateInputChange}
             placeholder="-0.359008"
             leftIcon={<FaMapMarkerAlt size={14} />}
           />
@@ -510,7 +615,7 @@ export const TechnicalConnectionStep: React.FC<
             name="longitude"
             size="small"
             value={displayLongitude}
-            onChange={handleInputChange}
+            onChange={handleCoordinateInputChange}
             placeholder="-78.195853"
             leftIcon={<FaMapMarkerAlt size={14} />}
           />
@@ -583,7 +688,10 @@ export const TechnicalConnectionStep: React.FC<
               MessageToastCustom(
                 'info',
                 `Ubicación de la acometida restaurada: (${initialLocation.lat}, ${initialLocation.lng})`,
-                'Ubicación Acometida'
+                'Ubicación Acometida',
+                {
+                  position: 'top-right'
+                }
               );
             }}
             leftIcon={<FaMapLocationDot size={16} />}
@@ -721,12 +829,14 @@ export const TechnicalConnectionStep: React.FC<
         />
       </div>
 
-      <div className="step-actions sticky-wizard-footer">
-        <Button type="button" variant="ghost" onClick={prevStep}>
-          {t('common.back')}
-        </Button>
-        <Button type="submit">{t('common.next')}</Button>
-      </div>
+      {!hideFooterActions && (
+        <div className="step-actions sticky-wizard-footer">
+          <Button type="button" variant="ghost" onClick={prevStep}>
+            {t('common.back')}
+          </Button>
+          <Button type="submit">{t('common.next')}</Button>
+        </div>
+      )}
     </form>
   );
 };

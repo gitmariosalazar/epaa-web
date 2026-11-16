@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import {
   User,
@@ -32,6 +33,7 @@ interface ClientSelectionStepProps {
   initialData?: any;
   initialType?: 'person' | 'company' | null;
   isClientExisting?: boolean;
+  hideFooterActions?: boolean;
 }
 
 export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
@@ -39,7 +41,8 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
   loading: externalLoading,
   initialData,
   initialType,
-  isClientExisting
+  isClientExisting,
+  hideFooterActions = false
 }) => {
   const { t } = useTranslation();
   const {
@@ -78,25 +81,47 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
         </p>
 
         {/* Entity Type Selector */}
-        <div className="wizard-tabs">
-          <button
-            className={`wizard-tab ${activeType === 'person' ? 'active' : ''}`}
-            onClick={() => setActiveType('person')}
-          >
-            <User size={14} />
-            {t('connections.wizard.clientSelection.person')}
-          </button>
-          <button
-            className={`wizard-tab ${activeType === 'company' ? 'active' : ''}`}
-            onClick={() => setActiveType('company')}
-          >
-            <Building2 size={14} />
-            {t('connections.wizard.clientSelection.company')}
-          </button>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 'var(--spacing-md)'
+          }}
+        >
+          <div className="wizard-tabs" style={{ marginBottom: 0 }}>
+            <button
+              className={`wizard-tab ${activeType === 'person' ? 'active' : ''}`}
+              onClick={() => setActiveType('person')}
+            >
+              <User size={14} />
+              {t('connections.wizard.clientSelection.person')}
+            </button>
+            <button
+              className={`wizard-tab ${activeType === 'company' ? 'active' : ''}`}
+              onClick={() => setActiveType('company')}
+            >
+              <Building2 size={14} />
+              {t('connections.wizard.clientSelection.company')}
+            </button>
+          </div>
+          {hideFooterActions && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
+              onClick={handleReset}
+              disabled={loading}
+            >
+              <RefreshCcw size={12} style={{ marginRight: '6px' }} />
+              {t('connections.wizard.clientSelection.clear', 'Limpiar')}
+            </Button>
+          )}
         </div>
 
         {activeType === 'person' ? (
           <form
+            id="client-selection-form"
             onSubmit={handleCreatePerson}
             onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
             className="form-grid"
@@ -419,33 +444,36 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
               </button>
             </div>
 
-            <div className="form-action-row sticky-wizard-footer">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleReset}
-                disabled={loading}
-                style={{ flex: 1, justifyContent: 'center' }}
-              >
-                <RefreshCcw size={14} style={{ marginRight: '8px' }} />
-                {t('connections.wizard.clientSelection.clear')}
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-                style={{ flex: 2, justifyContent: 'center' }}
-              >
-                {loading
-                  ? t('connections.wizard.clientSelection.processing')
-                  : isExisting
-                    ? t('connections.wizard.clientSelection.updateContinue')
-                    : t('connections.wizard.clientSelection.createContinue')}
-                <ArrowRight size={14} style={{ marginLeft: '8px' }} />
-              </Button>
-            </div>
+            {!hideFooterActions && (
+              <div className="form-action-row sticky-wizard-footer">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleReset}
+                  disabled={loading}
+                  style={{ flex: 1, justifyContent: 'center' }}
+                >
+                  <RefreshCcw size={14} style={{ marginRight: '8px' }} />
+                  {t('connections.wizard.clientSelection.clear')}
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  style={{ flex: 2, justifyContent: 'center' }}
+                >
+                  {loading
+                    ? t('connections.wizard.clientSelection.processing')
+                    : isExisting
+                      ? t('connections.wizard.clientSelection.updateContinue')
+                      : t('connections.wizard.clientSelection.createContinue')}
+                  <ArrowRight size={14} style={{ marginLeft: '8px' }} />
+                </Button>
+              </div>
+            )}
           </form>
         ) : (
           <form
+            id="client-selection-form"
             onSubmit={handleCreateCompany}
             onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
             className="form-grid"
@@ -680,30 +708,32 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
               </button>
             </div>
 
-            <div className="form-action-row sticky-wizard-footer">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleReset}
-                disabled={loading}
-                style={{ flex: 1, justifyContent: 'center' }}
-              >
-                <RefreshCcw size={14} style={{ marginRight: '8px' }} />
-                {t('connections.wizard.clientSelection.clear')}
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-                style={{ flex: 2, justifyContent: 'center' }}
-              >
-                {loading
-                  ? t('connections.wizard.clientSelection.processing')
-                  : isExisting
-                    ? t('connections.wizard.clientSelection.updateContinue')
-                    : t('connections.wizard.clientSelection.createContinue')}
-                <ArrowRight size={14} style={{ marginLeft: '8px' }} />
-              </Button>
-            </div>
+            {!hideFooterActions && (
+              <div className="form-action-row sticky-wizard-footer">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleReset}
+                  disabled={loading}
+                  style={{ flex: 1, justifyContent: 'center' }}
+                >
+                  <RefreshCcw size={14} style={{ marginRight: '8px' }} />
+                  {t('connections.wizard.clientSelection.clear')}
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  style={{ flex: 2, justifyContent: 'center' }}
+                >
+                  {loading
+                    ? t('connections.wizard.clientSelection.processing')
+                    : isExisting
+                      ? t('connections.wizard.clientSelection.updateContinue')
+                      : t('connections.wizard.clientSelection.createContinue')}
+                  <ArrowRight size={14} style={{ marginLeft: '8px' }} />
+                </Button>
+              </div>
+            )}
           </form>
         )}
 

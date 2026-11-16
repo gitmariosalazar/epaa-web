@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import type { Connection, Rate } from '../../domain/models/Connection';
+import type { UpdateConnectionBasicRequest } from '../../domain/models/UpdateConnectionBasic';
 import { ACTIVE_STATES } from '../../domain/models/ConnectionState';
 
 import { useConnectionsContext } from '../context/ConnectionContext';
@@ -35,7 +36,11 @@ function extractCoordinates(
     if (decoded) return decoded;
     if (typeof coordsCandidate === 'string' && coordsCandidate.includes(',')) {
       const parts = coordsCandidate.split(',').map((p) => Number(p.trim()));
-      if (!isNaN(parts[0]) && !isNaN(parts[1]) && !(parts[0] === 0 && parts[1] === 0)) {
+      if (
+        !isNaN(parts[0]) &&
+        !isNaN(parts[1]) &&
+        !(parts[0] === 0 && parts[1] === 0)
+      ) {
         return { lat: parts[0], lng: parts[1] };
       }
     }
@@ -53,7 +58,11 @@ function extractCoordinates(
           const parts = prop.propertyCoordinates
             .split(',')
             .map((p) => Number(p.trim()));
-          if (!isNaN(parts[0]) && !isNaN(parts[1]) && !(parts[0] === 0 && parts[1] === 0)) {
+          if (
+            !isNaN(parts[0]) &&
+            !isNaN(parts[1]) &&
+            !(parts[0] === 0 && parts[1] === 0)
+          ) {
             return { lat: parts[0], lng: parts[1] };
           }
         }
@@ -205,7 +214,8 @@ export const useConnectionsViewModel = () => {
     createCustomerUseCase,
     updateCustomerUseCase,
     createCompanyUseCase,
-    updateCompanyUseCase
+    updateCompanyUseCase,
+    updateConnectionBasicUseCase
   } = useConnectionsContext();
 
   // ── 1. LIST STATE ──
@@ -240,7 +250,8 @@ export const useConnectionsViewModel = () => {
     useState<Connection | null>(null);
   const [rates, setRates] = useState<Rate[]>([]);
   const [activeStep, setActiveStep] = useState(0);
-  const [mapModalConnection, setMapModalConnection] = useState<Connection | null>(null);
+  const [mapModalConnection, setMapModalConnection] =
+    useState<Connection | null>(null);
 
   // Client selection info
   const [foundClient, setFoundClient] = useState<ClientData | null>(null);
@@ -481,8 +492,16 @@ export const useConnectionsViewModel = () => {
       // 2. Map Client Data
       if (fullData.person) {
         const p = fullData.person;
-        const rawCedula = (fullData.clientId || p.personId || connection.clientId || '').toString().trim();
-        const formattedCedula = rawCedula.length === 9 ? rawCedula.padStart(10, '0') : rawCedula;
+        const rawCedula = (
+          fullData.clientId ||
+          p.personId ||
+          connection.clientId ||
+          ''
+        )
+          .toString()
+          .trim();
+        const formattedCedula =
+          rawCedula.length === 9 ? rawCedula.padStart(10, '0') : rawCedula;
 
         const clientData: Customer = {
           customerId: formattedCedula,
@@ -594,7 +613,9 @@ export const useConnectionsViewModel = () => {
         connectionCoordinates:
           resolvedLat && resolvedLng
             ? `${resolvedLat}, ${resolvedLng}`
-            : fullData.connectionCoordinates || connection.connectionCoordinates || '',
+            : fullData.connectionCoordinates ||
+              connection.connectionCoordinates ||
+              '',
         connectionReference: fullData.connectionReference ?? '',
         ConnectionMetaData: fullData.connectionMetadata || {},
         connectionAltitude: fullData.connectionAltitude ?? 0,
@@ -754,7 +775,12 @@ export const useConnectionsViewModel = () => {
       | Record<string, any>
   ) => {
     // Support batch update object (e.g. handleInputChange({ latitude: -0.35, longitude: -78.19, ... }))
-    if (!('target' in e) && !('name' in e) && typeof e === 'object' && e !== null) {
+    if (
+      !('target' in e) &&
+      !('name' in e) &&
+      typeof e === 'object' &&
+      e !== null
+    ) {
       setFormData((prev) => ({
         ...prev,
         ...e
@@ -872,7 +898,13 @@ export const useConnectionsViewModel = () => {
     setActiveStep(1);
   };
 
-  const handleWizardSave = async () => {
+  const handleWizardSave = async (basicUpdateData?: {
+    meterNumber?: string | null;
+    photosFacade?: File[];
+    photosMeter?: File[];
+    photosFacadeDescriptions?: string[];
+    photosMeterDescriptions?: string[];
+  }) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -885,8 +917,11 @@ export const useConnectionsViewModel = () => {
             formData.clientId ||
             selectedConnection?.clientId ||
             String(personData.customerId || '')
-          ).toString().trim();
-          const targetCustomerId = rawId.length === 9 ? rawId.padStart(10, '0') : rawId;
+          )
+            .toString()
+            .trim();
+          const targetCustomerId =
+            rawId.length === 9 ? rawId.padStart(10, '0') : rawId;
 
           if (isClientExisting) {
             const updateData: UpdateCustomerRequest = {
@@ -910,10 +945,7 @@ export const useConnectionsViewModel = () => {
               deceased: Boolean(personData.deceased)
             };
             try {
-              await updateCustomerUseCase.execute(
-                targetCustomerId,
-                updateData
-              );
+              await updateCustomerUseCase.execute(targetCustomerId, updateData);
             } catch (custErr) {
               console.warn('Customer update skipped or non-blocking:', custErr);
               // Do not abort connection save if editing existing connection
@@ -979,9 +1011,14 @@ export const useConnectionsViewModel = () => {
               (foundClient as Customer | null)?.customerId ||
               formData.clientId ||
               selectedConnection?.clientId ||
-              String((pendingClientData as CreateCustomerRequest)?.customerId || '')
-            ).toString().trim()
-          : (pendingClientData as CreateCompanyRequest)?.companyRuc || formData.clientId;
+              String(
+                (pendingClientData as CreateCustomerRequest)?.customerId || ''
+              )
+            )
+              .toString()
+              .trim()
+          : (pendingClientData as CreateCompanyRequest)?.companyRuc ||
+            formData.clientId;
 
       if (clientType === 'person' && clientId.length === 9) {
         clientId = clientId.padStart(10, '0');
@@ -995,32 +1032,110 @@ export const useConnectionsViewModel = () => {
         ...connectionData
       } = formData;
 
+      // Sanitize coordinates: If coordinates are empty, null or 0,0:
+      // Must not update with 0,0: conserve original connection coordinates or send null
+      const isCoordEmptyOrZero = (val: unknown) =>
+        val === null || val === undefined || val === '' || Number(val) === 0;
+
+      let resolvedLatitude: number | null = isCoordEmptyOrZero(
+        formData.latitude
+      )
+        ? null
+        : Number(formData.latitude);
+      let resolvedLongitude: number | null = isCoordEmptyOrZero(
+        formData.longitude
+      )
+        ? null
+        : Number(formData.longitude);
+
+      if (
+        (resolvedLatitude === null || resolvedLongitude === null) &&
+        selectedConnection
+      ) {
+        if (!isCoordEmptyOrZero(selectedConnection.latitude)) {
+          resolvedLatitude = Number(selectedConnection.latitude);
+        }
+        if (!isCoordEmptyOrZero(selectedConnection.longitude)) {
+          resolvedLongitude = Number(selectedConnection.longitude);
+        }
+      }
+
       const finalData = {
         ...connectionData,
+        latitude: resolvedLatitude,
+        longitude: resolvedLongitude,
         clientId,
         connectionId: formData.connectionCadastralKey,
         propertyCadastralKey: formData.propertyCadastralKey || null,
         ConnectionMetaData: formData.ConnectionMetaData || {}
       };
 
+      let targetConnectionId: string;
       if (selectedConnection) {
         await updateConnectionUseCase.execute(
           selectedConnection.connectionId,
           finalData as any // Use case expects specific type, but we ensured structure
         );
-        MessageToastCustom(
-          'success',
-          'Acometida actualizada correctamente.',
-          'Operación Exitosa'
-        );
+        targetConnectionId = selectedConnection.connectionId;
       } else {
-        await createConnectionUseCase.execute(finalData as any);
-        MessageToastCustom(
-          'success',
-          'Nueva acometida creada con éxito.',
-          'Operación Exitosa'
+        const createdConn = await createConnectionUseCase.execute(
+          finalData as any
         );
+        targetConnectionId =
+          createdConn?.connectionId || formData.connectionCadastralKey;
       }
+
+      // Upload basic evidence photos if provided
+      if (
+        basicUpdateData &&
+        ((basicUpdateData.photosFacade &&
+          basicUpdateData.photosFacade.length > 0) ||
+          (basicUpdateData.photosMeter &&
+            basicUpdateData.photosMeter.length > 0) ||
+          (basicUpdateData.meterNumber &&
+            basicUpdateData.meterNumber.trim().length > 0))
+      ) {
+        try {
+          const facadeFiles = basicUpdateData.photosFacade || [];
+          const meterFiles = basicUpdateData.photosMeter || [];
+          await updateConnectionBasicUseCase.execute({
+            connectionId: targetConnectionId,
+            meterNumber:
+              basicUpdateData.meterNumber !== undefined
+                ? basicUpdateData.meterNumber
+                : formData.connectionMeterNumber || null,
+            photosFacade: facadeFiles,
+            photosFacadeDescriptions:
+              basicUpdateData.photosFacadeDescriptions ||
+              facadeFiles.map(() => 'Fachada'),
+            photosMeter: meterFiles,
+            photosMeterDescriptions:
+              basicUpdateData.photosMeterDescriptions ||
+              meterFiles.map(() => 'Medidor')
+          });
+        } catch (basicErr) {
+          console.error('Error uploading basic connection evidence:', basicErr);
+          MessageToastCustom(
+            'warning',
+            'La acometida se guardó, pero hubo un error al subir las fotos de evidencia.',
+            'Advertencia',
+            {
+              position: 'top-right'
+            }
+          );
+        }
+      }
+
+      MessageToastCustom(
+        'success',
+        selectedConnection
+          ? 'Acometida actualizada correctamente.'
+          : 'Nueva acometida creada con éxito.',
+        'Operación Exitosa',
+        {
+          position: 'top-right'
+        }
+      );
 
       setIsFormOpen(false);
       resetForm();
@@ -1032,7 +1147,42 @@ export const useConnectionsViewModel = () => {
           ? err.message
           : 'Error occurred while creating connection';
       setError(message);
-      MessageToastCustom('error', message, 'Error al Guardar');
+      MessageToastCustom('error', message, 'Error al Guardar', {
+        position: 'top-right'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateConnectionBasic = async (
+    request: UpdateConnectionBasicRequest
+  ): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await updateConnectionBasicUseCase.execute(request);
+      MessageToastCustom(
+        'success',
+        'Evidencia fotográfica y medidor actualizados correctamente.',
+        'Operación Exitosa',
+        {
+          position: 'top-right'
+        }
+      );
+      handleFetch();
+      return true;
+    } catch (err: unknown) {
+      console.error('Error in updateConnectionBasic:', err);
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Error al actualizar fotos y datos básicos de acometida';
+      setError(message);
+      MessageToastCustom('error', message, 'Error', {
+        position: 'top-right'
+      });
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -1165,6 +1315,7 @@ export const useConnectionsViewModel = () => {
       searchClient,
       onClientConfirm,
       handleWizardSave,
+      updateConnectionBasic,
       setActiveStep,
       loadRates,
       handleInputChange

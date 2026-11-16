@@ -25,6 +25,7 @@ import { GetLiveUpdateMapConnectionsUseCase } from '../../application/usecases/G
 import { FindConnectionAndPropertyByCadastralKeyOrCardIdUseCase } from '../../application/usecases/FindConnectionAndPropertyByCadastralKeyOrCardIdUseCase';
 import { FindAllConnectionsWithPropertyUseCase } from '../../application/usecases/FindAllConnectionsWithPropertyUseCase';
 import { ChangeMeterUseCase } from '../../application/usecases/ChangeMeterUseCase';
+import { UpdateConnectionBasicUseCase } from '../../application/usecases/UpdateConnectionBasicUseCase';
 
 interface ConnectionContextType {
   getConnectionsUseCase: GetConnectionsUseCase;
@@ -45,6 +46,7 @@ interface ConnectionContextType {
   findConnectionAndPropertyByCadastralKeyOrCardIdUseCase: FindConnectionAndPropertyByCadastralKeyOrCardIdUseCase;
   findAllConnectionsWithPropertyUseCase: FindAllConnectionsWithPropertyUseCase;
   changeMeterUseCase: ChangeMeterUseCase;
+  updateConnectionBasicUseCase: UpdateConnectionBasicUseCase;
 }
 
 const ConnectionContext = createContext<ConnectionContextType | null>(null);
@@ -98,7 +100,10 @@ export const ConnectionProvider: React.FC<{ children: ReactNode }> = ({
         ),
       findAllConnectionsWithPropertyUseCase:
         new FindAllConnectionsWithPropertyUseCase(connectionRepository),
-      changeMeterUseCase: new ChangeMeterUseCase(connectionRepository)
+      changeMeterUseCase: new ChangeMeterUseCase(connectionRepository),
+      updateConnectionBasicUseCase: new UpdateConnectionBasicUseCase(
+        connectionRepository
+      )
     };
   }, [connectionRepository, customerRepository, companyRepository]);
 
@@ -109,6 +114,7 @@ export const ConnectionProvider: React.FC<{ children: ReactNode }> = ({
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useConnectionsContext = () => {
   const context = useContext(ConnectionContext);
   if (!context) {

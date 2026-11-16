@@ -206,12 +206,18 @@ export const useClientSelectionForm = ({
           originCountry: customer.originCountry || 'Ecuador',
           deceased: customer.deceased || false
         });
-        const clientName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
-        setSuccessMsg(`Cliente encontrado: ${clientName || customer.customerId}`);
+        const clientName =
+          `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
+        setSuccessMsg(
+          `Cliente encontrado: ${clientName || customer.customerId}`
+        );
         MessageToastCustom(
           'info',
           `Cliente registrado encontrado: ${clientName || customer.customerId}`,
-          'Cliente Encontrado'
+          'Cliente Encontrado',
+          {
+            position: 'top-right'
+          }
         );
       } else {
         setFoundClient(null);
@@ -220,7 +226,10 @@ export const useClientSelectionForm = ({
         MessageToastCustom(
           'info',
           'Cédula no registrada. Ingrese los datos para registrar un nuevo cliente.',
-          'Nuevo Cliente'
+          'Nuevo Cliente',
+          {
+            position: 'top-right'
+          }
         );
       }
     } catch (err: any) {
@@ -229,7 +238,10 @@ export const useClientSelectionForm = ({
       MessageToastCustom(
         'error',
         err?.message || 'Error al consultar la identificación del cliente.',
-        'Búsqueda de Cliente'
+        'Búsqueda de Cliente',
+        {
+          position: 'top-right'
+        }
       );
     } finally {
       setLoading(false);
@@ -267,12 +279,16 @@ export const useClientSelectionForm = ({
           companyParishId: company.companyParishId || '1',
           companyCountry: company.companyCountry || 'Ecuador'
         });
-        const compName = company.companyName || company.socialReason || company.companyRuc;
+        const compName =
+          company.companyName || company.socialReason || company.companyRuc;
         setSuccessMsg(`Empresa encontrada: ${compName}`);
         MessageToastCustom(
           'info',
           `Empresa registrada encontrada: ${compName}`,
-          'Empresa Encontrada'
+          'Empresa Encontrada',
+          {
+            position: 'top-right'
+          }
         );
       } else {
         setFoundClient(null);
@@ -281,7 +297,10 @@ export const useClientSelectionForm = ({
         MessageToastCustom(
           'info',
           'RUC no registrado. Ingrese los datos para registrar la nueva empresa.',
-          'Nueva Empresa'
+          'Nueva Empresa',
+          {
+            position: 'top-right'
+          }
         );
       }
     } catch (err: any) {
@@ -290,7 +309,10 @@ export const useClientSelectionForm = ({
       MessageToastCustom(
         'error',
         err?.message || 'Error al consultar el RUC de la empresa.',
-        'Búsqueda de Empresa'
+        'Búsqueda de Empresa',
+        {
+          position: 'top-right'
+        }
       );
     } finally {
       setLoading(false);
@@ -309,7 +331,10 @@ export const useClientSelectionForm = ({
       isExisting
         ? 'Cliente confirmado. Continuando a detalles básicos...'
         : 'Nuevo cliente preparado. Continuando a detalles básicos...',
-      'Cliente Confirmado'
+      'Cliente Confirmado',
+      {
+        position: 'top-right'
+      }
     );
     onConfirm(cleanedData, isExisting, 'person');
   };
@@ -328,7 +353,10 @@ export const useClientSelectionForm = ({
       isExisting
         ? 'Empresa confirmada. Continuando a detalles básicos...'
         : 'Nueva empresa preparada. Continuando a detalles básicos...',
-      'Empresa Confirmada'
+      'Empresa Confirmada',
+      {
+        position: 'top-right'
+      }
     );
     onConfirm(cleanedData, isExisting, 'company');
   };
