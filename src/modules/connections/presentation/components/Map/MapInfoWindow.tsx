@@ -11,6 +11,7 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { IoMdEye } from 'react-icons/io';
 import './MapInfoWindow.css';
 import { ConnectionDetailModal } from '../ConnectionDetailModal';
+import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 
 interface MapInfoWindowProps {
   connection: Connection;
@@ -30,7 +31,6 @@ export const MapInfoWindow: React.FC<MapInfoWindowProps> = memo(
     onViewIncidentsOnTable,
     onViewIncidentsOnMap
   }) => {
-
     const [selectedConnection, setSelectedConnection] =
       useState<Connection | null>(null);
 
@@ -73,8 +73,9 @@ export const MapInfoWindow: React.FC<MapInfoWindowProps> = memo(
     return (
       <div className={`premium-popup ${theme === 'dark' ? 'dark' : ''}`}>
         <div
-          className={`premium-popup-header-status ${connection.connectionStatus ? 'status-active' : 'status-inactive'
-            }`}
+          className={`premium-popup-header-status ${
+            connection.connectionStatus ? 'status-active' : 'status-inactive'
+          }`}
         />
 
         <button
@@ -114,6 +115,35 @@ export const MapInfoWindow: React.FC<MapInfoWindowProps> = memo(
           <p className="popup-subtitle">
             <MdLocationOn /> {connection.connectionAddress || 'Quito, Ecuador'}
           </p>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'start !important',
+              gap: '10px'
+            }}
+          >
+            <Avatar name={connection.clientName} size="sm" />
+            <div>
+              <span
+                style={{
+                  fontWeight: 'bold'
+                }}
+              >
+                {connection.clientName}
+              </span>
+              <div
+                style={{
+                  fontWeight: 300,
+                  fontSize: '0.7125rem',
+                  display: 'flex',
+                  gap: '4px'
+                }}
+              >
+                {connection.clientId}
+              </div>
+            </div>
+          </div>
 
           <div className="popup-info-grid">
             <div className="popup-info-item">
@@ -237,7 +267,13 @@ export const MapInfoWindow: React.FC<MapInfoWindowProps> = memo(
 
           <div
             className="popup-actions-centered"
-            style={{ display: 'flex', gap: '10px', marginTop: '10px', justifyContent: 'center', flexWrap: 'wrap' }}
+            style={{
+              display: 'flex',
+              gap: '10px',
+              marginTop: '10px',
+              justifyContent: 'center',
+              flexWrap: 'wrap'
+            }}
             onMouseDown={stopEventPropagation}
             onPointerDown={stopEventPropagation}
           >

@@ -637,6 +637,7 @@ export const TechnicalConnectionStep: React.FC<
         <Alert
           type="info"
           dismissible={false}
+          className="alert-step-connection"
           title={t(
             'connections.wizard.technicalDetails.optionalLocationTitle',
             'Ubicación opcional'

@@ -26,7 +26,7 @@ export interface PersonFormState {
   phoneNumbers: string[];
   emails: string[];
   address: string;
-  dateOfBirth: string; // Used for input[type="date"]
+  dateOfBirth: string | Date; // Supports ISO string ("YYYY-MM-DD") or Date instance
   sexId: number;
   civilStatus: number;
   parishId: string;
@@ -321,8 +321,16 @@ export const useClientSelectionForm = ({
 
   const handleCreatePerson = async (e: React.FormEvent) => {
     e.preventDefault();
+    const parsedDob =
+      (personForm.dateOfBirth as any) instanceof Date
+        ? (personForm.dateOfBirth as unknown as Date)
+        : personForm.dateOfBirth
+          ? new Date(personForm.dateOfBirth)
+          : new Date();
+
     const cleanedData = {
       ...personForm,
+      dateOfBirth: isNaN(parsedDob.getTime()) ? new Date() : parsedDob,
       emails: personForm.emails.filter((e_item) => e_item.trim() !== ''),
       phoneNumbers: personForm.phoneNumbers.filter((p) => p.trim() !== '')
     };

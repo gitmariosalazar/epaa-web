@@ -13,6 +13,7 @@ import { IoMdEye } from 'react-icons/io';
 import { TbAlertTriangle } from 'react-icons/tb';
 import { IoWaterSharp } from 'react-icons/io5';
 import { GiHexagonalNut } from 'react-icons/gi';
+import { truncateText } from '@/shared/utils/text/truncate-text';
 
 interface ConnectionCardProps {
   connection: Connection;
@@ -44,14 +45,29 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
           </h4>
         </div>
         <div
-          style={{ color: chip.color, borderColor: chip.color, display: 'flex', gap: '8px' }}
+          style={{
+            color: chip.color,
+            borderColor: chip.color,
+            display: 'flex',
+            gap: '8px'
+          }}
         >
-          <span className={`card-status-pill ${isActive ? 'active' : 'inactive'}`} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span
+            className={`card-status-pill ${isActive ? 'active' : 'inactive'}`}
+            style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+          >
             {chip.icon}
             {chip.label}
           </span>
-          <span className={`card-status-pill ${connection.connectionType === 'AGUA_POTABLE' ? 'active-water' : 'active-sewer'}`} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            {connection.connectionType === 'AGUA_POTABLE' ? <IoWaterSharp size={12} /> : <GiHexagonalNut size={12} />}
+          <span
+            className={`card-status-pill ${connection.connectionType === 'AGUA_POTABLE' ? 'active-water' : 'active-sewer'}`}
+            style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+          >
+            {connection.connectionType === 'AGUA_POTABLE' ? (
+              <IoWaterSharp size={12} />
+            ) : (
+              <GiHexagonalNut size={12} />
+            )}
             {connection.connectionTypeName}
           </span>
         </div>
@@ -158,9 +174,18 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({
       <div className="card-body">
         <div className="card-info-row">
           <MdPerson className="card-icon" size={14} />
-          <span className="card-text-client">
-            {connection.clientId || '1000211126'}
-          </span>
+          <Tooltip
+            content={t(
+              `Cliente: ${connection.clientId} - ${connection.clientName}`
+            )}
+            position="bottom"
+            followCursor={false}
+          >
+            <span className="card-text-client">
+              {connection.clientId +
+                ` (${truncateText(connection.clientName)})`}
+            </span>
+          </Tooltip>
         </div>
         <div className="card-info-row">
           <MdLocationOn className="card-icon" size={14} />

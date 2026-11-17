@@ -76,9 +76,10 @@
 
 .wizard-content {
   padding: var(--spacing-sm);
-  background-color: var(--background);
+  background-color: var(--surface) !important;
   overflow-y: auto;
   flex: 1;
+  margin: var(--spacing-sm);
 }
 
 /* Progress Bar */
@@ -280,6 +281,13 @@
   border-color: var(--accent);
   color: var(--accent);
   font-weight: var(--font-weight-medium);
+}
+
+.alert-step-connection {
+  border-left: 4px solid var(--info);
+  background-color: rgba(59, 130, 246, 0.1);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-md);
 }
 
 /* Sticky Footer Navigation for Wizard Steps */

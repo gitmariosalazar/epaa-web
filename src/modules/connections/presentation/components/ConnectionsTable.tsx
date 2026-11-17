@@ -15,7 +15,10 @@ import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Check, CheckCircle, EyeIcon, X } from 'lucide-react';
 import { FaTrashCan } from 'react-icons/fa6';
 import { FaEdit, FaMapMarkerAlt } from 'react-icons/fa';
-import type { Connection, ConnectionWithoutProperty } from '../../domain/models/Connection';
+import type {
+  Connection,
+  ConnectionWithoutProperty
+} from '../../domain/models/Connection';
 import type { SortConfig } from '../hooks/useConnectionsViewModel';
 import { IoInformationCircleOutline, IoWaterSharp } from 'react-icons/io5';
 import { getConnectionStateChip } from '../utils/connectionStateChip';
@@ -81,7 +84,10 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
             item.connectionMeterNumber,
             item.connectionAccount ? String(item.connectionAccount) : null,
             item.clientId
-          ].filter((val): val is string => typeof val === 'string' && val.trim().length > 0)
+          ].filter(
+            (val): val is string =>
+              typeof val === 'string' && val.trim().length > 0
+          )
         )
       );
 
@@ -89,18 +95,27 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
 
       for (const queryTerm of candidateTerms) {
         try {
-          const fullDataList = await findAllConnectionsWithPropertyUseCase.execute({
-            limit: 100,
-            offset: 0,
-            query: queryTerm
-          });
+          const fullDataList =
+            await findAllConnectionsWithPropertyUseCase.execute({
+              limit: 100,
+              offset: 0,
+              query: queryTerm
+            });
           if (fullDataList && fullDataList.length > 0) {
             // Filter by exact connectionId or cadastral key match if client owns multiple connections
             const match = fullDataList.find(
-              c =>
-                (c.connectionId && c.connectionId.trim().toLowerCase() === item.connectionId.trim().toLowerCase()) ||
-                (c.connectionCadastralKey && item.connectionCadastralKey && c.connectionCadastralKey.trim().toLowerCase() === item.connectionCadastralKey.trim().toLowerCase()) ||
-                (c.connectionAccount && item.connectionAccount && String(c.connectionAccount).trim() === String(item.connectionAccount).trim())
+              (c) =>
+                (c.connectionId &&
+                  c.connectionId.trim().toLowerCase() ===
+                    item.connectionId.trim().toLowerCase()) ||
+                (c.connectionCadastralKey &&
+                  item.connectionCadastralKey &&
+                  c.connectionCadastralKey.trim().toLowerCase() ===
+                    item.connectionCadastralKey.trim().toLowerCase()) ||
+                (c.connectionAccount &&
+                  item.connectionAccount &&
+                  String(c.connectionAccount).trim() ===
+                    String(item.connectionAccount).trim())
             );
             if (match) {
               fullData = match;
@@ -113,14 +128,18 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
       }
 
       if (!fullData) {
-        throw new Error('No se pudo encontrar la información detallada de esta acometida en el sistema.');
+        throw new Error(
+          'No se pudo encontrar la información detallada de esta acometida en el sistema.'
+        );
       }
 
       // 2. Generate PDF using the full data
       const generator = new TechnicalDataSheetPdfGenerator();
       const url = await generator.generateBlobUrl([fullData]);
       setPreviewUrl(url);
-      setFileNamePDF(`FICHA_TECNICA_${item.connectionId || item.connectionMeterNumber || 'ACOMETIDA'}.pdf`);
+      setFileNamePDF(
+        `FICHA_TECNICA_${item.connectionId || item.connectionMeterNumber || 'ACOMETIDA'}.pdf`
+      );
     } catch (error) {
       console.error('Error generando la ficha técnica:', error);
       setIsPreviewOpen(false);
@@ -151,9 +170,16 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         header: t('connections.table.client'),
         accessor: (item: Connection) => (
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Avatar name={item.clientId} size="sm" />
+            <Avatar name={item.clientName} size="sm" />
             <div>
-              <div style={{ fontWeight: 300, fontSize: '0.8125rem' }}>
+              <span
+                style={{
+                  fontWeight: 'bold'
+                }}
+              >
+                {item.clientName}
+              </span>
+              <div style={{ fontWeight: 300, fontSize: '0.7125rem' }}>
                 {item.clientId}
               </div>
             </div>
@@ -177,13 +203,23 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
       {
         header: t('connections.table.connectionType', 'Tipo de acometida'),
         accessor: (item: Connection) => {
-          return <ColorChip label={item.connectionTypeName}
-            variant='ghost'
-            color={item.connectionType === 'AGUA_POTABLE' ? '#2258C5' : '#a049db'} size="xs" icon={
-              item.connectionType === 'AGUA_POTABLE'
-                ? <IoWaterSharp size={14} />
-                : <GiHexagonalNut size={14} />
-            } />
+          return (
+            <ColorChip
+              label={item.connectionTypeName}
+              variant="ghost"
+              color={
+                item.connectionType === 'AGUA_POTABLE' ? '#2258C5' : '#a049db'
+              }
+              size="xs"
+              icon={
+                item.connectionType === 'AGUA_POTABLE' ? (
+                  <IoWaterSharp size={14} />
+                ) : (
+                  <GiHexagonalNut size={14} />
+                )
+              }
+            />
+          );
         },
         sortable: true,
         id: 'connectionTypeName'
@@ -410,38 +446,37 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
     [onEdit, onDelete, t]
   );
 
-  const getContextMenuItems = (item: Connection): ContextMenuItem<Connection>[] => {
+  const getContextMenuItems = (
+    item: Connection
+  ): ContextMenuItem<Connection>[] => {
     const items: ContextMenuItem<Connection>[] = [
       {
         label: t('connections.table.edit'),
         onClick: () => onEdit(item),
         icon: <FaEdit size={14} />,
-        color: "purple"
+        color: 'purple'
       },
       {
         label: t('connections.table.delete'),
         onClick: () => onDelete(item),
         icon: <FaTrashCan size={14} />,
-        color: "danger"
+        color: 'danger'
       },
       {
         label: t('connections.table.viewDetails'),
         onClick: () => setSelectedConnection(item),
         icon: <EyeIcon size={14} />,
-        color: "success"
+        color: 'success'
       },
       {
-        label: t(
-          'connections.table.connectionCoordinates',
-          'Ver en mapa'
-        ),
+        label: t('connections.table.connectionCoordinates', 'Ver en mapa'),
         onClick: () => onViewOnMap(item),
         icon: <FaMapMarkerAlt size={14} />,
-        color: "orange"
+        color: 'orange'
       },
       {
         label: '-',
-        onClick: () => { },
+        onClick: () => {},
         divider: true
       },
       {
@@ -499,7 +534,15 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, height: '100%' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        minHeight: 0,
+        height: '100%'
+      }}
+    >
       <Table
         data={data}
         columns={columns}
@@ -544,9 +587,8 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         documentUrl={previewUrl}
         isLoading={isGeneratingPdf}
         title="Vista Previa de Ficha Técnica"
-        fileName={fileNamePDF || "FICHA_TECNICA.pdf"}
+        fileName={fileNamePDF || 'FICHA_TECNICA.pdf'}
       />
     </div>
   );
 };
-

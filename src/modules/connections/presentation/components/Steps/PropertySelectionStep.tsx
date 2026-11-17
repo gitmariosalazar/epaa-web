@@ -212,7 +212,6 @@ export const PropertySelectionStep: React.FC<PropertySelectionStepProps> = ({
                     {isSelected && (
                       <div className="property-card-selected-badge">
                         <CheckCircle size={12} />
-                        <span>Seleccionado</span>
                       </div>
                     )}
 

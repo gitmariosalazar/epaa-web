@@ -3,6 +3,8 @@ import type { Property } from '@/modules/properties/domain/models/Property';
 export interface Connection {
   connectionId: string;
   clientId: string;
+  clientName: string;
+  clientAddress: string;
   connectionRateId: number;
   connectionRateName: string;
   connectionMeterNumber: string;

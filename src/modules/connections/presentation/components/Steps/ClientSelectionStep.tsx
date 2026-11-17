@@ -22,6 +22,7 @@ import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePick
 import { LocationSelector } from '@/shared/presentation/components/Input/LocationSelector';
 import { FaBuilding, FaIdCard, FaPhone, FaUser } from 'react-icons/fa6';
 import { FaMailBulk, FaMapMarkerAlt } from 'react-icons/fa';
+import { MdContacts } from 'react-icons/md';
 
 interface ClientSelectionStepProps {
   onConfirm: (
@@ -248,11 +249,11 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
               className="form-section-title"
               style={{
                 gridColumn: '1 / -1',
-                marginTop: '1rem',
+                marginTop: '0.5rem',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                color: 'var(--text-muted)',
+                color: 'var(--info)',
                 fontSize: '0.8rem'
               }}
             >
@@ -276,6 +277,24 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
                   })
                 }
               />
+            </div>
+            <div
+              className="form-section-title"
+              style={{
+                gridColumn: '1 / -1',
+                marginTop: '0.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: 'var(--info)',
+                fontSize: '0.8rem'
+              }}
+            >
+              <MapPin size={14} />{' '}
+              {t(
+                'connections.wizard.clientSelection.contact',
+                'Contactos'
+              ).toLocaleUpperCase()}
             </div>
 
             <div className="form-group">
@@ -553,11 +572,11 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
               className="form-section-title"
               style={{
                 gridColumn: '1 / -1',
-                marginTop: '1rem',
+                marginTop: '0.5rem',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                color: 'var(--text-muted)',
+                color: 'var(--info)',
                 fontSize: '0.8rem'
               }}
             >
@@ -583,6 +602,24 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
               />
             </div>
 
+            <div
+              className="form-section-title"
+              style={{
+                gridColumn: '1 / -1',
+                marginTop: '0.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                color: 'var(--info)',
+                fontSize: '0.8rem'
+              }}
+            >
+              <MdContacts size={14} />{' '}
+              {t(
+                'connections.wizard.clientSelection.contact',
+                'Contactos'
+              ).toLocaleUpperCase()}
+            </div>
             <div className="form-group">
               <label
                 className="input__label"
@@ -741,7 +778,7 @@ export const ClientSelectionStep: React.FC<ClientSelectionStepProps> = ({
           <div
             className="alert-success"
             style={{
-              marginTop: '1rem',
+              marginTop: '0.5rem',
               padding: '0.75rem',
               backgroundColor: 'rgba(34, 197, 94, 0.1)',
               color: 'var(--success)',

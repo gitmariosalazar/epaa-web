@@ -186,7 +186,9 @@
   border: 1px solid var(--border-color);
   background-color: #000;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .photo-thumbnail-card:hover {
@@ -234,7 +236,9 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
   z-index: 5;
 }
 

@@ -263,6 +263,8 @@ export const useConnectionsViewModel = () => {
 
   const initialFormState: Omit<Connection, 'connectionId'> = {
     clientId: '',
+    clientName: '',
+    clientAddress: '',
     connectionRateId: 0,
     connectionRateName: '',
     connectionMeterNumber: '',
@@ -365,6 +367,14 @@ export const useConnectionsViewModel = () => {
               const conn: Connection = {
                 connectionId: detail.connectionId,
                 clientId: detail.clientId,
+                clientName:
+                  detail.person?.firstName +
+                    ' ' +
+                    (detail.person?.lastName || '') ||
+                  detail.company?.businessName ||
+                  '',
+                clientAddress:
+                  detail.person?.address || detail.company?.address || '',
                 connectionRateId: Number(detail.connectionRateId),
                 connectionRateName: detail.connectionRateName,
                 connectionMeterNumber: detail.connectionMeterNumber || '',
@@ -593,6 +603,14 @@ export const useConnectionsViewModel = () => {
 
       const mappedFormData: Omit<Connection, 'connectionId'> = {
         clientId: fullData.clientId,
+        clientName:
+          fullData.person?.firstName +
+            ' ' +
+            (fullData.person?.lastName || '') ||
+          fullData.company?.businessName ||
+          '',
+        clientAddress:
+          fullData.person?.address || fullData.company?.address || '',
         connectionRateId: Number(fullData.connectionRateId),
         connectionRateName: fullData.connectionRateName,
         connectionMeterNumber: fullData.connectionMeterNumber ?? '',
@@ -685,6 +703,14 @@ export const useConnectionsViewModel = () => {
       const conn: Connection = {
         connectionId: fullData.connectionId,
         clientId: fullData.clientId,
+        clientName:
+          fullData.person?.firstName +
+            ' ' +
+            (fullData.person?.lastName || '') ||
+          fullData.company?.businessName ||
+          '',
+        clientAddress:
+          fullData.person?.address || fullData.company?.address || '',
         connectionRateId: Number(fullData.connectionRateId),
         connectionRateName: fullData.connectionRateName,
         connectionMeterNumber: fullData.connectionMeterNumber || '',
@@ -856,13 +882,23 @@ export const useConnectionsViewModel = () => {
       const d = data as CreateCustomerRequest;
       const rawId = (d.customerId || '').toString().trim();
       const formattedId = rawId.length === 9 ? rawId.padStart(10, '0') : rawId;
+      const parsedDob =
+        d.dateOfBirth instanceof Date
+          ? d.dateOfBirth
+          : d.dateOfBirth
+            ? new Date(d.dateOfBirth as unknown as string)
+            : new Date();
+      const safeDobIso = isNaN(parsedDob.getTime())
+        ? new Date().toISOString()
+        : parsedDob.toISOString();
+
       const customer: Customer = {
         customerId: formattedId,
         firstName: d.firstName,
         lastName: d.lastName,
         emails: d.emails,
         phoneNumbers: d.phoneNumbers,
-        dateOfBirth: d.dateOfBirth.toISOString(),
+        dateOfBirth: safeDobIso,
         sexId: d.sexId,
         civilStatus: d.civilStatus,
         address: d.address,
