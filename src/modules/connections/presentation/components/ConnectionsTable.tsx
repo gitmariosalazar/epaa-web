@@ -12,13 +12,22 @@ import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Check, CheckCircle, EyeIcon, X } from 'lucide-react';
+import {
+  AlertTriangle,
+  Camera,
+  Check,
+  CheckCircle,
+  EyeIcon,
+  Printer,
+  X
+} from 'lucide-react';
 import { FaTrashCan } from 'react-icons/fa6';
 import { FaEdit, FaMapMarkerAlt } from 'react-icons/fa';
 import type {
   Connection,
   ConnectionWithoutProperty
 } from '../../domain/models/Connection';
+import type { UpdateConnectionBasicRequest } from '../../domain/models/UpdateConnectionBasic';
 import type { SortConfig } from '../hooks/useConnectionsViewModel';
 import { IoInformationCircleOutline, IoWaterSharp } from 'react-icons/io5';
 import { getConnectionStateChip } from '../utils/connectionStateChip';
@@ -26,10 +35,10 @@ import { BsTable } from 'react-icons/bs';
 import { GiHexagonalNut } from 'react-icons/gi';
 
 import { ConnectionDetailModal } from './ConnectionDetailModal';
+import { ConnectionPhotoEvidenceModal } from './ConnectionPhotoEvidenceModal';
 import { DocumentPreviewModal } from '@/shared/presentation/components/DocumentPreviewModal';
 import { useConnectionsContext } from '../context/ConnectionContext';
 import { TechnicalDataSheetPdfGenerator } from './templates/pdf/TechnicalDataSheetPdfGenerator';
-import { Printer } from 'lucide-react';
 // ── Props ──────────────────────────────────────────────────────────────────────
 interface ConnectionsTableProps {
   data: Connection[];
@@ -44,6 +53,10 @@ interface ConnectionsTableProps {
   /** Navega a la lista de incidentes filtrando por esta acometida (delegado al padre) */
   onViewIncidentsOnTable?: (connectionId: string) => void;
   onViewIncidentsOnMap?: (connectionId: string) => void;
+  /** Handler opcional del ViewModel para actualizar fotos de evidencia y medidor */
+  onUpdateConnectionBasic?: (
+    request: UpdateConnectionBasicRequest
+  ) => Promise<boolean>;
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -58,11 +71,14 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
   hasMore,
   onViewOnMap,
   onViewIncidentsOnTable,
-  onViewIncidentsOnMap
+  onViewIncidentsOnMap,
+  onUpdateConnectionBasic
 }) => {
   const { t } = useTranslation();
   const { findAllConnectionsWithPropertyUseCase } = useConnectionsContext();
   const [selectedConnection, setSelectedConnection] =
+    useState<Connection | null>(null);
+  const [evidenceConnection, setEvidenceConnection] =
     useState<Connection | null>(null);
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -439,6 +455,17 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
                 <Printer size={14} />
               </Button>
             </Tooltip>
+            <Tooltip content="Evidencias Fotográficas" position="top">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setEvidenceConnection(row)}
+                circle
+                style={{ color: 'var(--primary)' }}
+              >
+                <Camera size={14} />
+              </Button>
+            </Tooltip>
           </div>
         )
       }
@@ -478,6 +505,12 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         label: '-',
         onClick: () => {},
         divider: true
+      },
+      {
+        label: 'Evidencias Fotográficas',
+        onClick: () => setEvidenceConnection(item),
+        icon: <Camera size={14} />,
+        color: 'primary'
       },
       {
         label: 'Generar Ficha Técnica PDF',
@@ -579,6 +612,14 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         onClose={() => setSelectedConnection(null)}
         cadastralKey={selectedConnection?.connectionCadastralKey || null}
       />
+
+      <ConnectionPhotoEvidenceModal
+        isOpen={evidenceConnection !== null}
+        onClose={() => setEvidenceConnection(null)}
+        connection={evidenceConnection}
+        onUpdateConnectionBasic={onUpdateConnectionBasic}
+      />
+
       {PdfPreviewModal}
 
       <DocumentPreviewModal

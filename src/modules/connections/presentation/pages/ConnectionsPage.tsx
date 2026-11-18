@@ -159,6 +159,7 @@ export const ConnectionsPage = () => {
             `/incidents/map?connectionId=${encodeURIComponent(connectionId)}`
           )
         }
+        onUpdateConnectionBasic={actions.updateConnectionBasic}
       />
     );
   };

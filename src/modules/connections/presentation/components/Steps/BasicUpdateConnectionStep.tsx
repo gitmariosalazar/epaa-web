@@ -38,6 +38,8 @@ export interface BasicUpdateConnectionStepProps {
   handleWizardSave: (basicUpdateData?: BasicUpdatePayload) => Promise<void>;
   wizardLoading: boolean;
   hideFooterActions?: boolean;
+  formId?: string;
+  headerTitle?: string;
 }
 
 export const BasicUpdateConnectionStep: React.FC<
@@ -49,7 +51,9 @@ export const BasicUpdateConnectionStep: React.FC<
   prevStep,
   handleWizardSave,
   wizardLoading,
-  hideFooterActions = false
+  hideFooterActions = false,
+  formId = 'basic-update-connection-form',
+  headerTitle
 }) => {
   const { t } = useTranslation();
 
@@ -218,17 +222,18 @@ export const BasicUpdateConnectionStep: React.FC<
 
   return (
     <form
-      id="basic-update-connection-form"
+      id={formId}
       onSubmit={handleSubmit}
       className="basic-update-step-container"
     >
       {/* Header */}
       <div className="basic-update-header">
         <h3>
-          {t(
-            'connections.wizard.basicUpdate.title',
-            'Paso 5: Evidencia Fotográfica y Medidor'
-          )}
+          {headerTitle ||
+            t(
+              'connections.wizard.basicUpdate.title',
+              'Paso 5: Evidencia Fotográfica y Medidor'
+            )}
         </h3>
         <p>
           {t(
