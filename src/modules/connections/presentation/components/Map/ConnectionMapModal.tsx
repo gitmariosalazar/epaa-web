@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
-import { APIProvider, Map, AdvancedMarker, InfoWindow } from '@vis.gl/react-google-maps';
+import {
+  APIProvider,
+  Map,
+  AdvancedMarker,
+  InfoWindow
+} from '@vis.gl/react-google-maps';
 import type { Connection } from '../../../domain/models/Connection';
 import { useTheme } from '@/shared/presentation/context/ThemeContext';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { MapMarker } from './MapMarker';
 import { MapInfoWindow } from './MapInfoWindow';
+import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface ConnectionMapModalProps {
   isOpen: boolean;
@@ -30,7 +37,7 @@ export const ConnectionMapModal: React.FC<ConnectionMapModalProps> = ({
   const lat = Number(connection.latitude);
   const lng = Number(connection.longitude);
   const hasValidCoords = !isNaN(lat) && !isNaN(lng) && (lat !== 0 || lng !== 0);
-  
+
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
   const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID';
 
@@ -42,7 +49,14 @@ export const ConnectionMapModal: React.FC<ConnectionMapModalProps> = ({
       size="full"
       icon={<FaMapMarkerAlt size={20} />}
     >
-      <div style={{ height: '75vh', width: '100%', borderRadius: '8px', overflow: 'hidden' }}>
+      <div
+        style={{
+          height: '75vh',
+          width: '100%',
+          borderRadius: '8px',
+          overflow: 'hidden'
+        }}
+      >
         {hasValidCoords ? (
           <APIProvider apiKey={apiKey} libraries={['marker']}>
             <Map
@@ -56,8 +70,8 @@ export const ConnectionMapModal: React.FC<ConnectionMapModalProps> = ({
               streetViewControl={true}
               fullscreenControl={true}
             >
-              <AdvancedMarker 
-                position={{ lat, lng }} 
+              <AdvancedMarker
+                position={{ lat, lng }}
                 onClick={() => setInfoWindowOpen(true)}
               >
                 <MapMarker
@@ -86,8 +100,21 @@ export const ConnectionMapModal: React.FC<ConnectionMapModalProps> = ({
             </Map>
           </APIProvider>
         ) : (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: 'var(--text-secondary)' }}>
-            No hay coordenadas válidas para esta acometida.
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
+              color: 'var(--text-secondary)'
+            }}
+          >
+            <EmptyState
+              message="No hay coordenadas válidas"
+              description="Esta acometida no tiene coordenadas válidas para mostrar en el mapa."
+              icon={<IoInformationCircleOutline size={40} />}
+              variant="warning"
+            />
           </div>
         )}
       </div>

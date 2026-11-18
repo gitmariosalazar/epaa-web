@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { Suspense, lazy, useEffect, useMemo } from 'react';
 import {
   BrowserRouter,
   Routes,
@@ -13,101 +13,336 @@ import {
 import { ThemeProvider } from '@/shared/presentation/context/ThemeContext';
 import { LoginPage } from '@/modules/auth/presentation/pages/auth/LoginPage';
 import { DashboardLayout } from '@/shared/presentation/components/Layout/DashboardLayout';
-import { DashboardHome } from '@/modules/dashboard/presentation/pages/dashboard/DashboardHome';
-import { UsersPage } from '@/modules/users/presentation/pages/users/UsersPage';
-import {
-  CustomersLayout,
-  NaturalPersonsPage,
-  CompaniesPage,
-  GeneralCustomersPage
-} from '@/modules/customers/presentation/pages';
-import { UserDetailPage } from '@/modules/users/presentation/pages/users/UserDetailPage';
-import { RolesPage } from '@/modules/roles/presentation/pages/roles/RolesPage';
-import { PositionsPage } from '@/modules/roles/presentation/pages/positions/PositionsPage';
-import { ConnectionsPage } from '@/modules/connections/presentation/pages/ConnectionsPage';
-import { ConnectionsDashboardPage } from '@/modules/connections/presentation/pages/ConnectionsDashboardPage/ConnectionsDashboardPage';
-import { PermissionsPage } from '@/modules/permissions/presentation/pages/permissions/PermissionsPage';
 import { PermissionsProvider } from '@/modules/permissions/presentation/context/PermissionsContext';
-import { AuditPage } from '@/modules/audit/presentation/pages/AuditPage';
-import { ProfilePage } from '@/modules/users/presentation/pages/profile/ProfilePage';
 import { UsersProvider } from '@/modules/users/presentation/context/UsersContext';
-import { SettingsPage } from '@/shared/presentation/pages/settings/SettingsPage';
-import { ReportsPage } from '@/modules/dashboard/presentation/pages/reports/ReportsPage';
 import './index.css';
 import { RolesProvider } from '@/modules/roles/presentation/context/RolesContext';
 import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
 import { ReadingsProvider } from '@/modules/readings/presentation/context/ReadingsContext';
-import { CreateReadingPage } from '@/modules/readings/presentation/pages/CreateReadingPage';
-import { CreateHistoricalReadingPage } from '@/modules/readings/presentation/pages/CreateHistoricalReadingPage';
 import { PaymentsProvider } from '@/modules/accounting/presentation/context/payments/PaymentsContext';
-import { PaymentsPage } from '@/modules/accounting/presentation/pages/payments/PaymentsPage';
 import { EntryDataProvider } from '@/modules/accounting/presentation/context/entry-data/EntryDataContext';
-import { EntryDataPage } from '@/modules/accounting/presentation/pages/entry-data/EntryDataPage';
-import { ReadingsListPage } from '@/modules/readings/presentation/pages/ReadingsListPage';
-import { ReadingAuditPage } from '@/modules/readings/presentation/pages/ReadingAuditPage';
-import { ReadingImagesPage } from '@/modules/readings/presentation/pages/ReadingImagesPage';
 import { TrashRateReportProvider } from './modules/trash/presentation/context/TrashRateReportContext';
-import { TrashRateReportPage } from './modules/trash/presentation/pages/TrashRateReportPage';
-import { TrashRateKPIPage } from './modules/trash/presentation/pages/TrashRateKPIPage';
-import { UpdateReadingPage } from './modules/readings/presentation/pages/UpdateReadingPage';
 import { GetPropertyContextProvider } from '@/modules/properties/presentation/context/GetPropertiesContext';
-import { PropertiesPage } from '@/modules/properties/presentation/pages/PropertiesPage';
-import { OverduePaymentsPage } from './modules/accounting/presentation/pages/overdue/OverduePaymentsPage';
 import { GeneralCollectionProvider } from '@/modules/accounting/presentation/context/general-collection/GeneralCollectionContext';
-import { GeneralCollectionPage } from '@/modules/accounting/presentation/pages/general-collection/GeneralCollectionPage';
 import { AgreementsProvider } from '@/modules/accounting/presentation/context/agreements/AgreementsContext';
-import { AgreementsPage } from '@/modules/accounting/presentation/pages/agreements/AgreementsPage';
-import { PendingBillsPage } from '@/modules/accounting/presentation/pages/pending-bills/PendingBillsPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { VersionChecker } from '@/shared/presentation/components/VersionChecker/VersionChecker';
-
-// Notifications Module
-import { NotificationsPage } from '@/modules/notifications/presentation/pages/NotificationsPage';
-
-// Tramites Module
 import { TramitesProvider } from '@/modules/tramites/presentation/context/TramitesContext';
-import { TramitesCatalogPage } from '@/modules/tramites/presentation/pages/TramitesCatalogPage';
-import { TramiteDetailPage } from '@/modules/tramites/presentation/pages/TramiteDetailPage';
-
-// Procedures Requirements Pages
-import { CambioTitularPage } from '@/modules/processes/cambio-titular/presentation/pages/CambioTitularPage';
-import { SuspensionPage } from '@/modules/processes/suspension/presentation/pages/SuspensionPage';
-import { BeneficioTerceraEdadPage } from '@/modules/processes/beneficio-tercera-edad/presentation/pages/BeneficioTerceraEdadPage';
-import { BeneficioDiscapacidadPage } from '@/modules/processes/beneficio-discapacidad/presentation/pages/BeneficioDiscapacidadPage';
-
-// Solicitudes Module
 import { SolicitudesProvider } from '@/modules/processes/solicitudes/presentation/context/SolicitudesContext';
-import { SolicitudNuevaPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudNuevaPage';
-import { SolicitudesTrackingPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudesTrackingPage';
-import { SolicitudesListPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudesListPage';
-import { SolicitudDetailPage } from '@/modules/processes/solicitudes/presentation/pages/SolicitudDetailPage';
-// Work Orders Module
-import { WorkOrdersProcessPage, WorkOrderCreatePage, AllWorkOrdersListPage, WorkOrderDetailPage, WorkOrderSearchPage, WorkOrdersDashboardPage } from '@/modules/work-orders/presentation/pages';
-
-// Network Operations Module
 import { NetworkOperationsProvider } from '@/modules/network-operations/presentation/context/NetworkOperationsContext';
-import { ScadaDashboardPage } from '@/modules/network-operations/presentation/pages/ScadaDashboardPage/ScadaDashboardPage';
-
-// Incidents Module
 import { IncidentProvider } from '@/modules/incidents/presentation/context/IncidentContext';
-//import { IncidentsListPage } from '@/modules/incidents/presentation/pages/IncidentsListPage';
-//import { IncidentsMapPage } from '@/modules/incidents/presentation/pages/IncidentsMapPage';
-import { IncidentsPage } from '@/modules/incidents/presentation/pages/IncidentsPage';
-import { IncidentDashboardPage } from '@/modules/incidents/presentation/pages/IncidentDashboardPage';
-import { CreateIncidentPage } from '@/modules/incidents/presentation/pages/CreateIncidentPage';
-
-import UnAuthorizedPage from '@/shared/presentation/components/unauthorized/UnAuthorizedPage';
 import { CircularProgress } from './shared/presentation/components/CircularProgress';
 import type { RolOrPermission } from './shared/utils/interfaces/RolOrPermission';
-import { ReadingReports } from './modules/readings/presentation/pages/ReadingReports';
-import { ReadingsWithErrors } from './modules/readings/presentation/pages/ReadingsWithErrors';
 import { RequireElevatedToken } from './modules/auth/presentation/components/RequireElevatedToken';
-import { UpdateSpecialReadingPage } from './modules/readings/presentation/pages/UpdateSpecialReadingPage';
-import { ReadingsReconciliationPage, ReadingsAnalyticsPage } from './modules/readings/presentation/pages';
-import { ReadingsDashboardPage } from './modules/readings/presentation/pages/ReadingsDashboardPage';
 import { ReadingRoutesProvider } from '@/modules/reading-routes/presentation/context/ReadingRoutesContext';
-import { ReadingRoutesPage } from '@/modules/reading-routes/presentation/pages/ReadingRoutesPage/ReadingRoutesPage';
+import { lazyNamed } from '@/shared/utils/lazyNamed';
+
+// ── Lazy-loaded Pages (Code Splitting by Domain Module — SRP & OCP) ───────────
+const UnAuthorizedPage = lazy(
+  () => import('@/shared/presentation/components/unauthorized/UnAuthorizedPage')
+);
+
+// Dashboard & Reports
+const DashboardHome = lazyNamed(
+  () => import('@/modules/dashboard/presentation/pages/dashboard/DashboardHome'),
+  'DashboardHome'
+);
+const ReportsPage = lazyNamed(
+  () => import('@/modules/dashboard/presentation/pages/reports/ReportsPage'),
+  'ReportsPage'
+);
+
+// Users, Roles, Permissions, Audit & Settings
+const UsersPage = lazyNamed(
+  () => import('@/modules/users/presentation/pages/users/UsersPage'),
+  'UsersPage'
+);
+const UserDetailPage = lazyNamed(
+  () => import('@/modules/users/presentation/pages/users/UserDetailPage'),
+  'UserDetailPage'
+);
+const ProfilePage = lazyNamed(
+  () => import('@/modules/users/presentation/pages/profile/ProfilePage'),
+  'ProfilePage'
+);
+const RolesPage = lazyNamed(
+  () => import('@/modules/roles/presentation/pages/roles/RolesPage'),
+  'RolesPage'
+);
+const PositionsPage = lazyNamed(
+  () => import('@/modules/roles/presentation/pages/positions/PositionsPage'),
+  'PositionsPage'
+);
+const PermissionsPage = lazyNamed(
+  () => import('@/modules/permissions/presentation/pages/permissions/PermissionsPage'),
+  'PermissionsPage'
+);
+const AuditPage = lazyNamed(
+  () => import('@/modules/audit/presentation/pages/AuditPage'),
+  'AuditPage'
+);
+const SettingsPage = lazyNamed(
+  () => import('@/shared/presentation/pages/settings/SettingsPage'),
+  'SettingsPage'
+);
+
+// Customers Module
+const CustomersLayout = lazyNamed(
+  () => import('@/modules/customers/presentation/pages'),
+  'CustomersLayout'
+);
+const NaturalPersonsPage = lazyNamed(
+  () => import('@/modules/customers/presentation/pages'),
+  'NaturalPersonsPage'
+);
+const CompaniesPage = lazyNamed(
+  () => import('@/modules/customers/presentation/pages'),
+  'CompaniesPage'
+);
+const GeneralCustomersPage = lazyNamed(
+  () => import('@/modules/customers/presentation/pages'),
+  'GeneralCustomersPage'
+);
+
+// Connections Module
+const ConnectionsPage = lazyNamed(
+  () => import('@/modules/connections/presentation/pages/ConnectionsPage'),
+  'ConnectionsPage'
+);
+const ConnectionsDashboardPage = lazyNamed(
+  () =>
+    import(
+      '@/modules/connections/presentation/pages/ConnectionsDashboardPage/ConnectionsDashboardPage'
+    ),
+  'ConnectionsDashboardPage'
+);
+
+// Accounting Module
+const PaymentsPage = lazyNamed(
+  () => import('@/modules/accounting/presentation/pages/payments/PaymentsPage'),
+  'PaymentsPage'
+);
+const EntryDataPage = lazyNamed(
+  () => import('@/modules/accounting/presentation/pages/entry-data/EntryDataPage'),
+  'EntryDataPage'
+);
+const OverduePaymentsPage = lazyNamed(
+  () => import('./modules/accounting/presentation/pages/overdue/OverduePaymentsPage'),
+  'OverduePaymentsPage'
+);
+const GeneralCollectionPage = lazyNamed(
+  () =>
+    import(
+      '@/modules/accounting/presentation/pages/general-collection/GeneralCollectionPage'
+    ),
+  'GeneralCollectionPage'
+);
+const AgreementsPage = lazyNamed(
+  () => import('@/modules/accounting/presentation/pages/agreements/AgreementsPage'),
+  'AgreementsPage'
+);
+const PendingBillsPage = lazyNamed(
+  () =>
+    import('@/modules/accounting/presentation/pages/pending-bills/PendingBillsPage'),
+  'PendingBillsPage'
+);
+
+// Readings & Reading Routes Module
+const CreateReadingPage = lazyNamed(
+  () => import('@/modules/readings/presentation/pages/CreateReadingPage'),
+  'CreateReadingPage'
+);
+const CreateHistoricalReadingPage = lazyNamed(
+  () =>
+    import('@/modules/readings/presentation/pages/CreateHistoricalReadingPage'),
+  'CreateHistoricalReadingPage'
+);
+const ReadingsListPage = lazyNamed(
+  () => import('@/modules/readings/presentation/pages/ReadingsListPage'),
+  'ReadingsListPage'
+);
+const ReadingAuditPage = lazyNamed(
+  () => import('@/modules/readings/presentation/pages/ReadingAuditPage'),
+  'ReadingAuditPage'
+);
+const ReadingImagesPage = lazyNamed(
+  () => import('@/modules/readings/presentation/pages/ReadingImagesPage'),
+  'ReadingImagesPage'
+);
+const UpdateReadingPage = lazyNamed(
+  () => import('./modules/readings/presentation/pages/UpdateReadingPage'),
+  'UpdateReadingPage'
+);
+const ReadingReports = lazyNamed(
+  () => import('./modules/readings/presentation/pages/ReadingReports'),
+  'ReadingReports'
+);
+const ReadingsWithErrors = lazyNamed(
+  () => import('./modules/readings/presentation/pages/ReadingsWithErrors'),
+  'ReadingsWithErrors'
+);
+const UpdateSpecialReadingPage = lazyNamed(
+  () => import('./modules/readings/presentation/pages/UpdateSpecialReadingPage'),
+  'UpdateSpecialReadingPage'
+);
+const ReadingsReconciliationPage = lazyNamed(
+  () => import('./modules/readings/presentation/pages'),
+  'ReadingsReconciliationPage'
+);
+const ReadingsAnalyticsPage = lazyNamed(
+  () => import('./modules/readings/presentation/pages'),
+  'ReadingsAnalyticsPage'
+);
+const ReadingsDashboardPage = lazyNamed(
+  () => import('./modules/readings/presentation/pages/ReadingsDashboardPage'),
+  'ReadingsDashboardPage'
+);
+const ReadingRoutesPage = lazyNamed(
+  () =>
+    import(
+      '@/modules/reading-routes/presentation/pages/ReadingRoutesPage/ReadingRoutesPage'
+    ),
+  'ReadingRoutesPage'
+);
+
+// Trash Rate & Properties Modules
+const TrashRateReportPage = lazyNamed(
+  () => import('./modules/trash/presentation/pages/TrashRateReportPage'),
+  'TrashRateReportPage'
+);
+const TrashRateKPIPage = lazyNamed(
+  () => import('./modules/trash/presentation/pages/TrashRateKPIPage'),
+  'TrashRateKPIPage'
+);
+const PropertiesPage = lazyNamed(
+  () => import('@/modules/properties/presentation/pages/PropertiesPage'),
+  'PropertiesPage'
+);
+
+// Notifications Module
+const NotificationsPage = lazyNamed(
+  () => import('@/modules/notifications/presentation/pages/NotificationsPage'),
+  'NotificationsPage'
+);
+
+// Tramites, Procedures & Solicitudes Modules
+const TramitesCatalogPage = lazyNamed(
+  () => import('@/modules/tramites/presentation/pages/TramitesCatalogPage'),
+  'TramitesCatalogPage'
+);
+const TramiteDetailPage = lazyNamed(
+  () => import('@/modules/tramites/presentation/pages/TramiteDetailPage'),
+  'TramiteDetailPage'
+);
+const CambioTitularPage = lazyNamed(
+  () =>
+    import(
+      '@/modules/processes/cambio-titular/presentation/pages/CambioTitularPage'
+    ),
+  'CambioTitularPage'
+);
+const SuspensionPage = lazyNamed(
+  () => import('@/modules/processes/suspension/presentation/pages/SuspensionPage'),
+  'SuspensionPage'
+);
+const BeneficioTerceraEdadPage = lazyNamed(
+  () =>
+    import(
+      '@/modules/processes/beneficio-tercera-edad/presentation/pages/BeneficioTerceraEdadPage'
+    ),
+  'BeneficioTerceraEdadPage'
+);
+const BeneficioDiscapacidadPage = lazyNamed(
+  () =>
+    import(
+      '@/modules/processes/beneficio-discapacidad/presentation/pages/BeneficioDiscapacidadPage'
+    ),
+  'BeneficioDiscapacidadPage'
+);
+const SolicitudNuevaPage = lazyNamed(
+  () =>
+    import(
+      '@/modules/processes/solicitudes/presentation/pages/SolicitudNuevaPage'
+    ),
+  'SolicitudNuevaPage'
+);
+const SolicitudesTrackingPage = lazyNamed(
+  () =>
+    import(
+      '@/modules/processes/solicitudes/presentation/pages/SolicitudesTrackingPage'
+    ),
+  'SolicitudesTrackingPage'
+);
+const SolicitudesListPage = lazyNamed(
+  () =>
+    import(
+      '@/modules/processes/solicitudes/presentation/pages/SolicitudesListPage'
+    ),
+  'SolicitudesListPage'
+);
+const SolicitudDetailPage = lazyNamed(
+  () =>
+    import(
+      '@/modules/processes/solicitudes/presentation/pages/SolicitudDetailPage'
+    ),
+  'SolicitudDetailPage'
+);
+
+// Work Orders Module
+const WorkOrdersProcessPage = lazyNamed(
+  () => import('@/modules/work-orders/presentation/pages'),
+  'WorkOrdersProcessPage'
+);
+const WorkOrderCreatePage = lazyNamed(
+  () => import('@/modules/work-orders/presentation/pages'),
+  'WorkOrderCreatePage'
+);
+const AllWorkOrdersListPage = lazyNamed(
+  () => import('@/modules/work-orders/presentation/pages'),
+  'AllWorkOrdersListPage'
+);
+const WorkOrderDetailPage = lazyNamed(
+  () => import('@/modules/work-orders/presentation/pages'),
+  'WorkOrderDetailPage'
+);
+const WorkOrderSearchPage = lazyNamed(
+  () => import('@/modules/work-orders/presentation/pages'),
+  'WorkOrderSearchPage'
+);
+const WorkOrdersDashboardPage = lazyNamed(
+  () => import('@/modules/work-orders/presentation/pages'),
+  'WorkOrdersDashboardPage'
+);
+
+// Network Operations (SCADA) Module
+const ScadaDashboardPage = lazyNamed(
+  () =>
+    import(
+      '@/modules/network-operations/presentation/pages/ScadaDashboardPage/ScadaDashboardPage'
+    ),
+  'ScadaDashboardPage'
+);
+
+// Incidents Module
+const IncidentsPage = lazyNamed(
+  () => import('@/modules/incidents/presentation/pages/IncidentsPage'),
+  'IncidentsPage'
+);
+const IncidentDashboardPage = lazyNamed(
+  () => import('@/modules/incidents/presentation/pages/IncidentDashboardPage'),
+  'IncidentDashboardPage'
+);
+const CreateIncidentPage = lazyNamed(
+  () => import('@/modules/incidents/presentation/pages/CreateIncidentPage'),
+  'CreateIncidentPage'
+);
+
+const PageSuspenseFallback = () => (
+  <div className="circular-progress">
+    <CircularProgress />
+  </div>
+);
 
 const ProtectedRoute = () => {
   const { token, user, isLoading, isVerifying, logout } = useAuth();
@@ -215,7 +450,8 @@ function App() {
         <VersionChecker />
         <UsersProvider>
           <BrowserRouter>
-            <Routes>
+            <Suspense fallback={<PageSuspenseFallback />}>
+              <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/unauthorized" element={<UnAuthorizedPage />} />
               <Route element={<ProtectedRoute />}>
@@ -620,7 +856,8 @@ function App() {
                   />
                 </Route>
               </Route>
-            </Routes>
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </UsersProvider>
       </ThemeProvider>
