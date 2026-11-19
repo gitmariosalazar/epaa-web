@@ -18,6 +18,7 @@ import { UsersProvider } from '@/modules/users/presentation/context/UsersContext
 import './index.css';
 import { RolesProvider } from '@/modules/roles/presentation/context/RolesContext';
 import { ConnectionProvider } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
+import { StateHistoryProvider } from '@/modules/connections/state-history';
 import { ReadingsProvider } from '@/modules/readings/presentation/context/ReadingsContext';
 import { PaymentsProvider } from '@/modules/accounting/presentation/context/payments/PaymentsContext';
 import { EntryDataProvider } from '@/modules/accounting/presentation/context/entry-data/EntryDataContext';
@@ -37,6 +38,7 @@ import type { RolOrPermission } from './shared/utils/interfaces/RolOrPermission'
 import { RequireElevatedToken } from './modules/auth/presentation/components/RequireElevatedToken';
 import { ReadingRoutesProvider } from '@/modules/reading-routes/presentation/context/ReadingRoutesContext';
 import { lazyNamed } from '@/shared/utils/lazyNamed';
+import { SeasonalProvider, SeasonalOverlay } from '@/shared/seasonal';
 
 // ── Lazy-loaded Pages (Code Splitting by Domain Module — SRP & OCP) ───────────
 const UnAuthorizedPage = lazy(
@@ -117,6 +119,11 @@ const ConnectionsDashboardPage = lazyNamed(
   () =>
     import('@/modules/connections/service-connections/presentation/pages/ConnectionsDashboardPage/ConnectionsDashboardPage'),
   'ConnectionsDashboardPage'
+);
+const StateHistoryAuditPage = lazyNamed(
+  () =>
+    import('@/modules/connections/state-history/presentation/pages/StateHistoryAuditPage'),
+  'StateHistoryAuditPage'
 );
 
 // Accounting Module
@@ -324,6 +331,12 @@ const CreateIncidentPage = lazyNamed(
   'CreateIncidentPage'
 );
 
+const UnderDevelopmentPage = lazyNamed(
+  () =>
+    import('@/shared/presentation/components/common/develop/UnderDevelopment'),
+  'UnderDevelopment'
+);
+
 const PageSuspenseFallback = () => (
   <div className="circular-progress">
     <CircularProgress />
@@ -423,11 +436,15 @@ const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
   return <Outlet />;
 };
 
+const isUnderDevelopment = true;
+
 function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <ToastContainer
+        <SeasonalProvider>
+          <SeasonalOverlay />
+          <ToastContainer
           position="top-right"
           autoClose={4500}
           hideProgressBar={false}
@@ -491,20 +508,35 @@ function App() {
                     <Route
                       path="/connections/*"
                       element={
-                        <ConnectionProvider>
-                          <Routes>
-                            <Route
-                              index
-                              element={<Navigate to="list" replace />}
-                            />
-                            <Route path="list" element={<ConnectionsPage />} />
-                            <Route path="map" element={<ConnectionsPage />} />
-                            <Route
-                              path="dashboard"
-                              element={<ConnectionsDashboardPage />}
-                            />
-                          </Routes>
-                        </ConnectionProvider>
+                        <StateHistoryProvider>
+                          <ConnectionProvider>
+                            <Routes>
+                              <Route
+                                index
+                                element={<Navigate to="list" replace />}
+                              />
+                              <Route
+                                path="list"
+                                element={<ConnectionsPage />}
+                              />
+                              <Route path="map" element={<ConnectionsPage />} />
+                              <Route
+                                path="dashboard"
+                                element={<ConnectionsDashboardPage />}
+                              />
+                              <Route
+                                path="state-history"
+                                element={
+                                  isUnderDevelopment ? (
+                                    <UnderDevelopmentPage />
+                                  ) : (
+                                    <StateHistoryAuditPage />
+                                  )
+                                }
+                              />
+                            </Routes>
+                          </ConnectionProvider>
+                        </StateHistoryProvider>
                       }
                     />
                     <Route
@@ -885,6 +917,7 @@ function App() {
             </Suspense>
           </BrowserRouter>
         </UsersProvider>
+        </SeasonalProvider>
       </ThemeProvider>
     </AuthProvider>
   );

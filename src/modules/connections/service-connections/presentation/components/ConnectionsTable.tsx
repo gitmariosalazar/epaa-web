@@ -19,8 +19,16 @@ import {
   CheckCircle,
   EyeIcon,
   Printer,
-  X
+  X,
+  History,
+  Sparkles,
+  RotateCcw
 } from 'lucide-react';
+import {
+  ConnectionStateHistoryModal,
+  ChangeConnectionStateModal,
+  RevertStateHistoryModal
+} from '@/modules/connections/state-history';
 import { FaTrashCan } from 'react-icons/fa6';
 import { FaEdit, FaMapMarkerAlt } from 'react-icons/fa';
 import type {
@@ -79,6 +87,13 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
   const [selectedConnection, setSelectedConnection] =
     useState<Connection | null>(null);
   const [evidenceConnection, setEvidenceConnection] =
+    useState<Connection | null>(null);
+  const [historyConnectionId, setHistoryConnectionId] = useState<string | null>(
+    null
+  );
+  const [changeStateConnection, setChangeStateConnection] =
+    useState<Connection | null>(null);
+  const [revertStateConnection, setRevertStateConnection] =
     useState<Connection | null>(null);
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -517,6 +532,32 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         onClick: () => handlePreviewPdf(item),
         icon: <Printer size={14} />,
         color: 'primary'
+      },
+      {
+        label: '-',
+        onClick: () => {},
+        divider: true
+      },
+      {
+        label: 'Historial de Estados',
+        onClick: () => setHistoryConnectionId(item.connectionId),
+        icon: <History size={14} />,
+        color: 'primary',
+        disabled: true
+      },
+      {
+        label: 'Cambiar Estado',
+        onClick: () => setChangeStateConnection(item),
+        icon: <Sparkles size={14} />,
+        color: 'purple',
+        disabled: true
+      },
+      {
+        label: 'Revertir Estado',
+        onClick: () => setRevertStateConnection(item),
+        icon: <RotateCcw size={14} />,
+        color: 'danger',
+        disabled: true
       }
     ];
     return items;
@@ -630,6 +671,31 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         title="Vista Previa de Ficha Técnica"
         fileName={fileNamePDF || 'FICHA_TECNICA.pdf'}
       />
+
+      <ConnectionStateHistoryModal
+        isOpen={historyConnectionId !== null}
+        onClose={() => setHistoryConnectionId(null)}
+        connectionId={historyConnectionId}
+      />
+
+      {changeStateConnection && (
+        <ChangeConnectionStateModal
+          isOpen={true}
+          onClose={() => setChangeStateConnection(null)}
+          connectionId={changeStateConnection.connectionId}
+          currentStatusName={
+            changeStateConnection.connectionStatus ? 'ACTIVA' : 'INACTIVA'
+          }
+        />
+      )}
+
+      {revertStateConnection && (
+        <RevertStateHistoryModal
+          isOpen={true}
+          onClose={() => setRevertStateConnection(null)}
+          connectionId={revertStateConnection.connectionId}
+        />
+      )}
     </div>
   );
 };

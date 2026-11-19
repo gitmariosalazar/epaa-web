@@ -252,22 +252,43 @@ export const Table = <T extends { [key: string]: any }>({
     setCurrentLimit(pageSize);
   }, [pageSize]);
 
+  const safeData = React.useMemo<T[]>(() => {
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object') {
+      const candidate = (data as any).items || (data as any).records || (data as any).data;
+      if (Array.isArray(candidate)) return candidate;
+    }
+    return [];
+  }, [data]);
+
   const processedData = React.useMemo(() => {
     if (disableLocalFiltering || filters.length === 0) {
-      return data;
+      return safeData;
     }
-    return applyTableFilters(data, filters, columns);
-  }, [data, filters, columns, disableLocalFiltering]);
+    return applyTableFilters(safeData, filters, columns);
+  }, [safeData, filters, columns, disableLocalFiltering]);
 
   // Adjust page when data changes (e.g. new search or data refresh)
+  const prevDataLengthRef = React.useRef(processedData.length);
   React.useEffect(() => {
     if (serverSidePagination) return;
     const totalPages = Math.ceil(processedData.length / currentLimit);
-    // Only reset if current page is out of bounds
-    if (activeCurrentPage > totalPages && totalPages > 0) {
+
+    // If data shrank (e.g. search, filter applied, tab switch) and current page is out of bounds:
+    if (processedData.length < prevDataLengthRef.current && activeCurrentPage > totalPages) {
       setCurrentPage(1);
+    } else if (activeCurrentPage > totalPages && totalPages > 0) {
+      // If we are loading more via infinite/cursor pagination (hasMore === true), do NOT reset to 1
+      if (hasMore && onEndReached) {
+        prevDataLengthRef.current = processedData.length;
+        return;
+      }
+      // If out of bounds and no more data can be fetched, clamp to totalPages
+      setCurrentPage(totalPages);
     }
-  }, [processedData, currentLimit, activeCurrentPage, serverSidePagination]);
+
+    prevDataLengthRef.current = processedData.length;
+  }, [processedData.length, currentLimit, activeCurrentPage, serverSidePagination, hasMore, onEndReached]);
 
   const handleSort = (key: keyof T | string) => {
     if (!onSort) return;
@@ -320,6 +341,7 @@ export const Table = <T extends { [key: string]: any }>({
         onEndReached();
       }
     } else if (hasMore && onEndReached) {
+      if (isLoading) return;
       onEndReached();
       setCurrentPage((p: number) => p + 1);
     }
@@ -858,7 +880,10 @@ export const Table = <T extends { [key: string]: any }>({
                   content={t('common.pagination.next', 'Siguiente')}>
                   <button
                     onClick={handleNext}
-                    disabled={activeCurrentPage >= totalPages && !hasMore}
+                    disabled={
+                      (activeCurrentPage >= totalPages && !hasMore) ||
+                      (activeCurrentPage > totalPages && isLoading)
+                    }
                     className="pagination-btn"
                   >
                     <ChevronRight size={16} strokeWidth={2.5} />
@@ -1050,8 +1075,8 @@ export const Table = <T extends { [key: string]: any }>({
                   </tr>
                 </thead>
                 <tbody>
-                  {data
-                    .slice(0, Math.min(6, data.length || 6))
+                  {safeData
+                    .slice(0, Math.min(6, safeData.length || 6))
                     .map((item, rowIdx) => (
                       <tr
                         key={rowIdx}
@@ -1072,7 +1097,7 @@ export const Table = <T extends { [key: string]: any }>({
                         ))}
                       </tr>
                     ))}
-                  {(!data || data.length === 0) && (
+                  {safeData.length === 0 && (
                     <tr>
                       <td
                         colSpan={draftVisibleColumns.length}

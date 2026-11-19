@@ -92,7 +92,7 @@ export interface SortConfig {
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const LIMIT_SIZE = 1000;
+const LIMIT_SIZE = 100;
 
 // ── Generic helpers ───────────────────────────────────────────────────────────
 function applySortConfig<T>(data: T[], sortConfig: SortConfig | null): T[] {

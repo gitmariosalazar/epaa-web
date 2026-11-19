@@ -1,0 +1,736 @@
+/* ==========================================================================
+   UnderDevelopment Component Styles
+   Professional Developer & Code Experience - Light & Dark Theme Adaptable
+   ========================================================================== */
+
+.ud-wrapper {
+  /* Component tokens mapped to design system variables (Light Mode default) */
+  --ud-bg: var(--background, #f8fafc);
+  --ud-text-title: linear-gradient(135deg, var(--text-main, #0f172a) 20%, var(--secondary, #475569) 100%);
+  --ud-text-body: var(--text-secondary, #475569);
+  --ud-card-bg: rgba(255, 255, 255, 0.88);
+  --ud-card-border: var(--border-color, #e2e8f0);
+  --ud-card-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
+  
+  /* Window & Code Tokens */
+  --ud-window-bg: rgba(255, 255, 255, 0.92);
+  --ud-window-header-bg: rgba(241, 245, 249, 0.9);
+  --ud-window-border: var(--border-color, #e2e8f0);
+  --ud-window-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.8);
+  --ud-code-text: #334155;
+  --ud-syntax-keyword: #7c3aed;
+  --ud-syntax-var: #0284c7;
+  --ud-syntax-func: #16a34a;
+  --ud-syntax-str: #d97706;
+  --ud-syntax-comp: #2563eb;
+  --ud-core-bg: linear-gradient(135deg, #3b82f6, #6366f1);
+  --ud-core-shadow: 0 10px 20px -4px rgba(59, 130, 246, 0.45);
+  
+  /* Badges & Satellites */
+  --ud-badge-bg: rgba(255, 255, 255, 0.92);
+  --ud-badge-border: var(--border-color, #e2e8f0);
+  --ud-badge-text: var(--text-primary, #0f172a);
+  --ud-sat-bg: rgba(255, 255, 255, 0.95);
+  --ud-sat-border: var(--border-color, #e2e8f0);
+  --ud-sat-text: var(--text-primary, #0f172a);
+  --ud-sat-shadow: 0 6px 16px -2px rgba(15, 23, 42, 0.08);
+
+  /* Progress & Chips */
+  --ud-track-bg: var(--surface-hover, #e2e8f0);
+  --ud-progress-val: var(--text-primary, #0f172a);
+  --ud-chip-bg: rgba(255, 255, 255, 0.85);
+  --ud-chip-border: var(--border-color, #e2e8f0);
+  --ud-chip-text: var(--text-primary, #0f172a);
+  --ud-chip-hover-bg: #ffffff;
+  --ud-chip-hover-border: var(--border-hover, #cbd5e1);
+  
+  /* Luminescence */
+  --ud-particle-color: rgba(59, 130, 246, 0.22);
+  --ud-ring-1: rgba(59, 130, 246, 0.2);
+  --ud-ring-2: rgba(99, 102, 241, 0.16);
+  --ud-glow-1: rgba(59, 130, 246, 0.08);
+  --ud-glow-2: rgba(99, 102, 241, 0.07);
+  --ud-glow-3: rgba(16, 185, 129, 0.06);
+
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--ud-bg);
+  font-family: var(--font-sans, 'Inter', system-ui, -apple-system, sans-serif);
+  color: var(--text-main, #0f172a);
+  padding: var(--spacing-xl, 2.5rem) var(--spacing-md, 1rem);
+  transition: background var(--transition-normal, 300ms cubic-bezier(0.4, 0, 0.2, 1)),
+              color var(--transition-normal, 300ms cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+/* ==========================================================================
+   Dark Mode Overrides
+   ========================================================================== */
+:root.dark .ud-wrapper,
+.dark .ud-wrapper,
+[data-theme='dark'] .ud-wrapper {
+  --ud-bg: var(--background, #020617);
+  --ud-text-title: linear-gradient(135deg, #f8fafc 20%, #94a3b8 100%);
+  --ud-text-body: var(--text-secondary, #94a3b8);
+  --ud-card-bg: rgba(15, 23, 42, 0.65);
+  --ud-card-border: rgba(148, 163, 184, 0.14);
+  --ud-card-shadow: 0 14px 30px -8px rgba(0, 0, 0, 0.6);
+  
+  /* Window & Code Tokens (Dark Mode) */
+  --ud-window-bg: rgba(15, 23, 42, 0.88);
+  --ud-window-header-bg: rgba(30, 41, 59, 0.7);
+  --ud-window-border: rgba(148, 163, 184, 0.16);
+  --ud-window-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(51, 65, 85, 0.4);
+  --ud-code-text: #94a3b8;
+  --ud-syntax-keyword: #a78bfa;
+  --ud-syntax-var: #38bdf8;
+  --ud-syntax-func: #4ade80;
+  --ud-syntax-str: #fbbf24;
+  --ud-syntax-comp: #60a5fa;
+  --ud-core-bg: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  --ud-core-shadow: 0 10px 24px -4px rgba(99, 102, 241, 0.55);
+  
+  /* Badges & Satellites (Dark Mode) */
+  --ud-badge-bg: rgba(30, 41, 59, 0.65);
+  --ud-badge-border: rgba(148, 163, 184, 0.18);
+  --ud-badge-text: #e2e8f0;
+  --ud-sat-bg: rgba(30, 41, 59, 0.85);
+  --ud-sat-border: rgba(148, 163, 184, 0.18);
+  --ud-sat-text: #f8fafc;
+  --ud-sat-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.5);
+
+  /* Progress & Chips (Dark Mode) */
+  --ud-track-bg: rgba(2, 6, 23, 0.85);
+  --ud-progress-val: #f8fafc;
+  --ud-chip-bg: rgba(30, 41, 59, 0.5);
+  --ud-chip-border: rgba(148, 163, 184, 0.12);
+  --ud-chip-text: #f8fafc;
+  --ud-chip-hover-bg: rgba(30, 41, 59, 0.8);
+  --ud-chip-hover-border: rgba(148, 163, 184, 0.28);
+  
+  /* Luminescence (Dark Mode) */
+  --ud-particle-color: rgba(148, 163, 184, 0.35);
+  --ud-ring-1: rgba(59, 130, 246, 0.32);
+  --ud-ring-2: rgba(99, 102, 241, 0.24);
+  --ud-glow-1: rgba(59, 130, 246, 0.16);
+  --ud-glow-2: rgba(99, 102, 241, 0.12);
+  --ud-glow-3: rgba(16, 185, 129, 0.08);
+}
+
+/* ==========================================================================
+   Background Ambient Glow & Particles
+   ========================================================================== */
+.ud-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ud-gradient {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 30%, var(--ud-glow-1), transparent 70%),
+    radial-gradient(ellipse 65% 45% at 80% 60%, var(--ud-glow-2), transparent 70%),
+    radial-gradient(ellipse 55% 35% at 50% 85%, var(--ud-glow-3), transparent 70%);
+  transition: background var(--transition-normal, 300ms cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.ud-particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--ud-particle-color);
+  border-radius: 50%;
+  animation: float 12s infinite ease-in-out;
+  left: calc(5% + (var(--i) * 5.2%));
+  top: 100%;
+  animation-delay: calc(var(--i) * -0.7s);
+  transition: background var(--transition-normal, 300ms cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-110vh) scale(0.6);
+    opacity: 0;
+  }
+}
+
+/* ==========================================================================
+   Content Container
+   ========================================================================== */
+.ud-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  max-width: 680px;
+  width: 100%;
+  padding: 1.5rem 1rem;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   Hero Visual: Terminal de Código IDE
+   ========================================================================== */
+.ud-dev-hero {
+  position: relative;
+  width: 320px;
+  height: 200px;
+  margin: 0 auto 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Pulsing Background Rings */
+.pulse-ring {
+  position: absolute;
+  border-radius: 50%;
+  animation: pulse 3.5s ease-out infinite;
+  pointer-events: none;
+  transition: border-color var(--transition-normal, 300ms cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.ring-1 {
+  width: 220px;
+  height: 220px;
+  border: 1.5px solid var(--ud-ring-1);
+}
+
+.ring-2 {
+  width: 270px;
+  height: 270px;
+  animation-delay: 1.2s;
+  border: 1.5px solid var(--ud-ring-2);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1.22);
+    opacity: 0;
+  }
+}
+
+/* Terminal Window Frame */
+.ud-code-window {
+  position: relative;
+  width: 250px;
+  background: var(--ud-window-bg);
+  border: 1px solid var(--ud-window-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--ud-window-shadow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: float-window 4.5s ease-in-out infinite;
+  z-index: 3;
+  transition: all var(--transition-normal, 300ms cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+@keyframes float-window {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.ud-window-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.75rem;
+  background: var(--ud-window-header-bg);
+  border-bottom: 1px solid var(--ud-window-border);
+}
+
+.ud-window-controls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.window-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-red {
+  background: #ef4444;
+}
+
+.dot-yellow {
+  background: #f59e0b;
+}
+
+.dot-green {
+  background: #10b981;
+}
+
+.ud-window-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Roboto Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--ud-text-body);
+  font-weight: 500;
+}
+
+.window-title-icon {
+  color: var(--accent, #3b82f6);
+}
+
+.ud-window-body {
+  position: relative;
+  padding: 0.75rem 0.85rem;
+  text-align: left;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Roboto Mono', monospace;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--ud-code-text);
+  min-height: 90px;
+}
+
+.ud-code-lines {
+  position: relative;
+  z-index: 1;
+}
+
+.syntax-keyword {
+  color: var(--ud-syntax-keyword);
+  font-weight: 600;
+}
+
+.syntax-variable {
+  color: var(--ud-syntax-var);
+}
+
+.syntax-function {
+  color: var(--ud-syntax-func);
+}
+
+.syntax-string {
+  color: var(--ud-syntax-str);
+}
+
+.syntax-component {
+  color: var(--ud-syntax-comp);
+  font-weight: 600;
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 6px;
+  height: 12px;
+  background: var(--accent, #3b82f6);
+  margin-left: 3px;
+  vertical-align: -1px;
+  animation: cursor-blink 1s steps(2, start) infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Central Glowing Dev Core */
+.ud-dev-core {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--ud-core-bg);
+  box-shadow: var(--ud-core-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  animation: pulse-core 3s ease-in-out infinite;
+  z-index: 2;
+}
+
+@keyframes pulse-core {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: var(--ud-core-shadow);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 12px 28px -2px rgba(99, 102, 241, 0.7);
+  }
+}
+
+/* ==========================================================================
+   Satélites de Desarrollo Flotantes
+   ========================================================================== */
+.ud-satellites {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.ud-satellite {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.3rem 0.65rem;
+  background: var(--ud-sat-bg);
+  border: 1px solid var(--ud-sat-border);
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ud-sat-text);
+  box-shadow: var(--ud-sat-shadow);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+
+.sat-icon {
+  flex-shrink: 0;
+}
+
+.sat-git {
+  color: #f97316;
+}
+
+.sat-cpu {
+  color: #3b82f6;
+}
+
+.sat-layers {
+  color: #8b5cf6;
+}
+
+.sat-boxes {
+  color: #10b981;
+}
+
+.sat-top-left {
+  top: 6px;
+  left: 2px;
+  animation: float-sat-1 4s ease-in-out infinite;
+}
+
+.sat-top-right {
+  top: -8px;
+  right: 0px;
+  animation: float-sat-2 5s ease-in-out infinite 0.5s;
+}
+
+.sat-bottom-left {
+  bottom: 4px;
+  left: -8px;
+  animation: float-sat-3 4.5s ease-in-out infinite 1s;
+}
+
+.sat-bottom-right {
+  bottom: -6px;
+  right: 4px;
+  animation: float-sat-4 4.8s ease-in-out infinite 1.5s;
+}
+
+@keyframes float-sat-1 {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes float-sat-2 {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+@keyframes float-sat-3 {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes float-sat-4 {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+/* ==========================================================================
+   Tipografía Principal
+   ========================================================================== */
+.ud-title {
+  font-size: clamp(1.85rem, 4.5vw, 2.65rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 1rem;
+  background: var(--ud-text-title);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.025em;
+  transition: background var(--transition-normal, 300ms cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.ud-message {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--ud-text-body);
+  margin: 0 auto 2.25rem;
+  max-width: 520px;
+  transition: color var(--transition-normal, 300ms cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+/* ==========================================================================
+   Badge de Estado
+   ========================================================================== */
+.ud-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: var(--ud-badge-bg);
+  border: 1px solid var(--ud-badge-border);
+  padding: 0.5rem 1.15rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ud-badge-text);
+  margin-bottom: 2.25rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal, 300ms cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.badge-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--success, #22c55e);
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
+  animation: blink 2s ease-in-out infinite;
+}
+
+.badge-terminal-icon {
+  color: var(--accent, #3b82f6);
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* ==========================================================================
+   Sección de Progreso
+   ========================================================================== */
+.ud-progress-section {
+  background: var(--ud-card-bg);
+  border: 1px solid var(--ud-card-border);
+  border-radius: var(--radius-lg, 16px);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2.25rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--ud-card-shadow);
+  transition: all var(--transition-normal, 300ms cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--ud-text-body);
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  transition: color var(--transition-normal, 300ms cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.progress-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.progress-icon {
+  color: var(--accent, #3b82f6);
+}
+
+.progress-value {
+  font-weight: 700;
+  color: var(--ud-progress-val);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  transition: color var(--transition-normal, 300ms cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.progress-bar {
+  height: 8px;
+  background: var(--ud-track-bg);
+  border-radius: var(--radius-full, 9999px);
+  overflow: hidden;
+  transition: background var(--transition-normal, 300ms cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #6366f1, #8b5cf6, #10b981);
+  border-radius: var(--radius-full, 9999px);
+  position: relative;
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+  animation: shimmer 2.2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ==========================================================================
+   Chips de Características Técnicas
+   ========================================================================== */
+.ud-features {
+  display: flex;
+  justify-content: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.feature {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--ud-chip-bg);
+  border: 1px solid var(--ud-chip-border);
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-md, 12px);
+  font-size: 0.825rem;
+  font-weight: 500;
+  color: var(--ud-chip-text);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature:hover {
+  background: var(--ud-chip-hover-bg);
+  border-color: var(--ud-chip-hover-border);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.feature-icon {
+  flex-shrink: 0;
+}
+
+.feature-icon-code {
+  color: #3b82f6;
+}
+
+.feature-icon-arch {
+  color: #8b5cf6;
+}
+
+.feature-icon-perf {
+  color: #f59e0b;
+}
+
+.feature-icon-sec {
+  color: #10b981;
+}
+
+/* ==========================================================================
+   Responsive Adaptability
+   ========================================================================== */
+@media (max-width: 580px) {
+  .ud-features {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .feature {
+    justify-content: center;
+  }
+
+  .ud-dev-hero {
+    width: 280px;
+    height: 190px;
+  }
+
+  .ud-code-window {
+    width: 220px;
+  }
+
+  .ud-sat-bottom-left {
+    display: none;
+  }
+
+  .ud-sat-bottom-right {
+    display: none;
+  }
+}

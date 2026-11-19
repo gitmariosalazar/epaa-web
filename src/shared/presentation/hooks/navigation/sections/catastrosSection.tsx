@@ -1,6 +1,6 @@
 import { MdOutlineCable } from 'react-icons/md';
 import { TiThList } from 'react-icons/ti';
-import { BarChart3, LayoutDashboard } from 'lucide-react';
+import { BarChart3, LayoutDashboard, History } from 'lucide-react';
 import type { NavSection } from '@/shared/domain/models/Navigation';
 
 export const getCatastrosSection = (t: any): NavSection => ({
@@ -25,6 +25,11 @@ export const getCatastrosSection = (t: any): NavSection => ({
           icon: <LayoutDashboard size={18} />,
           label: t('sidebar.connectionsDashboard', 'Dashboard de Avance'),
           to: '/connections/dashboard'
+        },
+        {
+          icon: <History size={18} />,
+          label: t('sidebar.stateHistory', 'Auditoría de Estados'),
+          to: '/connections/state-history'
         }
       ]
     }

@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
-import { CircularProgress, useSimulatedProgress } from '@/shared/presentation/components/CircularProgress';
+import {
+  CircularProgress,
+  useSimulatedProgress
+} from '@/shared/presentation/components/CircularProgress';
 
 import { EvidenceFiles } from '@/shared/files';
 import { PhotoLightbox } from '@/modules/incidents/presentation/components/PhotoLightbox';
@@ -26,13 +29,28 @@ import {
   X,
   Pause,
   Download,
-  Eye
+  Eye,
+  Activity,
+  Sparkles,
+  RotateCcw
 } from 'lucide-react';
-import { ConnectionProvider, useConnectionsContext } from '../context/ConnectionContext';
+import {
+  useConnectionStateHistory,
+  ConnectionStateHistoryTimeline,
+  ChangeConnectionStateModal,
+  RevertStateHistoryModal
+} from '@/modules/connections/state-history';
+import {
+  ConnectionProvider,
+  useConnectionsContext
+} from '../context/ConnectionContext';
 import { TechnicalDataSheetPdfGenerator } from './templates/pdf/TechnicalDataSheetPdfGenerator';
 import { ReadingHistoryTable } from '@/modules/readings/presentation/components/ReadingHistoryTable';
 import type { ReadingHistory } from '@/modules/readings/domain/models/ReadingHistory';
-import { Table, type Column } from '@/shared/presentation/components/Table/Table';
+import {
+  Table,
+  type Column
+} from '@/shared/presentation/components/Table/Table';
 import type { HistoryMeters } from '../../domain/models/Connection';
 import { decodeEWKBPoint, type Coordinate } from '@/shared/utils/geoUtils';
 import './ConnectionDetailModal.css';
@@ -55,28 +73,54 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
   cadastralKey
 }) => {
   const { t } = useTranslation();
-  const { getConnectionsUseCase, findAllConnectionsWithPropertyUseCase } = useConnectionsContext();
+  const { getConnectionsUseCase, findAllConnectionsWithPropertyUseCase } =
+    useConnectionsContext();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [connectionData, setConnectionData] = useState<ConnectionWithoutProperty | null>(null);
+  const [connectionData, setConnectionData] =
+    useState<ConnectionWithoutProperty | null>(null);
   const [activeTab, setActiveTab] = useState<string>('section-general');
   const [isNavExpanded, setIsNavExpanded] = useState<boolean>(false);
 
   const loadingProgress = useSimulatedProgress(loading);
 
-  const [lightboxFacadeIndex, setLightboxFacadeIndex] = useState<number | null>(null);
-  const [lightboxMeterIndex, setLightboxMeterIndex] = useState<number | null>(null);
+  const [lightboxFacadeIndex, setLightboxFacadeIndex] = useState<number | null>(
+    null
+  );
+  const [lightboxMeterIndex, setLightboxMeterIndex] = useState<number | null>(
+    null
+  );
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fileNamePDF, setFileNamePDF] = useState<string | null>(null);
 
   // Modal for to update meter number
-  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] = useState(false);
+  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] =
+    useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const handleOpenUpdateMeterNumberModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+  // State History Modals & Hook
+  const [isChangeStateModalOpen, setIsChangeStateModalOpen] = useState(false);
+  const [isRevertStateModalOpen, setIsRevertStateModalOpen] = useState(false);
+  const [selectedRecordToRevert, setSelectedRecordToRevert] = useState<
+    number | undefined
+  >(undefined);
+
+  const {
+    history: stateHistoryList,
+    reversibleRecord,
+    isLoading: isLoadingStateHistory,
+    refreshAll: refreshStateHistory
+  } = useConnectionStateHistory({
+    connectionId: connectionData?.connectionId,
+    autoFetch: isOpen && !!connectionData?.connectionId
+  });
+
+  const handleOpenUpdateMeterNumberModal = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     setAnchorEl(e.currentTarget);
     setOpenUpdateMeterNumberModal(true);
   };
@@ -95,7 +139,9 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
       const generator = new TechnicalDataSheetPdfGenerator();
       const url = await generator.generateBlobUrl([connectionData]);
       setPreviewUrl(url);
-      setFileNamePDF(`FICHA_TECNICA_${connectionData.connectionId || connectionData.connectionMeterNumber}.pdf`);
+      setFileNamePDF(
+        `FICHA_TECNICA_${connectionData.connectionId || connectionData.connectionMeterNumber}.pdf`
+      );
     } catch (error) {
       console.error('Error generando vista previa de PDF:', error);
       setIsPreviewOpen(false);
@@ -109,7 +155,10 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     setIsGeneratingPdf(true);
     try {
       const generator = new TechnicalDataSheetPdfGenerator();
-      await generator.downloadPdf([connectionData], `FICHA_TECNICA_${connectionData.connectionId || connectionData.connectionMeterNumber}.pdf`);
+      await generator.downloadPdf(
+        [connectionData],
+        `FICHA_TECNICA_${connectionData.connectionId || connectionData.connectionMeterNumber}.pdf`
+      );
     } catch (error) {
       console.error('Error downloading PDF:', error);
     } finally {
@@ -127,7 +176,6 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     }, 300);
   };
 
-
   useEffect(() => {
     let isMounted = true;
     const fetchDetails = async () => {
@@ -143,9 +191,14 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
       ) => {
         const cleanTarget = targetId.trim().toLowerCase();
         const cleanConnId = (c.connectionId || '').trim().toLowerCase();
-        const cleanCadastral = (c.connectionCadastralKey || '').trim().toLowerCase();
-        const cleanAccount = c.connectionAccount ? String(c.connectionAccount).trim() : '';
-        const targetAccStr = targetAccount != null ? String(targetAccount).trim() : '';
+        const cleanCadastral = (c.connectionCadastralKey || '')
+          .trim()
+          .toLowerCase();
+        const cleanAccount = c.connectionAccount
+          ? String(c.connectionAccount).trim()
+          : '';
+        const targetAccStr =
+          targetAccount != null ? String(targetAccount).trim() : '';
 
         return (
           cleanConnId === cleanTarget ||
@@ -165,7 +218,8 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
             query: cadastralKey
           });
           if (results && results.length > 0) {
-            foundData = results.find(c => isTargetMatch(c, cadastralKey)) || null;
+            foundData =
+              results.find((c) => isTargetMatch(c, cadastralKey)) || null;
           }
         } catch {
           // If 404 or error, continue to fallback search
@@ -174,30 +228,48 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
         // 2. Fallback: Query basic connections first to resolve clientId or meter number
         if (!foundData) {
           try {
-            const paginated = await getConnectionsUseCase.execute(50, 0, cadastralKey);
+            const paginated = await getConnectionsUseCase.execute(
+              50,
+              0,
+              cadastralKey
+            );
             if (paginated && paginated.length > 0) {
-              const matchedBasic = paginated.find(
-                c => c.connectionId === cadastralKey || c.connectionCadastralKey === cadastralKey || String(c.connectionAccount) === cadastralKey
-              ) || paginated[0];
+              const matchedBasic =
+                paginated.find(
+                  (c) =>
+                    c.connectionId === cadastralKey ||
+                    c.connectionCadastralKey === cadastralKey ||
+                    String(c.connectionAccount) === cadastralKey
+                ) || paginated[0];
 
               // Prefer meter number first (unique search term), then cadastralKey, account, and clientId
               const fallbackSearchTerms = [
                 matchedBasic.connectionMeterNumber,
                 matchedBasic.connectionCadastralKey,
-                matchedBasic.connectionAccount ? String(matchedBasic.connectionAccount) : null,
+                matchedBasic.connectionAccount
+                  ? String(matchedBasic.connectionAccount)
+                  : null,
                 matchedBasic.clientId
-              ].filter((term): term is string => typeof term === 'string' && term.trim().length > 0);
+              ].filter(
+                (term): term is string =>
+                  typeof term === 'string' && term.trim().length > 0
+              );
 
               for (const term of fallbackSearchTerms) {
                 try {
-                  const fallbackResults = await findAllConnectionsWithPropertyUseCase.execute({
-                    limit: 100,
-                    offset: 0,
-                    query: term
-                  });
+                  const fallbackResults =
+                    await findAllConnectionsWithPropertyUseCase.execute({
+                      limit: 100,
+                      offset: 0,
+                      query: term
+                    });
                   if (fallbackResults && fallbackResults.length > 0) {
-                    const match = fallbackResults.find(c =>
-                      isTargetMatch(c, matchedBasic.connectionId, matchedBasic.connectionAccount)
+                    const match = fallbackResults.find((c) =>
+                      isTargetMatch(
+                        c,
+                        matchedBasic.connectionId,
+                        matchedBasic.connectionAccount
+                      )
                     );
                     if (match) {
                       foundData = match;
@@ -218,12 +290,22 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
           if (foundData) {
             setConnectionData(foundData);
           } else {
-            setError(t('connections.table.noData', 'No se encontraron datos para esta acometida.'));
+            setError(
+              t(
+                'connections.table.noData',
+                'No se encontraron datos para esta acometida.'
+              )
+            );
           }
         }
       } catch (err) {
         if (isMounted) {
-          setError(t('connections.table.fetchError', 'Error al cargar los detalles de la acometida.'));
+          setError(
+            t(
+              'connections.table.fetchError',
+              'Error al cargar los detalles de la acometida.'
+            )
+          );
           console.error(err);
         }
       } finally {
@@ -238,7 +320,13 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [isOpen, cadastralKey, findAllConnectionsWithPropertyUseCase, getConnectionsUseCase, t]);
+  }, [
+    isOpen,
+    cadastralKey,
+    findAllConnectionsWithPropertyUseCase,
+    getConnectionsUseCase,
+    t
+  ]);
 
   const handleClose = () => {
     setActiveTab('general');
@@ -255,13 +343,41 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
   };
 
   const navItems = [
-    { id: 'section-general', label: t('connections.detail.general', 'Informacion Basica'), icon: <Info size={16} /> },
-    { id: 'section-client', label: t('connections.detail.client', 'Datos del Cliente'), icon: <User size={16} /> },
-    { id: 'section-readings', label: t('connections.detail.readings', 'Historial de Lecturas'), icon: <History size={16} /> },
-    { id: 'section-meters', label: t('connections.detail.meters', 'Historial de Medidores'), icon: <Settings size={16} /> },
-
-    { id: 'section-photos-facade', label: t('connections.detail.photos', 'Evidencias Fachada'), icon: <MdPhotoLibrary size={16} /> },
-    { id: 'section-photos-meter', label: t('connections.detail.photos', 'Evidencias Medidor'), icon: <IoMdPhotos size={16} /> }
+    {
+      id: 'section-general',
+      label: t('connections.detail.general', 'Informacion Basica'),
+      icon: <Info size={16} />
+    },
+    {
+      id: 'section-client',
+      label: t('connections.detail.client', 'Datos del Cliente'),
+      icon: <User size={16} />
+    },
+    {
+      id: 'section-readings',
+      label: t('connections.detail.readings', 'Historial de Lecturas'),
+      icon: <History size={16} />
+    },
+    {
+      id: 'section-meters',
+      label: t('connections.detail.meters', 'Historial de Medidores'),
+      icon: <Settings size={16} />
+    },
+    {
+      id: 'section-state-history',
+      label: 'Historial de Estados',
+      icon: <Activity size={16} />
+    },
+    {
+      id: 'section-photos-facade',
+      label: t('connections.detail.photos', 'Evidencias Fachada'),
+      icon: <MdPhotoLibrary size={16} />
+    },
+    {
+      id: 'section-photos-meter',
+      label: t('connections.detail.photos', 'Evidencias Medidor'),
+      icon: <IoMdPhotos size={16} />
+    }
   ];
 
   const renderGeneralInfo = () => {
@@ -269,7 +385,10 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     const statusChip = getConnectionStateChip(connectionData.connectionStatus);
 
     return (
-      <div id="section-general" className="connection-section-card connection-general-grid">
+      <div
+        id="section-general"
+        className="connection-section-card connection-general-grid"
+      >
         <div className="connection-info-column">
           <h3 className="connection-section-title">
             <span className="connection-section-icon">
@@ -279,25 +398,43 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
           </h3>
           <div className="connection-data-grid">
             <strong className="connection-data-label">C. Catastral</strong>
-            <span className="connection-data-value">{connectionData.connectionCadastralKey || '—'}</span>
+            <span className="connection-data-value">
+              {connectionData.connectionCadastralKey || '—'}
+            </span>
 
             <strong className="connection-data-label">Cuenta</strong>
-            <span className="connection-data-value">{connectionData.connectionAccount || '—'}</span>
+            <span className="connection-data-value">
+              {connectionData.connectionAccount || '—'}
+            </span>
 
             <strong className="connection-data-label">Medidor</strong>
-            <span className="connection-data-value connection-data-highlight">{connectionData.connectionMeterNumber || '—'}</span>
+            <span className="connection-data-value connection-data-highlight">
+              {connectionData.connectionMeterNumber || '—'}
+            </span>
 
             <strong className="connection-data-label">Contrato</strong>
-            <span className="connection-data-value">{connectionData.connectionContractNumber || '—'}</span>
+            <span className="connection-data-value">
+              {connectionData.connectionContractNumber || '—'}
+            </span>
 
             <strong className="connection-data-label">Estado</strong>
             <div>
-              <ColorChip label={statusChip.label} color={statusChip.color} icon={statusChip.icon} variant="soft" size="sm" />
+              <ColorChip
+                label={statusChip.label}
+                color={statusChip.color}
+                icon={statusChip.icon}
+                variant="soft"
+                size="sm"
+              />
             </div>
 
             <strong className="connection-data-label">Tarifa</strong>
             <div>
-              <ColorChip label={connectionData.connectionRateName || '—'} variant="ghost" size="sm" />
+              <ColorChip
+                label={connectionData.connectionRateName || '—'}
+                variant="ghost"
+                size="sm"
+              />
             </div>
           </div>
         </div>
@@ -311,28 +448,42 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
           </h3>
           <div className="connection-data-grid">
             <strong className="connection-data-label">Sector</strong>
-            <span className="connection-data-value">{connectionData.connectionSector || '—'}</span>
+            <span className="connection-data-value">
+              {connectionData.connectionSector || '—'}
+            </span>
 
             <strong className="connection-data-label">Zona</strong>
             <span className="connection-data-value">
-              {connectionData.zoneName ? `${connectionData.zoneCode} – ${connectionData.zoneName}` : '—'}
+              {connectionData.zoneName
+                ? `${connectionData.zoneCode} – ${connectionData.zoneName}`
+                : '—'}
             </span>
 
             <strong className="connection-data-label">Dirección</strong>
-            <span className="connection-data-value">{connectionData.connectionAddress || '—'}</span>
+            <span className="connection-data-value">
+              {connectionData.connectionAddress || '—'}
+            </span>
 
             <strong className="connection-data-label">Referencia</strong>
-            <span className="connection-data-value">{connectionData.connectionReference || '—'}</span>
+            <span className="connection-data-value">
+              {connectionData.connectionReference || '—'}
+            </span>
 
             <strong className="connection-data-label">Coordenadas</strong>
             <span className="connection-data-coords">
               {(() => {
                 const coords = connectionData.connectionCoordinates
                   ? decodeEWKBPoint(connectionData.connectionCoordinates)
-                  : ((connectionData as any).latitude && (connectionData as any).longitude
-                    ? { lat: Number((connectionData as any).latitude), lng: Number((connectionData as any).longitude) }
-                    : null);
-                return coords ? `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}` : '—';
+                  : (connectionData as any).latitude &&
+                      (connectionData as any).longitude
+                    ? {
+                        lat: Number((connectionData as any).latitude),
+                        lng: Number((connectionData as any).longitude)
+                      }
+                    : null;
+                return coords
+                  ? `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`
+                  : '—';
               })()}
             </span>
           </div>
@@ -344,13 +495,18 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
   const renderFacadePhotos = () => {
     const photosFacade = connectionData?.photoFacade || [];
     return (
-      <div id="section-photos-facade" className="connection-section-card connection-photos-section">
+      <div
+        id="section-photos-facade"
+        className="connection-section-card connection-photos-section"
+      >
         <h3 className="connection-section-title connection-section-title-mb">
           <span className="connection-section-icon">
             <MdPhotoLibrary size={18} />
           </span>
           Evidencias – Fotos de Fachada
-          <span className="connection-section-count">{photosFacade.length}</span>
+          <span className="connection-section-count">
+            {photosFacade.length}
+          </span>
         </h3>
         {photosFacade.length > 0 ? (
           <div className="photos-gallery">
@@ -382,7 +538,10 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
   const renderMeterPhotos = () => {
     const photosMeter = connectionData?.photoMeter || [];
     return (
-      <div id="section-photos-meter" className="connection-section-card connection-photos-section">
+      <div
+        id="section-photos-meter"
+        className="connection-section-card connection-photos-section"
+      >
         <h3 className="connection-section-title connection-section-title-mb">
           <span className="connection-section-icon">
             <MdPhotoLibrary size={18} />
@@ -433,10 +592,15 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     const name = isCompany
       ? connectionData.company?.businessName
       : `${connectionData.person?.firstName || ''} ${connectionData.person?.lastName || ''}`.trim();
-    const identifier = isCompany ? connectionData.company?.ruc : connectionData.clientId;
+    const identifier = isCompany
+      ? connectionData.company?.ruc
+      : connectionData.clientId;
 
     return (
-      <div id="section-client" className="connection-section-card connection-client-section">
+      <div
+        id="section-client"
+        className="connection-section-card connection-client-section"
+      >
         <h3 className="connection-section-title">
           <span className="connection-section-icon">
             <User size={18} />
@@ -471,7 +635,7 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
               </div>
               <span>
                 {client.phones && client.phones.length > 0
-                  ? client.phones.map(phone => phone.numero).join(', ')
+                  ? client.phones.map((phone) => phone.numero).join(', ')
                   : 'Sin teléfonos'}
               </span>
             </div>
@@ -481,7 +645,7 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
               </div>
               <span>
                 {client.emails && client.emails.length > 0
-                  ? client.emails.map(email => email.email).join(', ')
+                  ? client.emails.map((email) => email.email).join(', ')
                   : 'Sin correos'}
               </span>
             </div>
@@ -492,7 +656,11 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
   };
 
   const renderReadingsHistory = () => {
-    if (!connectionData || !connectionData.lastReadings || connectionData.lastReadings.length === 0) {
+    if (
+      !connectionData ||
+      !connectionData.lastReadings ||
+      connectionData.lastReadings.length === 0
+    ) {
       return (
         <div id="section-readings" className="connection-empty-state">
           <History size={48} className="connection-empty-icon" />
@@ -501,35 +669,40 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
       );
     }
 
+    const mappedReadings: ReadingHistory[] = connectionData.lastReadings.map(
+      (lr, idx) => {
+        const current = Number(lr.readingValueCurrent) || 0;
+        const previous = Number(lr.readingValuePreview) || 0;
+        const date = new Date(lr.readingDate);
+        return {
+          readingId: idx + 1,
+          connectionId: lr.cadastralKey,
+          readingYear: isNaN(date.getFullYear()) ? 0 : date.getFullYear(),
+          readingMonth: lr.readingMonth || '',
+          readingDate: date,
+          readingTime: lr.readingTime || '00:00:00',
+          previousReading: previous,
+          currentReading: current,
+          consumption: current - previous,
+          observation: lr.novelty || 'NOT_READ',
+          readingValue: 0 // LastReading doesn't include the monetary value
+        } as ReadingHistory;
+      }
+    );
 
-    const mappedReadings: ReadingHistory[] = connectionData.lastReadings.map((lr, idx) => {
-      const current = Number(lr.readingValueCurrent) || 0;
-      const previous = Number(lr.readingValuePreview) || 0;
-      const date = new Date(lr.readingDate);
-      return {
-        readingId: idx + 1,
-        connectionId: lr.cadastralKey,
-        readingYear: isNaN(date.getFullYear()) ? 0 : date.getFullYear(),
-        readingMonth: lr.readingMonth || '',
-        readingDate: date,
-        readingTime: lr.readingTime || '00:00:00',
-        previousReading: previous,
-        currentReading: current,
-        consumption: current - previous,
-        observation: lr.novelty || 'NOT_READ',
-        readingValue: 0 // LastReading doesn't include the monetary value
-
-      } as ReadingHistory;
-    });
-
-    const locationLastReading = connectionData.lastReadings[0].locationReading ?? '';
+    const locationLastReading =
+      connectionData.lastReadings[0].locationReading ?? '';
     console.log('locationLastReading', locationLastReading);
-    const decodedLocation: Coordinate | null = locationLastReading ? decodeEWKBPoint(locationLastReading) : null;
+    const decodedLocation: Coordinate | null = locationLastReading
+      ? decodeEWKBPoint(locationLastReading)
+      : null;
     console.log('decodedLocation', decodedLocation);
 
-
     return (
-      <div id="section-readings" className="connection-section-card connection-table-section">
+      <div
+        id="section-readings"
+        className="connection-section-card connection-table-section"
+      >
         <h3 className="connection-section-title connection-section-title-mb">
           <span className="connection-section-icon">
             <History size={18} />
@@ -550,7 +723,11 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
   };
 
   const renderMetersHistory = () => {
-    if (!connectionData || !connectionData.historyMeters || connectionData.historyMeters.length === 0) {
+    if (
+      !connectionData ||
+      !connectionData.historyMeters ||
+      connectionData.historyMeters.length === 0
+    ) {
       return (
         <div id="section-meters" className="connection-empty-state">
           <Settings size={48} className="connection-empty-icon" />
@@ -562,22 +739,41 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     const meterColumns: Column<HistoryMeters>[] = [
       {
         header: 'Fecha Inst.',
-        accessor: (row) => row.installationDate ? new Date(row.installationDate).toLocaleDateString() : '—',
+        accessor: (row) =>
+          row.installationDate
+            ? new Date(row.installationDate).toLocaleDateString()
+            : '—',
         id: 'installationDate'
       },
       {
         header: 'Fecha Desinst.',
-        accessor: (row) => row.uninstallationDate ? new Date(row.uninstallationDate).toLocaleDateString() : '—',
+        accessor: (row) =>
+          row.uninstallationDate
+            ? new Date(row.uninstallationDate).toLocaleDateString()
+            : '—',
         id: 'uninstallationDate'
       },
       {
         header: 'Medidor Ant.',
-        accessor: (row) => <ColorChip label={row.previousMeter || '—'} variant="ghost" size="xs" />,
+        accessor: (row) => (
+          <ColorChip
+            label={row.previousMeter || '—'}
+            variant="ghost"
+            size="xs"
+          />
+        ),
         id: 'previousMeter'
       },
       {
         header: 'Medidor Nuevo',
-        accessor: (row) => <ColorChip label={row.newMeter || '—'} color="var(--primary)" variant="soft" size="xs" />,
+        accessor: (row) => (
+          <ColorChip
+            label={row.newMeter || '—'}
+            color="var(--primary)"
+            variant="soft"
+            size="xs"
+          />
+        ),
         id: 'newMeter'
       },
       {
@@ -588,14 +784,22 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
             variant="soft"
             size="xs"
             color={
-              row.status === 'ACTIVO' ? 'var(--success)' :
-                row.status === 'INACTIVO' ? 'var(--error)' :
-                  row.status === 'SUSPENDIDO' ? 'var(--warning)' : 'var(--gray)'
+              row.status === 'ACTIVO'
+                ? 'var(--success)'
+                : row.status === 'INACTIVO'
+                  ? 'var(--error)'
+                  : row.status === 'SUSPENDIDO'
+                    ? 'var(--warning)'
+                    : 'var(--gray)'
             }
             icon={
-              row.status === 'ACTIVO' ? <Check size={12} /> :
-                row.status === 'INACTIVO' ? <X size={12} /> :
-                  row.status === 'SUSPENDIDO' ? <Pause size={12} /> : null
+              row.status === 'ACTIVO' ? (
+                <Check size={12} />
+              ) : row.status === 'INACTIVO' ? (
+                <X size={12} />
+              ) : row.status === 'SUSPENDIDO' ? (
+                <Pause size={12} />
+              ) : null
             }
           />
         ),
@@ -613,7 +817,10 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
     ];
 
     return (
-      <div id="section-meters" className="connection-section-card connection-table-section">
+      <div
+        id="section-meters"
+        className="connection-section-card connection-table-section"
+      >
         <h3 className="connection-section-title connection-section-title-mb">
           <span className="connection-section-icon">
             <Settings size={18} />
@@ -622,10 +829,81 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
         </h3>
         <Table<HistoryMeters>
           columns={meterColumns}
-          data={connectionData.historyMeters}
+          data={connectionData.historyMeters || []}
           isLoading={false}
           pagination={true}
           pageSize={5}
+        />
+      </div>
+    );
+  };
+
+  const renderStateHistorySection = () => {
+    if (!connectionData) return null;
+    return (
+      <div
+        id="section-state-history"
+        className="connection-section-card connection-table-section"
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '16px'
+          }}
+        >
+          <h3 className="connection-section-title" style={{ margin: 0 }}>
+            <span className="connection-section-icon">
+              <Activity size={18} />
+            </span>
+            Historial de Estados y Auditoría
+          </h3>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Tooltip
+              content="Revertir última transición"
+              followCursor={false}
+              themeColor="info"
+            >
+              <Button
+                size="xs"
+                variant="outline"
+                leftIcon={<RotateCcw size={14} />}
+                disabled={true || !reversibleRecord?.isReversible}
+                onClick={() => {
+                  setSelectedRecordToRevert(undefined);
+                  setIsRevertStateModalOpen(true);
+                }}
+              >
+                Revertir
+              </Button>
+            </Tooltip>
+            <Tooltip
+              content="Cambiar estado"
+              followCursor={false}
+              themeColor="info"
+            >
+              <Button
+                size="xs"
+                variant="primary"
+                leftIcon={<Sparkles size={14} />}
+                onClick={() => setIsChangeStateModalOpen(true)}
+                disabled={true}
+              >
+                Cambiar Estado
+              </Button>
+            </Tooltip>
+          </div>
+        </div>
+
+        <ConnectionStateHistoryTimeline
+          history={stateHistoryList}
+          isLoading={isLoadingStateHistory}
+          reversibleHistorialId={reversibleRecord?.record?.historialId}
+          onRevertTransition={(record) => {
+            setSelectedRecordToRevert(record.historialId);
+            setIsRevertStateModalOpen(true);
+          }}
         />
       </div>
     );
@@ -671,12 +949,8 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
                     title={!isNavExpanded ? item.label : undefined}
                     className={`connection-nav-item ${activeTab === item.id ? 'active' : 'inactive'}`}
                   >
-                    <div className="connection-nav-icon">
-                      {item.icon}
-                    </div>
-                    <span className="connection-nav-label">
-                      {item.label}
-                    </span>
+                    <div className="connection-nav-icon">{item.icon}</div>
+                    <span className="connection-nav-label">{item.label}</span>
                   </button>
                 ))}
               </div>
@@ -687,20 +961,24 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
                 {renderClientInfo()}
                 {renderReadingsHistory()}
                 {renderMetersHistory()}
+                {renderStateHistorySection()}
                 {renderFacadePhotos()}
                 {renderMeterPhotos()}
               </div>
 
               {/* Floating Action Buttons for PDF */}
               <div className="connection-fab-wrapper">
-                <Tooltip content="Vista Previa de Ficha Técnica" followCursor={false}>
+                <Tooltip
+                  content="Vista Previa de Ficha Técnica"
+                  followCursor={false}
+                >
                   <Button
                     onClick={handlePreviewPdf}
                     className="connection-fab-btn"
                     disabled={isGeneratingPdf}
                     color="indigo"
                     variant="outline"
-                    size='small'
+                    size="small"
                   >
                     {isGeneratingPdf ? (
                       <div className="connection-fab-spinner" role="status" />
@@ -717,7 +995,7 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
                     disabled={isGeneratingPdf}
                     color="indigo"
                     variant="primary"
-                    size='small'
+                    size="small"
                   >
                     {isGeneratingPdf ? (
                       <div className="connection-fab-spinner" role="status" />
@@ -733,26 +1011,38 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
       </Modal>
 
       {/* Lightbox for Facade Photos */}
-      {lightboxFacadeIndex !== null && connectionData?.photoFacade && connectionData.photoFacade.length > 0 && (
-        <PhotoLightbox
-          photos={connectionData.photoFacade.map((p) => ({ photoId: p.id, filePath: p.imagePath, type: p.photoType }))}
-          activeIndex={lightboxFacadeIndex}
-          category="connection_documents"
-          onClose={() => setLightboxFacadeIndex(null)}
-          onIndexChange={setLightboxFacadeIndex}
-        />
-      )}
+      {lightboxFacadeIndex !== null &&
+        connectionData?.photoFacade &&
+        connectionData.photoFacade.length > 0 && (
+          <PhotoLightbox
+            photos={connectionData.photoFacade.map((p) => ({
+              photoId: p.id,
+              filePath: p.imagePath,
+              type: p.photoType
+            }))}
+            activeIndex={lightboxFacadeIndex}
+            category="connection_documents"
+            onClose={() => setLightboxFacadeIndex(null)}
+            onIndexChange={setLightboxFacadeIndex}
+          />
+        )}
 
       {/* Lightbox for Meter Photos */}
-      {lightboxMeterIndex !== null && connectionData?.photoMeter && connectionData.photoMeter.length > 0 && (
-        <PhotoLightbox
-          photos={connectionData.photoMeter.map((p) => ({ photoId: p.id, filePath: p.imagePath, type: p.photoType }))}
-          activeIndex={lightboxMeterIndex}
-          category="connection_documents"
-          onClose={() => setLightboxMeterIndex(null)}
-          onIndexChange={setLightboxMeterIndex}
-        />
-      )}
+      {lightboxMeterIndex !== null &&
+        connectionData?.photoMeter &&
+        connectionData.photoMeter.length > 0 && (
+          <PhotoLightbox
+            photos={connectionData.photoMeter.map((p) => ({
+              photoId: p.id,
+              filePath: p.imagePath,
+              type: p.photoType
+            }))}
+            activeIndex={lightboxMeterIndex}
+            category="connection_documents"
+            onClose={() => setLightboxMeterIndex(null)}
+            onIndexChange={setLightboxMeterIndex}
+          />
+        )}
 
       <DocumentPreviewModal
         isOpen={isPreviewOpen}
@@ -760,7 +1050,7 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
         documentUrl={previewUrl}
         isLoading={isGeneratingPdf}
         title="Vista Previa de Ficha Técnica"
-        fileName={fileNamePDF || "FICHA_TECNICA_ACOMETIDA.pdf"}
+        fileName={fileNamePDF || 'FICHA_TECNICA_ACOMETIDA.pdf'}
       />
 
       {connectionData && (
@@ -778,6 +1068,31 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
             />
           </ConnectionProvider>
         </PopoverModal>
+      )}
+
+      {connectionData?.connectionId && (
+        <>
+          <ChangeConnectionStateModal
+            isOpen={isChangeStateModalOpen}
+            onClose={() => setIsChangeStateModalOpen(false)}
+            connectionId={connectionData.connectionId}
+            currentStatusName={
+              connectionData.connectionStatus ? 'ACTIVA' : 'INACTIVA'
+            }
+            onSuccess={() => {
+              refreshStateHistory();
+            }}
+          />
+          <RevertStateHistoryModal
+            isOpen={isRevertStateModalOpen}
+            onClose={() => setIsRevertStateModalOpen(false)}
+            connectionId={connectionData.connectionId}
+            specificHistorialId={selectedRecordToRevert}
+            onSuccess={() => {
+              refreshStateHistory();
+            }}
+          />
+        </>
       )}
     </>
   );

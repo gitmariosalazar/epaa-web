@@ -2,7 +2,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
   padding: 2rem;
   background-color: var(--background-main);
   background: radial-gradient(circle at center, var(--surface) 0%, var(--background-main) 100%);

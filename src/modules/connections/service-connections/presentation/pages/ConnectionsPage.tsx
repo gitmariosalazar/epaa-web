@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
-import { Plus, Network, Users, LayoutGrid } from 'lucide-react';
+import { Plus, Network, Users, LayoutGrid, History } from 'lucide-react';
 import { CreateConnectionWizard } from '../components/CreateConnectionWizard';
 import { ConnectionsTable } from '../components/ConnectionsTable';
 import { ConnectionsFilters } from '../components/ConnectionsFilters';
@@ -175,6 +175,14 @@ export const ConnectionsPage = () => {
             onTabChange={actions.handleTabChange}
           />
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <Button
+              variant="outline"
+              size="xs"
+              leftIcon={<History size={15} />}
+              onClick={() => navigate('/connections/state-history')}
+            >
+              Auditoría de Estados
+            </Button>
             <Button
               leftIcon={<Plus size={18} />}
               size="xs"

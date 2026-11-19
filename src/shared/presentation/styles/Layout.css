@@ -1,7 +1,9 @@
 .dashboard-layout {
   display: flex;
-  height: 100vh;
-  width: 100vw;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
   overflow: hidden; /* Prevent body scroll */
   background-color: var(--background);
 }
