@@ -23,31 +23,36 @@ import { CreateReadingPage } from './CreateReadingPage';
 import { UpdateReadingWithImagesPage } from './UpdateReadingWithImagesPage';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
 import { ReadingAdjustmentHistoryPopover } from '../components/ReadingAdjustmentHistoryPopover';
-import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
-import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
+import { ConnectionProvider } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
+import { ConnectionDetailModal } from '@/modules/connections/service-connections/presentation/components/ConnectionDetailModal';
 import { UpdateSpecialReadingWithImagesPage } from './UpdateSpecialReadingWithImagesPage';
 import { BsExclamationCircleFill } from 'react-icons/bs';
 import { useReadingImagesRealtimeSync } from '../hooks/useReadingImagesRealtimeSync';
 import { MdCable, MdOutlineKey } from 'react-icons/md';
 
-
 interface ReadingImagesPageProps {
   isPublic?: boolean;
 }
 
-export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic = true }) => {
+export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({
+  isPublic = true
+}) => {
   const { t } = useTranslation();
-  const { readingImages, isLoading, error, fetchImagesByFilter: fetchImages } =
-    useFindReadingImagesByFilter();
+  const {
+    readingImages,
+    isLoading,
+    error,
+    fetchImagesByFilter: fetchImages
+  } = useFindReadingImagesByFilter();
 
   // State for the image viewer
   const [selectedReading, setSelectedReading] = useState<ReadingImages | null>(
     null
   );
 
-  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(null);
-
-
+  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(
+    null
+  );
 
   const [readingModalState, setReadingModalState] = useState<{
     isOpen: boolean;
@@ -56,14 +61,21 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
   } | null>(null);
 
   // Detail Modal State for Readings
-  const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
+  const [detailModalState, setDetailModalState] = useState<{
+    isOpen: boolean;
+    cadastralKey: string | null;
+    yearAndMonth: string | null;
+  }>({
     isOpen: false,
     cadastralKey: null,
-    yearAndMonth: null,
+    yearAndMonth: null
   });
 
   // History Popover State
-  const [historyModalState, setHistoryModalState] = useState<{ isOpen: boolean; readingId: number | null }>({
+  const [historyModalState, setHistoryModalState] = useState<{
+    isOpen: boolean;
+    readingId: number | null;
+  }>({
     isOpen: false,
     readingId: null
   });
@@ -177,8 +189,12 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
     {
       header: t('common.actions', 'Acciones'),
       accessor: (row) => (
-        <div className='reading-table-actions'>
-          <Tooltip followCursor={false} themeColor="warning" content={t('common.edit', 'Editar')}>
+        <div className="reading-table-actions">
+          <Tooltip
+            followCursor={false}
+            themeColor="warning"
+            content={t('common.edit', 'Editar')}
+          >
             <Button
               size="sm"
               variant="ghost"
@@ -189,7 +205,8 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
               <FaEdit size={16} />
             </Button>
           </Tooltip>
-          <Tooltip followCursor={false}
+          <Tooltip
+            followCursor={false}
             themeColor="cyan"
             content={
               <>
@@ -198,12 +215,19 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
               </>
             }
           >
-            <Button color="cyan" size="sm" variant="ghost" onClick={() => setDetailCadastralKey(row.cadastralKey)} circle>
+            <Button
+              color="cyan"
+              size="sm"
+              variant="ghost"
+              onClick={() => setDetailCadastralKey(row.cadastralKey)}
+              circle
+            >
               <MapPin size={16} />
             </Button>
           </Tooltip>
 
-          <Tooltip followCursor={false}
+          <Tooltip
+            followCursor={false}
             themeColor="info"
             content={
               <>
@@ -212,7 +236,14 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
               </>
             }
           >
-            <Button size="sm" variant="ghost" onClick={() => handleViewDetails(row.cadastralKey, row.readingMonth)} circle>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() =>
+                handleViewDetails(row.cadastralKey, row.readingMonth)
+              }
+              circle
+            >
               <FileText size={16} />
             </Button>
           </Tooltip>
@@ -221,7 +252,7 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
         </div>
       ),
       id: 'actions'
-    },
+    }
   ];
 
   const handleOpenHistory = (readingId: number) => {
@@ -241,10 +272,15 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
 
       {error ? (
         <EmptyState
-          message='No se pudieron cargar las imágenes de las lecturas'
-          description='Intenta de nuevo más tarde.'
-          variant='error'
-          actionButton={<Button title='Reintentar' onClick={() => fetchImages(currentFilters)} />}
+          message="No se pudieron cargar las imágenes de las lecturas"
+          description="Intenta de nuevo más tarde."
+          variant="error"
+          actionButton={
+            <Button
+              title="Reintentar"
+              onClick={() => fetchImages(currentFilters)}
+            />
+          }
           icon={<BsExclamationCircleFill />}
         />
       ) : (
@@ -260,16 +296,30 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
                 <Tooltip
                   content={<> Clave Catastral: {row.cadastralKey} </>}
                   followCursor={false}
-                  themeColor='cyan'
+                  themeColor="cyan"
                 >
-                  <ColorChip color='cyan' label={row.cadastralKey} size='xs' variant='soft' icon={<MdCable />} borderRadius={8} />
+                  <ColorChip
+                    color="cyan"
+                    label={row.cadastralKey}
+                    size="xs"
+                    variant="soft"
+                    icon={<MdCable />}
+                    borderRadius={8}
+                  />
                 </Tooltip>
                 <Tooltip
                   content={<> Lectura ID: {row.readingId} </>}
-                  themeColor='green'
+                  themeColor="green"
                   followCursor={false}
                 >
-                  <ColorChip color='green' label={row.readingId} size='xs' variant='soft' icon={<MdOutlineKey />} borderRadius={8} />
+                  <ColorChip
+                    color="green"
+                    label={row.readingId}
+                    size="xs"
+                    variant="soft"
+                    icon={<MdOutlineKey />}
+                    borderRadius={8}
+                  />
                 </Tooltip>
               </div>
             )}
@@ -278,25 +328,27 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
                 label: 'Ver Detalles de la Acometida',
                 icon: <MapPin size={16} />,
                 color: 'cyan',
-                onClick: (item) => setDetailCadastralKey(item.cadastralKey),
+                onClick: (item) => setDetailCadastralKey(item.cadastralKey)
               },
               {
                 label: t('common.viewDetails', 'Ver Detalles de Lectura'),
                 icon: <FileText size={16} />,
                 color: 'info',
-                onClick: (item) => handleViewDetails(item.cadastralKey, item.readingMonth),
+                onClick: (item) =>
+                  handleViewDetails(item.cadastralKey, item.readingMonth)
               },
               {
                 label: t('common.edit1', 'Editar Lectura'),
                 icon: <FaEdit size={16} />,
                 color: 'warning',
-                onClick: (item) => handleAction('update', item.cadastralKey),
+                onClick: (item) => handleAction('update', item.cadastralKey)
               },
               {
                 label: 'Ver Registro Histórico de Ajustes',
                 icon: <FaList size={16} />,
                 color: 'info',
-                onClick: (item: ReadingImages) => handleOpenHistory(item.readingId),
+                onClick: (item: ReadingImages) =>
+                  handleOpenHistory(item.readingId)
               }
             ]}
             getRowColor={(row) => {
@@ -336,7 +388,9 @@ export const ReadingImagesPage: React.FC<ReadingImagesPageProps> = ({ isPublic =
       {/* Reading Detail Modal (No extra provider needed as page is already under ReadingsProvider) */}
       <ReadingDetailModal
         isOpen={detailModalState.isOpen}
-        onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+        onClose={() =>
+          setDetailModalState((prev) => ({ ...prev, isOpen: false }))
+        }
         cadastralKey={detailModalState.cadastralKey}
         yearAndMonth={detailModalState.yearAndMonth}
       />

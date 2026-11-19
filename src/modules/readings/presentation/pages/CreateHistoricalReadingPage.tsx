@@ -28,8 +28,8 @@ import { CircularProgress } from '@/shared/presentation/components/CircularProgr
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
 import { checkReadingIsCurrentMonth } from '../../application/usecases/CheckReadingMonthUseCase';
 import { PopoverModal } from '@/shared/presentation/components/PopoverModal';
-import { ChangeMeterPage } from '@/modules/connections/presentation/pages/ChangeMeterPage';
-import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ChangeMeterPage } from '@/modules/connections/service-connections/presentation/pages/ChangeMeterPage';
+import { ConnectionProvider } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
 
 export interface CreateHistoricalReadingPageProps {
   initialCadastralKey?: string;
@@ -38,15 +38,23 @@ export interface CreateHistoricalReadingPageProps {
 }
 
 const monthMap: Record<string, number> = {
-  'ENERO': 1, 'FEBRERO': 2, 'MARZO': 3, 'ABRIL': 4, 'MAYO': 5, 'JUNIO': 6,
-  'JULIO': 7, 'AGOSTO': 8, 'SEPTIEMBRE': 9, 'OCTUBRE': 10, 'NOVIEMBRE': 11, 'DICIEMBRE': 12
+  ENERO: 1,
+  FEBRERO: 2,
+  MARZO: 3,
+  ABRIL: 4,
+  MAYO: 5,
+  JUNIO: 6,
+  JULIO: 7,
+  AGOSTO: 8,
+  SEPTIEMBRE: 9,
+  OCTUBRE: 10,
+  NOVIEMBRE: 11,
+  DICIEMBRE: 12
 };
 
-export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPageProps> = ({
-  initialCadastralKey,
-  onSuccess,
-  onCancel
-}) => {
+export const CreateHistoricalReadingPage: React.FC<
+  CreateHistoricalReadingPageProps
+> = ({ initialCadastralKey, onSuccess, onCancel }) => {
   const {
     readingInfo,
     readingHistory,
@@ -62,8 +70,12 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
   const { getReadingHistoryUseCase } = useReadingsContext();
 
   const [cadastralKeyInput, setCadastralKeyInput] = useState('');
-  const [previousReadingInput, setPreviousReadingInput] = useState<number | ''>('');
-  const [currentReadingInput, setCurrentReadingInput] = useState<number | ''>('');
+  const [previousReadingInput, setPreviousReadingInput] = useState<number | ''>(
+    ''
+  );
+  const [currentReadingInput, setCurrentReadingInput] = useState<number | ''>(
+    ''
+  );
   const [observationInput, setObservationInput] = useState('');
 
   // Empty initially, computed automatically on search
@@ -74,10 +86,13 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   // Modal for to update meter number
-  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] = useState(false);
+  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] =
+    useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const handleOpenUpdateMeterNumberModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOpenUpdateMeterNumberModal = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     setAnchorEl(e.currentTarget);
     setOpenUpdateMeterNumberModal(true);
   };
@@ -113,7 +128,8 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
     const [selYearStr, selMonthStr] = selectedMonth.split('-');
     const selYear = parseInt(selYearStr, 10);
     const selMonth = parseInt(selMonthStr, 10);
-    const hMonthNum = monthMap[h.readingMonth?.toUpperCase()] || parseInt(h.readingMonth, 10);
+    const hMonthNum =
+      monthMap[h.readingMonth?.toUpperCase()] || parseInt(h.readingMonth, 10);
     return h.readingYear === selYear && hMonthNum === selMonth;
   });
 
@@ -121,7 +137,9 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
   // - Si el mes seleccionado ya está en el historial -> BLOQUEADO (evitar duplicado).
   // - Si el mes seleccionado es el mes actual y ya se registró la lectura -> BLOQUEADO.
   // - Si el mes seleccionado es un mes pasado y NO está en el historial -> HABILITADO (permite registrar lectura histórica pendiente).
-  const isBlocked = isSelectedMonthInHistory || (isCurrentMonth && !readingInfoForRequest?.hasCurrentReading);
+  const isBlocked =
+    isSelectedMonthInHistory ||
+    (isCurrentMonth && !readingInfoForRequest?.hasCurrentReading);
   const permitCreate = !isBlocked;
 
   useEffect(() => {
@@ -164,7 +182,6 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
     currentMonthReading: selectedMonth,
     previousMonthReading: readingInfoForRequest.monthReading
   });
-
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -212,7 +229,7 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
       setSelectedMonth(targetMonthStr);
       await fetchReadingData(searchKey, targetMonthStr);
     } catch (e) {
-      console.error("Error computing historical month", e);
+      console.error('Error computing historical month', e);
       // Fallback
       await fetchReadingData(searchKey);
     } finally {
@@ -251,7 +268,10 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
   const handleConfirm = async () => {
     try {
       const requestPayload = buildRequest();
-      console.log('🚀 ENVIANDO AL BACKEND:', JSON.stringify(requestPayload, null, 2));
+      console.log(
+        '🚀 ENVIANDO AL BACKEND:',
+        JSON.stringify(requestPayload, null, 2)
+      );
 
       const result = await submitReading(requestPayload);
       setIsConfirmModalOpen(false);
@@ -284,13 +304,20 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
 
   // ── Render ────────────────────────────────────────────────────────────────
 
-  const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
+  const [detailModalState, setDetailModalState] = useState<{
+    isOpen: boolean;
+    cadastralKey: string | null;
+    yearAndMonth: string | null;
+  }>({
     isOpen: false,
     cadastralKey: null,
-    yearAndMonth: null,
+    yearAndMonth: null
   });
 
-  const handleViewDetails = (cadastralKey: string, readingDate: Date | null) => {
+  const handleViewDetails = (
+    cadastralKey: string,
+    readingDate: Date | null
+  ) => {
     // Tomamos por defecto el monthReading que viene del backend
     let yearAndMonth = readingInfo[0]?.monthReading || '';
 
@@ -373,9 +400,9 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
                 <Tag size={15} style={{ marginRight: 6, flexShrink: 0 }} />
                 {readingInfoForRequest.connectionStateName
                   ? readingInfoForRequest.connectionStateName
-                    .replace(/_/g, ' ')
-                    .replace(/([A-Z])/g, ' $1')
-                    .trim()
+                      .replace(/_/g, ' ')
+                      .replace(/([A-Z])/g, ' $1')
+                      .trim()
                   : 'Estado Desconocido'}
               </div>
               <div className="cs-state-description">
@@ -453,15 +480,11 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
         )}
 
         {/* Mensajes de Estado (Búsqueda Inicial, Sin Resultados, Error) */}
-        {
-          isLoadingInfo && !readingInfoForRequest && (
-            <div className='reading-images-loading'>
-              <CircularProgress
-                label="Buscando..."
-              />
-            </div>
-          )
-        }
+        {isLoadingInfo && !readingInfoForRequest && (
+          <div className="reading-images-loading">
+            <CircularProgress label="Buscando..." />
+          </div>
+        )}
         {!readingInfoForRequest && !isLoadingInfo && (
           <div style={{ marginTop: '1rem' }}>
             {error ? (
@@ -469,11 +492,11 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
                 type="error"
                 title="Error en la búsqueda"
                 message={error}
-                size='small'
+                size="small"
               />
             ) : cadastralKeyInput.trim().length > 0 ? (
               <EmptyState
-                variant='warning'
+                variant="warning"
                 message="No se encontraron resultados"
                 description={`No se han encontrado datos para el predio con clave catastral "${cadastralKeyInput.toUpperCase()}" en el periodo seleccionado.`}
               />
@@ -536,7 +559,9 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
 
       <ReadingDetailModal
         isOpen={detailModalState.isOpen}
-        onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+        onClose={() =>
+          setDetailModalState((prev) => ({ ...prev, isOpen: false }))
+        }
         cadastralKey={detailModalState.cadastralKey}
         yearAndMonth={detailModalState.yearAndMonth}
       />
@@ -565,7 +590,9 @@ export const CreateHistoricalReadingPage: React.FC<CreateHistoricalReadingPagePr
         >
           <ConnectionProvider>
             <ChangeMeterPage
-              cadastralKeyProp={readingInfoForRequest?.cadastralKey || cadastralKeyInput}
+              cadastralKeyProp={
+                readingInfoForRequest?.cadastralKey || cadastralKeyInput
+              }
               onSuccess={handleSuccessUpdateMeterNumberModal}
               onCancel={handleCloseUpdateMeterNumberModal}
             />

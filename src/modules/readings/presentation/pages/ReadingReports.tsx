@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PageLayout } from '@/shared/presentation/components/Layout/PageLayout';
-import { useReadingReportsViewModel, type IncidentsFilterState } from '../hooks/useReadingReportsViewModel';
+import {
+  useReadingReportsViewModel,
+  type IncidentsFilterState
+} from '../hooks/useReadingReportsViewModel';
 import type { IncidentTab } from '../hooks/useReadingReportsViewModel';
 import { ResolveReadingReportModal } from '../components/ReadingReports/ResolveReadingReportModal';
 import { AddWorkOrderReadingReportModal } from '../components/ReadingReports/AddWorkOrderReadingReportModal';
@@ -34,7 +37,7 @@ import {
   Repeat,
   Plus,
   MapPin,
-  FileText,
+  FileText
 } from 'lucide-react';
 import {
   CircularProgress,
@@ -46,7 +49,13 @@ import type { IncidentDetailRowResponse } from '../../../incidents/domain/schema
 import '../styles/ReadingReports.css';
 import '../components/ReadingReports/Map/ReadingReportMap.css';
 import { truncateText } from '@/shared/utils/text/truncate-text';
-import { getMeterConditionColor, getPhysicalStateColor, getPriorityColor, getStatusColor, getWorkOrderStatusColor } from '@/shared/presentation/utils/colors/status-colors';
+import {
+  getMeterConditionColor,
+  getPhysicalStateColor,
+  getPriorityColor,
+  getStatusColor,
+  getWorkOrderStatusColor
+} from '@/shared/presentation/utils/colors/status-colors';
 import { FaEdit, FaTools } from 'react-icons/fa';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 
@@ -74,11 +83,10 @@ const INCIDENT_TABS: TabItem<IncidentTab>[] = [
 
 import { IncidentProvider } from '../../../incidents/presentation/context/IncidentContext';
 import { useTranslation } from 'react-i18next';
-import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
-import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
+import { ConnectionProvider } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
+import { ConnectionDetailModal } from '@/modules/connections/service-connections/presentation/components/ConnectionDetailModal';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
 import { ReadingAdjustmentHistoryPopover } from '../components/ReadingAdjustmentHistoryPopover';
-
 
 const ReadingReportsContent: React.FC = () => {
   const vm = useReadingReportsViewModel();
@@ -100,7 +108,6 @@ const ReadingReportsContent: React.FC = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
-
 
   // ── Detectar ruta activa para sincronizar el tab (igual que ConnectionsPage) ──
   useEffect(() => {
@@ -125,7 +132,9 @@ const ReadingReportsContent: React.FC = () => {
   const [selectedIncident, setSelectedIncident] =
     useState<IncidentDetailRowResponse | null>(null);
 
-  const [focusedIncidentId, setFocusedIncidentId] = useState<string | null>(null);
+  const [focusedIncidentId, setFocusedIncidentId] = useState<string | null>(
+    null
+  );
   const focusedIncident = useMemo(
     () => incidents.find((i) => i.incidentId === focusedIncidentId) || null,
     [incidents, focusedIncidentId]
@@ -133,10 +142,9 @@ const ReadingReportsContent: React.FC = () => {
   const [addWorkOrderIncident, setAddWorkOrderIncident] =
     useState<IncidentDetailRowResponse | null>(null);
 
-  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(null);
-
-
-
+  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(
+    null
+  );
 
   const [readingModalState, setReadingModalState] = useState<{
     isOpen: boolean;
@@ -145,18 +153,24 @@ const ReadingReportsContent: React.FC = () => {
   } | null>(null);
 
   // Detail Modal State for Readings
-  const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
+  const [detailModalState, setDetailModalState] = useState<{
+    isOpen: boolean;
+    cadastralKey: string | null;
+    yearAndMonth: string | null;
+  }>({
     isOpen: false,
     cadastralKey: null,
-    yearAndMonth: null,
+    yearAndMonth: null
   });
 
   // History Popover State
-  const [historyModalState, setHistoryModalState] = useState<{ isOpen: boolean; readingId: number | null }>({
+  const [historyModalState, setHistoryModalState] = useState<{
+    isOpen: boolean;
+    readingId: number | null;
+  }>({
     isOpen: false,
     readingId: null
   });
-
 
   const handleViewDetails = (cadastralKey: string, yearAndMonth: string) => {
     setDetailModalState({ isOpen: true, cadastralKey, yearAndMonth });
@@ -167,7 +181,6 @@ const ReadingReportsContent: React.FC = () => {
   };
 
   // TODO: We will move realtime sync to the ViewModel hook (useReadingReportsViewModel.ts)
-
 
   // ── Columnas de la tabla ──────────────────────────────────────────────────
   const columns: Column<IncidentDetailRowResponse>[] = [
@@ -198,38 +211,44 @@ const ReadingReportsContent: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <div className="geo-status-bar-table">
                 <div className="geo-status-bar__item">
-                  <Tooltip content={
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span className="geo-status-bar__label">Condicion del medidor: {meter.label}</span>
-                    </div>
-                  }
+                  <Tooltip
+                    content={
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span className="geo-status-bar__label">
+                          Condicion del medidor: {meter.label}
+                        </span>
+                      </div>
+                    }
                     followCursor={false}
                     themeColor={meter.color}
-                    position='top'>
-
+                    position="top"
+                  >
                     <ColorChip
                       label={meter.label}
                       color={meter.color}
                       icon={meter.icon}
-                      size='xs'
+                      size="xs"
                     />
                   </Tooltip>
                 </div>
                 <div className="geo-status-bar__item">
-                  <Tooltip content={
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span className="geo-status-bar__label">Estado físico del medidor: {physical.label}</span>
-                    </div>
-                  }
+                  <Tooltip
+                    content={
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span className="geo-status-bar__label">
+                          Estado físico del medidor: {physical.label}
+                        </span>
+                      </div>
+                    }
                     followCursor={false}
                     themeColor={physical.color}
-                    position='top'>
-
+                    position="top"
+                  >
                     <ColorChip
                       label={physical.label}
                       color={physical.color}
                       icon={physical.icon}
-                      size='xs'
+                      size="xs"
                     />
                   </Tooltip>
                 </div>
@@ -260,7 +279,8 @@ const ReadingReportsContent: React.FC = () => {
           ]
         }
       ],
-      filterValueGetter: (item) => `${item.meterCondition || ''} ${item.physicalState || ''}`,
+      filterValueGetter: (item) =>
+        `${item.meterCondition || ''} ${item.physicalState || ''}`,
       style: { width: '110px' }
     },
     {
@@ -272,17 +292,23 @@ const ReadingReportsContent: React.FC = () => {
         </div>
       ),
       id: 'categoryAndType',
-      filterValueGetter: (item) => `${item.categoryName || ''} ${item.incidentTypeName || ''}`
+      filterValueGetter: (item) =>
+        `${item.categoryName || ''} ${item.incidentTypeName || ''}`
     },
     {
       header: 'UBICACIÓN',
       accessor: (item) => (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span className="incident-category-text">{truncateText(item.referenceAddress?.toUpperCase() || '-', 40)}</span>
+            <span className="incident-category-text">
+              {truncateText(item.referenceAddress?.toUpperCase() || '-', 40)}
+            </span>
             <div className="geo-status-bar-table">
               <div className="geo-status-bar__item">
-                <Navigation size={12} className="geo-status-bar__icon geo-status-bar__icon--lat" />
+                <Navigation
+                  size={12}
+                  className="geo-status-bar__icon geo-status-bar__icon--lat"
+                />
                 <span className="geo-status-bar__label">Latitud:</span>
                 <span className="geo-status-bar__value geo-status-bar__value--coord">
                   {item.latitude ? Number(item.latitude).toFixed(7) : '-'}
@@ -290,7 +316,11 @@ const ReadingReportsContent: React.FC = () => {
               </div>
               <div className="geo-status-bar__divider" />
               <div className="geo-status-bar__item">
-                <Navigation size={12} className="geo-status-bar__icon geo-status-bar__icon--lng" style={{ transform: 'rotate(90deg)' }} />
+                <Navigation
+                  size={12}
+                  className="geo-status-bar__icon geo-status-bar__icon--lng"
+                  style={{ transform: 'rotate(90deg)' }}
+                />
                 <span className="geo-status-bar__label">Longitud:</span>
                 <span className="geo-status-bar__value geo-status-bar__value--coord">
                   {item.longitude ? Number(item.longitude).toFixed(7) : '-'}
@@ -301,7 +331,8 @@ const ReadingReportsContent: React.FC = () => {
         </div>
       ),
       id: 'location',
-      filterValueGetter: (item) => `${item.referenceAddress || ''} ${item.latitude || ''} ${item.longitude || ''}`
+      filterValueGetter: (item) =>
+        `${item.referenceAddress || ''} ${item.latitude || ''} ${item.longitude || ''}`
     },
     {
       header: 'PRIORIDAD',
@@ -360,11 +391,10 @@ const ReadingReportsContent: React.FC = () => {
     },
     {
       header: 'ESTADO OT1',
-      accessor: (item) => (
+      accessor: (item) =>
         item.currentOrderState ? (
-          <div
-            className="incident-actions-cell-state">
-            <div className='incident-row'>
+          <div className="incident-actions-cell-state">
+            <div className="incident-row">
               <ColorChip
                 label={item.currentOrderState.replace(/_/g, ' ')}
                 color={getWorkOrderStatusColor(item.currentOrderState || '')}
@@ -380,25 +410,28 @@ const ReadingReportsContent: React.FC = () => {
                 borderRadius={5}
               />
             </div>
-            {
-              item.orderCode !== null && (
-                <Tooltip content={`Ver Orden de Trabajo Nro. : ${item.orderCode}`} themeColor='accent' followCursor={false}>
-                  <Button
-                    onClick={() => navigate(`/work-orders/search?code=${item.orderCode}`)}
-                    size='xs'
-                    color='accent'
-                    circle
-                    variant='dashed'
-                  >
-                    <FaTools size={13} />
-                  </Button>
-                </Tooltip>
-              )
-            }
+            {item.orderCode !== null && (
+              <Tooltip
+                content={`Ver Orden de Trabajo Nro. : ${item.orderCode}`}
+                themeColor="accent"
+                followCursor={false}
+              >
+                <Button
+                  onClick={() =>
+                    navigate(`/work-orders/search?code=${item.orderCode}`)
+                  }
+                  size="xs"
+                  color="accent"
+                  circle
+                  variant="dashed"
+                >
+                  <FaTools size={13} />
+                </Button>
+              </Tooltip>
+            )}
           </div>
         ) : (
-          <div
-            className="incident-actions-cell">
+          <div className="incident-actions-cell">
             <ColorChip
               label="Sin Orden de Trabajo"
               color="red"
@@ -407,11 +440,12 @@ const ReadingReportsContent: React.FC = () => {
               borderRadius={5}
             />
           </div>
-        )
-
-      ),
+        ),
       id: 'currentOrderState',
-      filterValueGetter: (item) => item.currentOrderState ? `${item.currentOrderState.replace(/_/g, ' ')} ${item.orderCode}` : 'Sin Orden de Trabajo',
+      filterValueGetter: (item) =>
+        item.currentOrderState
+          ? `${item.currentOrderState.replace(/_/g, ' ')} ${item.orderCode}`
+          : 'Sin Orden de Trabajo',
       style: { width: '110px' }
     },
     {
@@ -429,19 +463,21 @@ const ReadingReportsContent: React.FC = () => {
           >
             Ver
           </Button>
-          {item.currentOrderState == 'COMPLETADA' && item.status != 'RESUELTO' && (
-            <Button
-              variant="dashed"
-              color="amber"
-              size="xs"
-              onClick={() => setResolveIncidentId(item.incidentId)}
-              leftIcon={<Wrench size={12} />}
-            >
-              Resolver
-            </Button>
-          )}
-          {
-            !item.orderCode && item.status != 'RESUELTO' && item.status !== 'FALSO_REPORTE' && (
+          {item.currentOrderState == 'COMPLETADA' &&
+            item.status != 'RESUELTO' && (
+              <Button
+                variant="dashed"
+                color="amber"
+                size="xs"
+                onClick={() => setResolveIncidentId(item.incidentId)}
+                leftIcon={<Wrench size={12} />}
+              >
+                Resolver
+              </Button>
+            )}
+          {!item.orderCode &&
+            item.status != 'RESUELTO' &&
+            item.status !== 'FALSO_REPORTE' && (
               <Button
                 variant="dashed"
                 color="green"
@@ -451,9 +487,12 @@ const ReadingReportsContent: React.FC = () => {
               >
                 Agregar OT
               </Button>
-            )
-          }
-          <Tooltip followCursor={false} themeColor="warning" content={t('common.edit', 'Editar')}>
+            )}
+          <Tooltip
+            followCursor={false}
+            themeColor="warning"
+            content={t('common.edit', 'Editar')}
+          >
             <Button
               size="sm"
               variant="ghost"
@@ -464,7 +503,8 @@ const ReadingReportsContent: React.FC = () => {
               <FaEdit size={16} />
             </Button>
           </Tooltip>
-          <Tooltip followCursor={false}
+          <Tooltip
+            followCursor={false}
             themeColor="cyan"
             content={
               <>
@@ -473,12 +513,19 @@ const ReadingReportsContent: React.FC = () => {
               </>
             }
           >
-            <Button color="cyan" size="sm" variant="ghost" onClick={() => setDetailCadastralKey(item.connectionId)} circle>
+            <Button
+              color="cyan"
+              size="sm"
+              variant="ghost"
+              onClick={() => setDetailCadastralKey(item.connectionId)}
+              circle
+            >
               <MapPin size={16} />
             </Button>
           </Tooltip>
 
-          <Tooltip followCursor={false}
+          <Tooltip
+            followCursor={false}
             themeColor="info"
             content={
               <>
@@ -487,7 +534,14 @@ const ReadingReportsContent: React.FC = () => {
               </>
             }
           >
-            <Button size="sm" variant="ghost" onClick={() => handleViewDetails(item.connectionId!, item.reportDate)} circle>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() =>
+                handleViewDetails(item.connectionId!, item.reportDate)
+              }
+              circle
+            >
               <FileText size={16} />
             </Button>
           </Tooltip>
@@ -545,14 +599,17 @@ const ReadingReportsContent: React.FC = () => {
             variant="error"
             minHeight="300px"
             actionButton={
-              <Button onClick={refresh} variant="outline" size="sm" color='error'
+              <Button
+                onClick={refresh}
+                variant="outline"
+                size="sm"
+                color="error"
                 leftIcon={<Repeat size={12} />}
               >
                 Actualizar
               </Button>
             }
           />
-
         </div>
       );
     }
@@ -626,19 +683,33 @@ const ReadingReportsContent: React.FC = () => {
             onPageSizeChange={vm.setPageSize}
             onFilterModelChange={(models) => {
               const updates: Partial<IncidentsFilterState> = {};
-              const statusModel = models.find(m => m.columnField === 'status');
-              const priorityModel = models.find(m => m.columnField === 'priority');
-              const meterModel = models.find(m => m.columnField === 'meterCondition');
-              const physicalModel = models.find(m => m.columnField === 'physicalState');
+              const statusModel = models.find(
+                (m) => m.columnField === 'status'
+              );
+              const priorityModel = models.find(
+                (m) => m.columnField === 'priority'
+              );
+              const meterModel = models.find(
+                (m) => m.columnField === 'meterCondition'
+              );
+              const physicalModel = models.find(
+                (m) => m.columnField === 'physicalState'
+              );
 
               updates.status = statusModel ? String(statusModel.value) : '';
-              updates.priority = priorityModel ? String(priorityModel.value) : '';
-              updates.meterCondition = meterModel ? String(meterModel.value) : '';
-              updates.physicalState = physicalModel ? String(physicalModel.value) : '';
+              updates.priority = priorityModel
+                ? String(priorityModel.value)
+                : '';
+              updates.meterCondition = meterModel
+                ? String(meterModel.value)
+                : '';
+              updates.physicalState = physicalModel
+                ? String(physicalModel.value)
+                : '';
 
               vm.handleFilterChange(updates);
             }}
-            onEndReached={() => { }}
+            onEndReached={() => {}}
             hasMore={false}
             getRowColor={(item) => {
               if (item.updatedStatus === true) {
@@ -647,32 +718,38 @@ const ReadingReportsContent: React.FC = () => {
                 return 'error';
               }
             }}
-
             contextMenuItems={(item: IncidentDetailRowResponse) => {
               const items: ContextMenuItem<IncidentDetailRowResponse>[] = [
                 {
                   label: 'Ver detalles del incidente',
                   icon: <Eye size={16} />,
                   color: 'primary',
-                  onClick: () => setSelectedIncident(item),
+                  onClick: () => setSelectedIncident(item)
                 }
               ];
 
-              if (item.currentOrderState === 'COMPLETADA' && item.status !== 'RESUELTO') {
+              if (
+                item.currentOrderState === 'COMPLETADA' &&
+                item.status !== 'RESUELTO'
+              ) {
                 items.push({
                   label: 'Resolver',
                   icon: <Wrench size={16} />,
                   color: 'warning',
-                  onClick: () => setResolveIncidentId(item.incidentId),
+                  onClick: () => setResolveIncidentId(item.incidentId)
                 });
               }
 
-              if (!item.orderCode && item.status !== 'RESUELTO' && item.status !== 'FALSO_REPORTE') {
+              if (
+                !item.orderCode &&
+                item.status !== 'RESUELTO' &&
+                item.status !== 'FALSO_REPORTE'
+              ) {
                 items.push({
                   label: 'Agregar OT',
                   icon: <Plus size={16} />,
                   color: 'success',
-                  onClick: () => setAddWorkOrderIncident(item),
+                  onClick: () => setAddWorkOrderIncident(item)
                 });
               }
 
@@ -680,23 +757,23 @@ const ReadingReportsContent: React.FC = () => {
                 label: t('common.edit', 'Editar'),
                 icon: <FaEdit size={16} />,
                 color: 'warning',
-                onClick: () => handleAction('update', item.connectionId!),
+                onClick: () => handleAction('update', item.connectionId!)
               });
 
               items.push({
                 label: 'Ver Detalles de la Acometida',
                 icon: <MapPin size={16} />,
                 color: 'cyan',
-                onClick: () => setDetailCadastralKey(item.connectionId!),
+                onClick: () => setDetailCadastralKey(item.connectionId!)
               });
 
               items.push({
                 label: 'Ver Detalles de la Lectura',
                 icon: <FileText size={16} />,
                 color: 'info',
-                onClick: () => handleViewDetails(item.connectionId!, item.reportDate),
+                onClick: () =>
+                  handleViewDetails(item.connectionId!, item.reportDate)
               });
-
 
               return items;
             }}
@@ -729,8 +806,7 @@ const ReadingReportsContent: React.FC = () => {
               activeTab={activeTab}
               onTabChange={handleTabClick}
             />
-            {
-              /*
+            {/*
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <Button
                 leftIcon={<ShieldAlert size={16} />}
@@ -740,8 +816,7 @@ const ReadingReportsContent: React.FC = () => {
                 Reportar Lectura
               </Button>
             </div>
-              */
-            }
+              */}
           </div>
         }
         filters={
@@ -749,7 +824,9 @@ const ReadingReportsContent: React.FC = () => {
             searchQuery={filters.search}
             onSearchQueryChange={(val) => handleFilterChange({ search: val })}
             searchField={filters.searchField}
-            onSearchFieldChange={(val) => handleFilterChange({ searchField: val })}
+            onSearchFieldChange={(val) =>
+              handleFilterChange({ searchField: val })
+            }
             selectedStatus={filters.status}
             onStatusChange={(val) => handleFilterChange({ status: val })}
             selectedPriority={filters.priority}
@@ -758,7 +835,9 @@ const ReadingReportsContent: React.FC = () => {
             onReportIncident={() => navigate('/incidents/create')}
             isLoading={isLoading}
             reportRangeDate={filters.reportRangeDate || null}
-            onReportRangeDateChange={(start, end) => handleFilterChange({ reportRangeDate: { start, end } })}
+            onReportRangeDateChange={(start, end) =>
+              handleFilterChange({ reportRangeDate: { start, end } })
+            }
           />
         }
       >
@@ -795,11 +874,12 @@ const ReadingReportsContent: React.FC = () => {
       {/* Reading Detail Modal (No extra provider needed as page is already under ReadingsProvider) */}
       <ReadingDetailModal
         isOpen={detailModalState.isOpen}
-        onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+        onClose={() =>
+          setDetailModalState((prev) => ({ ...prev, isOpen: false }))
+        }
         cadastralKey={detailModalState.cadastralKey}
         yearAndMonth={detailModalState.yearAndMonth}
       />
-
 
       {addWorkOrderIncident !== null && (
         <AddWorkOrderReadingReportModal
@@ -858,7 +938,6 @@ const ReadingReportsContent: React.FC = () => {
   );
 };
 
-
 export const ReadingReports: React.FC = () => {
   return (
     <IncidentProvider>
@@ -866,4 +945,3 @@ export const ReadingReports: React.FC = () => {
     </IncidentProvider>
   );
 };
-

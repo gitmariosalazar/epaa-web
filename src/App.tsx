@@ -17,7 +17,7 @@ import { PermissionsProvider } from '@/modules/permissions/presentation/context/
 import { UsersProvider } from '@/modules/users/presentation/context/UsersContext';
 import './index.css';
 import { RolesProvider } from '@/modules/roles/presentation/context/RolesContext';
-import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ConnectionProvider } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
 import { ReadingsProvider } from '@/modules/readings/presentation/context/ReadingsContext';
 import { PaymentsProvider } from '@/modules/accounting/presentation/context/payments/PaymentsContext';
 import { EntryDataProvider } from '@/modules/accounting/presentation/context/entry-data/EntryDataContext';
@@ -45,7 +45,8 @@ const UnAuthorizedPage = lazy(
 
 // Dashboard & Reports
 const DashboardHome = lazyNamed(
-  () => import('@/modules/dashboard/presentation/pages/dashboard/DashboardHome'),
+  () =>
+    import('@/modules/dashboard/presentation/pages/dashboard/DashboardHome'),
   'DashboardHome'
 );
 const ReportsPage = lazyNamed(
@@ -75,7 +76,8 @@ const PositionsPage = lazyNamed(
   'PositionsPage'
 );
 const PermissionsPage = lazyNamed(
-  () => import('@/modules/permissions/presentation/pages/permissions/PermissionsPage'),
+  () =>
+    import('@/modules/permissions/presentation/pages/permissions/PermissionsPage'),
   'PermissionsPage'
 );
 const AuditPage = lazyNamed(
@@ -107,14 +109,13 @@ const GeneralCustomersPage = lazyNamed(
 
 // Connections Module
 const ConnectionsPage = lazyNamed(
-  () => import('@/modules/connections/presentation/pages/ConnectionsPage'),
+  () =>
+    import('@/modules/connections/service-connections/presentation/pages/ConnectionsPage'),
   'ConnectionsPage'
 );
 const ConnectionsDashboardPage = lazyNamed(
   () =>
-    import(
-      '@/modules/connections/presentation/pages/ConnectionsDashboardPage/ConnectionsDashboardPage'
-    ),
+    import('@/modules/connections/service-connections/presentation/pages/ConnectionsDashboardPage/ConnectionsDashboardPage'),
   'ConnectionsDashboardPage'
 );
 
@@ -124,22 +125,23 @@ const PaymentsPage = lazyNamed(
   'PaymentsPage'
 );
 const EntryDataPage = lazyNamed(
-  () => import('@/modules/accounting/presentation/pages/entry-data/EntryDataPage'),
+  () =>
+    import('@/modules/accounting/presentation/pages/entry-data/EntryDataPage'),
   'EntryDataPage'
 );
 const OverduePaymentsPage = lazyNamed(
-  () => import('./modules/accounting/presentation/pages/overdue/OverduePaymentsPage'),
+  () =>
+    import('./modules/accounting/presentation/pages/overdue/OverduePaymentsPage'),
   'OverduePaymentsPage'
 );
 const GeneralCollectionPage = lazyNamed(
   () =>
-    import(
-      '@/modules/accounting/presentation/pages/general-collection/GeneralCollectionPage'
-    ),
+    import('@/modules/accounting/presentation/pages/general-collection/GeneralCollectionPage'),
   'GeneralCollectionPage'
 );
 const AgreementsPage = lazyNamed(
-  () => import('@/modules/accounting/presentation/pages/agreements/AgreementsPage'),
+  () =>
+    import('@/modules/accounting/presentation/pages/agreements/AgreementsPage'),
   'AgreementsPage'
 );
 const PendingBillsPage = lazyNamed(
@@ -183,7 +185,8 @@ const ReadingsWithErrors = lazyNamed(
   'ReadingsWithErrors'
 );
 const UpdateSpecialReadingPage = lazyNamed(
-  () => import('./modules/readings/presentation/pages/UpdateSpecialReadingPage'),
+  () =>
+    import('./modules/readings/presentation/pages/UpdateSpecialReadingPage'),
   'UpdateSpecialReadingPage'
 );
 const ReadingsReconciliationPage = lazyNamed(
@@ -200,9 +203,7 @@ const ReadingsDashboardPage = lazyNamed(
 );
 const ReadingRoutesPage = lazyNamed(
   () =>
-    import(
-      '@/modules/reading-routes/presentation/pages/ReadingRoutesPage/ReadingRoutesPage'
-    ),
+    import('@/modules/reading-routes/presentation/pages/ReadingRoutesPage/ReadingRoutesPage'),
   'ReadingRoutesPage'
 );
 
@@ -237,55 +238,42 @@ const TramiteDetailPage = lazyNamed(
 );
 const CambioTitularPage = lazyNamed(
   () =>
-    import(
-      '@/modules/processes/cambio-titular/presentation/pages/CambioTitularPage'
-    ),
+    import('@/modules/processes/cambio-titular/presentation/pages/CambioTitularPage'),
   'CambioTitularPage'
 );
 const SuspensionPage = lazyNamed(
-  () => import('@/modules/processes/suspension/presentation/pages/SuspensionPage'),
+  () =>
+    import('@/modules/processes/suspension/presentation/pages/SuspensionPage'),
   'SuspensionPage'
 );
 const BeneficioTerceraEdadPage = lazyNamed(
   () =>
-    import(
-      '@/modules/processes/beneficio-tercera-edad/presentation/pages/BeneficioTerceraEdadPage'
-    ),
+    import('@/modules/processes/beneficio-tercera-edad/presentation/pages/BeneficioTerceraEdadPage'),
   'BeneficioTerceraEdadPage'
 );
 const BeneficioDiscapacidadPage = lazyNamed(
   () =>
-    import(
-      '@/modules/processes/beneficio-discapacidad/presentation/pages/BeneficioDiscapacidadPage'
-    ),
+    import('@/modules/processes/beneficio-discapacidad/presentation/pages/BeneficioDiscapacidadPage'),
   'BeneficioDiscapacidadPage'
 );
 const SolicitudNuevaPage = lazyNamed(
   () =>
-    import(
-      '@/modules/processes/solicitudes/presentation/pages/SolicitudNuevaPage'
-    ),
+    import('@/modules/processes/solicitudes/presentation/pages/SolicitudNuevaPage'),
   'SolicitudNuevaPage'
 );
 const SolicitudesTrackingPage = lazyNamed(
   () =>
-    import(
-      '@/modules/processes/solicitudes/presentation/pages/SolicitudesTrackingPage'
-    ),
+    import('@/modules/processes/solicitudes/presentation/pages/SolicitudesTrackingPage'),
   'SolicitudesTrackingPage'
 );
 const SolicitudesListPage = lazyNamed(
   () =>
-    import(
-      '@/modules/processes/solicitudes/presentation/pages/SolicitudesListPage'
-    ),
+    import('@/modules/processes/solicitudes/presentation/pages/SolicitudesListPage'),
   'SolicitudesListPage'
 );
 const SolicitudDetailPage = lazyNamed(
   () =>
-    import(
-      '@/modules/processes/solicitudes/presentation/pages/SolicitudDetailPage'
-    ),
+    import('@/modules/processes/solicitudes/presentation/pages/SolicitudDetailPage'),
   'SolicitudDetailPage'
 );
 
@@ -318,9 +306,7 @@ const WorkOrdersDashboardPage = lazyNamed(
 // Network Operations (SCADA) Module
 const ScadaDashboardPage = lazyNamed(
   () =>
-    import(
-      '@/modules/network-operations/presentation/pages/ScadaDashboardPage/ScadaDashboardPage'
-    ),
+    import('@/modules/network-operations/presentation/pages/ScadaDashboardPage/ScadaDashboardPage'),
   'ScadaDashboardPage'
 );
 
@@ -372,7 +358,9 @@ const ProtectedRoute = () => {
   // Ejecutamos logout inmediatamente si es externo (Clean Architecture: Controller level side effect)
   useEffect(() => {
     if (isExternal) {
-      console.warn("Acceso denegado: Usuario externo intentando acceder a la intranet.");
+      console.warn(
+        'Acceso denegado: Usuario externo intentando acceder a la intranet.'
+      );
       logout();
     }
   }, [isExternal, logout]);
@@ -410,7 +398,8 @@ const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
   // Aseguramos que sea un array de strings o de objetos y extraemos el nombre del rol normalizado
   const rawRoles = Array.isArray(user?.roles) ? user?.roles : [user?.roles];
   const userRoles = rawRoles.filter(Boolean).flatMap((r: unknown) => {
-    const roleObj = typeof r === 'object' && r !== null ? (r as { name?: string }) : null;
+    const roleObj =
+      typeof r === 'object' && r !== null ? (r as { name?: string }) : null;
     const name = roleObj?.name ? roleObj.name : String(r);
     const upper = name.toUpperCase();
 
@@ -452,410 +441,446 @@ function App() {
           <BrowserRouter>
             <Suspense fallback={<PageSuspenseFallback />}>
               <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/unauthorized" element={<UnAuthorizedPage />} />
-              <Route element={<ProtectedRoute />}>
-                <Route element={<DashboardLayout />}>
-                  <Route path="/" element={<DashboardHome />} />
-                  <Route path="/reports" element={<ReportsPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/unauthorized" element={<UnAuthorizedPage />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<DashboardLayout />}>
+                    <Route path="/" element={<DashboardHome />} />
+                    <Route path="/reports" element={<ReportsPage />} />
 
-                  {/* Ejemplo de protección por Rol: Solo ADMIN puede ver usuarios */}
-                  <Route element={<RoleGuard allowedRoles={['SUPER ADMINISTRADOR', 'ADMINISTRADOR']} />}>
+                    {/* Ejemplo de protección por Rol: Solo ADMIN puede ver usuarios */}
                     <Route
-                      path="/users/*"
                       element={
-                        <Routes>
-                          <Route index element={<UsersPage />} />
-                          <Route
-                            path=":username"
-                            element={<UserDetailPage />}
-                          />
-                        </Routes>
+                        <RoleGuard
+                          allowedRoles={[
+                            'SUPER ADMINISTRADOR',
+                            'ADMINISTRADOR'
+                          ]}
+                        />
                       }
-                    />
-                  </Route>
-
-                  <Route path="/customers" element={<CustomersLayout />}>
-                    <Route
-                      index
-                      element={<Navigate to="natural-persons" replace />}
-                    />
-                    <Route
-                      path="natural-persons"
-                      element={<NaturalPersonsPage />}
-                    />
-                    <Route path="companies" element={<CompaniesPage />} />
-                    <Route path="general" element={<GeneralCustomersPage />} />
-                  </Route>
-                  <Route
-                    path="/connections/*"
-                    element={
-                      <ConnectionProvider>
-                        <Routes>
-                          <Route index element={<Navigate to="list" replace />} />
-                          <Route path="list" element={<ConnectionsPage />} />
-                          <Route path="map" element={<ConnectionsPage />} />
-                          <Route
-                            path="dashboard"
-                            element={<ConnectionsDashboardPage />}
-                          />
-                        </Routes>
-                      </ConnectionProvider>
-                    }
-                  />
-                  <Route
-                    path="/network-operations/*"
-                    element={
-                      <NetworkOperationsProvider>
-                        <Routes>
-                          <Route
-                            path="scada"
-                            element={<ScadaDashboardPage />}
-                          />
-                        </Routes>
-                      </NetworkOperationsProvider>
-                    }
-                  />
-                  <Route
-                    path="/roles"
-                    element={
-                      <RolesProvider>
-                        <RolesPage />
-                      </RolesProvider>
-                    }
-                  />
-                  <Route
-                    path="/positions"
-                    element={<PositionsPage />}
-                  />
-                  <Route
-                    path="/permissions"
-                    element={
-                      <PermissionsProvider>
-                        <PermissionsPage />
-                      </PermissionsProvider>
-                    }
-                  />
-                  <Route path="/audit" element={<AuditPage />} />
-                  <Route
-                    path="/profile"
-                    element={<ProfilePage />}
-                  />
-                  <Route path="/settings" element={<SettingsPage />} />
-                  <Route
-                    path="/accounting"
-                    element={
-                      <PaymentsProvider>
-                        <PaymentsPage />
-                      </PaymentsProvider>
-                    }
-                  />
-                  <Route
-                    path="/accounting/entry-data"
-                    element={
-                      <EntryDataProvider>
-                        <EntryDataPage />
-                      </EntryDataProvider>
-                    }
-                  />
-                  <Route
-                    path="/accounting/overdue"
-                    element={
-                      <PaymentsProvider>
-                        <OverduePaymentsPage />
-                      </PaymentsProvider>
-                    }
-                  />
-                  <Route
-                    path="/accounting/general-collection"
-                    element={
-                      <GeneralCollectionProvider>
-                        <GeneralCollectionPage />
-                      </GeneralCollectionProvider>
-                    }
-                  />
-                  <Route
-                    path="/accounting/agreements"
-                    element={
-                      <AgreementsProvider>
-                        <AgreementsPage />
-                      </AgreementsProvider>
-                    }
-                  />
-                  <Route
-                    path="/accounting/payment-receipts"
-                    element={
-                      <PaymentsProvider>
-                        <PendingBillsPage />
-                      </PaymentsProvider>
-                    }
-                  />
-                  <Route
-                    path="/readings/*"
-                    element={
-                      <ReadingsProvider>
-                        <Routes>
-                          <Route path="add" element={<CreateReadingPage />} />
-                          <Route path="list" element={<ReadingsListPage />} />
-                          <Route path="images" element={<ReadingImagesPage />} />
-                          <Route path="update" element={<UpdateReadingPage />} />
-                          <Route path="audit" element={<ReadingAuditPage />} />
-                          <Route path="report" element={<ReadingReports />} />
-                          <Route path="dashboard" element={<ReadingsDashboardPage />} />
-                          <Route path="analytics" element={<ReadingsAnalyticsPage />} />
-                          <Route
-                            path="report-errors"
-                            element={
-                              <RequireElevatedToken fallbackMessage="El acceso a los Errores de Lectura requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
-                                <ReadingsWithErrors />
-                              </RequireElevatedToken>
-                            }
-                          />
-                          <Route
-                            path="advanced-update"
-                            element={
-                              <RequireElevatedToken fallbackMessage="La actualización avanzada de lecturas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
-                                <UpdateSpecialReadingPage />
-                              </RequireElevatedToken>
-                            }
-                          />
-                          <Route
-                            path="reconciliation"
-                            element={
-                              <RequireElevatedToken fallbackMessage="La sincronización de lecturas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
-                                <ReadingsReconciliationPage />
-                              </RequireElevatedToken>
-                            }
-                          />
-                          <Route
-                            path="reading-images"
-                            element={
-                              <RequireElevatedToken fallbackMessage="La visualización de imágenes requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
-                                <ReadingImagesPage isPublic={false} />
-                              </RequireElevatedToken>
-                            }
-                          />
-                          <Route
-                            path="add-historical"
-                            element={
-                              <RequireElevatedToken fallbackMessage="La adición de lecturas históricas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
-                                <CreateHistoricalReadingPage />
-                              </RequireElevatedToken>
-                            }
-                          />
-
-
-                          {/* Other reading routes can be added here */}
-                          <Route
-                            path="routes"
-                            element={
-                              <ReadingRoutesProvider>
-                                <ReadingRoutesPage />
-                              </ReadingRoutesProvider>
-                            }
-                          />
-                        </Routes>
-                      </ReadingsProvider>
-                    }
-                  />
-                  <Route
-                    path="/reading-routes/*"
-                    element={
-                      <ReadingRoutesProvider>
-                        <ReadingRoutesPage />
-                      </ReadingRoutesProvider>
-                    }
-                  />
-                  <Route
-                    path="/incidents/*"
-                    element={
-                      <ConnectionProvider>
-                        <IncidentProvider>
+                    >
+                      <Route
+                        path="/users/*"
+                        element={
                           <Routes>
-                            {/* Ruta raíz → lista */}
-                            <Route index element={<IncidentsPage />} />
-                            {/* Tab: Lista e Incidentes (comparten IncidentsPage, el tab se sincroniza por pathname) */}
-                            <Route path="list" element={<IncidentsPage />} />
-                            <Route path="map" element={<IncidentsPage />} />
-                            <Route path="dashboard" element={<IncidentDashboardPage />} />
-                            {/* Crear incidente (flujo separado) */}
+                            <Route index element={<UsersPage />} />
                             <Route
-                              path="create"
-                              element={
-                                <ReadingsProvider>
-                                  <CreateIncidentPage />
-                                </ReadingsProvider>
-                              }
+                              path=":username"
+                              element={<UserDetailPage />}
                             />
                           </Routes>
-                        </IncidentProvider>
-                      </ConnectionProvider>
-                    }
-                  />
-                  <Route
-                    path="/trash-rate/*"
-                    element={
-                      <TrashRateReportProvider>
-                        <Routes>
-                          <Route
-                            path="trash-report-audit"
-                            element={<TrashRateReportPage />}
-                          />
-                          <Route
-                            path="trash-rate-kpi"
-                            element={<TrashRateKPIPage />}
-                          />
-                          {/* Add more trash-rate sub-routes here */}
-                        </Routes>
-                      </TrashRateReportProvider>
-                    }
-                  />
-                  <Route
-                    path="/properties/*"
-                    element={
-                      <GetPropertyContextProvider>
-                        <Routes>
-                          <Route path="list" element={<PropertiesPage />} />
-                        </Routes>
-                      </GetPropertyContextProvider>
-                    }
-                  />
+                        }
+                      />
+                    </Route>
 
-                  {/* Módulo de Notificaciones */}
-                  <Route path="/notifications" element={<NotificationsPage />} />
-
-                  {/* Módulo de Órdenes de Trabajo */}
-                  <Route
-                    path="/work-orders/dashboard"
-                    element={<WorkOrdersDashboardPage />}
-                  />
-                  <Route
-                    path="/work-orders/list"
-                    element={<AllWorkOrdersListPage />}
-                  />
-                  <Route
-                    path="/work-orders/search"
-                    element={<WorkOrderSearchPage />}
-                  />
-                  <Route
-                    path="/work-orders/process"
-                    element={<WorkOrdersProcessPage />}
-                  />
-                  <Route
-                    path="/work-orders/new"
-                    element={<WorkOrderCreatePage />}
-                  />
-                  <Route
-                    path="/work-orders/create"
-                    element={<WorkOrderCreatePage />}
-                  />
-                  {/* Detalle de OT — ruta dinámica SIEMPRE después de las estáticas */}
-                  <Route
-                    path="/work-orders/:codigoOrden"
-                    element={<WorkOrderDetailPage />}
-                  />
-
-                  {/* Módulo de Trámites */}
-                  <Route
-                    path="/tramites/*"
-                    element={
-                      <TramitesProvider>
-                        <Routes>
-                          <Route index element={<TramitesCatalogPage />} />
-                          <Route path=":id" element={<TramiteDetailPage />} />
-                        </Routes>
-                      </TramitesProvider>
-                    }
-                  />
-
-                  {/* Módulo de Requisitos por Trámite (Procedures) */}
-                  <Route
-                    path="/procedures/cambio-titular"
-                    element={<CambioTitularPage />}
-                  />
-                  <Route
-                    path="/procedures/suspension"
-                    element={<SuspensionPage />}
-                  />
-                  <Route
-                    path="/procedures/tercera-edad"
-                    element={<BeneficioTerceraEdadPage />}
-                  />
-                  <Route
-                    path="/procedures/discapacidad"
-                    element={<BeneficioDiscapacidadPage />}
-                  />
-                  <Route
-                    path="/procedures/acometidas"
-                    element={<Navigate to="/tramites" replace />}
-                  />
-
-                  {/* Módulo de Solicitudes (Requests) */}
-                  <Route
-                    path="/requests/*"
-                    element={
-                      <SolicitudesProvider>
-                        <TramitesProvider>
-                          <Routes>
-                            <Route
-                              path=":categoria/new"
-                              element={<SolicitudNuevaPage />}
-                            />
-                            <Route
-                              path=":categoria/tracking"
-                              element={<SolicitudesTrackingPage />}
-                            />
-                            <Route
-                              path=":categoria/list"
-                              element={<SolicitudesListPage />}
-                            />
-                            <Route
-                              path=":categoria/pending"
-                              element={
-                                <SolicitudesListPage filter="en_proceso" />
-                              }
-                            />
-                            <Route
-                              path=":categoria/approved"
-                              element={<SolicitudesListPage filter="aprobada" />}
-                            />
-                            <Route
-                              path=":categoria/rejected"
-                              element={<SolicitudesListPage filter="rechazada" />}
-                            />
-                          </Routes>
-                        </TramitesProvider>
-                      </SolicitudesProvider>
-                    }
-                  />
-
-                  {/* Rutas adicionales de Solicitudes (Detalles y compatibilidad) */}
-                  <Route
-                    path="/solicitudes/*"
-                    element={
-                      <SolicitudesProvider>
-                        <TramitesProvider>
+                    <Route path="/customers" element={<CustomersLayout />}>
+                      <Route
+                        index
+                        element={<Navigate to="natural-persons" replace />}
+                      />
+                      <Route
+                        path="natural-persons"
+                        element={<NaturalPersonsPage />}
+                      />
+                      <Route path="companies" element={<CompaniesPage />} />
+                      <Route
+                        path="general"
+                        element={<GeneralCustomersPage />}
+                      />
+                    </Route>
+                    <Route
+                      path="/connections/*"
+                      element={
+                        <ConnectionProvider>
                           <Routes>
                             <Route
                               index
-                              element={<Navigate to="/tramites" replace />}
+                              element={<Navigate to="list" replace />}
+                            />
+                            <Route path="list" element={<ConnectionsPage />} />
+                            <Route path="map" element={<ConnectionsPage />} />
+                            <Route
+                              path="dashboard"
+                              element={<ConnectionsDashboardPage />}
+                            />
+                          </Routes>
+                        </ConnectionProvider>
+                      }
+                    />
+                    <Route
+                      path="/network-operations/*"
+                      element={
+                        <NetworkOperationsProvider>
+                          <Routes>
+                            <Route
+                              path="scada"
+                              element={<ScadaDashboardPage />}
+                            />
+                          </Routes>
+                        </NetworkOperationsProvider>
+                      }
+                    />
+                    <Route
+                      path="/roles"
+                      element={
+                        <RolesProvider>
+                          <RolesPage />
+                        </RolesProvider>
+                      }
+                    />
+                    <Route path="/positions" element={<PositionsPage />} />
+                    <Route
+                      path="/permissions"
+                      element={
+                        <PermissionsProvider>
+                          <PermissionsPage />
+                        </PermissionsProvider>
+                      }
+                    />
+                    <Route path="/audit" element={<AuditPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route
+                      path="/accounting"
+                      element={
+                        <PaymentsProvider>
+                          <PaymentsPage />
+                        </PaymentsProvider>
+                      }
+                    />
+                    <Route
+                      path="/accounting/entry-data"
+                      element={
+                        <EntryDataProvider>
+                          <EntryDataPage />
+                        </EntryDataProvider>
+                      }
+                    />
+                    <Route
+                      path="/accounting/overdue"
+                      element={
+                        <PaymentsProvider>
+                          <OverduePaymentsPage />
+                        </PaymentsProvider>
+                      }
+                    />
+                    <Route
+                      path="/accounting/general-collection"
+                      element={
+                        <GeneralCollectionProvider>
+                          <GeneralCollectionPage />
+                        </GeneralCollectionProvider>
+                      }
+                    />
+                    <Route
+                      path="/accounting/agreements"
+                      element={
+                        <AgreementsProvider>
+                          <AgreementsPage />
+                        </AgreementsProvider>
+                      }
+                    />
+                    <Route
+                      path="/accounting/payment-receipts"
+                      element={
+                        <PaymentsProvider>
+                          <PendingBillsPage />
+                        </PaymentsProvider>
+                      }
+                    />
+                    <Route
+                      path="/readings/*"
+                      element={
+                        <ReadingsProvider>
+                          <Routes>
+                            <Route path="add" element={<CreateReadingPage />} />
+                            <Route path="list" element={<ReadingsListPage />} />
+                            <Route
+                              path="images"
+                              element={<ReadingImagesPage />}
                             />
                             <Route
-                              path="nueva"
-                              element={<SolicitudNuevaPage />}
+                              path="update"
+                              element={<UpdateReadingPage />}
                             />
                             <Route
-                              path="nueva/:tramiteId"
-                              element={<SolicitudNuevaPage />}
+                              path="audit"
+                              element={<ReadingAuditPage />}
                             />
-                            <Route path=":id" element={<SolicitudDetailPage />} />
+                            <Route path="report" element={<ReadingReports />} />
+                            <Route
+                              path="dashboard"
+                              element={<ReadingsDashboardPage />}
+                            />
+                            <Route
+                              path="analytics"
+                              element={<ReadingsAnalyticsPage />}
+                            />
+                            <Route
+                              path="report-errors"
+                              element={
+                                <RequireElevatedToken fallbackMessage="El acceso a los Errores de Lectura requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                  <ReadingsWithErrors />
+                                </RequireElevatedToken>
+                              }
+                            />
+                            <Route
+                              path="advanced-update"
+                              element={
+                                <RequireElevatedToken fallbackMessage="La actualización avanzada de lecturas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                  <UpdateSpecialReadingPage />
+                                </RequireElevatedToken>
+                              }
+                            />
+                            <Route
+                              path="reconciliation"
+                              element={
+                                <RequireElevatedToken fallbackMessage="La sincronización de lecturas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                  <ReadingsReconciliationPage />
+                                </RequireElevatedToken>
+                              }
+                            />
+                            <Route
+                              path="reading-images"
+                              element={
+                                <RequireElevatedToken fallbackMessage="La visualización de imágenes requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                  <ReadingImagesPage isPublic={false} />
+                                </RequireElevatedToken>
+                              }
+                            />
+                            <Route
+                              path="add-historical"
+                              element={
+                                <RequireElevatedToken fallbackMessage="La adición de lecturas históricas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                  <CreateHistoricalReadingPage />
+                                </RequireElevatedToken>
+                              }
+                            />
+
+                            {/* Other reading routes can be added here */}
+                            <Route
+                              path="routes"
+                              element={
+                                <ReadingRoutesProvider>
+                                  <ReadingRoutesPage />
+                                </ReadingRoutesProvider>
+                              }
+                            />
+                          </Routes>
+                        </ReadingsProvider>
+                      }
+                    />
+                    <Route
+                      path="/reading-routes/*"
+                      element={
+                        <ReadingRoutesProvider>
+                          <ReadingRoutesPage />
+                        </ReadingRoutesProvider>
+                      }
+                    />
+                    <Route
+                      path="/incidents/*"
+                      element={
+                        <ConnectionProvider>
+                          <IncidentProvider>
+                            <Routes>
+                              {/* Ruta raíz → lista */}
+                              <Route index element={<IncidentsPage />} />
+                              {/* Tab: Lista e Incidentes (comparten IncidentsPage, el tab se sincroniza por pathname) */}
+                              <Route path="list" element={<IncidentsPage />} />
+                              <Route path="map" element={<IncidentsPage />} />
+                              <Route
+                                path="dashboard"
+                                element={<IncidentDashboardPage />}
+                              />
+                              {/* Crear incidente (flujo separado) */}
+                              <Route
+                                path="create"
+                                element={
+                                  <ReadingsProvider>
+                                    <CreateIncidentPage />
+                                  </ReadingsProvider>
+                                }
+                              />
+                            </Routes>
+                          </IncidentProvider>
+                        </ConnectionProvider>
+                      }
+                    />
+                    <Route
+                      path="/trash-rate/*"
+                      element={
+                        <TrashRateReportProvider>
+                          <Routes>
+                            <Route
+                              path="trash-report-audit"
+                              element={<TrashRateReportPage />}
+                            />
+                            <Route
+                              path="trash-rate-kpi"
+                              element={<TrashRateKPIPage />}
+                            />
+                            {/* Add more trash-rate sub-routes here */}
+                          </Routes>
+                        </TrashRateReportProvider>
+                      }
+                    />
+                    <Route
+                      path="/properties/*"
+                      element={
+                        <GetPropertyContextProvider>
+                          <Routes>
+                            <Route path="list" element={<PropertiesPage />} />
+                          </Routes>
+                        </GetPropertyContextProvider>
+                      }
+                    />
+
+                    {/* Módulo de Notificaciones */}
+                    <Route
+                      path="/notifications"
+                      element={<NotificationsPage />}
+                    />
+
+                    {/* Módulo de Órdenes de Trabajo */}
+                    <Route
+                      path="/work-orders/dashboard"
+                      element={<WorkOrdersDashboardPage />}
+                    />
+                    <Route
+                      path="/work-orders/list"
+                      element={<AllWorkOrdersListPage />}
+                    />
+                    <Route
+                      path="/work-orders/search"
+                      element={<WorkOrderSearchPage />}
+                    />
+                    <Route
+                      path="/work-orders/process"
+                      element={<WorkOrdersProcessPage />}
+                    />
+                    <Route
+                      path="/work-orders/new"
+                      element={<WorkOrderCreatePage />}
+                    />
+                    <Route
+                      path="/work-orders/create"
+                      element={<WorkOrderCreatePage />}
+                    />
+                    {/* Detalle de OT — ruta dinámica SIEMPRE después de las estáticas */}
+                    <Route
+                      path="/work-orders/:codigoOrden"
+                      element={<WorkOrderDetailPage />}
+                    />
+
+                    {/* Módulo de Trámites */}
+                    <Route
+                      path="/tramites/*"
+                      element={
+                        <TramitesProvider>
+                          <Routes>
+                            <Route index element={<TramitesCatalogPage />} />
+                            <Route path=":id" element={<TramiteDetailPage />} />
                           </Routes>
                         </TramitesProvider>
-                      </SolicitudesProvider>
-                    }
-                  />
+                      }
+                    />
+
+                    {/* Módulo de Requisitos por Trámite (Procedures) */}
+                    <Route
+                      path="/procedures/cambio-titular"
+                      element={<CambioTitularPage />}
+                    />
+                    <Route
+                      path="/procedures/suspension"
+                      element={<SuspensionPage />}
+                    />
+                    <Route
+                      path="/procedures/tercera-edad"
+                      element={<BeneficioTerceraEdadPage />}
+                    />
+                    <Route
+                      path="/procedures/discapacidad"
+                      element={<BeneficioDiscapacidadPage />}
+                    />
+                    <Route
+                      path="/procedures/acometidas"
+                      element={<Navigate to="/tramites" replace />}
+                    />
+
+                    {/* Módulo de Solicitudes (Requests) */}
+                    <Route
+                      path="/requests/*"
+                      element={
+                        <SolicitudesProvider>
+                          <TramitesProvider>
+                            <Routes>
+                              <Route
+                                path=":categoria/new"
+                                element={<SolicitudNuevaPage />}
+                              />
+                              <Route
+                                path=":categoria/tracking"
+                                element={<SolicitudesTrackingPage />}
+                              />
+                              <Route
+                                path=":categoria/list"
+                                element={<SolicitudesListPage />}
+                              />
+                              <Route
+                                path=":categoria/pending"
+                                element={
+                                  <SolicitudesListPage filter="en_proceso" />
+                                }
+                              />
+                              <Route
+                                path=":categoria/approved"
+                                element={
+                                  <SolicitudesListPage filter="aprobada" />
+                                }
+                              />
+                              <Route
+                                path=":categoria/rejected"
+                                element={
+                                  <SolicitudesListPage filter="rechazada" />
+                                }
+                              />
+                            </Routes>
+                          </TramitesProvider>
+                        </SolicitudesProvider>
+                      }
+                    />
+
+                    {/* Rutas adicionales de Solicitudes (Detalles y compatibilidad) */}
+                    <Route
+                      path="/solicitudes/*"
+                      element={
+                        <SolicitudesProvider>
+                          <TramitesProvider>
+                            <Routes>
+                              <Route
+                                index
+                                element={<Navigate to="/tramites" replace />}
+                              />
+                              <Route
+                                path="nueva"
+                                element={<SolicitudNuevaPage />}
+                              />
+                              <Route
+                                path="nueva/:tramiteId"
+                                element={<SolicitudNuevaPage />}
+                              />
+                              <Route
+                                path=":id"
+                                element={<SolicitudDetailPage />}
+                              />
+                            </Routes>
+                          </TramitesProvider>
+                        </SolicitudesProvider>
+                      }
+                    />
+                  </Route>
                 </Route>
-              </Route>
               </Routes>
             </Suspense>
           </BrowserRouter>

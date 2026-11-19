@@ -5,7 +5,10 @@ import { AdditionalInfoAccordion } from '../components/AdditionalInfoAccordion';
 import { ReadingHistoryTable } from '../components/ReadingHistoryTable';
 import { ReadingToolbar } from '../components/ReadingToolbar';
 import { useLocation } from 'react-router-dom';
-import type { UpdateSpecialReadingRequest, PhotoInputDto } from '../../domain/dto/request/UpdateSpecialReadingRequest';
+import type {
+  UpdateSpecialReadingRequest,
+  PhotoInputDto
+} from '../../domain/dto/request/UpdateSpecialReadingRequest';
 import {
   IdCard,
   User,
@@ -18,7 +21,10 @@ import {
   FileText
 } from 'lucide-react';
 import { ReadingConfirmationModal } from '../components/ReadingConfirmationModal';
-import { checkReadingIsCurrentMonth, formatReadingMonth } from '../../application/usecases/CheckReadingMonthUseCase';
+import {
+  checkReadingIsCurrentMonth,
+  formatReadingMonth
+} from '../../application/usecases/CheckReadingMonthUseCase';
 import { Alert } from '@/shared/presentation/components/Alert';
 import '../styles/create-reading.css';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
@@ -26,8 +32,8 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
 import { ReadingSpecialUpdateInfoForm } from '../components/ReadingSpecialUpdateInfoForm';
 import { PopoverModal } from '@/shared/presentation/components/PopoverModal';
-import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
-import { ChangeMeterPage } from '@/modules/connections/presentation/pages/ChangeMeterPage';
+import { ConnectionProvider } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
+import { ChangeMeterPage } from '@/modules/connections/service-connections/presentation/pages/ChangeMeterPage';
 
 export interface UpdateReadingPageProps {
   initialCadastralKey?: string;
@@ -72,10 +78,13 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
   const [photosInput, setPhotosInput] = useState<PhotoInputDto[]>([]);
 
   // Modal for to update meter number
-  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] = useState(false);
+  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] =
+    useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const handleOpenUpdateMeterNumberModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOpenUpdateMeterNumberModal = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     setAnchorEl(e.currentTarget);
     setOpenUpdateMeterNumberModal(true);
   };
@@ -84,7 +93,10 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
   };
   const handleSuccessUpdateMeterNumberModal = async () => {
     setOpenUpdateMeterNumberModal(false);
-    const activeKey = currentReadingInfoForRequest?.cadastralKey || cadastralKey || initialCadastralKey;
+    const activeKey =
+      currentReadingInfoForRequest?.cadastralKey ||
+      cadastralKey ||
+      initialCadastralKey;
     if (activeKey) {
       await fetchReadingData(activeKey, initialMonth);
     }
@@ -94,7 +106,9 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
   useEffect(() => {
     if (initialPhotos && initialPhotos.length > 0) {
       const formatted: PhotoInputDto[] = initialPhotos.map((p) =>
-        typeof p === 'string' ? { photoUrl: p, description: 'Foto evidencia de lectura' } : p
+        typeof p === 'string'
+          ? { photoUrl: p, description: 'Foto evidencia de lectura' }
+          : p
       );
       setPhotosInput(formatted);
     }
@@ -111,11 +125,21 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
       setCadastralKey(keyToLoad as string);
       fetchReadingData(keyToLoad as string, initialMonth);
     }
-  }, [initialCadastralKey, initialMonth, location.state?.cadastralKey, refreshTrigger]);
+  }, [
+    initialCadastralKey,
+    initialMonth,
+    location.state?.cadastralKey,
+    refreshTrigger
+  ]);
 
   // ── Pre-cargar datos para actualización ───────────────────────────────────────────
   useEffect(() => {
-    const info = readingInfoForUpdated.length > 0 ? readingInfoForUpdated[0] : (readingInfo && readingInfo.length > 0 ? readingInfo[0] : null);
+    const info =
+      readingInfoForUpdated.length > 0
+        ? readingInfoForUpdated[0]
+        : readingInfo && readingInfo.length > 0
+          ? readingInfo[0]
+          : null;
     if (info) {
       if (info.readingId) {
         setCurrentReadingId(info.readingId);
@@ -134,20 +158,25 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
     }
   }, [readingInfo, readingInfoForUpdated]);
 
-  const currentReadingInfoForRequest = readingInfoForUpdated.length > 0 ? readingInfoForUpdated[0] : readingInfo[0];
+  const currentReadingInfoForRequest =
+    readingInfoForUpdated.length > 0
+      ? readingInfoForUpdated[0]
+      : readingInfo[0];
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const buildRequest = (): UpdateSpecialReadingRequest => ({
     tipoAjusteId: Number(tipoAjusteId),
     justificacion: observationInput,
-    previousReading: previousReadingInput === '' ? null : Number(previousReadingInput),
-    currentReading: currentReadingInput === '' ? null : Number(currentReadingInput),
+    previousReading:
+      previousReadingInput === '' ? null : Number(previousReadingInput),
+    currentReading:
+      currentReadingInput === '' ? null : Number(currentReadingInput),
     meterStatus: 'NORMAL',
     cadastralKey: currentReadingInfoForRequest?.cadastralKey ?? '',
     averageConsumption: currentReadingInfoForRequest?.averageConsumption ?? 0,
     photos: photosInput.length > 0 ? photosInput : undefined,
     evidencePhotos: photosInput.length > 0 ? photosInput : undefined,
-    images: photosInput.length > 0 ? photosInput : undefined,
+    images: photosInput.length > 0 ? photosInput : undefined
   });
 
   const handleSearch = async () => {
@@ -187,7 +216,8 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
     }
 
     // Auto-seleccionar la lectura para actualizar si no hay una seleccionada
-    const latestReadingId = currentReadingId || currentReadingInfoForRequest?.readingId;
+    const latestReadingId =
+      currentReadingId || currentReadingInfoForRequest?.readingId;
     if (!latestReadingId) {
       alert('No hay lectura previa en el historial para actualizar.');
       return;
@@ -199,12 +229,16 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
   };
 
   const handleConfirm = async () => {
-    const readingIdToUpdate = currentReadingId || currentReadingInfoForRequest?.readingId;
+    const readingIdToUpdate =
+      currentReadingId || currentReadingInfoForRequest?.readingId;
     if (!readingIdToUpdate) return;
 
     const requestPayload = buildRequest();
 
-    const result = await submitUpdateSpecialReading(readingIdToUpdate, requestPayload);
+    const result = await submitUpdateSpecialReading(
+      readingIdToUpdate,
+      requestPayload
+    );
     setIsConfirmModalOpen(false);
 
     if (result) {
@@ -219,7 +253,10 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
       setPhotosInput([]);
 
       // Recargar datos actualizados automáticamente
-      const activeKey = currentReadingInfoForRequest?.cadastralKey || cadastralKey || initialCadastralKey;
+      const activeKey =
+        currentReadingInfoForRequest?.cadastralKey ||
+        cadastralKey ||
+        initialCadastralKey;
       if (activeKey) {
         await fetchReadingData(activeKey, initialMonth);
       }
@@ -274,7 +311,9 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
     <div className="cr-container">
       <div className="cr-content-wrapper">
         <div className="cr-header-container">
-          <h2 className="cr-page-title">Actualización y Corrección de Lecturas</h2>
+          <h2 className="cr-page-title">
+            Actualización y Corrección de Lecturas
+          </h2>
 
           {currentReadingInfoForRequest && (
             <div className="cr-client-badge">
@@ -337,9 +376,9 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
                   <Tag size={15} style={{ marginRight: 6, flexShrink: 0 }} />
                   {currentReadingInfoForRequest.connectionStateName
                     ? currentReadingInfoForRequest.connectionStateName
-                      .replace(/_/g, ' ')
-                      .replace(/([A-Z])/g, ' $1')
-                      .trim()
+                        .replace(/_/g, ' ')
+                        .replace(/([A-Z])/g, ' $1')
+                        .trim()
                     : 'Estado Desconocido'}
                 </div>
                 <div className="cs-state-description">
@@ -450,7 +489,9 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
         {currentReadingInfoForRequest &&
           currentReadingInfoForRequest.permitReading && (
             <>
-              {!checkReadingIsCurrentMonth(currentReadingInfoForRequest.monthReading) && (
+              {!checkReadingIsCurrentMonth(
+                currentReadingInfoForRequest.monthReading
+              ) && (
                 <div style={{ marginTop: '0.09rem', marginBottom: '-0.9rem' }}>
                   <Alert
                     type="warning"
@@ -469,7 +510,11 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
               />
 
               <ReadingSpecialUpdateInfoForm
-                info={readingInfoForUpdated.length > 0 ? readingInfoForUpdated : readingInfo}
+                info={
+                  readingInfoForUpdated.length > 0
+                    ? readingInfoForUpdated
+                    : readingInfo
+                }
                 currentReadingInput={currentReadingInput}
                 setCurrentReadingInput={setCurrentReadingInput}
                 previousReadingInput={previousReadingInput}
@@ -490,7 +535,7 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
               history={readingHistory}
               connectionInfo={{
                 cadastralKey: currentReadingInfoForRequest.cadastralKey,
-                meterNumber: currentReadingInfoForRequest.meterNumber,
+                meterNumber: currentReadingInfoForRequest.meterNumber
               }}
               isLoading={isLoadingHistory}
               onUpdateMeterNumber={handleOpenUpdateMeterNumberModal}
@@ -535,7 +580,12 @@ export const UpdateSpecialReadingPage: React.FC<UpdateReadingPageProps> = ({
         >
           <ConnectionProvider>
             <ChangeMeterPage
-              cadastralKeyProp={currentReadingInfoForRequest?.cadastralKey || cadastralKey || initialCadastralKey || ''}
+              cadastralKeyProp={
+                currentReadingInfoForRequest?.cadastralKey ||
+                cadastralKey ||
+                initialCadastralKey ||
+                ''
+              }
               onSuccess={handleSuccessUpdateMeterNumberModal}
               onCancel={handleCloseUpdateMeterNumberModal}
             />

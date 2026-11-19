@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { UpdateReadingPage, type UpdateReadingPageProps } from './UpdateReadingPage';
+import {
+  UpdateReadingPage,
+  type UpdateReadingPageProps
+} from './UpdateReadingPage';
 import { useReadingImagesList } from '../hooks/useReadingImagesList';
 import { useFilePreview } from '@/shared/files/presentation/hooks/useFilePreview';
-import { Loader2, ImageOff, ChevronLeft, ChevronRight, Calendar, Droplet, AlertTriangle } from 'lucide-react';
+import {
+  Loader2,
+  ImageOff,
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Droplet,
+  AlertTriangle
+} from 'lucide-react';
 import '../styles/UpdateReadingWithImagesPage.css';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { PopoverModal } from '@/shared/presentation/components/PopoverModal';
@@ -17,8 +28,8 @@ import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.co
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { BsPatchQuestionFill } from 'react-icons/bs';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
-import { ChangeMeterPage } from '@/modules/connections/presentation/pages/ChangeMeterPage';
-import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ChangeMeterPage } from '@/modules/connections/service-connections/presentation/pages/ChangeMeterPage';
+import { ConnectionProvider } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
 import type { ReadingDetailed } from '../../domain/models/ReadingInfoResponse';
 import { useReading } from '../hooks/useReading';
 import { truncateText } from '@/shared/utils/text/truncate-text';
@@ -31,11 +42,14 @@ const ImagePreview: React.FC<{ filename: string }> = ({ filename }) => {
   const cleanFilename = extractFilename(filename);
   const { blobUrl, loading, error } = useFilePreview('readings', cleanFilename);
 
-
   if (loading) {
     return (
       <div className="urw-loading">
-        <Loader2 className="animate-spin" size={48} style={{ color: 'white' }} />
+        <Loader2
+          className="animate-spin"
+          size={48}
+          style={{ color: 'white' }}
+        />
       </div>
     );
   }
@@ -63,17 +77,18 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
   initialCadastralKey,
   initialMonth,
   onSuccess,
-  onCancel,
+  onCancel
 }) => {
   const { readingImages, fetchImages, isLoading } = useReadingImagesList();
-  const { readingDetailed, fetchReadingData } = useReading()
+  const { readingDetailed, fetchReadingData } = useReading();
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'images' | 'details'>('images');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [isOpenDetailInfo, setIsOpenDetailInfo] = useState(false);
-  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] = useState(false);
+  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] =
+    useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const handleOpenDetailInfo = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -84,7 +99,9 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
     setIsOpenDetailInfo(false);
   };
 
-  const handleOpenUpdateMeterNumberModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOpenUpdateMeterNumberModal = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     setAnchorEl(e.currentTarget);
     setOpenUpdateMeterNumberModal(true);
   };
@@ -93,7 +110,7 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
   };
   const handleSuccessUpdateMeterNumberModal = () => {
     setOpenUpdateMeterNumberModal(false);
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   useEffect(() => {
@@ -109,21 +126,27 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
   );
 
   const handlePrev = () => {
-    setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : imageItems.length - 1));
+    setCurrentImageIndex((prev) =>
+      prev > 0 ? prev - 1 : imageItems.length - 1
+    );
   };
 
   const handleNext = () => {
-    setCurrentImageIndex((prev) => (prev < imageItems.length - 1 ? prev + 1 : 0));
+    setCurrentImageIndex((prev) =>
+      prev < imageItems.length - 1 ? prev + 1 : 0
+    );
   };
 
   const currentItem = imageItems[currentImageIndex];
   const displayData: ReadingDetailed = readingDetailed!;
 
-
   return (
     <div className="urw-split-container">
       {/* Left Pane: Images */}
-      <div className="urw-images-pane" style={{ justifyContent: 'flex-start', padding: 0 }}>
+      <div
+        className="urw-images-pane"
+        style={{ justifyContent: 'flex-start', padding: 0 }}
+      >
         <Tabs
           tabs={[
             { id: 'images', label: 'Imágenes', icon: <FaCamera size={16} /> },
@@ -134,12 +157,37 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
           className="urw-tabs"
         />
 
-        <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <TabPanel tabId="images" activeTab={activeTab} className="urw-tab-panel">
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%', position: 'relative', overflowY: 'auto' }}>
+        <div
+          style={{
+            flex: 1,
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
+          }}
+        >
+          <TabPanel
+            tabId="images"
+            activeTab={activeTab}
+            className="urw-tab-panel"
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                flex: 1,
+                height: '100%',
+                position: 'relative',
+                overflowY: 'auto'
+              }}
+            >
               {isLoading ? (
                 <div className="urw-loading">
-                  <Loader2 className="animate-spin" size={48} style={{ color: 'white' }} />
+                  <Loader2
+                    className="animate-spin"
+                    size={48}
+                    style={{ color: 'white' }}
+                  />
                 </div>
               ) : imageItems.length > 0 ? (
                 <>
@@ -170,11 +218,28 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
                   </div>
                 </>
               ) : (
-                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px' }}>
+                <div
+                  style={{
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '5px'
+                  }}
+                >
                   <EmptyState
-                    description={isLoading ? 'Cargando...' : `No hay imágenes disponibles para la lectura con clave catastral ${initialCadastralKey}`}
+                    description={
+                      isLoading
+                        ? 'Cargando...'
+                        : `No hay imágenes disponibles para la lectura con clave catastral ${initialCadastralKey}`
+                    }
                     message="Sin imágenes"
-                    icon={<BsPatchQuestionFill size={48} style={{ marginBottom: '8px' }} />}
+                    icon={
+                      <BsPatchQuestionFill
+                        size={48}
+                        style={{ marginBottom: '8px' }}
+                      />
+                    }
                   />
                 </div>
               )}
@@ -186,32 +251,39 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
                     <span className="urw-footer-label">Período</span>
                     <ColorChip
                       label={`${displayData?.readingMonthName || ''}`}
-                      size='xs'
-                      variant='soft'
-                      color='#0891b2'
-                      icon={<Calendar size='1em' />}
+                      size="xs"
+                      variant="soft"
+                      color="#0891b2"
+                      icon={<Calendar size="1em" />}
                       borderRadius={5}
                     />
                   </div>
                   <div className="urw-footer-item">
                     <span className="urw-footer-label">Consumo</span>
                     <ColorChip
-                      label={(displayData?.currentReading! - displayData?.previousReading || 0).toString() + ' m³'}
-                      size='xs'
-                      variant='soft'
+                      label={
+                        (
+                          displayData?.currentReading! -
+                            displayData?.previousReading || 0
+                        ).toString() + ' m³'
+                      }
+                      size="xs"
+                      variant="soft"
                       color={getNoveltyColor(displayData?.novelty || '')}
-                      icon={<Droplet size='1em' />}
+                      icon={<Droplet size="1em" />}
                       borderRadius={5}
                     />
                   </div>
                   <div className="urw-footer-item">
                     <span className="urw-footer-label">Novedad</span>
                     <ColorChip
-                      label={truncateText(displayData?.novelty!, 10) || 'Ninguna'}
-                      size='xs'
-                      variant='soft'
+                      label={
+                        truncateText(displayData?.novelty!, 10) || 'Ninguna'
+                      }
+                      size="xs"
+                      variant="soft"
                       color={getNoveltyColor(displayData?.novelty)}
-                      icon={<AlertTriangle size='1em' />}
+                      icon={<AlertTriangle size="1em" />}
                       borderRadius={5}
                     />
                   </div>
@@ -219,40 +291,40 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
                     <span className="urw-footer-label">C. catastral</span>
                     <ColorChip
                       label={displayData?.cadastralKey || initialCadastralKey}
-                      size='xs'
-                      variant='soft'
-                      color='#0868B2'
-                      icon={<MdCable size='1em' />}
+                      size="xs"
+                      variant="soft"
+                      color="#0868B2"
+                      icon={<MdCable size="1em" />}
                       borderRadius={5}
                     />
                   </div>
                 </div>
-                <div className='urw-footer-actions-left'>
+                <div className="urw-footer-actions-left">
                   <Tooltip
                     content={'Ver información de la lectura'}
                     followCursor={false}
                   >
                     <Button
                       onClick={handleOpenDetailInfo}
-                      variant='outline'
+                      variant="outline"
                       circle
-                      size='sm'
+                      size="sm"
                     >
                       <FaList size={16} />
                     </Button>
                   </Tooltip>
                 </div>
-                <div className='urw-footer-actions-right'>
+                <div className="urw-footer-actions-right">
                   <Tooltip
                     content={'Actualizar Número de medidor'}
                     followCursor={false}
                   >
                     <Button
                       onClick={handleOpenUpdateMeterNumberModal}
-                      variant='outline'
+                      variant="outline"
                       circle
-                      color='orange'
-                      size='sm'
+                      color="orange"
+                      size="sm"
                     >
                       <FaEdit size={16} />
                     </Button>
@@ -262,8 +334,20 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
             </div>
           </TabPanel>
 
-          <TabPanel tabId="details" activeTab={activeTab} className="urw-tab-panel">
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%', overflowY: 'auto' }}>
+          <TabPanel
+            tabId="details"
+            activeTab={activeTab}
+            className="urw-tab-panel"
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                flex: 1,
+                height: '100%',
+                overflowY: 'auto'
+              }}
+            >
               <ReadingDetailTabContent
                 cadastralKey={initialCadastralKey || ''}
                 yearAndMonth={
@@ -271,15 +355,13 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
                     ? String(displayData.readingMonth).includes('-')
                       ? String(displayData.readingMonth)
                       : `${displayData.readingMonth.split('-')[0]}-${String(displayData.readingMonth).padStart(2, '0')}`
-                    : (initialMonth || dateService.getCurrentMonthString())
+                    : initialMonth || dateService.getCurrentMonthString()
                 }
               />
             </div>
           </TabPanel>
         </div>
       </div>
-
-
 
       {/* Right Pane: Edit Form */}
       <div className="urw-form-panel">
@@ -301,9 +383,11 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
         {currentItem?.data && (
           <ReadingInfoPopoverContent
             cadastralKey={currentItem.data.cadastralKey}
-            yearAndMonth={String(currentItem.data.readingMonth).includes('-')
-              ? currentItem.data.readingMonth
-              : `${currentItem.data.readingYear}-${String(currentItem.data.readingMonth).padStart(2, '0')}`}
+            yearAndMonth={
+              String(currentItem.data.readingMonth).includes('-')
+                ? currentItem.data.readingMonth
+                : `${currentItem.data.readingYear}-${String(currentItem.data.readingMonth).padStart(2, '0')}`
+            }
           />
         )}
       </PopoverModal>
@@ -322,7 +406,6 @@ export const UpdateReadingWithImagesPage: React.FC<UpdateReadingPageProps> = ({
           />
         </ConnectionProvider>
       </PopoverModal>
-
     </div>
   );
 };

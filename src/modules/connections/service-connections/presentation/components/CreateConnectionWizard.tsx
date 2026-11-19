@@ -1,7 +1,7 @@
 import React from 'react';
 import { Home, Camera } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useConnectionsViewModel } from '@/modules/connections/presentation/hooks/useConnectionsViewModel';
+import { useConnectionsViewModel } from '@/modules/connections/service-connections/presentation/hooks/useConnectionsViewModel';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { ClientSelectionStep } from './Steps/ClientSelectionStep';
@@ -91,8 +91,8 @@ export const CreateConnectionWizard: React.FC<CreateConnectionWizardProps> = ({
               clientId={
                 clientType === 'person'
                   ? (
-                    pendingClientData as CreateCustomerRequest
-                  )?.customerId.toString()
+                      pendingClientData as CreateCustomerRequest
+                    )?.customerId.toString()
                   : (pendingClientData as CreateCompanyRequest)?.companyRuc
               }
               selectedPropertyKey={formData.propertyCadastralKey || null}
@@ -167,18 +167,18 @@ export const CreateConnectionWizard: React.FC<CreateConnectionWizardProps> = ({
             >
               {loading
                 ? t(
-                  'connections.wizard.clientSelection.processing',
-                  'Procesando...'
-                )
+                    'connections.wizard.clientSelection.processing',
+                    'Procesando...'
+                  )
                 : isClientExisting
                   ? t(
-                    'connections.wizard.clientSelection.updateContinue',
-                    'Actualizar y Continuar'
-                  )
+                      'connections.wizard.clientSelection.updateContinue',
+                      'Actualizar y Continuar'
+                    )
                   : t(
-                    'connections.wizard.clientSelection.createContinue',
-                    'Confirmar y Continuar'
-                  )}
+                      'connections.wizard.clientSelection.createContinue',
+                      'Confirmar y Continuar'
+                    )}
             </Button>
           )}
 
@@ -230,13 +230,13 @@ export const CreateConnectionWizard: React.FC<CreateConnectionWizardProps> = ({
                 ? t('common.saving', 'Guardando...')
                 : selectedConnection
                   ? t(
-                    'connections.wizard.basicUpdate.saveUpdate',
-                    'Actualizar Acometida'
-                  )
+                      'connections.wizard.basicUpdate.saveUpdate',
+                      'Actualizar Acometida'
+                    )
                   : t(
-                    'connections.wizard.basicUpdate.saveConnection',
-                    'Guardar Acometida'
-                  )}
+                      'connections.wizard.basicUpdate.saveConnection',
+                      'Guardar Acometida'
+                    )}
             </Button>
           )}
         </div>
@@ -298,11 +298,8 @@ export const CreateConnectionWizard: React.FC<CreateConnectionWizardProps> = ({
             />
           </div>
         </div>
-
       </div>
-      <div className="wizard-steps">
-        {renderStep()}
-      </div>
+      <div className="wizard-steps">{renderStep()}</div>
     </Modal>
   );
 };

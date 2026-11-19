@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { ConnectionRepositoryImpl } from '@/modules/connections/infrastructure/repositories/ConnectionRepositoryImpl';
-import { FindConnectionWithPropertyByCadastralKeyUseCase } from '@/modules/connections/application/usecases/FindConnectionWithPropertyByCadastralKeyUseCase';
-import type { ConnectionWithProperty } from '@/modules/connections/domain/models/Connection';
+import { ConnectionRepositoryImpl } from '@/modules/connections/service-connections/infrastructure/repositories/ConnectionRepositoryImpl';
+import { FindConnectionWithPropertyByCadastralKeyUseCase } from '@/modules/connections/service-connections/application/usecases/FindConnectionWithPropertyByCadastralKeyUseCase';
+import type { ConnectionWithProperty } from '@/modules/connections/service-connections/domain/models/Connection';
 
 export const useScadaConnectionDetails = (cadastralKey?: string | null) => {
-  const [connectionDetails, setConnectionDetails] = useState<ConnectionWithProperty | null>(null);
+  const [connectionDetails, setConnectionDetails] =
+    useState<ConnectionWithProperty | null>(null);
   const [loadingConnection, setLoadingConnection] = useState(false);
   const [errorConnection, setErrorConnection] = useState<string | null>(null);
 
@@ -20,12 +21,16 @@ export const useScadaConnectionDetails = (cadastralKey?: string | null) => {
       setErrorConnection(null);
       try {
         const repo = new ConnectionRepositoryImpl();
-        const useCase = new FindConnectionWithPropertyByCadastralKeyUseCase(repo);
+        const useCase = new FindConnectionWithPropertyByCadastralKeyUseCase(
+          repo
+        );
         const data = await useCase.execute(cadastralKey);
         setConnectionDetails(data);
       } catch (err) {
         console.error('Error fetching connection details:', err);
-        setErrorConnection('No se pudieron obtener los detalles de la acometida.');
+        setErrorConnection(
+          'No se pudieron obtener los detalles de la acometida.'
+        );
       } finally {
         setLoadingConnection(false);
       }

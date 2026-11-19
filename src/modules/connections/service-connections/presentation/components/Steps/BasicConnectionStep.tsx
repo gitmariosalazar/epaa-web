@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type {
   Connection,
   Rate
-} from '@/modules/connections/domain/models/Connection';
+} from '@/modules/connections/service-connections/domain/models/Connection';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { Select } from '@/shared/presentation/components/Input/Select';

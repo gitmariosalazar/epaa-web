@@ -14,7 +14,7 @@ import {
   FaBullseye,
   FaStickyNote
 } from 'react-icons/fa';
-import type { Connection } from '@/modules/connections/domain/models/Connection';
+import type { Connection } from '@/modules/connections/service-connections/domain/models/Connection';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { Alert } from '@/shared/presentation/components/Alert';

@@ -13,7 +13,7 @@ import {
 } from '../components/ReadinsFilters';
 import { useReadingsList } from '../hooks/useReadingsList';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
-import '@/modules/connections/domain/events/ConnectionWsEvents';
+import '@/modules/connections/service-connections/domain/events/ConnectionWsEvents';
 import '@/modules/readings/domain/events/ReadingWsEvents';
 
 import { PendingReadingConnectionTable } from '../components/PendingReadingConnectionTable';
@@ -24,8 +24,8 @@ import { CreateReadingPage } from './CreateReadingPage';
 import { BsExclamationCircleFill, BsPatchQuestionFill } from 'react-icons/bs';
 import { ReadingsNoveltyTabView } from '../components/novelties/ReadingsNoveltyTabView';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
-import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
-import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
+import { ConnectionProvider } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
+import { ConnectionDetailModal } from '@/modules/connections/service-connections/presentation/components/ConnectionDetailModal';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { useReadingsRealtimeSync } from '../hooks/useReadingsRealtimeSync';
@@ -83,7 +83,6 @@ export const ReadingsListPage: React.FC = () => {
   const [globalSearch, setGlobalSearch] = useState('');
 
   const [isManualSync, setIsManualSync] = useState(false);
-
 
   const [detailModalState, setDetailModalState] = useState<{
     isOpen: boolean;

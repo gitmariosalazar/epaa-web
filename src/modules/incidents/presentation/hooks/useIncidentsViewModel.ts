@@ -4,7 +4,7 @@ import { useIncidentContext } from '../context/IncidentContext';
 import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
 import { NotificationIncidentPdfGenerator } from '../components/templates/pdf/NotificationIncidentPdfGenerator';
 import type { NotificationIncidentItem } from '../components/templates/pdf/components/NotificationIncidentDocument';
-import type { FindConnectionWithPropertyByCadastralKeyUseCase } from '@/modules/connections/application/usecases/FindConnectionWithPropertyByCadastralKeyUseCase';
+import type { FindConnectionWithPropertyByCadastralKeyUseCase } from '@/modules/connections/service-connections/application/usecases/FindConnectionWithPropertyByCadastralKeyUseCase';
 
 export type IncidentSortKey =
   | 'fecha_desc'

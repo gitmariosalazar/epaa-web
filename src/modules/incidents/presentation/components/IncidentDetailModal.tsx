@@ -21,7 +21,7 @@ import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip
 import { StatusTimeline } from '@/shared/presentation/components/Timeline';
 import { GeoSection } from '@/shared/presentation/components/GeoLocation';
 import type { IncidentDetailRowResponse } from '../../domain/schemas/dtos/response/view_incident.response';
-import type { ConnectionWithProperty } from '@/modules/connections/domain/models/Connection';
+import type { ConnectionWithProperty } from '@/modules/connections/service-connections/domain/models/Connection';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { MdOutlineTripOrigin, MdPhotoLibrary } from 'react-icons/md';
 import { FaUserCheck, FaUsersCog } from 'react-icons/fa';
@@ -186,12 +186,24 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                   </div>
                   <div className="detail-item">
                     <span className="detail-label">Orden de Trabajo</span>
-                    <span className="detail-value font-medium" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span
+                      className="detail-value font-medium"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
                       {incident.orderCode || 'No asignada'}
                       {incident.orderCode && onPreviewWorkOrderPdf && (
-                        <Tooltip content="Ver PDF de la Orden de Trabajo" position="top">
+                        <Tooltip
+                          content="Ver PDF de la Orden de Trabajo"
+                          position="top"
+                        >
                           <Button
-                            onClick={() => onPreviewWorkOrderPdf(incident.orderCode!)}
+                            onClick={() =>
+                              onPreviewWorkOrderPdf(incident.orderCode!)
+                            }
                             size="xs"
                             color="primary"
                             circle
@@ -445,46 +457,46 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
               {/* ── Location ── */}
               {(incident.referenceAddress ||
                 (incident.latitude && incident.longitude)) && (
-                  <div className="detail-section">
-                    <h4 className="detail-section-title">Ubicación</h4>
-                    {incident.referenceAddress && (
-                      <div className="incident-location-header">
-                        <MapPin size={16} className="text-secondary" />
-                        <span className="detail-value">
-                          {incident.referenceAddress}
-                        </span>
+                <div className="detail-section">
+                  <h4 className="detail-section-title">Ubicación</h4>
+                  {incident.referenceAddress && (
+                    <div className="incident-location-header">
+                      <MapPin size={16} className="text-secondary" />
+                      <span className="detail-value">
+                        {incident.referenceAddress}
+                      </span>
+                    </div>
+                  )}
+                  {/* Original coordinates box — kept intact */}
+                  {incident.latitude && incident.longitude && (
+                    <div className="geolocation-box">
+                      <span className="detail-value">
+                        Coordenadas: {incident.latitude}, {incident.longitude}
+                      </span>
+                      <div className="maps-link">
+                        <a
+                          className="geo-card__maps-link"
+                          href={`https://www.google.com/maps/search/?api=1&query=${incident.latitude},${incident.longitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Navigation size={12} />
+                          Ver en Google Maps
+                        </a>
                       </div>
-                    )}
-                    {/* Original coordinates box — kept intact */}
-                    {incident.latitude && incident.longitude && (
-                      <div className="geolocation-box">
-                        <span className="detail-value">
-                          Coordenadas: {incident.latitude}, {incident.longitude}
-                        </span>
-                        <div className="maps-link">
-                          <a
-                            className="geo-card__maps-link"
-                            href={`https://www.google.com/maps/search/?api=1&query=${incident.latitude},${incident.longitude}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Navigation size={12} />
-                            Ver en Google Maps
-                          </a>
-                        </div>
-                      </div>
-                    )}
-                    {/* Geocoded address card — reverse geocodes the saved coordinates */}
-                    {incident.latitude && incident.longitude && (
-                      <div className="incident-location-map-wrapper">
-                        <GeoSection
-                          lat={Number(incident.latitude)}
-                          lng={Number(incident.longitude)}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
+                    </div>
+                  )}
+                  {/* Geocoded address card — reverse geocodes the saved coordinates */}
+                  {incident.latitude && incident.longitude && (
+                    <div className="incident-location-map-wrapper">
+                      <GeoSection
+                        lat={Number(incident.latitude)}
+                        lng={Number(incident.longitude)}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* ── Resolution ── */}
               {incident.status === 'RESUELTO' && (

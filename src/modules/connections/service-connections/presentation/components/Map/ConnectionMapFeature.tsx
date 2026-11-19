@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { ConnectionMap } from './ConnectionMap.tsx';
-import { ConnectionSidePanel } from './ConnectionSidePanel';
-import { useConnectionsViewModel } from '../../hooks/useConnectionsViewModel';
+import { ConnectionSidePanel } from './ConnectionSidePanel.tsx';
+import { useConnectionsViewModel } from '../../hooks/useConnectionsViewModel.ts';
 import './ConnectionMap.css';
 import { FALLBACK_CENTER_ANTONIO_ANTE } from '@/shared/utils/types/IGeolocationData.ts';
 

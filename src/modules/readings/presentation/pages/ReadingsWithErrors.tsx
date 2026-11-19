@@ -20,14 +20,13 @@ import { AllReadingsTable } from '../components/AllReadingsTable';
 import { CreateReadingPage } from './CreateReadingPage';
 import { ReadingsNoveltyTabView } from '../components/novelties/ReadingsNoveltyTabView';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
-import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
-import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
+import { ConnectionProvider } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
+import { ConnectionDetailModal } from '@/modules/connections/service-connections/presentation/components/ConnectionDetailModal';
 import { BsExclamationCircleFill, BsPatchQuestionFill } from 'react-icons/bs';
 import { UpdateSpecialReadingWithImagesPage } from './UpdateSpecialReadingWithImagesPage';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { useReadingsRealtimeSync } from '../hooks/useReadingsRealtimeSync';
-
 
 interface ModalState {
   isOpen: boolean;
@@ -72,16 +71,25 @@ export const ReadingsWithErrors: React.FC = () => {
 
   const [isManualSync, setIsManualSync] = useState(false);
 
-  const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
+  const [detailModalState, setDetailModalState] = useState<{
+    isOpen: boolean;
+    cadastralKey: string | null;
+    yearAndMonth: string | null;
+  }>({
     isOpen: false,
     cadastralKey: null,
-    yearAndMonth: null,
+    yearAndMonth: null
   });
 
   // Detail Modal State for Connection
-  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(null);
+  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(
+    null
+  );
 
-  const handleViewDetails = (cadastralKey: string, readingDate: Date | null) => {
+  const handleViewDetails = (
+    cadastralKey: string,
+    readingDate: Date | null
+  ) => {
     let yearAndMonth = month;
     if (readingDate) {
       const d = new Date(readingDate);
@@ -109,21 +117,36 @@ export const ReadingsWithErrors: React.FC = () => {
     clearAll();
   }, [activeTab]);
 
-  const filterData = <T extends { sector: number | string; cadastralKey?: string; clientName?: string; meterNumber?: string }>(list: T[]) => {
+  const filterData = <
+    T extends {
+      sector: number | string;
+      cadastralKey?: string;
+      clientName?: string;
+      meterNumber?: string;
+    }
+  >(
+    list: T[]
+  ) => {
     let filtered = list;
 
     // Filter by sector
     if (sector) {
-      filtered = filtered.filter((item) => String(item.sector).includes(sector));
+      filtered = filtered.filter((item) =>
+        String(item.sector).includes(sector)
+      );
     }
 
     // Filter by global search
     if (globalSearch) {
       const lowerSearch = globalSearch.toLowerCase();
-      filtered = filtered.filter((item) =>
-        (item.cadastralKey && String(item.cadastralKey).toLowerCase().includes(lowerSearch)) ||
-        (item.clientName && String(item.clientName).toLowerCase().includes(lowerSearch)) ||
-        (item.meterNumber && String(item.meterNumber).toLowerCase().includes(lowerSearch))
+      filtered = filtered.filter(
+        (item) =>
+          (item.cadastralKey &&
+            String(item.cadastralKey).toLowerCase().includes(lowerSearch)) ||
+          (item.clientName &&
+            String(item.clientName).toLowerCase().includes(lowerSearch)) ||
+          (item.meterNumber &&
+            String(item.meterNumber).toLowerCase().includes(lowerSearch))
       );
     }
 
@@ -140,9 +163,7 @@ export const ReadingsWithErrors: React.FC = () => {
   );
 
   const filteredAll = useMemo(() => {
-    return [
-      ...filteredCompleted.map((item) => ({ ...item, _type: 'Tomada' }))
-    ];
+    return [...filteredCompleted.map((item) => ({ ...item, _type: 'Tomada' }))];
   }, [filteredCompleted]);
 
   const handleTableAction = (
@@ -162,7 +183,7 @@ export const ReadingsWithErrors: React.FC = () => {
     sector,
     userId,
     date,
-    fetchReadings,
+    fetchReadings
   });
 
   const handleModalSuccess = () => {
@@ -226,10 +247,17 @@ export const ReadingsWithErrors: React.FC = () => {
     >
       {error ? (
         <EmptyState
-          message='No se pudieron cargar las lecturas'
-          description='Intenta de nuevo más tarde.'
-          variant='error'
-          actionButton={<Button title='Reintentar' onClick={() => fetchReadings(activeTab as any, month, sector, userId, date)} />}
+          message="No se pudieron cargar las lecturas"
+          description="Intenta de nuevo más tarde."
+          variant="error"
+          actionButton={
+            <Button
+              title="Reintentar"
+              onClick={() =>
+                fetchReadings(activeTab as any, month, sector, userId, date)
+              }
+            />
+          }
           icon={<BsExclamationCircleFill />}
         />
       ) : (
@@ -296,7 +324,9 @@ export const ReadingsWithErrors: React.FC = () => {
 
       <ReadingDetailModal
         isOpen={detailModalState.isOpen}
-        onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+        onClose={() =>
+          setDetailModalState((prev) => ({ ...prev, isOpen: false }))
+        }
         cadastralKey={detailModalState.cadastralKey}
         yearAndMonth={detailModalState.yearAndMonth}
       />

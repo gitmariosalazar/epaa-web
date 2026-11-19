@@ -26,8 +26,8 @@ import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
 import { PopoverModal } from '@/shared/presentation/components/PopoverModal';
-import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
-import { ChangeMeterPage } from '@/modules/connections/presentation/pages/ChangeMeterPage';
+import { ConnectionProvider } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
+import { ChangeMeterPage } from '@/modules/connections/service-connections/presentation/pages/ChangeMeterPage';
 
 export interface CreateReadingPageProps {
   initialCadastralKey?: string;
@@ -62,10 +62,13 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   // Modal for to update meter number
-  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] = useState(false);
+  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] =
+    useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const handleOpenUpdateMeterNumberModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOpenUpdateMeterNumberModal = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     setAnchorEl(e.currentTarget);
     setOpenUpdateMeterNumberModal(true);
   };
@@ -85,7 +88,6 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
       fetchReadingData(keyToLoad as string);
     }
   }, [initialCadastralKey, location.state?.cadastralKey]);
-
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -193,16 +195,20 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
 
   // ── Render ────────────────────────────────────────────────────────────────
 
-
-
-
-  const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
+  const [detailModalState, setDetailModalState] = useState<{
+    isOpen: boolean;
+    cadastralKey: string | null;
+    yearAndMonth: string | null;
+  }>({
     isOpen: false,
     cadastralKey: null,
-    yearAndMonth: null,
+    yearAndMonth: null
   });
 
-  const handleViewDetails = (cadastralKey: string, readingDate: Date | null) => {
+  const handleViewDetails = (
+    cadastralKey: string,
+    readingDate: Date | null
+  ) => {
     // Tomamos por defecto el monthReading que viene del backend
     let yearAndMonth = readingInfo[0]?.monthReading || '';
 
@@ -281,9 +287,9 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
                 <Tag size={15} style={{ marginRight: 6, flexShrink: 0 }} />
                 {readingInfoForRequest.connectionStateName
                   ? readingInfoForRequest.connectionStateName
-                    .replace(/_/g, ' ')
-                    .replace(/([A-Z])/g, ' $1')
-                    .trim()
+                      .replace(/_/g, ' ')
+                      .replace(/([A-Z])/g, ' $1')
+                      .trim()
                   : 'Estado Desconocido'}
               </div>
               <div className="cs-state-description">
@@ -361,15 +367,11 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
         )}
 
         {/* Mensajes de Estado (Búsqueda Inicial, Sin Resultados, Error) */}
-        {
-          isLoadingInfo && !readingInfoForRequest && (
-            <div className='reading-images-loading'>
-              <CircularProgress
-                label="Buscando..."
-              />
-            </div>
-          )
-        }
+        {isLoadingInfo && !readingInfoForRequest && (
+          <div className="reading-images-loading">
+            <CircularProgress label="Buscando..." />
+          </div>
+        )}
         {!readingInfoForRequest && !isLoadingInfo && (
           <div style={{ marginTop: '1rem' }}>
             {error ? (
@@ -377,11 +379,11 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
                 type="error"
                 title="Error en la búsqueda"
                 message={error}
-                size='small'
+                size="small"
               />
             ) : cadastralKeyInput.trim().length > 0 ? (
               <EmptyState
-                variant='warning'
+                variant="warning"
                 message="No se encontraron resultados"
                 description={`No se han encontrado datos para el predio con clave catastral "${cadastralKeyInput.toUpperCase()}".`}
               />
@@ -395,12 +397,8 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
           </div>
         )}
 
-
-
         {readingInfoForRequest?.permitReading && (
           <>
-
-
             {readingInfoForRequest && (
               <>
                 <ReadingSummaryCards
@@ -443,11 +441,12 @@ export const CreateReadingPage: React.FC<CreateReadingPageProps> = ({
 
       <ReadingDetailModal
         isOpen={detailModalState.isOpen}
-        onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+        onClose={() =>
+          setDetailModalState((prev) => ({ ...prev, isOpen: false }))
+        }
         cadastralKey={detailModalState.cadastralKey}
         yearAndMonth={detailModalState.yearAndMonth}
       />
-
 
       {/* ── Modal de confirmación ─────────────────────────────────────────── */}
       {readingInfoForRequest && (

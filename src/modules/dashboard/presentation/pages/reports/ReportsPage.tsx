@@ -8,11 +8,11 @@ import { useReportsViewModel } from '../../hooks/useReportsViewModel';
 import '@/shared/presentation/styles/reports.css';
 import { useState } from 'react';
 import { ReadingDetailModal } from '@/modules/readings/presentation/components/ReadingDetailModal';
-import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
+import { ConnectionDetailModal } from '@/modules/connections/service-connections/presentation/components/ConnectionDetailModal';
 import { CreateReadingPage } from '@/modules/readings/presentation/pages';
 import { UpdateReadingWithImagesPage } from '@/modules/readings/presentation/pages/UpdateReadingWithImagesPage';
 import { ReadingsProvider } from '@/modules/readings/presentation/context/ReadingsContext';
-import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
+import { ConnectionProvider } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
 import { Modal } from '@/shared/presentation/components/Modal/Modal';
 
 export const ReportsPage = () => {
@@ -26,11 +26,13 @@ export const ReportsPage = () => {
   }>({
     isOpen: false,
     cadastralKey: '',
-    yearAndMonth: null,
+    yearAndMonth: null
   });
 
   // Detail Modal State for Connection
-  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(null);
+  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(
+    null
+  );
 
   // Modal de Creación / Edición
   const [readingModalState, setReadingModalState] = useState<{
@@ -39,7 +41,10 @@ export const ReportsPage = () => {
     cadastralKey: string;
   } | null>(null);
 
-  const handleViewReadingDetails = (cadastralKey: string, readingDate: Date | null) => {
+  const handleViewReadingDetails = (
+    cadastralKey: string,
+    readingDate: Date | null
+  ) => {
     let yearAndMonth = null;
     if (readingDate) {
       const d = new Date(readingDate);
@@ -152,7 +157,9 @@ export const ReportsPage = () => {
       <ReadingsProvider>
         <ReadingDetailModal
           isOpen={detailModalState.isOpen}
-          onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+          onClose={() =>
+            setDetailModalState((prev) => ({ ...prev, isOpen: false }))
+          }
           cadastralKey={detailModalState.cadastralKey}
           yearAndMonth={detailModalState.yearAndMonth}
         />

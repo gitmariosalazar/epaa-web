@@ -14,11 +14,14 @@ import { getNoveltyColor } from '@/shared/presentation/utils/colors/novelties.co
 import { NumberFormatter } from '@/shared/utils/formatters/NumberFormatter';
 import { FileText, MapPin } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
-import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
+import { ConnectionProvider } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
+import { ConnectionDetailModal } from '@/modules/connections/service-connections/presentation/components/ConnectionDetailModal';
 import { useTranslation } from 'react-i18next';
 import { FaEdit } from 'react-icons/fa';
-import { IoInformationCircleOutline, IoSpeedometerSharp } from 'react-icons/io5';
+import {
+  IoInformationCircleOutline,
+  IoSpeedometerSharp
+} from 'react-icons/io5';
 import { TbChartPieFilled } from 'react-icons/tb';
 import { MdCable } from 'react-icons/md';
 
@@ -33,7 +36,6 @@ interface ReadingsNoveltyTableProps {
   sector: string;
   onAction?: (mode: 'create' | 'update', cadastralKey: string) => void;
   onViewDetails?: (cadastralKey: string, readingDate: Date | null) => void;
-
 }
 
 export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
@@ -48,7 +50,9 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
   onViewDetails
 }) => {
   const { t } = useTranslation();
-  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(null);
+  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(
+    null
+  );
 
   const columns: Column<ReadingNovelty>[] = [
     {
@@ -294,7 +298,8 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
       header: t('common.actions', 'Acciones'),
       accessor: (reading) => (
         <div style={{ display: 'flex', gap: '8px' }}>
-          <Tooltip followCursor={false}
+          <Tooltip
+            followCursor={false}
             themeColor="info"
             content={
               <>
@@ -303,11 +308,20 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
               </>
             }
           >
-            <Button size="sm" variant="ghost" onClick={() => onViewDetails && onViewDetails(reading.cadastralKey, reading.readingDate)} circle>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() =>
+                onViewDetails &&
+                onViewDetails(reading.cadastralKey, reading.readingDate)
+              }
+              circle
+            >
               <FileText size={16} />
             </Button>
           </Tooltip>
-          <Tooltip followCursor={false}
+          <Tooltip
+            followCursor={false}
             themeColor="cyan"
             content={
               <>
@@ -316,11 +330,21 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
               </>
             }
           >
-            <Button color="cyan" size="sm" variant="ghost" onClick={() => setDetailCadastralKey(reading.cadastralKey)} circle>
+            <Button
+              color="cyan"
+              size="sm"
+              variant="ghost"
+              onClick={() => setDetailCadastralKey(reading.cadastralKey)}
+              circle
+            >
               <MapPin size={16} />
             </Button>
           </Tooltip>
-          <Tooltip followCursor={false} themeColor="warning" content={t('common.edit', 'Editar Lectura')}>
+          <Tooltip
+            followCursor={false}
+            themeColor="warning"
+            content={t('common.edit', 'Editar Lectura')}
+          >
             <Button
               size="sm"
               variant="ghost"
@@ -478,26 +502,43 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
             <Tooltip
               content={<> Clave Catastral: {row.cadastralKey} </>}
               followCursor={false}
-              themeColor='cyan'
+              themeColor="cyan"
             >
-              <ColorChip color='cyan' label={row.cadastralKey} size='xs' variant='soft' icon={<MdCable />} borderRadius={8} />
+              <ColorChip
+                color="cyan"
+                label={row.cadastralKey}
+                size="xs"
+                variant="soft"
+                icon={<MdCable />}
+                borderRadius={8}
+              />
             </Tooltip>
             <Tooltip
               content={<> Número de Medidor: {row.meterNumber} </>}
               followCursor={false}
-              themeColor='green'
+              themeColor="green"
             >
-              <ColorChip color='green' label={row.meterNumber} size='xs' variant='soft' icon={<IoSpeedometerSharp />} borderRadius={8} />
+              <ColorChip
+                color="green"
+                label={row.meterNumber}
+                size="xs"
+                variant="soft"
+                icon={<IoSpeedometerSharp />}
+                borderRadius={8}
+              />
             </Tooltip>
           </div>
         )}
         contextMenuItems={(row) => [
           {
-            label: t('readingsNovelty.viewDetails', 'Ver Información de la Acometida'),
+            label: t(
+              'readingsNovelty.viewDetails',
+              'Ver Información de la Acometida'
+            ),
             icon: <MapPin size={16} />,
             color: 'cyan',
             onClick: () => {
-              setDetailCadastralKey(row.cadastralKey)
+              setDetailCadastralKey(row.cadastralKey);
             }
           },
           {
@@ -507,7 +548,10 @@ export const ReadingsNoveltyTable: React.FC<ReadingsNoveltyTableProps> = ({
             onClick: () => onAction?.('update', row.cadastralKey)
           },
           {
-            label: t('readingsNovelty.viewReading', 'Ver detalles de la lectura'),
+            label: t(
+              'readingsNovelty.viewReading',
+              'Ver detalles de la lectura'
+            ),
             icon: <FileText size={16} />,
             color: 'accent',
             onClick: () => onViewDetails?.(row.cadastralKey, row.readingDate)

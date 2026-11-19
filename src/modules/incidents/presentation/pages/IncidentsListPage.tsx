@@ -46,10 +46,9 @@ import {
 } from '@/shared/presentation/utils/colors/status-colors';
 import { FaTools } from 'react-icons/fa';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
-import { useConnectionsContext } from '@/modules/connections/presentation/context/ConnectionContext';
-import type { ConnectionWithProperty } from '@/modules/connections/domain/models/Connection';
+import { useConnectionsContext } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
+import type { ConnectionWithProperty } from '@/modules/connections/service-connections/domain/models/Connection';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
-
 
 /**
  * IncidentsListPage
@@ -177,7 +176,6 @@ export const IncidentsListPage: React.FC = () => {
   );
 
   const handlePrintAllNotifications = async () => {
-
     const clandestineIncidents = incidents.filter(
       (item) =>
         item.incidentTypeName.includes('clandestino') ||
@@ -371,7 +369,9 @@ export const IncidentsListPage: React.FC = () => {
               />
             </div>
             {item.orderCode !== null && (
-              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+              <div
+                style={{ display: 'flex', gap: '4px', alignItems: 'center' }}
+              >
                 <Tooltip
                   content={`Ver Orden de Trabajo`}
                   themeColor="accent"
@@ -459,7 +459,7 @@ export const IncidentsListPage: React.FC = () => {
 
     items.push({
       label: '-',
-      onClick: () => { },
+      onClick: () => {},
       divider: true
     });
 
@@ -597,7 +597,7 @@ export const IncidentsListPage: React.FC = () => {
             totalRecords={totalCount}
             currentPage={page}
             onPageChange={setPage}
-            onEndReached={() => { }}
+            onEndReached={() => {}}
             hasMore={false}
             emptyState={
               <div className="incidents-empty-state">

@@ -1,5 +1,5 @@
 import { useRealtimeEvent } from '@/shared/presentation/hooks/useRealtimeEvent';
-import '@/modules/connections/domain/events/ConnectionWsEvents';
+import '@/modules/connections/service-connections/domain/events/ConnectionWsEvents';
 import '@/modules/readings/domain/events/ReadingWsEvents';
 
 interface UseReadingsRealtimeSyncProps {

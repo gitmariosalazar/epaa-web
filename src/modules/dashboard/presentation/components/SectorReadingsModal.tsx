@@ -27,9 +27,12 @@ import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
 import { IoInformationCircleOutline } from 'react-icons/io5';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import { CircularProgress, useSimulatedProgress } from '@/shared/presentation/components/CircularProgress';
-import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
-import { ConnectionDetailModal } from '@/modules/connections/presentation/components/ConnectionDetailModal';
+import {
+  CircularProgress,
+  useSimulatedProgress
+} from '@/shared/presentation/components/CircularProgress';
+import { ConnectionProvider } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
+import { ConnectionDetailModal } from '@/modules/connections/service-connections/presentation/components/ConnectionDetailModal';
 import { ReadingDetailModal } from '@/modules/readings/presentation/components/ReadingDetailModal';
 
 interface SectorReadingsModalProps {
@@ -49,8 +52,9 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const { data, loading, refetch } = useSectorReadings(sector, month, type);
-  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(null);
-
+  const [detailCadastralKey, setDetailCadastralKey] = useState<string | null>(
+    null
+  );
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,13 +68,20 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
   } | null>(null);
 
   // Detail Modal State for Readings
-  const [detailModalState, setDetailModalState] = useState<{ isOpen: boolean; cadastralKey: string | null; yearAndMonth: string | null }>({
+  const [detailModalState, setDetailModalState] = useState<{
+    isOpen: boolean;
+    cadastralKey: string | null;
+    yearAndMonth: string | null;
+  }>({
     isOpen: false,
     cadastralKey: null,
-    yearAndMonth: null,
+    yearAndMonth: null
   });
 
-  const handleViewDetails = (cadastralKey: string, readingDate: Date | null) => {
+  const handleViewDetails = (
+    cadastralKey: string,
+    readingDate: Date | null
+  ) => {
     let yearAndMonth = month;
     if (readingDate) {
       const d = new Date(readingDate);
@@ -155,7 +166,11 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
         header: t('common.actions', 'Acciones'),
         accessor: (row) => (
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Tooltip followCursor={false} themeColor="warning" content={t('common.edit', 'Editar')}>
+            <Tooltip
+              followCursor={false}
+              themeColor="warning"
+              content={t('common.edit', 'Editar')}
+            >
               <Button
                 size="sm"
                 variant="ghost"
@@ -166,7 +181,8 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
                 <FaEdit size={16} />
               </Button>
             </Tooltip>
-            <Tooltip followCursor={false}
+            <Tooltip
+              followCursor={false}
               themeColor="cyan"
               content={
                 <>
@@ -175,12 +191,19 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
                 </>
               }
             >
-              <Button color="cyan" size="sm" variant="ghost" onClick={() => setDetailCadastralKey(row.cadastralKey)} circle>
+              <Button
+                color="cyan"
+                size="sm"
+                variant="ghost"
+                onClick={() => setDetailCadastralKey(row.cadastralKey)}
+                circle
+              >
                 <MapPin size={16} />
               </Button>
             </Tooltip>
 
-            <Tooltip followCursor={false}
+            <Tooltip
+              followCursor={false}
               themeColor="info"
               content={
                 <>
@@ -189,11 +212,17 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
                 </>
               }
             >
-              <Button size="sm" variant="ghost" onClick={() => handleViewDetails(row.cadastralKey, row.readingDate)} circle>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() =>
+                  handleViewDetails(row.cadastralKey, row.readingDate)
+                }
+                circle
+              >
                 <FileText size={16} />
               </Button>
             </Tooltip>
-
           </div>
         ),
         id: 'actions'
@@ -236,7 +265,11 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
         header: t('common.actions', 'Acciones'),
         accessor: (row) => (
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Tooltip followCursor={false} themeColor="success" content={t('common.create', 'Registrar Lectura')}>
+            <Tooltip
+              followCursor={false}
+              themeColor="success"
+              content={t('common.create', 'Registrar Lectura')}
+            >
               <Button
                 size="sm"
                 variant="ghost"
@@ -248,11 +281,17 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
               </Button>
             </Tooltip>
 
-            <Tooltip followCursor={false}
+            <Tooltip
+              followCursor={false}
               themeColor="info"
               content={t('common.details', 'Ver Detalles')}
             >
-              <Button size="sm" variant="ghost" onClick={() => setDetailCadastralKey(row.cadastralKey)} circle>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setDetailCadastralKey(row.cadastralKey)}
+                circle
+              >
                 <Eye size={16} />
               </Button>
             </Tooltip>
@@ -412,7 +451,9 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
                 // @ts-ignore
                 data={filteredData}
                 // @ts-ignore
-                columns={type === 'completed' ? completedColumns : missingColumns}
+                columns={
+                  type === 'completed' ? completedColumns : missingColumns
+                }
                 isLoading={false}
                 pagination={true}
                 pageSize={20}
@@ -441,11 +482,12 @@ export const SectorReadingsModal: React.FC<SectorReadingsModalProps> = ({
       {/* PDF Modal Preview */}
       {PdfPreviewModal}
 
-
       <ReadingsProvider>
         <ReadingDetailModal
           isOpen={detailModalState.isOpen}
-          onClose={() => setDetailModalState(prev => ({ ...prev, isOpen: false }))}
+          onClose={() =>
+            setDetailModalState((prev) => ({ ...prev, isOpen: false }))
+          }
           cadastralKey={detailModalState.cadastralKey}
           yearAndMonth={detailModalState.yearAndMonth}
         />

@@ -19,15 +19,18 @@ import {
 } from 'lucide-react';
 import { ReadingConfirmationModal } from '../components/ReadingConfirmationModal';
 import { ReadingUpdateInfoForm } from '../components/ReadingUpdateInfoForm';
-import { checkReadingIsCurrentMonth, formatReadingMonth } from '../../application/usecases/CheckReadingMonthUseCase';
+import {
+  checkReadingIsCurrentMonth,
+  formatReadingMonth
+} from '../../application/usecases/CheckReadingMonthUseCase';
 import { Alert } from '@/shared/presentation/components/Alert';
 import '../styles/create-reading.css';
 import { CircularProgress } from '@/shared/presentation/components/CircularProgress';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
 import { ReadingDetailModal } from '../components/ReadingDetailModal';
 import { PopoverModal } from '@/shared/presentation/components/PopoverModal';
-import { ConnectionProvider } from '@/modules/connections/presentation/context/ConnectionContext';
-import { ChangeMeterPage } from '@/modules/connections/presentation/pages/ChangeMeterPage';
+import { ConnectionProvider } from '@/modules/connections/service-connections/presentation/context/ConnectionContext';
+import { ChangeMeterPage } from '@/modules/connections/service-connections/presentation/pages/ChangeMeterPage';
 
 export interface UpdateReadingPageProps {
   initialCadastralKey?: string;
@@ -68,10 +71,13 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   // Modal for to update meter number
-  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] = useState(false);
+  const [openUpdateMeterNumberModal, setOpenUpdateMeterNumberModal] =
+    useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const handleOpenUpdateMeterNumberModal = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOpenUpdateMeterNumberModal = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     setAnchorEl(e.currentTarget);
     setOpenUpdateMeterNumberModal(true);
   };
@@ -80,7 +86,10 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
   };
   const handleSuccessUpdateMeterNumberModal = async () => {
     setOpenUpdateMeterNumberModal(false);
-    const activeKey = currentReadingInfoForRequest?.cadastralKey || cadastralKey || initialCadastralKey;
+    const activeKey =
+      currentReadingInfoForRequest?.cadastralKey ||
+      cadastralKey ||
+      initialCadastralKey;
     if (activeKey) {
       await fetchReadingData(activeKey, initialMonth);
     }
@@ -94,11 +103,21 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
       setCadastralKey(keyToLoad as string);
       fetchReadingData(keyToLoad as string, initialMonth);
     }
-  }, [initialCadastralKey, initialMonth, location.state?.cadastralKey, refreshTrigger]);
+  }, [
+    initialCadastralKey,
+    initialMonth,
+    location.state?.cadastralKey,
+    refreshTrigger
+  ]);
 
   // ── Pre-cargar datos para actualización ───────────────────────────────────────────
   useEffect(() => {
-    const info = readingInfoForUpdated.length > 0 ? readingInfoForUpdated[0] : (readingInfo && readingInfo.length > 0 ? readingInfo[0] : null);
+    const info =
+      readingInfoForUpdated.length > 0
+        ? readingInfoForUpdated[0]
+        : readingInfo && readingInfo.length > 0
+          ? readingInfo[0]
+          : null;
     if (info) {
       if (info.readingId) {
         setCurrentReadingId(info.readingId);
@@ -111,7 +130,10 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
     }
   }, [readingInfo, readingInfoForUpdated]);
 
-  const currentReadingInfoForRequest = readingInfoForUpdated.length > 0 ? readingInfoForUpdated[0] : readingInfo[0];
+  const currentReadingInfoForRequest =
+    readingInfoForUpdated.length > 0
+      ? readingInfoForUpdated[0]
+      : readingInfo[0];
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const buildRequest = (): UpdateReadingRequest => ({
@@ -156,7 +178,8 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
     }
 
     // Auto-seleccionar la lectura para actualizar si no hay una seleccionada
-    const latestReadingId = currentReadingId || currentReadingInfoForRequest?.readingId;
+    const latestReadingId =
+      currentReadingId || currentReadingInfoForRequest?.readingId;
     if (!latestReadingId) {
       alert('No hay lectura previa en el historial para actualizar.');
       return;
@@ -168,7 +191,8 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
   };
 
   const handleConfirm = async () => {
-    const readingIdToUpdate = currentReadingId || currentReadingInfoForRequest?.readingId;
+    const readingIdToUpdate =
+      currentReadingId || currentReadingInfoForRequest?.readingId;
     if (!readingIdToUpdate) return;
 
     const requestPayload = buildRequest();
@@ -183,7 +207,10 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
       }
 
       // Recargar datos actualizados automáticamente
-      const activeKey = currentReadingInfoForRequest?.cadastralKey || cadastralKey || initialCadastralKey;
+      const activeKey =
+        currentReadingInfoForRequest?.cadastralKey ||
+        cadastralKey ||
+        initialCadastralKey;
       if (activeKey) {
         await fetchReadingData(activeKey, initialMonth);
       }
@@ -298,9 +325,9 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
                   <Tag size={15} style={{ marginRight: 6, flexShrink: 0 }} />
                   {currentReadingInfoForRequest.connectionStateName
                     ? currentReadingInfoForRequest.connectionStateName
-                      .replace(/_/g, ' ')
-                      .replace(/([A-Z])/g, ' $1')
-                      .trim()
+                        .replace(/_/g, ' ')
+                        .replace(/([A-Z])/g, ' $1')
+                        .trim()
                     : 'Estado Desconocido'}
                 </div>
                 <div className="cs-state-description">
@@ -391,21 +418,19 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
                 type="error"
                 title="Error en la búsqueda"
                 message={error}
-                size='small'
+                size="small"
               />
             ) : cadastralKey.trim().length > 0 ? (
               <EmptyState
                 variant="warning"
-
                 message="No se encontraron resultados"
                 description={`No se han encontrado datos para el predio con clave catastral "${cadastralKey.toUpperCase()}".`}
-
               />
             ) : (
               <Alert
                 type="info"
                 title="Buscar Conexión"
-                size='small'
+                size="small"
                 message="Ingrese la clave catastral en la barra superior y presione buscar para cargar los datos."
               />
             )}
@@ -415,7 +440,9 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
         {currentReadingInfoForRequest &&
           currentReadingInfoForRequest.permitReading && (
             <>
-              {!checkReadingIsCurrentMonth(currentReadingInfoForRequest.monthReading) && (
+              {!checkReadingIsCurrentMonth(
+                currentReadingInfoForRequest.monthReading
+              ) && (
                 <div style={{ marginTop: '0.09rem', marginBottom: '-0.9rem' }}>
                   <Alert
                     type="warning"
@@ -434,7 +461,11 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
               />
 
               <ReadingUpdateInfoForm
-                info={readingInfoForUpdated.length > 0 ? readingInfoForUpdated : readingInfo}
+                info={
+                  readingInfoForUpdated.length > 0
+                    ? readingInfoForUpdated
+                    : readingInfo
+                }
                 currentReadingInput={currentReadingInput}
                 setCurrentReadingInput={setCurrentReadingInput}
                 observationInput={observationInput}
@@ -449,7 +480,7 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
               history={readingHistory}
               connectionInfo={{
                 cadastralKey: currentReadingInfoForRequest.cadastralKey,
-                meterNumber: currentReadingInfoForRequest.meterNumber,
+                meterNumber: currentReadingInfoForRequest.meterNumber
               }}
               isLoading={isLoadingHistory}
               onUpdateMeterNumber={handleOpenUpdateMeterNumberModal}
@@ -494,7 +525,12 @@ export const UpdateReadingPage: React.FC<UpdateReadingPageProps> = ({
         >
           <ConnectionProvider>
             <ChangeMeterPage
-              cadastralKeyProp={currentReadingInfoForRequest?.cadastralKey || cadastralKey || initialCadastralKey || ''}
+              cadastralKeyProp={
+                currentReadingInfoForRequest?.cadastralKey ||
+                cadastralKey ||
+                initialCadastralKey ||
+                ''
+              }
               onSuccess={handleSuccessUpdateMeterNumberModal}
               onCancel={handleCloseUpdateMeterNumberModal}
             />
