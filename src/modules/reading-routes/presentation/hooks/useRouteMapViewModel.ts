@@ -20,6 +20,12 @@ export interface UseRouteMapViewModelReturn {
   setSelectedSector: Dispatch<SetStateAction<number | undefined>>;
   activaOnly: boolean;
   setActivaOnly: Dispatch<SetStateAction<boolean>>;
+  estadoFilter: string;
+  setEstadoFilter: Dispatch<SetStateAction<string>>;
+  periodoFilter: string;
+  setPeriodoFilter: Dispatch<SetStateAction<string>>;
+  resetFilters: () => void;
+  hasActiveFilters: boolean;
   isLoading: boolean;
   isSidePanelOpen: boolean;
   selectRouteById: (idRuta: number) => Promise<ReadingRoute | null>;
@@ -37,6 +43,9 @@ export const useRouteMapViewModel = (): UseRouteMapViewModelReturn => {
     optimizeRouteSequenceUseCase,
   } = useReadingRoutesContext();
 
+  const now = new Date();
+  const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
   const [geojsonData, setGeojsonData] =
     useState<RouteGeoJsonFeatureCollection | null>(null);
   const [centroidsData, setCentroidsData] =
@@ -50,8 +59,24 @@ export const useRouteMapViewModel = (): UseRouteMapViewModelReturn => {
     undefined,
   );
   const [activaOnly, setActivaOnly] = useState<boolean>(true);
+  const [estadoFilter, setEstadoFilter] = useState<string>('TODOS');
+  const [periodoFilter, setPeriodoFilter] = useState<string>(currentMonthStr);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSidePanelOpen, setIsSidePanelOpen] = useState<boolean>(false);
+
+  const resetFilters = useCallback(() => {
+    setSelectedSector(undefined);
+    setActivaOnly(true);
+    setEstadoFilter('TODOS');
+    setPeriodoFilter(currentMonthStr);
+  }, [currentMonthStr]);
+
+  const hasActiveFilters = Boolean(
+    selectedSector !== undefined ||
+      !activaOnly ||
+      (estadoFilter && estadoFilter !== 'TODOS') ||
+      periodoFilter !== currentMonthStr,
+  );
 
   // Fetch GeoJSON polygons
   const loadGeoJson = useCallback(async () => {
@@ -60,6 +85,8 @@ export const useRouteMapViewModel = (): UseRouteMapViewModelReturn => {
       const data = await getRoutesGeoJsonUseCase.execute(
         selectedSector,
         activaOnly,
+        estadoFilter === 'TODOS' ? undefined : estadoFilter,
+        periodoFilter || undefined,
       );
       setGeojsonData(data);
     } catch (err: unknown) {
@@ -68,17 +95,34 @@ export const useRouteMapViewModel = (): UseRouteMapViewModelReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [getRoutesGeoJsonUseCase, selectedSector, activaOnly]);
+  }, [
+    getRoutesGeoJsonUseCase,
+    selectedSector,
+    activaOnly,
+    estadoFilter,
+    periodoFilter,
+  ]);
 
-  // Fetch 79 Centroids
+  // Fetch Centroids
   const loadCentroids = useCallback(async () => {
     try {
-      const data = await getRouteCentroidsUseCase.execute(activaOnly);
+      const data = await getRouteCentroidsUseCase.execute({
+        activa: activaOnly,
+        sectorId: selectedSector,
+        estado: estadoFilter === 'TODOS' ? undefined : estadoFilter,
+        periodo: periodoFilter || undefined,
+      });
       setCentroidsData(data);
     } catch (err: unknown) {
       console.error('Error al cargar centroides:', err);
     }
-  }, [getRouteCentroidsUseCase, activaOnly]);
+  }, [
+    getRouteCentroidsUseCase,
+    activaOnly,
+    selectedSector,
+    estadoFilter,
+    periodoFilter,
+  ]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -159,6 +203,12 @@ export const useRouteMapViewModel = (): UseRouteMapViewModelReturn => {
     setSelectedSector,
     activaOnly,
     setActivaOnly,
+    estadoFilter,
+    setEstadoFilter,
+    periodoFilter,
+    setPeriodoFilter,
+    resetFilters,
+    hasActiveFilters,
     isLoading,
     isSidePanelOpen,
     selectRouteById,

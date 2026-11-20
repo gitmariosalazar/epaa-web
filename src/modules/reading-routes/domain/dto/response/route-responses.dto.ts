@@ -12,6 +12,14 @@ export interface BatchDispatchResponse {
 
 export type BatchMorningDispatchResponse = BatchDispatchResponse;
 
+export interface BatchDispatchProgress {
+  completed: number;
+  total: number;
+  currentChunk: number;
+  totalChunks: number;
+  percent: number;
+}
+
 export interface AssignSingleRouteResponse {
   idAsignacion: number;
   message: string;

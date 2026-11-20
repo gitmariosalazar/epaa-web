@@ -22,14 +22,22 @@ export interface UseReadingRoutesViewModelReturn {
   setSectorFilter: Dispatch<SetStateAction<number | undefined>>;
   activaFilter: boolean | undefined;
   setActivaFilter: Dispatch<SetStateAction<boolean | undefined>>;
+  estadoFilter: string;
+  setEstadoFilter: Dispatch<SetStateAction<string>>;
+  periodoFilter: string;
+  setPeriodoFilter: Dispatch<SetStateAction<string>>;
   isLoading: boolean;
   isResolverModalOpen: boolean;
   setIsResolverModalOpen: Dispatch<SetStateAction<boolean>>;
   refreshRoutes: () => Promise<void>;
+  resetFilters: () => void;
 }
 
 export const useReadingRoutesViewModel = (): UseReadingRoutesViewModelReturn => {
   const { getReadingRoutesUseCase } = useReadingRoutesContext();
+
+  const now = new Date();
+  const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
   const [activeTab, setActiveTab] = useState<ReadingRoutesTab>('map');
   const [routes, setRoutes] = useState<ReadingRoute[]>([]);
@@ -40,6 +48,8 @@ export const useReadingRoutesViewModel = (): UseReadingRoutesViewModelReturn => 
   const [search, setSearch] = useState<string>('');
   const [sectorFilter, setSectorFilter] = useState<number | undefined>(undefined);
   const [activaFilter, setActivaFilter] = useState<boolean | undefined>(undefined);
+  const [estadoFilter, setEstadoFilter] = useState<string>('TODOS');
+  const [periodoFilter, setPeriodoFilter] = useState<string>(currentMonthStr);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Resolver modal
@@ -51,19 +61,39 @@ export const useReadingRoutesViewModel = (): UseReadingRoutesViewModelReturn => 
       const response = await getReadingRoutesUseCase.execute({
         page,
         limit,
-        search: search || undefined,
+        search: search.trim() || undefined,
         sectorId: sectorFilter,
         activa: activaFilter,
+        estado: estadoFilter || undefined,
+        periodo: periodoFilter || undefined,
       });
-      setRoutes(response.items);
-      setTotal(response.total);
+      setRoutes(response?.items || []);
+      setTotal(response?.total || (response?.items?.length ?? 0));
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       notify.error('Error al cargar catálogo de rutas: ' + msg);
     } finally {
       setIsLoading(false);
     }
-  }, [getReadingRoutesUseCase, page, limit, search, sectorFilter, activaFilter]);
+  }, [
+    getReadingRoutesUseCase,
+    page,
+    limit,
+    search,
+    sectorFilter,
+    activaFilter,
+    estadoFilter,
+    periodoFilter,
+  ]);
+
+  const resetFilters = useCallback(() => {
+    setSearch('');
+    setSectorFilter(undefined);
+    setActivaFilter(undefined);
+    setEstadoFilter('TODOS');
+    setPeriodoFilter(currentMonthStr);
+    setPage(1);
+  }, [currentMonthStr]);
 
   const loadAllRoutes = useCallback(async () => {
     try {
@@ -71,7 +101,7 @@ export const useReadingRoutesViewModel = (): UseReadingRoutesViewModelReturn => 
         limit: 150,
         activa: true,
       });
-      setAllRoutes(response.items);
+      setAllRoutes(response?.items || []);
     } catch (err: unknown) {
       console.warn('Error al precargar todas las rutas:', err);
     }
@@ -108,9 +138,14 @@ export const useReadingRoutesViewModel = (): UseReadingRoutesViewModelReturn => 
     setSectorFilter,
     activaFilter,
     setActivaFilter,
+    estadoFilter,
+    setEstadoFilter,
+    periodoFilter,
+    setPeriodoFilter,
     isLoading,
     isResolverModalOpen,
     setIsResolverModalOpen,
     refreshRoutes: loadRoutes,
+    resetFilters,
   };
 };

@@ -19,9 +19,18 @@ export interface ReadingRouteCatalogRepository {
   getRoutesGeoJson(
     sectorId?: number,
     activa?: boolean,
+    estado?: string,
+    periodo?: string,
   ): Promise<RouteGeoJsonFeatureCollection>;
   getRouteCentroids(
-    activaOnly?: boolean,
+    filter?:
+      | boolean
+      | {
+          sectorId?: number;
+          activa?: boolean;
+          estado?: string;
+          periodo?: string;
+        },
   ): Promise<RouteCentroidFeatureCollection>;
   getRouteConnections(idRuta: number): Promise<RouteConnection[]>;
   optimizeRouteSequence(

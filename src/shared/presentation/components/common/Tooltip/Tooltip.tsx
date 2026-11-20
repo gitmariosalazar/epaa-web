@@ -1,6 +1,15 @@
-import React, { useState, useRef, useLayoutEffect, type ReactNode } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  type ReactNode
+} from 'react';
 import { createPortal } from 'react-dom';
 import './Tooltip.css';
+
+// Singleton coordinator: ensures at most one Tooltip is visible at any time
+let activeTooltipCloseFn: (() => void) | null = null;
 
 export type TooltipPosition = 'top' | 'bottom' | 'left' | 'right';
 
@@ -241,6 +250,59 @@ export const Tooltip: React.FC<TooltipProps> = ({
     }
   }, [disabled, isVisible]);
 
+  // Global & singleton lifecycle guard: prevents stuck tooltips when interacting with
+  // native <select> OS dropdowns, React portals (DatePicker/Modal), scrolling, or window blur.
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const closeSelf = () => {
+      setIsVisible(false);
+      setMouseCoords(null);
+    };
+
+    if (activeTooltipCloseFn && activeTooltipCloseFn !== closeSelf) {
+      activeTooltipCloseFn();
+    }
+    activeTooltipCloseFn = closeSelf;
+
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (
+        triggerRef.current &&
+        e.target instanceof Node &&
+        !triggerRef.current.contains(e.target)
+      ) {
+        closeSelf();
+      }
+    };
+
+    const handleGlobalPointerDown = () => {
+      closeSelf();
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeSelf();
+    };
+
+    document.addEventListener('mousemove', handleGlobalMouseMove, {
+      passive: true
+    });
+    document.addEventListener('pointerdown', handleGlobalPointerDown, true);
+    document.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('scroll', closeSelf, true);
+    window.addEventListener('blur', closeSelf);
+
+    return () => {
+      if (activeTooltipCloseFn === closeSelf) {
+        activeTooltipCloseFn = null;
+      }
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('pointerdown', handleGlobalPointerDown, true);
+      document.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('scroll', closeSelf, true);
+      window.removeEventListener('blur', closeSelf);
+    };
+  }, [isVisible]);
+
   // Resolve dynamic styles based on theme and variants
   const dynamicStyles = resolveTooltipStyles(themeColor, variant, backgroundColor, textColor);
 
@@ -266,9 +328,21 @@ export const Tooltip: React.FC<TooltipProps> = ({
         if (followCursor) setMouseCoords(null);
         onMouseLeave?.(e);
       }}
+      onMouseDown={() => {
+        setIsVisible(false);
+        if (followCursor) setMouseCoords(null);
+      }}
       onClick={(e: React.MouseEvent) => {
         setIsVisible(false);
         onClick?.(e);
+      }}
+      onChange={() => {
+        setIsVisible(false);
+        if (followCursor) setMouseCoords(null);
+      }}
+      onBlur={() => {
+        setIsVisible(false);
+        if (followCursor) setMouseCoords(null);
       }}
     >
       {children}

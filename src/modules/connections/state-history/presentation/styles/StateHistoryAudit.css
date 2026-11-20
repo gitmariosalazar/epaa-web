@@ -1,8 +1,8 @@
 .state-audit-page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 16px;
+  gap: 5px;
+  padding: 0px;
   height: 100%;
   overflow-y: auto;
 }
@@ -22,7 +22,9 @@
   flex-direction: column;
   gap: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   cursor: pointer;
 }
 
@@ -78,7 +80,7 @@
   background: var(--card-bg, #ffffff);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 10px;
-  padding: 16px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -95,9 +97,10 @@
   background: var(--card-bg, #ffffff);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 10px;
-  padding: 16px;
+  padding: 0px;
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 400px;
+  height: 100% !important;
 }

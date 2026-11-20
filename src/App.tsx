@@ -436,7 +436,7 @@ const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
   return <Outlet />;
 };
 
-const isUnderDevelopment = true;
+const isUnderDevelopment = false;
 
 function App() {
   return (
@@ -445,478 +445,496 @@ function App() {
         <SeasonalProvider>
           <SeasonalOverlay />
           <ToastContainer
-          position="top-right"
-          autoClose={4500}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          pauseOnHover
-          theme="colored"
-        />
-        <VersionChecker />
-        <UsersProvider>
-          <BrowserRouter>
-            <Suspense fallback={<PageSuspenseFallback />}>
-              <Routes>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/unauthorized" element={<UnAuthorizedPage />} />
-                <Route element={<ProtectedRoute />}>
-                  <Route element={<DashboardLayout />}>
-                    <Route path="/" element={<DashboardHome />} />
-                    <Route path="/reports" element={<ReportsPage />} />
+            position="top-right"
+            autoClose={4500}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            pauseOnHover
+            theme="colored"
+          />
+          <VersionChecker />
+          <UsersProvider>
+            <BrowserRouter>
+              <Suspense fallback={<PageSuspenseFallback />}>
+                <Routes>
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/unauthorized" element={<UnAuthorizedPage />} />
+                  <Route element={<ProtectedRoute />}>
+                    <Route element={<DashboardLayout />}>
+                      <Route path="/" element={<DashboardHome />} />
+                      <Route path="/reports" element={<ReportsPage />} />
 
-                    {/* Ejemplo de protección por Rol: Solo ADMIN puede ver usuarios */}
-                    <Route
-                      element={
-                        <RoleGuard
-                          allowedRoles={[
-                            'SUPER ADMINISTRADOR',
-                            'ADMINISTRADOR'
-                          ]}
-                        />
-                      }
-                    >
+                      {/* Ejemplo de protección por Rol: Solo ADMIN puede ver usuarios */}
                       <Route
-                        path="/users/*"
                         element={
-                          <Routes>
-                            <Route index element={<UsersPage />} />
-                            <Route
-                              path=":username"
-                              element={<UserDetailPage />}
-                            />
-                          </Routes>
+                          <RoleGuard
+                            allowedRoles={[
+                              'SUPER ADMINISTRADOR',
+                              'ADMINISTRADOR'
+                            ]}
+                          />
+                        }
+                      >
+                        <Route
+                          path="/users/*"
+                          element={
+                            <Routes>
+                              <Route index element={<UsersPage />} />
+                              <Route
+                                path=":username"
+                                element={<UserDetailPage />}
+                              />
+                            </Routes>
+                          }
+                        />
+                      </Route>
+
+                      <Route path="/customers" element={<CustomersLayout />}>
+                        <Route
+                          index
+                          element={<Navigate to="natural-persons" replace />}
+                        />
+                        <Route
+                          path="natural-persons"
+                          element={<NaturalPersonsPage />}
+                        />
+                        <Route path="companies" element={<CompaniesPage />} />
+                        <Route
+                          path="general"
+                          element={<GeneralCustomersPage />}
+                        />
+                      </Route>
+                      <Route
+                        path="/connections/*"
+                        element={
+                          <StateHistoryProvider>
+                            <ConnectionProvider>
+                              <Routes>
+                                <Route
+                                  index
+                                  element={<Navigate to="list" replace />}
+                                />
+                                <Route
+                                  path="list"
+                                  element={<ConnectionsPage />}
+                                />
+                                <Route
+                                  path="map"
+                                  element={<ConnectionsPage />}
+                                />
+                                <Route
+                                  path="dashboard"
+                                  element={<ConnectionsDashboardPage />}
+                                />
+                                <Route
+                                  path="state-history"
+                                  element={
+                                    isUnderDevelopment ? (
+                                      <UnderDevelopmentPage />
+                                    ) : (
+                                      <StateHistoryAuditPage />
+                                    )
+                                  }
+                                />
+                              </Routes>
+                            </ConnectionProvider>
+                          </StateHistoryProvider>
                         }
                       />
-                    </Route>
-
-                    <Route path="/customers" element={<CustomersLayout />}>
                       <Route
-                        index
-                        element={<Navigate to="natural-persons" replace />}
-                      />
-                      <Route
-                        path="natural-persons"
-                        element={<NaturalPersonsPage />}
-                      />
-                      <Route path="companies" element={<CompaniesPage />} />
-                      <Route
-                        path="general"
-                        element={<GeneralCustomersPage />}
-                      />
-                    </Route>
-                    <Route
-                      path="/connections/*"
-                      element={
-                        <StateHistoryProvider>
-                          <ConnectionProvider>
+                        path="/network-operations/*"
+                        element={
+                          <NetworkOperationsProvider>
                             <Routes>
                               <Route
-                                index
-                                element={<Navigate to="list" replace />}
+                                path="scada"
+                                element={<ScadaDashboardPage />}
+                              />
+                            </Routes>
+                          </NetworkOperationsProvider>
+                        }
+                      />
+                      <Route
+                        path="/roles"
+                        element={
+                          <RolesProvider>
+                            <RolesPage />
+                          </RolesProvider>
+                        }
+                      />
+                      <Route path="/positions" element={<PositionsPage />} />
+                      <Route
+                        path="/permissions"
+                        element={
+                          <PermissionsProvider>
+                            <PermissionsPage />
+                          </PermissionsProvider>
+                        }
+                      />
+                      <Route path="/audit" element={<AuditPage />} />
+                      <Route path="/profile" element={<ProfilePage />} />
+                      <Route path="/settings" element={<SettingsPage />} />
+                      <Route
+                        path="/accounting"
+                        element={
+                          <PaymentsProvider>
+                            <PaymentsPage />
+                          </PaymentsProvider>
+                        }
+                      />
+                      <Route
+                        path="/accounting/entry-data"
+                        element={
+                          <EntryDataProvider>
+                            <EntryDataPage />
+                          </EntryDataProvider>
+                        }
+                      />
+                      <Route
+                        path="/accounting/overdue"
+                        element={
+                          <PaymentsProvider>
+                            <OverduePaymentsPage />
+                          </PaymentsProvider>
+                        }
+                      />
+                      <Route
+                        path="/accounting/general-collection"
+                        element={
+                          <GeneralCollectionProvider>
+                            <GeneralCollectionPage />
+                          </GeneralCollectionProvider>
+                        }
+                      />
+                      <Route
+                        path="/accounting/agreements"
+                        element={
+                          <AgreementsProvider>
+                            <AgreementsPage />
+                          </AgreementsProvider>
+                        }
+                      />
+                      <Route
+                        path="/accounting/payment-receipts"
+                        element={
+                          <PaymentsProvider>
+                            <PendingBillsPage />
+                          </PaymentsProvider>
+                        }
+                      />
+                      <Route
+                        path="/readings/*"
+                        element={
+                          <ReadingsProvider>
+                            <Routes>
+                              <Route
+                                path="add"
+                                element={<CreateReadingPage />}
                               />
                               <Route
                                 path="list"
-                                element={<ConnectionsPage />}
+                                element={<ReadingsListPage />}
                               />
-                              <Route path="map" element={<ConnectionsPage />} />
+                              <Route
+                                path="images"
+                                element={<ReadingImagesPage />}
+                              />
+                              <Route
+                                path="update"
+                                element={<UpdateReadingPage />}
+                              />
+                              <Route
+                                path="audit"
+                                element={<ReadingAuditPage />}
+                              />
+                              <Route
+                                path="report"
+                                element={<ReadingReports />}
+                              />
                               <Route
                                 path="dashboard"
-                                element={<ConnectionsDashboardPage />}
+                                element={<ReadingsDashboardPage />}
                               />
                               <Route
-                                path="state-history"
+                                path="analytics"
+                                element={<ReadingsAnalyticsPage />}
+                              />
+                              <Route
+                                path="report-errors"
                                 element={
-                                  isUnderDevelopment ? (
-                                    <UnderDevelopmentPage />
-                                  ) : (
-                                    <StateHistoryAuditPage />
-                                  )
+                                  <RequireElevatedToken fallbackMessage="El acceso a los Errores de Lectura requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                    <ReadingsWithErrors />
+                                  </RequireElevatedToken>
+                                }
+                              />
+                              <Route
+                                path="advanced-update"
+                                element={
+                                  <RequireElevatedToken fallbackMessage="La actualización avanzada de lecturas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                    <UpdateSpecialReadingPage />
+                                  </RequireElevatedToken>
+                                }
+                              />
+                              <Route
+                                path="reconciliation"
+                                element={
+                                  <RequireElevatedToken fallbackMessage="La sincronización de lecturas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                    <ReadingsReconciliationPage />
+                                  </RequireElevatedToken>
+                                }
+                              />
+                              <Route
+                                path="reading-images"
+                                element={
+                                  <RequireElevatedToken fallbackMessage="La visualización de imágenes requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                    <ReadingImagesPage isPublic={false} />
+                                  </RequireElevatedToken>
+                                }
+                              />
+                              <Route
+                                path="add-historical"
+                                element={
+                                  <RequireElevatedToken fallbackMessage="La adición de lecturas históricas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
+                                    <CreateHistoricalReadingPage />
+                                  </RequireElevatedToken>
+                                }
+                              />
+
+                              {/* Other reading routes can be added here */}
+                              <Route
+                                path="routes"
+                                element={
+                                  <ReadingRoutesProvider>
+                                    <ReadingRoutesPage />
+                                  </ReadingRoutesProvider>
                                 }
                               />
                             </Routes>
+                          </ReadingsProvider>
+                        }
+                      />
+                      <Route
+                        path="/reading-routes/*"
+                        element={
+                          <ReadingRoutesProvider>
+                            <ReadingRoutesPage />
+                          </ReadingRoutesProvider>
+                        }
+                      />
+                      <Route
+                        path="/incidents/*"
+                        element={
+                          <ConnectionProvider>
+                            <IncidentProvider>
+                              <Routes>
+                                {/* Ruta raíz → lista */}
+                                <Route index element={<IncidentsPage />} />
+                                {/* Tab: Lista e Incidentes (comparten IncidentsPage, el tab se sincroniza por pathname) */}
+                                <Route
+                                  path="list"
+                                  element={<IncidentsPage />}
+                                />
+                                <Route path="map" element={<IncidentsPage />} />
+                                <Route
+                                  path="dashboard"
+                                  element={<IncidentDashboardPage />}
+                                />
+                                {/* Crear incidente (flujo separado) */}
+                                <Route
+                                  path="create"
+                                  element={
+                                    <ReadingsProvider>
+                                      <CreateIncidentPage />
+                                    </ReadingsProvider>
+                                  }
+                                />
+                              </Routes>
+                            </IncidentProvider>
                           </ConnectionProvider>
-                        </StateHistoryProvider>
-                      }
-                    />
-                    <Route
-                      path="/network-operations/*"
-                      element={
-                        <NetworkOperationsProvider>
-                          <Routes>
-                            <Route
-                              path="scada"
-                              element={<ScadaDashboardPage />}
-                            />
-                          </Routes>
-                        </NetworkOperationsProvider>
-                      }
-                    />
-                    <Route
-                      path="/roles"
-                      element={
-                        <RolesProvider>
-                          <RolesPage />
-                        </RolesProvider>
-                      }
-                    />
-                    <Route path="/positions" element={<PositionsPage />} />
-                    <Route
-                      path="/permissions"
-                      element={
-                        <PermissionsProvider>
-                          <PermissionsPage />
-                        </PermissionsProvider>
-                      }
-                    />
-                    <Route path="/audit" element={<AuditPage />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/settings" element={<SettingsPage />} />
-                    <Route
-                      path="/accounting"
-                      element={
-                        <PaymentsProvider>
-                          <PaymentsPage />
-                        </PaymentsProvider>
-                      }
-                    />
-                    <Route
-                      path="/accounting/entry-data"
-                      element={
-                        <EntryDataProvider>
-                          <EntryDataPage />
-                        </EntryDataProvider>
-                      }
-                    />
-                    <Route
-                      path="/accounting/overdue"
-                      element={
-                        <PaymentsProvider>
-                          <OverduePaymentsPage />
-                        </PaymentsProvider>
-                      }
-                    />
-                    <Route
-                      path="/accounting/general-collection"
-                      element={
-                        <GeneralCollectionProvider>
-                          <GeneralCollectionPage />
-                        </GeneralCollectionProvider>
-                      }
-                    />
-                    <Route
-                      path="/accounting/agreements"
-                      element={
-                        <AgreementsProvider>
-                          <AgreementsPage />
-                        </AgreementsProvider>
-                      }
-                    />
-                    <Route
-                      path="/accounting/payment-receipts"
-                      element={
-                        <PaymentsProvider>
-                          <PendingBillsPage />
-                        </PaymentsProvider>
-                      }
-                    />
-                    <Route
-                      path="/readings/*"
-                      element={
-                        <ReadingsProvider>
-                          <Routes>
-                            <Route path="add" element={<CreateReadingPage />} />
-                            <Route path="list" element={<ReadingsListPage />} />
-                            <Route
-                              path="images"
-                              element={<ReadingImagesPage />}
-                            />
-                            <Route
-                              path="update"
-                              element={<UpdateReadingPage />}
-                            />
-                            <Route
-                              path="audit"
-                              element={<ReadingAuditPage />}
-                            />
-                            <Route path="report" element={<ReadingReports />} />
-                            <Route
-                              path="dashboard"
-                              element={<ReadingsDashboardPage />}
-                            />
-                            <Route
-                              path="analytics"
-                              element={<ReadingsAnalyticsPage />}
-                            />
-                            <Route
-                              path="report-errors"
-                              element={
-                                <RequireElevatedToken fallbackMessage="El acceso a los Errores de Lectura requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
-                                  <ReadingsWithErrors />
-                                </RequireElevatedToken>
-                              }
-                            />
-                            <Route
-                              path="advanced-update"
-                              element={
-                                <RequireElevatedToken fallbackMessage="La actualización avanzada de lecturas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
-                                  <UpdateSpecialReadingPage />
-                                </RequireElevatedToken>
-                              }
-                            />
-                            <Route
-                              path="reconciliation"
-                              element={
-                                <RequireElevatedToken fallbackMessage="La sincronización de lecturas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
-                                  <ReadingsReconciliationPage />
-                                </RequireElevatedToken>
-                              }
-                            />
-                            <Route
-                              path="reading-images"
-                              element={
-                                <RequireElevatedToken fallbackMessage="La visualización de imágenes requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
-                                  <ReadingImagesPage isPublic={false} />
-                                </RequireElevatedToken>
-                              }
-                            />
-                            <Route
-                              path="add-historical"
-                              element={
-                                <RequireElevatedToken fallbackMessage="La adición de lecturas históricas requiere un nivel de autorización especial. Ingresa tu PIN de seguridad.">
-                                  <CreateHistoricalReadingPage />
-                                </RequireElevatedToken>
-                              }
-                            />
-
-                            {/* Other reading routes can be added here */}
-                            <Route
-                              path="routes"
-                              element={
-                                <ReadingRoutesProvider>
-                                  <ReadingRoutesPage />
-                                </ReadingRoutesProvider>
-                              }
-                            />
-                          </Routes>
-                        </ReadingsProvider>
-                      }
-                    />
-                    <Route
-                      path="/reading-routes/*"
-                      element={
-                        <ReadingRoutesProvider>
-                          <ReadingRoutesPage />
-                        </ReadingRoutesProvider>
-                      }
-                    />
-                    <Route
-                      path="/incidents/*"
-                      element={
-                        <ConnectionProvider>
-                          <IncidentProvider>
+                        }
+                      />
+                      <Route
+                        path="/trash-rate/*"
+                        element={
+                          <TrashRateReportProvider>
                             <Routes>
-                              {/* Ruta raíz → lista */}
-                              <Route index element={<IncidentsPage />} />
-                              {/* Tab: Lista e Incidentes (comparten IncidentsPage, el tab se sincroniza por pathname) */}
-                              <Route path="list" element={<IncidentsPage />} />
-                              <Route path="map" element={<IncidentsPage />} />
                               <Route
-                                path="dashboard"
-                                element={<IncidentDashboardPage />}
+                                path="trash-report-audit"
+                                element={<TrashRateReportPage />}
                               />
-                              {/* Crear incidente (flujo separado) */}
                               <Route
-                                path="create"
-                                element={
-                                  <ReadingsProvider>
-                                    <CreateIncidentPage />
-                                  </ReadingsProvider>
-                                }
+                                path="trash-rate-kpi"
+                                element={<TrashRateKPIPage />}
                               />
+                              {/* Add more trash-rate sub-routes here */}
                             </Routes>
-                          </IncidentProvider>
-                        </ConnectionProvider>
-                      }
-                    />
-                    <Route
-                      path="/trash-rate/*"
-                      element={
-                        <TrashRateReportProvider>
-                          <Routes>
-                            <Route
-                              path="trash-report-audit"
-                              element={<TrashRateReportPage />}
-                            />
-                            <Route
-                              path="trash-rate-kpi"
-                              element={<TrashRateKPIPage />}
-                            />
-                            {/* Add more trash-rate sub-routes here */}
-                          </Routes>
-                        </TrashRateReportProvider>
-                      }
-                    />
-                    <Route
-                      path="/properties/*"
-                      element={
-                        <GetPropertyContextProvider>
-                          <Routes>
-                            <Route path="list" element={<PropertiesPage />} />
-                          </Routes>
-                        </GetPropertyContextProvider>
-                      }
-                    />
+                          </TrashRateReportProvider>
+                        }
+                      />
+                      <Route
+                        path="/properties/*"
+                        element={
+                          <GetPropertyContextProvider>
+                            <Routes>
+                              <Route path="list" element={<PropertiesPage />} />
+                            </Routes>
+                          </GetPropertyContextProvider>
+                        }
+                      />
 
-                    {/* Módulo de Notificaciones */}
-                    <Route
-                      path="/notifications"
-                      element={<NotificationsPage />}
-                    />
+                      {/* Módulo de Notificaciones */}
+                      <Route
+                        path="/notifications"
+                        element={<NotificationsPage />}
+                      />
 
-                    {/* Módulo de Órdenes de Trabajo */}
-                    <Route
-                      path="/work-orders/dashboard"
-                      element={<WorkOrdersDashboardPage />}
-                    />
-                    <Route
-                      path="/work-orders/list"
-                      element={<AllWorkOrdersListPage />}
-                    />
-                    <Route
-                      path="/work-orders/search"
-                      element={<WorkOrderSearchPage />}
-                    />
-                    <Route
-                      path="/work-orders/process"
-                      element={<WorkOrdersProcessPage />}
-                    />
-                    <Route
-                      path="/work-orders/new"
-                      element={<WorkOrderCreatePage />}
-                    />
-                    <Route
-                      path="/work-orders/create"
-                      element={<WorkOrderCreatePage />}
-                    />
-                    {/* Detalle de OT — ruta dinámica SIEMPRE después de las estáticas */}
-                    <Route
-                      path="/work-orders/:codigoOrden"
-                      element={<WorkOrderDetailPage />}
-                    />
+                      {/* Módulo de Órdenes de Trabajo */}
+                      <Route
+                        path="/work-orders/dashboard"
+                        element={<WorkOrdersDashboardPage />}
+                      />
+                      <Route
+                        path="/work-orders/list"
+                        element={<AllWorkOrdersListPage />}
+                      />
+                      <Route
+                        path="/work-orders/search"
+                        element={<WorkOrderSearchPage />}
+                      />
+                      <Route
+                        path="/work-orders/process"
+                        element={<WorkOrdersProcessPage />}
+                      />
+                      <Route
+                        path="/work-orders/new"
+                        element={<WorkOrderCreatePage />}
+                      />
+                      <Route
+                        path="/work-orders/create"
+                        element={<WorkOrderCreatePage />}
+                      />
+                      {/* Detalle de OT — ruta dinámica SIEMPRE después de las estáticas */}
+                      <Route
+                        path="/work-orders/:codigoOrden"
+                        element={<WorkOrderDetailPage />}
+                      />
 
-                    {/* Módulo de Trámites */}
-                    <Route
-                      path="/tramites/*"
-                      element={
-                        <TramitesProvider>
-                          <Routes>
-                            <Route index element={<TramitesCatalogPage />} />
-                            <Route path=":id" element={<TramiteDetailPage />} />
-                          </Routes>
-                        </TramitesProvider>
-                      }
-                    />
-
-                    {/* Módulo de Requisitos por Trámite (Procedures) */}
-                    <Route
-                      path="/procedures/cambio-titular"
-                      element={<CambioTitularPage />}
-                    />
-                    <Route
-                      path="/procedures/suspension"
-                      element={<SuspensionPage />}
-                    />
-                    <Route
-                      path="/procedures/tercera-edad"
-                      element={<BeneficioTerceraEdadPage />}
-                    />
-                    <Route
-                      path="/procedures/discapacidad"
-                      element={<BeneficioDiscapacidadPage />}
-                    />
-                    <Route
-                      path="/procedures/acometidas"
-                      element={<Navigate to="/tramites" replace />}
-                    />
-
-                    {/* Módulo de Solicitudes (Requests) */}
-                    <Route
-                      path="/requests/*"
-                      element={
-                        <SolicitudesProvider>
+                      {/* Módulo de Trámites */}
+                      <Route
+                        path="/tramites/*"
+                        element={
                           <TramitesProvider>
                             <Routes>
-                              <Route
-                                path=":categoria/new"
-                                element={<SolicitudNuevaPage />}
-                              />
-                              <Route
-                                path=":categoria/tracking"
-                                element={<SolicitudesTrackingPage />}
-                              />
-                              <Route
-                                path=":categoria/list"
-                                element={<SolicitudesListPage />}
-                              />
-                              <Route
-                                path=":categoria/pending"
-                                element={
-                                  <SolicitudesListPage filter="en_proceso" />
-                                }
-                              />
-                              <Route
-                                path=":categoria/approved"
-                                element={
-                                  <SolicitudesListPage filter="aprobada" />
-                                }
-                              />
-                              <Route
-                                path=":categoria/rejected"
-                                element={
-                                  <SolicitudesListPage filter="rechazada" />
-                                }
-                              />
-                            </Routes>
-                          </TramitesProvider>
-                        </SolicitudesProvider>
-                      }
-                    />
-
-                    {/* Rutas adicionales de Solicitudes (Detalles y compatibilidad) */}
-                    <Route
-                      path="/solicitudes/*"
-                      element={
-                        <SolicitudesProvider>
-                          <TramitesProvider>
-                            <Routes>
-                              <Route
-                                index
-                                element={<Navigate to="/tramites" replace />}
-                              />
-                              <Route
-                                path="nueva"
-                                element={<SolicitudNuevaPage />}
-                              />
-                              <Route
-                                path="nueva/:tramiteId"
-                                element={<SolicitudNuevaPage />}
-                              />
+                              <Route index element={<TramitesCatalogPage />} />
                               <Route
                                 path=":id"
-                                element={<SolicitudDetailPage />}
+                                element={<TramiteDetailPage />}
                               />
                             </Routes>
                           </TramitesProvider>
-                        </SolicitudesProvider>
-                      }
-                    />
+                        }
+                      />
+
+                      {/* Módulo de Requisitos por Trámite (Procedures) */}
+                      <Route
+                        path="/procedures/cambio-titular"
+                        element={<CambioTitularPage />}
+                      />
+                      <Route
+                        path="/procedures/suspension"
+                        element={<SuspensionPage />}
+                      />
+                      <Route
+                        path="/procedures/tercera-edad"
+                        element={<BeneficioTerceraEdadPage />}
+                      />
+                      <Route
+                        path="/procedures/discapacidad"
+                        element={<BeneficioDiscapacidadPage />}
+                      />
+                      <Route
+                        path="/procedures/acometidas"
+                        element={<Navigate to="/tramites" replace />}
+                      />
+
+                      {/* Módulo de Solicitudes (Requests) */}
+                      <Route
+                        path="/requests/*"
+                        element={
+                          <SolicitudesProvider>
+                            <TramitesProvider>
+                              <Routes>
+                                <Route
+                                  path=":categoria/new"
+                                  element={<SolicitudNuevaPage />}
+                                />
+                                <Route
+                                  path=":categoria/tracking"
+                                  element={<SolicitudesTrackingPage />}
+                                />
+                                <Route
+                                  path=":categoria/list"
+                                  element={<SolicitudesListPage />}
+                                />
+                                <Route
+                                  path=":categoria/pending"
+                                  element={
+                                    <SolicitudesListPage filter="en_proceso" />
+                                  }
+                                />
+                                <Route
+                                  path=":categoria/approved"
+                                  element={
+                                    <SolicitudesListPage filter="aprobada" />
+                                  }
+                                />
+                                <Route
+                                  path=":categoria/rejected"
+                                  element={
+                                    <SolicitudesListPage filter="rechazada" />
+                                  }
+                                />
+                              </Routes>
+                            </TramitesProvider>
+                          </SolicitudesProvider>
+                        }
+                      />
+
+                      {/* Rutas adicionales de Solicitudes (Detalles y compatibilidad) */}
+                      <Route
+                        path="/solicitudes/*"
+                        element={
+                          <SolicitudesProvider>
+                            <TramitesProvider>
+                              <Routes>
+                                <Route
+                                  index
+                                  element={<Navigate to="/tramites" replace />}
+                                />
+                                <Route
+                                  path="nueva"
+                                  element={<SolicitudNuevaPage />}
+                                />
+                                <Route
+                                  path="nueva/:tramiteId"
+                                  element={<SolicitudNuevaPage />}
+                                />
+                                <Route
+                                  path=":id"
+                                  element={<SolicitudDetailPage />}
+                                />
+                              </Routes>
+                            </TramitesProvider>
+                          </SolicitudesProvider>
+                        }
+                      />
+                    </Route>
                   </Route>
-                </Route>
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-        </UsersProvider>
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </UsersProvider>
         </SeasonalProvider>
       </ThemeProvider>
     </AuthProvider>

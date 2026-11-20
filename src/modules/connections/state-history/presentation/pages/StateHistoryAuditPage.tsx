@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { Table, type Column } from '@/shared/presentation/components/Table/Table';
+import {
+  Table,
+  type Column
+} from '@/shared/presentation/components/Table/Table';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { EmptyState } from '@/shared/presentation/components/common/EmptyState';
-import {
-  Eye,
-  HelpCircle,
-  Layers
-} from 'lucide-react';
+import { Eye, HelpCircle, Layers } from 'lucide-react';
 import { useStateHistoryAudit } from '../hooks/useStateHistoryAudit';
 import { StateHistoryKpiCards } from '../components/StateHistoryKpiCards';
 import { StateHistoryFilterBar } from '../components/StateHistoryFilterBar';
@@ -25,7 +24,9 @@ import '../styles/StateHistoryAudit.css';
 export const StateHistoryAuditPage: React.FC = () => {
   const auditHook = useStateHistoryAudit();
 
-  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
+  const [selectedConnectionId, setSelectedConnectionId] = useState<
+    string | null
+  >(null);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   const columns: Column<StateHistory>[] = [
@@ -53,7 +54,8 @@ export const StateHistoryAuditPage: React.FC = () => {
     {
       id: 'changeDate',
       header: 'Fecha Efectiva',
-      accessor: (row) => formatStateHistoryDate(row.effectiveDate || row.changeDate)
+      accessor: (row) =>
+        formatStateHistoryDate(row.effectiveDate || row.changeDate)
     },
     {
       id: 'transition',
@@ -62,7 +64,11 @@ export const StateHistoryAuditPage: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           {row.previousStateId && (
             <>
-              {renderStateChip(row.previousStateId, row.previousStateName, 'xs')}
+              {renderStateChip(
+                row.previousStateId,
+                row.previousStateName,
+                'xs'
+              )}
               <span style={{ color: 'var(--text-secondary)' }}>→</span>
             </>
           )}
@@ -135,13 +141,35 @@ export const StateHistoryAuditPage: React.FC = () => {
   return (
     <div className="state-audit-page">
       {/* Header con título y acciones globales */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}
+      >
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: '1rem',
+              fontWeight: 700,
+              color: 'var(--text-primary)'
+            }}
+          >
             Auditoría y Libro Mayor de Estados de Acometidas
           </h2>
-          <p style={{ margin: '4px 0 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-            Trazabilidad cronológica inmutable, análisis de transición y control forense de la red.
+          <p
+            style={{
+              margin: '4px 0 0 0',
+              fontSize: '0.875rem',
+              color: 'var(--text-secondary)'
+            }}
+          >
+            Trazabilidad cronológica inmutable, análisis de transición y control
+            forense de la red.
           </p>
         </div>
 
@@ -229,7 +257,9 @@ export const StateHistoryAuditPage: React.FC = () => {
         onClose={() => setIsBulkModalOpen(false)}
         selectedConnectionIds={
           auditHook.records.length > 0
-            ? Array.from(new Set(auditHook.records.map((r) => r.connectionId))).slice(0, 10)
+            ? Array.from(
+                new Set(auditHook.records.map((r) => r.connectionId))
+              ).slice(0, 10)
             : []
         }
         onSuccess={() => {

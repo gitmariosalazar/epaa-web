@@ -1,9 +1,5 @@
-export type RouteAssignmentStatus =
-  | 'ASIGNADA'
-  | 'EN_PROCESO'
-  | 'PAUSADA'
-  | 'COMPLETADA'
-  | 'REASIGNADA';
+import type { RouteAssignmentStatus } from '../../presentation/utils/notify';
+export type { RouteAssignmentStatus };
 
 export interface RouteAssignment {
   idAsignacion: number;

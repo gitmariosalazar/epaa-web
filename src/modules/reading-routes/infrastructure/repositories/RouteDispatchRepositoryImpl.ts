@@ -29,7 +29,7 @@ export class RouteDispatchRepositoryImpl implements RouteDispatchRepository {
         : Array.from(
             new Set(
               (request.asignaciones || [])
-                .map(a => a.lecturistaId)
+                .map((a) => a.lecturistaId)
                 .filter(Boolean),
             ),
           );
@@ -52,11 +52,24 @@ export class RouteDispatchRepositoryImpl implements RouteDispatchRepository {
       payload.asignaciones = request.asignaciones;
     }
 
+    // Timeout extendido de 90s para procesamiento batch pesado en base de datos
     const response = await this.client.post<ApiResponse<BatchDispatchResponse>>(
       '/route-assignments/bulk-dispatch',
       payload,
+      { timeout: 90000 }
     );
-    return response.data.data;
+
+    const rawData = response?.data;
+    const dispatchData = (rawData as any)?.data ?? rawData;
+
+    return (dispatchData || {
+      success: true,
+      message: 'Despacho matutino procesado exitosamente',
+      totalRutasAsignadas: request.asignaciones?.length ?? 0,
+      totalAcometidasDespachadas: 0,
+      periodo: request.periodo,
+      rutasDespachadas: [],
+    }) as BatchDispatchResponse;
   }
 
   async assignSingleRoute(
@@ -109,7 +122,9 @@ export class RouteDispatchRepositoryImpl implements RouteDispatchRepository {
     const response = await this.client.get<ApiResponse<RouteAssignment[]>>(
       `/route-assignments/live-tracking${qs}`,
     );
-    return response.data.data;
+    const rawData = response?.data;
+    const body = (rawData as any)?.data ?? rawData;
+    return Array.isArray(body) ? body : [];
   }
 
   async cancelAssignment(

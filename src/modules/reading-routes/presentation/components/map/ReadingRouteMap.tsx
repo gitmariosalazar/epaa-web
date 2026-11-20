@@ -4,16 +4,25 @@ import {
   Map,
   useMap,
   AdvancedMarker,
-  AdvancedMarkerAnchorPoint,
+  AdvancedMarkerAnchorPoint
 } from '@vis.gl/react-google-maps';
-import { Layers, MapPin, RefreshCw, ZoomIn, Eye, EyeOff } from 'lucide-react';
+import {
+  Layers,
+  MapPin,
+  RefreshCw,
+  ZoomIn,
+  Eye,
+  EyeOff,
+  RotateCcw
+} from 'lucide-react';
 import { useTheme } from '@/shared/presentation/context/ThemeContext';
+import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import { FALLBACK_CENTER_ANTONIO_ANTE } from '@/shared/utils/types/IGeolocationData';
 import type {
   ReadingRoute,
   RouteCentroidFeature,
   RouteCentroidFeatureCollection,
-  RouteGeoJsonFeatureCollection,
+  RouteGeoJsonFeatureCollection
 } from '../../../domain/models/ReadingRoute';
 import type { RouteConnection } from '../../../domain/models/RouteConnection';
 import { ReadingRouteCentroidMarker } from './ReadingRouteCentroidMarker';
@@ -21,6 +30,9 @@ import { ReadingRouteMapInfoWindow } from './ReadingRouteMapInfoWindow';
 import { ReadingRouteMapSidePanel } from './ReadingRouteMapSidePanel';
 import { DARK_MAP_STYLE, SILVER_MAP_STYLE } from './ReadingRouteMapStyles';
 import './ReadingRouteMap.css';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { Select } from '@/shared/presentation/components/Input/Select';
+import { sectors as DEFAULT_SECTORS } from '@/shared/utils/listSectors';
 
 interface ReadingRouteMapDataLayerProps {
   geojsonData: RouteGeoJsonFeatureCollection | null;
@@ -33,7 +45,7 @@ const ReadingRouteMapDataLayer: React.FC<ReadingRouteMapDataLayerProps> = ({
   geojsonData,
   showPolygons,
   selectedRoute,
-  onSelectRouteId,
+  onSelectRouteId
 }) => {
   const map = useMap();
 
@@ -41,7 +53,7 @@ const ReadingRouteMapDataLayer: React.FC<ReadingRouteMapDataLayerProps> = ({
     if (!map) return;
 
     // Clear previous features
-    map.data.forEach(feature => {
+    map.data.forEach((feature) => {
       map.data.remove(feature);
     });
 
@@ -56,22 +68,27 @@ const ReadingRouteMapDataLayer: React.FC<ReadingRouteMapDataLayerProps> = ({
     map.data.setStyle((feature: google.maps.Data.Feature) => {
       const color = String(feature.getProperty('color') || '#0284c7');
       const idRuta = Number(feature.getProperty('idRuta'));
-      const isSelected = Boolean(selectedRoute && selectedRoute.idRuta === idRuta);
+      const isSelected = Boolean(
+        selectedRoute && selectedRoute.idRuta === idRuta
+      );
       return {
         fillColor: color,
         fillOpacity: isSelected ? 0.45 : 0.2,
         strokeColor: isSelected ? '#ffffff' : color,
         strokeWeight: isSelected ? 3 : 1.5,
-        zIndex: isSelected ? 25 : 2,
+        zIndex: isSelected ? 25 : 2
       };
     });
 
-    const clickListener = map.data.addListener('click', (event: google.maps.Data.MouseEvent) => {
-      const idRuta = event.feature.getProperty('idRuta');
-      if (idRuta) {
-        onSelectRouteId(Number(idRuta));
+    const clickListener = map.data.addListener(
+      'click',
+      (event: google.maps.Data.MouseEvent) => {
+        const idRuta = event.feature.getProperty('idRuta');
+        if (idRuta) {
+          onSelectRouteId(Number(idRuta));
+        }
       }
-    });
+    );
 
     return () => {
       google.maps.event.removeListener(clickListener);
@@ -118,6 +135,12 @@ export interface ReadingRouteMapProps {
   isOptimizing: boolean;
   selectedSector: number | undefined;
   onSectorChange: (sector: number | undefined) => void;
+  periodoFilter: string;
+  onPeriodoChange: (periodo: string) => void;
+  estadoFilter: string;
+  onEstadoChange: (estado: string) => void;
+  onResetFilters?: () => void;
+  hasActiveFilters?: boolean;
   onSelectRouteId: (idRuta: number) => void;
   onCloseSidePanel: () => void;
   onOptimizeSequence: (idRuta: number) => Promise<void>;
@@ -136,13 +159,19 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
   isOptimizing,
   selectedSector,
   onSectorChange,
+  periodoFilter,
+  onPeriodoChange,
+  estadoFilter,
+  onEstadoChange,
+  onResetFilters,
+  hasActiveFilters,
   onSelectRouteId,
   onCloseSidePanel,
   onOptimizeSequence,
   onRefresh,
   isLoading = false,
   isSidePanelOpen,
-  onAssignRoute,
+  onAssignRoute
 }) => {
   const { theme } = useTheme();
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
@@ -150,24 +179,33 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
 
   const [showPolygons, setShowPolygons] = useState(true);
   const [showCentroids, setShowCentroids] = useState(true);
-  const [infoWindowCentroid, setInfoWindowCentroid] = useState<RouteCentroidFeature | null>(null);
-  const [infoWindowCoords, setInfoWindowCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [cameraTarget, setCameraTarget] = useState<{ lat: number; lng: number } | null>(null);
+  const [infoWindowCentroid, setInfoWindowCentroid] =
+    useState<RouteCentroidFeature | null>(null);
+  const [infoWindowCoords, setInfoWindowCoords] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [cameraTarget, setCameraTarget] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [cameraZoom, setCameraZoom] = useState<number | undefined>(undefined);
   const [focusedConnectionCoords, setFocusedConnectionCoords] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
 
-  // Available sectors from centroids
+  // Sectores estándar del 1 al 40 (complementados con cualquier sector de centroides)
   const sectors = useMemo(() => {
-    if (!centroidsData?.features) return [];
-    const set = new Set<number>();
-    centroidsData.features.forEach((f: RouteCentroidFeature) => {
-      if (typeof f.properties.sector === 'number') {
-        set.add(f.properties.sector);
-      }
-    });
+    const set = new Set<number>(DEFAULT_SECTORS.map((s) => s.id));
+    if (centroidsData?.features) {
+      centroidsData.features.forEach((f: RouteCentroidFeature) => {
+        const sec = f.properties.sector ?? f.properties.sectorId;
+        if (typeof sec === 'number' && Number.isFinite(sec)) {
+          set.add(sec);
+        }
+      });
+    }
     return Array.from(set).sort((a, b) => a - b);
   }, [centroidsData]);
 
@@ -175,13 +213,22 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
   const filteredCentroids = useMemo(() => {
     if (!centroidsData?.features) return [];
     if (!selectedSector) return centroidsData.features;
-    return centroidsData.features.filter((f: RouteCentroidFeature) => f.properties.sector === selectedSector);
+    return centroidsData.features.filter((f: RouteCentroidFeature) => {
+      const sec = f.properties.sector ?? f.properties.sectorId;
+      return sec === selectedSector;
+    });
   }, [centroidsData, selectedSector]);
 
   const handleCentroidClick = useCallback(
     (feature: RouteCentroidFeature, coords: { lat: number; lng: number }) => {
-      const lat = typeof coords.lat === 'number' ? coords.lat : parseFloat(String(coords.lat));
-      const lng = typeof coords.lng === 'number' ? coords.lng : parseFloat(String(coords.lng));
+      const lat =
+        typeof coords.lat === 'number'
+          ? coords.lat
+          : parseFloat(String(coords.lat));
+      const lng =
+        typeof coords.lng === 'number'
+          ? coords.lng
+          : parseFloat(String(coords.lng));
       if (Number.isFinite(lat) && Number.isFinite(lng)) {
         setInfoWindowCentroid(feature);
         setInfoWindowCoords({ lat, lng });
@@ -189,7 +236,7 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
         setCameraZoom(14);
       }
     },
-    [],
+    []
   );
 
   const handleOpenSidePanelFromInfoWindow = useCallback(
@@ -198,13 +245,13 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
       setInfoWindowCoords(null);
       onSelectRouteId(idRuta);
     },
-    [onSelectRouteId],
+    [onSelectRouteId]
   );
 
   const handleResetView = useCallback(() => {
     setCameraTarget({
       lat: Number(FALLBACK_CENTER_ANTONIO_ANTE.lat),
-      lng: Number(FALLBACK_CENTER_ANTONIO_ANTE.lng),
+      lng: Number(FALLBACK_CENTER_ANTONIO_ANTE.lng)
     });
     setCameraZoom(13);
     setFocusedConnectionCoords(null);
@@ -230,18 +277,21 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
       <APIProvider apiKey={apiKey} libraries={['marker']}>
         {/* Toolbar */}
         <div className="reading-route-map-toolbar">
+          {/* Layer toggles */}
           <div className="reading-route-map-toolbar-group">
             <button
+              type="button"
               className={`reading-route-map-btn ${showPolygons ? 'active' : ''}`}
-              onClick={() => setShowPolygons(prev => !prev)}
+              onClick={() => setShowPolygons((prev) => !prev)}
               title="Alternar visibilidad de polígonos GeoJSON"
             >
               <Layers size={14} />
               Polígonos
             </button>
             <button
+              type="button"
               className={`reading-route-map-btn ${showCentroids ? 'active' : ''}`}
-              onClick={() => setShowCentroids(prev => !prev)}
+              onClick={() => setShowCentroids((prev) => !prev)}
               title="Alternar visibilidad de marcadores de centroides"
             >
               {showCentroids ? <Eye size={14} /> : <EyeOff size={14} />}
@@ -251,45 +301,133 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
 
           <div className="reading-route-map-toolbar-divider" />
 
-          {/* Sector Selector */}
-          <div className="reading-route-map-toolbar-group">
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-              Sector:
-            </span>
-            <select
-              className="reading-route-map-select"
-              value={selectedSector ?? ''}
-              onChange={e => onSectorChange(e.target.value ? Number(e.target.value) : undefined)}
+          {/* Filtro Período */}
+          <div className="reading-route-map-toolbar-group reading-route-map-filter-item">
+            <Tooltip
+              content="Selecciona el período operativo mensual"
+              followCursor={false}
+              themeColor="indigo"
             >
-              <option value="">Todos los sectores</option>
-              {sectors.map(sec => (
-                <option key={sec} value={sec}>
-                  Sector {sec}
-                </option>
-              ))}
-            </select>
+              <DatePicker
+                value={periodoFilter}
+                onChange={(val) => onPeriodoChange(val)}
+                size="small"
+                view="month"
+              />
+            </Tooltip>
           </div>
+
+          <div className="reading-route-map-toolbar-divider" />
+
+          {/* Filtro Estado de Asignación */}
+          <div className="reading-route-map-toolbar-group reading-route-map-filter-item">
+            <Tooltip
+              content="Filtrar por estado de asignación de la ruta"
+              followCursor={false}
+              themeColor="indigo"
+            >
+              <Select
+                value={estadoFilter || 'TODOS'}
+                onChange={(e) => onEstadoChange(e.target.value)}
+                aria-label="Filtrar por estado de asignación"
+                size="small"
+              >
+                <option value="TODOS">Todos los estados</option>
+                <option value="NO_ASIGNADA">Sin Asignar (Pendientes)</option>
+                <option value="ASIGNADA">Asignadas</option>
+                <option value="EN_PROCESO">En Proceso (En campo)</option>
+                <option value="PAUSADA">Pausadas</option>
+                <option value="COMPLETADA">Completadas</option>
+                <option value="REASIGNADA">Reasignadas</option>
+              </Select>
+            </Tooltip>
+          </div>
+
+          <div className="reading-route-map-toolbar-divider" />
+
+          {/* Sector Selector */}
+          <div className="reading-route-map-toolbar-group reading-route-map-filter-item">
+            <Tooltip
+              content="Filtrar por sector comercial/hidráulico"
+              followCursor={false}
+              themeColor="indigo"
+            >
+              <Select
+                value={selectedSector ?? ''}
+                onChange={(e) =>
+                  onSectorChange(
+                    e.target.value ? Number(e.target.value) : undefined
+                  )
+                }
+                aria-label="Filtrar por sector"
+                size="small"
+              >
+                <option value="">Todos los sectores</option>
+                {sectors.map((sec) => (
+                  <option key={sec} value={sec}>
+                    Sector {sec}
+                  </option>
+                ))}
+              </Select>
+            </Tooltip>
+          </div>
+
+          {/* Botón Restablecer Filtros */}
+          {hasActiveFilters && onResetFilters && (
+            <>
+              <div className="reading-route-map-toolbar-divider" />
+              <Tooltip
+                content="Restablecer todos los filtros"
+                followCursor={false}
+                themeColor="indigo"
+              >
+                <button
+                  type="button"
+                  className="reading-route-map-reset-btn"
+                  onClick={onResetFilters}
+                >
+                  <RotateCcw size={12} />
+                  Limpiar
+                </button>
+              </Tooltip>
+            </>
+          )}
 
           <div className="reading-route-map-toolbar-divider" />
 
           {/* Map reset & reload */}
           <div className="reading-route-map-toolbar-group">
-            <button
-              className="reading-route-map-btn"
-              onClick={handleResetView}
-              title="Centrar vista en Antonio Ante"
+            <Tooltip
+              content="Centrar vista en Antonio Ante"
+              followCursor={false}
+              themeColor="indigo"
             >
-              <ZoomIn size={14} />
-              Centrar
-            </button>
-            <button
-              className="reading-route-map-btn"
-              onClick={onRefresh}
-              title="Refrescar capas"
-              disabled={isLoading}
+              <button
+                type="button"
+                className="reading-route-map-btn"
+                onClick={handleResetView}
+              >
+                <ZoomIn size={14} />
+                Centrar
+              </button>
+            </Tooltip>
+            <Tooltip
+              content="Refrescar capas"
+              followCursor={false}
+              themeColor="indigo"
             >
-              <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
-            </button>
+              <button
+                type="button"
+                className="reading-route-map-btn"
+                onClick={onRefresh}
+                disabled={isLoading}
+              >
+                <RefreshCw
+                  size={14}
+                  className={isLoading ? 'animate-spin' : ''}
+                />
+              </button>
+            </Tooltip>
           </div>
 
           <div className="reading-route-map-toolbar-divider" />
@@ -303,34 +441,48 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
 
         {/* Legend */}
         <div className="reading-route-map-legend">
-          <div className="reading-route-legend-title">Simbología SIG</div>
+          <div className="reading-route-legend-title">Estado de Asignación</div>
+          <div className="reading-route-legend-item">
+            <span
+              className="reading-route-legend-swatch"
+              style={{ backgroundColor: '#64748b' }}
+            />
+            <span>Sin Asignar (Pendiente)</span>
+          </div>
           <div className="reading-route-legend-item">
             <span
               className="reading-route-legend-swatch"
               style={{ backgroundColor: '#2563eb' }}
             />
-            <span>Sector 1 (Centro Urbano)</span>
-          </div>
-          <div className="reading-route-legend-item">
-            <span
-              className="reading-route-legend-swatch"
-              style={{ backgroundColor: '#10b981' }}
-            />
-            <span>Sector 2 (Andrade Marín)</span>
+            <span>Asignada</span>
           </div>
           <div className="reading-route-legend-item">
             <span
               className="reading-route-legend-swatch"
               style={{ backgroundColor: '#f59e0b' }}
             />
-            <span>Sector 3 (San Roque)</span>
+            <span>En Proceso</span>
+          </div>
+          <div className="reading-route-legend-item">
+            <span
+              className="reading-route-legend-swatch"
+              style={{ backgroundColor: '#10b981' }}
+            />
+            <span>Completada</span>
+          </div>
+          <div className="reading-route-legend-item">
+            <span
+              className="reading-route-legend-swatch"
+              style={{ backgroundColor: '#ef4444' }}
+            />
+            <span>Pausada</span>
           </div>
           <div className="reading-route-legend-item">
             <span
               className="reading-route-legend-swatch"
               style={{ backgroundColor: '#8b5cf6' }}
             />
-            <span>Sector 4 (Chaltura / Natabuela)</span>
+            <span>Reasignada</span>
           </div>
         </div>
 
@@ -338,7 +490,9 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
         {isLoading && (
           <div className="reading-route-map-loading-overlay">
             <div className="reading-route-map-loading-spinner" />
-            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Cargando capas cartográficas...</span>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+              Cargando capas cartográficas...
+            </span>
           </div>
         )}
 
@@ -347,7 +501,7 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
           <Map
             defaultCenter={{
               lat: FALLBACK_CENTER_ANTONIO_ANTE.lat,
-              lng: FALLBACK_CENTER_ANTONIO_ANTE.lng,
+              lng: FALLBACK_CENTER_ANTONIO_ANTE.lng
             }}
             defaultZoom={13}
             mapId={mapId}
@@ -367,7 +521,10 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
             />
 
             {/* Camera controller */}
-            <MapCameraController centerTarget={cameraTarget} zoomTarget={cameraZoom} />
+            <MapCameraController
+              centerTarget={cameraTarget}
+              zoomTarget={cameraZoom}
+            />
 
             {/* Centroid markers */}
             {showCentroids &&
@@ -386,7 +543,10 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
                 position={focusedConnectionCoords}
                 anchorPoint={AdvancedMarkerAnchorPoint.CENTER}
               >
-                <div className="focused-connection-pin" title="Acometida enfocada">
+                <div
+                  className="focused-connection-pin"
+                  title="Acometida enfocada"
+                >
                   <div className="focused-connection-pulse" />
                   <div className="focused-connection-dot" />
                 </div>

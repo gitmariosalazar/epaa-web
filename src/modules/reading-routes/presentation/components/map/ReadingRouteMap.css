@@ -21,8 +21,8 @@
 
 .reading-route-map-toolbar {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
+  top: 0.3rem;
+  left: 0.3rem;
   z-index: 100;
   display: flex;
   align-items: center;
@@ -72,6 +72,56 @@
   background-color: var(--accent);
   color: #ffffff;
   border-color: var(--accent);
+}
+
+.reading-route-map-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.reading-route-map-filter-icon {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.reading-route-map-filter-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.reading-route-map-filter-item .custom-datepicker-container {
+  width: auto;
+}
+
+.reading-route-map-filter-item .custom-datepicker-trigger {
+  height: 28px;
+  padding: 0 0.55rem;
+  font-size: 0.78rem;
+  border-radius: 16px;
+  background-color: var(--surface);
+  border-color: var(--border-color);
+}
+
+.reading-route-map-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 14px;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reading-route-map-reset-btn:hover {
+  background-color: rgba(239, 68, 68, 0.18);
+  border-color: #ef4444;
 }
 
 .reading-route-map-select {
@@ -182,7 +232,8 @@
 }
 
 @keyframes connection-ping {
-  75%, 100% {
+  75%,
+  100% {
     transform: scale(2.2);
     opacity: 0;
   }

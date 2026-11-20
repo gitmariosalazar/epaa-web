@@ -64,12 +64,16 @@ export const RouteBadge: React.FC<RouteBadgeProps> = ({
     );
   }
 
+  const statusUpper = (status || '').toUpperCase();
+  const defaultLabel =
+    statusUpper === 'NO_ASIGNADA' || statusUpper === 'SIN_ASIGNAR'
+      ? 'Sin Asignar'
+      : statusUpper === 'EN_PROCESO'
+      ? 'En Proceso'
+      : status?.replace('_', ' ') || 'ASIGNADA';
+
   const normalizedStatus = (status || 'ASIGNADA').toLowerCase();
-  const formatLabel =
-    label ||
-    children ||
-    status?.replace('_', ' ') ||
-    'ASIGNADA';
+  const formatLabel = label || children || defaultLabel;
 
   return (
     <span

@@ -11,6 +11,7 @@ import type {
 import type {
   AssignSingleRouteResponse,
   BatchMorningDispatchResponse,
+  BatchDispatchProgress,
   ReassignRouteSegmentResponse,
 } from '../../domain/dto/response/route-responses.dto';
 import { notify } from '../utils/notify';
@@ -33,7 +34,10 @@ export interface UseRouteDispatchViewModelReturn {
   openSingleAssignModal: (route: ReadingRoute) => void;
   closeSingleAssignModal: () => void;
   executeSingleAssign: (request: AssignSingleRouteRequest) => Promise<AssignSingleRouteResponse>;
-  executeMorningDispatch: (request: BatchMorningDispatchRequest) => Promise<BatchMorningDispatchResponse>;
+  executeMorningDispatch: (
+    request: BatchMorningDispatchRequest,
+    onProgress?: (progress: BatchDispatchProgress) => void,
+  ) => Promise<BatchMorningDispatchResponse>;
   executeReassignment: (request: ReassignRouteSegmentRequest) => Promise<ReassignRouteSegmentResponse>;
   cancelAssignment: (idAsignacion: number, motivo?: string) => Promise<void>;
   resumeAssignment: (idAsignacion: number, motivo?: string) => Promise<void>;
@@ -96,12 +100,23 @@ export const useRouteDispatchViewModel = (): UseRouteDispatchViewModelReturn => 
 
   // Execute bulk morning dispatch
   const executeMorningDispatch = useCallback(
-    async (request: BatchMorningDispatchRequest): Promise<BatchMorningDispatchResponse> => {
+    async (
+      request: BatchMorningDispatchRequest,
+      onProgress?: (progress: BatchDispatchProgress) => void,
+    ): Promise<BatchMorningDispatchResponse> => {
       try {
         const response =
-          await executeBatchMorningDispatchUseCase.execute(request);
+          await executeBatchMorningDispatchUseCase.execute(request, onProgress);
+        const totalRutas =
+          response?.totalRutasAsignadas ??
+          request.asignaciones?.length ??
+          0;
+        const totalMedidores = response?.totalAcometidasDespachadas ?? 0;
+        const medidoresLabel =
+          totalMedidores > 0 ? ` (${totalMedidores} medidores)` : '';
+
         notify.success(
-          `Despacho exitoso: ${response.totalRutasAsignadas} rutas asignadas (${response.totalAcometidasDespachadas} medidores).`,
+          `Despacho exitoso: ${totalRutas} rutas asignadas${medidoresLabel}.`,
         );
         setIsMorningDispatchModalOpen(false);
         void loadLiveTracking();

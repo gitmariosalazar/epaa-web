@@ -16,6 +16,7 @@ import { ReassignSegmentModal } from '../../components/dispatch/ReassignSegmentM
 import { AssignSingleRouteModal } from '../../components/dispatch/AssignSingleRouteModal';
 import { SmartRouteResolverModal } from '../../components/resolution/SmartRouteResolverModal';
 import type { ReadingRoute } from '../../../domain/models/ReadingRoute';
+import type { RouteAssignment } from '../../../domain/models/RouteAssignment';
 
 import './ReadingRoutesPage.css';
 
@@ -46,6 +47,36 @@ export const ReadingRoutesPage: React.FC = () => {
       pageVm.routes.find((r) => r.idRuta === idRuta) || mapVm.selectedRoute;
     setDrawerRoute(found);
     setIsDrawerOpen(true);
+  };
+
+  // Handle Reassign Route from Catalog Table or Detail Drawer
+  const handleReassignRoute = (route: ReadingRoute) => {
+    const existing = dispatchVm.assignments.find(
+      (a) =>
+        (route.idAsignacion && a.idAsignacion === route.idAsignacion) ||
+        a.rutaId === route.idRuta,
+    );
+    if (existing) {
+      dispatchVm.openReassignModal(existing);
+      return;
+    }
+
+    const assignmentFromRoute: RouteAssignment = {
+      idAsignacion: Number(route.idAsignacion || route.idRuta),
+      rutaId: route.idRuta,
+      codigoRuta: route.codigoRuta || route.codigo,
+      nombreRuta: route.nombreRuta || route.nombre,
+      usuarioId: route.idUsuarioAsignado,
+      lecturistaId: route.idUsuarioAsignado,
+      nombreLecturista: route.nombreUsuario || route.usuario,
+      periodoMes: route.periodo || pageVm.periodoFilter,
+      estado: (route.estado as any) || 'ASIGNADA',
+      lecturasEsperadas: route.lecturasEsperadas || route.cantidadAcometidas,
+      lecturasCompletadas: route.lecturasCompletadas || 0,
+      lecturasPendientes: route.lecturasPendientes || 0,
+      totalPredios: route.cantidadAcometidas,
+    };
+    dispatchVm.openReassignModal(assignmentFromRoute);
   };
 
   return (
@@ -147,6 +178,12 @@ export const ReadingRoutesPage: React.FC = () => {
                 isOptimizing={mapVm.isOptimizing}
                 selectedSector={mapVm.selectedSector}
                 onSectorChange={mapVm.setSelectedSector}
+                periodoFilter={mapVm.periodoFilter}
+                onPeriodoChange={mapVm.setPeriodoFilter}
+                estadoFilter={mapVm.estadoFilter}
+                onEstadoChange={mapVm.setEstadoFilter}
+                onResetFilters={mapVm.resetFilters}
+                hasActiveFilters={mapVm.hasActiveFilters}
                 onSelectRouteId={mapVm.selectRouteById}
                 onCloseSidePanel={mapVm.closeSidePanel}
                 onOptimizeSequence={mapVm.optimizeSequence}
@@ -186,17 +223,21 @@ export const ReadingRoutesPage: React.FC = () => {
               limit={pageVm.limit}
               searchTerm={pageVm.search}
               selectedSector={pageVm.sectorFilter}
-              activaOnly={pageVm.activaFilter ?? true}
+              activaOnly={pageVm.activaFilter}
+              estadoFilter={pageVm.estadoFilter}
+              periodoFilter={pageVm.periodoFilter}
               onSearchChange={pageVm.setSearch}
               onSectorChange={pageVm.setSectorFilter}
-              onActivaChange={(activa) =>
-                pageVm.setActivaFilter(activa ? true : undefined)
-              }
+              onActivaChange={pageVm.setActivaFilter}
+              onEstadoChange={pageVm.setEstadoFilter}
+              onPeriodoChange={pageVm.setPeriodoFilter}
+              onResetFilters={pageVm.resetFilters}
               onPageChange={pageVm.setPage}
               onViewInMap={handleViewInMap}
               onInspectRoute={handleInspectRouteCatalog}
               onOptimize={(idRuta) => mapVm.optimizeSequence(idRuta)}
               onAssignRoute={dispatchVm.openSingleAssignModal}
+              onReassignRoute={handleReassignRoute}
             />
           )}
 
@@ -247,6 +288,7 @@ export const ReadingRoutesPage: React.FC = () => {
         }}
         onOptimize={mapVm.optimizeSequence}
         onAssignRoute={dispatchVm.openSingleAssignModal}
+        onReassignRoute={handleReassignRoute}
       />
 
       {/* Bulk Morning Dispatch Modal */}
@@ -254,7 +296,11 @@ export const ReadingRoutesPage: React.FC = () => {
         isOpen={dispatchVm.isMorningDispatchModalOpen}
         onClose={() => dispatchVm.setIsMorningDispatchModalOpen(false)}
         routes={pageVm.allRoutes.length > 0 ? pageVm.allRoutes : pageVm.routes}
-        onDispatch={dispatchVm.executeMorningDispatch}
+        onDispatch={async (req, onProgress) => {
+          const res = await dispatchVm.executeMorningDispatch(req, onProgress);
+          void pageVm.refreshRoutes();
+          return res;
+        }}
       />
 
       {/* Single Route Assignment Modal */}
@@ -262,7 +308,11 @@ export const ReadingRoutesPage: React.FC = () => {
         isOpen={dispatchVm.isSingleAssignModalOpen}
         route={dispatchVm.selectedRouteForAssign}
         onClose={dispatchVm.closeSingleAssignModal}
-        onAssign={dispatchVm.executeSingleAssign}
+        onAssign={async (req) => {
+          const res = await dispatchVm.executeSingleAssign(req);
+          void pageVm.refreshRoutes();
+          return res;
+        }}
       />
 
       {/* Reassign Segment Modal */}
@@ -270,7 +320,11 @@ export const ReadingRoutesPage: React.FC = () => {
         isOpen={dispatchVm.isReassignModalOpen}
         assignment={dispatchVm.selectedAssignmentForReassign}
         onClose={dispatchVm.closeReassignModal}
-        onReassign={dispatchVm.executeReassignment}
+        onReassign={async (req) => {
+          const res = await dispatchVm.executeReassignment(req);
+          void pageVm.refreshRoutes();
+          return res;
+        }}
       />
 
       {/* Spatial Route Resolver Modal */}

@@ -5,6 +5,7 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { Search, RotateCcw } from 'lucide-react';
 import type { StateCatalogItem } from '../../domain/models/StateCatalog';
 import '../styles/StateHistoryAudit.css';
+import { DateRangePicker } from '@/shared/presentation/components/DatePicker';
 
 export interface StateHistoryFilterBarProps {
   catalog: StateCatalogItem[];
@@ -53,6 +54,7 @@ export const StateHistoryFilterBar: React.FC<StateHistoryFilterBarProps> = ({
             placeholder="Ej: 14-293"
             value={connectionId}
             onChange={(e) => onConnectionIdChange(e.target.value)}
+            size="small"
           />
         </div>
 
@@ -62,7 +64,9 @@ export const StateHistoryFilterBar: React.FC<StateHistoryFilterBarProps> = ({
             label="Estado Alcanzado"
             value={stateId === '' ? '' : String(stateId)}
             onChange={(e) =>
-              onStateIdChange(e.target.value === '' ? '' : Number(e.target.value))
+              onStateIdChange(
+                e.target.value === '' ? '' : Number(e.target.value)
+              )
             }
             options={[
               { value: '', label: 'Todos los Estados' },
@@ -71,6 +75,7 @@ export const StateHistoryFilterBar: React.FC<StateHistoryFilterBarProps> = ({
                 label: `${c.name} (${c.stateId})`
               }))
             ]}
+            size="small"
           />
         </div>
 
@@ -89,6 +94,7 @@ export const StateHistoryFilterBar: React.FC<StateHistoryFilterBarProps> = ({
               { value: 'INTEGRACION', label: 'Integración' },
               { value: 'MIGRACION', label: 'Migración' }
             ]}
+            size="small"
           />
         </div>
 
@@ -106,36 +112,32 @@ export const StateHistoryFilterBar: React.FC<StateHistoryFilterBarProps> = ({
               { value: 'true', label: 'Solo Reversos (Compensación)' },
               { value: 'false', label: 'Solo Transiciones Normales' }
             ]}
+            size="small"
           />
         </div>
 
         {/* Fecha Desde */}
         <div style={{ flex: '1 1 160px' }}>
-          <Input
-            label="Fecha Desde"
-            type="date"
-            value={startDate}
-            onChange={(e) => onStartDateChange(e.target.value)}
-          />
-        </div>
-
-        {/* Fecha Hasta */}
-        <div style={{ flex: '1 1 160px' }}>
-          <Input
-            label="Fecha Hasta"
-            type="date"
-            value={endDate}
-            onChange={(e) => onEndDateChange(e.target.value)}
+          <DateRangePicker
+            startDate={startDate}
+            endDate={endDate}
+            onChange={(start, end) => {
+              onStartDateChange(start);
+              onEndDateChange(end);
+            }}
+            size="small"
+            mode="date"
           />
         </div>
 
         {/* Botones de acción */}
-        <div style={{ display: 'flex', gap: '8px', paddingBottom: '2px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
           <Button
             variant="primary"
             leftIcon={<Search size={15} />}
             onClick={onSearch}
             disabled={isLoading}
+            size="xs"
           >
             Filtrar
           </Button>
@@ -144,6 +146,8 @@ export const StateHistoryFilterBar: React.FC<StateHistoryFilterBarProps> = ({
             leftIcon={<RotateCcw size={15} />}
             onClick={onReset}
             disabled={isLoading}
+            size="xs"
+            color="warning"
           >
             Limpiar
           </Button>

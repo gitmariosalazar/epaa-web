@@ -8,6 +8,7 @@ import {
   ArrowUpDown,
   Clock,
   UserPlus,
+  ArrowRightLeft,
   Layers,
   Timer,
   Map,
@@ -33,6 +34,7 @@ interface RouteDetailDrawerProps {
   onClose: () => void;
   onOptimize: (idRuta: number) => Promise<void>;
   onAssignRoute?: (route: ReadingRoute) => void;
+  onReassignRoute?: (route: ReadingRoute) => void;
 }
 
 export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
@@ -43,7 +45,8 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
   isOptimizing,
   onClose,
   onOptimize,
-  onAssignRoute
+  onAssignRoute,
+  onReassignRoute,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -191,22 +194,53 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
             />
           </Tooltip>
 
-          {onAssignRoute && (
-            <Tooltip
-              content="Asignar esta ruta a un lecturista"
-              followCursor={false}
-              themeColor="green"
-            >
-              <Button
-                variant="outline"
-                onClick={() => onAssignRoute(route)}
-                leftIcon={<UserPlus size={14} />}
-                size="xs"
-                color="green"
-                circle
-              />
-            </Tooltip>
-          )}
+          {!Boolean(
+            route.idAsignacion ||
+              route.idUsuarioAsignado ||
+              (route.estado &&
+                route.estado.toUpperCase() !== 'NO_ASIGNADA' &&
+                route.estado.toUpperCase() !== 'SIN_ASIGNAR'),
+          ) &&
+            onAssignRoute && (
+              <Tooltip
+                content="Asignar esta ruta a un lecturista"
+                followCursor={false}
+                themeColor="green"
+              >
+                <Button
+                  variant="outline"
+                  onClick={() => onAssignRoute(route)}
+                  leftIcon={<UserPlus size={14} />}
+                  size="xs"
+                  color="green"
+                  circle
+                />
+              </Tooltip>
+            )}
+
+          {Boolean(
+            route.idAsignacion ||
+              route.idUsuarioAsignado ||
+              (route.estado &&
+                route.estado.toUpperCase() !== 'NO_ASIGNADA' &&
+                route.estado.toUpperCase() !== 'SIN_ASIGNAR'),
+          ) &&
+            onReassignRoute && (
+              <Tooltip
+                content="Reasignar esta ruta a otro operador en campo"
+                followCursor={false}
+                themeColor="accent"
+              >
+                <Button
+                  variant="outline"
+                  onClick={() => onReassignRoute(route)}
+                  leftIcon={<ArrowRightLeft size={14} />}
+                  size="xs"
+                  color="primary"
+                  circle
+                />
+              </Tooltip>
+            )}
 
           <Tooltip
             followCursor={false}

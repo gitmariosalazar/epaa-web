@@ -16,6 +16,13 @@
   padding-bottom: 0.4rem;
 }
 
+.route-info-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
 .route-info-code {
   font-size: 0.9rem;
   font-weight: 700;
@@ -27,6 +34,27 @@
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: var(--text-main);
+}
+
+.route-info-assignee {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0.45rem;
+  background-color: var(--surface-hover);
+  border-radius: 4px;
+}
+
+.route-info-assignee-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.route-info-assignee-val {
+  color: var(--text-main);
+  font-weight: 600;
 }
 
 .route-info-stats {
@@ -52,6 +80,33 @@
 .route-info-stat-val {
   font-weight: 700;
   color: var(--text-main);
+}
+
+.route-info-progress-container {
+  margin-bottom: 0.6rem;
+}
+
+.route-info-progress-bar {
+  width: 100%;
+  height: 6px;
+  background-color: var(--border-color);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.route-info-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.route-info-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--text-muted);
 }
 
 .route-info-btn {

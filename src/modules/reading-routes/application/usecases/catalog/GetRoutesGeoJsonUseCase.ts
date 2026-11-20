@@ -8,7 +8,12 @@ export class GetRoutesGeoJsonUseCase {
     this.repository = repository;
   }
 
-  async execute(sector?: number, activa?: boolean): Promise<RouteGeoJsonFeatureCollection> {
-    return this.repository.getRoutesGeoJson(sector, activa);
+  async execute(
+    sector?: number,
+    activa?: boolean,
+    estado?: string,
+    periodo?: string,
+  ): Promise<RouteGeoJsonFeatureCollection> {
+    return this.repository.getRoutesGeoJson(sector, activa, estado, periodo);
   }
 }

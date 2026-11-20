@@ -36,6 +36,12 @@ export class ReadingRouteCatalogRepositoryImpl
     if (query?.activa !== undefined && query.activa !== null) {
       params.append('activa', String(query.activa));
     }
+    if (query?.estado !== undefined && query.estado !== null && query.estado !== '') {
+      params.append('estado', String(query.estado));
+    }
+    if (query?.periodo !== undefined && query.periodo !== null && query.periodo.trim() !== '') {
+      params.append('periodo', query.periodo.trim());
+    }
     if (query?.search) {
       params.append('search', query.search);
     }
@@ -50,7 +56,23 @@ export class ReadingRouteCatalogRepositoryImpl
     const response = await this.client.get<
       ApiResponse<PaginatedRoutesResponse>
     >(`/reading-routes${qs}`);
-    return response.data.data;
+
+    const rawData = response?.data;
+    const body = (rawData as any)?.data ?? rawData;
+    if (Array.isArray(body)) {
+      return {
+        items: body,
+        total: body.length,
+        page: query?.page ?? 1,
+        limit: query?.limit ?? body.length,
+      };
+    }
+    return (body || {
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+    }) as PaginatedRoutesResponse;
   }
 
   async getRouteById(id: number): Promise<ReadingRoute> {
@@ -63,6 +85,8 @@ export class ReadingRouteCatalogRepositoryImpl
   async getRoutesGeoJson(
     sectorId?: number,
     activa?: boolean,
+    estado?: string,
+    periodo?: string,
   ): Promise<RouteGeoJsonFeatureCollection> {
     const params = new URLSearchParams();
     if (sectorId !== undefined && sectorId !== null) {
@@ -71,21 +95,76 @@ export class ReadingRouteCatalogRepositoryImpl
     if (activa !== undefined && activa !== null) {
       params.append('activa', String(activa));
     }
+    if (estado !== undefined && estado !== null && estado !== '') {
+      params.append('estado', estado);
+    }
+    if (periodo !== undefined && periodo !== null && periodo.trim() !== '') {
+      params.append('periodo', periodo.trim());
+    }
 
     const qs = params.toString() ? `?${params.toString()}` : '';
     const response = await this.client.get<
       ApiResponse<RouteGeoJsonFeatureCollection>
     >(`/reading-routes/geojson${qs}`);
-    return response.data.data;
+
+    const rawData = response?.data;
+    const data = (rawData as any)?.data ?? rawData;
+    return (data || {
+      type: 'FeatureCollection',
+      features: [],
+    }) as RouteGeoJsonFeatureCollection;
   }
 
   async getRouteCentroids(
-    activaOnly: boolean = true,
+    filter?:
+      | boolean
+      | {
+          sectorId?: number;
+          activa?: boolean;
+          estado?: string;
+          periodo?: string;
+        },
   ): Promise<RouteCentroidFeatureCollection> {
+    const params = new URLSearchParams();
+
+    if (typeof filter === 'boolean') {
+      params.append('activaOnly', String(filter));
+    } else if (filter) {
+      if (filter.activa !== undefined && filter.activa !== null) {
+        params.append('activaOnly', String(filter.activa));
+      }
+      if (filter.sectorId !== undefined && filter.sectorId !== null) {
+        params.append('sectorId', String(filter.sectorId));
+      }
+      if (
+        filter.estado !== undefined &&
+        filter.estado !== null &&
+        filter.estado.trim() !== ''
+      ) {
+        params.append('estado', filter.estado.trim());
+      }
+      if (
+        filter.periodo !== undefined &&
+        filter.periodo !== null &&
+        filter.periodo.trim() !== ''
+      ) {
+        params.append('periodo', filter.periodo.trim());
+      }
+    } else {
+      params.append('activaOnly', 'true');
+    }
+
+    const qs = params.toString() ? `?${params.toString()}` : '';
     const response = await this.client.get<
       ApiResponse<RouteCentroidFeatureCollection>
-    >(`/reading-routes/centroids?activa=${activaOnly}`);
-    return response.data.data;
+    >(`/reading-routes/centroids${qs}`);
+
+    const rawData = response?.data;
+    const data = (rawData as any)?.data ?? rawData;
+    return (data || {
+      type: 'FeatureCollection',
+      features: [],
+    }) as RouteCentroidFeatureCollection;
   }
 
   async getRouteConnections(idRuta: number): Promise<RouteConnection[]> {

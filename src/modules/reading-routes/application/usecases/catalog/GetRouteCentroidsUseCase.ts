@@ -8,7 +8,16 @@ export class GetRouteCentroidsUseCase {
     this.repository = repository;
   }
 
-  async execute(activa?: boolean): Promise<RouteCentroidFeatureCollection> {
-    return this.repository.getRouteCentroids(activa);
+  async execute(
+    filter?:
+      | boolean
+      | {
+          sectorId?: number;
+          activa?: boolean;
+          estado?: string;
+          periodo?: string;
+        },
+  ): Promise<RouteCentroidFeatureCollection> {
+    return this.repository.getRouteCentroids(filter);
   }
 }

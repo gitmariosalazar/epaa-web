@@ -83,6 +83,17 @@
   background-color: #64748b;
 }
 
+.route-badge-no_asignada,
+.route-badge-sin_asignar {
+  background-color: rgba(148, 163, 184, 0.12);
+  color: #64748b;
+  border-color: rgba(148, 163, 184, 0.28);
+}
+.route-badge-no_asignada .route-badge-dot,
+.route-badge-sin_asignar .route-badge-dot {
+  background-color: #94a3b8;
+}
+
 /* Dark mode adjustments */
 :root.dark .route-badge-asignada,
 .dark .route-badge-asignada,

@@ -66,15 +66,110 @@
   flex-wrap: wrap;
 }
 
+.route-catalog-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: var(--surface-hover);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.route-catalog-filter-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.route-catalog-filter-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
 .route-catalog-select {
-  padding: 0.55rem 0.85rem;
+  padding: 0.45rem 0.75rem;
   border-radius: 6px;
   border: 1px solid var(--border-color);
   background-color: var(--surface);
   color: var(--text-main);
-  font-size: 0.85rem;
+  font-size: 0.825rem;
   outline: none;
   cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.route-catalog-select:focus {
+  border-color: var(--accent);
+}
+
+.route-catalog-reset-btn {
+  margin-left: 0.25rem;
+}
+
+.route-catalog-reassign-btn {
+  color: var(--accent);
+  border-color: rgba(37, 99, 235, 0.35);
+  background-color: rgba(37, 99, 235, 0.05);
+}
+
+.route-catalog-reassign-btn:hover {
+  background-color: rgba(37, 99, 235, 0.12);
+  border-color: var(--accent);
+}
+
+.route-catalog-operator-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.825rem;
+  color: var(--text-main);
+  max-width: 140px;
+}
+
+.route-catalog-operator-icon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.route-catalog-operator-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+.route-catalog-unassigned-dash {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.route-catalog-progress-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 90px;
+}
+
+.route-catalog-progress-bar-bg {
+  width: 100%;
+  height: 5px;
+  background-color: var(--border-color);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.route-catalog-progress-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.route-catalog-progress-text {
+  font-size: 0.725rem;
+  color: var(--text-secondary);
+  font-family: monospace;
 }
 
 .route-catalog-table-wrapper {

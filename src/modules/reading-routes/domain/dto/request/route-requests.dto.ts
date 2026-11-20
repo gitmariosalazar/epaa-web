@@ -48,9 +48,20 @@ export interface OptimizeRouteSequenceRequest {
   acometidaInicio?: string;
 }
 
+export type RouteCatalogStatusFilter =
+  | 'TODOS'
+  | 'NO_ASIGNADA'
+  | 'ASIGNADA'
+  | 'EN_PROCESO'
+  | 'PAUSADA'
+  | 'COMPLETADA'
+  | 'REASIGNADA';
+
 export interface FindReadingRoutesQuery {
   sectorId?: number;
   activa?: boolean;
+  estado?: RouteCatalogStatusFilter | string;
+  periodo?: string;
   search?: string;
   page?: number;
   limit?: number;

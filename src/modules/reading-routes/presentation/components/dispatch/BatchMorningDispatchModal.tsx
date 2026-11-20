@@ -5,18 +5,23 @@ import { useReadingRoutesContext } from '../../context/ReadingRoutesContext';
 import type { User } from '@/modules/users/domain/models/User';
 import type { ReadingRoute } from '../../../domain/models/ReadingRoute';
 import type { BatchMorningDispatchRequest } from '../../../domain/dto/request/route-requests.dto';
+import type { BatchDispatchProgress } from '../../../domain/dto/response/route-responses.dto';
 import { RouteBadge } from '../common/RouteBadge';
 import { BatchDispatchMapPreview } from './BatchDispatchMapPreview';
 import './BatchMorningDispatchModal.css';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import { Select } from '@/shared/presentation/components/Input/Select';
+import { sectors as DEFAULT_SECTORS } from '@/shared/utils/listSectors';
 
 export interface BatchMorningDispatchModalProps {
   isOpen: boolean;
   onClose: () => void;
   routes: ReadingRoute[];
-  onDispatch: (request: BatchMorningDispatchRequest) => Promise<unknown>;
+  onDispatch: (
+    request: BatchMorningDispatchRequest,
+    onProgress?: (progress: BatchDispatchProgress) => void,
+  ) => Promise<unknown>;
 }
 
 /**
@@ -49,7 +54,14 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
   const [baseActiveCountByUser, setBaseActiveCountByUser] = useState<Record<string, number>>({});
   const [isLoadingOperators, setIsLoadingOperators] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [dispatchProgress, setDispatchProgress] = useState<BatchDispatchProgress | null>(null);
   const [fallbackRoutes, setFallbackRoutes] = useState<ReadingRoute[]>([]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setDispatchProgress(null);
+    }
+  }, [isOpen]);
 
   // Estado para la ruta actualmente enfocada en el mapa lateral
   const [selectedRouteIdForMap, setSelectedRouteIdForMap] = useState<number | null>(null);
@@ -136,6 +148,18 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
     };
   }, [isOpen, periodo, getUsersUseCase, getLiveTrackingAssignmentsUseCase]);
 
+  // Sectores estándar (1-40) combinados con los sectores de las rutas cargadas
+  const sectors = useMemo(() => {
+    const set = new Set<number>(DEFAULT_SECTORS.map((s) => s.id));
+    (effectiveRoutes || []).forEach((r) => {
+      const sec = r?.sectorId ?? r?.sector;
+      if (typeof sec === 'number' && Number.isFinite(sec)) {
+        set.add(sec);
+      }
+    });
+    return Array.from(set).sort((a, b) => a - b);
+  }, [effectiveRoutes]);
+
   // Filter routes based on selectedSector supporting both activa/activo and sectorId/sector
   const filteredRoutes = useMemo(() => {
     const isActiva = (r: ReadingRoute) => (r.activa ?? r.activo ?? true) === true;
@@ -152,31 +176,34 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
     return filteredRoutes.reduce((acc, r) => acc + (r.cantidadAcometidas || 0), 0);
   }, [filteredRoutes]);
 
-  // Auto assign (Round-Robin con límite estricto de máx 3 rutas activas por lecturista)
-  const handleAutoAssign = () => {
+  // Auto assign balanceado (Least-Loaded First):
+  // Si fullDispatch=true, distribuye TODAS las rutas equitativamente entre los operadores cargados.
+  // Si fullDispatch=false, distribuye respetando un límite recomendado de 3 rutas por lecturista.
+  const handleAutoAssign = (fullDispatch: boolean = true) => {
     if (operators.length === 0 || filteredRoutes.length === 0) return;
     const newAssignments: Record<number, string> = {};
     const trackingCounts = { ...baseActiveCountByUser };
 
-    let opIdx = 0;
     for (const route of filteredRoutes) {
-      let assigned = false;
-      for (let attempt = 0; attempt < operators.length; attempt++) {
-        const candidate = operators[(opIdx + attempt) % operators.length];
-        const currentCount = trackingCounts[candidate.userId] || 0;
-        if (currentCount < 3) {
-          newAssignments[route.idRuta] = candidate.userId;
-          trackingCounts[candidate.userId] = currentCount + 1;
-          opIdx = (opIdx + attempt + 1) % operators.length;
-          assigned = true;
-          break;
-        }
-      }
-      if (!assigned) {
-        // Todos los operadores disponibles han alcanzado su capacidad máxima (3)
+      // Ordenar operadores por menor carga acumulada (Least-Loaded First)
+      const sortedOperators = [...operators].sort((a, b) => {
+        const countA = trackingCounts[a.userId] || 0;
+        const countB = trackingCounts[b.userId] || 0;
+        return countA - countB;
+      });
+
+      const bestCandidate = sortedOperators[0];
+      const currentCount = trackingCounts[bestCandidate.userId] || 0;
+
+      if (!fullDispatch && currentCount >= 3) {
+        // Se alcanzó el umbral recomendado para todos los operadores
         break;
       }
+
+      newAssignments[route.idRuta] = bestCandidate.userId;
+      trackingCounts[bestCandidate.userId] = currentCount + 1;
     }
+
     setRouteAssignments(newAssignments);
   };
 
@@ -193,18 +220,20 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
   };
 
   const handleToggleAllRoutes = () => {
-    const allSelected = filteredRoutes.every(r => !!routeAssignments[r.idRuta]);
+    const allSelected =
+      filteredRoutes.length > 0 &&
+      filteredRoutes.every((r) => !!routeAssignments[r.idRuta]);
     if (allSelected) {
       setRouteAssignments({});
     } else {
-      handleAutoAssign();
+      handleAutoAssign(true); // Asigna TODAS las rutas disponibles balanceando la carga
     }
   };
 
   const totalAssigned = Object.keys(routeAssignments).length;
 
   const handleSubmit = async () => {
-    if (totalAssigned === 0) return;
+    if (totalAssigned === 0 || isSubmitting) return;
 
     const asignaciones = Object.entries(routeAssignments).map(([rId, uId]) => ({
       rutaId: Number(rId),
@@ -212,15 +241,31 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
     }));
 
     setIsSubmitting(true);
+    setDispatchProgress({
+      completed: 0,
+      total: asignaciones.length,
+      currentChunk: 0,
+      totalChunks: Math.ceil(asignaciones.length / 6),
+      percent: 0,
+    });
+
     try {
-      await onDispatch({
-        periodo,
-        sector: selectedSector,
-        fechaProgramada,
-        asignaciones,
-      });
+      await onDispatch(
+        {
+          periodo,
+          sector: selectedSector,
+          fechaProgramada,
+          asignaciones,
+        },
+        (progress) => {
+          setDispatchProgress(progress);
+        },
+      );
+    } catch (err: unknown) {
+      console.error('Error al despachar lote matutino:', err);
     } finally {
       setIsSubmitting(false);
+      setDispatchProgress(null);
     }
   };
 
@@ -280,10 +325,11 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
                   }
                 >
                   <option value="">Todos los sectores</option>
-                  <option value="1">Sector 1 (Centro)</option>
-                  <option value="2">Sector 2 (Andrade Marín)</option>
-                  <option value="3">Sector 3 (San Roque)</option>
-                  <option value="4">Sector 4 (Chaltura/Natabuela)</option>
+                  {sectors.map((sec) => (
+                    <option key={sec} value={sec}>
+                      Sector {sec}
+                    </option>
+                  ))}
                 </Select>
               </div>
             </div>
@@ -328,7 +374,7 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
                 </div>
 
                 <Button
-                  onClick={handleAutoAssign}
+                  onClick={() => handleAutoAssign(true)}
                   disabled={operators.length === 0}
                   variant="ghost"
                   size="xs"
@@ -408,17 +454,16 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
                           >
                             <option value="">-- Sin asignar --</option>
                             {operators.map(op => {
-                              const isCurrentlyAssigned = assignedUser === op.userId;
                               const count = currentTotalAssignedByUser[op.userId] || 0;
-                              const isMax = count >= 3 && !isCurrentlyAssigned;
+                              const isHeavy = count >= 4;
                               const name =
                                 op.firstName || op.lastName
                                   ? `${op.firstName || ''} ${op.lastName || ''}`.trim()
                                   : op.username;
 
                               return (
-                                <option key={op.userId} value={op.userId} disabled={isMax}>
-                                  {name} ({count}/3){isMax ? ' — Límite' : ''}
+                                <option key={op.userId} value={op.userId}>
+                                  {name} ({count} ruta{count === 1 ? '' : 's'}){isHeavy ? ' — Carga alta' : ''}
                                 </option>
                               );
                             })}
@@ -446,11 +491,32 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
 
         {/* Footer */}
         <div className="morning-dispatch-footer">
-          <div className="morning-dispatch-summary">
-            <strong>{totalAssigned}</strong> de {filteredRoutes.length} rutas seleccionadas
-            para despacho
-          </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          {dispatchProgress ? (
+            <div className="morning-dispatch-progress-container">
+              <div className="morning-dispatch-progress-text">
+                <span>
+                  Despachando lote {dispatchProgress.currentChunk} de{' '}
+                  {dispatchProgress.totalChunks} ({dispatchProgress.completed} de{' '}
+                  {dispatchProgress.total} rutas)...
+                </span>
+                <span className="morning-dispatch-progress-percentage">
+                  {dispatchProgress.percent}%
+                </span>
+              </div>
+              <div className="morning-dispatch-progress-track">
+                <div
+                  className="morning-dispatch-progress-bar"
+                  style={{ width: `${dispatchProgress.percent}%` }}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="morning-dispatch-summary">
+              <strong>{totalAssigned}</strong> de {filteredRoutes.length} rutas seleccionadas
+              para despacho
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
             <Button variant="ghost" onClick={onClose} disabled={isSubmitting} size="xs">
               Cancelar
             </Button>
