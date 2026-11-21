@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import {
   X,
   Zap,
-  Hash,
   MapPin,
   Search,
   ArrowUpDown,
@@ -22,8 +21,9 @@ import { Button } from '@/shared/presentation/components/Button/Button';
 import { Input } from '@/shared/presentation/components/Input/Input';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
-import { FaTachometerAlt } from 'react-icons/fa';
+import { FaTachometerAlt, FaUser } from 'react-icons/fa';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
+import { PiSealWarningFill } from 'react-icons/pi';
 
 interface RouteDetailDrawerProps {
   isOpen: boolean;
@@ -46,7 +46,7 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
   onClose,
   onOptimize,
   onAssignRoute,
-  onReassignRoute,
+  onReassignRoute
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -83,6 +83,8 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
 
   if (!isOpen || !route) return null;
 
+  console.log('Filtered connections:', route);
+
   return (
     <div className="route-drawer-overlay" onClick={onClose}>
       <div
@@ -90,44 +92,66 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="route-drawer-header">
-          <div className="route-drawer-title-group">
-            <span className="route-drawer-code-badge">
-              <Hash size={14} strokeWidth={2.5} />
-              {route.codigo}
-            </span>
-
-            <div className="route-drawer-meta-row">
-              <RouteBadge sector={route.sector} />
+        <div className="route-side-panel-header">
+          <div className="route-side-panel-title-group">
+            <div className="route-side-panel-code-row">
+              <span className="route-side-panel-code">{route.codigo}</span>
+              <RouteBadge sector={route.sectorId} />
               <span
-                className={`status-pill ${
-                  route.activo ? 'status-active' : 'status-inactive'
-                }`}
+                className={`status-pill ${route.activa ? 'status-active' : 'status-inactive'}`}
               >
-                {route.activo ? 'Activa' : 'Inactiva'}
+                {route.activa === true ? 'Activa' : 'Inactiva'}
               </span>
             </div>
-
-            <h2 className="route-drawer-name">{route.nombreRuta}</h2>
+            <h3 className="route-side-panel-name">{route.nombreRuta}</h3>
           </div>
+          <Tooltip
+            content="Cerrar panel de ruta"
+            position="left"
+            themeColor="red"
+            followCursor={false}
+          >
+            <Button
+              onClick={onClose}
+              aria-label="Cerrar panel de ruta"
+              leftIcon={<X size={15} />}
+              circle
+              color="red"
+              variant="danger"
+              size="xs"
+            />
+          </Tooltip>
+        </div>
 
-          <div className="close-route-detail-btn">
+        <div className="route-connection-info">
+          <Tooltip
+            content={`${route.descripcion}`}
+            followCursor={false}
+            themeColor="gray"
+          >
+            <span className="route-connection-seq route-drawer-seq">
+              {`${route.nombre}`}
+            </span>
+          </Tooltip>
+          <span className="route-drawer-meter">
             <Tooltip
-              content="Cerrar panel de detalle de ruta"
-              themeColor="error"
+              content={
+                route.usuario
+                  ? `${route.nombreUsuario}`
+                  : 'Esta ruta no tiene usuario asignado'
+              }
               followCursor={false}
+              themeColor="gray"
             >
-              <Button
-                variant="dashed"
-                onClick={onClose}
-                aria-label="Cerrar panel"
-                leftIcon={<X size={18} />}
+              <ColorChip
+                label={route.usuario ? `${route.usuario}` : 'Sin Asignar'}
+                variant="soft"
                 size="xs"
-                circle
-                color="error"
+                color={route.usuario ? `${route.colorIdentificador}` : 'red'}
+                icon={route.usuario ? <FaUser /> : <PiSealWarningFill />}
               />
             </Tooltip>
-          </div>
+          </span>
         </div>
 
         {/* KPIs */}
@@ -196,10 +220,10 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
 
           {!Boolean(
             route.idAsignacion ||
-              route.idUsuarioAsignado ||
-              (route.estado &&
-                route.estado.toUpperCase() !== 'NO_ASIGNADA' &&
-                route.estado.toUpperCase() !== 'SIN_ASIGNAR'),
+            route.idUsuarioAsignado ||
+            (route.estado &&
+              route.estado.toUpperCase() !== 'NO_ASIGNADA' &&
+              route.estado.toUpperCase() !== 'SIN_ASIGNAR')
           ) &&
             onAssignRoute && (
               <Tooltip
@@ -220,10 +244,10 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
 
           {Boolean(
             route.idAsignacion ||
-              route.idUsuarioAsignado ||
-              (route.estado &&
-                route.estado.toUpperCase() !== 'NO_ASIGNADA' &&
-                route.estado.toUpperCase() !== 'SIN_ASIGNAR'),
+            route.idUsuarioAsignado ||
+            (route.estado &&
+              route.estado.toUpperCase() !== 'NO_ASIGNADA' &&
+              route.estado.toUpperCase() !== 'SIN_ASIGNAR')
           ) &&
             onReassignRoute && (
               <Tooltip

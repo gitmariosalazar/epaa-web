@@ -186,14 +186,15 @@
 .reading-route-map-loading-overlay {
   position: absolute;
   inset: 0;
-  background-color: rgba(var(--surface-rgb, 255, 255, 255), 0.7);
-  backdrop-filter: blur(3px);
+  background-color: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(4px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   gap: 0.75rem;
+  color: var(--text-main);
 }
 
 .reading-route-map-loading-spinner {
@@ -247,4 +248,68 @@
   border: 2px solid #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
   z-index: 2;
+}
+
+/* Google Maps InfoWindow Theme Adaptation (Scoped) */
+.reading-route-map-container .gm-style .gm-style-iw-c {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+  border-radius: 12px !important;
+  padding: 0 !important;
+}
+
+.reading-route-map-container .gm-style-iw-tc::after {
+  background: var(--surface) !important;
+}
+
+.reading-route-map-container .gm-style .gm-style-iw-d {
+  overflow: auto !important;
+  padding: 0.5rem !important;
+}
+
+.dark .reading-route-map-container .gm-ui-hover-effect {
+  filter: invert(1);
+}
+
+/* InfoWindow de Acometida en Mapa */
+.reading-route-connection-infowindow {
+  padding: 0.4rem 0.25rem;
+  max-width: 260px;
+  font-size: 0.8rem;
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.reading-route-connection-infowindow-seq {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background-color: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.7rem;
+  width: fit-content;
+}
+
+.reading-route-connection-infowindow-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+.reading-route-connection-infowindow-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.reading-route-connection-infowindow-row strong {
+  color: var(--text-main);
 }

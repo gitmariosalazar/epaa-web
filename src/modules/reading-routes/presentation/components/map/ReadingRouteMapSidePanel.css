@@ -146,6 +146,7 @@
   padding: 0.5rem 0.5rem;
   border-bottom: 1px solid var(--border-color);
   background-color: var(--surface-hover);
+  border-bottom: 1px solid var(--border-hover);
 }
 
 .route-side-panel-actions {
@@ -173,6 +174,8 @@
   justify-content: space-between;
   font-size: 0.75rem;
   color: var(--text-muted);
+  margin: 0.25rem 0;
+  margin-bottom: -0.25rem;
 }
 .route-connections-header-info span {
   margin: 5px !important;
@@ -182,7 +185,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
-  font-size: 0.7rem;
+  font-size: 0.975rem;
   color: var(--text-muted);
 }
 
@@ -191,7 +194,7 @@
   border: 1px solid var(--border-color);
   border-radius: 4px;
   padding: 0.05rem 0.35rem;
-  font-size: 0.65rem;
+  font-size: 0.95rem;
   font-family: inherit;
   font-weight: 600;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
@@ -239,10 +242,16 @@
   border-radius: 0 4px 4px 0;
 }
 
-.route-connection-header {
+.route-connection-header,
+.route-connection-info {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.route-connection-info {
+  padding: 0rem 0.5rem;
+  margin-top: 0.15rem;
 }
 
 .route-connection-seq {
@@ -281,4 +290,34 @@
   font-size: 0.725rem;
   color: var(--text-muted);
   border-top: 1px dashed var(--border-color);
+}
+
+/* Botón para alternar visibilidad de puntos de acometidas en el mapa */
+.route-points-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  color: var(--text-secondary);
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.route-points-toggle-btn:hover {
+  background-color: var(--surface-hover);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.route-points-toggle-btn.active {
+  background-color: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
 }

@@ -209,10 +209,12 @@ export const RouteCatalogTable: React.FC<RouteCatalogTableProps> = ({
         accessor: (r: ReadingRoute) => (
           <span
             className={`status-pill ${
-              (r.activa ?? r.activo) ? 'status-active' : 'status-inactive'
+              (r.activa === true)
+                ? 'status-active'
+                : 'status-inactive'
             }`}
           >
-            {(r.activa ?? r.activo) ? 'Activa' : 'Inactiva'}
+            {(r.activa === true) ? 'Activa' : 'Inactiva'}
           </span>
         ),
         style: { width: '90px', textAlign: 'center' }

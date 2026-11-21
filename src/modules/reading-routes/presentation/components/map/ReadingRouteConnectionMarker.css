@@ -1,0 +1,44 @@
+/* Marcador cartográfico para Acometidas de la ruta seleccionada */
+.reading-route-connection-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 4px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent, #0284c7), #0369a1);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition:
+    transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.reading-route-connection-pin:hover {
+  transform: scale(1.22) translateY(-2px);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.55);
+  z-index: 100 !important;
+}
+
+.reading-route-connection-pin.is-selected {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  transform: scale(1.32) translateY(-3px);
+  border-color: #ffffff;
+  box-shadow:
+    0 0 0 3px rgba(239, 68, 68, 0.4),
+    0 4px 16px rgba(0, 0, 0, 0.45);
+  z-index: 120 !important;
+}
+
+.reading-route-connection-pin-seq {
+  line-height: 1;
+  pointer-events: none;
+}

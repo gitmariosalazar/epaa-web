@@ -6,11 +6,11 @@ import type { RouteAssignment } from '../../domain/models/RouteAssignment';
 import type {
   AssignSingleRouteRequest,
   BatchMorningDispatchRequest,
-  ReassignRouteSegmentRequest,
+  ReassignRouteSegmentRequest
 } from '../../domain/dto/request/route-requests.dto';
 import type {
   BatchDispatchResponse,
-  ReassignSegmentResponse,
+  ReassignSegmentResponse
 } from '../../domain/dto/response/route-responses.dto';
 
 export class RouteDispatchRepositoryImpl implements RouteDispatchRepository {
@@ -21,7 +21,7 @@ export class RouteDispatchRepositoryImpl implements RouteDispatchRepository {
   }
 
   async executeBatchMorningDispatch(
-    request: BatchMorningDispatchRequest,
+    request: BatchMorningDispatchRequest
   ): Promise<BatchDispatchResponse> {
     const lecturistaIds =
       request.lecturistaIds && request.lecturistaIds.length > 0
@@ -30,8 +30,8 @@ export class RouteDispatchRepositoryImpl implements RouteDispatchRepository {
             new Set(
               (request.asignaciones || [])
                 .map((a) => a.lecturistaId)
-                .filter(Boolean),
-            ),
+                .filter(Boolean)
+            )
           );
 
     const sectorOrZona = request.zonaId ?? request.sectorId ?? request.sector;
@@ -40,7 +40,8 @@ export class RouteDispatchRepositoryImpl implements RouteDispatchRepository {
       periodo: request.periodo,
       fechaProgramada: request.fechaProgramada,
       lecturistaIds,
-      observaciones: request.observaciones || 'Despacho matutino masivo',
+      asignaciones: request.asignaciones || [], // <-- Garantizar envío de pares (rutaId, lecturistaId)
+      observaciones: request.observaciones || 'Despacho matutino masivo'
     };
 
     if (sectorOrZona !== undefined && sectorOrZona !== null) {
@@ -68,18 +69,18 @@ export class RouteDispatchRepositoryImpl implements RouteDispatchRepository {
       totalRutasAsignadas: request.asignaciones?.length ?? 0,
       totalAcometidasDespachadas: 0,
       periodo: request.periodo,
-      rutasDespachadas: [],
+      rutasDespachadas: []
     }) as BatchDispatchResponse;
   }
 
   async assignSingleRoute(
-    request: AssignSingleRouteRequest,
+    request: AssignSingleRouteRequest
   ): Promise<{ idAsignacion: number; message: string }> {
     const payload = {
       rutaId: Number(request.rutaId),
       usuarioId: String(request.usuarioId),
       periodo: request.periodo,
-      fechaProgramada: request.fechaProgramada,
+      fechaProgramada: request.fechaProgramada
     };
     const response = await this.client.post<
       ApiResponse<{ idAsignacion: number; message: string }>
@@ -88,18 +89,18 @@ export class RouteDispatchRepositoryImpl implements RouteDispatchRepository {
   }
 
   async reassignRouteSegment(
-    request: ReassignRouteSegmentRequest,
+    request: ReassignRouteSegmentRequest
   ): Promise<ReassignSegmentResponse> {
     const asignacionId = Number(
-      request.asignacionId ?? request.idAsignacionOrigen,
+      request.asignacionId ?? request.idAsignacionOrigen
     );
     const nuevoUsuarioId = String(
-      request.nuevoUsuarioId ?? request.nuevoLecturistaId,
+      request.nuevoUsuarioId ?? request.nuevoLecturistaId
     );
     const payload = {
       asignacionId,
       nuevoUsuarioId,
-      motivo: request.motivo,
+      motivo: request.motivo
     };
     const response = await this.client.post<
       ApiResponse<ReassignSegmentResponse>
@@ -109,7 +110,7 @@ export class RouteDispatchRepositoryImpl implements RouteDispatchRepository {
 
   async getLiveTracking(
     periodo?: string,
-    fecha?: string,
+    fecha?: string
   ): Promise<RouteAssignment[]> {
     const params = new URLSearchParams();
     if (periodo) {
@@ -120,7 +121,7 @@ export class RouteDispatchRepositoryImpl implements RouteDispatchRepository {
     }
     const qs = params.toString() ? `?${params.toString()}` : '';
     const response = await this.client.get<ApiResponse<RouteAssignment[]>>(
-      `/route-assignments/live-tracking${qs}`,
+      `/route-assignments/live-tracking${qs}`
     );
     const rawData = response?.data;
     const body = (rawData as any)?.data ?? rawData;
@@ -129,7 +130,7 @@ export class RouteDispatchRepositoryImpl implements RouteDispatchRepository {
 
   async cancelAssignment(
     idAsignacion: number,
-    motivo?: string,
+    motivo?: string
   ): Promise<{ success: boolean; message: string }> {
     const response = await this.client.put<
       ApiResponse<{ success: boolean; message: string }>
@@ -139,7 +140,7 @@ export class RouteDispatchRepositoryImpl implements RouteDispatchRepository {
 
   async resumeAssignment(
     idAsignacion: number,
-    motivo?: string,
+    motivo?: string
   ): Promise<{ success: boolean; message: string; nuevoEstado?: string }> {
     const response = await this.client.put<
       ApiResponse<{ success: boolean; message: string; nuevoEstado?: string }>

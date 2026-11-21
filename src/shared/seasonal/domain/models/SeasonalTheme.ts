@@ -35,7 +35,7 @@ export interface SeasonalConfig {
  * Switch global de compilación: ponlo en false si deseas apagarlo
  * por completo de raíz en toda la aplicación.
  */
-export const GLOBAL_SEASONAL_MASTER_SWITCH = false;
+export const GLOBAL_SEASONAL_MASTER_SWITCH = true;
 
 /**
  * Evalúa si la fecha actual corresponde a la temporada navideña

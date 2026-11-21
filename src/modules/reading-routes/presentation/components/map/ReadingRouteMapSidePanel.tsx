@@ -15,7 +15,8 @@ import {
   Navigation,
   UserPlus,
   Home,
-  Gauge
+  Gauge,
+  ArrowRightLeft
 } from 'lucide-react';
 import type { ReadingRoute } from '../../../domain/models/ReadingRoute';
 import type { RouteConnection } from '../../../domain/models/RouteConnection';
@@ -25,8 +26,10 @@ import { Input } from '@/shared/presentation/components/Input/Input';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { ColorChip } from '@/shared/presentation/components/chip/ColorChip';
-import { FaTachometerAlt } from 'react-icons/fa';
+import { FaTachometerAlt, FaUser } from 'react-icons/fa';
 import { Avatar } from '@/shared/presentation/components/Avatar/Avatar';
+import { RiEyeFill, RiEyeOffFill } from 'react-icons/ri';
+import { PiSealWarningFill } from 'react-icons/pi';
 
 interface ReadingRouteMapSidePanelProps {
   route: ReadingRoute | null;
@@ -37,6 +40,11 @@ interface ReadingRouteMapSidePanelProps {
   onOptimize: (idRuta: number) => Promise<void>;
   onFocusConnection?: (lat: number, lng: number) => void;
   onAssignRoute?: (route: ReadingRoute) => void;
+  onReassignRoute?: (route: ReadingRoute) => void;
+  showConnectionPoints?: boolean;
+  onToggleConnectionPoints?: () => void;
+  selectedConnectionId?: number | string | null;
+  onSelectConnection?: (connection: RouteConnection) => void;
 }
 
 const getValidCoords = (
@@ -67,12 +75,31 @@ export const ReadingRouteMapSidePanel: React.FC<
   onClose,
   onOptimize,
   onFocusConnection,
-  onAssignRoute
+  onAssignRoute,
+  onReassignRoute,
+  showConnectionPoints,
+  onToggleConnectionPoints,
+  selectedConnectionId,
+  onSelectConnection
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [internalEnablePoints, setInternalEnablePoints] = useState(true);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const isPointsVisible =
+    showConnectionPoints !== undefined
+      ? showConnectionPoints
+      : internalEnablePoints;
+
+  const handleTogglePoints = useCallback(() => {
+    if (onToggleConnectionPoints) {
+      onToggleConnectionPoints();
+    } else {
+      setInternalEnablePoints((prev) => !prev);
+    }
+  }, [onToggleConnectionPoints]);
 
   const filteredConnections = useMemo(() => {
     if (!connections) return [];
@@ -121,10 +148,27 @@ export const ReadingRouteMapSidePanel: React.FC<
         if (coords && onFocusConnection) {
           onFocusConnection(coords.lat, coords.lng);
         }
+        if (onSelectConnection) {
+          onSelectConnection(conn);
+        }
       }
     },
-    [filteredConnections, onFocusConnection]
+    [filteredConnections, onFocusConnection, onSelectConnection]
   );
+
+  // Sync external selection from map to side panel
+  useEffect(() => {
+    if (selectedConnectionId !== undefined && selectedConnectionId !== null) {
+      const idx = filteredConnections.findIndex(
+        (c) =>
+          c.idRutaAcometida === selectedConnectionId ||
+          c.acometidaId === selectedConnectionId
+      );
+      if (idx !== -1 && idx !== selectedIndex) {
+        setSelectedIndex(idx);
+      }
+    }
+  }, [selectedConnectionId, filteredConnections, selectedIndex]);
 
   // Auto-scroll selected card into view smoothly
   useEffect(() => {
@@ -157,6 +201,9 @@ export const ReadingRouteMapSidePanel: React.FC<
             if (coords && onFocusConnection) {
               onFocusConnection(coords.lat, coords.lng);
             }
+            if (onSelectConnection) {
+              onSelectConnection(conn);
+            }
           }
           return next;
         });
@@ -170,6 +217,9 @@ export const ReadingRouteMapSidePanel: React.FC<
             if (coords && onFocusConnection) {
               onFocusConnection(coords.lat, coords.lng);
             }
+            if (onSelectConnection) {
+              onSelectConnection(conn);
+            }
           }
           return next;
         });
@@ -180,9 +230,21 @@ export const ReadingRouteMapSidePanel: React.FC<
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [filteredConnections, onFocusConnection]);
+  }, [filteredConnections, onFocusConnection, onSelectConnection]);
 
   if (!route) return null;
+
+  const isAssigned = Boolean(
+    route.idAsignacion ||
+    route.idUsuarioAsignado ||
+    (route.estado &&
+      route.estado.toUpperCase() !== 'NO_ASIGNADA' &&
+      route.estado.toUpperCase() !== 'SIN_ASIGNAR')
+  );
+
+  const isCompleted: boolean = route.estado === 'COMPLETADA';
+
+  console.log('Route:', route);
 
   return (
     <aside
@@ -193,12 +255,12 @@ export const ReadingRouteMapSidePanel: React.FC<
       <div className="route-side-panel-header">
         <div className="route-side-panel-title-group">
           <div className="route-side-panel-code-row">
-            <span className="route-side-panel-code">{route.codigoRuta}</span>
-            <RouteBadge sector={route.sector} />
+            <span className="route-side-panel-code">{route.codigo}</span>
+            <RouteBadge sector={route.sectorId} />
             <span
-              className={`status-pill ${route.activo ? 'status-active' : 'status-inactive'}`}
+              className={`status-pill ${route.activa ? 'status-active' : 'status-inactive'}`}
             >
-              {route.activo ? 'Activa' : 'Inactiva'}
+              {route.activa === true ? 'Activa' : 'Inactiva'}
             </span>
           </div>
           <h3 className="route-side-panel-name">{route.nombreRuta}</h3>
@@ -219,6 +281,37 @@ export const ReadingRouteMapSidePanel: React.FC<
             size="xs"
           />
         </Tooltip>
+      </div>
+
+      <div className="route-connection-info">
+        <Tooltip
+          content={`${route.descripcion}`}
+          followCursor={false}
+          themeColor="gray"
+        >
+          <span className="route-connection-seq route-drawer-seq">
+            {`${route.nombre}`}
+          </span>
+        </Tooltip>
+        <span className="route-drawer-meter">
+          <Tooltip
+            content={
+              route.usuario
+                ? `${route.nombreUsuario}`
+                : 'Esta ruta no tiene usuario asignado'
+            }
+            followCursor={false}
+            themeColor="gray"
+          >
+            <ColorChip
+              label={route.usuario ? `${route.usuario}` : 'Sin Asignar'}
+              variant="soft"
+              size="xs"
+              color={route.usuario ? `${route.colorIdentificador}` : 'red'}
+              icon={route.usuario ? <FaUser /> : <PiSealWarningFill />}
+            />
+          </Tooltip>
+        </span>
       </div>
 
       {/* Metrics Bar */}
@@ -269,20 +362,38 @@ export const ReadingRouteMapSidePanel: React.FC<
                 size="small"
               />
             </div>
-            {onAssignRoute && (
+            {!isAssigned && onAssignRoute && (
               <Tooltip
-                content="Asignar ruta a un lecturista"
-                themeColor="green"
+                content="Asignar esta ruta a un lecturista"
                 followCursor={false}
+                themeColor="info"
               >
                 <Button
-                  onClick={() => onAssignRoute(route)}
-                  leftIcon={<UserPlus size={15} />}
-                  circle
-                  color="green"
                   variant="dashed"
+                  onClick={() => onAssignRoute(route)}
+                  leftIcon={<UserPlus size={13} />}
                   size="xs"
-                />
+                  circle
+                  color="info"
+                  disabled={isCompleted}
+                ></Button>
+              </Tooltip>
+            )}
+            {isAssigned && onReassignRoute && (
+              <Tooltip
+                content="Reasignar esta ruta a otro operador en campo"
+                followCursor={false}
+                themeColor="amber"
+              >
+                <Button
+                  variant="dashed"
+                  onClick={() => onReassignRoute(route)}
+                  leftIcon={<ArrowRightLeft size={13} />}
+                  size="xs"
+                  color="amber"
+                  circle
+                  disabled={isCompleted}
+                ></Button>
               </Tooltip>
             )}
             <Tooltip
@@ -326,6 +437,36 @@ export const ReadingRouteMapSidePanel: React.FC<
               Mostrando {filteredConnections.length} de {connections.length}{' '}
               acometidas
             </span>
+
+            <Tooltip
+              content={
+                isPointsVisible
+                  ? 'Ocultar marcadores de acometidas en el mapa'
+                  : 'Mostrar marcadores de acometidas en el mapa'
+              }
+              themeColor="info"
+              followCursor={false}
+            >
+              <button
+                type="button"
+                className={`route-points-toggle-btn ${isPointsVisible ? 'active' : ''}`}
+                onClick={handleTogglePoints}
+                aria-label={
+                  isPointsVisible
+                    ? 'Ocultar puntos de acometidas'
+                    : 'Activar puntos de acometidas'
+                }
+              >
+                {isPointsVisible ? (
+                  <RiEyeFill size={13} />
+                ) : (
+                  <RiEyeOffFill size={13} />
+                )}
+                <span>
+                  {isPointsVisible ? 'Puntos activos' : 'Activar puntos'}
+                </span>
+              </button>
+            </Tooltip>
             <Tooltip
               content="Usa las flechas ↑ y ↓ para seleccionar y centrar"
               themeColor="info"

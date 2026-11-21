@@ -107,10 +107,18 @@ export const useRouteDispatchViewModel = (): UseRouteDispatchViewModelReturn => 
       try {
         const response =
           await executeBatchMorningDispatchUseCase.execute(request, onProgress);
-        const totalRutas =
-          response?.totalRutasAsignadas ??
-          request.asignaciones?.length ??
-          0;
+
+        if (response && response.success === false) {
+          notify.error(response.message || 'No se pudo despachar ninguna de las rutas.');
+          return response;
+        }
+
+        const totalRutas = response?.totalRutasAsignadas ?? 0;
+        if (totalRutas === 0) {
+          notify.warning(response?.message || 'No se asignó ninguna ruta en el lote.');
+          return response;
+        }
+
         const totalMedidores = response?.totalAcometidasDespachadas ?? 0;
         const medidoresLabel =
           totalMedidores > 0 ? ` (${totalMedidores} medidores)` : '';

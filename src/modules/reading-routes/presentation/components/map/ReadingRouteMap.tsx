@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef
+} from 'react';
 import {
   APIProvider,
   Map,
   useMap,
   AdvancedMarker,
-  AdvancedMarkerAnchorPoint
+  AdvancedMarkerAnchorPoint,
+  InfoWindow
 } from '@vis.gl/react-google-maps';
 import {
   Layers,
@@ -26,26 +33,36 @@ import type {
 } from '../../../domain/models/ReadingRoute';
 import type { RouteConnection } from '../../../domain/models/RouteConnection';
 import { ReadingRouteCentroidMarker } from './ReadingRouteCentroidMarker';
+import { ReadingRouteConnectionMarker } from './ReadingRouteConnectionMarker';
 import { ReadingRouteMapInfoWindow } from './ReadingRouteMapInfoWindow';
 import { ReadingRouteMapSidePanel } from './ReadingRouteMapSidePanel';
-import { DARK_MAP_STYLE, SILVER_MAP_STYLE } from './ReadingRouteMapStyles';
+import {
+  getMapThemeConfig,
+  type MapThemeConfig
+} from './ReadingRouteMapStyles';
 import './ReadingRouteMap.css';
 import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { sectors as DEFAULT_SECTORS } from '@/shared/utils/listSectors';
+import type { RouteAssignment } from '@/modules/reading-routes/domain/models/RouteAssignment';
+import { useRouteDispatchViewModel } from '../../hooks/useRouteDispatchViewModel';
+import { useReadingRoutesViewModel } from '../../hooks/useReadingRoutesViewModel';
+import { ReassignSegmentModal } from '../dispatch/ReassignSegmentModal';
 
 interface ReadingRouteMapDataLayerProps {
   geojsonData: RouteGeoJsonFeatureCollection | null;
   showPolygons: boolean;
   selectedRoute: ReadingRoute | null;
   onSelectRouteId: (idRuta: number) => void;
+  mapTheme: MapThemeConfig;
 }
 
 const ReadingRouteMapDataLayer: React.FC<ReadingRouteMapDataLayerProps> = ({
   geojsonData,
   showPolygons,
   selectedRoute,
-  onSelectRouteId
+  onSelectRouteId,
+  mapTheme
 }) => {
   const map = useMap();
 
@@ -73,9 +90,13 @@ const ReadingRouteMapDataLayer: React.FC<ReadingRouteMapDataLayerProps> = ({
       );
       return {
         fillColor: color,
-        fillOpacity: isSelected ? 0.45 : 0.2,
-        strokeColor: isSelected ? '#ffffff' : color,
-        strokeWeight: isSelected ? 3 : 1.5,
+        fillOpacity: isSelected
+          ? mapTheme.polygon.selectedFillOpacity
+          : mapTheme.polygon.unselectedFillOpacity,
+        strokeColor: isSelected ? mapTheme.polygon.selectedStroke : color,
+        strokeWeight: isSelected
+          ? mapTheme.polygon.selectedStrokeWeight
+          : mapTheme.polygon.unselectedStrokeWeight,
         zIndex: isSelected ? 25 : 2
       };
     });
@@ -93,19 +114,73 @@ const ReadingRouteMapDataLayer: React.FC<ReadingRouteMapDataLayerProps> = ({
     return () => {
       google.maps.event.removeListener(clickListener);
     };
-  }, [map, geojsonData, showPolygons, selectedRoute, onSelectRouteId]);
+  }, [
+    map,
+    geojsonData,
+    showPolygons,
+    selectedRoute,
+    onSelectRouteId,
+    mapTheme
+  ]);
 
   return null;
 };
 
-// Map Camera Controller
+// Subcomponente: Sincronización dinámica de tema en el mapa (SRP / OCP)
+const MapThemeSyncController: React.FC<{ mapTheme: MapThemeConfig }> = ({
+  mapTheme
+}) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map) return;
+    try {
+      map.setOptions({
+        colorScheme: mapTheme.colorScheme,
+        styles: mapTheme.styles
+      });
+    } catch {
+      // Fallback seguro en caso de entornos con versión API fija
+    }
+  }, [map, mapTheme]);
+
+  return null;
+};
+
+// Map Camera Controller: Preserva la posición del usuario sin resetear la vista al alternar tema (SRP)
 const MapCameraController: React.FC<{
   centerTarget: { lat: number; lng: number } | null;
   zoomTarget?: number;
 }> = ({ centerTarget, zoomTarget }) => {
   const map = useMap();
+  const lastCameraRef = useRef<{
+    center: { lat: number; lng: number };
+    zoom: number;
+  } | null>(null);
+
+  // Registrar continuamente la posición del usuario para mantenerla intacta si se cambia el tema
   useEffect(() => {
-    if (map && centerTarget) {
+    if (!map) return;
+    const listener = map.addListener('idle', () => {
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+      if (center && typeof zoom === 'number') {
+        lastCameraRef.current = {
+          center: { lat: center.lat(), lng: center.lng() },
+          zoom
+        };
+      }
+    });
+
+    return () => {
+      google.maps.event.removeListener(listener);
+    };
+  }, [map]);
+
+  useEffect(() => {
+    if (!map) return;
+
+    if (centerTarget) {
       const lat =
         typeof centerTarget.lat === 'number'
           ? centerTarget.lat
@@ -121,8 +196,15 @@ const MapCameraController: React.FC<{
           map.setZoom(zoomTarget);
         }
       }
+    } else if (lastCameraRef.current) {
+      // Preservar la cámara activa tras re-renderizado o cambio de esquema de color
+      map.moveCamera({
+        center: lastCameraRef.current.center,
+        zoom: lastCameraRef.current.zoom
+      });
     }
   }, [map, centerTarget, zoomTarget]);
+
   return null;
 };
 
@@ -150,6 +232,27 @@ export interface ReadingRouteMapProps {
   onAssignRoute?: (route: ReadingRoute) => void;
 }
 
+const getValidCoords = (
+  lat: unknown,
+  lng: unknown
+): { lat: number; lng: number } | null => {
+  if (lat === null || lat === undefined || lng === null || lng === undefined) {
+    return null;
+  }
+  const numLat = typeof lat === 'number' ? lat : parseFloat(String(lat));
+  const numLng = typeof lng === 'number' ? lng : parseFloat(String(lng));
+  if (!Number.isFinite(numLat) || !Number.isFinite(numLng)) {
+    return null;
+  }
+  if (numLat < -90 || numLat > 90 || numLng < -180 || numLng > 180) {
+    return null;
+  }
+  if (numLat === 0 && numLng === 0) {
+    return null;
+  }
+  return { lat: numLat, lng: numLng };
+};
+
 export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
   geojsonData,
   centroidsData,
@@ -174,11 +277,15 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
   onAssignRoute
 }) => {
   const { theme } = useTheme();
+  const mapTheme = useMemo(() => getMapThemeConfig(theme), [theme]);
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
   const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID ?? 'DEMO_MAP_ID';
 
   const [showPolygons, setShowPolygons] = useState(true);
   const [showCentroids, setShowCentroids] = useState(true);
+  const [showConnectionPoints, setShowConnectionPoints] = useState(true);
+  const [selectedConnection, setSelectedConnection] =
+    useState<RouteConnection | null>(null);
   const [infoWindowCentroid, setInfoWindowCentroid] =
     useState<RouteCentroidFeature | null>(null);
   const [infoWindowCoords, setInfoWindowCoords] = useState<{
@@ -194,6 +301,9 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
     lat: number;
     lng: number;
   } | null>(null);
+
+  const dispatchVm = useRouteDispatchViewModel();
+  const pageVm = useReadingRoutesViewModel();
 
   // Sectores estándar del 1 al 40 (complementados con cualquier sector de centroides)
   const sectors = useMemo(() => {
@@ -267,10 +377,55 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
     }
   }, []);
 
+  const handleConnectionClick = useCallback(
+    (conn: RouteConnection, coords: { lat: number; lng: number }) => {
+      setSelectedConnection(conn);
+      setFocusedConnectionCoords(coords);
+      setCameraTarget(coords);
+      setCameraZoom(18);
+    },
+    []
+  );
+
+  // Limpiar conexión seleccionada si cambia la ruta
+  useEffect(() => {
+    setSelectedConnection(null);
+  }, [selectedRoute?.idRuta]);
+
   const handleCloseSidePanel = useCallback(() => {
     setFocusedConnectionCoords(null);
+    setSelectedConnection(null);
     onCloseSidePanel();
   }, [onCloseSidePanel]);
+
+  const handleReassignRoute = (route: ReadingRoute) => {
+    const existing = dispatchVm.assignments.find(
+      (a) =>
+        (route.idAsignacion && a.idAsignacion === route.idAsignacion) ||
+        a.rutaId === route.idRuta
+    );
+    if (existing) {
+      dispatchVm.openReassignModal(existing);
+      return;
+    }
+
+    const assignmentFromRoute: RouteAssignment = {
+      idAsignacion: Number(route.idAsignacion || route.idRuta),
+      rutaId: route.idRuta,
+      codigoRuta: route.codigoRuta || route.codigo,
+      nombreRuta: route.nombreRuta || route.nombre,
+      usuarioId: route.idUsuarioAsignado,
+      lecturistaId: route.idUsuarioAsignado,
+      nombreLecturista: route.nombreUsuario || route.usuario,
+      periodoMes: route.periodo || pageVm.periodoFilter,
+      estado: (route.estado as any) || 'ASIGNADA',
+      lecturasEsperadas: route.lecturasEsperadas || route.cantidadAcometidas,
+      lecturasCompletadas: route.lecturasCompletadas || 0,
+      lecturasPendientes: route.lecturasPendientes || 0,
+      totalPredios: route.cantidadAcometidas
+    };
+    dispatchVm.openReassignModal(assignmentFromRoute);
+  };
 
   return (
     <div className="reading-route-map-wrapper">
@@ -297,6 +452,21 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
               {showCentroids ? <Eye size={14} /> : <EyeOff size={14} />}
               Centroides
             </button>
+            {selectedRoute && (
+              <button
+                type="button"
+                className={`reading-route-map-btn ${showConnectionPoints ? 'active' : ''}`}
+                onClick={() => setShowConnectionPoints((prev) => !prev)}
+                title="Alternar visibilidad de puntos de acometidas en la ruta seleccionada"
+              >
+                {showConnectionPoints ? (
+                  <MapPin size={14} />
+                ) : (
+                  <EyeOff size={14} />
+                )}
+                Acometidas ({routeConnections.length})
+              </button>
+            )}
           </div>
 
           <div className="reading-route-map-toolbar-divider" />
@@ -499,25 +669,30 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
         {/* Map Container */}
         <div className="reading-route-map-container">
           <Map
+            colorScheme={mapTheme.colorScheme}
             defaultCenter={{
               lat: FALLBACK_CENTER_ANTONIO_ANTE.lat,
               lng: FALLBACK_CENTER_ANTONIO_ANTE.lng
             }}
             defaultZoom={13}
             mapId={mapId}
-            styles={theme === 'dark' ? DARK_MAP_STYLE : SILVER_MAP_STYLE}
+            styles={mapTheme.styles}
             disableDefaultUI={false}
             zoomControl={true}
             streetViewControl={false}
             mapTypeControl={false}
             fullscreenControl={false}
           >
+            {/* Theme synchronizer */}
+            <MapThemeSyncController mapTheme={mapTheme} />
+
             {/* GeoJSON layer */}
             <ReadingRouteMapDataLayer
               geojsonData={geojsonData}
               showPolygons={showPolygons}
               selectedRoute={selectedRoute}
               onSelectRouteId={onSelectRouteId}
+              mapTheme={mapTheme}
             />
 
             {/* Camera controller */}
@@ -537,6 +712,31 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
                 />
               ))}
 
+            {/* Marcadores de acometidas (puntos secuenciales) de la ruta seleccionada */}
+            {showConnectionPoints &&
+              selectedRoute &&
+              routeConnections.map((conn) => {
+                const coords = getValidCoords(conn.latitud, conn.longitud);
+                if (!coords) return null;
+                const isSelected = Boolean(
+                  (selectedConnection &&
+                    (selectedConnection.idRutaAcometida === conn.idRutaAcometida ||
+                      selectedConnection.acometidaId === conn.acometidaId)) ||
+                    (focusedConnectionCoords &&
+                      coords.lat === focusedConnectionCoords.lat &&
+                      coords.lng === focusedConnectionCoords.lng)
+                );
+
+                return (
+                  <ReadingRouteConnectionMarker
+                    key={conn.idRutaAcometida || conn.acometidaId}
+                    connection={conn}
+                    isSelected={isSelected}
+                    onClick={handleConnectionClick}
+                  />
+                );
+              })}
+
             {/* Focused Connection Highlight Pin */}
             {focusedConnectionCoords && (
               <AdvancedMarker
@@ -552,6 +752,53 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
                 </div>
               </AdvancedMarker>
             )}
+
+            {/* InfoWindow de la acometida seleccionada */}
+            {selectedConnection &&
+              (() => {
+                const coords = getValidCoords(
+                  selectedConnection.latitud,
+                  selectedConnection.longitud
+                );
+                if (!coords) return null;
+                return (
+                  <InfoWindow
+                    position={coords}
+                    onCloseClick={() => setSelectedConnection(null)}
+                  >
+                    <div className="reading-route-connection-infowindow">
+                      <span className="reading-route-connection-infowindow-seq">
+                        Secuencia #{selectedConnection.ordenSecuencia}
+                      </span>
+                      <h4 className="reading-route-connection-infowindow-title">
+                        {selectedConnection.abonado || 'Consumidor desconocido'}
+                      </h4>
+                      <div className="reading-route-connection-infowindow-row">
+                        <span>Medidor:</span>
+                        <strong>
+                          {selectedConnection.numeroMedidor || 'Sin medidor'}
+                        </strong>
+                      </div>
+                      <div className="reading-route-connection-infowindow-row">
+                        <span>Cuenta / Acometida:</span>
+                        <strong>
+                          {selectedConnection.cuenta ||
+                            selectedConnection.acometidaId ||
+                            'N/D'}
+                        </strong>
+                      </div>
+                      <div className="reading-route-connection-infowindow-row">
+                        <span>Dirección:</span>
+                        <span>
+                          {selectedConnection.direccion ||
+                            selectedConnection.referencia ||
+                            'Sin dirección registrada'}
+                        </span>
+                      </div>
+                    </div>
+                  </InfoWindow>
+                );
+              })()}
 
             {/* InfoWindow */}
             {infoWindowCentroid && infoWindowCoords && (
@@ -579,9 +826,37 @@ export const ReadingRouteMap: React.FC<ReadingRouteMapProps> = ({
             onOptimize={onOptimizeSequence}
             onFocusConnection={handleFocusConnection}
             onAssignRoute={onAssignRoute}
+            onReassignRoute={handleReassignRoute}
+            showConnectionPoints={showConnectionPoints}
+            onToggleConnectionPoints={() =>
+              setShowConnectionPoints((prev) => !prev)
+            }
+            selectedConnectionId={
+              selectedConnection?.idRutaAcometida ??
+              selectedConnection?.acometidaId
+            }
+            onSelectConnection={(conn) => {
+              setSelectedConnection(conn);
+              const coords = getValidCoords(conn.latitud, conn.longitud);
+              if (coords) {
+                setFocusedConnectionCoords(coords);
+              }
+            }}
           />
         )}
       </APIProvider>
+
+      {/* Reassign Segment Modal */}
+      <ReassignSegmentModal
+        isOpen={dispatchVm.isReassignModalOpen}
+        assignment={dispatchVm.selectedAssignmentForReassign}
+        onClose={dispatchVm.closeReassignModal}
+        onReassign={async (req) => {
+          const res = await dispatchVm.executeReassignment(req);
+          void pageVm.refreshRoutes();
+          return res;
+        }}
+      />
     </div>
   );
 };

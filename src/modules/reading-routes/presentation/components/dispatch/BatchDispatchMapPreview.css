@@ -44,7 +44,7 @@
   background-color: color-mix(in srgb, var(--accent) 15%, transparent);
   border: 1px solid var(--accent);
   color: var(--accent);
-  border-radius: 20px;
+  border-radius: 8px;
   font-size: 0.75rem;
   font-weight: 700;
 }
@@ -126,7 +126,9 @@
   border: 2px solid #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
   user-select: none;
 }
 
@@ -139,7 +141,9 @@
 .batch-dispatch-meter-pin.is-active {
   background: linear-gradient(135deg, #ef4444, #b91c1c);
   transform: scale(1.35);
-  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.35), 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 0 0 4px rgba(239, 68, 68, 0.35),
+    0 4px 16px rgba(0, 0, 0, 0.4);
   z-index: 110;
 }
 
@@ -148,7 +152,7 @@
   padding: 0.4rem 0.2rem;
   max-width: 250px;
   font-size: 0.8rem;
-  color: var(--text-main, #1e293b);
+  color: var(--text-main);
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
@@ -169,7 +173,7 @@
   font-size: 0.85rem;
   font-weight: 700;
   margin: 0;
-  color: var(--text-main, #0f172a);
+  color: var(--text-main);
 }
 
 .batch-dispatch-infowindow-row {
@@ -177,11 +181,11 @@
   justify-content: space-between;
   gap: 0.5rem;
   font-size: 0.75rem;
-  color: var(--text-secondary, #475569);
+  color: var(--text-secondary);
 }
 
 .batch-dispatch-infowindow-row strong {
-  color: var(--text-main, #0f172a);
+  color: var(--text-main);
 }
 
 /* Legend bar */
@@ -213,4 +217,91 @@
   width: 10px;
   height: 10px;
   border-radius: 2px;
+}
+
+.batch-dispatch-legend-item span {
+  font-size: 0.65rem !important;
+  font-weight: 400;
+}
+
+/* Operator Toolbar Tags & Action Buttons */
+.batch-dispatch-active-op-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.65rem;
+  border: 1.5px solid;
+  border-radius: 8px;
+  background-color: var(--surface);
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.batch-dispatch-active-op-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.batch-dispatch-route-assigned-tag {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-left: 0.25rem;
+}
+
+.batch-dispatch-route-unassigned-tag {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 8px;
+  background-color: var(--surface-hover);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  margin-left: 0.25rem;
+}
+
+.batch-dispatch-route-assign-btn {
+  padding: 0.2rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.35rem;
+}
+
+.batch-dispatch-route-assign-btn:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+/* Google Maps InfoWindow Theme Adaptation (Scoped) */
+.batch-dispatch-map-viewport .gm-style .gm-style-iw-c {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+  border-radius: 12px !important;
+  padding: 0 !important;
+}
+
+.batch-dispatch-map-viewport .gm-style-iw-tc::after {
+  background: var(--surface) !important;
+}
+
+.batch-dispatch-map-viewport .gm-style .gm-style-iw-d {
+  overflow: auto !important;
+  padding: 0.5rem !important;
+}
+
+.dark .batch-dispatch-map-viewport .gm-ui-hover-effect {
+  filter: invert(1);
 }

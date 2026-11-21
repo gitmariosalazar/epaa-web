@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, UserPlus, Send } from 'lucide-react';
 import { useUsersContext } from '@/modules/users/presentation/context/UsersContext';
 import { useReadingRoutesContext } from '../../context/ReadingRoutesContext';
 import type { User as UserModel } from '@/modules/users/domain/models/User';
 import type { ReadingRoute } from '../../../domain/models/ReadingRoute';
 import type { AssignSingleRouteRequest } from '../../../domain/dto/request/route-requests.dto';
+import { defaultRouteDispatchPolicy } from '../../../domain/policies/RouteDispatchPolicy';
 import { RouteBadge } from '../common/RouteBadge';
 import './AssignSingleRouteModal.css';
 import { Button } from '@/shared/presentation/components/Button/Button';
@@ -49,6 +50,11 @@ export const AssignSingleRouteModal: React.FC<AssignSingleRouteModalProps> = ({
   const [isLoadingOperators, setIsLoadingOperators] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Filter operators just by positionName Lecturista
+  const lecturistaOperators = useMemo(() => {
+    return operators.filter((op) => op.roles.some((role) => role.id === 4));
+  }, [operators]);
+
   useEffect(() => {
     if (!isOpen) return;
     let isMounted = true;
@@ -57,7 +63,10 @@ export const AssignSingleRouteModal: React.FC<AssignSingleRouteModalProps> = ({
       try {
         const [list, liveAssignments] = await Promise.all([
           getUsersUseCase.execute(100, 0),
-          getLiveTrackingAssignmentsUseCase.execute(periodo || undefined)
+          getLiveTrackingAssignmentsUseCase.execute(
+            periodo || undefined,
+            fechaProgramada || undefined
+          )
         ]);
         if (isMounted) {
           setOperators(list);
@@ -66,7 +75,19 @@ export const AssignSingleRouteModal: React.FC<AssignSingleRouteModalProps> = ({
 
           (liveAssignments || []).forEach((a) => {
             const uId = a.usuarioId || a.lecturistaId;
-            if (uId && (a.estado === 'ASIGNADA' || a.estado === 'EN_PROCESO')) {
+            const aFecha =
+              typeof a.fechaProgramada === 'string'
+                ? a.fechaProgramada.split('T')[0]
+                : a.fechaProgramada
+                  ? new Date(a.fechaProgramada).toISOString().split('T')[0]
+                  : null;
+            const matchesDate =
+              !fechaProgramada || !aFecha || aFecha === fechaProgramada;
+            if (
+              uId &&
+              matchesDate &&
+              (a.estado === 'ASIGNADA' || a.estado === 'EN_PROCESO')
+            ) {
               counts[uId] = (counts[uId] || 0) + 1;
             }
             if (
@@ -101,6 +122,7 @@ export const AssignSingleRouteModal: React.FC<AssignSingleRouteModalProps> = ({
   }, [
     isOpen,
     periodo,
+    fechaProgramada,
     route,
     getUsersUseCase,
     getLiveTrackingAssignmentsUseCase
@@ -201,12 +223,13 @@ export const AssignSingleRouteModal: React.FC<AssignSingleRouteModalProps> = ({
                     ? 'Cargando lecturistas...'
                     : '-- Seleccionar lecturista --'}
                 </option>
-                {operators.map((op) => {
+                {lecturistaOperators.map((op) => {
                   const activeCount = activeRoutesCountByUser[op.userId] || 0;
                   const isAlreadyAssigned = operatorsAssignedToRoute.has(
                     op.userId
                   );
-                  const isMaxReached = activeCount >= 3;
+                  const isMaxReached =
+                    defaultRouteDispatchPolicy.hasReachedMaxLimit(activeCount);
                   const isDisabled = isMaxReached || isAlreadyAssigned;
                   const name =
                     op.firstName || op.lastName
@@ -219,11 +242,12 @@ export const AssignSingleRouteModal: React.FC<AssignSingleRouteModalProps> = ({
                       value={op.userId}
                       disabled={isDisabled}
                     >
-                      {name} ({activeCount}/3 rutas activas)
+                      {name} ({activeCount}/
+                      {defaultRouteDispatchPolicy.maxDailyRoutes} rutas activas)
                       {isAlreadyAssigned
                         ? ' — Ya asignado a esta ruta'
                         : isMaxReached
-                          ? ' — Límite alcanzado (máx 3)'
+                          ? ` — Límite alcanzado (máx ${defaultRouteDispatchPolicy.maxDailyRoutes})`
                           : ''}
                     </option>
                   );

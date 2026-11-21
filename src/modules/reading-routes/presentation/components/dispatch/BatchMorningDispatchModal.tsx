@@ -1,5 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { X, Send, CheckSquare, Square, Zap, MapPin } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  X,
+  Send,
+  Zap,
+  MapPin,
+  Search,
+  Check,
+  Plus,
+  ArrowRight,
+  RotateCcw
+} from 'lucide-react';
 import { useUsersContext } from '@/modules/users/presentation/context/UsersContext';
 import { useReadingRoutesContext } from '../../context/ReadingRoutesContext';
 import type { User } from '@/modules/users/domain/models/User';
@@ -8,11 +18,18 @@ import type { BatchMorningDispatchRequest } from '../../../domain/dto/request/ro
 import type { BatchDispatchProgress } from '../../../domain/dto/response/route-responses.dto';
 import { RouteBadge } from '../common/RouteBadge';
 import { BatchDispatchMapPreview } from './BatchDispatchMapPreview';
+import {
+  OPERATOR_PALETTE,
+  getOperatorColor
+} from '../map/ReadingRouteMapStyles';
+import { notify } from '../../utils/notify';
+import { defaultRouteDispatchPolicy } from '../../../domain/policies/RouteDispatchPolicy';
 import './BatchMorningDispatchModal.css';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { sectors as DEFAULT_SECTORS } from '@/shared/utils/listSectors';
+import { Input } from '@/shared/presentation/components/Input/Input';
 
 export interface BatchMorningDispatchModalProps {
   isOpen: boolean;
@@ -20,25 +37,30 @@ export interface BatchMorningDispatchModalProps {
   routes: ReadingRoute[];
   onDispatch: (
     request: BatchMorningDispatchRequest,
-    onProgress?: (progress: BatchDispatchProgress) => void,
+    onProgress?: (progress: BatchDispatchProgress) => void
   ) => Promise<unknown>;
 }
+
+type FilterTab = 'ALL' | 'UNASSIGNED' | 'ACTIVE_OP' | 'OTHER_OPS';
 
 /**
  * Componente Modal: BatchMorningDispatchModal
  *
- * Arquitectura Limpia (Clean Architecture) y SOLID:
- * - SRP: Orquesta el flujo de despacho matutino, formulario de asignaciones y divide
- *   el layout en panel de control operativo (izq) y visor SIG interactivo (der).
- * - DIP: Obtiene casos de uso a través del Contexto (UseCases) sin depender de HTTP directo.
- * - Modularidad: Delega la visualización del mapa al componente especializado `BatchDispatchMapPreview`.
+ * Enfoque Operator-First (Lecturista céntrico):
+ * 1. El supervisor selecciona primero el lecturista deseado.
+ * 2. Agrega rutas para ese lecturista haciendo clic en la lista o directamente sobre el polígono en el mapa SIG.
+ * 3. Cada lecturista tiene un color identificativo único reflejado en el mapa SIG y en las tarjetas.
+ * 4. Pasa al siguiente lecturista para continuar asignando su territorio.
+ * 5. Guarda y confirma el despacho masivo con barra de progreso.
+ *
+ * Clean Architecture & SOLID:
+ * - SRP: Separa la gestión del estado operativo de asignación y delega el visor SIG a BatchDispatchMapPreview.
+ * - DIP: Obtiene casos de uso a través del contexto sin acoplarse a capas de infraestructura.
+ * - OCP: Soporte para paleta extensible y asignaciones dinámicas.
  */
-export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps> = ({
-  isOpen,
-  onClose,
-  routes,
-  onDispatch,
-}) => {
+export const BatchMorningDispatchModal: React.FC<
+  BatchMorningDispatchModalProps
+> = ({ isOpen, onClose, routes, onDispatch }) => {
   const { getUsersUseCase } = useUsersContext();
   const { getLiveTrackingAssignmentsUseCase, getReadingRoutesUseCase } =
     useReadingRoutesContext();
@@ -47,41 +69,92 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const todayStr = now.toISOString().split('T')[0];
 
+  // Parámetros de formulario
   const [periodo, setPeriodo] = useState<string>(currentMonth);
   const [fechaProgramada, setFechaProgramada] = useState<string>(todayStr);
-  const [selectedSector, setSelectedSector] = useState<number | undefined>(undefined);
+  const [selectedSector, setSelectedSector] = useState<number | undefined>(
+    undefined
+  );
+
+  // Operadores y asignaciones de campo
   const [operators, setOperators] = useState<User[]>([]);
-  const [baseActiveCountByUser, setBaseActiveCountByUser] = useState<Record<string, number>>({});
+  const [baseActiveCountByUser, setBaseActiveCountByUser] = useState<
+    Record<string, number>
+  >({});
   const [isLoadingOperators, setIsLoadingOperators] = useState(false);
+
+  // Lecturista actualmente seleccionado como objetivo de asignación
+  const [selectedOperatorId, setSelectedOperatorId] = useState<string | null>(
+    null
+  );
+
+  // Mapa de asignaciones: idRuta -> userId (lecturista)
+  const [routeAssignments, setRouteAssignments] = useState<
+    Record<number, string>
+  >({});
+
+  // Ruta enfocada en el visor SIG lateral
+  const [selectedRouteIdForMap, setSelectedRouteIdForMap] = useState<
+    number | null
+  >(null);
+
+  // Búsqueda y filtrado dentro de la lista de rutas
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterTab, setFilterTab] = useState<FilterTab>('ALL');
+
+  // Estado de despacho y progreso
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [dispatchProgress, setDispatchProgress] = useState<BatchDispatchProgress | null>(null);
+  const [dispatchProgress, setDispatchProgress] =
+    useState<BatchDispatchProgress | null>(null);
   const [fallbackRoutes, setFallbackRoutes] = useState<ReadingRoute[]>([]);
 
+  // Filtrar lecturistas por cargo 'Lecturista' (o todos si no hay ese cargo específico)
+  const lecturistaOperators = useMemo(() => {
+    const filtered = operators.filter((op) =>
+      op.roles.some((role) => role.id === 4)
+    );
+    return filtered.length > 0 ? filtered : operators;
+  }, [operators]);
+
+  // Asignar color único y determinista a cada lecturista
+  const operatorColorMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    lecturistaOperators.forEach((op, index) => {
+      map[op.userId] = getOperatorColor(op.userId, index);
+    });
+    return map;
+  }, [lecturistaOperators]);
+
+  // Reset al abrir o cerrar modal
   useEffect(() => {
     if (!isOpen) {
       setDispatchProgress(null);
+      setRouteAssignments({});
+      setSelectedRouteIdForMap(null);
+      setSearchQuery('');
+      setFilterTab('ALL');
     }
   }, [isOpen]);
 
-  // Estado para la ruta actualmente enfocada en el mapa lateral
-  const [selectedRouteIdForMap, setSelectedRouteIdForMap] = useState<number | null>(null);
-
-  // Selected routes map: routeId -> lecturistaId
-  const [routeAssignments, setRouteAssignments] = useState<Record<number, string>>({});
-
-  // Fallback: Si no se pasaron rutas en props, cargarlas directamente desde el caso de uso
+  // Carga de respaldo si no llegaron rutas por props
   useEffect(() => {
     if (!isOpen) return;
     if (routes && routes.length > 0) return;
     let isMounted = true;
     const fetchFallbackRoutes = async () => {
       try {
-        const response = await getReadingRoutesUseCase.execute({ limit: 150, activa: true });
+        const response = await getReadingRoutesUseCase.execute({
+          limit: 150,
+          activa: true
+        });
         if (isMounted) {
           setFallbackRoutes(response.items || []);
         }
       } catch (err) {
-        console.warn('Error al cargar rutas de respaldo en modal de despacho:', err);
+        console.warn(
+          'Error al cargar rutas de respaldo en modal de despacho:',
+          err
+        );
       }
     };
     void fetchFallbackRoutes();
@@ -92,23 +165,7 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
 
   const effectiveRoutes = routes && routes.length > 0 ? routes : fallbackRoutes;
 
-  // Al cambiar de sector, limpiar la ruta enfocada en el mapa
-  useEffect(() => {
-    setSelectedRouteIdForMap(null);
-  }, [selectedSector]);
-
-  // Total acumulado por operador (base previa + asignaciones en este modal)
-  const currentTotalAssignedByUser = useMemo(() => {
-    const counts = { ...baseActiveCountByUser };
-    Object.values(routeAssignments).forEach(uId => {
-      if (uId) {
-        counts[uId] = (counts[uId] || 0) + 1;
-      }
-    });
-    return counts;
-  }, [baseActiveCountByUser, routeAssignments]);
-
-  // Load available users and active assignments safely with allSettled
+  // Carga de usuarios y monitoreo de campo en paralelo
   useEffect(() => {
     if (!isOpen) return;
     let isMounted = true;
@@ -117,7 +174,10 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
       try {
         const [usersRes, trackingRes] = await Promise.allSettled([
           getUsersUseCase.execute(100, 0),
-          getLiveTrackingAssignmentsUseCase.execute(periodo || undefined),
+          getLiveTrackingAssignmentsUseCase.execute(
+            periodo || undefined,
+            fechaProgramada || undefined
+          )
         ]);
         if (isMounted) {
           if (usersRes.status === 'fulfilled') {
@@ -125,9 +185,21 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
           }
           if (trackingRes.status === 'fulfilled') {
             const counts: Record<string, number> = {};
-            (trackingRes.value || []).forEach(a => {
+            (trackingRes.value || []).forEach((a) => {
               const uId = a.usuarioId || a.lecturistaId;
-              if (uId && (a.estado === 'ASIGNADA' || a.estado === 'EN_PROCESO')) {
+              const aFecha =
+                typeof a.fechaProgramada === 'string'
+                  ? a.fechaProgramada.split('T')[0]
+                  : a.fechaProgramada
+                    ? new Date(a.fechaProgramada).toISOString().split('T')[0]
+                    : null;
+              const matchesDate =
+                !fechaProgramada || !aFecha || aFecha === fechaProgramada;
+              if (
+                uId &&
+                matchesDate &&
+                (a.estado === 'ASIGNADA' || a.estado === 'EN_PROCESO')
+              ) {
                 counts[uId] = (counts[uId] || 0) + 1;
               }
             });
@@ -135,7 +207,10 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
           }
         }
       } catch (err) {
-        console.error('Error al cargar operadores y asignaciones en lote:', err);
+        console.error(
+          'Error al cargar operadores y asignaciones en lote:',
+          err
+        );
       } finally {
         if (isMounted) {
           setIsLoadingOperators(false);
@@ -146,7 +221,13 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
     return () => {
       isMounted = false;
     };
-  }, [isOpen, periodo, getUsersUseCase, getLiveTrackingAssignmentsUseCase]);
+  }, [
+    isOpen,
+    periodo,
+    fechaProgramada,
+    getUsersUseCase,
+    getLiveTrackingAssignmentsUseCase
+  ]);
 
   // Sectores estándar (1-40) combinados con los sectores de las rutas cargadas
   const sectors = useMemo(() => {
@@ -160,85 +241,336 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
     return Array.from(set).sort((a, b) => a - b);
   }, [effectiveRoutes]);
 
-  // Filter routes based on selectedSector supporting both activa/activo and sectorId/sector
-  const filteredRoutes = useMemo(() => {
-    const isActiva = (r: ReadingRoute) => (r.activa ?? r.activo ?? true) === true;
+  // Rutas activas del sector seleccionado
+  const sectorRoutes = useMemo(() => {
+    const isActiva = (r: ReadingRoute) =>
+      (r.activa ?? r.activa ?? true) === true;
     const getSector = (r: ReadingRoute) => r.sectorId ?? r.sector;
 
     if (!selectedSector) return effectiveRoutes.filter(isActiva);
     return effectiveRoutes.filter(
-      r => isActiva(r) && Number(getSector(r)) === Number(selectedSector),
+      (r) => isActiva(r) && Number(getSector(r)) === Number(selectedSector)
     );
   }, [effectiveRoutes, selectedSector]);
 
-  // Métricas rápidas del sector
-  const totalMetersEstimated = useMemo(() => {
-    return filteredRoutes.reduce((acc, r) => acc + (r.cantidadAcometidas || 0), 0);
-  }, [filteredRoutes]);
+  // Lista detallada de lecturistas con estadísticas calculadas en tiempo real
+  const operatorsWithStats = useMemo(() => {
+    return lecturistaOperators.map((op, idx) => {
+      const color =
+        operatorColorMap[op.userId] ||
+        OPERATOR_PALETTE[idx % OPERATOR_PALETTE.length];
+      const name =
+        op.firstName || op.lastName
+          ? `${op.firstName || ''} ${op.lastName || ''}`.trim()
+          : op.username;
 
-  // Auto assign balanceado (Least-Loaded First):
-  // Si fullDispatch=true, distribuye TODAS las rutas equitativamente entre los operadores cargados.
-  // Si fullDispatch=false, distribuye respetando un límite recomendado de 3 rutas por lecturista.
+      // Rutas asignadas a este operador en este modal
+      const assignedRouteIds = Object.entries(routeAssignments)
+        .filter(([_, uId]) => uId === op.userId)
+        .map(([rId]) => Number(rId));
+
+      const count = assignedRouteIds.length;
+      const meters = effectiveRoutes
+        .filter((r) => assignedRouteIds.includes(r.idRuta))
+        .reduce((acc, r) => acc + (r.cantidadAcometidas || 0), 0);
+
+      const baseTrackingCount = baseActiveCountByUser[op.userId] || 0;
+      const totalActiveCount = baseTrackingCount + count;
+      const isMaxReached =
+        defaultRouteDispatchPolicy.hasReachedMaxLimit(totalActiveCount);
+      const workloadLevel =
+        defaultRouteDispatchPolicy.getWorkloadLevel(totalActiveCount);
+      const remainingCapacity =
+        defaultRouteDispatchPolicy.getRemainingCapacity(totalActiveCount);
+      const cardId = op.cardId || '';
+
+      return {
+        userId: op.userId,
+        username: op.username,
+        cardId,
+        name,
+        color,
+        count,
+        meters,
+        baseTrackingCount,
+        totalActiveCount,
+        isMaxReached,
+        workloadLevel,
+        remainingCapacity
+      };
+    });
+  }, [
+    lecturistaOperators,
+    operatorColorMap,
+    routeAssignments,
+    effectiveRoutes,
+    baseActiveCountByUser
+  ]);
+
+  // Auto-seleccionar primer lecturista por defecto si no hay ninguno seleccionado
+  useEffect(() => {
+    if (operatorsWithStats.length > 0 && !selectedOperatorId) {
+      setSelectedOperatorId(operatorsWithStats[0].userId);
+    }
+  }, [operatorsWithStats, selectedOperatorId]);
+
+  // Objeto del lecturista activo
+  const activeOperator = useMemo(() => {
+    if (!selectedOperatorId) return null;
+    return (
+      operatorsWithStats.find((op) => op.userId === selectedOperatorId) || null
+    );
+  }, [operatorsWithStats, selectedOperatorId]);
+
+  // Filtrado de rutas según búsqueda y tab seleccionado
+  const displayedRoutes = useMemo(() => {
+    let list = sectorRoutes;
+
+    // Filtro por tab
+    if (filterTab === 'UNASSIGNED') {
+      list = list.filter((r) => !routeAssignments[r.idRuta]);
+    } else if (filterTab === 'ACTIVE_OP' && selectedOperatorId) {
+      list = list.filter(
+        (r) => routeAssignments[r.idRuta] === selectedOperatorId
+      );
+    } else if (filterTab === 'OTHER_OPS' && selectedOperatorId) {
+      list = list.filter(
+        (r) =>
+          Boolean(routeAssignments[r.idRuta]) &&
+          routeAssignments[r.idRuta] !== selectedOperatorId
+      );
+    }
+
+    // Filtro por texto de búsqueda
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter((r) => {
+        const code = (
+          r.codigo ||
+          r.codigoRuta ||
+          `R-${r.idRuta}`
+        ).toLowerCase();
+        const name = (r.nombre || r.nombreRuta || '').toLowerCase();
+        return code.includes(q) || name.includes(q);
+      });
+    }
+
+    return list;
+  }, [
+    sectorRoutes,
+    filterTab,
+    selectedOperatorId,
+    routeAssignments,
+    searchQuery
+  ]);
+
+  // Contadores de métricas
+  const totalAssigned = Object.keys(routeAssignments).length;
+  const unassignedCount = sectorRoutes.filter(
+    (r) => !routeAssignments[r.idRuta]
+  ).length;
+  const activeOpAssignedCount = selectedOperatorId
+    ? sectorRoutes.filter(
+        (r) => routeAssignments[r.idRuta] === selectedOperatorId
+      ).length
+    : 0;
+  const otherOpsAssignedCount = selectedOperatorId
+    ? sectorRoutes.filter(
+        (r) =>
+          Boolean(routeAssignments[r.idRuta]) &&
+          routeAssignments[r.idRuta] !== selectedOperatorId
+      ).length
+    : 0;
+
+  // Acción: Alternar asignación de una ruta para el lecturista activo
+  const handleToggleAssignToActiveOperator = useCallback(
+    (routeId: number) => {
+      if (!selectedOperatorId) return;
+
+      // Si la ruta ya está asignada al activo, permitir quitarla siempre (libera capacidad)
+      const isCurrentlyAssignedToActive =
+        routeAssignments[routeId] === selectedOperatorId;
+      if (!isCurrentlyAssignedToActive) {
+        // Validar límite diario de la política
+        const baseTracking = baseActiveCountByUser[selectedOperatorId] || 0;
+        const currentBatchAssigned = Object.values(routeAssignments).filter(
+          (uId) => uId === selectedOperatorId
+        ).length;
+        const currentTotal = baseTracking + currentBatchAssigned;
+
+        if (!defaultRouteDispatchPolicy.canAssign(currentTotal, 1)) {
+          notify.warning(
+            defaultRouteDispatchPolicy.getLimitExceededMessage(
+              activeOperator?.name
+            ),
+            'Límite de Asignación'
+          );
+          return;
+        }
+      }
+
+      setRouteAssignments((prev) => {
+        const next = { ...prev };
+        if (next[routeId] === selectedOperatorId) {
+          delete next[routeId];
+        } else {
+          next[routeId] = selectedOperatorId;
+        }
+        return next;
+      });
+    },
+    [
+      selectedOperatorId,
+      routeAssignments,
+      baseActiveCountByUser,
+      activeOperator
+    ]
+  );
+
+  // Acción: Asignar todas las rutas actualmente filtradas al lecturista activo (respetando límite)
+  const handleAssignAllFilteredToActive = useCallback(() => {
+    if (!selectedOperatorId || displayedRoutes.length === 0) return;
+
+    const baseTracking = baseActiveCountByUser[selectedOperatorId] || 0;
+    const currentBatchAssigned = Object.values(routeAssignments).filter(
+      (uId) => uId === selectedOperatorId
+    ).length;
+    const currentTotal = baseTracking + currentBatchAssigned;
+    const remainingCapacity =
+      defaultRouteDispatchPolicy.getRemainingCapacity(currentTotal);
+
+    if (remainingCapacity <= 0) {
+      notify.warning(
+        defaultRouteDispatchPolicy.getLimitExceededMessage(
+          activeOperator?.name
+        ),
+        'Límite Diario Alcanzado'
+      );
+      return;
+    }
+
+    const unassignedToThisOp = displayedRoutes.filter(
+      (r) => routeAssignments[r.idRuta] !== selectedOperatorId
+    );
+
+    if (unassignedToThisOp.length === 0) return;
+
+    const routesToAssign = unassignedToThisOp.slice(0, remainingCapacity);
+
+    setRouteAssignments((prev) => {
+      const next = { ...prev };
+      routesToAssign.forEach((r) => {
+        next[r.idRuta] = selectedOperatorId;
+      });
+      return next;
+    });
+
+    if (unassignedToThisOp.length > remainingCapacity) {
+      notify.info(
+        `Se asignaron ${routesToAssign.length} rutas hasta alcanzar el límite diario (${defaultRouteDispatchPolicy.maxDailyRoutes} rutas).`,
+        'Asignación Parcial'
+      );
+    }
+  }, [
+    selectedOperatorId,
+    displayedRoutes,
+    routeAssignments,
+    baseActiveCountByUser,
+    activeOperator
+  ]);
+
+  // Acción: Limpiar todas las asignaciones del lecturista activo
+  const handleClearActiveOperatorRoutes = useCallback(() => {
+    if (!selectedOperatorId) return;
+    setRouteAssignments((prev) => {
+      const next = { ...prev };
+      Object.entries(next).forEach(([rId, uId]) => {
+        if (uId === selectedOperatorId) {
+          delete next[Number(rId)];
+        }
+      });
+      return next;
+    });
+  }, [selectedOperatorId]);
+
+  // Acción: Pasar al siguiente lecturista (workflow fluido 1 a 1)
+  const handleSelectNextOperator = useCallback(() => {
+    if (operatorsWithStats.length === 0) return;
+    const currentIndex = operatorsWithStats.findIndex(
+      (op) => op.userId === selectedOperatorId
+    );
+    const nextIndex = (currentIndex + 1) % operatorsWithStats.length;
+    setSelectedOperatorId(operatorsWithStats[nextIndex].userId);
+  }, [operatorsWithStats, selectedOperatorId]);
+
+  // Acción auxiliar: Auto Asignar equitativo (Round-Robin balanceado con observancia de política de dominio)
   const handleAutoAssign = (fullDispatch: boolean = true) => {
-    if (operators.length === 0 || filteredRoutes.length === 0) return;
+    if (lecturistaOperators.length === 0 || sectorRoutes.length === 0) return;
     const newAssignments: Record<number, string> = {};
     const trackingCounts = { ...baseActiveCountByUser };
 
-    for (const route of filteredRoutes) {
-      // Ordenar operadores por menor carga acumulada (Least-Loaded First)
-      const sortedOperators = [...operators].sort((a, b) => {
+    for (const route of sectorRoutes) {
+      const eligibleOperators = lecturistaOperators.filter((op) => {
+        const count = trackingCounts[op.userId] || 0;
+        return fullDispatch
+          ? !defaultRouteDispatchPolicy.hasReachedMaxLimit(count)
+          : count < defaultRouteDispatchPolicy.highLoadThreshold;
+      });
+
+      if (eligibleOperators.length === 0) {
+        break;
+      }
+
+      eligibleOperators.sort((a, b) => {
         const countA = trackingCounts[a.userId] || 0;
         const countB = trackingCounts[b.userId] || 0;
         return countA - countB;
       });
 
-      const bestCandidate = sortedOperators[0];
+      const bestCandidate = eligibleOperators[0];
       const currentCount = trackingCounts[bestCandidate.userId] || 0;
-
-      if (!fullDispatch && currentCount >= 3) {
-        // Se alcanzó el umbral recomendado para todos los operadores
-        break;
-      }
 
       newAssignments[route.idRuta] = bestCandidate.userId;
       trackingCounts[bestCandidate.userId] = currentCount + 1;
     }
 
+    const assignedCount = Object.keys(newAssignments).length;
+    if (assignedCount < sectorRoutes.length) {
+      notify.info(
+        `Se distribuyeron ${assignedCount} de ${sectorRoutes.length} rutas respetando el límite máximo diario de ${defaultRouteDispatchPolicy.maxDailyRoutes} rutas por lecturista.`,
+        'Distribución Equitativa'
+      );
+    }
+
     setRouteAssignments(newAssignments);
   };
 
-  const handleSelectRouteOperator = (routeId: number, userId: string) => {
-    setRouteAssignments(prev => {
-      const copy = { ...prev };
-      if (!userId) {
-        delete copy[routeId];
-      } else {
-        copy[routeId] = userId;
-      }
-      return copy;
-    });
-  };
-
-  const handleToggleAllRoutes = () => {
-    const allSelected =
-      filteredRoutes.length > 0 &&
-      filteredRoutes.every((r) => !!routeAssignments[r.idRuta]);
-    if (allSelected) {
-      setRouteAssignments({});
-    } else {
-      handleAutoAssign(true); // Asigna TODAS las rutas disponibles balanceando la carga
-    }
-  };
-
-  const totalAssigned = Object.keys(routeAssignments).length;
-
+  // Guardar y confirmar despacho
   const handleSubmit = async () => {
     if (totalAssigned === 0 || isSubmitting) return;
 
     const asignaciones = Object.entries(routeAssignments).map(([rId, uId]) => ({
       rutaId: Number(rId),
-      lecturistaId: uId,
+      lecturistaId: uId
     }));
+
+    const assignedSectors = Array.from(
+      new Set(
+        asignaciones
+          .map((a) => {
+            const r = effectiveRoutes.find((rt) => rt.idRuta === a.rutaId);
+            return r?.sectorId ?? r?.sector;
+          })
+          .filter(
+            (s): s is number => typeof s === 'number' && Number.isFinite(s)
+          )
+      )
+    );
+
+    // Si todas las rutas pertenecen a un único sector, enviar ese sector explícito
+    const resolvedSector =
+      selectedSector ??
+      (assignedSectors.length === 1 ? assignedSectors[0] : undefined);
 
     setIsSubmitting(true);
     setDispatchProgress({
@@ -246,20 +578,20 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
       total: asignaciones.length,
       currentChunk: 0,
       totalChunks: Math.ceil(asignaciones.length / 6),
-      percent: 0,
+      percent: 0
     });
 
     try {
       await onDispatch(
         {
           periodo,
-          sector: selectedSector,
+          sector: resolvedSector,
           fechaProgramada,
-          asignaciones,
+          asignaciones
         },
         (progress) => {
           setDispatchProgress(progress);
-        },
+        }
       );
     } catch (err: unknown) {
       console.error('Error al despachar lote matutino:', err);
@@ -273,7 +605,10 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
 
   return (
     <div className="morning-dispatch-overlay" onClick={onClose}>
-      <div className="morning-dispatch-modal" onClick={e => e.stopPropagation()}>
+      <div
+        className="morning-dispatch-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="morning-dispatch-header">
           <h2 className="morning-dispatch-title">
@@ -281,27 +616,28 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
             Despacho Masivo Matutino de Rutas (SIG)
           </h2>
           <Button
-            variant="ghost"
+            variant="danger"
             onClick={onClose}
             aria-label="Cerrar modal"
             leftIcon={<X size={18} />}
             size="xs"
+            circle
           />
         </div>
 
-        {/* Body dividido en 2 columnas: Control Izq y Mapa SIG Der */}
+        {/* Body en 2 columnas: Control Operativo Izq y Mapa SIG Der */}
         <div className="morning-dispatch-body">
-          {/* Panel Izquierdo: Configuración, Filtros y Tabla de Rutas */}
+          {/* Panel Izquierdo */}
           <div className="morning-dispatch-panel-left">
-            {/* Controles de Formulario */}
+            {/* Parámetros de Sesión y Filtro de Sector */}
             <div className="morning-dispatch-form-grid">
               <div className="morning-form-group">
-                <label className="morning-form-label">Periodo (Año-Mes)1:</label>
+                <label className="morning-form-label">Periodo (Mes):</label>
                 <DatePicker
                   value={periodo}
-                  onChange={e => setPeriodo(e)}
+                  onChange={(e) => setPeriodo(e)}
                   view="month"
-                  size='small'
+                  size="small"
                 />
               </div>
 
@@ -309,19 +645,21 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
                 <label className="morning-form-label">Fecha Programada:</label>
                 <DatePicker
                   value={fechaProgramada}
-                  onChange={e => setFechaProgramada(e)}
+                  onChange={(e) => setFechaProgramada(e)}
                   view="date"
-                  size='small'
+                  size="small"
                 />
               </div>
 
-              <div className="morning-form-group-K">
+              <div className="morning-form-group">
                 <label className="morning-form-label">Sector:</label>
                 <Select
-                  size='small'
+                  size="small"
                   value={selectedSector ?? ''}
-                  onChange={e =>
-                    setSelectedSector(e.target.value ? Number(e.target.value) : undefined)
+                  onChange={(e) =>
+                    setSelectedSector(
+                      e.target.value ? Number(e.target.value) : undefined
+                    )
                   }
                 >
                   <option value="">Todos los sectores</option>
@@ -334,78 +672,334 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
               </div>
             </div>
 
-            {/* Barra de Métricas Rápidas */}
-            <div className="morning-dispatch-stats-bar">
-              <div className="morning-stat-item">
-                <span className="morning-stat-label">Rutas Activas</span>
-                <span className="morning-stat-val">{filteredRoutes.length}</span>
-              </div>
-              <div className="morning-stat-item">
-                <span className="morning-stat-label">Acometidas Estimadas</span>
-                <span className="morning-stat-val">{totalMetersEstimated.toLocaleString()}</span>
-              </div>
-              <div className="morning-stat-item">
-                <span className="morning-stat-label">Lecturistas Listos</span>
-                <span className="morning-stat-val">{operators.length}</span>
-              </div>
-            </div>
-
-            {/* Lista y Asignación de Rutas */}
-            <div className="morning-routes-list-container">
-              <div className="morning-routes-list-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Button
-                    onClick={handleToggleAllRoutes}
-                    title="Seleccionar o deseleccionar todas"
-                    variant="ghost"
-                    size="xs"
-                    leftIcon={
-                      filteredRoutes.length > 0 &&
-                        filteredRoutes.every(r => !!routeAssignments[r.idRuta]) ? (
-                        <CheckSquare size={16} />
-                      ) : (
-                        <Square size={16} />
-                      )
-                    }
-                  >
-                    Todas
-                  </Button>
-                  <span>Rutas Disponibles ({filteredRoutes.length})</span>
-                </div>
-
+            {/* SECCIÓN 1: Selección de Lecturista (Operator-First) */}
+            <div className="morning-dispatch-operators-section">
+              <div className="morning-dispatch-section-header">
+                <span>
+                  1. Selecciona el Lecturista a despachar (
+                  {operatorsWithStats.length}):
+                </span>
                 <Button
                   onClick={() => handleAutoAssign(true)}
-                  disabled={operators.length === 0}
-                  variant="ghost"
+                  disabled={operatorsWithStats.length === 0}
+                  variant="dashed"
                   size="xs"
-                  title="Distribuir rutas de forma equitativa entre los lecturistas cargados"
+                  title="Distribuir automáticamente las rutas de forma equitativa entre todos los lecturistas"
                   leftIcon={<Zap size={12} />}
                 >
-                  Auto Asignar (Round-Robin)
+                  Auto-Distribuir
                 </Button>
               </div>
 
+              <div className="morning-dispatch-operators-deck">
+                {isLoadingOperators ? (
+                  <div
+                    style={{ padding: '0.5rem', color: 'var(--text-muted)' }}
+                  >
+                    Cargando lecturistas...
+                  </div>
+                ) : (
+                  operatorsWithStats.map((op) => {
+                    const isActive = op.userId === selectedOperatorId;
+                    const isMaxReached = op.isMaxReached;
+                    const isHighLoad = op.workloadLevel === 'HIGH';
+
+                    return (
+                      <button
+                        key={op.userId}
+                        type="button"
+                        className={`morning-operator-card ${isActive ? 'is-active' : ''}`}
+                        onClick={() => setSelectedOperatorId(op.userId)}
+                        style={{
+                          borderColor: isActive ? op.color : undefined,
+                          backgroundColor: isActive
+                            ? `color-mix(in srgb, ${op.color} 10%, var(--surface))`
+                            : undefined
+                        }}
+                      >
+                        <div className="morning-operator-card-header">
+                          <span
+                            className="morning-operator-dot"
+                            style={{ backgroundColor: op.color }}
+                          />
+                          {isActive && (
+                            <span
+                              className="morning-operator-active-badge"
+                              style={{ backgroundColor: op.color }}
+                            >
+                              Activo
+                            </span>
+                          )}
+                          {isMaxReached && (
+                            <span
+                              style={{
+                                fontSize: '0.65rem',
+                                color: '#ef4444',
+                                fontWeight: 700,
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                padding: '1px 4px',
+                                borderRadius: '4px'
+                              }}
+                              title={`Límite diario alcanzado (${op.totalActiveCount}/${defaultRouteDispatchPolicy.maxDailyRoutes})`}
+                            >
+                              Máx. ({op.totalActiveCount}/
+                              {defaultRouteDispatchPolicy.maxDailyRoutes})
+                            </span>
+                          )}
+                          {isHighLoad && !isMaxReached && !isActive && (
+                            <span
+                              style={{
+                                fontSize: '0.65rem',
+                                color: '#f59e0b',
+                                fontWeight: 700
+                              }}
+                              title={`Carga alta (${op.totalActiveCount}/${defaultRouteDispatchPolicy.maxDailyRoutes})`}
+                            >
+                              {op.totalActiveCount}/
+                              {defaultRouteDispatchPolicy.maxDailyRoutes}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="morning-operator-name" title={op.name}>
+                          {op.name}
+                        </div>
+
+                        <div className="morning-operator-meta">
+                          <span>
+                            <strong>{op.count}</strong> asignada
+                            {op.count === 1 ? '' : 's'}
+                          </span>
+                          <span>{op.meters} med.</span>
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* SECCIÓN 2: Banner de Trabajo del Lecturista Activo */}
+            {activeOperator && (
+              <div
+                className="morning-active-banner"
+                style={{
+                  borderColor: activeOperator.color,
+                  backgroundColor: `color-mix(in srgb, ${activeOperator.color} 8%, var(--surface))`
+                }}
+              >
+                <div className="morning-active-banner-info">
+                  <span
+                    className="morning-operator-dot"
+                    style={{
+                      backgroundColor: activeOperator.color,
+                      width: '12px',
+                      height: '12px'
+                    }}
+                  />
+                  <div>
+                    <span>
+                      Asignando rutas a:{' '}
+                      <strong style={{ color: activeOperator.color }}>
+                        {activeOperator.name}
+                      </strong>
+                      {activeOperator.isMaxReached && (
+                        <span
+                          style={{
+                            marginLeft: '0.5rem',
+                            fontSize: '0.72rem',
+                            color: '#ef4444',
+                            fontWeight: 700,
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            padding: '2px 6px',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          Límite Diario ({activeOperator.totalActiveCount}/
+                          {defaultRouteDispatchPolicy.maxDailyRoutes})
+                        </span>
+                      )}
+                    </span>
+                    <div
+                      style={{
+                        fontSize: '0.72rem',
+                        color: 'var(--text-muted)'
+                      }}
+                    >
+                      {activeOperator.count} asignadas en este lote • Total
+                      diario:{' '}
+                      <strong>
+                        {activeOperator.totalActiveCount}/
+                        {defaultRouteDispatchPolicy.maxDailyRoutes}
+                      </strong>{' '}
+                      (previas: {activeOperator.baseTrackingCount}) •{' '}
+                      {activeOperator.meters} acometidas
+                    </div>
+                  </div>
+                </div>
+
+                <div className="morning-active-banner-actions">
+                  <Button
+                    size="xs"
+                    variant="dashed"
+                    onClick={handleAssignAllFilteredToActive}
+                    disabled={
+                      displayedRoutes.length === 0 ||
+                      activeOperator.isMaxReached
+                    }
+                    title={
+                      activeOperator.isMaxReached
+                        ? `Lecturista al límite diario (${defaultRouteDispatchPolicy.maxDailyRoutes}/${defaultRouteDispatchPolicy.maxDailyRoutes})`
+                        : 'Asigna todas las rutas posibles de la lista filtrada a este lecturista'
+                    }
+                  >
+                    + Asignar filtradas ({displayedRoutes.length})
+                  </Button>
+                  {activeOperator.count > 0 && (
+                    <Button
+                      size="xs"
+                      variant="dashed"
+                      onClick={handleClearActiveOperatorRoutes}
+                      title="Quita todas las rutas asignadas a este lecturista"
+                      leftIcon={<RotateCcw size={12} />}
+                      color="orange"
+                    >
+                      Limpiar
+                    </Button>
+                  )}
+                  {operatorsWithStats.length > 1 && (
+                    <Button
+                      size="xs"
+                      variant="primary"
+                      onClick={handleSelectNextOperator}
+                      title="Pasar al siguiente lecturista"
+                      rightIcon={<ArrowRight size={12} />}
+                    >
+                      Siguiente
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* SECCIÓN 3: Lista de Rutas para Asignar */}
+            <div className="morning-routes-list-container">
+              {/* Barra de Filtros y Búsqueda */}
+              <div className="morning-routes-filter-bar">
+                <div className="morning-routes-search-box">
+                  <Input
+                    type="text"
+                    placeholder="Buscar ruta por código o nombre..."
+                    className="morning-routes-search-input"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    size="small"
+                    leftIcon={<Search size={12} />}
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: 'var(--text-muted)',
+                        padding: 0
+                      }}
+                      onClick={() => setSearchQuery('')}
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="morning-routes-filter-tabs">
+                  <button
+                    type="button"
+                    className={`morning-routes-filter-tab ${
+                      filterTab === 'ALL' ? 'is-active' : ''
+                    }`}
+                    onClick={() => setFilterTab('ALL')}
+                  >
+                    Todas ({sectorRoutes.length})
+                  </button>
+                  <button
+                    type="button"
+                    className={`morning-routes-filter-tab ${
+                      filterTab === 'UNASSIGNED' ? 'is-active' : ''
+                    }`}
+                    onClick={() => setFilterTab('UNASSIGNED')}
+                  >
+                    Sin Asignar ({unassignedCount})
+                  </button>
+                  {activeOperator && (
+                    <button
+                      type="button"
+                      className={`morning-routes-filter-tab ${
+                        filterTab === 'ACTIVE_OP' ? 'is-active' : ''
+                      }`}
+                      onClick={() => setFilterTab('ACTIVE_OP')}
+                    >
+                      De {activeOperator.name.split(' ')[0]} (
+                      {activeOpAssignedCount})
+                    </button>
+                  )}
+                  {otherOpsAssignedCount > 0 && (
+                    <button
+                      type="button"
+                      className={`morning-routes-filter-tab ${
+                        filterTab === 'OTHER_OPS' ? 'is-active' : ''
+                      }`}
+                      onClick={() => setFilterTab('OTHER_OPS')}
+                    >
+                      Otros ({otherOpsAssignedCount})
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Filas de Rutas */}
               <div className="morning-routes-list-scroll">
-                {filteredRoutes.length === 0 ? (
+                {displayedRoutes.length === 0 ? (
                   <div
                     style={{
                       padding: '2.5rem',
                       textAlign: 'center',
                       color: 'var(--text-muted)',
-                      fontSize: '0.85rem',
+                      fontSize: '0.85rem'
                     }}
                   >
-                    No hay rutas activas para el sector seleccionado.
+                    {searchQuery
+                      ? 'No se encontraron rutas con el término ingresado.'
+                      : 'No hay rutas para el filtro seleccionado.'}
                   </div>
                 ) : (
-                  filteredRoutes.map(r => {
-                    const assignedUser = routeAssignments[r.idRuta] || '';
+                  displayedRoutes.map((r) => {
+                    const assignedUserId = routeAssignments[r.idRuta];
+                    const assignedOp = assignedUserId
+                      ? operatorsWithStats.find(
+                          (o) => o.userId === assignedUserId
+                        )
+                      : null;
+                    const isAssignedToActive = Boolean(
+                      selectedOperatorId &&
+                      assignedUserId === selectedOperatorId
+                    );
                     const isSelectedForMap = selectedRouteIdForMap === r.idRuta;
 
                     return (
                       <div
                         key={r.idRuta}
-                        className={`morning-route-item-row ${isSelectedForMap ? 'is-selected-for-map' : ''}`}
+                        className={`morning-route-item-row ${
+                          isSelectedForMap ? 'is-selected-for-map' : ''
+                        }`}
+                        style={{
+                          borderLeft: isAssignedToActive
+                            ? `4px solid ${activeOperator?.color || 'var(--accent)'}`
+                            : assignedOp
+                              ? `4px solid ${assignedOp.color}`
+                              : undefined
+                        }}
                       >
                         <div className="morning-route-item-info">
                           <span className="morning-route-code">
@@ -420,18 +1014,52 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
                           </span>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                          }}
+                        >
+                          {/* Badge de estado de asignación con color del lecturista */}
+                          {assignedOp ? (
+                            <span
+                              className="morning-route-assign-badge"
+                              style={{
+                                backgroundColor: `color-mix(in srgb, ${assignedOp.color} 18%, transparent)`,
+                                color: assignedOp.color,
+                                border: `1px solid ${assignedOp.color}`
+                              }}
+                              title={`Asignada a ${assignedOp.name}`}
+                            >
+                              <span
+                                className="morning-operator-dot"
+                                style={{
+                                  backgroundColor: assignedOp.color,
+                                  width: '6px',
+                                  height: '6px'
+                                }}
+                              />
+                              {assignedOp.name}
+                            </span>
+                          ) : (
+                            <span className="morning-route-assign-badge is-unassigned">
+                              Sin asignar
+                            </span>
+                          )}
+
+                          {/* Botón Ver en Mapa */}
                           <Button
                             size="xs"
                             variant={isSelectedForMap ? 'primary' : 'ghost'}
                             onClick={() =>
-                              setSelectedRouteIdForMap(prev =>
-                                prev === r.idRuta ? null : r.idRuta,
+                              setSelectedRouteIdForMap((prev) =>
+                                prev === r.idRuta ? null : r.idRuta
                               )
                             }
                             title={
                               isSelectedForMap
-                                ? 'Ruta activa en el mapa (clic para quitar)'
+                                ? 'Ruta enfocada en el mapa (clic para deseleccionar)'
                                 : 'Ver polígono y acometidas en el mapa'
                             }
                             leftIcon={<MapPin size={12} />}
@@ -439,35 +1067,78 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
                             {isSelectedForMap ? 'En mapa' : 'Mapa'}
                           </Button>
 
-                          <select
-                            className="morning-form-select"
-                            style={{
-                              minWidth: '185px',
-                              fontSize: '0.8rem',
-                              padding: '0.35rem 0.5rem',
-                            }}
-                            value={assignedUser}
-                            disabled={isLoadingOperators}
-                            onChange={e =>
-                              handleSelectRouteOperator(r.idRuta, e.target.value)
-                            }
-                          >
-                            <option value="">-- Sin asignar --</option>
-                            {operators.map(op => {
-                              const count = currentTotalAssignedByUser[op.userId] || 0;
-                              const isHeavy = count >= 4;
-                              const name =
-                                op.firstName || op.lastName
-                                  ? `${op.firstName || ''} ${op.lastName || ''}`.trim()
-                                  : op.username;
-
-                              return (
-                                <option key={op.userId} value={op.userId}>
-                                  {name} ({count} ruta{count === 1 ? '' : 's'}){isHeavy ? ' — Carga alta' : ''}
-                                </option>
-                              );
-                            })}
-                          </select>
+                          {/* Botón Acción para el Lecturista Activo */}
+                          {activeOperator && (
+                            <button
+                              type="button"
+                              className="morning-route-action-btn"
+                              disabled={
+                                !isAssignedToActive &&
+                                activeOperator.isMaxReached
+                              }
+                              onClick={() =>
+                                handleToggleAssignToActiveOperator(r.idRuta)
+                              }
+                              style={{
+                                backgroundColor: isAssignedToActive
+                                  ? activeOperator.color
+                                  : 'transparent',
+                                borderColor:
+                                  !isAssignedToActive &&
+                                  activeOperator.isMaxReached
+                                    ? 'var(--border)'
+                                    : activeOperator.color,
+                                color: isAssignedToActive
+                                  ? '#ffffff'
+                                  : !isAssignedToActive &&
+                                      activeOperator.isMaxReached
+                                    ? 'var(--text-muted)'
+                                    : activeOperator.color,
+                                cursor:
+                                  !isAssignedToActive &&
+                                  activeOperator.isMaxReached
+                                    ? 'not-allowed'
+                                    : 'pointer',
+                                opacity:
+                                  !isAssignedToActive &&
+                                  activeOperator.isMaxReached
+                                    ? 0.6
+                                    : 1
+                              }}
+                              title={
+                                isAssignedToActive
+                                  ? `Quitar ruta de ${activeOperator.name}`
+                                  : activeOperator.isMaxReached
+                                    ? `${activeOperator.name} alcanzó el límite diario (${defaultRouteDispatchPolicy.maxDailyRoutes} rutas)`
+                                    : assignedOp
+                                      ? `Reasignar de ${assignedOp.name} a ${activeOperator.name}`
+                                      : `Asignar a ${activeOperator.name}`
+                              }
+                            >
+                              {isAssignedToActive ? (
+                                <>
+                                  <Check size={12} />
+                                  Quitar
+                                </>
+                              ) : activeOperator.isMaxReached ? (
+                                <>
+                                  Máx. (
+                                  {defaultRouteDispatchPolicy.maxDailyRoutes}/
+                                  {defaultRouteDispatchPolicy.maxDailyRoutes})
+                                </>
+                              ) : assignedOp ? (
+                                <>
+                                  <Plus size={12} />
+                                  Reasignar
+                                </>
+                              ) : (
+                                <>
+                                  <Plus size={12} />
+                                  Asignar
+                                </>
+                              )}
+                            </button>
+                          )}
                         </div>
                       </div>
                     );
@@ -485,6 +1156,11 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
               selectedRouteId={selectedRouteIdForMap}
               onSelectRouteId={setSelectedRouteIdForMap}
               isOpen={isOpen}
+              assignments={routeAssignments}
+              operatorColors={operatorColorMap}
+              activeOperator={activeOperator}
+              onToggleAssignRoute={handleToggleAssignToActiveOperator}
+              operators={operatorsWithStats}
             />
           </div>
         </div>
@@ -496,8 +1172,8 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
               <div className="morning-dispatch-progress-text">
                 <span>
                   Despachando lote {dispatchProgress.currentChunk} de{' '}
-                  {dispatchProgress.totalChunks} ({dispatchProgress.completed} de{' '}
-                  {dispatchProgress.total} rutas)...
+                  {dispatchProgress.totalChunks} ({dispatchProgress.completed}{' '}
+                  de {dispatchProgress.total} rutas)...
                 </span>
                 <span className="morning-dispatch-progress-percentage">
                   {dispatchProgress.percent}%
@@ -512,22 +1188,42 @@ export const BatchMorningDispatchModal: React.FC<BatchMorningDispatchModalProps>
             </div>
           ) : (
             <div className="morning-dispatch-summary">
-              <strong>{totalAssigned}</strong> de {filteredRoutes.length} rutas seleccionadas
-              para despacho
+              <strong>{totalAssigned}</strong> de {sectorRoutes.length} rutas
+              asignadas a{' '}
+              <strong>
+                {new Set(Object.values(routeAssignments).filter(Boolean)).size}
+              </strong>{' '}
+              lecturistas
             </div>
           )}
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <Button variant="ghost" onClick={onClose} disabled={isSubmitting} size="xs">
+
+          <div
+            style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}
+          >
+            <Button
+              variant="dashed"
+              onClick={onClose}
+              disabled={isSubmitting}
+              size="xs"
+              color="error"
+            >
               Cancelar
             </Button>
             <Button
               variant="primary"
               onClick={handleSubmit}
               disabled={isSubmitting || totalAssigned === 0}
-              leftIcon={<Send size={14} className={isSubmitting ? 'animate-spin' : ''} />}
+              leftIcon={
+                <Send
+                  size={14}
+                  className={isSubmitting ? 'animate-spin' : ''}
+                />
+              }
               size="xs"
             >
-              {isSubmitting ? 'Procesando Despacho...' : 'Confirmar y Despachar'}
+              {isSubmitting
+                ? 'Procesando Despacho...'
+                : 'Confirmar y Despachar'}
             </Button>
           </div>
         </div>

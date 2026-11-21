@@ -31,7 +31,6 @@ export interface ReadingRoute {
   codigoRuta?: string;
   nombreRuta?: string;
   sector?: number;
-  activo?: boolean;
 }
 
 export interface RouteFeatureProperties {
