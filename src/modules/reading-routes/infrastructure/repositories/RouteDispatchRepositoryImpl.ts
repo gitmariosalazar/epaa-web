@@ -118,6 +118,7 @@ export class RouteDispatchRepositoryImpl implements RouteDispatchRepository {
     }
     if (fecha) {
       params.append('fecha', fecha);
+      params.append('fechaProgramada', fecha);
     }
     const qs = params.toString() ? `?${params.toString()}` : '';
     const response = await this.client.get<ApiResponse<RouteAssignment[]>>(

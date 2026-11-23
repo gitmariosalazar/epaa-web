@@ -15,6 +15,7 @@ import type {
   ReassignRouteSegmentResponse,
 } from '../../domain/dto/response/route-responses.dto';
 import { notify } from '../utils/notify';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 export interface UseRouteDispatchViewModelReturn {
   periodo: string;
@@ -54,9 +55,8 @@ export const useRouteDispatchViewModel = (): UseRouteDispatchViewModelReturn => 
     resumeRouteAssignmentUseCase,
   } = useReadingRoutesContext();
 
-  const now = new Date();
-  const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const currentDateStr = now.toISOString().split('T')[0];
+  const currentMonthStr = dateService.getCurrentMonthString();
+  const currentDateStr = dateService.getCurrentDateString();
 
   const [periodo, setPeriodo] = useState<string>(currentMonthStr);
   const [fecha, setFecha] = useState<string>(currentDateStr);

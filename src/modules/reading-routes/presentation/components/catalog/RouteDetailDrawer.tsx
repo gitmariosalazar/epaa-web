@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   X,
   Zap,
@@ -50,6 +50,20 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const PAGE_SIZE = 50;
+  const [renderedLimit, setRenderedLimit] = useState<number>(PAGE_SIZE);
+
+  // Reiniciar límite al cambiar la ruta o los filtros
+  useEffect(() => {
+    setRenderedLimit(PAGE_SIZE);
+  }, [route?.idRuta, searchTerm, sortOrder]);
+
+  const handleBodyScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollTop + clientHeight >= scrollHeight - 200) {
+      setRenderedLimit((prev) => Math.min(prev + PAGE_SIZE, filteredConnections.length));
+    }
+  };
 
   const filteredConnections = useMemo(() => {
     let list = [...connections];
@@ -82,8 +96,6 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
   }, [connections, searchTerm, sortOrder]);
 
   if (!isOpen || !route) return null;
-
-  console.log('Filtered connections:', route);
 
   return (
     <div className="route-drawer-overlay" onClick={onClose}>
@@ -134,23 +146,45 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
             </span>
           </Tooltip>
           <span className="route-drawer-meter">
-            <Tooltip
-              content={
-                route.usuario
-                  ? `${route.nombreUsuario}`
-                  : 'Esta ruta no tiene usuario asignado'
-              }
-              followCursor={false}
-              themeColor="gray"
-            >
-              <ColorChip
-                label={route.usuario ? `${route.usuario}` : 'Sin Asignar'}
-                variant="soft"
-                size="xs"
-                color={route.usuario ? `${route.colorIdentificador}` : 'red'}
-                icon={route.usuario ? <FaUser /> : <PiSealWarningFill />}
-              />
-            </Tooltip>
+            {(() => {
+              const assignedUser = route.usuario || route.nombreUsuario;
+              const isAssigned = Boolean(
+                route.idAsignacion ||
+                route.idUsuarioAsignado ||
+                assignedUser ||
+                (route.estado &&
+                  route.estado.toUpperCase() !== 'NO_ASIGNADA' &&
+                  route.estado.toUpperCase() !== 'SIN_ASIGNAR')
+              );
+              const label =
+                assignedUser ||
+                (isAssigned ? (route.estado || 'Asignada') : 'Sin Asignar');
+              const isAssignedStatus = isAssigned && label !== 'Sin Asignar';
+
+              return (
+                <Tooltip
+                  content={
+                    isAssignedStatus
+                      ? `Asignado a: ${label}`
+                      : 'Esta ruta no tiene usuario asignado'
+                  }
+                  followCursor={false}
+                  themeColor="gray"
+                >
+                  <ColorChip
+                    label={label}
+                    variant="soft"
+                    size="xs"
+                    color={
+                      isAssignedStatus
+                        ? (route.colorIdentificador || '#0284c7')
+                        : 'red'
+                    }
+                    icon={isAssignedStatus ? <FaUser /> : <PiSealWarningFill />}
+                  />
+                </Tooltip>
+              );
+            })()}
           </span>
         </div>
 
@@ -287,7 +321,7 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
         </div>
 
         {/* Body / Connection List */}
-        <div className="route-drawer-body">
+        <div className="route-drawer-body" onScroll={handleBodyScroll}>
           {isLoading ? (
             <div className="route-drawer-loading">
               <Clock
@@ -312,72 +346,89 @@ export const RouteDetailDrawer: React.FC<RouteDetailDrawerProps> = ({
               </div>
             </div>
           ) : (
-            filteredConnections.map((c) => (
-              <div
-                key={c.idRutaAcometida || c.acometidaId}
-                className="route-drawer-card"
-              >
-                {/* Top row: sequence + meter */}
-                <div className="route-drawer-card-top">
-                  <span className="route-drawer-seq">
-                    Orden Secuencia # {c.ordenSecuencia}
-                  </span>
-                  <span className="route-drawer-meter">
-                    <Tooltip
-                      content="Numero de medidor"
-                      followCursor={false}
-                      themeColor="gray"
-                    >
-                      <ColorChip
-                        label={`${c.numeroMedidor}`}
-                        color=""
-                        variant="ghost"
-                        size="xs"
-                        icon={<FaTachometerAlt />}
-                      />
-                    </Tooltip>
-                  </span>
-                </div>
-
-                {/* User */}
-                <div className="route-drawer-user">
-                  <Avatar
-                    size="sm"
-                    name={c.abonado || 'Consumidor desconocido'}
-                  />
-                  <div className="route-drawer-user-name">
-                    <span className="route-drawer-user-name-text">
-                      {c.abonado || 'Consumidor desconocido'}
+            <>
+              {filteredConnections.slice(0, renderedLimit).map((c) => (
+                <div
+                  key={c.idRutaAcometida || c.acometidaId}
+                  className="route-drawer-card"
+                >
+                  {/* Top row: sequence + meter */}
+                  <div className="route-drawer-card-top">
+                    <span className="route-drawer-seq">
+                      Orden Secuencia # {c.ordenSecuencia}
                     </span>
-                    <span className="route-drawer-user-id">{c.clienteId}</span>
+                    <span className="route-drawer-meter">
+                      <Tooltip
+                        content="Numero de medidor"
+                        followCursor={false}
+                        themeColor="gray"
+                      >
+                        <ColorChip
+                          label={`${c.numeroMedidor}`}
+                          color=""
+                          variant="ghost"
+                          size="xs"
+                          icon={<FaTachometerAlt />}
+                        />
+                      </Tooltip>
+                    </span>
+                  </div>
+
+                  {/* User */}
+                  <div className="route-drawer-user">
+                    <Avatar
+                      size="sm"
+                      name={c.abonado || 'Consumidor desconocido'}
+                    />
+                    <div className="route-drawer-user-name">
+                      <span className="route-drawer-user-name-text">
+                        {c.abonado || 'Consumidor desconocido'}
+                      </span>
+                      <span className="route-drawer-user-id">{c.clienteId}</span>
+                    </div>
+                  </div>
+
+                  {/* Address */}
+                  <div className="route-drawer-address">
+                    <MapPin size={12} className="route-drawer-address-icon" />
+                    <span>
+                      {c.direccion || c.referencia || 'Sin dirección registrada'}
+                    </span>
+                  </div>
+
+                  {/* Footer meta */}
+                  <div className="route-drawer-footer-row">
+                    <span className="route-drawer-footer-item">
+                      Sector: <strong>{c.sector || 'N/A'}</strong>
+                    </span>
+                    <span className="route-drawer-footer-item">
+                      Acometida: <strong>{c.acometidaId}</strong>
+                    </span>
+                    {typeof c.consumoPromedio === 'number' && (
+                      <span className="route-drawer-footer-item">
+                        <Gauge size={11} />
+                        Prom: <strong>{c.consumoPromedio} m³</strong>
+                      </span>
+                    )}
                   </div>
                 </div>
-
-                {/* Address */}
-                <div className="route-drawer-address">
-                  <MapPin size={12} className="route-drawer-address-icon" />
-                  <span>
-                    {c.direccion || c.referencia || 'Sin dirección registrada'}
-                  </span>
+              ))}
+              {renderedLimit < filteredConnections.length && (
+                <div style={{ textAlign: 'center', padding: '0.75rem' }}>
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    onClick={() =>
+                      setRenderedLimit((prev) =>
+                        Math.min(prev + PAGE_SIZE, filteredConnections.length)
+                      )
+                    }
+                  >
+                    Cargar más ({filteredConnections.length - renderedLimit} restantes)
+                  </Button>
                 </div>
-
-                {/* Footer meta */}
-                <div className="route-drawer-footer-row">
-                  <span className="route-drawer-footer-item">
-                    Sector: <strong>{c.sector || 'N/A'}</strong>
-                  </span>
-                  <span className="route-drawer-footer-item">
-                    Acometida: <strong>{c.acometidaId}</strong>
-                  </span>
-                  {typeof c.consumoPromedio === 'number' && (
-                    <span className="route-drawer-footer-item">
-                      <Gauge size={11} />
-                      Prom: <strong>{c.consumoPromedio} m³</strong>
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))
+              )}
+            </>
           )}
         </div>
       </div>

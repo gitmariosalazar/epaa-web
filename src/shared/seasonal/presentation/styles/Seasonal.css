@@ -100,25 +100,214 @@
 
 .seasonal-banner-text-group {
   display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 0.65rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .seasonal-banner-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: #ffffff;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.seasonal-text-sparkle {
+  color: #fef08a;
+  filter: drop-shadow(0 0 6px rgba(253, 224, 71, 0.7));
+  animation: festive-sparkle-dance 3.2s ease-in-out infinite;
+  flex-shrink: 0;
+  transform-origin: center;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.seasonal-banner-title-text {
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(
+    110deg,
+    #ffffff 0%,
+    #ffffff 22%,
+    #fef08a 38%,
+    #ffffff 48%,
+    #fde047 54%,
+    #ffffff 68%,
+    #ffffff 100%
+  );
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #ffffff;
+  animation: festive-text-shimmer 5s cubic-bezier(0.4, 0, 0.2, 1) infinite,
+             festive-title-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  filter: drop-shadow(0 0 8px rgba(254, 240, 138, 0.35))
+          drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: filter 0.3s ease;
 }
 
 .seasonal-banner-subtitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   font-size: 0.785rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.92);
   font-weight: 400;
+  animation: festive-subtitle-reveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.15s backwards;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seasonal-banner-bullet {
+  display: inline-block;
+  color: #fde047;
+  font-size: 0.7rem;
+  line-height: 1;
+  animation: festive-bullet-twinkle 2.8s ease-in-out infinite 0.5s;
+  filter: drop-shadow(0 0 4px rgba(253, 224, 71, 0.65));
+}
+
+.seasonal-banner-subtitle-text {
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.9) 28%,
+    #ffffff 44%,
+    #fef9c3 52%,
+    rgba(255, 255, 255, 0.9) 66%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  animation: festive-subtext-shimmer 5s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.8s;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+}
+
+/* Subtle festive hover interaction */
+.seasonal-banner-text-group:hover .seasonal-text-sparkle {
+  transform: scale(1.3) rotate(20deg);
+  filter: drop-shadow(0 0 10px rgba(254, 240, 138, 1));
+}
+
+.seasonal-banner-text-group:hover .seasonal-banner-title-text {
+  filter: drop-shadow(0 0 12px rgba(254, 240, 138, 0.6))
+          drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+}
+
+/* Festive Keyframe Animations */
+@keyframes festive-text-shimmer {
+  0% {
+    background-position: 100% 50%;
+    filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.3)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+  }
+  16% {
+    filter: drop-shadow(0 0 14px rgba(254, 240, 138, 0.7)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+  }
+  32% {
+    background-position: -20% 50%;
+    filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.3)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+  }
+  100% {
+    background-position: -20% 50%;
+    filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.3)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+  }
+}
+
+@keyframes festive-subtext-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  32% {
+    background-position: -20% 50%;
+  }
+  100% {
+    background-position: -20% 50%;
+  }
+}
+
+@keyframes festive-title-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes festive-subtitle-reveal {
+  0% {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes festive-sparkle-dance {
+  0%, 100% {
+    transform: scale(0.9) rotate(0deg);
+    opacity: 0.85;
+    filter: drop-shadow(0 0 4px rgba(253, 224, 71, 0.5));
+  }
+  25% {
+    transform: scale(1.18) rotate(14deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 10px rgba(254, 240, 138, 0.95));
+  }
+  50% {
+    transform: scale(0.95) rotate(-6deg);
+    opacity: 0.9;
+    filter: drop-shadow(0 0 5px rgba(253, 224, 71, 0.6));
+  }
+  75% {
+    transform: scale(1.12) rotate(8deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 9px rgba(254, 240, 138, 0.9));
+  }
+}
+
+@keyframes festive-bullet-twinkle {
+  0%, 100% {
+    transform: scale(0.85) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.25) rotate(45deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 7px rgba(254, 240, 138, 0.9));
+  }
+}
+
+/* Accessibility: Prefers Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .seasonal-banner-title-text,
+  .seasonal-banner-subtitle-text,
+  .seasonal-text-sparkle,
+  .seasonal-banner-bullet,
+  .seasonal-banner-subtitle {
+    animation: none !important;
+    transform: none !important;
+    -webkit-text-fill-color: #ffffff !important;
+    color: #ffffff !important;
+  }
 }
 
 .seasonal-banner-actions {

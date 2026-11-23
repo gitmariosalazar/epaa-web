@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   APIProvider,
   Map,
@@ -44,6 +44,7 @@ export interface BatchDispatchMapPreviewProps {
   activeOperator?: { userId: string; name: string; color: string } | null;
   onToggleAssignRoute?: (routeId: number) => void;
   operators?: OperatorMapInfo[];
+  dbAssignedRouteIds?: Set<number>;
 }
 
 const getValidCoords = (
@@ -92,6 +93,7 @@ interface BatchDispatchDataLayerProps {
   operatorColors?: Record<string, string>;
   activeOperator?: { userId: string; name: string; color: string } | null;
   onToggleAssignRoute?: (routeId: number) => void;
+  dbAssignedRouteIds?: Set<number>;
 }
 
 const BatchDispatchDataLayer: React.FC<BatchDispatchDataLayerProps> = ({
@@ -102,14 +104,23 @@ const BatchDispatchDataLayer: React.FC<BatchDispatchDataLayerProps> = ({
   assignments,
   operatorColors,
   activeOperator,
-  onToggleAssignRoute
+  onToggleAssignRoute,
+  dbAssignedRouteIds
 }) => {
   const map = useMap();
+  const onSelectRouteIdRef = useRef(onSelectRouteId);
+  onSelectRouteIdRef.current = onSelectRouteId;
+  const onToggleAssignRouteRef = useRef(onToggleAssignRoute);
+  onToggleAssignRouteRef.current = onToggleAssignRoute;
+  const activeOperatorRef = useRef(activeOperator);
+  activeOperatorRef.current = activeOperator;
+  const dbAssignedRouteIdsRef = useRef(dbAssignedRouteIds);
+  dbAssignedRouteIdsRef.current = dbAssignedRouteIds;
 
+  // 1. Cargar GeoJSON de rutas únicamente cuando cambien los datos
   useEffect(() => {
     if (!map) return;
 
-    // Limpiar polígonos previos
     map.data.forEach((feature) => {
       map.data.remove(feature);
     });
@@ -121,16 +132,60 @@ const BatchDispatchDataLayer: React.FC<BatchDispatchDataLayerProps> = ({
     } catch (e) {
       console.warn('Error al cargar GeoJSON de rutas en despacho:', e);
     }
+  }, [map, geojsonData]);
+
+  // 2. Listener de clics en polígonos
+  useEffect(() => {
+    if (!map) return;
+
+    const clickListener = map.data.addListener(
+      'click',
+      (event: google.maps.Data.MouseEvent) => {
+        const idRuta = event.feature.getProperty('idRuta');
+        if (idRuta) {
+          const numId = Number(idRuta);
+          onSelectRouteIdRef.current(numId);
+          // Si la ruta ya está asignada en base de datos para esta fecha, no intentar asignarla en este despacho
+          if (dbAssignedRouteIdsRef.current?.has(numId)) {
+            return;
+          }
+          if (onToggleAssignRouteRef.current && activeOperatorRef.current) {
+            onToggleAssignRouteRef.current(numId);
+          }
+        }
+      }
+    );
+
+    return () => {
+      google.maps.event.removeListener(clickListener);
+    };
+  }, [map]);
+
+  // 3. Estilos dinámicos sin re-parsear las geometrías de polígonos
+  useEffect(() => {
+    if (!map) return;
 
     map.data.setStyle((feature: google.maps.Data.Feature) => {
       const defaultColor = String(feature.getProperty('color') || '#0284c7');
       const idRuta = Number(feature.getProperty('idRuta'));
       const isSelected = Boolean(selectedRouteId && selectedRouteId === idRuta);
+      const isAssignedInDb = Boolean(dbAssignedRouteIds?.has(idRuta));
       const assignedUserId = assignments?.[idRuta];
       const isAssigned = Boolean(assignedUserId);
       const isAssignedToActive = Boolean(
         activeOperator && assignedUserId === activeOperator.userId
       );
+
+      // Si ya está asignada en la base de datos para esta fecha
+      if (isAssignedInDb) {
+        return {
+          fillColor: '#64748b',
+          fillOpacity: isSelected ? 0.35 : 0.15,
+          strokeColor: isSelected ? mapTheme.polygon.selectedStroke : '#64748b',
+          strokeWeight: isSelected ? 3 : 1.2,
+          zIndex: isSelected ? 25 : 1
+        };
+      }
 
       const opColor =
         assignedUserId && operatorColors?.[assignedUserId]
@@ -174,35 +229,102 @@ const BatchDispatchDataLayer: React.FC<BatchDispatchDataLayerProps> = ({
         zIndex: isSelected ? 30 : isAssignedToActive ? 20 : isAssigned ? 10 : 2
       };
     });
+  }, [
+    map,
+    selectedRouteId,
+    assignments,
+    operatorColors,
+    activeOperator,
+    mapTheme,
+    dbAssignedRouteIds
+  ]);
 
-    const clickListener = map.data.addListener(
+  return null;
+};
+
+// Capa Vectorial de Acometidas en Despacho (GPU accelerated, sin saturación del DOM)
+const BatchDispatchConnectionsLayer: React.FC<{
+  connections: RouteConnection[];
+  activeConnectionId?: number | string | null;
+  onSelectConnection: (conn: RouteConnection) => void;
+}> = ({ connections, activeConnectionId, onSelectConnection }) => {
+  const map = useMap();
+  const onSelectRef = useRef(onSelectConnection);
+  onSelectRef.current = onSelectConnection;
+  const dataLayerRef = useRef<google.maps.Data | null>(null);
+
+  useEffect(() => {
+    if (!map) return;
+    const dataLayer = new google.maps.Data();
+    dataLayer.setMap(map);
+    dataLayerRef.current = dataLayer;
+
+    const clickListener = dataLayer.addListener(
       'click',
       (event: google.maps.Data.MouseEvent) => {
-        const idRuta = event.feature.getProperty('idRuta');
-        if (idRuta) {
-          const numId = Number(idRuta);
-          onSelectRouteId(numId);
-          if (onToggleAssignRoute && activeOperator) {
-            onToggleAssignRoute(numId);
-          }
+        const conn = event.feature.getProperty('connection') as RouteConnection;
+        if (conn) {
+          onSelectRef.current(conn);
         }
       }
     );
 
     return () => {
       google.maps.event.removeListener(clickListener);
+      dataLayer.setMap(null);
+      dataLayerRef.current = null;
     };
-  }, [
-    map,
-    geojsonData,
-    selectedRouteId,
-    onSelectRouteId,
-    mapTheme,
-    assignments,
-    operatorColors,
-    activeOperator,
-    onToggleAssignRoute
-  ]);
+  }, [map]);
+
+  useEffect(() => {
+    const dataLayer = dataLayerRef.current;
+    if (!dataLayer) return;
+
+    dataLayer.forEach((f: google.maps.Data.Feature) => dataLayer.remove(f));
+    if (!connections || connections.length === 0) return;
+
+    connections.forEach((conn) => {
+      const coords = getValidCoords(conn.latitud, conn.longitud);
+      if (!coords) return;
+      dataLayer.add(
+        new google.maps.Data.Feature({
+          geometry: new google.maps.Data.Point(coords),
+          id: conn.idRutaAcometida || conn.acometidaId,
+          properties: {
+            connection: conn,
+            id: conn.idRutaAcometida || conn.acometidaId,
+            seq: conn.ordenSecuencia,
+            meter: conn.numeroMedidor || 'S/N'
+          }
+        })
+      );
+    });
+  }, [connections]);
+
+  useEffect(() => {
+    const dataLayer = dataLayerRef.current;
+    if (!dataLayer) return;
+
+    dataLayer.setStyle((feature: google.maps.Data.Feature) => {
+      const id = feature.getProperty('id');
+      const isSelected = Boolean(activeConnectionId && activeConnectionId === id);
+      const seq = feature.getProperty('seq');
+      const meter = feature.getProperty('meter');
+
+      return {
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: isSelected ? 8 : 4.5,
+          fillColor: isSelected ? '#ef4444' : '#2563eb',
+          fillOpacity: isSelected ? 1 : 0.85,
+          strokeColor: '#ffffff',
+          strokeWeight: isSelected ? 2.5 : 1.2
+        },
+        title: `Acometida #${seq} • Medidor: ${meter}`,
+        zIndex: isSelected ? 45 : 10
+      };
+    });
+  }, [activeConnectionId]);
 
   return null;
 };
@@ -318,381 +440,384 @@ export const BatchDispatchMapPreview: React.FC<
   operatorColors,
   activeOperator,
   onToggleAssignRoute,
-  operators
+  operators,
+  dbAssignedRouteIds
 }) => {
-  const { theme } = useTheme();
-  const mapTheme = useMemo(() => getMapThemeConfig(theme), [theme]);
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
-  const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID ?? 'DEMO_MAP_ID';
+    const { theme } = useTheme();
+    const mapTheme = useMemo(() => getMapThemeConfig(theme), [theme]);
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
+    const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID ?? 'DEMO_MAP_ID';
 
-  const {
-    geojsonData,
-    isLoadingGeoJson,
-    connections,
-    isLoadingConnections,
-    activeConnection,
-    setActiveConnection,
-    refreshMapData
-  } = useBatchDispatchMap({
-    selectedSector,
-    selectedRouteId,
-    isOpen
-  });
-
-  const selectedRoute = useMemo(() => {
-    if (!selectedRouteId) return null;
-    return routes.find((r) => r.idRuta === selectedRouteId) || null;
-  }, [routes, selectedRouteId]);
-
-  const activeConnectionCoords = useMemo(() => {
-    if (!activeConnection) return null;
-    return getValidCoords(activeConnection.latitud, activeConnection.longitud);
-  }, [activeConnection]);
-
-  const handleClearSelectedRoute = useCallback(() => {
-    onSelectRouteId(null);
-  }, [onSelectRouteId]);
-
-  const assignedOperatorToSelectedRoute = useMemo(() => {
-    if (!selectedRouteId || !assignments || !operators) return null;
-    const uId = assignments[selectedRouteId];
-    if (!uId) return null;
-    return operators.find((op) => op.userId === uId) || null;
-  }, [selectedRouteId, assignments, operators]);
-
-  const isAssignedToActive = useMemo(() => {
-    if (!selectedRouteId || !assignments || !activeOperator) return false;
-    return assignments[selectedRouteId] === activeOperator.userId;
-  }, [selectedRouteId, assignments, activeOperator]);
-
-  const operatorsWithAssignments = useMemo(() => {
-    if (!operators || !assignments) return [];
-    const counts: Record<string, number> = {};
-    Object.values(assignments).forEach((uId) => {
-      counts[uId] = (counts[uId] || 0) + 1;
+    const {
+      geojsonData,
+      isLoadingGeoJson,
+      connections,
+      isLoadingConnections,
+      activeConnection,
+      setActiveConnection,
+      refreshMapData
+    } = useBatchDispatchMap({
+      selectedSector,
+      selectedRouteId,
+      isOpen
     });
-    return operators
-      .filter((op) => (counts[op.userId] || 0) > 0)
-      .map((op) => ({
-        ...op,
-        count: counts[op.userId] || 0
-      }));
-  }, [operators, assignments]);
 
-  const unassignedCount = useMemo(() => {
-    if (!routes) return 0;
-    if (!assignments) return routes.length;
-    return routes.filter((r) => !assignments[r.idRuta]).length;
-  }, [routes, assignments]);
+    const selectedRoute = useMemo(() => {
+      if (!selectedRouteId) return null;
+      return routes.find((r) => r.idRuta === selectedRouteId) || null;
+    }, [routes, selectedRouteId]);
 
-  const sectorName = useMemo(() => {
-    if (!selectedSector) return 'Todos los sectores';
-    switch (Number(selectedSector)) {
-      case 1:
-        return 'Sector 1 (Centro)';
-      case 2:
-        return 'Sector 2 (Andrade Marín)';
-      case 3:
-        return 'Sector 3 (San Roque)';
-      case 4:
-        return 'Sector 4 (Chaltura/Natabuela)';
-      default:
-        return `Sector ${selectedSector}`;
-    }
-  }, [selectedSector]);
+    const activeConnectionCoords = useMemo(() => {
+      if (!activeConnection) return null;
+      return getValidCoords(activeConnection.latitud, activeConnection.longitud);
+    }, [activeConnection]);
 
-  return (
-    <div className="batch-dispatch-map-wrapper">
-      {/* Barra superior de herramientas sobre el mapa */}
-      <div className="batch-dispatch-map-toolbar">
-        <div className="batch-dispatch-map-title-group">
-          <Layers size={16} style={{ color: 'var(--accent)' }} />
-          <span>Vista SIG: {sectorName}</span>
+    const handleClearSelectedRoute = useCallback(() => {
+      onSelectRouteId(null);
+    }, [onSelectRouteId]);
 
-          {/* Pill de lecturista activo para asignación */}
-          {activeOperator && (
-            <div
-              className="batch-dispatch-active-op-pill"
-              style={{
-                borderColor: activeOperator.color,
-                color: activeOperator.color
-              }}
-              title={`Lecturista actual para asignar: ${activeOperator.name}`}
-            >
-              <span
-                className="batch-dispatch-active-op-dot"
-                style={{ backgroundColor: activeOperator.color }}
-              />
-              <span>
-                Asignando a: <strong>{activeOperator.name}</strong>
-              </span>
-            </div>
-          )}
+    const assignedOperatorToSelectedRoute = useMemo(() => {
+      if (!selectedRouteId || !assignments || !operators) return null;
+      const uId = assignments[selectedRouteId];
+      if (!uId) return null;
+      return operators.find((op) => op.userId === uId) || null;
+    }, [selectedRouteId, assignments, operators]);
 
-          {/* Información y acción sobre la ruta enfocada */}
-          {selectedRoute && (
-            <div className="batch-dispatch-route-pill">
-              <MapPin size={12} />
-              <span>
-                {selectedRoute.codigo ||
-                  selectedRoute.codigoRuta ||
-                  `Ruta #${selectedRoute.idRuta}`}
-                {connections.length > 0 && ` (${connections.length} acom.)`}
-              </span>
+    const isAssignedToActive = useMemo(() => {
+      if (!selectedRouteId || !assignments || !activeOperator) return false;
+      return assignments[selectedRouteId] === activeOperator.userId;
+    }, [selectedRouteId, assignments, activeOperator]);
 
-              {assignedOperatorToSelectedRoute ? (
+    const operatorsWithAssignments = useMemo(() => {
+      if (!operators || !assignments) return [];
+      const counts: Record<string, number> = {};
+      Object.values(assignments).forEach((uId) => {
+        counts[uId] = (counts[uId] || 0) + 1;
+      });
+      return operators
+        .filter((op) => (counts[op.userId] || 0) > 0)
+        .map((op) => ({
+          ...op,
+          count: counts[op.userId] || 0
+        }));
+    }, [operators, assignments]);
+
+    const unassignedCount = useMemo(() => {
+      if (!routes) return 0;
+      if (!assignments) return routes.length;
+      return routes.filter((r) => !assignments[r.idRuta]).length;
+    }, [routes, assignments]);
+
+    const sectorName = useMemo(() => {
+      if (!selectedSector) return 'Todos los sectores';
+      switch (Number(selectedSector)) {
+        case 1:
+          return 'Sector 1 (Centro)';
+        case 2:
+          return 'Sector 2 (Andrade Marín)';
+        case 3:
+          return 'Sector 3 (San Roque)';
+        case 4:
+          return 'Sector 4 (Chaltura/Natabuela)';
+        default:
+          return `Sector ${selectedSector}`;
+      }
+    }, [selectedSector]);
+
+    return (
+      <div className="batch-dispatch-map-wrapper">
+        {/* Barra superior de herramientas sobre el mapa */}
+        <div className="batch-dispatch-map-toolbar">
+          <div className="batch-dispatch-map-title-group">
+            <Layers size={16} style={{ color: 'var(--accent)' }} />
+            <span>Vista SIG: {sectorName}</span>
+
+            {/* Pill de lecturista activo para asignación */}
+            {activeOperator && (
+              <div
+                className="batch-dispatch-active-op-pill"
+                style={{
+                  borderColor: activeOperator.color,
+                  color: activeOperator.color
+                }}
+                title={`Lecturista actual para asignar: ${activeOperator.name}`}
+              >
                 <span
-                  className="batch-dispatch-route-assigned-tag"
-                  style={{
-                    backgroundColor: assignedOperatorToSelectedRoute.color,
-                    color: '#ffffff'
-                  }}
-                >
-                  ● {assignedOperatorToSelectedRoute.name}
-                </span>
-              ) : (
-                <span className="batch-dispatch-route-unassigned-tag">
-                  Sin asignar
-                </span>
-              )}
-
-              {activeOperator && onToggleAssignRoute && (
-                <button
-                  type="button"
-                  className={`batch-dispatch-route-assign-btn ${
-                    isAssignedToActive ? 'is-assigned' : ''
-                  }`}
-                  onClick={() => onToggleAssignRoute(selectedRoute.idRuta)}
-                  style={{
-                    backgroundColor: isAssignedToActive
-                      ? activeOperator.color
-                      : 'transparent',
-                    borderColor: activeOperator.color,
-                    color: isAssignedToActive ? '#ffffff' : activeOperator.color
-                  }}
-                  title={
-                    isAssignedToActive
-                      ? `Quitar asignación de ${activeOperator.name}`
-                      : `Asignar ruta a ${activeOperator.name}`
-                  }
-                >
-                  {isAssignedToActive
-                    ? '✓ Quitar'
-                    : `+ Asignar a ${activeOperator.name.split(' ')[0]}`}
-                </button>
-              )}
-
-              <Button
-                type="button"
-                circle
-                variant="dashed"
-                onClick={handleClearSelectedRoute}
-                title="Quitar filtro de ruta y ver sector completo"
-                aria-label="Quitar filtro de ruta"
-                size="xs"
-              >
-                <X size={12} />
-              </Button>
-            </div>
-          )}
-        </div>
-
-        <div className="batch-dispatch-map-actions">
-          <Button
-            size="xs"
-            variant="dashed"
-            color="error"
-            onClick={() => void refreshMapData()}
-            title="Refrescar capa cartográfica"
-            circle
-            leftIcon={
-              <RefreshCw
-                size={13}
-                className={isLoadingGeoJson ? 'animate-spin' : ''}
-              />
-            }
-          ></Button>
-        </div>
-      </div>
-
-      {/* Loading Overlay */}
-      {(isLoadingGeoJson || isLoadingConnections) && (
-        <div className="batch-dispatch-map-loading-overlay">
-          <div className="batch-dispatch-map-spinner" />
-          <span>
-            {isLoadingConnections
-              ? 'Cargando puntos de acometidas...'
-              : 'Cargando polígonos del sector...'}
-          </span>
-        </div>
-      )}
-
-      {/* Visor de Google Maps */}
-      <div className="batch-dispatch-map-viewport">
-        <APIProvider apiKey={apiKey} libraries={['marker']}>
-          <Map
-            colorScheme={mapTheme.colorScheme}
-            defaultCenter={{
-              lat: FALLBACK_CENTER_ANTONIO_ANTE.lat,
-              lng: FALLBACK_CENTER_ANTONIO_ANTE.lng
-            }}
-            defaultZoom={13}
-            mapId={mapId}
-            styles={mapTheme.styles}
-            disableDefaultUI={false}
-            zoomControl={true}
-            streetViewControl={false}
-            mapTypeControl={false}
-            fullscreenControl={false}
-          >
-            {/* Sincronizador dinámico de tema */}
-            <BatchDispatchThemeSyncController mapTheme={mapTheme} />
-
-            {/* Capa de polígonos GeoJSON con coloreado por lecturista */}
-            <BatchDispatchDataLayer
-              geojsonData={geojsonData}
-              selectedRouteId={selectedRouteId}
-              onSelectRouteId={onSelectRouteId}
-              mapTheme={mapTheme}
-              assignments={assignments}
-              operatorColors={operatorColors}
-              activeOperator={activeOperator}
-              onToggleAssignRoute={onToggleAssignRoute}
-            />
-
-            {/* Controlador de encuadre automático de cámara */}
-            <BatchDispatchBoundsController
-              geojsonData={geojsonData}
-              connections={connections}
-              selectedRouteId={selectedRouteId}
-            />
-
-            {/* Marcadores de acometidas (puntos secuenciales) */}
-            {connections.map((conn) => {
-              const coords = getValidCoords(conn.latitud, conn.longitud);
-              if (!coords) return null;
-              const isActive =
-                activeConnection?.idRutaAcometida === conn.idRutaAcometida;
-
-              return (
-                <AdvancedMarker
-                  key={conn.idRutaAcometida || conn.acometidaId}
-                  position={coords}
-                  onClick={() => setActiveConnection(conn)}
-                >
-                  <div
-                    className={`batch-dispatch-meter-pin ${isActive ? 'is-active' : ''}`}
-                    title={`Acometida #${conn.ordenSecuencia} • Medidor: ${conn.numeroMedidor || 'S/N'}`}
-                  >
-                    <span>{conn.ordenSecuencia}</span>
-                  </div>
-                </AdvancedMarker>
-              );
-            })}
-
-            {/* Ventana de información de acometida seleccionada */}
-            {activeConnection && activeConnectionCoords && (
-              <InfoWindow
-                position={activeConnectionCoords}
-                onCloseClick={() => setActiveConnection(null)}
-              >
-                <div className="batch-dispatch-infowindow">
-                  <span className="batch-dispatch-infowindow-seq">
-                    Secuencia #{activeConnection.ordenSecuencia}
-                  </span>
-                  <h4 className="batch-dispatch-infowindow-title">
-                    {activeConnection.abonado || 'Consumidor desconocido'}
-                  </h4>
-                  <div className="batch-dispatch-infowindow-row">
-                    <span>Medidor:</span>
-                    <strong>
-                      {activeConnection.numeroMedidor || 'Sin medidor'}
-                    </strong>
-                  </div>
-                  <div className="batch-dispatch-infowindow-row">
-                    <span>Cuenta:</span>
-                    <strong>{activeConnection.cuenta || 'N/D'}</strong>
-                  </div>
-                  <div className="batch-dispatch-infowindow-row">
-                    <span>Dirección:</span>
-                    <span>
-                      {activeConnection.direccion || 'Sin dirección registrada'}
-                    </span>
-                  </div>
-                </div>
-              </InfoWindow>
-            )}
-          </Map>
-        </APIProvider>
-      </div>
-
-      {/* Leyenda cartográfica al pie del mapa */}
-      <div className="batch-dispatch-map-legend">
-        {operatorsWithAssignments.length > 0 ? (
-          operatorsWithAssignments.map((op) => (
-            <Tooltip
-              key={op.userId}
-              content={
-                <div
-                  style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
-                >
-                  <Avatar name={op.name || 'S/N'} size="sm" />
-                  <div>
-                    <div style={{ fontWeight: 300 }}>
-                      {truncateText(op.name, 25)}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: '0.85em',
-                        color: 'var(--text-secondary)'
-                      }}
-                    >
-                      {op.cardId}
-                    </div>
-                  </div>
-                </div>
-              }
-              followCursor={false}
-              themeColor={op.color}
-            >
-              <div key={op.userId} className="batch-dispatch-legend-item">
-                <div
-                  className="batch-dispatch-legend-dot"
-                  style={{ backgroundColor: op.color }}
+                  className="batch-dispatch-active-op-dot"
+                  style={{ backgroundColor: activeOperator.color }}
                 />
                 <span>
-                  {op.cardId} ({op.count})
+                  Asignando a: <strong>{activeOperator.name}</strong>
                 </span>
               </div>
-            </Tooltip>
-          ))
-        ) : (
+            )}
+
+            {/* Información y acción sobre la ruta enfocada */}
+            {selectedRoute && (
+              <div className="batch-dispatch-route-pill">
+                <MapPin size={12} />
+                <span>
+                  {selectedRoute.codigo ||
+                    selectedRoute.codigoRuta ||
+                    `Ruta #${selectedRoute.idRuta}`}
+                  {connections.length > 0 && ` (${connections.length} acom.)`}
+                </span>
+
+                {assignedOperatorToSelectedRoute ? (
+                  <span
+                    className="batch-dispatch-route-assigned-tag"
+                    style={{
+                      backgroundColor: assignedOperatorToSelectedRoute.color,
+                      color: '#ffffff'
+                    }}
+                  >
+                    ● {assignedOperatorToSelectedRoute.name}
+                  </span>
+                ) : (
+                  <span className="batch-dispatch-route-unassigned-tag">
+                    Sin asignar
+                  </span>
+                )}
+
+                {activeOperator && onToggleAssignRoute && (
+                  <button
+                    type="button"
+                    className={`batch-dispatch-route-assign-btn ${isAssignedToActive ? 'is-assigned' : ''
+                      }`}
+                    onClick={() => onToggleAssignRoute(selectedRoute.idRuta)}
+                    style={{
+                      backgroundColor: isAssignedToActive
+                        ? activeOperator.color
+                        : 'transparent',
+                      borderColor: activeOperator.color,
+                      color: isAssignedToActive ? '#ffffff' : activeOperator.color
+                    }}
+                    title={
+                      isAssignedToActive
+                        ? `Quitar asignación de ${activeOperator.name}`
+                        : `Asignar ruta a ${activeOperator.name}`
+                    }
+                  >
+                    {isAssignedToActive
+                      ? '✓ Quitar'
+                      : `+ Asignar a ${activeOperator.name.split(' ')[0]}`}
+                  </button>
+                )}
+
+                <Button
+                  type="button"
+                  circle
+                  variant="dashed"
+                  onClick={handleClearSelectedRoute}
+                  title="Quitar filtro de ruta y ver sector completo"
+                  aria-label="Quitar filtro de ruta"
+                  size="xs"
+                >
+                  <X size={12} />
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div className="batch-dispatch-map-actions">
+            <Button
+              size="xs"
+              variant="dashed"
+              color="error"
+              onClick={() => void refreshMapData()}
+              title="Refrescar capa cartográfica"
+              circle
+              leftIcon={
+                <RefreshCw
+                  size={13}
+                  className={isLoadingGeoJson ? 'animate-spin' : ''}
+                />
+              }
+            ></Button>
+          </div>
+        </div>
+
+        {/* Loading Overlay */}
+        {(isLoadingGeoJson || isLoadingConnections) && (
+          <div className="batch-dispatch-map-loading-overlay">
+            <div className="batch-dispatch-map-spinner" />
+            <span>
+              {isLoadingConnections
+                ? 'Cargando puntos de acometidas...'
+                : 'Cargando polígonos del sector...'}
+            </span>
+          </div>
+        )}
+
+        {/* Visor de Google Maps */}
+        <div className="batch-dispatch-map-viewport">
+          <APIProvider apiKey={apiKey} libraries={['marker']}>
+            <Map
+              colorScheme={mapTheme.colorScheme}
+              defaultCenter={{
+                lat: FALLBACK_CENTER_ANTONIO_ANTE.lat,
+                lng: FALLBACK_CENTER_ANTONIO_ANTE.lng
+              }}
+              defaultZoom={13}
+              mapId={mapId}
+              styles={mapTheme.styles}
+              disableDefaultUI={false}
+              zoomControl={true}
+              streetViewControl={false}
+              mapTypeControl={false}
+              fullscreenControl={false}
+            >
+              {/* Sincronizador dinámico de tema */}
+              <BatchDispatchThemeSyncController mapTheme={mapTheme} />
+
+              {/* Capa de polígonos GeoJSON con coloreado por lecturista */}
+              <BatchDispatchDataLayer
+                geojsonData={geojsonData}
+                selectedRouteId={selectedRouteId}
+                onSelectRouteId={onSelectRouteId}
+                mapTheme={mapTheme}
+                assignments={assignments}
+                operatorColors={operatorColors}
+                activeOperator={activeOperator}
+                onToggleAssignRoute={onToggleAssignRoute}
+                dbAssignedRouteIds={dbAssignedRouteIds}
+              />
+
+              {/* Controlador de encuadre automático de cámara */}
+              <BatchDispatchBoundsController
+                geojsonData={geojsonData}
+                connections={connections}
+                selectedRouteId={selectedRouteId}
+              />
+
+              {/* Capa vectorial de acometidas (GPU acelerado en canvas, cero sobrecarga DOM) */}
+              <BatchDispatchConnectionsLayer
+                connections={connections}
+                activeConnectionId={
+                  activeConnection?.idRutaAcometida ??
+                  activeConnection?.acometidaId
+                }
+                onSelectConnection={setActiveConnection}
+              />
+
+              {/* Marcador DOM activo únicamente para la acometida seleccionada */}
+              {activeConnection && activeConnectionCoords && (
+                <AdvancedMarker
+                  position={activeConnectionCoords}
+                  onClick={() => setActiveConnection(activeConnection)}
+                >
+                  <div
+                    className="batch-dispatch-meter-pin is-active"
+                    title={`Acometida #${activeConnection.ordenSecuencia} • Medidor: ${activeConnection.numeroMedidor || 'S/N'}`}
+                  >
+                    <span>{activeConnection.ordenSecuencia}</span>
+                  </div>
+                </AdvancedMarker>
+              )}
+
+              {/* Ventana de información de acometida seleccionada */}
+              {activeConnection && activeConnectionCoords && (
+                <InfoWindow
+                  position={activeConnectionCoords}
+                  onCloseClick={() => setActiveConnection(null)}
+                >
+                  <div className="batch-dispatch-infowindow">
+                    <span className="batch-dispatch-infowindow-seq">
+                      Secuencia #{activeConnection.ordenSecuencia}
+                    </span>
+                    <h4 className="batch-dispatch-infowindow-title">
+                      {activeConnection.abonado || 'Consumidor desconocido'}
+                    </h4>
+                    <div className="batch-dispatch-infowindow-row">
+                      <span>Medidor:</span>
+                      <strong>
+                        {activeConnection.numeroMedidor || 'Sin medidor'}
+                      </strong>
+                    </div>
+                    <div className="batch-dispatch-infowindow-row">
+                      <span>Cuenta:</span>
+                      <strong>{activeConnection.cuenta || 'N/D'}</strong>
+                    </div>
+                    <div className="batch-dispatch-infowindow-row">
+                      <span>Dirección:</span>
+                      <span>
+                        {activeConnection.direccion || 'Sin dirección registrada'}
+                      </span>
+                    </div>
+                  </div>
+                </InfoWindow>
+              )}
+            </Map>
+          </APIProvider>
+        </div>
+
+        {/* Leyenda cartográfica al pie del mapa */}
+        <div className="batch-dispatch-map-legend">
+          {operatorsWithAssignments.length > 0 ? (
+            operatorsWithAssignments.map((op) => (
+              <Tooltip
+                key={op.userId}
+                content={
+                  <div
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <Avatar name={op.name || 'S/N'} size="sm" />
+                    <div>
+                      <div style={{ fontWeight: 300 }}>
+                        {truncateText(op.name, 25)}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: '0.85em',
+                          color: 'var(--text-secondary)'
+                        }}
+                      >
+                        {op.cardId}
+                      </div>
+                    </div>
+                  </div>
+                }
+                followCursor={false}
+                themeColor={op.color}
+              >
+                <div key={op.userId} className="batch-dispatch-legend-item">
+                  <div
+                    className="batch-dispatch-legend-dot"
+                    style={{ backgroundColor: op.color }}
+                  />
+                  <span>
+                    {op.cardId} ({op.count})
+                  </span>
+                </div>
+              </Tooltip>
+            ))
+          ) : (
+            <div className="batch-dispatch-legend-item">
+              <div
+                className="batch-dispatch-legend-dot"
+                style={{ backgroundColor: '#0284c7' }}
+              />
+              <span>Polígonos de Ruta</span>
+            </div>
+          )}
           <div className="batch-dispatch-legend-item">
             <div
               className="batch-dispatch-legend-dot"
-              style={{ backgroundColor: '#0284c7' }}
+              style={{ backgroundColor: '#94a3b8' }}
             />
-            <span>Polígonos de Ruta</span>
+            <span>Sin Asignar ({unassignedCount})</span>
           </div>
-        )}
-        <div className="batch-dispatch-legend-item">
-          <div
-            className="batch-dispatch-legend-dot"
-            style={{ backgroundColor: '#94a3b8' }}
-          />
-          <span>Sin Asignar ({unassignedCount})</span>
-        </div>
-        <div className="batch-dispatch-legend-item">
-          <div
-            className="batch-dispatch-legend-dot"
-            style={{
-              backgroundColor: 'var(--accent, #3b82f6)',
-              borderRadius: '50%'
-            }}
-          />
-          <span>Punt. Acometidas ({connections.length})</span>
+          <div className="batch-dispatch-legend-item">
+            <div
+              className="batch-dispatch-legend-dot"
+              style={{
+                backgroundColor: 'var(--accent, #3b82f6)',
+                borderRadius: '50%'
+              }}
+            />
+            <span>Punt. Acometidas ({connections.length})</span>
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };

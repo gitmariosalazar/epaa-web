@@ -1,10 +1,21 @@
 import type { SeasonalRepository } from '../../domain/repositories/SeasonalRepository';
 import {
   type SeasonalConfig,
+  type SeasonalUserPreferences,
   GLOBAL_SEASONAL_MASTER_SWITCH,
   isHolidaySeasonDate
 } from '../../domain/models/SeasonalTheme';
 
+/**
+ * LocalStorageSeasonalRepository
+ * Infrastructure layer - Implements SeasonalRepository using browser localStorage.
+ *
+ * Clean Architecture & SOLID:
+ * - SRP: Only responsible for storing/retrieving user preferences.
+ *   Does NOT persist presentation copy (Single Source of Truth stays in UI/components).
+ * - LSP: Conforms fully to SeasonalRepository contract.
+ * - DIP: Consumers depend on SeasonalRepository, not this implementation directly.
+ */
 export class LocalStorageSeasonalRepository implements SeasonalRepository {
   private readonly storageKey: string = 'epaa_seasonal_config_v2';
 
@@ -16,11 +27,19 @@ export class LocalStorageSeasonalRepository implements SeasonalRepository {
     try {
       const stored = localStorage.getItem(this.storageKey);
       if (stored) {
-        const parsed = JSON.parse(stored) as Partial<SeasonalConfig>;
-        return {
-          ...this.getDefaultConfig(),
-          ...parsed
-        };
+        const parsed = JSON.parse(stored) as Partial<SeasonalConfig & SeasonalUserPreferences>;
+
+        // Migration/Sanitization: Eliminar cualquier copia de texto persistida antigua
+        // para garantizar que los cambios en ChristmasBanner.tsx tomen efecto inmediatamente (HMR).
+        if ('bannerMessage' in parsed || 'bannerSubMessage' in parsed) {
+          delete parsed.bannerMessage;
+          delete parsed.bannerSubMessage;
+          // Si el banner estaba cerrado en la versión anterior con datos obsoletos, restaurarlo
+          parsed.showBanner = true;
+          this.savePreferencesOnly(parsed);
+        }
+
+        return this.getDefaultConfig(parsed);
       }
     } catch {
       // Ignorar error de JSON corrupto y usar default
@@ -30,21 +49,7 @@ export class LocalStorageSeasonalRepository implements SeasonalRepository {
   }
 
   saveConfig(config: SeasonalConfig): void {
-    try {
-      const cleanConfig: SeasonalConfig = {
-        enabled: Boolean(config.enabled),
-        holiday: config.holiday || 'christmas',
-        showSnow: Boolean(config.showSnow),
-        showBanner: Boolean(config.showBanner),
-        showDecorations: Boolean(config.showDecorations),
-        bannerMessage: String(config.bannerMessage || ''),
-        bannerSubMessage: config.bannerSubMessage ? String(config.bannerSubMessage) : undefined,
-        autoSchedule: Boolean(config.autoSchedule)
-      };
-      localStorage.setItem(this.storageKey, JSON.stringify(cleanConfig));
-    } catch (e) {
-      console.warn('[Seasonal] No se pudo guardar la configuración festiva:', e);
-    }
+    this.savePreferencesOnly(config);
   }
 
   toggleSnow(enabled?: boolean): SeasonalConfig {
@@ -60,7 +65,8 @@ export class LocalStorageSeasonalRepository implements SeasonalRepository {
 
   toggleBanner(enabled?: boolean): SeasonalConfig {
     const current = this.getConfig();
-    const nextBanner = typeof enabled === 'boolean' ? enabled : !current.showBanner;
+    const nextBanner =
+      typeof enabled === 'boolean' ? enabled : !current.showBanner;
     const updated: SeasonalConfig = {
       ...current,
       showBanner: nextBanner
@@ -71,7 +77,8 @@ export class LocalStorageSeasonalRepository implements SeasonalRepository {
 
   toggleGlobal(enabled?: boolean): SeasonalConfig {
     const current = this.getConfig();
-    const nextEnabled = typeof enabled === 'boolean' ? enabled : !current.enabled;
+    const nextEnabled =
+      typeof enabled === 'boolean' ? enabled : !current.enabled;
     const updated: SeasonalConfig = {
       ...current,
       enabled: nextEnabled,
@@ -82,24 +89,46 @@ export class LocalStorageSeasonalRepository implements SeasonalRepository {
   }
 
   resetConfig(): SeasonalConfig {
-    const defaultConfig = this.getDefaultConfig();
-    this.saveConfig(defaultConfig);
-    return defaultConfig;
+    try {
+      localStorage.removeItem(this.storageKey);
+    } catch {
+      // Ignorar error al limpiar storage
+    }
+    return this.getDefaultConfig();
   }
 
-  private getDefaultConfig(): SeasonalConfig {
-    // Si la fecha cae en temporada navideña (o para demos/días festivos)
+  /**
+   * Persiste ÚNICAMENTE las preferencias del usuario (booleanos de control).
+   * No persiste texto ni contenido visual estático.
+   */
+  private savePreferencesOnly(prefs: Partial<SeasonalUserPreferences>): void {
+    try {
+      const cleanPrefs: SeasonalUserPreferences = {
+        enabled: prefs.enabled !== undefined ? Boolean(prefs.enabled) : true,
+        showSnow: prefs.showSnow !== undefined ? Boolean(prefs.showSnow) : true,
+        showBanner: prefs.showBanner !== undefined ? Boolean(prefs.showBanner) : true
+      };
+      localStorage.setItem(this.storageKey, JSON.stringify(cleanPrefs));
+    } catch (e) {
+      console.warn(
+        '[Seasonal] No se pudo guardar la configuración festiva:',
+        e
+      );
+    }
+  }
+
+  private getDefaultConfig(prefs?: Partial<SeasonalUserPreferences>): SeasonalConfig {
     const inSeason = isHolidaySeasonDate() || true;
 
     return {
-      enabled: inSeason && GLOBAL_SEASONAL_MASTER_SWITCH,
+      enabled: prefs?.enabled ?? (inSeason && GLOBAL_SEASONAL_MASTER_SWITCH),
       holiday: 'christmas',
-      showSnow: true,
-      showBanner: true,
+      showSnow: prefs?.showSnow ?? true,
+      showBanner: prefs?.showBanner ?? true,
       showDecorations: true,
-      bannerMessage: '¡Feliz Navidad y un Próspero Año Nuevo les desea EPAA!',
-      bannerSubMessage: 'Paz, salud y bienestar para ti y tu familia',
       autoSchedule: true
+      // bannerMessage y bannerSubMessage se dejan sin definir a propósito
+      // para que el componente ChristmasBanner.tsx sea la Única Fuente de Verdad.
     };
   }
 
@@ -110,7 +139,6 @@ export class LocalStorageSeasonalRepository implements SeasonalRepository {
       showSnow: false,
       showBanner: false,
       showDecorations: false,
-      bannerMessage: '',
       autoSchedule: false
     };
   }

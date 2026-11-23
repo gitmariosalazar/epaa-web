@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { AdvancedMarker, AdvancedMarkerAnchorPoint } from '@vis.gl/react-google-maps';
 import type { RouteCentroidFeature } from '../../../domain/models/ReadingRoute';
 import './ReadingRouteCentroidMarker.css';
@@ -9,7 +9,7 @@ export interface ReadingRouteCentroidMarkerProps {
   onClick: (feature: RouteCentroidFeature, coords: { lat: number; lng: number }) => void;
 }
 
-export const ReadingRouteCentroidMarker: React.FC<ReadingRouteCentroidMarkerProps> = ({
+export const ReadingRouteCentroidMarker: React.FC<ReadingRouteCentroidMarkerProps> = memo(({
   feature,
   isSelected = false,
   onClick,
@@ -38,4 +38,7 @@ export const ReadingRouteCentroidMarker: React.FC<ReadingRouteCentroidMarkerProp
       </div>
     </AdvancedMarker>
   );
-};
+});
+
+ReadingRouteCentroidMarker.displayName = 'ReadingRouteCentroidMarker';
+

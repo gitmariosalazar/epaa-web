@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useImperativeHandle } from 'react';
+import React, { useState, useRef, useEffect, useImperativeHandle, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ChevronLeft,
@@ -9,10 +9,16 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import './DatePicker.css';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
+import {
+  createDateConstraintPolicy,
+  parseSafeDate,
+  type DateConstraintProps,
+  type DatePickerView
+} from './dateConstraints';
 
-type DatePickerView = 'date' | 'month' | 'year';
+export { parseSafeDate, type DatePickerView };
 
-interface DatePickerProps {
+export interface DatePickerProps extends DateConstraintProps {
   value?: string | Date | null; // Format: YYYY-MM-DD, YYYY-MM, YYYY, or Date instance
   onChange: (date: string) => void;
   disabled?: boolean;
@@ -22,91 +28,6 @@ interface DatePickerProps {
 
 export interface DatePickerRef {
   showPicker: () => void;
-}
-
-/**
- * SRP / Clean Architecture: Parser robusto y puro para interpretar cualquier
- * valor de entrada de fecha (Date, ISO string, YYYY-MM-DD, etc.) sin efectos
- * secundarios ni dependencias del DOM o React.
- */
-function parseSafeDate(value: unknown, view: DatePickerView = 'date'): Date | null {
-  if (value === null || value === undefined || value === '') {
-    return null;
-  }
-
-  // 1. Manejo seguro si ya es una instancia de Date
-  if (value instanceof Date) {
-    if (isNaN(value.getTime())) return null;
-    // Si fue parseado como medianoche UTC desde "YYYY-MM-DD", evitar desplazamiento de día local
-    if (
-      value.getUTCHours() === 0 &&
-      value.getUTCMinutes() === 0 &&
-      value.getHours() !== 0
-    ) {
-      return new Date(
-        value.getUTCFullYear(),
-        value.getUTCMonth(),
-        value.getUTCDate()
-      );
-    }
-    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
-  }
-
-  // 2. Si es de otro tipo (número timestamp, etc.)
-  if (typeof value !== 'string') {
-    const d = new Date(value as number);
-    if (isNaN(d.getTime())) return null;
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  }
-
-  const trimmed = value.trim();
-  if (
-    !trimmed ||
-    trimmed === 'undefined' ||
-    trimmed === 'null' ||
-    trimmed.toLowerCase().includes('invalid')
-  ) {
-    return null;
-  }
-
-  // 3. Extracción de YYYY-MM-DD (cubre formatos como "2026-11-16", "2026-11-16T...", "2026-11-16 12:00:00")
-  const dateMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (dateMatch) {
-    const year = Number(dateMatch[1]);
-    const month = Number(dateMatch[2]) - 1;
-    const day = Number(dateMatch[3]);
-    const d = new Date(year, month, day);
-    return isNaN(d.getTime()) ? null : d;
-  }
-
-  // 4. Si la vista es mensual o coincide con YYYY-MM
-  const monthMatch = trimmed.match(/^(\d{4})-(\d{2})/);
-  if (view === 'month' && monthMatch) {
-    const year = Number(monthMatch[1]);
-    const month = Number(monthMatch[2]) - 1;
-    const d = new Date(year, month, 1);
-    return isNaN(d.getTime()) ? null : d;
-  }
-
-  // 5. Si la vista es anual o coincide con YYYY
-  const yearMatch = trimmed.match(/^(\d{4})/);
-  if (view === 'year' && yearMatch) {
-    const year = Number(yearMatch[1]);
-    const d = new Date(year, 0, 1);
-    return isNaN(d.getTime()) ? null : d;
-  }
-
-  // 6. Fallback seguro para otros formatos parseables por Date
-  const fallback = new Date(trimmed);
-  if (!isNaN(fallback.getTime())) {
-    return new Date(
-      fallback.getFullYear(),
-      fallback.getMonth(),
-      fallback.getDate()
-    );
-  }
-
-  return null;
 }
 
 /**
@@ -124,7 +45,24 @@ function formatDateOutput(date: Date, view: DatePickerView = 'date'): string {
 }
 
 export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
-  ({ value, onChange, disabled = false, view = 'date', size = 'medium' }, ref) => {
+  (
+    {
+      value,
+      onChange,
+      disabled = false,
+      view = 'date',
+      size = 'medium',
+      minDate,
+      maxDate,
+      min,
+      max,
+      allowedRange,
+      allowedRanges,
+      disabledDates,
+      isDateDisabled
+    },
+    ref
+  ) => {
     const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [alignment, setAlignment] = useState<{
@@ -135,9 +73,36 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
     const popoverRef = useRef<HTMLDivElement>(null);
     const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
 
-    // Parse defensivo del valor inicial o fallback al día actual en Ecuador
+    // SRP / Clean Architecture: Instancia inmutable de la política de restricciones
+    const policy = useMemo(() => {
+      return createDateConstraintPolicy({
+        minDate,
+        maxDate,
+        min,
+        max,
+        allowedRange,
+        allowedRanges,
+        disabledDates,
+        isDateDisabled
+      });
+    }, [
+      minDate,
+      maxDate,
+      min,
+      max,
+      allowedRange,
+      allowedRanges,
+      disabledDates,
+      isDateDisabled
+    ]);
+
+    // Parse defensivo del valor inicial o fallback al día actual en Ecuador (a medianoche 00:00:00)
     const parsedInitial = parseSafeDate(value, view);
-    const initialCalendarDate = parsedInitial || dateService.getCurrentDate();
+    const initialCalendarDate = useMemo(() => {
+      if (parsedInitial) return parsedInitial;
+      const ecNow = dateService.getCurrentDate();
+      return new Date(ecNow.getFullYear(), ecNow.getMonth(), ecNow.getDate());
+    }, [parsedInitial]);
 
     const [currentMonth, setCurrentMonth] = useState<Date>(initialCalendarDate);
     const [selectedDate, setSelectedDate] = useState<Date | null>(parsedInitial);
@@ -226,6 +191,7 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
 
     const nextMonth = (e: React.MouseEvent) => {
       e.stopPropagation();
+      if (policy.isNextNavDisabled(currentMonth, view)) return;
       if (view === 'year') {
         setCurrentMonth(
           new Date(currentMonth.getFullYear() + 12, 0, 1)
@@ -243,6 +209,7 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
 
     const prevMonth = (e: React.MouseEvent) => {
       e.stopPropagation();
+      if (policy.isPrevNavDisabled(currentMonth, view)) return;
       if (view === 'year') {
         setCurrentMonth(
           new Date(currentMonth.getFullYear() - 12, 0, 1)
@@ -268,19 +235,25 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
     const handleManualChange = (val: string) => {
       setManualValue(val);
       if (isValidDate(val)) {
-        onChange(val);
-        const parsed = parseSafeDate(val, view);
-        if (parsed && !isNaN(parsed.getTime())) {
-          setCurrentMonth(parsed);
-          setSelectedDate(parsed);
+        if (!policy.isDateDisabled(val, view)) {
+          onChange(val);
+          const parsed = parseSafeDate(val, view);
+          if (parsed && !isNaN(parsed.getTime())) {
+            setCurrentMonth(parsed);
+            setSelectedDate(parsed);
+          }
         }
       }
     };
 
     const handleDateSelect = (day: number) => {
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+      if (policy.isDayDisabled(year, month, day)) return;
+
       const newDate = new Date(
-        currentMonth.getFullYear(),
-        currentMonth.getMonth(),
+        year,
+        month,
         day
       );
       setSelectedDate(newDate);
@@ -301,7 +274,9 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
 
     const getFormattedDateDisplay = () => {
       if (!selectedDate || isNaN(selectedDate.getTime())) {
-        return view === 'month' ? 'Seleccionar Mes' : 'Select Date';
+        return view === 'month'
+          ? t('common.datePicker.selectMonth', 'Seleccionar Mes')
+          : t('common.datePicker.selectDate', 'Seleccionar Fecha');
       }
       if (view === 'month') {
         const monthIdx = selectedDate.getMonth();
@@ -310,12 +285,10 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
       if (view === 'year') {
         return selectedDate.getFullYear().toString();
       }
-      const formatted = selectedDate.toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      });
-      return formatted === 'Invalid Date' ? 'Select Date' : formatted;
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const year = selectedDate.getFullYear();
+      return `${day}/${month}/${year}`;
     };
 
     const monthNames = [
@@ -353,6 +326,7 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
 
       // Actual days
       for (let i = 1; i <= daysInMonth; i++) {
+        const isDayDisabled = policy.isDayDisabled(year, month, i);
         const isSelected =
           selectedDate?.getDate() === i &&
           selectedDate?.getMonth() === month &&
@@ -367,7 +341,13 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
         days.push(
           <button
             key={i}
-            className={`datepicker-cell datepicker-cell--day ${isSelected ? 'datepicker-cell--selected' : ''} ${isToday && !isSelected ? 'datepicker-cell--today' : ''}`}
+            type="button"
+            disabled={isDayDisabled}
+            className={`datepicker-cell datepicker-cell--day ${
+              isSelected ? 'datepicker-cell--selected' : ''
+            } ${isToday && !isSelected ? 'datepicker-cell--today' : ''} ${
+              isDayDisabled ? 'datepicker-cell--disabled' : ''
+            }`}
             onClick={() => handleDateSelect(i)}
           >
             {i}
@@ -382,6 +362,7 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
       const year = currentMonth.getFullYear();
 
       return monthNames.map((mName, idx) => {
+        const isMonthDisabled = policy.isMonthDisabled(year, idx);
         const isSelected =
           selectedDate?.getMonth() === idx &&
           selectedDate?.getFullYear() === year;
@@ -390,8 +371,12 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
           <button
             key={idx}
             type="button"
-            className={`datepicker-month-cell ${isSelected ? 'datepicker-month-cell--selected' : ''}`}
+            disabled={isMonthDisabled}
+            className={`datepicker-month-cell ${
+              isSelected ? 'datepicker-month-cell--selected' : ''
+            } ${isMonthDisabled ? 'datepicker-month-cell--disabled' : ''}`}
             onClick={() => {
+              if (isMonthDisabled) return;
               const newDate = new Date(year, idx, 1);
               setSelectedDate(newDate);
               const formatted = formatDateOutput(newDate, 'month');
@@ -412,14 +397,19 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
 
       for (let i = 0; i < 12; i++) {
         const yearToRender = startYear + i;
+        const isYearDisabled = policy.isYearDisabled(yearToRender);
         const isSelected = selectedDate?.getFullYear() === yearToRender;
 
         years.push(
           <button
             key={yearToRender}
             type="button"
-            className={`datepicker-month-cell ${isSelected ? 'datepicker-month-cell--selected' : ''}`}
+            disabled={isYearDisabled}
+            className={`datepicker-month-cell ${
+              isSelected ? 'datepicker-month-cell--selected' : ''
+            } ${isYearDisabled ? 'datepicker-month-cell--disabled' : ''}`}
             onClick={() => {
+              if (isYearDisabled) return;
               const newDate = new Date(yearToRender, 0, 1);
               setSelectedDate(newDate);
               const formatted = formatDateOutput(newDate, 'year');
@@ -465,7 +455,9 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
               <button
                 className="datepicker-nav-btn"
                 onClick={prevMonth}
+                disabled={policy.isPrevNavDisabled(currentMonth, view)}
                 type="button"
+                aria-label="Previous"
               >
                 <ChevronLeft size={16} />
               </button>
@@ -479,7 +471,9 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
               <button
                 className="datepicker-nav-btn"
                 onClick={nextMonth}
+                disabled={policy.isNextNavDisabled(currentMonth, view)}
                 type="button"
+                aria-label="Next"
               >
                 <ChevronRight size={16} />
               </button>
@@ -531,12 +525,12 @@ export const DatePicker = React.forwardRef<DatePickerRef, DatePickerProps>(
                   size="xs"
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (manualValue) {
+                    if (manualValue && !policy.isDateDisabled(manualValue, view)) {
                       onChange(manualValue);
                       setIsOpen(false);
                     }
                   }}
-                  disabled={!manualValue}
+                  disabled={!manualValue || policy.isDateDisabled(manualValue, view)}
                 >
                   {t('common.datePicker.selectDate')}
                 </Button>

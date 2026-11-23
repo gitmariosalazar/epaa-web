@@ -224,10 +224,16 @@
   white-space: nowrap;
 }
 
-.datetimepicker-preset-btn:hover {
+.datetimepicker-preset-btn:hover:not(:disabled) {
   border-color: var(--primary, #3b82f6);
   color: var(--primary, #3b82f6);
   background: rgba(59, 130, 246, 0.08);
+}
+
+.datetimepicker-preset-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* Calendar Header */
@@ -258,10 +264,16 @@
   transition: all 0.12s ease;
 }
 
-.datetimepicker-nav-btn:hover {
+.datetimepicker-nav-btn:hover:not(:disabled) {
   background-color: var(--surface-hover, #f1f5f9);
   color: var(--text-main, #0f172a);
   border-color: var(--border-color, #cbd5e1);
+}
+
+.datetimepicker-nav-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* Weekdays */

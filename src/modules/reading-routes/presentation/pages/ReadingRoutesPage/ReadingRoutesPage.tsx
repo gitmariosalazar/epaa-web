@@ -34,10 +34,10 @@ export const ReadingRoutesPage: React.FC = () => {
   const [drawerRoute, setDrawerRoute] = useState<ReadingRoute | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Switch to Map and select a route
+
+  // Select route in map ViewModel when requested from catalog
   const handleViewInMap = (idRuta: number) => {
-    mapVm.selectRouteById(idRuta);
-    pageVm.setActiveTab('map');
+    void mapVm.selectRouteById(idRuta);
   };
 
   // Inspect route from catalog
@@ -166,34 +166,36 @@ export const ReadingRoutesPage: React.FC = () => {
         }
       >
         <div className="reading-routes-tab-content">
-          {/* Tab 1: Map */}
-          {pageVm.activeTab === 'map' && (
-            <div className="reading-routes-map-tab-content">
-              <ReadingRouteMap
-                geojsonData={mapVm.geojsonData}
-                centroidsData={mapVm.centroidsData}
-                selectedRoute={mapVm.selectedRoute}
-                routeConnections={mapVm.routeConnections}
-                isConnectionsLoading={mapVm.isConnectionsLoading}
-                isOptimizing={mapVm.isOptimizing}
-                selectedSector={mapVm.selectedSector}
-                onSectorChange={mapVm.setSelectedSector}
-                periodoFilter={mapVm.periodoFilter}
-                onPeriodoChange={mapVm.setPeriodoFilter}
-                estadoFilter={mapVm.estadoFilter}
-                onEstadoChange={mapVm.setEstadoFilter}
-                onResetFilters={mapVm.resetFilters}
-                hasActiveFilters={mapVm.hasActiveFilters}
-                onSelectRouteId={mapVm.selectRouteById}
-                onCloseSidePanel={mapVm.closeSidePanel}
-                onOptimizeSequence={mapVm.optimizeSequence}
-                onRefresh={mapVm.refreshMap}
-                isLoading={mapVm.isLoading}
-                isSidePanelOpen={mapVm.isSidePanelOpen}
-                onAssignRoute={dispatchVm.openSingleAssignModal}
-              />
-            </div>
-          )}
+          {/* Tab 1: Map (preservado en DOM para transiciones instantáneas sin re-descarga de mapas) */}
+          <div
+            className="reading-routes-map-tab-content"
+            style={{ display: pageVm.activeTab === 'map' ? 'flex' : 'none' }}
+          >
+            <ReadingRouteMap
+              geojsonData={mapVm.geojsonData}
+              centroidsData={mapVm.centroidsData}
+              selectedRoute={mapVm.selectedRoute}
+              routeConnections={mapVm.routeConnections}
+              isConnectionsLoading={mapVm.isConnectionsLoading}
+              isOptimizing={mapVm.isOptimizing}
+              selectedSector={mapVm.selectedSector}
+              onSectorChange={mapVm.setSelectedSector}
+              periodoFilter={mapVm.periodoFilter}
+              onPeriodoChange={mapVm.setPeriodoFilter}
+              estadoFilter={mapVm.estadoFilter}
+              onEstadoChange={mapVm.setEstadoFilter}
+              onResetFilters={mapVm.resetFilters}
+              hasActiveFilters={mapVm.hasActiveFilters}
+              onSelectRouteId={mapVm.selectRouteById}
+              onCloseSidePanel={mapVm.closeSidePanel}
+              onOptimizeSequence={mapVm.optimizeSequence}
+              onRefresh={mapVm.refreshMap}
+              isLoading={mapVm.isLoading}
+              isSidePanelOpen={mapVm.isSidePanelOpen}
+              onAssignRoute={dispatchVm.openSingleAssignModal}
+              onReassignRoute={handleReassignRoute}
+            />
+          </div>
 
           {/* Tab 2: Live Tracking & Dispatch */}
           {pageVm.activeTab === 'dispatch' && (
@@ -210,6 +212,21 @@ export const ReadingRoutesPage: React.FC = () => {
               onOpenReassign={dispatchVm.openReassignModal}
               onCancelAssignment={dispatchVm.cancelAssignment}
               onRefresh={dispatchVm.refreshLiveTracking}
+              routes={
+                pageVm.allRoutes.length > 0 ? pageVm.allRoutes : pageVm.routes
+              }
+              onDispatch={async (req, onProgress) => {
+                const res = await dispatchVm.executeMorningDispatch(
+                  req,
+                  onProgress
+                );
+                void pageVm.refreshRoutes();
+                return res;
+              }}
+              mapVm={mapVm}
+              onViewInMap={handleViewInMap}
+              onAssignRoute={dispatchVm.openSingleAssignModal}
+              onReassignRoute={handleReassignRoute}
             />
           )}
 
@@ -238,6 +255,7 @@ export const ReadingRoutesPage: React.FC = () => {
               onOptimize={(idRuta) => mapVm.optimizeSequence(idRuta)}
               onAssignRoute={dispatchVm.openSingleAssignModal}
               onReassignRoute={handleReassignRoute}
+              mapVm={mapVm}
             />
           )}
 

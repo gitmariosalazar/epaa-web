@@ -133,6 +133,22 @@
   text-align: left;
 }
 
+.morning-operator-card-by-user {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-color);
+  background-color: var(--surface) !important;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  position: relative;
+  text-align: left;
+  width: 100% !important;
+  min-width: 500px !important;
+}
+
 .morning-operator-card:hover {
   background-color: var(--surface-hover);
   border-color: var(--accent);
@@ -158,6 +174,25 @@
   height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.morning-operator-username {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  display: flex;
+  align-items: start;
+  justify-content: start;
+  left: 0;
+  width: 55%;
+}
+
+.morning-operator-card-header-left {
+  display: flex;
+  align-items: start;
+  justify-content: start;
+  gap: 0.4rem;
 }
 
 .morning-operator-active-badge {

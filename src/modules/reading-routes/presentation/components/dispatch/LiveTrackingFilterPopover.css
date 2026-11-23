@@ -173,7 +173,8 @@
   background-color: rgba(245, 158, 11, 0.08);
   box-shadow: 0 0 0 1px #f59e0b;
 }
-.filter-popover-status-card.status-tag-progress.selected .filter-popover-status-check {
+.filter-popover-status-card.status-tag-progress.selected
+  .filter-popover-status-check {
   color: #f59e0b;
 }
 
@@ -182,7 +183,8 @@
   background-color: rgba(16, 185, 129, 0.08);
   box-shadow: 0 0 0 1px #10b981;
 }
-.filter-popover-status-card.status-tag-completed.selected .filter-popover-status-check {
+.filter-popover-status-card.status-tag-completed.selected
+  .filter-popover-status-check {
   color: #10b981;
 }
 
@@ -191,7 +193,8 @@
   background-color: rgba(239, 68, 68, 0.08);
   box-shadow: 0 0 0 1px #ef4444;
 }
-.filter-popover-status-card.status-tag-paused.selected .filter-popover-status-check {
+.filter-popover-status-card.status-tag-paused.selected
+  .filter-popover-status-check {
   color: #ef4444;
 }
 
@@ -200,7 +203,8 @@
   background-color: rgba(139, 92, 246, 0.08);
   box-shadow: 0 0 0 1px #8b5cf6;
 }
-.filter-popover-status-card.status-tag-reassigned.selected .filter-popover-status-check {
+.filter-popover-status-card.status-tag-reassigned.selected
+  .filter-popover-status-check {
   color: #8b5cf6;
 }
 
@@ -333,6 +337,7 @@
   justify-content: space-between;
   width: 100%;
   gap: 0.75rem;
+  box-sizing: border-box;
 }
 
 .filter-popover-footer-actions {

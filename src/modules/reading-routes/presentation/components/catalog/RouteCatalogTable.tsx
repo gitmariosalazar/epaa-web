@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   Search,
   MapPin,
@@ -24,6 +24,8 @@ import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip
 import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePicker';
 import type { ReadingRoute } from '../../../domain/models/ReadingRoute';
 import { RouteBadge } from '../common/RouteBadge';
+import { ReadingRouteMapModal } from '../map/ReadingRouteMapModal';
+import type { UseRouteMapViewModelReturn } from '../../hooks/useRouteMapViewModel';
 import './RouteCatalogTable.css';
 import { Select } from '@/shared/presentation/components/Input/Select';
 
@@ -47,11 +49,12 @@ interface RouteCatalogTableProps {
   onPeriodoChange: (periodo: string) => void;
   onResetFilters?: () => void;
   onPageChange: (page: number) => void;
-  onViewInMap: (idRuta: number) => void;
+  onViewInMap?: (idRuta: number) => void;
   onInspectRoute: (idRuta: number) => void;
   onOptimize: (idRuta: number) => void;
   onAssignRoute?: (route: ReadingRoute) => void;
   onReassignRoute?: (route: ReadingRoute) => void;
+  mapVm?: UseRouteMapViewModelReturn;
 }
 
 export const RouteCatalogTable: React.FC<RouteCatalogTableProps> = ({
@@ -76,8 +79,33 @@ export const RouteCatalogTable: React.FC<RouteCatalogTableProps> = ({
   onInspectRoute,
   onOptimize,
   onAssignRoute,
-  onReassignRoute
+  onReassignRoute,
+  mapVm
 }) => {
+  const [localSearch, setLocalSearch] = useState(searchTerm);
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [selectedRouteForMap, setSelectedRouteForMap] =
+    useState<ReadingRoute | null>(null);
+
+  const handleViewInMap = (route: ReadingRoute) => {
+    setSelectedRouteForMap(route);
+    setIsMapModalOpen(true);
+    onViewInMap?.(route.idRuta);
+  };
+
+  useEffect(() => {
+    setLocalSearch(searchTerm);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localSearch !== searchTerm) {
+        onSearchChange(localSearch);
+      }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [localSearch, searchTerm, onSearchChange]);
+
   const hasActiveFilters = Boolean(
     searchTerm.trim() ||
     selectedSector !== undefined ||
@@ -282,7 +310,7 @@ export const RouteCatalogTable: React.FC<RouteCatalogTableProps> = ({
               >
                 <Button
                   variant="dashed"
-                  onClick={() => onViewInMap(r.idRuta)}
+                  onClick={() => handleViewInMap(r)}
                   leftIcon={<MapPin size={13} />}
                   size="xs"
                   color="cyan"
@@ -323,7 +351,7 @@ export const RouteCatalogTable: React.FC<RouteCatalogTableProps> = ({
         style: { width: '280px', textAlign: 'right' }
       }
     ],
-    [onAssignRoute, onReassignRoute, onViewInMap, onInspectRoute, onOptimize]
+    [onAssignRoute, onReassignRoute, onViewInMap, onInspectRoute, onOptimize, handleViewInMap]
   );
 
   const sectors = useMemo(() => {
@@ -350,8 +378,8 @@ export const RouteCatalogTable: React.FC<RouteCatalogTableProps> = ({
             type="text"
             className="route-catalog-search-input"
             placeholder="Buscar por código de ruta o nombre..."
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
           />
         </div>
 
@@ -509,6 +537,21 @@ export const RouteCatalogTable: React.FC<RouteCatalogTableProps> = ({
           fullHeight={true}
         />
       </div>
+
+      {/* Modal del Visor GIS: Polígono y Centroide de Ruta */}
+      {isMapModalOpen && (
+        <ReadingRouteMapModal
+          isOpen={isMapModalOpen}
+          onClose={() => {
+            setIsMapModalOpen(false);
+            setSelectedRouteForMap(null);
+          }}
+          selectedRoute={selectedRouteForMap}
+          mapVm={mapVm}
+          onAssignRoute={onAssignRoute}
+          onReassignRoute={onReassignRoute}
+        />
+      )}
     </div>
   );
 };

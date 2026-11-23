@@ -16,17 +16,17 @@
 .modal-content {
   position: relative;
   background: var(--surface);
-  padding: 1rem;
+  padding: 0rem;
   border-radius: 1rem;
   width: 90%;
   max-width: 480px;
-  max-height: 90vh; /* Prevent modal from being taller than the screen */
-  box-shadow: var(
-    --shadow-xl,
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 8px 10px -6px rgba(0, 0, 0, 0.1)
-  );
-  border: 1px solid var(--border-color);
+  max-height: 90vh;
+  /* Sombra profunda + brillo sutil para dark mode */
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.45),
+    0 12px 24px -8px rgba(225, 57, 57, 0.2),
+    /* Tu toque rojizo más visible */ 0 0 0 1px rgba(255, 255, 255, 0.08) inset !important;
+  border: 1px solid var(--info);
   animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
@@ -78,6 +78,11 @@
   border-bottom: 1px solid var(--border-color);
   border-top-left-radius: 1rem;
   border-top-right-radius: 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.15) 0%,
+    rgba(37, 99, 235, 0.05) 100%
+  );
 }
 
 .modal-header-icon {
@@ -275,6 +280,10 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
+  background-color: var(--background);
+  padding: 0.75rem 0.5rem;
+  border-top: 1px solid var(--border-color);
+  border-radius: 0 0 18px 18px;
 }
 
 .modal-form {

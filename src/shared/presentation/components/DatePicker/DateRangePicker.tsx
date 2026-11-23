@@ -17,8 +17,12 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import './DateRangePicker.css';
+import {
+  createDateConstraintPolicy,
+  type DateConstraintProps
+} from './dateConstraints';
 
-interface DateRangePickerProps {
+export interface DateRangePickerProps extends DateConstraintProps {
   startDate: string;
   endDate: string;
   onChange: (start: string, end: string) => void;
@@ -37,6 +41,13 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   size = 'medium',
   mode = 'date',
   maxDate,
+  minDate,
+  min,
+  max,
+  allowedRange,
+  allowedRanges,
+  disabledDates,
+  isDateDisabled,
   label = 'Fecha Desde -> Fecha Hasta'
 }) => {
   const { t } = useTranslation();
@@ -44,6 +55,29 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const [hoverDate, setHoverDate] = useState<string>('');
+
+  // SRP / Clean Architecture: Instancia inmutable de la política de restricciones
+  const policy = useMemo(() => {
+    return createDateConstraintPolicy({
+      maxDate,
+      minDate,
+      min,
+      max,
+      allowedRange,
+      allowedRanges,
+      disabledDates,
+      isDateDisabled
+    });
+  }, [
+    maxDate,
+    minDate,
+    min,
+    max,
+    allowedRange,
+    allowedRanges,
+    disabledDates,
+    isDateDisabled
+  ]);
 
   const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
   const [verticalAlign, setVerticalAlign] = useState<'top' | 'bottom'>(
@@ -287,22 +321,22 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         dateStr > actualStart &&
         dateStr < actualEnd;
       const isToday = today === dateStr;
-      const isAfterMax = maxDate ? dateStr > maxDate : false;
+      const isDayDisabled = policy.isDayDisabled(year, month, i);
 
       days.push(
         <button
           key={i}
           type="button"
-          disabled={isAfterMax}
+          disabled={isDayDisabled}
           className={`date-range-picker-cell 
             ${isStart ? 'date-range-picker-cell--selected date-range-picker-cell--range-start' : ''} 
             ${isEnd ? 'date-range-picker-cell--selected date-range-picker-cell--range-end' : ''} 
             ${isInRange ? 'date-range-picker-cell--in-range' : ''}
             ${isToday ? 'date-range-picker-cell--today' : ''}
-            ${isAfterMax ? 'date-range-picker-cell--disabled' : ''}
+            ${isDayDisabled ? 'date-range-picker-cell--disabled' : ''}
           `}
-          onClick={() => !isAfterMax && handleDateClick(dateStr)}
-          onMouseEnter={() => !isAfterMax && setHoverDate(dateStr)}
+          onClick={() => !isDayDisabled && handleDateClick(dateStr)}
+          onMouseEnter={() => !isDayDisabled && setHoverDate(dateStr)}
           onMouseLeave={() => setHoverDate('')}
         >
           {i}
@@ -349,24 +383,22 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         cellMonthStr > actualStartStr &&
         cellMonthStr < actualEndStr;
       const isToday = currentTodayMonthStr === cellMonthStr;
-
-      const maxMonthStr = maxDate ? maxDate.substring(0, 7) : null;
-      const isAfterMax = maxMonthStr ? cellMonthStr > maxMonthStr : false;
+      const isMonthDisabled = policy.isMonthDisabled(year, index);
 
       return (
         <button
           key={index}
           type="button"
-          disabled={isAfterMax}
+          disabled={isMonthDisabled}
           className={`date-range-picker-cell date-range-picker-cell--month
             ${isStart ? 'date-range-picker-cell--selected date-range-picker-cell--range-start' : ''} 
             ${isEnd ? 'date-range-picker-cell--selected date-range-picker-cell--range-end' : ''} 
             ${isInRange ? 'date-range-picker-cell--in-range' : ''}
             ${isToday ? 'date-range-picker-cell--today' : ''}
-            ${isAfterMax ? 'date-range-picker-cell--disabled' : ''}
+            ${isMonthDisabled ? 'date-range-picker-cell--disabled' : ''}
           `}
-          onClick={() => !isAfterMax && handleMonthClick(year, index)}
-          onMouseEnter={() => !isAfterMax && setHoverDate(`${cellMonthStr}-01`)}
+          onClick={() => !isMonthDisabled && handleMonthClick(year, index)}
+          onMouseEnter={() => !isMonthDisabled && setHoverDate(`${cellMonthStr}-01`)}
           onMouseLeave={() => setHoverDate('')}
         >
           {monthName.substring(0, 3)}
@@ -492,6 +524,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     type="button"
                     className="date-range-picker-nav-btn"
                     onClick={prevMonth}
+                    disabled={policy.isPrevNavDisabled(currentMonth, mode)}
                     title={t('common.prevMonth', 'Mes anterior')}
                   >
                     <ChevronLeft size={18} />
@@ -535,6 +568,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     type="button"
                     className="date-range-picker-nav-btn"
                     onClick={nextMonth}
+                    disabled={policy.isNextNavDisabled(secondMonth, mode)}
                     title={t('common.nextMonth', 'Mes siguiente')}
                   >
                     <ChevronRight size={18} />

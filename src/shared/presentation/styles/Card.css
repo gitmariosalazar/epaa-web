@@ -9,7 +9,8 @@
 }
 
 .card__header {
-  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm)
+    var(--spacing-md) !important;
   border-bottom: 1px solid var(--border-color);
   background-color: var(--surface-hover);
 }
@@ -19,7 +20,6 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  gap: var(--spacing-sm, 8px);
 }
 
 .card__title {

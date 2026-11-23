@@ -41,7 +41,7 @@ export const DashBoardProgressReadings: React.FC<
     totalData.expectedTotal > 0
       ? (totalData.completed / totalData.expectedTotal) * 100
       : 0;
-      
+
   // Asegurar que visualmente nunca sobrepase el 100%
   if (totalPercentage > 100) {
     totalPercentage = 100;

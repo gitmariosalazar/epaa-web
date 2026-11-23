@@ -157,9 +157,15 @@
   transition: all 0.1s;
 }
 
-.datepicker-nav-btn:hover {
+.datepicker-nav-btn:hover:not(:disabled) {
   background-color: var(--surface-hover);
   color: var(--text-main);
+}
+
+.datepicker-nav-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .datepicker-weekdays {
@@ -195,9 +201,17 @@
   transition: all 0.1s;
 }
 
-.datepicker-cell--day:hover {
+.datepicker-cell--day:hover:not(.datepicker-cell--disabled) {
   background-color: var(--surface-hover);
   color: var(--text-main);
+}
+
+.datepicker-cell--disabled {
+  opacity: 0.25;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  background: transparent !important;
+  color: var(--text-muted) !important;
 }
 
 .datepicker-cell--today {
@@ -242,8 +256,16 @@
   border: none;
 }
 
-.datepicker-month-cell:hover {
+.datepicker-month-cell:hover:not(.datepicker-month-cell--disabled) {
   background-color: var(--surface-hover);
+}
+
+.datepicker-month-cell--disabled {
+  opacity: 0.25;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  background: transparent !important;
+  color: var(--text-muted) !important;
 }
 
 .datepicker-month-cell--selected {

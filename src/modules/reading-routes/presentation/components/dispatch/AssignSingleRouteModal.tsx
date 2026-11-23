@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { X, UserPlus, Send } from 'lucide-react';
 import { useUsersContext } from '@/modules/users/presentation/context/UsersContext';
 import { useReadingRoutesContext } from '../../context/ReadingRoutesContext';
@@ -16,6 +16,7 @@ import {
   getRouteAssignmentStatusLabel
 } from '../../utils/notify';
 import { FaDotCircle } from 'react-icons/fa';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 export interface AssignSingleRouteModalProps {
   isOpen: boolean;
@@ -33,9 +34,8 @@ export const AssignSingleRouteModal: React.FC<AssignSingleRouteModalProps> = ({
   const { getUsersUseCase } = useUsersContext();
   const { getLiveTrackingAssignmentsUseCase } = useReadingRoutesContext();
 
-  const now = new Date();
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const todayStr = now.toISOString().split('T')[0];
+  const currentMonth = useMemo(() => dateService.getCurrentMonthString(), []);
+  const todayStr = useMemo(() => dateService.getCurrentDateString(), []);
 
   const [periodo, setPeriodo] = useState<string>(currentMonth);
   const [fechaProgramada, setFechaProgramada] = useState<string>(todayStr);
@@ -49,6 +49,86 @@ export const AssignSingleRouteModal: React.FC<AssignSingleRouteModalProps> = ({
   >(new Set());
   const [isLoadingOperators, setIsLoadingOperators] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Límites dinámicos para Fecha Programada según el Periodo seleccionado
+  const { minDateProgramada, maxDateProgramada } = useMemo(() => {
+    if (!periodo) {
+      return {
+        minDateProgramada: todayStr,
+        maxDateProgramada: undefined
+      };
+    }
+
+    const [y, m] = periodo.split('-').map(Number);
+    if (isNaN(y) || isNaN(m)) {
+      return {
+        minDateProgramada: todayStr,
+        maxDateProgramada: undefined
+      };
+    }
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const firstDayOfMonth = `${y}-${pad(m)}-01`;
+    const lastDayNum = new Date(y, m, 0).getDate();
+    const lastDayOfMonth = `${y}-${pad(m)}-${pad(lastDayNum)}`;
+
+    const isCurrentMonth = periodo === currentMonth;
+    const minDate = isCurrentMonth ? todayStr : firstDayOfMonth;
+    const maxDate = lastDayOfMonth;
+
+    return {
+      minDateProgramada: minDate,
+      maxDateProgramada: maxDate
+    };
+  }, [periodo, currentMonth, todayStr]);
+
+  // Sincroniza automáticamente la fecha programada al cambiar el periodo
+  const handlePeriodoChange = useCallback(
+    (newPeriodo: string) => {
+      setPeriodo(newPeriodo);
+
+      if (!newPeriodo) return;
+
+      const currentFechaMonth = fechaProgramada
+        ? fechaProgramada.slice(0, 7)
+        : '';
+
+      if (currentFechaMonth !== newPeriodo) {
+        if (newPeriodo === currentMonth) {
+          setFechaProgramada(todayStr);
+        } else {
+          setFechaProgramada(`${newPeriodo}-01`);
+        }
+      }
+    },
+    [fechaProgramada, currentMonth, todayStr]
+  );
+
+  // Mantiene la sincronía bidireccional si se ingresa/selecciona manualmente una fecha de otro mes
+  const handleFechaProgramadaChange = useCallback(
+    (newDate: string) => {
+      setFechaProgramada(newDate);
+
+      if (newDate && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
+        const monthOfDate = newDate.slice(0, 7);
+        if (monthOfDate !== periodo) {
+          setPeriodo(monthOfDate);
+        }
+      }
+    },
+    [periodo]
+  );
+
+  useEffect(() => {
+    if (!isOpen) {
+      setUsuarioId('');
+    } else {
+      const nowMonth = dateService.getCurrentMonthString();
+      const nowToday = dateService.getCurrentDateString();
+      setPeriodo(nowMonth);
+      setFechaProgramada(nowToday);
+    }
+  }, [isOpen]);
 
   // Filter operators just by positionName Lecturista
   const lecturistaOperators = useMemo(() => {
@@ -263,9 +343,10 @@ export const AssignSingleRouteModal: React.FC<AssignSingleRouteModalProps> = ({
                 </label>
                 <DatePicker
                   value={periodo}
-                  onChange={(e) => setPeriodo(e)}
+                  onChange={handlePeriodoChange}
                   view="month"
                   size="small"
+                  minDate={currentMonth}
                 />
               </div>
 
@@ -273,9 +354,11 @@ export const AssignSingleRouteModal: React.FC<AssignSingleRouteModalProps> = ({
                 <label className="single-assign-label">Fecha Programada:</label>
                 <DatePicker
                   value={fechaProgramada}
-                  onChange={(e) => setFechaProgramada(e)}
+                  onChange={handleFechaProgramadaChange}
                   view="date"
                   size="small"
+                  minDate={minDateProgramada}
+                  maxDate={maxDateProgramada}
                 />
               </div>
             </div>

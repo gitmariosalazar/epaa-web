@@ -32,7 +32,7 @@ export const StateHistoryAuditPage: React.FC = () => {
   const columns: Column<StateHistory>[] = [
     {
       id: 'historialId',
-      header: 'ID Folio',
+      header: 'ID',
       accessor: (row) => `#${row.historialId}`
     },
     {
@@ -258,8 +258,8 @@ export const StateHistoryAuditPage: React.FC = () => {
         selectedConnectionIds={
           auditHook.records.length > 0
             ? Array.from(
-                new Set(auditHook.records.map((r) => r.connectionId))
-              ).slice(0, 10)
+              new Set(auditHook.records.map((r) => r.connectionId))
+            ).slice(0, 10)
             : []
         }
         onSuccess={() => {

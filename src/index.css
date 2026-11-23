@@ -1,5 +1,6 @@
 @import './shared/presentation/styles/variables.css';
 @import './shared/presentation/styles/palette.css';
+@import './shared/presentation/styles/EntryFilters.css';
 
 :root {
   font-family: var(--font-sans);

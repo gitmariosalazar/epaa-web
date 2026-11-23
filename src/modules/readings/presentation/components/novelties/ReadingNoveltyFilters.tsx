@@ -13,6 +13,7 @@ import { TbChartPieFilled } from 'react-icons/tb';
 import { RiMenuSearchLine } from 'react-icons/ri';
 import { User } from 'lucide-react';
 import { useUsersViewModel } from '@/modules/users/presentation/hooks/useUsersViewModel';
+import '@/shared/presentation/styles/EntryFilters.css';
 
 export interface ReadingNoveltyFiltersProps {
   novelty: string;

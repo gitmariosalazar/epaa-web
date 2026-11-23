@@ -30,6 +30,7 @@ import { DatePicker } from '@/shared/presentation/components/DatePicker/DatePick
 import { Select } from '@/shared/presentation/components/Input/Select';
 import { sectors as DEFAULT_SECTORS } from '@/shared/utils/listSectors';
 import { Input } from '@/shared/presentation/components/Input/Input';
+import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 
 export interface BatchMorningDispatchModalProps {
   isOpen: boolean;
@@ -65,15 +66,89 @@ export const BatchMorningDispatchModal: React.FC<
   const { getLiveTrackingAssignmentsUseCase, getReadingRoutesUseCase } =
     useReadingRoutesContext();
 
-  const now = new Date();
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const todayStr = now.toISOString().split('T')[0];
+  const currentMonth = useMemo(() => dateService.getCurrentMonthString(), []);
+  const todayStr = useMemo(() => dateService.getCurrentDateString(), []);
 
   // Parámetros de formulario
   const [periodo, setPeriodo] = useState<string>(currentMonth);
   const [fechaProgramada, setFechaProgramada] = useState<string>(todayStr);
   const [selectedSector, setSelectedSector] = useState<number | undefined>(
     undefined
+  );
+
+  // Cálculo dinámico y reactivo de límites para Fecha Programada según el Periodo seleccionado
+  const { minDateProgramada, maxDateProgramada } = useMemo(() => {
+    if (!periodo) {
+      return {
+        minDateProgramada: todayStr,
+        maxDateProgramada: undefined
+      };
+    }
+
+    const [y, m] = periodo.split('-').map(Number);
+    if (isNaN(y) || isNaN(m)) {
+      return {
+        minDateProgramada: todayStr,
+        maxDateProgramada: undefined
+      };
+    }
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const firstDayOfMonth = `${y}-${pad(m)}-01`;
+    // Al pasar el mes siguiente (m) y día 0, devuelve el último día del mes m
+    const lastDayNum = new Date(y, m, 0).getDate();
+    const lastDayOfMonth = `${y}-${pad(m)}-${pad(lastDayNum)}`;
+
+    // Si el periodo seleccionado es el mes en curso, no permitir fechas pasadas (desde hoy hasta fin de mes)
+    // Si el periodo es un mes futuro (ej. diciembre), todo el mes es hábil (desde el día 1 al último día)
+    const isCurrentMonth = periodo === currentMonth;
+    const minDate = isCurrentMonth ? todayStr : firstDayOfMonth;
+    const maxDate = lastDayOfMonth;
+
+    return {
+      minDateProgramada: minDate,
+      maxDateProgramada: maxDate
+    };
+  }, [periodo, currentMonth, todayStr]);
+
+  // Sincroniza automáticamente la fecha programada al cambiar el periodo
+  const handlePeriodoChange = useCallback(
+    (newPeriodo: string) => {
+      setPeriodo(newPeriodo);
+
+      if (!newPeriodo) return;
+
+      const currentFechaMonth = fechaProgramada
+        ? fechaProgramada.slice(0, 7)
+        : '';
+
+      // Si la fecha programada no pertenece al nuevo período, actualizarla automáticamente
+      if (currentFechaMonth !== newPeriodo) {
+        if (newPeriodo === currentMonth) {
+          // Si regresa al mes actual, sincronizar con la fecha de hoy
+          setFechaProgramada(todayStr);
+        } else {
+          // Si pasa a otro mes (ej. diciembre), sincronizar con el primer día del mes
+          setFechaProgramada(`${newPeriodo}-01`);
+        }
+      }
+    },
+    [fechaProgramada, currentMonth, todayStr]
+  );
+
+  // Mantiene la sincronía bidireccional si se ingresa/selecciona manualmente una fecha de otro mes
+  const handleFechaProgramadaChange = useCallback(
+    (newDate: string) => {
+      setFechaProgramada(newDate);
+
+      if (newDate && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
+        const monthOfDate = newDate.slice(0, 7);
+        if (monthOfDate !== periodo) {
+          setPeriodo(monthOfDate);
+        }
+      }
+    },
+    [periodo]
   );
 
   // Operadores y asignaciones de campo
@@ -108,6 +183,15 @@ export const BatchMorningDispatchModal: React.FC<
     useState<BatchDispatchProgress | null>(null);
   const [fallbackRoutes, setFallbackRoutes] = useState<ReadingRoute[]>([]);
 
+  // Rutas frescas consultadas directamente desde la base de datos
+  const [dbRoutes, setDbRoutes] = useState<ReadingRoute[]>([]);
+  const [isLoadingRoutes, setIsLoadingRoutes] = useState(false);
+
+  // Set reactivo de IDs de rutas que ya están asignadas en la base de datos para este período y fecha
+  const [dbAssignedRouteIds, setDbAssignedRouteIds] = useState<Set<number>>(
+    new Set()
+  );
+
   // Filtrar lecturistas por cargo 'Lecturista' (o todos si no hay ese cargo específico)
   const lecturistaOperators = useMemo(() => {
     const filtered = operators.filter((op) =>
@@ -133,13 +217,141 @@ export const BatchMorningDispatchModal: React.FC<
       setSelectedRouteIdForMap(null);
       setSearchQuery('');
       setFilterTab('ALL');
+      setDbAssignedRouteIds(new Set());
+    } else {
+      const nowMonth = dateService.getCurrentMonthString();
+      const nowToday = dateService.getCurrentDateString();
+      setPeriodo(nowMonth);
+      setFechaProgramada(nowToday);
     }
   }, [isOpen]);
 
-  // Carga de respaldo si no llegaron rutas por props
+  // Consulta directa a la base de datos de operadores, rutas y asignaciones existentes
   useEffect(() => {
     if (!isOpen) return;
-    if (routes && routes.length > 0) return;
+    let isMounted = true;
+
+    const fetchDatabaseState = async () => {
+      setIsLoadingOperators(true);
+      setIsLoadingRoutes(true);
+
+      try {
+        const [usersRes, trackingRes, routesRes] = await Promise.allSettled([
+          getUsersUseCase.execute(100, 0),
+          getLiveTrackingAssignmentsUseCase.execute(
+            periodo || undefined,
+            fechaProgramada || undefined
+          ),
+          getReadingRoutesUseCase.execute({
+            limit: 150,
+            activa: true,
+            periodo: periodo || undefined
+          })
+        ]);
+
+        if (!isMounted) return;
+
+        // 1. Cargar operadores
+        if (usersRes.status === 'fulfilled') {
+          setOperators(usersRes.value || []);
+        }
+
+        // 2. Cargar rutas frescas del catálogo desde la base de datos
+        if (routesRes.status === 'fulfilled') {
+          setDbRoutes(routesRes.value?.items || []);
+        }
+
+        // 3. Procesar asignaciones en la base de datos para el período y fecha programada
+        const assignedIds = new Set<number>();
+        const counts: Record<string, number> = {};
+
+        if (trackingRes.status === 'fulfilled') {
+          (trackingRes.value || []).forEach((a) => {
+            const uId = a.usuarioId || a.lecturistaId;
+            const rId = Number(a.rutaId || (a as any).idRuta);
+
+            const aFecha =
+              typeof a.fechaProgramada === 'string'
+                ? a.fechaProgramada.split('T')[0]
+                : a.fechaProgramada
+                  ? new Date(a.fechaProgramada).toISOString().split('T')[0]
+                  : null;
+
+            const matchesDate =
+              !fechaProgramada || !aFecha || aFecha === fechaProgramada;
+
+            const estado = (a.estado || '').toUpperCase();
+            const isActiveAssignment =
+              estado !== 'CANCELADA' &&
+              estado !== 'NO_ASIGNADA' &&
+              estado !== 'SIN_ASIGNAR';
+
+            if (
+              uId &&
+              matchesDate &&
+              (estado === 'ASIGNADA' || estado === 'EN_PROCESO')
+            ) {
+              counts[uId] = (counts[uId] || 0) + 1;
+            }
+
+            if (rId && isActiveAssignment && matchesDate) {
+              assignedIds.add(rId);
+            }
+          });
+        }
+
+        // 4. Si el catálogo para este período reporta rutas ya asignadas, consolidarlas
+        if (routesRes.status === 'fulfilled') {
+          (routesRes.value?.items || []).forEach((r) => {
+            const rEstado = (r.estado || '').toUpperCase();
+            const hasAssignment =
+              Boolean(r.idAsignacion) ||
+              (rEstado !== '' &&
+                rEstado !== 'NO_ASIGNADA' &&
+                rEstado !== 'SIN_ASIGNAR' &&
+                rEstado !== 'CANCELADA');
+
+            const isSamePeriod = !r.periodo || r.periodo === periodo;
+
+            if (hasAssignment && isSamePeriod && r.idRuta) {
+              assignedIds.add(Number(r.idRuta));
+            }
+          });
+        }
+
+        setBaseActiveCountByUser(counts);
+        setDbAssignedRouteIds(assignedIds);
+      } catch (err) {
+        console.error(
+          'Error al consultar estado de rutas en la base de datos:',
+          err
+        );
+      } finally {
+        if (isMounted) {
+          setIsLoadingOperators(false);
+          setIsLoadingRoutes(false);
+        }
+      }
+    };
+
+    void fetchDatabaseState();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    isOpen,
+    periodo,
+    fechaProgramada,
+    getUsersUseCase,
+    getLiveTrackingAssignmentsUseCase,
+    getReadingRoutesUseCase
+  ]);
+
+  // Carga de respaldo si no llegaron rutas por props y la base de datos está respondiendo
+  useEffect(() => {
+    if (!isOpen) return;
+    if ((routes && routes.length > 0) || dbRoutes.length > 0) return;
     let isMounted = true;
     const fetchFallbackRoutes = async () => {
       try {
@@ -161,97 +373,51 @@ export const BatchMorningDispatchModal: React.FC<
     return () => {
       isMounted = false;
     };
-  }, [isOpen, routes, getReadingRoutesUseCase]);
+  }, [isOpen, routes, dbRoutes.length, getReadingRoutesUseCase]);
 
-  const effectiveRoutes = routes && routes.length > 0 ? routes : fallbackRoutes;
+  // Rutas base: Prioriza las consultadas directamente de la base de datos, luego props y fallback
+  const baseRoutes = useMemo(() => {
+    if (dbRoutes && dbRoutes.length > 0) return dbRoutes;
+    if (routes && routes.length > 0) return routes;
+    return fallbackRoutes;
+  }, [dbRoutes, routes, fallbackRoutes]);
 
-  // Carga de usuarios y monitoreo de campo en paralelo
-  useEffect(() => {
-    if (!isOpen) return;
-    let isMounted = true;
-    const fetchUsersAndTracking = async () => {
-      setIsLoadingOperators(true);
-      try {
-        const [usersRes, trackingRes] = await Promise.allSettled([
-          getUsersUseCase.execute(100, 0),
-          getLiveTrackingAssignmentsUseCase.execute(
-            periodo || undefined,
-            fechaProgramada || undefined
-          )
-        ]);
-        if (isMounted) {
-          if (usersRes.status === 'fulfilled') {
-            setOperators(usersRes.value || []);
-          }
-          if (trackingRes.status === 'fulfilled') {
-            const counts: Record<string, number> = {};
-            (trackingRes.value || []).forEach((a) => {
-              const uId = a.usuarioId || a.lecturistaId;
-              const aFecha =
-                typeof a.fechaProgramada === 'string'
-                  ? a.fechaProgramada.split('T')[0]
-                  : a.fechaProgramada
-                    ? new Date(a.fechaProgramada).toISOString().split('T')[0]
-                    : null;
-              const matchesDate =
-                !fechaProgramada || !aFecha || aFecha === fechaProgramada;
-              if (
-                uId &&
-                matchesDate &&
-                (a.estado === 'ASIGNADA' || a.estado === 'EN_PROCESO')
-              ) {
-                counts[uId] = (counts[uId] || 0) + 1;
-              }
-            });
-            setBaseActiveCountByUser(counts);
-          }
-        }
-      } catch (err) {
-        console.error(
-          'Error al cargar operadores y asignaciones en lote:',
-          err
-        );
-      } finally {
-        if (isMounted) {
-          setIsLoadingOperators(false);
-        }
+  // Rutas sin asignar: Excluye de forma estricta todas las rutas que ya tengan asignación en la base de datos
+  const unassignedRoutes = useMemo(() => {
+    return baseRoutes.filter((r) => {
+      const isActiva = (r.activa ?? true) === true;
+      if (!isActiva) return false;
+
+      // Si la ruta ya tiene asignación en la BD para este período y fecha, se excluye
+      if (dbAssignedRouteIds.has(Number(r.idRuta))) {
+        return false;
       }
-    };
-    void fetchUsersAndTracking();
-    return () => {
-      isMounted = false;
-    };
-  }, [
-    isOpen,
-    periodo,
-    fechaProgramada,
-    getUsersUseCase,
-    getLiveTrackingAssignmentsUseCase
-  ]);
 
-  // Sectores estándar (1-40) combinados con los sectores de las rutas cargadas
+      return true;
+    });
+  }, [baseRoutes, dbAssignedRouteIds]);
+
+  // Sectores estándar (1-40) combinados con los sectores de las rutas disponibles
   const sectors = useMemo(() => {
     const set = new Set<number>(DEFAULT_SECTORS.map((s) => s.id));
-    (effectiveRoutes || []).forEach((r) => {
+    (baseRoutes || []).forEach((r) => {
       const sec = r?.sectorId ?? r?.sector;
       if (typeof sec === 'number' && Number.isFinite(sec)) {
         set.add(sec);
       }
     });
     return Array.from(set).sort((a, b) => a - b);
-  }, [effectiveRoutes]);
+  }, [baseRoutes]);
 
-  // Rutas activas del sector seleccionado
+  // Rutas activas y sin asignar del sector seleccionado
   const sectorRoutes = useMemo(() => {
-    const isActiva = (r: ReadingRoute) =>
-      (r.activa ?? r.activa ?? true) === true;
     const getSector = (r: ReadingRoute) => r.sectorId ?? r.sector;
 
-    if (!selectedSector) return effectiveRoutes.filter(isActiva);
-    return effectiveRoutes.filter(
-      (r) => isActiva(r) && Number(getSector(r)) === Number(selectedSector)
+    if (!selectedSector) return unassignedRoutes;
+    return unassignedRoutes.filter(
+      (r) => Number(getSector(r)) === Number(selectedSector)
     );
-  }, [effectiveRoutes, selectedSector]);
+  }, [unassignedRoutes, selectedSector]);
 
   // Lista detallada de lecturistas con estadísticas calculadas en tiempo real
   const operatorsWithStats = useMemo(() => {
@@ -270,7 +436,7 @@ export const BatchMorningDispatchModal: React.FC<
         .map(([rId]) => Number(rId));
 
       const count = assignedRouteIds.length;
-      const meters = effectiveRoutes
+      const meters = baseRoutes
         .filter((r) => assignedRouteIds.includes(r.idRuta))
         .reduce((acc, r) => acc + (r.cantidadAcometidas || 0), 0);
 
@@ -303,7 +469,7 @@ export const BatchMorningDispatchModal: React.FC<
     lecturistaOperators,
     operatorColorMap,
     routeAssignments,
-    effectiveRoutes,
+    baseRoutes,
     baseActiveCountByUser
   ]);
 
@@ -371,21 +537,30 @@ export const BatchMorningDispatchModal: React.FC<
   ).length;
   const activeOpAssignedCount = selectedOperatorId
     ? sectorRoutes.filter(
-        (r) => routeAssignments[r.idRuta] === selectedOperatorId
-      ).length
+      (r) => routeAssignments[r.idRuta] === selectedOperatorId
+    ).length
     : 0;
   const otherOpsAssignedCount = selectedOperatorId
     ? sectorRoutes.filter(
-        (r) =>
-          Boolean(routeAssignments[r.idRuta]) &&
-          routeAssignments[r.idRuta] !== selectedOperatorId
-      ).length
+      (r) =>
+        Boolean(routeAssignments[r.idRuta]) &&
+        routeAssignments[r.idRuta] !== selectedOperatorId
+    ).length
     : 0;
 
   // Acción: Alternar asignación de una ruta para el lecturista activo
   const handleToggleAssignToActiveOperator = useCallback(
     (routeId: number) => {
       if (!selectedOperatorId) return;
+
+      // Si la ruta ya está asignada en la base de datos para esta fecha programada, impedir reasignación no controlada
+      if (dbAssignedRouteIds.has(routeId)) {
+        notify.warning(
+          'Esta ruta ya se encuentra asignada en la base de datos para esta fecha programada.',
+          'Ruta ya Asignada'
+        );
+        return;
+      }
 
       // Si la ruta ya está asignada al activo, permitir quitarla siempre (libera capacidad)
       const isCurrentlyAssignedToActive =
@@ -423,7 +598,8 @@ export const BatchMorningDispatchModal: React.FC<
       selectedOperatorId,
       routeAssignments,
       baseActiveCountByUser,
-      activeOperator
+      activeOperator,
+      dbAssignedRouteIds
     ]
   );
 
@@ -558,7 +734,7 @@ export const BatchMorningDispatchModal: React.FC<
       new Set(
         asignaciones
           .map((a) => {
-            const r = effectiveRoutes.find((rt) => rt.idRuta === a.rutaId);
+            const r = baseRoutes.find((rt) => rt.idRuta === a.rutaId);
             return r?.sectorId ?? r?.sector;
           })
           .filter(
@@ -635,9 +811,10 @@ export const BatchMorningDispatchModal: React.FC<
                 <label className="morning-form-label">Periodo (Mes):</label>
                 <DatePicker
                   value={periodo}
-                  onChange={(e) => setPeriodo(e)}
+                  onChange={handlePeriodoChange}
                   view="month"
                   size="small"
+                  minDate={currentMonth}
                 />
               </div>
 
@@ -645,9 +822,11 @@ export const BatchMorningDispatchModal: React.FC<
                 <label className="morning-form-label">Fecha Programada:</label>
                 <DatePicker
                   value={fechaProgramada}
-                  onChange={(e) => setFechaProgramada(e)}
+                  onChange={handleFechaProgramadaChange}
                   view="date"
                   size="small"
+                  minDate={minDateProgramada}
+                  maxDate={maxDateProgramada}
                 />
               </div>
 
@@ -718,10 +897,18 @@ export const BatchMorningDispatchModal: React.FC<
                         }}
                       >
                         <div className="morning-operator-card-header">
-                          <span
-                            className="morning-operator-dot"
-                            style={{ backgroundColor: op.color }}
-                          />
+                          <div className="morning-operator-card-header-left">
+                            <span
+                              className="morning-operator-dot"
+                              style={{ backgroundColor: op.color }}
+                            />
+                            <span
+                              className="morning-operator-username"
+                              style={{ color: op.color }}
+                            >
+                              {op.username}
+                            </span>
+                          </div>
                           {isActive && (
                             <span
                               className="morning-operator-active-badge"
@@ -916,18 +1103,16 @@ export const BatchMorningDispatchModal: React.FC<
                 <div className="morning-routes-filter-tabs">
                   <button
                     type="button"
-                    className={`morning-routes-filter-tab ${
-                      filterTab === 'ALL' ? 'is-active' : ''
-                    }`}
+                    className={`morning-routes-filter-tab ${filterTab === 'ALL' ? 'is-active' : ''
+                      }`}
                     onClick={() => setFilterTab('ALL')}
                   >
                     Todas ({sectorRoutes.length})
                   </button>
                   <button
                     type="button"
-                    className={`morning-routes-filter-tab ${
-                      filterTab === 'UNASSIGNED' ? 'is-active' : ''
-                    }`}
+                    className={`morning-routes-filter-tab ${filterTab === 'UNASSIGNED' ? 'is-active' : ''
+                      }`}
                     onClick={() => setFilterTab('UNASSIGNED')}
                   >
                     Sin Asignar ({unassignedCount})
@@ -935,9 +1120,8 @@ export const BatchMorningDispatchModal: React.FC<
                   {activeOperator && (
                     <button
                       type="button"
-                      className={`morning-routes-filter-tab ${
-                        filterTab === 'ACTIVE_OP' ? 'is-active' : ''
-                      }`}
+                      className={`morning-routes-filter-tab ${filterTab === 'ACTIVE_OP' ? 'is-active' : ''
+                        }`}
                       onClick={() => setFilterTab('ACTIVE_OP')}
                     >
                       De {activeOperator.name.split(' ')[0]} (
@@ -947,9 +1131,8 @@ export const BatchMorningDispatchModal: React.FC<
                   {otherOpsAssignedCount > 0 && (
                     <button
                       type="button"
-                      className={`morning-routes-filter-tab ${
-                        filterTab === 'OTHER_OPS' ? 'is-active' : ''
-                      }`}
+                      className={`morning-routes-filter-tab ${filterTab === 'OTHER_OPS' ? 'is-active' : ''
+                        }`}
                       onClick={() => setFilterTab('OTHER_OPS')}
                     >
                       Otros ({otherOpsAssignedCount})
@@ -960,7 +1143,18 @@ export const BatchMorningDispatchModal: React.FC<
 
               {/* Filas de Rutas */}
               <div className="morning-routes-list-scroll">
-                {displayedRoutes.length === 0 ? (
+                {isLoadingRoutes ? (
+                  <div
+                    style={{
+                      padding: '2.5rem',
+                      textAlign: 'center',
+                      color: 'var(--text-muted)',
+                      fontSize: '0.85rem'
+                    }}
+                  >
+                    Consultando rutas sin asignar en la base de datos...
+                  </div>
+                ) : displayedRoutes.length === 0 ? (
                   <div
                     style={{
                       padding: '2.5rem',
@@ -971,15 +1165,17 @@ export const BatchMorningDispatchModal: React.FC<
                   >
                     {searchQuery
                       ? 'No se encontraron rutas con el término ingresado.'
-                      : 'No hay rutas para el filtro seleccionado.'}
+                      : unassignedRoutes.length === 0 && dbAssignedRouteIds.size > 0
+                        ? 'Todas las rutas activas ya están asignadas en la base de datos para este período y fecha.'
+                        : 'No hay rutas para el filtro seleccionado.'}
                   </div>
                 ) : (
                   displayedRoutes.map((r) => {
                     const assignedUserId = routeAssignments[r.idRuta];
                     const assignedOp = assignedUserId
                       ? operatorsWithStats.find(
-                          (o) => o.userId === assignedUserId
-                        )
+                        (o) => o.userId === assignedUserId
+                      )
                       : null;
                     const isAssignedToActive = Boolean(
                       selectedOperatorId &&
@@ -990,9 +1186,8 @@ export const BatchMorningDispatchModal: React.FC<
                     return (
                       <div
                         key={r.idRuta}
-                        className={`morning-route-item-row ${
-                          isSelectedForMap ? 'is-selected-for-map' : ''
-                        }`}
+                        className={`morning-route-item-row ${isSelectedForMap ? 'is-selected-for-map' : ''
+                          }`}
                         style={{
                           borderLeft: isAssignedToActive
                             ? `4px solid ${activeOperator?.color || 'var(--accent)'}`
@@ -1085,23 +1280,23 @@ export const BatchMorningDispatchModal: React.FC<
                                   : 'transparent',
                                 borderColor:
                                   !isAssignedToActive &&
-                                  activeOperator.isMaxReached
+                                    activeOperator.isMaxReached
                                     ? 'var(--border)'
                                     : activeOperator.color,
                                 color: isAssignedToActive
                                   ? '#ffffff'
                                   : !isAssignedToActive &&
-                                      activeOperator.isMaxReached
+                                    activeOperator.isMaxReached
                                     ? 'var(--text-muted)'
                                     : activeOperator.color,
                                 cursor:
                                   !isAssignedToActive &&
-                                  activeOperator.isMaxReached
+                                    activeOperator.isMaxReached
                                     ? 'not-allowed'
                                     : 'pointer',
                                 opacity:
                                   !isAssignedToActive &&
-                                  activeOperator.isMaxReached
+                                    activeOperator.isMaxReached
                                     ? 0.6
                                     : 1
                               }}
@@ -1152,7 +1347,7 @@ export const BatchMorningDispatchModal: React.FC<
           <div className="morning-dispatch-panel-right">
             <BatchDispatchMapPreview
               selectedSector={selectedSector}
-              routes={effectiveRoutes}
+              routes={unassignedRoutes}
               selectedRouteId={selectedRouteIdForMap}
               onSelectRouteId={setSelectedRouteIdForMap}
               isOpen={isOpen}
@@ -1161,6 +1356,7 @@ export const BatchMorningDispatchModal: React.FC<
               activeOperator={activeOperator}
               onToggleAssignRoute={handleToggleAssignToActiveOperator}
               operators={operatorsWithStats}
+              dbAssignedRouteIds={dbAssignedRouteIds}
             />
           </div>
         </div>

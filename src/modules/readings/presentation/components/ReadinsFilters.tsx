@@ -9,6 +9,7 @@ import { Input } from '@/shared/presentation/components/Input/Input';
 import { User } from 'lucide-react';
 import { useUsersViewModel } from '@/modules/users/presentation/hooks/useUsersViewModel';
 import { Select } from '@/shared/presentation/components/Input/Select';
+import '@/shared/presentation/styles/EntryFilters.css';
 
 // ── Tab type ──────────────────────────────────────────────────────────────────
 export type ReadingDataTab =

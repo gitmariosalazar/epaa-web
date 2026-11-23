@@ -19,8 +19,12 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/presentation/components/Button/Button';
 import { dateService } from '@/shared/infrastructure/services/EcuadorDateService';
 import './DateTimePicker.css';
+import {
+  createDateConstraintPolicy,
+  type DateConstraintProps
+} from './dateConstraints';
 
-export interface DateTimePickerProps {
+export interface DateTimePickerProps extends DateConstraintProps {
   /**
    * Datetime string in standard format: 'YYYY-MM-DDTHH:mm' or 'YYYY-MM-DDTHH:mm:ss'
    */
@@ -61,6 +65,12 @@ export const DateTimePicker = React.forwardRef<
       onChange,
       min,
       max,
+      minDate,
+      maxDate,
+      allowedRange,
+      allowedRanges,
+      disabledDates,
+      isDateDisabled,
       disabled = false,
       size = 'medium',
       placeholder = 'Seleccionar fecha y hora',
@@ -75,6 +85,29 @@ export const DateTimePicker = React.forwardRef<
     const containerRef = useRef<HTMLDivElement>(null);
     const popoverRef = useRef<HTMLDivElement>(null);
     const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
+
+    // SRP / Clean Architecture: Instancia inmutable de la política de restricciones
+    const policy = useMemo(() => {
+      return createDateConstraintPolicy({
+        minDate,
+        maxDate,
+        min,
+        max,
+        allowedRange,
+        allowedRanges,
+        disabledDates,
+        isDateDisabled
+      });
+    }, [
+      minDate,
+      maxDate,
+      min,
+      max,
+      allowedRange,
+      allowedRanges,
+      disabledDates,
+      isDateDisabled
+    ]);
 
     // Parse value helper
     const parseValue = useCallback((val: string) => {
@@ -208,20 +241,10 @@ export const DateTimePicker = React.forwardRef<
       };
     }, [isOpen, updatePopoverPosition]);
 
-    // Min and Max constraints
-    const minDateStr = useMemo(() => {
-      if (!min) return null;
-      return min.slice(0, 10);
-    }, [min]);
-
-    const maxDateStr = useMemo(() => {
-      if (!max) return null;
-      return max.slice(0, 10);
-    }, [max]);
-
     // Month Navigation
     const prevMonth = (e: React.MouseEvent) => {
       e.stopPropagation();
+      if (policy.isPrevNavDisabled(currentMonth, 'date')) return;
       setCurrentMonth(
         new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1)
       );
@@ -229,6 +252,7 @@ export const DateTimePicker = React.forwardRef<
 
     const nextMonth = (e: React.MouseEvent) => {
       e.stopPropagation();
+      if (policy.isNextNavDisabled(currentMonth, 'date')) return;
       setCurrentMonth(
         new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1)
       );
@@ -267,6 +291,15 @@ export const DateTimePicker = React.forwardRef<
     };
 
     // Quick presets
+    const isPresetDisabled = (daysOffset: number) => {
+      const target = dateService.getCurrentDate();
+      target.setDate(target.getDate() + daysOffset);
+      const y = target.getFullYear();
+      const m = pad(target.getMonth() + 1);
+      const d = pad(target.getDate());
+      return policy.isDateDisabled(`${y}-${m}-${d}`);
+    };
+
     const handleApplyPreset = (daysOffset: number, timeStr = '23:59') => {
       const target = dateService.getCurrentDate();
       target.setDate(target.getDate() + daysOffset);
@@ -274,6 +307,7 @@ export const DateTimePicker = React.forwardRef<
       const m = pad(target.getMonth() + 1);
       const d = pad(target.getDate());
       const dateStr = `${y}-${m}-${d}`;
+      if (policy.isDateDisabled(dateStr)) return;
       const [h, min] = timeStr.split(':').map(Number);
 
       setSelectedDateStr(dateStr);
@@ -350,9 +384,7 @@ export const DateTimePicker = React.forwardRef<
         const cellDateStr = `${year}-${pad(month)}-${pad(d)}`;
         const isSelected = selectedDateStr === cellDateStr;
         const isToday = todayStr === cellDateStr;
-        const isDisabled =
-          (minDateStr && cellDateStr < minDateStr) ||
-          (maxDateStr && cellDateStr > maxDateStr);
+        const isDisabled = policy.isDayDisabled(year, month - 1, d);
 
         cells.push(
           <button
@@ -364,7 +396,7 @@ export const DateTimePicker = React.forwardRef<
             } ${isToday && !isSelected ? 'datetimepicker-cell--today' : ''} ${
               isDisabled ? 'datetimepicker-cell--disabled' : ''
             }`}
-            onClick={() => handleSelectDay(d)}
+            onClick={() => !isDisabled && handleSelectDay(d)}
           >
             {d}
           </button>
@@ -455,6 +487,7 @@ export const DateTimePicker = React.forwardRef<
                     type="button"
                     className="datetimepicker-preset-btn"
                     onClick={() => handleApplyPreset(0, '23:59')}
+                    disabled={isPresetDisabled(0)}
                     title="Hoy a las 23:59"
                   >
                     Hoy fin de día
@@ -463,6 +496,7 @@ export const DateTimePicker = React.forwardRef<
                     type="button"
                     className="datetimepicker-preset-btn"
                     onClick={() => handleApplyPreset(1, '23:59')}
+                    disabled={isPresetDisabled(1)}
                     title="Mañana a las 23:59"
                   >
                     +1 día
@@ -471,6 +505,7 @@ export const DateTimePicker = React.forwardRef<
                     type="button"
                     className="datetimepicker-preset-btn"
                     onClick={() => handleApplyPreset(7, '23:59')}
+                    disabled={isPresetDisabled(7)}
                     title="En 7 días"
                   >
                     +7 días
@@ -479,6 +514,7 @@ export const DateTimePicker = React.forwardRef<
                     type="button"
                     className="datetimepicker-preset-btn"
                     onClick={() => handleApplyPreset(30, '23:59')}
+                    disabled={isPresetDisabled(30)}
                     title="En 30 días"
                   >
                     +30 días
@@ -487,6 +523,7 @@ export const DateTimePicker = React.forwardRef<
                     type="button"
                     className="datetimepicker-preset-btn"
                     onClick={() => handleApplyPreset(90, '23:59')}
+                    disabled={isPresetDisabled(90)}
                     title="En 90 días"
                   >
                     +90 días
@@ -495,6 +532,7 @@ export const DateTimePicker = React.forwardRef<
                     type="button"
                     className="datetimepicker-preset-btn"
                     onClick={() => handleApplyPreset(365, '23:59')}
+                    disabled={isPresetDisabled(365)}
                     title="En 1 año"
                   >
                     +1 año
@@ -508,6 +546,7 @@ export const DateTimePicker = React.forwardRef<
                   type="button"
                   className="datetimepicker-nav-btn"
                   onClick={prevMonth}
+                  disabled={policy.isPrevNavDisabled(currentMonth, 'date')}
                   title="Mes anterior"
                 >
                   <ChevronLeft size={16} />
@@ -520,6 +559,7 @@ export const DateTimePicker = React.forwardRef<
                   type="button"
                   className="datetimepicker-nav-btn"
                   onClick={nextMonth}
+                  disabled={policy.isNextNavDisabled(currentMonth, 'date')}
                   title="Mes siguiente"
                 >
                   <ChevronRight size={16} />
