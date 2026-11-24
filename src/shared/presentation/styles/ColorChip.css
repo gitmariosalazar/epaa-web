@@ -54,6 +54,17 @@
   filter: brightness(0.9);
 }
 
+/* Disabled state: only disables click/hover interaction, preserves full original color */
+.color-chip--disabled {
+  cursor: not-allowed !important;
+}
+
+.color-chip--disabled:hover,
+.color-chip--disabled:active {
+  transform: none !important;
+  filter: none !important;
+}
+
 /* --- Sizes --- */
 .color-chip--xs {
   padding: 0 8px;

@@ -14,7 +14,6 @@ import { useTablePdfExport } from '@/shared/presentation/hooks/useTablePdfExport
 import { useTranslation } from 'react-i18next';
 import {
   AlertTriangle,
-  Camera,
   Check,
   CheckCircle,
   EyeIcon,
@@ -47,6 +46,9 @@ import { ConnectionPhotoEvidenceModal } from './ConnectionPhotoEvidenceModal';
 import { DocumentPreviewModal } from '@/shared/presentation/components/DocumentPreviewModal';
 import { useConnectionsContext } from '../context/ConnectionContext';
 import { TechnicalDataSheetPdfGenerator } from './templates/pdf/TechnicalDataSheetPdfGenerator';
+import { MdAddAPhoto, MdPhotoLibrary } from 'react-icons/md';
+import { TiWarning } from 'react-icons/ti';
+import { ConnectionPhotosPopoverModal } from './ConnectionPhotosPopoverModal';
 // ── Props ──────────────────────────────────────────────────────────────────────
 interface ConnectionsTableProps {
   data: Connection[];
@@ -255,6 +257,89 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         sortable: true,
         id: 'connectionTypeName'
       },
+      {
+        header: t('connections.table.evidencePhotos', 'Fotografías'),
+        accessor: (item: Connection) => {
+          return (
+            <div className="conn-table-actions-photod-wrapper">
+              <div>
+                <Tooltip
+                  content={
+                    item.connectionHasFacade
+                      ? t(
+                          'connections.table.viewPhotos',
+                          'Ver evidencias fotográficas'
+                        )
+                      : t(
+                          'connections.table.consultPhotos',
+                          'Sin evidencias fotográficas'
+                        )
+                  }
+                  position="top"
+                  followCursor={false}
+                >
+                  <ConnectionPhotosPopoverModal
+                    cadastralKey={
+                      item.connectionCadastralKey || item.connectionId
+                    }
+                    connectionId={item.connectionId}
+                    trigger={
+                      <ColorChip
+                        label={
+                          item.connectionHasFacade
+                            ? 'Tiene Fotografías'
+                            : 'Sin Fotografías'
+                        }
+                        variant="soft"
+                        color={item.connectionHasFacade ? '#22c55e' : '#ef4444'}
+                        size="xs"
+                        disabled={!item.connectionHasFacade}
+                        icon={
+                          item.connectionHasFacade ? (
+                            <MdPhotoLibrary size={14} />
+                          ) : (
+                            <TiWarning size={14} />
+                          )
+                        }
+                      />
+                    }
+                  />
+                </Tooltip>
+              </div>
+              <div>
+                <Tooltip
+                  content={
+                    item.connectionHasFacade
+                      ? t(
+                          'connections.table.viewPhotos',
+                          'Agregar nuevas evidencias fotográficas'
+                        )
+                      : t(
+                          'connections.table.consultPhotos',
+                          'Agregar evidencias fotográficas'
+                        )
+                  }
+                  position="top"
+                  themeColor={item.connectionHasFacade ? 'success' : 'warning'}
+                  followCursor={false}
+                >
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    onClick={() => setEvidenceConnection(item)}
+                    circle
+                    color={item.connectionHasFacade ? 'success' : 'warning'}
+                  >
+                    <MdAddAPhoto size={18} />
+                  </Button>
+                </Tooltip>
+              </div>
+            </div>
+          );
+        },
+        sortable: true,
+        id: 'connectionHasFacade'
+      },
 
       {
         header: t('connections.table.incidents', 'Incidentes'),
@@ -406,7 +491,11 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
         header: t('connections.table.options'),
         accessor: (row: Connection) => (
           <div className="conn-table-actions">
-            <Tooltip content={t('connections.table.edit')} position="top">
+            <Tooltip
+              content={t('connections.table.edit')}
+              position="top"
+              followCursor={false}
+            >
               <Button
                 size="sm"
                 variant="ghost"
@@ -417,7 +506,11 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
                 <FaEdit size={14} />
               </Button>
             </Tooltip>
-            <Tooltip content={t('connections.table.delete')} position="top">
+            <Tooltip
+              content={t('connections.table.delete')}
+              position="top"
+              followCursor={false}
+            >
               <Button
                 size="sm"
                 variant="ghost"
@@ -431,6 +524,7 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
             <Tooltip
               content={t('connections.table.viewDetails')}
               position="top"
+              followCursor={false}
             >
               <Button
                 size="sm"
@@ -448,6 +542,7 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
                 'Ver en mapa'
               )}
               position="top"
+              followCursor={false}
             >
               <Button
                 size="sm"
@@ -459,7 +554,11 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
                 <FaMapMarkerAlt size={14} />
               </Button>
             </Tooltip>
-            <Tooltip content="Generar Ficha Técnica" position="top">
+            <Tooltip
+              content="Generar Ficha Técnica"
+              position="top"
+              followCursor={false}
+            >
               <Button
                 size="sm"
                 variant="ghost"
@@ -470,15 +569,30 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
                 <Printer size={14} />
               </Button>
             </Tooltip>
-            <Tooltip content="Evidencias Fotográficas" position="top">
+            <Tooltip
+              content={
+                row.connectionHasFacade
+                  ? t(
+                      'connections.table.viewPhotos',
+                      'Agregar nuevas evidencias fotográficas'
+                    )
+                  : t(
+                      'connections.table.consultPhotos',
+                      'Agregar evidencias fotográficas'
+                    )
+              }
+              position="top"
+              themeColor={row.connectionHasFacade ? 'success' : 'warning'}
+              followCursor={false}
+            >
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={() => setEvidenceConnection(row)}
                 circle
-                style={{ color: 'var(--primary)' }}
+                color={row.connectionHasFacade ? 'success' : 'warning'}
               >
-                <Camera size={14} />
+                <MdAddAPhoto size={18} />
               </Button>
             </Tooltip>
           </div>
@@ -524,7 +638,7 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
       {
         label: 'Evidencias Fotográficas',
         onClick: () => setEvidenceConnection(item),
-        icon: <Camera size={14} />,
+        icon: <MdAddAPhoto size={14} />,
         color: 'primary'
       },
       {

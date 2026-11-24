@@ -436,7 +436,7 @@ const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
   return <Outlet />;
 };
 
-const isUnderDevelopment = true;
+const isUnderDevelopment = false;
 
 function App() {
   return (

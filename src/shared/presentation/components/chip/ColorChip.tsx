@@ -14,6 +14,8 @@ export interface ColorChipProps {
   /** If provided, right icon/action */
   iconPosition?: 'left' | 'right';
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  /** If true, disables interaction and ignores onClick */
+  disabled?: boolean;
   /** Add a dot indicator for status (useful in 'soft' or 'outline' variants) */
   withDot?: boolean;
   /** Optional custom border radius (e.g. '4px', '50%') */
@@ -68,10 +70,20 @@ export const ColorChip: React.FC<ColorChipProps> = ({
   icon,
   iconPosition = 'left',
   onClick,
+  disabled = false,
   withDot = false,
   borderRadius
 }) => {
-  const isInteractive = !!onClick;
+  const isInteractive = Boolean(onClick && !disabled);
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (disabled) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    onClick?.(e);
+  };
 
   const finalColor = status ? `var(--${status})` : color;
   const isLight = isLightColor(finalColor);
@@ -89,12 +101,14 @@ export const ColorChip: React.FC<ColorChipProps> = ({
         color-chip--${size} 
         color-chip--${variant} 
         ${isInteractive ? 'color-chip--interactive' : ''} 
+        ${disabled ? 'color-chip--disabled' : ''}
         ${className}
       `}
       style={style}
-      onClick={onClick}
+      onClick={isInteractive ? handleClick : undefined}
       role={isInteractive ? 'button' : undefined}
       tabIndex={isInteractive ? 0 : undefined}
+      aria-disabled={disabled ? true : undefined}
     >
       {withDot && <span className="color-chip__dot" />}
 

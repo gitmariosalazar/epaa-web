@@ -12,6 +12,20 @@
   margin-bottom: 0.25rem;
 }
 
+.basic-update-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.basic-update-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
 .basic-update-header h3 {
   font-size: var(--font-size-lg, 1.15rem);
   font-weight: 700;

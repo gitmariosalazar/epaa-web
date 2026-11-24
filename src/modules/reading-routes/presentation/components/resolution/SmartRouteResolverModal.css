@@ -1,3 +1,5 @@
+/* SmartRouteResolverModal.css */
+
 .smart-resolver-overlay {
   position: fixed;
   inset: 0;
@@ -15,9 +17,9 @@
   background-color: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-lg, 12px);
-  width: 640px;
-  max-width: 95vw;
-  max-height: 90vh;
+  width: 95vw;
+  max-width: 1400px;
+  max-height: 92vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
@@ -25,7 +27,7 @@
 }
 
 .smart-resolver-header {
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -42,31 +44,6 @@
   gap: 0.5rem;
 }
 
-.smart-resolver-close-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 0.35rem;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.smart-resolver-close-btn:hover {
-  background-color: var(--surface-hover);
-  color: var(--text-main);
-}
-
-.smart-resolver-body {
-  padding: 1.5rem;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
 .smart-resolver-intro {
   font-size: 0.85rem;
   color: var(--text-secondary);
@@ -74,22 +51,138 @@
   margin: 0;
 }
 
-.smart-resolver-grid {
+/* ── Split 2-Column Layout ── */
+.smart-resolver-layout {
+  display: flex;
+  flex: 1;
+  height: calc(88vh - 75px);
+  min-height: 540px;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ── Left Panel (Form & Connection Info) ── */
+.smart-resolver-left-panel {
+  width: 480px;
+  min-width: 380px;
+  max-width: 520px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background-color: var(--surface);
+}
+
+/* ── Right Panel (Interactive Map) ── */
+.smart-resolver-right-panel {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  min-height: 450px;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Connection Info Card ── */
+.smart-resolver-connection-card {
+  background: var(--surface-hover);
+  border: 1px solid color-mix(in srgb, var(--border-color) 85%, transparent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  position: relative;
+}
+
+.smart-georeferenced {
+  position: absolute;
+  right: 5px;
+  flex-shrink: 0;
+  top: 5px;
+}
+
+.smart-resolver-connection-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.smart-resolver-connection-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.smart-resolver-connection-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.smart-resolver-connection-client {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  display: block;
+}
+
+.smart-resolver-connection-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 8px 12px;
+  font-size: 0.8rem;
+  border-top: 1px dashed var(--border-color);
+  padding-top: 10px;
+}
+
+.smart-resolver-card-label {
+  color: var(--text-muted);
+  font-weight: 550;
+  margin-right: 6px;
+  font-size: 0.75rem;
+}
+
+.smart-resolver-card-val {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* ── Form Fields & Grid ── */
+.smart-resolver-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.85rem;
 }
 
 .smart-resolver-field {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  width: 100%;
 }
 
 .smart-resolver-label {
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .smart-resolver-input,
@@ -108,15 +201,16 @@
   border-color: var(--accent);
 }
 
-/* Result Card */
+/* ── Result Card ── */
 .smart-resolver-result {
   background-color: var(--surface-hover);
   border: 1px solid var(--accent);
   border-radius: 8px;
-  padding: 1.25rem;
+  padding: 1.15rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .smart-resolver-result-header {
@@ -126,7 +220,7 @@
 }
 
 .smart-resolver-route-name {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text-main);
 }
@@ -134,7 +228,7 @@
 .smart-resolver-method-badge {
   padding: 0.2rem 0.55rem;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
 }
 
@@ -167,7 +261,7 @@
 
 .smart-resolver-result-item span:first-child {
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
 }
 
 .smart-resolver-result-item span:last-child {
@@ -175,12 +269,452 @@
   color: var(--text-main);
 }
 
+.centroid-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  max-width: 100%;
+  color: var(--text-primary, #1f2937);
+}
+
+.centroid-label {
+  font-weight: 600;
+  color: var(--text-secondary, #6b7280);
+  white-space: nowrap;
+}
+
+.centroid-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.125rem 0.45rem;
+  border-radius: 0.375rem;
+  background-color: var(--badge-bg, rgba(59, 130, 246, 0.12));
+  color: var(--badge-text, #2563eb);
+  border: 1px solid var(--badge-border, rgba(59, 130, 246, 0.25));
+  white-space: nowrap;
+}
+
+.centroid-separator {
+  color: var(--text-muted, #9ca3af);
+  user-select: none;
+}
+
+.centroid-name {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Adaptación automática si manejas clase .dark o data-theme="dark" */
+:is(.dark, [data-theme='dark']) .centroid-info {
+  color: var(--text-primary, #f3f4f6);
+}
+
+:is(.dark, [data-theme='dark']) .centroid-label {
+  color: var(--text-secondary, #9ca3af);
+}
+
+:is(.dark, [data-theme='dark']) .centroid-code {
+  background-color: var(--badge-bg, rgba(96, 165, 250, 0.15));
+  color: var(--badge-text, #60a5fa);
+  border-color: var(--badge-border, rgba(96, 165, 250, 0.3));
+}
+
+/* ── Map Styles ── */
+.smart-resolver-map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.smart-resolver-map-toolbar {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 6px 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.smart-resolver-map-toolbar-left,
+.smart-resolver-map-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.smart-resolver-sector-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 650;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+}
+
+.smart-resolver-route-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 650;
+  background: color-mix(in srgb, #10b981 18%, transparent);
+  color: #10b981;
+}
+
+.smart-resolver-map-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 550;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.smart-resolver-map-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-main);
+  border-color: var(--accent);
+}
+
+.smart-resolver-map-btn.active {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.smart-resolver-map-canvas {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.smart-resolver-map-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.smart-resolver-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.smart-resolver-map-hint {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Marker Pin Animation ── */
+.smart-resolver-marker-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.smart-resolver-marker-pulse {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.3);
+  animation: markerPulse 1.8s infinite;
+  pointer-events: none;
+}
+
+.smart-resolver-marker-pin {
+  width: 32px;
+  height: 32px;
+  border-radius: 50% 50% 50% 0;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.45);
+  border: 2px solid #ffffff;
+}
+
+.smart-resolver-marker-pin svg {
+  transform: rotate(45deg);
+}
+
+.smart-resolver-marker-tag {
+  margin-top: 6px;
+  padding: 2px 8px;
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+@keyframes markerPulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Centroid Heartbeat Marker for Resolved Route ── */
+.smart-resolver-centroid-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  z-index: 150;
+  user-select: none;
+  animation: centroidHeartbeat 1.6s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+/* Pulsing radar waves radiating from the centroid across the polygon */
+.smart-resolver-centroid-ripple-1,
+.smart-resolver-centroid-ripple-2 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.smart-resolver-centroid-ripple-1 {
+  width: 90px;
+  height: 90px;
+  background: radial-gradient(
+    circle,
+    rgba(16, 185, 129, 0.35) 0%,
+    rgba(16, 185, 129, 0) 70%
+  );
+  border: 2px solid rgba(16, 185, 129, 0.65);
+  animation: centroidRadarWave 1.8s infinite ease-out;
+}
+
+.smart-resolver-centroid-ripple-2 {
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(
+    circle,
+    rgba(16, 185, 129, 0.2) 0%,
+    rgba(16, 185, 129, 0) 75%
+  );
+  border: 1.5px dashed rgba(5, 150, 105, 0.5);
+  animation: centroidRadarWave 1.8s infinite ease-out 0.5s;
+}
+
+.smart-resolver-centroid-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #065f46, #047857);
+  color: #ffffff;
+  border-radius: 20px;
+  border: 2px solid #34d399;
+  box-shadow:
+    0 4px 18px rgba(16, 185, 129, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.35);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+  transform-origin: center;
+}
+
+.smart-resolver-centroid-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #a7f3d0;
+  box-shadow: 0 0 8px #34d399;
+  flex-shrink: 0;
+  animation: centroidDotBeat 0.9s infinite alternate;
+}
+
+.smart-resolver-centroid-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.smart-resolver-centroid-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a7f3d0;
+  font-weight: 600;
+}
+
+.smart-resolver-centroid-name {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.smart-resolver-centroid-subtag {
+  margin-top: 4px;
+  padding: 2px 8px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(4px);
+  color: #34d399;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Keyframes for Heartbeat on Centroid and Polygons */
+@keyframes centroidHeartbeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.14);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.22);
+  }
+  70% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes centroidDotBeat {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 1;
+  }
+}
+
+@keyframes centroidRadarWave {
+  0% {
+    transform: translate(-50%, -50%) scale(0.35);
+    opacity: 0.95;
+  }
+  50% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.65);
+    opacity: 0;
+  }
+}
+
+/* ── Footer ── */
 .smart-resolver-footer {
-  padding: 1.15rem 1.5rem;
-  border-top: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
-  background-color: var(--surface);
+  width: 100%;
+}
+
+/* ── Responsive Breakdown ── */
+@media (max-width: 960px) {
+  .smart-resolver-layout {
+    flex-direction: column;
+    height: auto;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .smart-resolver-left-panel {
+    width: 100%;
+    max-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .smart-resolver-right-panel {
+    min-height: 380px;
+    height: 380px;
+  }
 }

@@ -17,6 +17,9 @@ import { Input } from '@/shared/presentation/components/Input/Input';
 import { Alert } from '@/shared/presentation/components/Alert';
 import { MessageToastCustom } from '@/shared/presentation/components/toast/CustomMessageToast';
 import './BasicUpdateConnectionStep.css';
+import { Tooltip } from '@/shared/presentation/components/common/Tooltip/Tooltip';
+import { MdPhotoLibrary } from 'react-icons/md';
+import { ConnectionPhotosPopoverModal } from '../ConnectionPhotosPopoverModal';
 
 export interface BasicUpdatePayload {
   meterNumber?: string | null;
@@ -101,6 +104,24 @@ export const BasicUpdateConnectionStep: React.FC<
       meterPreviews.forEach((item) => URL.revokeObjectURL(item.url));
     };
   }, [facadePreviews, meterPreviews]);
+
+  // Resolved connection identifiers and existing photos for evidence inspection
+  const resolvedCadastralKey = useMemo(() => {
+    return (
+      selectedConnection?.connectionCadastralKey ||
+      selectedConnection?.connectionId ||
+      formData.connectionCadastralKey ||
+      null
+    );
+  }, [selectedConnection, formData.connectionCadastralKey]);
+
+  const initialPhotosFacade = useMemo(() => {
+    return (selectedConnection as any)?.photoFacade || null;
+  }, [selectedConnection]);
+
+  const initialPhotosMeter = useMemo(() => {
+    return (selectedConnection as any)?.photoMeter || null;
+  }, [selectedConnection]);
 
   // Handle meter number input change
   const handleMeterNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -228,19 +249,55 @@ export const BasicUpdateConnectionStep: React.FC<
     >
       {/* Header */}
       <div className="basic-update-header">
-        <h3>
-          {headerTitle ||
-            t(
-              'connections.wizard.basicUpdate.title',
-              'Paso 5: Evidencia Fotográfica y Medidor'
-            )}
-        </h3>
-        <p>
-          {t(
-            'connections.wizard.basicUpdate.subtitle',
-            'Adjunta las fotografías de la fachada del predio y del medidor para respaldar el registro de la acometida.'
-          )}
-        </p>
+        <div className="basic-update-header-content">
+          <div>
+            <h3>
+              {headerTitle ||
+                t(
+                  'connections.wizard.basicUpdate.title',
+                  'Paso 5: Evidencia Fotográfica y Medidor'
+                )}
+            </h3>
+            <p>
+              {t(
+                'connections.wizard.basicUpdate.subtitle',
+                'Adjunta las fotografías de la fachada del predio y del medidor para respaldar el registro de la acometida.'
+              )}
+            </p>
+          </div>
+          <div className="basic-update-header-actions">
+            <ConnectionPhotosPopoverModal
+              cadastralKey={resolvedCadastralKey}
+              connectionId={selectedConnection?.connectionId || null}
+              photosFacade={initialPhotosFacade}
+              photosMeter={initialPhotosMeter}
+              trigger={
+                <Tooltip
+                  content={t(
+                    'connections.wizard.basicUpdate.viewPreviousPhotos',
+                    'Ver fotos anteriores'
+                  )}
+                  position="top"
+                  followCursor={false}
+                >
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="dashed"
+                    color="amber"
+                    aria-label={t(
+                      'connections.wizard.basicUpdate.viewPreviousPhotos',
+                      'Ver fotos anteriores'
+                    )}
+                    leftIcon={<MdPhotoLibrary size={18} />}
+                  >
+                    Ver fotos anteriores
+                  </Button>
+                </Tooltip>
+              }
+            />
+          </div>
+        </div>
       </div>
 
       {/* Connection Info Summary Card */}

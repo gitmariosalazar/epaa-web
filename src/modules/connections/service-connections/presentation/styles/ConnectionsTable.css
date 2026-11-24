@@ -19,6 +19,14 @@
   justify-content: flex-end;
 }
 
+.conn-table-actions-photod-wrapper {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-self: start;
+  align-items: center;
+}
+
 .table-column-center {
   text-align: center !important;
   vertical-align: middle !important;

@@ -33,6 +33,7 @@ export interface Connection {
   zoneId: number;
   zoneCode: string;
   zoneName: string;
+  connectionHasFacade?: boolean;
   incidents: number;
   connectionType: string | null;
   connectionTypeName: string | null;

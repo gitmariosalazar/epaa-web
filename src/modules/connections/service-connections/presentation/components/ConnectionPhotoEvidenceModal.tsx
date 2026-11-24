@@ -68,6 +68,7 @@ const mapConnectionToFormData = (
   zoneId: conn?.zoneId ?? 0,
   zoneCode: conn?.zoneCode ?? '',
   zoneName: conn?.zoneName ?? '',
+  connectionHasFacade: conn?.connectionHasFacade ?? false,
   incidents: conn?.incidents ?? 0,
   connectionStateId: conn?.connectionStateId ?? 0,
   connectionIsReadable: conn?.connectionIsReadable ?? true,

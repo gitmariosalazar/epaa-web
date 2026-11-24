@@ -27,7 +27,7 @@ import { FindAllConnectionsWithPropertyUseCase } from '../../application/usecase
 import { ChangeMeterUseCase } from '../../application/usecases/ChangeMeterUseCase';
 import { UpdateConnectionBasicUseCase } from '../../application/usecases/UpdateConnectionBasicUseCase';
 
-interface ConnectionContextType {
+export interface ConnectionContextType {
   getConnectionsUseCase: GetConnectionsUseCase;
   getRatesUseCase: GetRatesUseCase;
   createConnectionUseCase: CreateConnectionUseCase;
@@ -49,7 +49,7 @@ interface ConnectionContextType {
   updateConnectionBasicUseCase: UpdateConnectionBasicUseCase;
 }
 
-const ConnectionContext = createContext<ConnectionContextType | null>(null);
+export const ConnectionContext = createContext<ConnectionContextType | null>(null);
 
 export const ConnectionProvider: React.FC<{ children: ReactNode }> = ({
   children
