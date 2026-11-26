@@ -187,7 +187,8 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
       const isTargetMatch = (
         c: ConnectionWithoutProperty,
         targetId: string,
-        targetAccount?: string | number | null
+        targetAccount?: string | number | null,
+        targetSector?: string | number | null
       ) => {
         const cleanTarget = targetId.trim().toLowerCase();
         const cleanConnId = (c.connectionId || '').trim().toLowerCase();
@@ -197,14 +198,30 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
         const cleanAccount = c.connectionAccount
           ? String(c.connectionAccount).trim()
           : '';
+        const cleanSector = c.connectionSector
+          ? String(c.connectionSector).trim()
+          : '';
         const targetAccStr =
           targetAccount != null ? String(targetAccount).trim() : '';
+        const targetSectorStr =
+          targetSector != null ? String(targetSector).trim() : '';
 
-        return (
-          cleanConnId === cleanTarget ||
-          cleanCadastral === cleanTarget ||
-          (targetAccStr.length > 0 && cleanAccount === targetAccStr)
-        );
+        // Coincidencia exacta por ID o Clave Catastral
+        if (cleanConnId === cleanTarget || cleanCadastral === cleanTarget) {
+          return true;
+        }
+
+        // Si se compara por cuenta, OBLIGATORIAMENTE debe coincidir también el sector
+        if (
+          targetAccStr.length > 0 &&
+          cleanAccount === targetAccStr &&
+          targetSectorStr.length > 0 &&
+          cleanSector === targetSectorStr
+        ) {
+          return true;
+        }
+
+        return false;
       };
 
       try {
@@ -268,7 +285,8 @@ export const ConnectionDetailModal: React.FC<ConnectionDetailModalProps> = ({
                       isTargetMatch(
                         c,
                         matchedBasic.connectionId,
-                        matchedBasic.connectionAccount
+                        matchedBasic.connectionAccount,
+                        matchedBasic.connectionSector
                       )
                     );
                     if (match) {

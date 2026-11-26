@@ -115,7 +115,6 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
             item.connectionCadastralKey,
             item.connectionId,
             item.connectionMeterNumber,
-            item.connectionAccount ? String(item.connectionAccount) : null,
             item.clientId
           ].filter(
             (val): val is string =>
@@ -126,6 +125,19 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
 
       let fullData: ConnectionWithoutProperty | null = null;
 
+      const cleanCadastral = (item.connectionCadastralKey || '')
+        .trim()
+        .toLowerCase();
+      const cleanId = (item.connectionId || '').trim().toLowerCase();
+      const cleanSector =
+        item.connectionSector != null
+          ? String(item.connectionSector).trim()
+          : '';
+      const cleanAccount =
+        item.connectionAccount != null
+          ? String(item.connectionAccount).trim()
+          : '';
+
       for (const queryTerm of candidateTerms) {
         try {
           const fullDataList =
@@ -135,21 +147,33 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
               query: queryTerm
             });
           if (fullDataList && fullDataList.length > 0) {
-            // Filter by exact connectionId or cadastral key match if client owns multiple connections
-            const match = fullDataList.find(
-              (c) =>
-                (c.connectionId &&
-                  c.connectionId.trim().toLowerCase() ===
-                    item.connectionId.trim().toLowerCase()) ||
-                (c.connectionCadastralKey &&
-                  item.connectionCadastralKey &&
-                  c.connectionCadastralKey.trim().toLowerCase() ===
-                    item.connectionCadastralKey.trim().toLowerCase()) ||
-                (c.connectionAccount &&
-                  item.connectionAccount &&
-                  String(c.connectionAccount).trim() ===
-                    String(item.connectionAccount).trim())
-            );
+            // Prioritize:
+            // 1. Exact match on Cadastral Key (most reliable and specific)
+            // 2. Exact match on connectionId
+            // 3. Exact match on Sector AND Account (both must match to prevent collisions with the same account in another sector)
+            const match =
+              (cleanCadastral
+                ? fullDataList.find(
+                    (c) =>
+                      (c.connectionCadastralKey || '')
+                        .trim()
+                        .toLowerCase() === cleanCadastral
+                  )
+                : null) ||
+              (cleanId
+                ? fullDataList.find(
+                    (c) =>
+                      (c.connectionId || '').trim().toLowerCase() === cleanId
+                  )
+                : null) ||
+              (cleanSector && cleanAccount
+                ? fullDataList.find(
+                    (c) =>
+                      String(c.connectionSector ?? '').trim() === cleanSector &&
+                      String(c.connectionAccount ?? '').trim() === cleanAccount
+                  )
+                : null);
+
             if (match) {
               fullData = match;
               break;
@@ -171,7 +195,7 @@ export const ConnectionsTable: React.FC<ConnectionsTableProps> = ({
       const url = await generator.generateBlobUrl([fullData]);
       setPreviewUrl(url);
       setFileNamePDF(
-        `FICHA_TECNICA_${item.connectionId || item.connectionMeterNumber || 'ACOMETIDA'}.pdf`
+        `FICHA_TECNICA_${item.connectionCadastralKey || item.connectionId || item.connectionMeterNumber || 'ACOMETIDA'}.pdf`
       );
     } catch (error) {
       console.error('Error generando la ficha técnica:', error);

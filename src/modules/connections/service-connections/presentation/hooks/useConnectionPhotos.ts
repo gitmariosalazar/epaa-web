@@ -52,7 +52,8 @@ export interface UseConnectionPhotosReturn {
 function isTargetMatch(
   c: ConnectionWithoutProperty,
   targetId: string,
-  targetAccount?: string | number | null
+  targetAccount?: string | number | null,
+  targetSector?: string | number | null
 ): boolean {
   const cleanTarget = targetId.trim().toLowerCase();
   const cleanConnId = (c.connectionId || '').trim().toLowerCase();
@@ -60,14 +61,28 @@ function isTargetMatch(
   const cleanAccount = c.connectionAccount
     ? String(c.connectionAccount).trim()
     : '';
+  const cleanSector = c.connectionSector
+    ? String(c.connectionSector).trim()
+    : '';
   const targetAccStr =
     targetAccount != null ? String(targetAccount).trim() : '';
+  const targetSectorStr =
+    targetSector != null ? String(targetSector).trim() : '';
 
-  return (
-    cleanConnId === cleanTarget ||
-    cleanCadastral === cleanTarget ||
-    (targetAccStr.length > 0 && cleanAccount === targetAccStr)
-  );
+  if (cleanConnId === cleanTarget || cleanCadastral === cleanTarget) {
+    return true;
+  }
+
+  if (
+    targetAccStr.length > 0 &&
+    cleanAccount === targetAccStr &&
+    targetSectorStr.length > 0 &&
+    cleanSector === targetSectorStr
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -208,7 +223,8 @@ export function useConnectionPhotos({
                     isTargetMatch(
                       c,
                       matchedBasic.connectionId,
-                      matchedBasic.connectionAccount
+                      matchedBasic.connectionAccount,
+                      matchedBasic.connectionSector
                     )
                   );
                   if (match) {
